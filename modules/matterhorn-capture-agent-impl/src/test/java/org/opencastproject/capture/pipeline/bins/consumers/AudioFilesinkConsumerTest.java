@@ -80,8 +80,8 @@ public class AudioFilesinkConsumerTest {
               AudioFilesinkConsumer.DEFAULT_ENCODER, null);
       bitrateDefault = defaultEncoder.getPropertyDefaultValue("bitrate").toString();
     } catch (UnableToCreateElementException e) {
-      logger.warn("It appears that you have GStreamer installed but not all of the packages that we require. The " +
-              "following tests for this class will appear to pass, but in fact are skipped.", e);
+      logger.warn("It appears that you have GStreamer installed but not all of the packages that we require. The "
+              + "following tests for this class will appear to pass, but in fact are skipped.", e);
       gstreamerInstalled = false;
       return;
     }
@@ -97,8 +97,8 @@ public class AudioFilesinkConsumerTest {
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String codec, String bitrate, String container) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec, bitrate, null,
-            container, null, null, null, null);
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec,
+            bitrate, null, container, null, null, null, null);
     return captureDeviceProperties;
   }
 
@@ -214,7 +214,7 @@ public class AudioFilesinkConsumerTest {
       audioFileSinkBin = createAudioFileSinkBin(captureDeviceProperties);
     } catch (UnableToCreateElementException e) {
       Assert.assertTrue(true);
-    }catch (Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
       Assert.fail();
     }

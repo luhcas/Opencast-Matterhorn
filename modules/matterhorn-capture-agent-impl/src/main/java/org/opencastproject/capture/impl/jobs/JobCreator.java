@@ -28,8 +28,16 @@ import org.slf4j.LoggerFactory;
 import java.text.ParseException;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class JobCreator {
+public final class JobCreator {
+
   private static final Logger logger = LoggerFactory.getLogger(JobCreator.class);
+
+  /**
+   * This constructor prevents instantiating this utility class.
+   */
+  private JobCreator() {
+    // Nothing to be done here
+  }
 
   /**
    * Creates a job and trigger that tries to ingest captures to the core. Please see the classes IngestJob and
@@ -38,7 +46,7 @@ public class JobCreator {
    * @throws ParseException
    *           if the cron expression can't be parsed, usually caused by an invalid pauseInterval.
    * @param cronSeconds
-   *        How many seconds to run the cron job. 
+   *          How many seconds to run the cron job.
    * @param recordingID
    *          The unique identifier of the recording
    * @param postfix
@@ -55,10 +63,9 @@ public class JobCreator {
   public static JobDetailTriggerPair createInjestJob(long cronSeconds, String recordingID, String postfix,
           CaptureAgent captureAgent, Scheduler sched, ConfigurationManager configurationManager) throws ParseException {
     long cronInterval = -1;
-    if(cronSeconds <= 0){
+    if (cronSeconds <= 0) {
       cronInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
-    }
-    else{
+    } else {
       cronInterval = cronSeconds;
     }
     // Create job
@@ -76,11 +83,11 @@ public class JobCreator {
     trigger.getJobDataMap().put(JobParameters.SCHEDULER, sched);
     trigger.getJobDataMap().put(CaptureParameters.INGEST_PAUSE_TIME, getPauseInterval(configurationManager));
     trigger.getJobDataMap().put(CaptureParameters.INGEST_RETRY_INTERVAL, getRetryInterval(configurationManager));
-    // Get the number of retries to allow. 
+    // Get the number of retries to allow.
     long retryLimit = getRetryLimit(configurationManager);
     trigger.getJobDataMap().put(CaptureParameters.INGEST_RETRY_LIMIT, retryLimit);
-    // Set the number of retries to start with. 
-    AtomicLong retriesLeft= new AtomicLong(retryLimit);
+    // Set the number of retries to start with.
+    AtomicLong retriesLeft = new AtomicLong(retryLimit);
     trigger.getJobDataMap().put(IngestJob.RETRIES_LEFT, retriesLeft);
     return new JobDetailTriggerPair(job, trigger);
   }
@@ -117,9 +124,9 @@ public class JobCreator {
     long retryInterval;
     try {
       retryInterval = Long.parseLong(configurationManager.getItem(CaptureParameters.INGEST_RETRY_INTERVAL));
-    }catch(NullPointerException e){ 
+    } catch (NullPointerException e) {
       retryInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
-    }catch (NumberFormatException e) {
+    } catch (NumberFormatException e) {
       retryInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
     }
     return retryInterval;
@@ -133,12 +140,12 @@ public class JobCreator {
    **/
   private static long getRetryLimit(ConfigurationManager configurationManager) {
     // Pass in the amount of times we want to retry ingesting
-    long retryLimit; 
+    long retryLimit;
     try {
       retryLimit = Long.parseLong(configurationManager.getItem(CaptureParameters.INGEST_RETRY_LIMIT));
       if (retryLimit < 1) {
         retryLimit = 1;
-      } 
+      }
     } catch (NumberFormatException e) {
       retryLimit = Long.parseLong(IngestJob.DEFAULT_RETRIES);
     }

@@ -53,16 +53,15 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-
 @Path("/")
 public class ConfidenceMonitorRestService {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(ConfidenceMonitorRestService.class);
-  
+
   private ConfidenceMonitor service;
-  
+
   protected String docs;
-  
+
   /**
    * Callback from OSGi that is called when this service is activated.
    * 
@@ -74,63 +73,74 @@ public class ConfidenceMonitorRestService {
     docs = generateDocs(serviceUrl);
   }
 
-  //CHECKSTYLE:OFF
+  // CHECKSTYLE:OFF
   protected String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("ConfidenceMonitor", "Confidence Monitor", serviceUrl, null);
-    
+
     // grabFrame Endpoint
-    RestEndpoint grabFrameEndpoint = new RestEndpoint("grabFrame", RestEndpoint.Method.GET, "/{name}", "Loads a JPEG image from the device specified");
+    RestEndpoint grabFrameEndpoint = new RestEndpoint("grabFrame", RestEndpoint.Method.GET, "/{name}",
+            "Loads a JPEG image from the device specified");
     grabFrameEndpoint.addFormat(new Format("jpeg", "The image of the device", null));
     grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
-    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't grab a frame from specified device"));
+    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .ERROR("Couldn't grab a frame from specified device"));
     Param device = new Param("name", Type.STRING, null, "The device to grab a frame from");
     grabFrameEndpoint.addPathParam(device);
     grabFrameEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, grabFrameEndpoint);
-    
+
     // list devices endpoint
-    RestEndpoint getDevices = new RestEndpoint("getDevices", RestEndpoint.Method.GET, "/devices", "Lists devices accessible on capture agent");
+    RestEndpoint getDevices = new RestEndpoint("getDevices", RestEndpoint.Method.GET, "/devices",
+            "Lists devices accessible on capture agent");
     getDevices.addFormat(new Format("XML", "Devices that support confidence monitoring", null));
     getDevices.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
     getDevices.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't list devices"));
     getDevices.addStatus(org.opencastproject.util.doc.Status.SERVICE_UNAVAILABLE("Confidence monitor unavailable"));
     getDevices.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getDevices);
-    
+
     // audio rms endpoint
-    RestEndpoint getRMSValues = new RestEndpoint("getRMSValues", RestEndpoint.Method.GET, "/audio/{name}/{timestamp}", "Retrieve all RMS data for device {name} after Unix time {timestamp}");
+    RestEndpoint getRMSValues = new RestEndpoint("getRMSValues", RestEndpoint.Method.GET, "/audio/{name}/{timestamp}",
+            "Retrieve all RMS data for device {name} after Unix time {timestamp}");
     getRMSValues.addStatus(org.opencastproject.util.doc.Status.OK(("NONE")));
     getRMSValues.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't grab RMS values"));
-    getRMSValues.addFormat(new Format("JSON", "start:Unix time to start getting values, interval: time between samples (ns), samples:list of RMS values", null));
+    getRMSValues.addFormat(new Format("JSON",
+            "start:Unix time to start getting values, interval: time between samples (ns), samples:list of RMS values",
+            null));
     Param audioDevice = new Param("name", Type.STRING, null, "The device to get RMS values from");
     Param timestamp = new Param("timestamp", Type.STRING, null, "The timestamp to start getting RMS values from");
     getRMSValues.addPathParam(audioDevice);
     getRMSValues.addPathParam(timestamp);
     getRMSValues.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getRMSValues);
-    
+
     return DocUtil.generate(data);
   }
-  //CHECKSTYLE:ON
-  
+
+  // CHECKSTYLE:ON
+
   /**
    * OSGI activate method. Will be called on service activation.
    */
   public void activate() {
     logger.info("Video Monitoring Service Activated");
   }
-  
+
   /**
    * Set {@link org.opencastproject.capture.api.ConfidenceMonitor} service.
-   * @param service Service implemented {@link org.opencastproject.capture.api.ConfidenceMonitor}
+   * 
+   * @param service
+   *          Service implemented {@link org.opencastproject.capture.api.ConfidenceMonitor}
    */
   public void setService(ConfidenceMonitor service) {
     this.service = service;
   }
-  
+
   /**
    * Unset {@link org.opencastproject.capture.api.ConfidenceMonitor} service.
-   * @param service Service implemented {@link org.opencastproject.capture.api.ConfidenceMonitor}
+   * 
+   * @param service
+   *          Service implemented {@link org.opencastproject.capture.api.ConfidenceMonitor}
    */
   public void unsetService(ConfidenceMonitor service) {
     this.service = null;
@@ -138,7 +148,9 @@ public class ConfidenceMonitorRestService {
 
   /**
    * Gets the most recent frame from the monitoring service
-   * @param device The name of the device from which you want a frame
+   * 
+   * @param device
+   *          The name of the device from which you want a frame
    * @return The image as a image/jpeg
    */
   @GET
@@ -162,6 +174,7 @@ public class ConfidenceMonitorRestService {
 
   /**
    * Gets a list of available devices from the monitoring service
+   * 
    * @return The list of devices in XML format
    */
   @GET
@@ -206,11 +219,14 @@ public class ConfidenceMonitorRestService {
       return Response.serverError().entity(ex.getMessage()).build();
     }
   }
-  
+
   /**
-   * Returns the RMS values for device after a given Unix timestamp. 
-   * @param device Friendly name of the audio device
-   * @param timestamp A Unix timestamp (set to 0 to get all values stored)
+   * Returns the RMS values for device after a given Unix timestamp.
+   * 
+   * @param device
+   *          Friendly name of the audio device
+   * @param timestamp
+   *          A Unix timestamp (set to 0 to get all values stored)
    * @return application/json with keys start, interval and samples
    */
   @SuppressWarnings("unchecked")
@@ -221,8 +237,8 @@ public class ConfidenceMonitorRestService {
     JSONObject jsonOutput = new JSONObject();
     if (service == null) {
       // Error code 500 -> 503
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity(
-              "Confidence monitor unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Confidence monitor unavailable, please wait...").build();
     }
     // Attempt to grab audio information, if exception is thrown the device does not exist
     try {
@@ -241,21 +257,21 @@ public class ConfidenceMonitorRestService {
       return Response.ok("Device " + device + " does not exist.").build();
     }
   }
-  
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("core/url")
   public Response getCoreUrl() {
     JSONObject json = new JSONObject();
     json.put("url", service.getCoreUrl());
-    return Response.ok(json.toJSONString()).build(); 
+    return Response.ok(json.toJSONString()).build();
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public Response getDocumentation() {
     return Response.ok(docs).build();
   }
-  
+
 }

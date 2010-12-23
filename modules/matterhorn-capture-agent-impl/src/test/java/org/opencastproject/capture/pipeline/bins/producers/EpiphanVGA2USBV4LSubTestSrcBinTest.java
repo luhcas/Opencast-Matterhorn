@@ -25,7 +25,8 @@ import org.junit.Ignore;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 
 /**
- * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanVGA2USBV4LSubTestSrcBin}.
+ * Test class for {@Link
+ * org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanVGA2USBV4LSubTestSrcBin}.
  */
 public class EpiphanVGA2USBV4LSubTestSrcBinTest extends EpiphanVGA2USBV4LTest {
 
@@ -37,7 +38,7 @@ public class EpiphanVGA2USBV4LSubTestSrcBinTest extends EpiphanVGA2USBV4LTest {
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
     Assert.assertNotNull(epiphanBin.subBin);
     Assert.assertTrue(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubTestSrcBin);
-    Assert.assertEquals(epiphanBin.getCaps(), ((EpiphanVGA2USBV4LSubTestSrcBin)epiphanBin.subBin).caps);
+    Assert.assertEquals(epiphanBin.getCaps(), ((EpiphanVGA2USBV4LSubTestSrcBin) epiphanBin.subBin).caps);
   }
 
   @Test
@@ -69,10 +70,10 @@ public class EpiphanVGA2USBV4LSubTestSrcBinTest extends EpiphanVGA2USBV4LTest {
     Assert.assertEquals(subBin.sink.get(GStreamerProperties.EMIT_SIGNALS), false);
     Assert.assertEquals(subBin.sink.get(GStreamerProperties.DROP), true);
     Assert.assertEquals(subBin.sink.get(GStreamerProperties.MAX_BUFFERS), 1);
-//    if (subBin.caps != null) {
-//      //TODO: can not convert to Caps
-//      Assert.assertEquals(subBin.caps_filter.get("caps"), Caps.fromString(subBin.caps));
-//    }
+    // if (subBin.caps != null) {
+    // //TODO: can not convert to Caps
+    // Assert.assertEquals(subBin.caps_filter.get("caps"), Caps.fromString(subBin.caps));
+    // }
   }
 
   @Test

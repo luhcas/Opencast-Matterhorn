@@ -16,5 +16,5 @@
 package org.opencastproject.capture.impl;
 
 public interface ConfigurationManagerListener {
-  void refresh(); 
+  void refresh();
 }

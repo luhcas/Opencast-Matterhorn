@@ -46,9 +46,9 @@ public class RecordingStateUpdateTest {
 
   @Test
   public void correctInformation() {
-    Assert.assertEquals("test", rsu.id);
-    Assert.assertEquals(RecordingState.CAPTURING, rsu.state);
-    if (rsu.time_since_last_update <= 1) {
+    Assert.assertEquals("test", rsu.getId());
+    Assert.assertEquals(RecordingState.CAPTURING, rsu.getState());
+    if (rsu.getTimeSinceLastUpdate() <= 1) {
       Assert.fail("Invalid update time in recording state update");
     }
   }
@@ -58,8 +58,8 @@ public class RecordingStateUpdateTest {
   public void blank() {
     rsu = new RecordingStateUpdate();
     Assert.assertNotNull(rsu);
-    Assert.assertNull(rsu.id);
-    Assert.assertNull(rsu.state);
-    Assert.assertNull(rsu.time_since_last_update);
+    Assert.assertNull(rsu.getId());
+    Assert.assertNull(rsu.getState());
+    Assert.assertNull(rsu.getTimeSinceLastUpdate());
   }
 }

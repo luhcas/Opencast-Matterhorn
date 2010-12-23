@@ -15,7 +15,6 @@
  */
 package org.opencastproject.annotation.impl;
 
-
 import org.opencastproject.annotation.api.Annotation;
 
 import java.util.Date;
@@ -43,7 +42,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @Entity(name = "Annotation")
 @Table(name = "ANNOTATION")
-@NamedQueries( {
+@NamedQueries({
         @NamedQuery(name = "findAnnotations", query = "SELECT a FROM Annotation a WHERE a.userId = :userId"),
         @NamedQuery(name = "findAnnotationsByType", query = "SELECT a FROM Annotation a WHERE a.type = :type AND a.userId = :userId"),
         @NamedQuery(name = "findAnnotationsByTypeAndMediapackageId", query = "SELECT a FROM Annotation a WHERE a.mediapackageId = :mediapackageId AND a.type = :type AND a.userId = :userId"),
@@ -62,7 +61,7 @@ import javax.xml.bind.annotation.XmlType;
 public class AnnotationImpl implements Annotation {
 
   @Id
-  @Column(name="ID")
+  @Column(name = "ID")
   @GeneratedValue(strategy = GenerationType.AUTO)
   @XmlElement(name = "annotationId")
   private Long annotationId;
@@ -193,4 +192,5 @@ public class AnnotationImpl implements Annotation {
   private void updateLength() {
     this.length = this.outpoint - this.inpoint;
   }
+
 }

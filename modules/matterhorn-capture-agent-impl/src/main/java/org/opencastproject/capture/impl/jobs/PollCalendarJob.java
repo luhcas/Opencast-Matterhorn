@@ -27,8 +27,8 @@ import org.quartz.JobExecutionException;
 public class PollCalendarJob implements Job {
 
   /**
-   * Pulls the calendar data and updates the calendar for the capture scheduling service.
-   * {@inheritDoc}
+   * Pulls the calendar data and updates the calendar for the capture scheduling service. {@inheritDoc}
+   * 
    * @see org.quartz.Job#execute(JobExecutionContext)
    * @throws JobExecutionException
    */

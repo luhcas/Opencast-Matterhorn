@@ -69,7 +69,7 @@ public class CaptureRestService {
   }
 
   // CHECKSTYLE:OFF
-  //Checkstyle disable because it's a pain with these doc generation functions 
+  // Checkstyle disable because it's a pain with these doc generation functions
   protected String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("CaptureAgent", "Capture Agent", serviceUrl, null);
     // // startCapture signatures
@@ -164,6 +164,7 @@ public class CaptureRestService {
 
     return DocUtil.generate(data);
   }
+
   // CHECKSTYLE:ON
 
   /**

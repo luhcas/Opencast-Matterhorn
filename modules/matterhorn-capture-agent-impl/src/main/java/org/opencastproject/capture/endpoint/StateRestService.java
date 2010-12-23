@@ -80,7 +80,8 @@ public class StateRestService {
 
   /**
    * Gets the state of the agent from the state service
-   * @return String The state of the of the agent.  Will be defined in AgentState
+   * 
+   * @return String The state of the of the agent. Will be defined in AgentState
    * @see org.opencastproject.capture.admin.api.AgentState
    */
   @GET
@@ -96,6 +97,7 @@ public class StateRestService {
 
   /**
    * Gets the list of recording that the capture agent knows about.
+   * 
    * @return Response The method outputs the list to the response's output stream
    */
   @GET
@@ -104,7 +106,7 @@ public class StateRestService {
   public LinkedList<RecordingStateUpdate> getRecordings() {
     if (service == null) {
       Response r = Response.status(Response.Status.SERVICE_UNAVAILABLE)
-                    .entity("State Service is unavailable, please wait...").build();
+              .entity("State Service is unavailable, please wait...").build();
       throw new WebApplicationException(r);
     }
 
@@ -120,7 +122,8 @@ public class StateRestService {
 
   /**
    * Gets the documentation for the service.
-   * @return Response The method outputs the list to the response's output stream 
+   * 
+   * @return Response The method outputs the list to the response's output stream
    */
   @GET
   @Produces(MediaType.TEXT_HTML)
@@ -132,11 +135,11 @@ public class StateRestService {
   protected String docs;
   private String[] notes = {
           "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service" +
-          " is not working and is either restarting or has failed",
-          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated." +
-          " In other words, there is a bug! You should file an error report with your server logs from the time when" +
-          " the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+          "If the service is down or not working it will return a status 503, this means the the underlying service"
+                  + " is not working and is either restarting or has failed",
+          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated."
+                  + " In other words, there is a bug! You should file an error report with your server logs from the time when"
+                  + " the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
   private String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("stateservice", "State Service", serviceUrl, notes);
@@ -163,4 +166,5 @@ public class StateRestService {
 
   public StateRestService() {
   }
+
 }

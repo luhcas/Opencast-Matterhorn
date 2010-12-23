@@ -33,8 +33,8 @@ import java.util.Collection;
 import java.util.Properties;
 
 /**
- * The class which cleans up captures if the capture has been successfully ingested and the 
- * remaining diskspace is below a minimum threshold or above a maximum archive days threshold.
+ * The class which cleans up captures if the capture has been successfully ingested and the remaining diskspace is below
+ * a minimum threshold or above a maximum archive days threshold.
  */
 public class CleanCaptureJob implements Job {
 
@@ -46,23 +46,23 @@ public class CleanCaptureJob implements Job {
   /** The length of one day represented in milliseconds */
   public static final long DAY_LENGTH_MILLIS = 86400000;
 
-  long minDiskSpace = 0;
-  long maxArchivalDays = Long.MAX_VALUE;
-  boolean checkArchivalDays = true;
-  boolean checkDiskSpace = true;
-  boolean underMinSpace = false;
-  CaptureAgentImpl service = null;
-  
+  private long minDiskSpace = 0;
+  private long maxArchivalDays = Long.MAX_VALUE;
+  private boolean checkArchivalDays = true;
+  private boolean checkDiskSpace = true;
+  private boolean underMinSpace = false;
+  private CaptureAgentImpl service = null;
+
   /**
-   * Cleans up lectures which no longer need to be stored on the capture agent itself.
-   * {@inheritDoc}
+   * Cleans up lectures which no longer need to be stored on the capture agent itself. {@inheritDoc}
+   * 
    * @see org.quartz.Job#execute(JobExecutionContext)
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
     ConfigurationManager cm = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
-    service = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
+    service = (CaptureAgentImpl) ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     Properties p = cm.getAllProperties();
 
     if (service != null) {
@@ -75,16 +75,19 @@ public class CleanCaptureJob implements Job {
   public void doCleaning(Properties p, CaptureAgentImpl service) {
     doCleaning(p, service.getKnownRecordings().values());
   }
-  
+
   /**
    * This method is public to allow an easy testing without having to schedule anything
-   * @param p {@code Properties} including the keys for maximum archival days and minimum disk space
-   * @param recordings The {@code Collection} of {@code AgentRecording}s
+   * 
+   * @param p
+   *          {@code Properties} including the keys for maximum archival days and minimum disk space
+   * @param recordings
+   *          The {@code Collection} of {@code AgentRecording}s
    */
-  public void doCleaning(Properties p , Collection<AgentRecording> recordings) {
-    // Parse the necessary values for minimum disk space and maximum archival days. 
+  public void doCleaning(Properties p, Collection<AgentRecording> recordings) {
+    // Parse the necessary values for minimum disk space and maximum archival days.
     // Note that if some of those is not specified, the corresponding cleaning is not done.
-    
+
     try {
       maxArchivalDays = Long.parseLong(p.getProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS));
       // If the value is < 0 (no matter if it's because of an overflow), it's invalid.
@@ -114,27 +117,26 @@ public class CleanCaptureJob implements Job {
     // Gets all the recording IDs for this agent, and iterates over them
     for (AgentRecording theRec : recordings) {
       File recDir = theRec.getBaseDir();
-      
+
       // If the capture.ingested file does not exist we cannot delete the data
       if (!theRec.getState().equals(RecordingState.UPLOAD_FINISHED)) {
         logger.info("Skipped cleaning for {}. Ingest has not been completed.", theRec.getID());
         continue;
       }
 
-      // Clean up if we are running out of disk space 
+      // Clean up if we are running out of disk space
       if (checkDiskSpace) {
         long freeSpace = recDir.getFreeSpace();
         if (freeSpace < minDiskSpace) {
           underMinSpace = true;
-          logger.info("Removing capture {} archives in {}. Under minimum free disk space.",
-                      theRec.getID(), recDir.getAbsolutePath());
+          logger.info("Removing capture {} archives in {}. Under minimum free disk space.", theRec.getID(),
+                  recDir.getAbsolutePath());
           FileSupport.delete(recDir, true);
           if (service != null) {
             service.removeCompletedRecording(theRec.getID());
           }
           continue;
-        }
-        else {
+        } else {
           underMinSpace = false;
           logger.debug("Archive: recording {} not removed, enough disk space remains for archive.", theRec.getID());
         }
@@ -145,24 +147,23 @@ public class CleanCaptureJob implements Job {
         long age = theRec.getLastCheckinTime();
         long currentTime = System.currentTimeMillis();
         if (currentTime - age > maxArchivalDays * DAY_LENGTH_MILLIS) {
-          logger.info("Removing capture {} archives at {}.\nExceeded the maximum archival days.",
-                      theRec.getID(), recDir.getAbsolutePath());
+          logger.info("Removing capture {} archives at {}.\nExceeded the maximum archival days.", theRec.getID(),
+                  recDir.getAbsolutePath());
           FileSupport.delete(recDir, true);
           if (service != null) {
             service.removeCompletedRecording(theRec.getID());
           }
           continue;
-        }
-        else {
-          logger.debug("Recording {} has NOT yet exceeded the maximum archival days. Keeping {}",
-                       theRec.getID(), recDir.getAbsolutePath());
+        } else {
+          logger.debug("Recording {} has NOT yet exceeded the maximum archival days. Keeping {}", theRec.getID(),
+                  recDir.getAbsolutePath());
         }
       }
       logger.debug("Recording {} ({}) not deleted.", theRec.getID(), recDir.getAbsolutePath());
     }
-    
+
     if (underMinSpace)
       logger.warn("Free space is under the minimum disk space limit!");
-    
+
   }
 }

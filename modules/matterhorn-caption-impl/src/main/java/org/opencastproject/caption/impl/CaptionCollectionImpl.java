@@ -58,7 +58,7 @@ public class CaptionCollectionImpl implements CaptionCollection {
   public Iterator<Caption> getCollectionIterator() {
     return new Iterator<Caption>() {
 
-      Iterator<Caption> iterator = captionCollection.iterator();
+      private Iterator<Caption> iterator = captionCollection.iterator();
 
       @Override
       public boolean hasNext() {
@@ -76,4 +76,5 @@ public class CaptionCollectionImpl implements CaptionCollection {
       }
     };
   }
+
 }

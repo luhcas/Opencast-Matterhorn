@@ -39,35 +39,35 @@ public class StartCaptureJob implements Job {
   private static final Logger logger = LoggerFactory.getLogger(StartCaptureJob.class);
 
   /**
-   * Starts the capture itself.  Also schedules a StopCaptureJob.
-   * {@inheritDoc}
+   * Starts the capture itself. Also schedules a StopCaptureJob. {@inheritDoc}
+   * 
    * @see org.quartz.Job#execute(JobExecutionContext)
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    
+
     logger.info("Initiating StartCaptureJob.");
     CaptureAgentImpl captureAgentImpl = null;
     MediaPackage mediaPackage = null;
     Properties properties = null;
     Scheduler sched = null;
 
-    //// Extracts the necessary parameters for calling startCapture()
+    // // Extracts the necessary parameters for calling startCapture()
     // The capture agent
-    captureAgentImpl = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
+    captureAgentImpl = (CaptureAgentImpl) ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     // The MediaPackage
-    mediaPackage = (MediaPackage)ctx.getMergedJobDataMap().get(JobParameters.MEDIA_PACKAGE);
+    mediaPackage = (MediaPackage) ctx.getMergedJobDataMap().get(JobParameters.MEDIA_PACKAGE);
     // The capture Properties
-    properties = (Properties)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_PROPS);
+    properties = (Properties) ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_PROPS);
     // The scheduler to use.
-    sched = (Scheduler)ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
+    sched = (Scheduler) ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
 
     if (captureAgentImpl == null) {
       logger.error("No capture agent provided. Capture Interrupted");
       return;
     }
 
-    //We require both objects to exist, if either of them doesn't then the scheduler didn't do its job properly
+    // We require both objects to exist, if either of them doesn't then the scheduler didn't do its job properly
     if (properties == null || mediaPackage == null) {
       logger.error("Insufficient parameters provided. startCapture() needs Properties and a MediaPackage to proceed");
       return;
@@ -78,10 +78,10 @@ public class StartCaptureJob implements Job {
       logger.error("Key {} not found in job properties, cannot continue.", JobParameters.JOB_POSTFIX);
       return;
     }
-    
+
     try {
 
-      //Find the recording end time
+      // Find the recording end time
       String time2Stop = properties.getProperty(CaptureParameters.RECORDING_END);
 
       JobDetail job = new JobDetail(StopCaptureJob.JOB_PREFIX + postfix, StopCaptureJob.class);
@@ -108,7 +108,7 @@ public class StartCaptureJob implements Job {
       sched.scheduleJob(job, trigger);
       logger.debug("stopCapture scheduled for: {}", trigger);
 
-      //Remove this job from the system if my scheduler still exists
+      // Remove this job from the system if my scheduler still exists
       JobDetail mine = ctx.getJobDetail();
       try {
         if (!ctx.getScheduler().isShutdown()) {
@@ -118,10 +118,10 @@ public class StartCaptureJob implements Job {
         logger.warn("Unable to delete start capture job {}!", mine.getName());
         e.printStackTrace();
       }
-      
+
     } catch (SchedulerException e) {
       logger.error("Couldn't schedule task: {}", e);
-      //e.printStackTrace();
+      // e.printStackTrace();
     } catch (Exception e) {
       logger.error("Unexpected exception: {}\nJob may have not been executed", e);
       e.printStackTrace();

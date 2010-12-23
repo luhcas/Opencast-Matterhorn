@@ -34,14 +34,13 @@ import org.opencastproject.util.ConfigurationException;
  */
 public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
 
-
   String imageMockPath = null;
-  
+
   @Before
   @Override
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     super.setup();
-    
+
     if (!readyTestEnvironment())
       return;
 
@@ -62,7 +61,7 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
 
     Assert.assertNotNull(epiphanBin.subBin);
     Assert.assertTrue(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubPngBin);
-    Assert.assertEquals(epiphanBin.getCaps(), ((EpiphanVGA2USBV4LSubPngBin)epiphanBin.subBin).caps);
+    Assert.assertEquals(epiphanBin.getCaps(), ((EpiphanVGA2USBV4LSubPngBin) epiphanBin.subBin).caps);
   }
 
   @Test
@@ -107,10 +106,10 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
     Assert.assertEquals(subBin.sink.get(GStreamerProperties.EMIT_SIGNALS), false);
     Assert.assertEquals(subBin.sink.get(GStreamerProperties.DROP), true);
     Assert.assertEquals(subBin.sink.get(GStreamerProperties.MAX_BUFFERS), 1);
-//    if (subBin.caps != null) {
-//      //TODO: can not convert to Caps
-//      Assert.assertEquals(subBin.caps_filter.get("caps"), Caps.fromString(subBin.caps));
-//    }
+    // if (subBin.caps != null) {
+    // //TODO: can not convert to Caps
+    // Assert.assertEquals(subBin.caps_filter.get("caps"), Caps.fromString(subBin.caps));
+    // }
   }
 
   @Test

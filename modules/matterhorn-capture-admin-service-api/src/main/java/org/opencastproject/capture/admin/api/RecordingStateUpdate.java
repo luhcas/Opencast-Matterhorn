@@ -24,43 +24,76 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A representation of an recording which stores its id, state and time-since-last-update value
  */
-@XmlType(name="recording-state-update", namespace="http://capture.admin.opencastproject.org")
-@XmlRootElement(name="recording-state-update", namespace="http://capture.admin.opencastproject.org")
+@XmlType(name = "recording-state-update", namespace = "http://capture.admin.opencastproject.org")
+@XmlRootElement(name = "recording-state-update", namespace = "http://capture.admin.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RecordingStateUpdate {
 
   /**
    * The recording's ID.
    */
-  @XmlElement(name="name")
-  public String id;
-  
+  @XmlElement(name = "name")
+  private String id;
+
   /**
-   * The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
+   * The state of the recording. This should be defined from
+   * {@link org.opencastproject.capture.admin.api.RecordingState}.
+   * 
    * @see RecordingState
    */
-  @XmlElement(name="state")
-  public String state;
-  
+  @XmlElement(name = "state")
+  private String state;
+
   /**
-   * The number of milliseconds since the last time the recording checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970).
+   * The number of milliseconds since the last time the recording checked in. Note that this is relative (ie, it's been
+   * 3000 ms) rather than absolute (milliseconds since 1970).
    */
-  @XmlElement(name="time-since-last-update")
-  public Long time_since_last_update;
+  @XmlElement(name = "time-since-last-update")
+  private Long timeSinceLastUpdate;
 
   /**
    * Required zero-arg. constructor. Do not use
    */
-  public RecordingStateUpdate() {}
-  
+  public RecordingStateUpdate() {
+  }
+
   /**
-   * Builds an RecordingStateUpdate object about the Recording r.  This calculates the time delta for you.
-   *
-   * @param r The recording you wish to know more information about
+   * Builds an RecordingStateUpdate object about the Recording r. This calculates the time delta for you.
+   * 
+   * @param r
+   *          The recording you wish to know more information about
    */
   public RecordingStateUpdate(Recording r) {
     id = r.getID();
     state = r.getState();
-    time_since_last_update = System.currentTimeMillis() - r.getLastCheckinTime();
+    timeSinceLastUpdate = System.currentTimeMillis() - r.getLastCheckinTime();
   }
+
+  /**
+   * Returns the recording id.
+   * 
+   * @return the id
+   */
+  public String getId() {
+    return id;
+  }
+
+  /**
+   * Reuturns the recording state.
+   * 
+   * @return the state
+   */
+  public String getState() {
+    return state;
+  }
+
+  /**
+   * Returns the time where the recording was last updated.
+   * 
+   * @return the update time
+   */
+  public Long getTimeSinceLastUpdate() {
+    return timeSinceLastUpdate;
+  }
+
 }

@@ -50,7 +50,7 @@ public class SubRipCaptionConverter implements CaptionConverter {
   private static final String EXTENSION = "srt";
 
   /** line ending used in srt - windows native in specification */
-  private final String LINE_ENDING = "\r\n";
+  private static final String LINE_ENDING = "\r\n";
 
   /**
    * {@inheritDoc} Since srt does not store information about language, language parameter is ignored.

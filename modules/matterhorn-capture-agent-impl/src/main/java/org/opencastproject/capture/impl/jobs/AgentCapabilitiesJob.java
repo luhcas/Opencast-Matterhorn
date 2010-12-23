@@ -43,8 +43,8 @@ public class AgentCapabilitiesJob implements Job {
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
 
   /**
-   * Pushes the agent's capabilities to the remote state service.
-   * {@inheritDoc}
+   * Pushes the agent's capabilities to the remote state service. {@inheritDoc}
+   * 
    * @see org.quartz.Job#execute(JobExecutionContext)
    * @throws JobExecutionException
    */
@@ -53,15 +53,15 @@ public class AgentCapabilitiesJob implements Job {
     CaptureAgent agent = (CaptureAgent) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
     TrustedHttpClient client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
 
-    //Figure out where we're sending the data
+    // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
       logger.warn("URL for {} is invalid, unable to push capabilities to remote server.",
-                  CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
+              CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
-      if (url.charAt(url.length()-1) == '/') {
+      if (url.charAt(url.length() - 1) == '/') {
         url += config.getItem(CaptureParameters.AGENT_NAME) + "/capabilities";
       } else {
         url += "/" + config.getItem(CaptureParameters.AGENT_NAME) + "/capabilities";

@@ -35,19 +35,19 @@ public class IngestJob implements StatefulJob {
   /**
    * The class to create the manifest, then attempt to ingest the media to the remote server.
    */
-  /** The prefix for the job name so that it can be found and removed easily. **/ 
+  /** The prefix for the job name so that it can be found and removed easily. **/
   public static final String JOB_PREFIX = "IngestJob-";
-  /** The prefix for the trigger so that it can be found and removed easily.**/ 
+  /** The prefix for the trigger so that it can be found and removed easily. **/
   public static final String TRIGGER_PREFIX = "IngestJobTrigger-";
   /** The default amount of time before restarting the ingestion retries in seconds. **/
   public static final String DEFAULT_PAUSE_TIME = "3600";
-  /** The default number of times to try ingesting to the core before sleeping to try again.**/
+  /** The default number of times to try ingesting to the core before sleeping to try again. **/
   public static final String DEFAULT_RETRIES = "5";
-  /** The default amount of time in seconds to wait between retrying to ingest to the core.**/
+  /** The default amount of time in seconds to wait between retrying to ingest to the core. **/
   public static final long DEFAULT_RETRY_INTERVAL = 1;
   /** The current number of retries left before a pause. **/
   public static final String RETRIES_LEFT = "Retries.Left";
-  
+
   private static final Logger logger = LoggerFactory.getLogger(IngestJob.class);
 
   /**
@@ -61,24 +61,22 @@ public class IngestJob implements StatefulJob {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     logger.info("Running IngestJob");
-    // Get the unique identifier that will allow this job to be found uniquely in the scheduler. 
+    // Get the unique identifier that will allow this job to be found uniquely in the scheduler.
     String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
-    // Obtain the quartz scheduler that will be used to remove this job and reschedule it. 
+    // Obtain the quartz scheduler that will be used to remove this job and reschedule it.
     Scheduler scheduler = (Scheduler) ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
     // Obtains the recordingID
     String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
     // Obtains the CaptureAgentImpl from the context
     CaptureAgentImpl captureAgentImpl = (CaptureAgentImpl) ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     // Get number of retries
-    AtomicLong retriesLeft = (AtomicLong)ctx.getMergedJobDataMap().get(IngestJob.RETRIES_LEFT);
-    // If retries left are 0 we have to start a pause, less than 0 is the end of a pause and anything else is a retry.  
-    if(retriesLeft.get() == 0){
+    AtomicLong retriesLeft = (AtomicLong) ctx.getMergedJobDataMap().get(IngestJob.RETRIES_LEFT);
+    // If retries left are 0 we have to start a pause, less than 0 is the end of a pause and anything else is a retry.
+    if (retriesLeft.get() == 0) {
       startPause(ctx, postfix, scheduler, recordingID, captureAgentImpl);
-    }
-    else if(retriesLeft.get() < 0){
+    } else if (retriesLeft.get() < 0) {
       endPause(ctx, postfix, scheduler, recordingID, captureAgentImpl);
-    }
-    else{
+    } else {
       retryIngest(ctx, recordingID, captureAgentImpl, retriesLeft);
     }
   }
@@ -92,7 +90,7 @@ public class IngestJob implements StatefulJob {
     rescheduleJob(ctx.getMergedJobDataMap().getLong(CaptureParameters.INGEST_PAUSE_TIME), ctx, postfix, scheduler,
             recordingID, captureAgentImpl);
     // Decrease the retry amount
-    AtomicLong retriesLeft = (AtomicLong)ctx.getMergedJobDataMap().get(IngestJob.RETRIES_LEFT);
+    AtomicLong retriesLeft = (AtomicLong) ctx.getMergedJobDataMap().get(IngestJob.RETRIES_LEFT);
     retriesLeft.set(retriesLeft.get() - 1);
   }
 
@@ -114,14 +112,14 @@ public class IngestJob implements StatefulJob {
     // Remove this job
     removeJob(ctx, ctx.getJobDetail());
     // Reset the retry amount
-    AtomicLong retriesLeft = (AtomicLong)ctx.getMergedJobDataMap().get(IngestJob.RETRIES_LEFT);
+    AtomicLong retriesLeft = (AtomicLong) ctx.getMergedJobDataMap().get(IngestJob.RETRIES_LEFT);
     retriesLeft.set(ctx.getMergedJobDataMap().getLong(CaptureParameters.INGEST_RETRY_LIMIT));
     // Schedule the job with the retry interval again
     try {
       long retryInterval;
-      try{
+      try {
         retryInterval = ctx.getMergedJobDataMap().getLong(CaptureParameters.INGEST_RETRY_INTERVAL);
-      }catch(NullPointerException e){
+      } catch (NullPointerException e) {
         retryInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
       }
       JobDetailTriggerPair jobAndTrigger = JobCreator.createInjestJob(retryInterval, recordingID, postfix,
@@ -135,7 +133,7 @@ public class IngestJob implements StatefulJob {
     // Retry to Ingest
     retryIngest(ctx, recordingID, captureAgentImpl, retriesLeft);
   }
-  
+
   private void retryIngest(JobExecutionContext ctx, String recordingID, CaptureAgentImpl captureAgentImpl,
           AtomicLong retriesLeft) {
     // Try to Ingest
@@ -144,15 +142,15 @@ public class IngestJob implements StatefulJob {
     // Decrease the Number of Retries
     retriesLeft.set(retriesLeft.get() - 1);
     if (result != HttpURLConnection.HTTP_OK) {
-      // Wait until the next fire to try again. 
+      // Wait until the next fire to try again.
       logger.error("Ingestion failed with a value of {}", result);
     } else {
       logger.info("Ingestion finished");
-      // Remove this job from the system because we are finished. 
+      // Remove this job from the system because we are finished.
       removeJob(ctx, ctx.getJobDetail());
     }
   }
-  
+
   /**
    * Removes a job from the schedule.
    * 

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.capture.admin.api;
 
+import org.apache.commons.lang.StringUtils;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -24,54 +26,122 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A representation of an agent which stores its name, state and time-since-last-update value.
  */
-@XmlType(name="agent-state-update", namespace="http://capture.admin.opencastproject.org")
-@XmlRootElement(name="agent-state-update", namespace="http://capture.admin.opencastproject.org")
+@XmlType(name = "agent-state-update", namespace = "http://capture.admin.opencastproject.org")
+@XmlRootElement(name = "agent-state-update", namespace = "http://capture.admin.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AgentStateUpdate {
 
   /**
    * The agent's name.
    */
-  @XmlElement(name="name")
-  public String name;
+  @XmlElement(name = "name")
+  private String name;
 
   /**
-   * The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
+   * The state of the agent. This should be defined from the constants in
+   * {@link org.opencastproject.capture.admin.api.AgentState}.
+   * 
    * @see AgentState
    */
-  @XmlElement(name="state")
-  public String state;
-  
+  @XmlElement(name = "state")
+  private String state;
+
   /**
    * The agent's URL.
-   */ 
-  @XmlElement(name="url")
-  public String url;
+   */
+  @XmlElement(name = "url")
+  private String url;
 
   /**
-   * The number of milliseconds since the last time the agent checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970).
+   * The number of milliseconds since the last time the agent checked in. Note that this is relative (ie, it's been 3000
+   * ms) rather than absolute (milliseconds since 1970).
    */
-  @XmlElement(name="time-since-last-update")
-  public Long time_since_last_update;
+  @XmlElement(name = "time-since-last-update")
+  private Long timeSinceLastUpdate;
 
-  @XmlElement(name="capabilities")
-  public String capabilities;
+  @XmlElement(name = "capabilities")
+  private String capabilities;
 
   /**
    * Required zero-arg. constructor. Do not use.
    */
-  public AgentStateUpdate() {}
-  
+  public AgentStateUpdate() {
+  }
+
   /**
-   * Builds an AgentStateUpdate object about the Agent a.  This calculates the time delta for you.
-   *
-   * @param a The agent you wish to know more information about.
+   * Builds an AgentStateUpdate object about the Agent a. This calculates the time delta for you.
+   * 
+   * @param a
+   *          The agent you wish to know more information about.
    */
   public AgentStateUpdate(Agent a) {
     name = a.getName();
     state = a.getState();
     url = a.getUrl();
     capabilities = "";
-    time_since_last_update = System.currentTimeMillis() - a.getLastHeardFrom();
+    timeSinceLastUpdate = System.currentTimeMillis() - a.getLastHeardFrom();
   }
+
+  /**
+   * Returns the agent name.
+   * 
+   * @return the name
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Returns the agent url.
+   * 
+   * @return the url
+   */
+  public String getUrl() {
+    return url;
+  }
+
+  /**
+   * Returns the agent state.
+   * 
+   * @return the state
+   */
+  public String getState() {
+    return state;
+  }
+  
+  public void addCapability(String capability) {
+    if (StringUtils.isBlank(capability))
+      this.capabilities = capability;
+    else
+      StringUtils.join(new String[] {this.capabilities, capability}, ' ');
+  }
+
+  /**
+   * Sets the agent capabilities. If there is more than one capability, simply put spaces in between them.
+   * 
+   * @param capabilities
+   *          the capabilities to set
+   */
+  public void setCapabilities(String capabilities) {
+    this.capabilities = capabilities;
+  }
+
+  /**
+   * Returns the agent capabilities.
+   * 
+   * @return the capabilities
+   */
+  public String getCapabilities() {
+    return capabilities;
+  }
+
+  /**
+   * Returns the time when the agent was last seen online.
+   * 
+   * @return the time of the last update
+   */
+  public Long getTimeSinceLastUpdate() {
+    return timeSinceLastUpdate;
+  }
+
 }

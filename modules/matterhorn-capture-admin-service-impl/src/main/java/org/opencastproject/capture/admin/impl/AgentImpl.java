@@ -31,9 +31,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "CAPTURE_AGENT_STATE")
-@NamedQueries( {
-  @NamedQuery(name = "AgentImpl.getAll", query = "SELECT a FROM AgentImpl a")
-})
+@NamedQueries({ @NamedQuery(name = "AgentImpl.getAll", query = "SELECT a FROM AgentImpl a") })
 public class AgentImpl implements Agent {
 
   /**
@@ -43,30 +41,28 @@ public class AgentImpl implements Agent {
   protected String name;
 
   /**
-   * The state of the agent.  This should be defined from the constants in AgentState.
+   * The state of the agent. This should be defined from the constants in AgentState.
    */
   @Column(name = "STATE", nullable = false)
   protected String state;
-  
+
   /**
    * The URL of the agent. This is determined from the referer header parameter when the agent is registered.
-   *
+   * 
    */
   @Column(name = "URL")
   protected String url;
 
   /**
-   * The time at which the agent last checked in with this service.
-   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than
-   *  a relative timestamp (ie, it's been 3000 ms since it last checked in). 
+   * The time at which the agent last checked in with this service. Note that this is an absolute timestamp (ie,
+   * milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in).
    */
   @Column(name = "LAST_HEARD_FROM", nullable = false)
   protected Long lastHeardFrom;
 
   /**
-   * The capabilities the agent has
-   * Capabilities are the devices this agent can record from, with a friendly name associated
-   * to determine their nature (e.g. PRESENTER --> dev/video0)
+   * The capabilities the agent has Capabilities are the devices this agent can record from, with a friendly name
+   * associated to determine their nature (e.g. PRESENTER --> dev/video0)
    */
   @Column(name = "CAPABILITIES", nullable = true)
   protected Properties capabilities;
@@ -74,25 +70,28 @@ public class AgentImpl implements Agent {
   /**
    * Required 0-arg constructor for JAXB, creates a blank agent.
    */
-  public AgentImpl() {};
+  public AgentImpl() {
+  };
 
   /**
    * Builds a representation of the agent.
-   *
-   * @param agentName The name of the agent.
-   * @param agentState The state of the agent.  This should be defined from the constants in AgentState
+   * 
+   * @param agentName
+   *          The name of the agent.
+   * @param agentState
+   *          The state of the agent. This should be defined from the constants in AgentState
    */
   public AgentImpl(String agentName, String agentState, String agentUrl, Properties capabilities) {
     name = agentName;
     this.setState(agentState);
     this.setUrl(agentUrl);
-    //Agents with no capabilities are allowed.  These can/will be updated after the agent is built if necessary.
+    // Agents with no capabilities are allowed. These can/will be updated after the agent is built if necessary.
     this.capabilities = capabilities;
   }
 
-
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#getName()
    */
   public String getName() {
@@ -101,6 +100,7 @@ public class AgentImpl implements Agent {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#setState(java.lang.String)
    */
   public void setState(String newState) {
@@ -110,30 +110,34 @@ public class AgentImpl implements Agent {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#getState()
    */
   public String getState() {
     return state;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#setUrl(java.lang.String)
    */
-  public void setUrl(String agentUrl){
+  public void setUrl(String agentUrl) {
     url = agentUrl;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#getUrl()
    */
-  public String getUrl(){
+  public String getUrl() {
     return url;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#setLastHeardFrom(java.lang.Long)
    */
   public void setLastHeardFrom(Long time) {
@@ -142,6 +146,7 @@ public class AgentImpl implements Agent {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#getLastHeardFrom()
    */
   public Long getLastHeardFrom() {
@@ -150,6 +155,7 @@ public class AgentImpl implements Agent {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#getCapabilities()
    */
   public Properties getCapabilities() {
@@ -158,6 +164,7 @@ public class AgentImpl implements Agent {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Agent#setCapabilities(java.util.Properties)
    */
   public void setCapabilities(Properties capabilities) {

@@ -29,7 +29,6 @@ import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanVGA2USBV4LProducer}.
  */
@@ -62,7 +61,7 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
     } catch (Exception ex) {
       Assert.fail();
     }
-    
+
     try {
       EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, null);
       Assert.fail();
@@ -117,7 +116,7 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
       return;
 
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
-      
+
     // AppSrc -> identity
     Pad pad = epiphanBin.src.getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
@@ -159,11 +158,9 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
     String caps = epiphanBin.getCaps();
     Assert.assertNotNull(caps);
     Assert.assertFalse(caps.isEmpty());
-    Assert.assertTrue(caps.contains(GStreamerProperties.VIDEO_X_RAW_YUV) &&
-            caps.contains(GStreamerProperties.WIDTH) &&
-            caps.contains(GStreamerProperties.HEIGHT) &&
-            caps.contains(GStreamerProperties.FRAMERATE) &&
-            caps.contains("format="));
+    Assert.assertTrue(caps.contains(GStreamerProperties.VIDEO_X_RAW_YUV) && caps.contains(GStreamerProperties.WIDTH)
+            && caps.contains(GStreamerProperties.HEIGHT) && caps.contains(GStreamerProperties.FRAMERATE)
+            && caps.contains("format="));
     epiphanBin = null;
   }
 
@@ -180,10 +177,10 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
     State state = epiphanBin.getBin().getState(15 * CaptureAgentImpl.GST_SECOND);
     Assert.assertEquals(state, State.PLAYING);
 
-//    state = epiphanBin.deviceBin.pipeline.getState();
-//    Assert.assertEquals(state, State.PLAYING);
+    // state = epiphanBin.deviceBin.pipeline.getState();
+    // Assert.assertEquals(state, State.PLAYING);
 
-    state = ((EpiphanVGA2USBV4LSubAbstractBin)epiphanBin.subBin).bin.getState();
+    state = ((EpiphanVGA2USBV4LSubAbstractBin) epiphanBin.subBin).bin.getState();
     Assert.assertEquals(state, State.PLAYING);
 
     // stop Bin
@@ -192,10 +189,10 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
     state = epiphanBin.getBin().getState(15 * CaptureAgentImpl.GST_SECOND);
     Assert.assertEquals(state, State.NULL);
 
-//    state = epiphanBin.deviceBin.pipeline.getState();
-//    Assert.assertEquals(state, State.NULL);
+    // state = epiphanBin.deviceBin.pipeline.getState();
+    // Assert.assertEquals(state, State.NULL);
 
-    state = ((EpiphanVGA2USBV4LSubAbstractBin)epiphanBin.subBin).bin.getState();
+    state = ((EpiphanVGA2USBV4LSubAbstractBin) epiphanBin.subBin).bin.getState();
     Assert.assertEquals(state, State.NULL);
   }
 }

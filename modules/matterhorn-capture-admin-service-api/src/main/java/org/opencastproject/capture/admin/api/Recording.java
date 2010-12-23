@@ -22,31 +22,36 @@ public interface Recording {
 
   /**
    * Gets the ID of the recording.
-   *
+   * 
    * @return The ID of the recording.
    */
-  public String getID();
+  String getID();
 
   /**
    * Sets the state of the recording, and updates the time it was last heard from.
-   *
-   * @param newState The new state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.  This can be equal to the current one if the goal is to update the timestamp.
+   * 
+   * @param newState
+   *          The new state of the recording. This should be defined from
+   *          {@link org.opencastproject.capture.admin.api.RecordingState}. This can be equal to the current one if the
+   *          goal is to update the timestamp.
    * @see RecordingState
    */
-  public void setState(String newState);
+  void setState(String newState);
 
   /**
    * Gets the state of the recording.
-   *
-   * @return The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
+   * 
+   * @return The state of the recording. This should be defined from
+   *         {@link org.opencastproject.capture.admin.api.RecordingState}.
    * @see RecordingState
    */
-  public String getState();
+  String getState();
 
   /**
    * Gets the time at which the recording last checked in.
-   *
+   * 
    * @return The number of milliseconds since 1970 when the recording last checked in.
    */
-  public Long getLastCheckinTime();
+  Long getLastCheckinTime();
+
 }

@@ -53,6 +53,7 @@ import javax.persistence.spi.PersistenceProvider;
  * IMPL for the capture-admin service (MH-1336, MH-1394, MH-1457, MH-1475 and MH-1476).
  */
 public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, ManagedService {
+  
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateServiceImpl.class);
 
   /** The name of the persistence unit for this class */
@@ -431,11 +432,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    */
   public boolean removeRecording(String id) {
     logger.debug("Removing Recording {}.", id);
-    if (recordings.remove(id) != null) {
-      return true;
-    } else {
-      return false;
-    }
+    return recordings.remove(id) != null;
   }
 
   /**

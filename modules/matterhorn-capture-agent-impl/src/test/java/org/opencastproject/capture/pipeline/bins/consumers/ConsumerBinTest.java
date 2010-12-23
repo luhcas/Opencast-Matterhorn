@@ -84,8 +84,8 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     try {
-      Element testQueue = GStreamerElementFactory.getInstance().createElement("SinkBinTest",
-              GStreamerElements.QUEUE, null);
+      Element testQueue = GStreamerElementFactory.getInstance().createElement("SinkBinTest", GStreamerElements.QUEUE,
+              null);
       maxSizeBuffersDefault = testQueue.getPropertyDefaultValue("max-size-buffers").toString();
       maxSizeBytesDefault = testQueue.getPropertyDefaultValue("max-size-bytes").toString();
       maxSizeTimeDefault = testQueue.get("max-size-time").toString();
@@ -104,8 +104,8 @@ public class ConsumerBinTest {
 
   /** Salient queue properties to test are bufferCount, bufferBytes and bufferTime. **/
   private Properties createQueueProperties(String bufferCount, String bufferBytes, String bufferTime) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
-            bufferCount, bufferBytes, bufferTime, null);
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null,
+            null, null, bufferCount, bufferBytes, bufferTime, null);
     return captureDeviceProperties;
   }
 

@@ -121,8 +121,8 @@ public class VideoFilesinkConsumer extends ConsumerBin {
        * will not start. Pass 0 is CBR (default), Pass 4 is constant quantizer, Pass 5 is constant quality
        **/
       encoder.set(GStreamerProperties.PASS, DEFAULT_X264_PASS);
-      if (captureDevice.properties.contains(GStreamerProperties.QUANTIZER))
-        encoder.set(GStreamerProperties.QUANTIZER, captureDevice.properties.getProperty(GStreamerProperties.QUANTIZER));
+      if (captureDevice.getProperties().contains(GStreamerProperties.QUANTIZER))
+        encoder.set(GStreamerProperties.QUANTIZER, captureDevice.getProperties().getProperty(GStreamerProperties.QUANTIZER));
     }
     if (captureDeviceProperties.getContainer() != null) {
       /** The user has specified a different container than H.264 **/

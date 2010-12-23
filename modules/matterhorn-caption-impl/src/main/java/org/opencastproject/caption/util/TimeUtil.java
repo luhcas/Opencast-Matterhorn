@@ -23,13 +23,20 @@ import org.opencastproject.caption.impl.TimeImpl;
  * Auxiliary class that contains methods for converting from and to specific time formats.
  * 
  */
-public class TimeUtil {
+public final class TimeUtil {
 
   // time format regular expressions
   private static final String SRT_FORMAT = "[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}";
   private static final String DFXP_FORMAT_1 = "[0-9]{1,2}:[0-9]{2}:[0-9]{2}(.[0-9]+)?";
 
   // SRT time format functions
+
+  /**
+   * Private constructor to prevent instantiation of this utility class.
+   */
+  private TimeUtil() {
+    // Nothing to be done
+  }
 
   /**
    * Parse String representation of SubRip time format.
@@ -61,8 +68,8 @@ public class TimeUtil {
    * @return time exported to SubRip time format
    */
   public static String exportToSrt(Time time) {
-    return String.format("%02d:%02d:%02d,%03d", time.getHours(), time.getMinutes(), time.getSeconds(), time
-            .getMiliseconds());
+    return String.format("%02d:%02d:%02d,%03d", time.getHours(), time.getMinutes(), time.getSeconds(),
+            time.getMiliseconds());
   }
 
   // DFXP TT time format
@@ -112,7 +119,7 @@ public class TimeUtil {
    * @return time exported to DFXP time format
    */
   public static String exportToDFXP(Time time) {
-    return String.format("%d:%02d:%02d.%03d", time.getHours(), time.getMinutes(), time.getSeconds(), time
-            .getMiliseconds());
+    return String.format("%d:%02d:%02d.%03d", time.getHours(), time.getMinutes(), time.getSeconds(),
+            time.getMiliseconds());
   }
 }

@@ -74,8 +74,8 @@ public class CaptureDeviceBin {
     if (captureDevice.getName() == ProducerType.FILE) {
       addFileBin(captureDevice, properties);
     } else if (captureDevice.getName() == ProducerType.HAUPPAUGE_WINTV
-            && captureDevice.properties.getProperty("codec") == null
-            && captureDevice.properties.getProperty("container") == null) {
+            && captureDevice.getProperties().getProperty("codec") == null
+            && captureDevice.getProperties().getProperty("container") == null) {
       // If the device is a Hauppauge card and we aren't changing either the codec or the container create a FileBin
       // that will just copy the data from the Hauppauge card to the FileSink so that we take advantage of the onboard
       // mpeg encoding and don't do it in software.

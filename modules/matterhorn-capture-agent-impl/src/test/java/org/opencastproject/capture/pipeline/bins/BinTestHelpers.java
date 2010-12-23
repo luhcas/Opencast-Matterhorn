@@ -24,33 +24,29 @@ public class BinTestHelpers {
   public static final String V4L_LOCATION = "/dev/vga";
   public static final String V4L2_LOCATION = "/dev/video2";
   public static final String HAUPPAGE_LOCATION = "/dev/video0";
-  
- 
+
   private static String operatingSystemName = null;
-  
-  public static String getOsName()
-  {
-    if(operatingSystemName == null) { 
+
+  public static String getOsName() {
+    if (operatingSystemName == null) {
       operatingSystemName = System.getProperty("os.name");
     }
     return operatingSystemName;
   }
 
-  public static boolean isWindows(){
+  public static boolean isWindows() {
     return getOsName().startsWith("Windows");
   }
 
   public static boolean isLinux() {
     return getOsName().startsWith("Linux");
   }
-  
 
-  
-  public static Properties createCaptureDeviceProperties(CaptureDevice captureDevice, String customProducer, String codec, String bitrate, 
-          String quantizer, String container, String bufferCount, String bufferBytes, String bufferTime, 
-          String framerate){
+  public static Properties createCaptureDeviceProperties(CaptureDevice captureDevice, String customProducer,
+          String codec, String bitrate, String quantizer, String container, String bufferCount, String bufferBytes,
+          String bufferTime, String framerate) {
     Properties properties = new Properties();
-   
+
     if (customProducer != null)
       properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
               + CaptureParameters.CAPTURE_DEVICE_CUSTOM_PRODUCER, customProducer);
@@ -72,15 +68,15 @@ public class BinTestHelpers {
       properties.setProperty("framerate", framerate);
     return properties;
   }
-  
-  public static CaptureDevice createCaptureDevice(String sourceLocation, ProducerType sourceDeviceName, 
+
+  public static CaptureDevice createCaptureDevice(String sourceLocation, ProducerType sourceDeviceName,
           String friendlyName, String outputLocation, Properties captureDeviceProperties) {
     CaptureDevice captureDevice = new CaptureDevice(sourceLocation, sourceDeviceName, friendlyName, outputLocation);
-    captureDevice.properties = captureDeviceProperties;
+    captureDevice.setProperties(captureDeviceProperties);
     return captureDevice;
   }
-  
-  public static Properties createConfidenceMonitoringProperties(){
+
+  public static Properties createConfidenceMonitoringProperties() {
     // setup testing properties
     Properties properties = new Properties();
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION, "/tmp/testpipe/confidence");

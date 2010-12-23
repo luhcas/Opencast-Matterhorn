@@ -91,9 +91,9 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
   protected void activate(ComponentContext componentContext) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.annotation", persistenceProperties);
   }
-  
+
   protected void deactivate() {
-    if(emf != null && emf.isOpen()) {
+    if (emf != null && emf.isOpen()) {
       emf.close();
     }
   }
@@ -133,7 +133,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
     try {
       em = emf.createEntityManager();
       AnnotationImpl a = em.find(AnnotationImpl.class, id);
-      if(a == null) {
+      if (a == null) {
         throw new NotFoundException("Annotation '" + id + "' not found");
       } else {
         return a;

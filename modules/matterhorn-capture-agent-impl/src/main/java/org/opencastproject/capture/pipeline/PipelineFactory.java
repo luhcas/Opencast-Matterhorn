@@ -46,20 +46,20 @@ public class PipelineFactory {
   public static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
 
   private static Properties properties;
-  
+
   public static boolean broken;
-  
+
   public static int v4LSrcIndex;
-  
+
   protected static CaptureAgent captureAgent = null;
 
   /**
    * Create a bin that contains multiple pipelines using each source in the properties object as the gstreamer source
    * 
    * @param props
-   *          {@code Properties} object defining sources 
+   *          {@code Properties} object defining sources
    * @return The {@code Pipeline} to control the pipelines
-   * @throws Exception 
+   * @throws Exception
    * @throws UnsupportedDeviceException
    */
   public static Pipeline create(Properties props, boolean confidence, CaptureAgent ca) {
@@ -74,7 +74,7 @@ public class PipelineFactory {
       e.printStackTrace();
       return null;
     }
-    
+
     String outputDirectory = properties.getProperty(CaptureParameters.RECORDING_ROOT_URL);
 
     devices = initDevices(friendlyNames, outputDirectory, confidence);
@@ -87,9 +87,10 @@ public class PipelineFactory {
 
   /**
    * Splits the device names from the pipeline's properties.
+   * 
    * @return The device names to capture from.
-   * @throws NoCaptureDevicesSpecifiedException - If there are no capture devices 
-   * specified in the configuration file we throw an exception. 
+   * @throws NoCaptureDevicesSpecifiedException
+   *           - If there are no capture devices specified in the configuration file we throw an exception.
    */
   private static String[] getDeviceNames() throws NoCaptureDevicesSpecifiedException {
     // Setup pipeline for all the devices specified
@@ -99,12 +100,12 @@ public class PipelineFactory {
               + CaptureParameters.CAPTURE_DEVICE_NAMES);
     }
 
-    //Sanity checks for the device list
+    // Sanity checks for the device list
     String[] friendlyNames = deviceNames.split(",");
     if (friendlyNames.length < 1) {
       throw new NoCaptureDevicesSpecifiedException("Insufficient number of capture devices listed.  Aborting!");
     } else if (friendlyNames.length == 1) {
-      //Java gives us an array even if the string being split is blank...
+      // Java gives us an array even if the string being split is blank...
       if (friendlyNames[0].trim().equals("")) {
         throw new NoCaptureDevicesSpecifiedException("Invalid capture device listed.  Aborting!");
       }
@@ -114,16 +115,22 @@ public class PipelineFactory {
   }
 
   /**
-   * Returns an {@code ArrayList} of {@code CaptureDevice}s which contain everything the rest of this class needs 
-   * to start the pipeline
-   * @param friendlyNames  The list of friendly names we will be capturing from.
-   * @param outputDirectory  The destination directory of the captures.
-   * @param confidence  True to enable confidence monitoring, false otherwise.
+   * Returns an {@code ArrayList} of {@code CaptureDevice}s which contain everything the rest of this class needs to
+   * start the pipeline
+   * 
+   * @param friendlyNames
+   *          The list of friendly names we will be capturing from.
+   * @param outputDirectory
+   *          The destination directory of the captures.
+   * @param confidence
+   *          True to enable confidence monitoring, false otherwise.
    * @return A list of {@code CaptureDevice}s which can be captured from.
-   * @throws InvalidDeviceNameException The device name specified in the list of devices could not be found in 
-   * the properties list.
-   * @throws UnrecognizedDeviceException JV4L could not recognize the device after the type was not specified.
-   * @throws UnableToCreateSampleOutputFileException Failure while trying to create a test capture file.
+   * @throws InvalidDeviceNameException
+   *           The device name specified in the list of devices could not be found in the properties list.
+   * @throws UnrecognizedDeviceException
+   *           JV4L could not recognize the device after the type was not specified.
+   * @throws UnableToCreateSampleOutputFileException
+   *           Failure while trying to create a test capture file.
    */
   protected static ArrayList<CaptureDevice> initDevices(String[] friendlyNames, String outputDirectory,
           boolean confidence) {
@@ -150,33 +157,33 @@ public class PipelineFactory {
           UnrecognizedDeviceException, CannotFindSourceFileOrDeviceException {
     name = name.trim();
     ProducerType devName;
-  
+
     // Get properties from the configuration
-    String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-    String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
-    String typeProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_TYPE;
-    
+    String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+    String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST;
+    String typeProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_TYPE;
+
     if (outputDirectory == null && confidence == false) {
-      logger.warn("Output directory is null, this may not work because we may not be able to write to the current " +
-        "output dir!");
+      logger.warn("Output directory is null, this may not work because we may not be able to write to the current "
+              + "output dir!");
     }
     if (!properties.containsKey(outputProperty)) {
-      throw new InvalidDeviceNameException("Invalid device name: " + name + ".  No keys named " 
-              + CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + " exist in the properties!");
+      throw new InvalidDeviceNameException("Invalid device name: " + name + ".  No keys named "
+              + CaptureParameters.CAPTURE_DEVICE_PREFIX + name + " exist in the properties!");
     }
     String srcLoc = properties.getProperty(srcProperty);
     File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
-    
+
     logger.debug("Device {} has source at {}.", name, srcLoc);
     logger.debug("Device {} has output at {}.", name, outputFile);
-    
+
     String type = properties.getProperty(typeProperty);
     logger.debug("Device {} has type {}.", name, type);
-    
-    //Only try and create an output file if this pipeline will *not* be used for confidence monitoring
+
+    // Only try and create an output file if this pipeline will *not* be used for confidence monitoring
     if (!confidence) {
       try {
-        if(!outputFile.createNewFile()){
+        if (!outputFile.createNewFile()) {
           throw new UnableToCreateSampleOutputFileException("Could not create ouput file for " + name
                   + " file may already exist.");
         }
@@ -186,18 +193,16 @@ public class PipelineFactory {
       }
     }
     String outputLoc = outputFile.getAbsolutePath();
-        
-  
+
     if (srcLoc == null) {
       throw new CannotFindSourceFileOrDeviceException("Unable to create pipeline for " + name
               + " because its source file/device does not exist!");
     }
-    
-    if(type != null){
+
+    if (type != null) {
       devName = ProducerType.valueOf(type);
       logger.debug("Device {} has been confirmed to be type {}", name, devName.toString());
-    }
-    else{
+    } else {
       logger.debug("Device {} has no type so we will determine it's type.", name);
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
@@ -216,14 +221,14 @@ public class PipelineFactory {
     return name;
   }
 
-  private static ProducerType determineSourceFromJ4VLInfo(String srcLoc) throws UnrecognizedDeviceException{
+  private static ProducerType determineSourceFromJ4VLInfo(String srcLoc) throws UnrecognizedDeviceException {
     // ALSA source
-    if (srcLoc.contains("hw:")){
+    if (srcLoc.contains("hw:")) {
       return ProducerType.ALSASRC;
     } else if (srcLoc.equals("dv1394")) {
       return ProducerType.DV_1394;
     } else { // V4L devices
-      // Attempt to determine what the device is using the JV4LInfo library 
+      // Attempt to determine what the device is using the JV4LInfo library
       try {
         V4LInfo v4linfo = JV4LInfo.getV4LInfo(srcLoc);
         String deviceString = v4linfo.toString();
@@ -235,7 +240,7 @@ public class PipelineFactory {
           return ProducerType.BLUECHERRY_PROVIDEO;
         else {
           throw new UnrecognizedDeviceException("Do not recognized device: " + srcLoc);
-          
+
         }
       } catch (JV4LInfoException e) {
         // The v4l device caused an exception
@@ -248,12 +253,14 @@ public class PipelineFactory {
       }
     }
   }
-  
+
   /**
    * Initializes the pipeline itself, but does not start capturing
    * 
-   * @param devices  The list of devices to capture from.
-   * @param confidence  True to enable confidence monitoring.
+   * @param devices
+   *          The list of devices to capture from.
+   * @param confidence
+   *          True to enable confidence monitoring.
    * @return The created {@code Pipeline}, or null in the case of an error.
    */
   private static Pipeline startPipeline(ArrayList<CaptureDevice> devices, boolean confidence) {
@@ -261,11 +268,11 @@ public class PipelineFactory {
     for (int i = 0; i < devices.size(); i++)
       logger.debug("Device #{}: {}.", i, devices.get(i));
 
-    // setup gstreamer pipeline using capture devices 
+    // setup gstreamer pipeline using capture devices
     Gst.init(); // cannot using gst library without first initialising it
 
     Pipeline pipeline = new Pipeline();
-    
+
     if (confidence) {
       for (CaptureDevice c : devices) {
         if (c.getName() == ProducerType.ALSASRC)
@@ -283,9 +290,8 @@ public class PipelineFactory {
     return pipeline;
   }
 
-  //TODO:  Document me!
-  public static CaptureDevice createCaptureDevice(String srcLoc, ProducerType devName, String name, 
-          String outputLoc) {
+  // TODO: Document me!
+  public static CaptureDevice createCaptureDevice(String srcLoc, ProducerType devName, String name, String outputLoc) {
     CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
     String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
     String containerProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name
@@ -308,21 +314,21 @@ public class PipelineFactory {
     String framerate = properties.getProperty(framerateProperty);
 
     if (codec != null)
-      capdev.properties.setProperty("codec", codec);
+      capdev.getProperties().setProperty("codec", codec);
     if (bitrate != null)
-      capdev.properties.setProperty("bitrate", bitrate);
+      capdev.getProperties().setProperty("bitrate", bitrate);
     if (quantizer != null)
-      capdev.properties.setProperty("quantizer", quantizer);
+      capdev.getProperties().setProperty("quantizer", quantizer);
     if (container != null)
-      capdev.properties.setProperty("container", container);
+      capdev.getProperties().setProperty("container", container);
     if (bufferCount != null)
-      capdev.properties.setProperty("bufferCount", bufferCount);
+      capdev.getProperties().setProperty("bufferCount", bufferCount);
     if (bufferBytes != null)
-      capdev.properties.setProperty("bufferBytes", bufferBytes);
+      capdev.getProperties().setProperty("bufferBytes", bufferBytes);
     if (bufferTime != null)
-      capdev.properties.setProperty("bufferTime", bufferTime);
+      capdev.getProperties().setProperty("bufferTime", bufferTime);
     if (framerate != null)
-      capdev.properties.setProperty("framerate", framerate);
+      capdev.getProperties().setProperty("framerate", framerate);
 
     return capdev;
   }
@@ -337,7 +343,7 @@ public class PipelineFactory {
    * @return True, if successful
    */
   public static boolean addPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
-    
+
     CaptureDeviceBin captureDeviceBin = null;
     try {
       captureDeviceBin = new CaptureDeviceBin(captureDevice, properties, captureAgent);
@@ -345,10 +351,8 @@ public class PipelineFactory {
       e.printStackTrace();
       return false;
     }
-   
+
     pipeline.add(captureDeviceBin.getBin());
     return true;
   }
 }
-
-

@@ -22,40 +22,48 @@ import java.io.File;
 import java.util.Properties;
 
 public interface AgentRecording extends Recording {
+
   /**
    * Gets a property from the local {@code Properties} object
-   * @param key The property name
+   * 
+   * @param key
+   *          The property name
    * @return The property value, or {@code null} if it doesn't exist
    * @see java.util.Properties#getProperty(String)
    */
-  public String getProperty(String key);
-  
+  String getProperty(String key);
+
   /**
    * Sets a property in the local {@code Properties} object (by simply calling its own setProperty method)
-   * @param  key The property name
-   * @param  value The value to be set
+   * 
+   * @param key
+   *          The property name
+   * @param value
+   *          The value to be set
    * @return The previous value of the specified key in this property list, or null if it did not have one.
    * @see java.util.Properties#setProperty(String, String)
    */
-  public String setProperty(String key, String value);
+  String setProperty(String key, String value);
 
   /**
    * @return The {@code Properties} object associated with the recording
    */
-  public Properties getProperties();
+  Properties getProperties();
 
   /**
-   * @param props A {@code Properties} object to associate to the recording
+   * @param props
+   *          A {@code Properties} object to associate to the recording
    */
-  public void setProperties(Properties props);
+  void setProperties(Properties props);
 
   /**
    * @return The current {@code MediaPackage}
    */
-  public MediaPackage getMediaPackage();
+  MediaPackage getMediaPackage();
 
   /**
    * @return A {@code File} object pointing to the directory where those recording files are
    */
-  public File getBaseDir();
+  File getBaseDir();
+
 }

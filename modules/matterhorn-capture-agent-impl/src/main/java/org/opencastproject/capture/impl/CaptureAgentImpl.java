@@ -55,6 +55,7 @@ import org.opencastproject.util.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -122,6 +123,7 @@ import javax.xml.transform.stream.StreamResult;
  */
 public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService,
         ConfigurationManagerListener {
+
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
   /** The default maximum length to capture, measured in seconds. */
@@ -142,49 +144,49 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public static final String CAPTURE_TYPE_VIDEO = "video";
 
   /** The agent's pipeline. **/
-  Pipeline pipe = null;
+  private Pipeline pipe = null;
 
   /** Pipeline for confidence monitoring while agent is idle */
-  Pipeline confidencePipe = null;
+  private Pipeline confidencePipe = null;
 
   /** Keeps the recordings which have not been succesfully ingested yet. **/
-  Map<String, AgentRecording> pendingRecordings = new ConcurrentHashMap<String, AgentRecording>();
+  private Map<String, AgentRecording> pendingRecordings = new ConcurrentHashMap<String, AgentRecording>();
 
   /** Keeps the recordings which have been successfully ingested. */
-  Map<String, AgentRecording> completedRecordings = new ConcurrentHashMap<String, AgentRecording>();
+  private Map<String, AgentRecording> completedRecordings = new ConcurrentHashMap<String, AgentRecording>();
 
   /** The agent's name. */
-  String agentName = null;
+  private String agentName = null;
 
   /** The agent's current state. Used for logging. */
-  String agentState = null;
+  private String agentState = null;
 
   /** A pointer to the scheduler. */
-  org.opencastproject.capture.api.Scheduler scheduler = null;
+  private org.opencastproject.capture.api.Scheduler scheduler = null;
 
   /** The scheduler the agent will use to schedule any recurring events */
-  org.quartz.Scheduler agentScheduler = null;
+  private org.quartz.Scheduler agentScheduler = null;
 
   /** The configuration manager for the agent. */
-  ConfigurationManager configService = null;
+  private ConfigurationManager configService = null;
 
   /** The (remote) service registry */
-  protected ServiceRegistry serviceRegistry = null;
+  private ServiceRegistry serviceRegistry = null;
 
   /** The http client used to communicate with the core */
-  TrustedHttpClient client = null;
+  private TrustedHttpClient client = null;
 
   /** Indicates the ID of the recording currently being recorded. **/
-  String currentRecID = null;
+  private String currentRecID = null;
 
   /** Is confidence monitoring enabled? */
-  boolean confidence = false;
+  private boolean confidence = false;
 
   /** Stores the start time of the current recording */
-  long startTime = -1L;
+  private long startTime = -1L;
 
   /** Stores the current bundle context */
-  ComponentContext context = null;
+  private ComponentContext context = null;
 
   /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
@@ -643,7 +645,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     // Get the list of device names so we can attach all the files appropriately (re: flavours, etc)
     String[] friendlyNames = recording.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
-    if (friendlyNames.length == 1 && friendlyNames[0].equals("")) {
+    if (friendlyNames.length == 1 && StringUtils.isBlank(friendlyNames[0])) {
       // Idiot check against blank name lists.
       logger.error("Unable to build mediapackage for recording {} because the device names list is blank!", recID);
       return false;
@@ -655,8 +657,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     try {
 
       // Adds the files present in the Properties
-      for (String name : friendlyNames) {
-        name = name.trim();
+      for (String friendlyName : friendlyNames) {
+        String name = friendlyName.trim();
 
         String flavorPointer = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR;
         String flavorString = recording.getProperty(flavorPointer);
@@ -841,10 +843,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         logger.warn("Unable to ingest media because no ingest service is available");
         return -4;
       }
-      
+
       // Take the least loaded one (first in line)
       ServiceRegistration ingestService = ingestServices.get(0);
-      url = new URL(UrlSupport.concat(ingestService.getHost(), ingestService.getPath())); 
+      url = new URL(UrlSupport.concat(ingestService.getHost(), ingestService.getPath()));
     } catch (ServiceRegistryException e) {
       logger.warn("Unable to ingest media because communication with the remote service registry failed.", e);
       return -4;
@@ -852,7 +854,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       logger.warn("Malformed URL for ingest target.");
       return -3;
     }
-    
+
     File fileDesc = new File(recording.getBaseDir(), CaptureParameters.ZIP_NAME);
 
     // Set the file as the body of the request
@@ -964,14 +966,20 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
         confidencePipe.stop();
         // TODO: What if this loop never finishes?
-        while (confidencePipe.isPlaying())
-          ;
+        while (true) {
+          if (confidencePipe.isPlaying())
+            continue;
+          break;
+        }
         confidencePipe = null;
         logger.info("Confidence monitoring has been shut down.");
       } else if (state.equalsIgnoreCase(AgentState.IDLE)) {
         try {
-          while (configService.getAllProperties().size() == 0)
-            ;
+          while (true) {
+            if (configService.getAllProperties().size() == 0)
+              continue;
+            break;
+          }
           confidencePipe = PipelineFactory.create(configService.getAllProperties(), true, this);
           Bus bus = confidencePipe.getBus();
           bus.connect(new Bus.EOS() {

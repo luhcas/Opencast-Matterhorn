@@ -25,25 +25,26 @@ public class RecordingImpl implements Recording {
   /**
    * The ID of the recording.
    */
-  public String id;
+  private String id;
 
   /**
-   * The state of the recording.  This should be defined from RecordingState.
+   * The state of the recording. This should be defined from RecordingState.
    */
-  public String state;
+  private String state;
 
   /**
-   * The time at which the recording last checked in with this service.
-   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than
-   *  a relative timestamp (ie, it's been 3000 ms since it last checked in). 
+   * The time at which the recording last checked in with this service. Note that this is an absolute timestamp (ie,
+   * milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in).
    */
-  public Long lastHeardFrom;
+  private Long lastHeardFrom;
 
   /**
    * Builds a representation of the recording.
-   *
-   * @param recordingID The ID of the recording.
-   * @param recordingState The state of the recording.  This should be defined from RecordingState.
+   * 
+   * @param recordingID
+   *          The ID of the recording.
+   * @param recordingState
+   *          The state of the recording. This should be defined from RecordingState.
    */
   public RecordingImpl(String recordingID, String recordingState) {
     id = recordingID;
@@ -52,6 +53,7 @@ public class RecordingImpl implements Recording {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#getID()
    */
   public String getID() {
@@ -60,6 +62,7 @@ public class RecordingImpl implements Recording {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#setState(java.lang.String)
    */
   public void setState(String newState) {
@@ -69,6 +72,7 @@ public class RecordingImpl implements Recording {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#getState()
    */
   public String getState() {
@@ -77,6 +81,7 @@ public class RecordingImpl implements Recording {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#getLastCheckinTime()
    */
   public Long getLastCheckinTime() {

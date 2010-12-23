@@ -96,19 +96,19 @@ public class SerializeJob implements Job {
   private void scheduleIngest(String recordingID, CaptureAgentImpl ca, Scheduler sched, String postfix) {
     try {
       long retryInterval;
-      try{
+      try {
         retryInterval = Long.parseLong(ca.getConfigService().getItem(CaptureParameters.INGEST_RETRY_INTERVAL));
-      }catch(NullPointerException e){
+      } catch (NullPointerException e) {
         logger.warn(CaptureParameters.INGEST_RETRY_INTERVAL + " was null so the default "
                 + IngestJob.DEFAULT_RETRY_INTERVAL + " will be used.", e);
         retryInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
-      }catch(NumberFormatException e){
-        logger.warn(CaptureParameters.INGEST_RETRY_INTERVAL + " was an invalid number " 
-                + ca.getConfigService().getItem(CaptureParameters.INGEST_RETRY_INTERVAL) 
-                + "so the default " + IngestJob.DEFAULT_RETRY_INTERVAL + " will be used.", e);
+      } catch (NumberFormatException e) {
+        logger.warn(CaptureParameters.INGEST_RETRY_INTERVAL + " was an invalid number "
+                + ca.getConfigService().getItem(CaptureParameters.INGEST_RETRY_INTERVAL) + "so the default "
+                + IngestJob.DEFAULT_RETRY_INTERVAL + " will be used.", e);
         retryInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
       }
-      
+
       JobDetailTriggerPair jobAndTrigger = JobCreator.createInjestJob(retryInterval, recordingID, postfix, ca, sched,
               ca.getConfigService());
       sched.scheduleJob(jobAndTrigger.getJob(), jobAndTrigger.getTrigger());

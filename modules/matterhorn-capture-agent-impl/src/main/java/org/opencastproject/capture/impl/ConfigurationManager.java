@@ -50,18 +50,18 @@ import java.util.TimerTask;
 public class ConfigurationManager implements ManagedService {
 
   /** slf4j logging */
-  static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
+  private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
 
   /** Hashtable that represents config file in memory */
-  XProperties properties = new XProperties();
+  private XProperties properties = new XProperties();
 
   /** should point to a centralised config file */
-  URL url;
+  private URL url;
 
   /**
    * Timer that will every at a specified interval to retrieve the centralised configuration file from a server
    */
-  Timer timer;
+  private Timer timer;
 
   /** Is set to true when the Config Manager has been updated by felix populating its properties. **/
   private boolean initialized = false;
@@ -155,12 +155,12 @@ public class ConfigurationManager implements ManagedService {
         logger.warn("Invalid polling time for parameter {}.", CaptureParameters.CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL);
       }
     }
-    
+
     /**
      * This synchronized is required! If a new listener were to add itself to the list of observers such that it missed
      * getting called in the refreshes and initialization was still false, refresh would not be automatically called
-     * when it registers. This would result in refresh never being called for that listener. 
-     **/ 
+     * when it registers. This would result in refresh never being called for that listener.
+     **/
     synchronized (listeners) {
       for (ConfigurationManagerListener listener : listeners) {
         RefreshRunner refreshRunner = new RefreshRunner(listener);
@@ -171,27 +171,28 @@ public class ConfigurationManager implements ManagedService {
       initialized = true;
     }
   }
-  
+
   /**
    * A thread to run the refresh for each ConfigurationManagerListener. This will ensure that the listeners don't get
    * blocked waiting for another one to finish executing.
    **/
-  class RefreshRunner implements Runnable{
+  class RefreshRunner implements Runnable {
     /** The listener to call refresh on. **/
-    private ConfigurationManagerListener listener = null; 
-    public RefreshRunner(ConfigurationManagerListener listener){
+    private ConfigurationManagerListener listener = null;
+
+    public RefreshRunner(ConfigurationManagerListener listener) {
       this.listener = listener;
     }
-    
+
     @Override
     public void run() {
-      if(listener != null){
+      if (listener != null) {
         listener.refresh();
         logger.info("ConfigurationManager has refreshed " + listener);
       }
     }
   }
-  
+
   /**
    * Creates the core Opencast directories.
    */
@@ -459,7 +460,7 @@ public class ConfigurationManager implements ManagedService {
    **/
   public void registerListener(ConfigurationManagerListener listener) {
     listeners.add(listener);
-    if(isInitialized()){
+    if (isInitialized()) {
       listener.refresh();
     }
   }

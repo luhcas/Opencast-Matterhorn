@@ -37,8 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Abstract class for Epiphan producer bins testing.
- * (De)Initialize a JUnit test environment.
+ * Abstract class for Epiphan producer bins testing. (De)Initialize a JUnit test environment.
  */
 public abstract class EpiphanVGA2USBV4LTest {
 
@@ -59,7 +58,6 @@ public abstract class EpiphanVGA2USBV4LTest {
   /** Capture Device Properties created for unit testing **/
   protected Properties captureDeviceProperties;
 
-
   @BeforeClass
   public static void testGst() {
     try {
@@ -74,7 +72,7 @@ public abstract class EpiphanVGA2USBV4LTest {
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
-    
+
     if (System.getProperty("testEpiphan") != null) {
       String epiphanDeviceLocation = System.getProperty("testEpiphan");
       if (new File(epiphanDeviceLocation).exists()) {
@@ -92,14 +90,11 @@ public abstract class EpiphanVGA2USBV4LTest {
     File tmpDir = new File(System.getProperty("java.io.tmpdir"), "testpipe");
     if (!tmpDir.exists())
       tmpDir.mkdir();
-    
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, 
-            null, null, null, null, null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation,
-            ProducerType.EPIPHAN_VGA2USB,
-            "Epiphan VGA 2 USB", 
-            new File(tmpDir, "test.mpg").getAbsolutePath(),
-            captureDeviceProperties);
+
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
+            null, null, null, null);
+    captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation, ProducerType.EPIPHAN_VGA2USB,
+            "Epiphan VGA 2 USB", new File(tmpDir, "test.mpg").getAbsolutePath(), captureDeviceProperties);
 
     // setup testing properties
     properties = new Properties();
@@ -121,6 +116,7 @@ public abstract class EpiphanVGA2USBV4LTest {
 
   /**
    * Returns true, if gstreamer installed and epiphan device location is set
+   * 
    * @return true, if tests can be started
    */
   protected boolean readyTestEnvironment() {
@@ -129,11 +125,13 @@ public abstract class EpiphanVGA2USBV4LTest {
 
   /**
    * Creates EpiphanVGA2USBV4LProducer.
-   *
-   * @param captureDevice CaptureDevice for testing Epiphan VGA2USB device
-   * @param properties Properties for unit testing
+   * 
+   * @param captureDevice
+   *          CaptureDevice for testing Epiphan VGA2USB device
+   * @param properties
+   *          Properties for unit testing
    * @return EpiphanVGA2USBV4LProducer if captureDevice not null and properties are set
-   *
+   * 
    * @throws UnableToLinkGStreamerElementsException
    * @throws UnableToCreateGhostPadsForBinException
    * @throws UnableToSetElementPropertyBecauseElementWasNullException
@@ -141,8 +139,8 @@ public abstract class EpiphanVGA2USBV4LTest {
    * @throws UnableToCreateElementException
    * @throws NoProducerFoundException
    */
-  protected static EpiphanVGA2USBV4LProducer getEpiphanVGA2USBV4LProducer(CaptureDevice captureDevice, Properties properties)
-          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+  protected static EpiphanVGA2USBV4LProducer getEpiphanVGA2USBV4LProducer(CaptureDevice captureDevice,
+          Properties properties) throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException, NoProducerFoundException {
 

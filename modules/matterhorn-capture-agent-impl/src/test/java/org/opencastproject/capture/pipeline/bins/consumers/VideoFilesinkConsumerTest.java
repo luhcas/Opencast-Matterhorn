@@ -41,10 +41,10 @@ public class VideoFilesinkConsumerTest {
 
   /** Capture Device Properties created for unit testing **/
   CaptureDevice captureDevice = null;
-  
+
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
-  
+
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBinTest.class);
 
@@ -57,12 +57,12 @@ public class VideoFilesinkConsumerTest {
       gstreamerInstalled = false;
     }
   }
-   
+
   @Before
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
-    
+
     try {
       @SuppressWarnings("unused")
       Element defaultMuxer = GStreamerElementFactory.getInstance().createElement("Setup for VideoFileSinkBinTest",
@@ -83,12 +83,12 @@ public class VideoFilesinkConsumerTest {
       return;
     captureDevice = null;
   }
-  
+
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String codec, String bitrate, String container) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec, bitrate, null,
-            container, null, null, null, null);
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec,
+            bitrate, null, container, null, null, null, null);
     return captureDeviceProperties;
   }
 
@@ -96,12 +96,12 @@ public class VideoFilesinkConsumerTest {
     Assert.assertTrue(sinkBin.encoder.getName().contains(codec));
     Assert.assertEquals(bitrate, sinkBin.encoder.get("bitrate").toString());
   }
-  
+
   private void checkMuxerProperties(ConsumerBin sinkBin, String muxer) {
     Assert.assertTrue("The muxer name " + sinkBin.muxer.getName() + " should match the muxer type " + muxer,
             sinkBin.muxer.getName().contains(muxer));
   }
-  
+
   @Test
   public void nullSettingsForCodecBitrateAndContainerCreatesElementsWithDefaults() {
     if (!gstreamerInstalled)
@@ -113,7 +113,7 @@ public class VideoFilesinkConsumerTest {
     checkEncoderProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_ENCODER, "2000000");
     checkMuxerProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_MUXER);
   }
-  
+
   @Test
   public void settingBitrateChangesCodecBitrate() {
     if (!gstreamerInstalled)
@@ -124,7 +124,7 @@ public class VideoFilesinkConsumerTest {
     VideoFilesinkConsumer videoFileSinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_ENCODER, "32000000");
   }
-  
+
   @Test
   public void settingCodecButNotContainerResultsInCorrectCodecAndDefaultMuxer() {
     if (!gstreamerInstalled)
@@ -136,7 +136,7 @@ public class VideoFilesinkConsumerTest {
     checkEncoderProperties(videoFileSinkBin, "x264enc", "4096");
     checkMuxerProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_MUXER);
   }
-  
+
   @Test
   public void settingContainerResultsInCorrectMuxer() {
     if (!gstreamerInstalled)
@@ -148,9 +148,7 @@ public class VideoFilesinkConsumerTest {
     checkEncoderProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_ENCODER, "2000000");
     checkMuxerProperties(videoFileSinkBin, "mpegtsmux");
   }
-  
-  
-  
+
   /** Testing permutations of possible file locations for tests **/
   @Test
   public void realFileLocationExampleSetsPropertyAndDoesntThrowException() {
@@ -163,7 +161,7 @@ public class VideoFilesinkConsumerTest {
     VideoFilesinkConsumer sinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
     Assert.assertEquals(location, sinkBin.filesink.get("location"));
   }
-  
+
   @Test
   public void emptyFileLocationShouldThrowAnException() {
     if (!gstreamerInstalled)
@@ -175,7 +173,7 @@ public class VideoFilesinkConsumerTest {
     @SuppressWarnings("unused")
     VideoFilesinkConsumer sinkBin = createVideoSinkBinWantException(captureDeviceProperties);
   }
-  
+
   @Test
   public void nullFileLocationShouldThrowAnException() {
     if (!gstreamerInstalled)
@@ -187,8 +185,6 @@ public class VideoFilesinkConsumerTest {
     @SuppressWarnings("unused")
     VideoFilesinkConsumer sinkBin = createVideoSinkBinWantException(captureDeviceProperties);
   }
-  
-  
 
   private VideoFilesinkConsumer createVideoFileSinkBinDontWantException(Properties captureDeviceProperties) {
     VideoFilesinkConsumer videoFileSinkBin = null;
@@ -200,14 +196,14 @@ public class VideoFilesinkConsumerTest {
     }
     return videoFileSinkBin;
   }
-  
+
   private VideoFilesinkConsumer createVideoSinkBinWantException(Properties captureDeviceProperties) {
     VideoFilesinkConsumer videoFileSinkBin = null;
     try {
       videoFileSinkBin = createVideoFileSinkBin(captureDeviceProperties);
       Assert.fail();
     } catch (Exception e) {
-      
+
     }
     return videoFileSinkBin;
   }

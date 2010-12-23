@@ -23,18 +23,23 @@ import java.util.List;
  * inter-version compatibility (eg, a version 2 agent talking to a version 1 core)
  */
 public interface AgentState {
-  /** Constant <code>IDLE="idle"</code> */
-  public static final String IDLE = "idle";
-  /** Constant <code>SHUTTING_DOWN="shutting_down"</code> */
-  public static final String SHUTTING_DOWN = "shutting_down";
-  /** Constant <code>CAPTURING="capturing"</code> */
-  public static final String CAPTURING = "capturing";
-  /** Constant <code>UPLOADING="uploading"</code> */
-  public static final String UPLOADING = "uploading";
-  /** Constant <code>UNKNOWN="unknown"</code> */
-  public static final String UNKNOWN = "unknown";
 
-  /** The collection of all known states.  TODO: Remove this when the states are replaced with enums */
-  public static final List<String> KNOWN_STATES = Arrays.asList(new String[] { IDLE, SHUTTING_DOWN, CAPTURING,
-          UPLOADING, UNKNOWN });
+  /** Constant <code>IDLE="idle"</code> */
+  String IDLE = "idle";
+  
+  /** Constant <code>SHUTTING_DOWN="shutting_down"</code> */
+  String SHUTTING_DOWN = "shutting_down";
+
+  /** Constant <code>CAPTURING="capturing"</code> */
+  String CAPTURING = "capturing";
+  
+  /** Constant <code>UPLOADING="uploading"</code> */
+  String UPLOADING = "uploading";
+  
+  /** Constant <code>UNKNOWN="unknown"</code> */
+  String UNKNOWN = "unknown";
+
+  /** The collection of all known states. TODO: Remove this when the states are replaced with enums */
+  List<String> KNOWN_STATES = Arrays.asList(new String[] { IDLE, SHUTTING_DOWN, CAPTURING, UPLOADING, UNKNOWN });
+
 }

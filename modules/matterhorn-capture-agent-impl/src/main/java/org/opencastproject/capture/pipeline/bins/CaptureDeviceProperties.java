@@ -44,13 +44,13 @@ public class CaptureDeviceProperties {
   public CaptureDeviceProperties(CaptureDevice captureDevice, Properties properties) {
     customProducer = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
             + CaptureParameters.CAPTURE_DEVICE_CUSTOM_PRODUCER);
-    codec = captureDevice.properties.getProperty("codec");
-    container = captureDevice.properties.getProperty("container");
-    bitrate = captureDevice.properties.getProperty("bitrate");
-    framerate = captureDevice.properties.getProperty("framerate");
-    bufferCount = captureDevice.properties.getProperty("bufferCount");
-    bufferBytes = captureDevice.properties.getProperty("bufferBytes");
-    bufferTime = captureDevice.properties.getProperty("bufferTime");
+    codec = captureDevice.getProperties().getProperty("codec");
+    container = captureDevice.getProperties().getProperty("container");
+    bitrate = captureDevice.getProperties().getProperty("bitrate");
+    framerate = captureDevice.getProperties().getProperty("framerate");
+    bufferCount = captureDevice.getProperties().getProperty("bufferCount");
+    bufferBytes = captureDevice.getProperties().getProperty("bufferBytes");
+    bufferTime = captureDevice.getProperties().getProperty("bufferTime");
     if (properties != null && properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE) != null) {
       confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
     } else {

@@ -34,10 +34,10 @@ public class CustomAudioProducerTest {
 
   /** Capture Device Properties created for unit testing **/
   CaptureDevice captureDevice = null;
-    
+
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
-  
+
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBinTest.class);
 
@@ -50,71 +50,75 @@ public class CustomAudioProducerTest {
       gstreamerInstalled = false;
     }
   }
-   
+
   @AfterClass
   public static void tearDownGst() {
     if (gstreamerInstalled) {
-      //Gst.deinit();
+      // Gst.deinit();
     }
   }
-  
+
   @After
   public void tearDown() {
     if (!gstreamerInstalled)
       return;
     captureDevice = null;
   }
-  
+
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
-  private Properties createProperties(String customProducer){
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
-            "Friendly Name", "/tmp/testpipe/test.mp2", null);
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, customProducer, null, null, null,
-            null, null, null, null, null);
+  private Properties createProperties(String customProducer) {
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", null);
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, customProducer,
+            null, null, null, null, null, null, null, null);
     return captureDeviceProperties;
   }
-  
+
   @Test
   public void nullSettingForCustomSourceResultsInException() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties(null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
-            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomAudioProducer customAudioSrcBin = createCustomAudioSrcBinWantException(captureDeviceProperties);
   }
 
   @Test
   public void garbageSettingForCustomSourceResultsInException() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties("This is not really a source");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
-            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomAudioProducer customAudioSrcBin = createCustomAudioSrcBinWantException(captureDeviceProperties);
   }
-  
+
   @Test
   public void singleItemInStringResultsInCorrectPipeline() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties("fakesrc");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
-            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomAudioProducer customAudioSrcBin = createCustomAudioSrcBinDontWantException(captureDeviceProperties);
   }
-  
+
   @Test
   public void multiItemInStringResultsInCorrectPipeline() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties("fakesrc ! queue");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
-            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomAudioProducer customAudioSrcBin = createCustomAudioSrcBinDontWantException(captureDeviceProperties);
   }
-  
+
   private CustomAudioProducer createCustomAudioSrcBinDontWantException(Properties captureDeviceProperties) {
     CustomAudioProducer customAudioSrcBin = null;
     try {
@@ -125,14 +129,14 @@ public class CustomAudioProducerTest {
     }
     return customAudioSrcBin;
   }
-  
+
   private CustomAudioProducer createCustomAudioSrcBinWantException(Properties captureDeviceProperties) {
     CustomAudioProducer customAudioSrcBin = null;
     try {
       customAudioSrcBin = createCustomAudioSrcBin(captureDeviceProperties);
       Assert.fail();
     } catch (Exception e) {
-      
+
     }
     return customAudioSrcBin;
   }

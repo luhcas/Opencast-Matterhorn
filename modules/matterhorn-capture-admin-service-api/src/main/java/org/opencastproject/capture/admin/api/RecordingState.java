@@ -22,34 +22,46 @@ import java.util.List;
  * A representation of a recording's current state (MH-1475).
  */
 public interface RecordingState {
+
   /** Constant <code>UNKNOWN="unknown"</code> */
-  public static final String UNKNOWN = "unknown";
+  String UNKNOWN = "unknown";
+
   /** Constant <code>CAPTURING="capturing"</code> */
-  public static final String CAPTURING = "capturing";
+  String CAPTURING = "capturing";
+
   /** Constant <code>CAPTURE_FINISHED="capture_finished"</code> */
-  public static final String CAPTURE_FINISHED = "capture_finished";
+  String CAPTURE_FINISHED = "capture_finished";
+
   /** Constant <code>CAPTURE_ERROR="capture_error"</code> */
-  public static final String CAPTURE_ERROR = "capture_error";
+  String CAPTURE_ERROR = "capture_error";
+
   /** Constant <code>MANIFEST="manifest"</code> */
-  public static final String MANIFEST = "manifest";
+  String MANIFEST = "manifest";
+
   /** Constant <code>MANIFEST_ERROR="manifest_error"</code> */
-  public static final String MANIFEST_ERROR = "manifest_error";
+  String MANIFEST_ERROR = "manifest_error";
+
   /** Constant <code>MANIFEST_FINISHED="manifest_finished"</code> */
-  public static final String MANIFEST_FINISHED = "manifest_finished";
+  String MANIFEST_FINISHED = "manifest_finished";
+
   /** Constant <code>COMPRESSING="compressing"</code> */
-  public static final String COMPRESSING = "compressing";
+  String COMPRESSING = "compressing";
+
   /** Constant <code>COMPRESSING_ERROR="compressing_error"</code> */
-  public static final String COMPRESSING_ERROR = "compressing_error";
+  String COMPRESSING_ERROR = "compressing_error";
+
   /** Constant <code>UPLOADING="uploading"</code> */
-  public static final String UPLOADING = "uploading";
+  String UPLOADING = "uploading";
+
   /** Constant <code>UPLOAD_FINISHED="upload_finished"</code> */
-  public static final String UPLOAD_FINISHED = "upload_finished";
+  String UPLOAD_FINISHED = "upload_finished";
+
   /** Constant <code>UPLOAD_ERROR="upload_error"</code> */
-  public static final String UPLOAD_ERROR = "upload_error";
+  String UPLOAD_ERROR = "upload_error";
 
   /** The collection of all known states. TODO: Remove this when the states are replaced with enums */
-  public static final List<String> KNOWN_STATES = Arrays.asList(new String[] { UNKNOWN, CAPTURING, CAPTURE_FINISHED,
-          CAPTURE_ERROR, MANIFEST, MANIFEST_ERROR, MANIFEST_FINISHED, COMPRESSING, COMPRESSING_ERROR, UPLOADING,
-          UPLOAD_FINISHED, UPLOAD_ERROR });
+  List<String> KNOWN_STATES = Arrays.asList(new String[] { UNKNOWN, CAPTURING, CAPTURE_FINISHED, CAPTURE_ERROR,
+          MANIFEST, MANIFEST_ERROR, MANIFEST_FINISHED, COMPRESSING, COMPRESSING_ERROR, UPLOADING, UPLOAD_FINISHED,
+          UPLOAD_ERROR });
 
 }

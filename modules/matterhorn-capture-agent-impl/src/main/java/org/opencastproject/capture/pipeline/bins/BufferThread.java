@@ -26,8 +26,8 @@ public class BufferThread implements Runnable {
 
   private static final Logger log = LoggerFactory.getLogger(BufferThread.class);
   private static final int MILLISECONDS_BETWEEN_CHECKS = 60000;
-  Element queue = null;
-  boolean run = true;
+  private Element queue = null;
+  private boolean run = true;
 
   /**
    * A Quick and dirty logging class.  This will only be created when the logging level is set to TRACE.

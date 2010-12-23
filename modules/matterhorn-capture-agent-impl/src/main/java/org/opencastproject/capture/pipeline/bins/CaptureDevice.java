@@ -29,16 +29,16 @@ public class CaptureDevice {
 
   /** Device name */
   private ProducerType sourceDeviceName;
-  
-  /** Friendly name defined in properties file by user e.g. VGA, Podium etc.*/
+
+  /** Friendly name defined in properties file by user e.g. VGA, Podium etc. */
   private String friendlyName;
 
-  /** Name of the file to save the stream to such as Podium.mpg*/
+  /** Name of the file to save the stream to such as Podium.mpg */
   private String outputPath;
-  
+
   /** A list of properties set for this device */
-  public Properties properties;
-  
+  private Properties properties;
+
   /**
    * Create a representation of a capture device for the PipelineFactory
    * 
@@ -56,9 +56,8 @@ public class CaptureDevice {
     this.sourceDeviceName = sourceDeviceName;
     this.outputPath = outputPath;
     this.friendlyName = friendlyName;
-    
-    properties = new Properties();
 
+    properties = new Properties();
   }
 
   public ProducerType getName() {
@@ -76,9 +75,27 @@ public class CaptureDevice {
   public String toString() {
     return "[" + sourceDeviceName + ", " + location + ": " + outputPath + "]";
   }
-  
+
   public String getFriendlyName() {
     return friendlyName;
+  }
+
+  /**
+   * Returns the device properties.
+   * 
+   * @return the properties
+   */
+  public Properties getProperties() {
+    return properties;
+  }
+
+  /**
+   * @param captureDeviceProperties
+   */
+  public void setProperties(Properties captureDeviceProperties) {
+    if (captureDeviceProperties == null)
+      properties = new Properties();
+    this.properties = captureDeviceProperties;
   }
 
 }

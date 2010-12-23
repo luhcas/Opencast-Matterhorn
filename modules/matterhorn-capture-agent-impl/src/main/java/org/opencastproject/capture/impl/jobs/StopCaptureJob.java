@@ -37,38 +37,38 @@ public class StopCaptureJob implements Job {
 
   public static final String JOB_PREFIX = "StopCapture-";
   public static final String TRIGGER_PREFIX = "StopCaptureTrigger-";
-  
+
   private static final Logger logger = LoggerFactory.getLogger(StopCaptureJob.class);
-  
+
   /**
-   * Stops the capture.  Also schedules a SerializeJob.
-   * {@inheritDoc}
+   * Stops the capture. Also schedules a SerializeJob. {@inheritDoc}
+   * 
    * @see org.quartz.Job#execute(JobExecutionContext)
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    
+
     logger.debug("Initiating stopCaptureJob");
-    
+
     try {
       // Extract the Capture Agent to stop the capture ASAP
-      CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
+      CaptureAgentImpl ca = (CaptureAgentImpl) ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
 
       // The scheduler to use when scheduling the next job
-      Scheduler sched = (Scheduler)ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
+      Scheduler sched = (Scheduler) ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
 
       // Extract the recording ID
       String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
 
-      //This needs to specify which job to stop
-      //otherwise we could end up stopping something else if the expected job failed earlier.
+      // This needs to specify which job to stop
+      // otherwise we could end up stopping something else if the expected job failed earlier.
       ca.stopCapture(recordingID, false);
 
       String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
       // Create job and trigger
       JobDetail job = new JobDetail(SerializeJob.JOB_PREFIX + postfix, JobParameters.SUPPORT_TYPE, SerializeJob.class);
 
-      //Setup the trigger.  The serialization job will automatically refire if it fails
+      // Setup the trigger. The serialization job will automatically refire if it fails
       SimpleTrigger trigger = new SimpleTrigger(SerializeJob.TRIGGER_PREFIX + postfix, JobParameters.SUPPORT_TYPE);
       trigger.setStartTime(new Date());
       trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
@@ -78,12 +78,12 @@ public class StopCaptureJob implements Job {
       trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, postfix);
       trigger.getJobDataMap().put(JobParameters.SCHEDULER, sched);
 
-      //Schedule the serializeJob
+      // Schedule the serializeJob
       sched.scheduleJob(job, trigger);
-      
+
       logger.info("stopCaptureJob complete");
 
-      //Remove this job from the system
+      // Remove this job from the system
       JobDetail mine = ctx.getJobDetail();
       try {
         if (!ctx.getScheduler().isShutdown()) {

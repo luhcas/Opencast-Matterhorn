@@ -53,8 +53,8 @@ public class AgentStateJob implements Job {
   private String localAddress = "";
 
   /**
-   * Pushes the agent's state to the remote state service.
-   * {@inheritDoc}
+   * Pushes the agent's state to the remote state service. {@inheritDoc}
+   * 
    * @see org.quartz.Job#execute(JobExecutionContext)
    * @throws JobExecutionException
    */
@@ -85,16 +85,16 @@ public class AgentStateJob implements Job {
   protected void sendAgentState() {
 
     logger.debug("Sending agent {}'s state: {}", state.getAgentName(), state.getAgentState());
-    
-    //Figure out where we're sending the data
+
+    // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
       logger.warn("URL for {} is invalid, unable to push state to remote server.",
-                  CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
+              CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
-      if (url.charAt(url.length()-1) == '/') {
+      if (url.charAt(url.length() - 1) == '/') {
         url += config.getItem(CaptureParameters.AGENT_NAME);
       } else {
         url += "/" + config.getItem(CaptureParameters.AGENT_NAME);
@@ -106,7 +106,7 @@ public class AgentStateJob implements Job {
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
-    //formParams.add(new BasicNameValuePair("agentName", a.getName()));
+    // formParams.add(new BasicNameValuePair("agentName", a.getName()));
     formParams.add(new BasicNameValuePair("state", state.getAgentState()));
     formParams.add(new BasicNameValuePair("address", localAddress));
 
@@ -118,11 +118,11 @@ public class AgentStateJob implements Job {
    */
   protected void sendRecordingState() {
 
-    //Figure out where we're sending the data
+    // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
       logger.warn("URL for {} is invalid, unable to push recording state to remote server.",
-                  CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
+              CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
@@ -134,7 +134,7 @@ public class AgentStateJob implements Job {
       return;
     }
 
-    //For each recording being tracked by the system send an update
+    // For each recording being tracked by the system send an update
     Map<String, AgentRecording> recordings = state.getKnownRecordings();
     for (Entry<String, AgentRecording> e : recordings.entrySet()) {
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -146,10 +146,13 @@ public class AgentStateJob implements Job {
   }
 
   /**
-   * Utility method to POST data to a URL.
-   * This method encodes the data in UTF-8 as post data, rather than multipart MIME.
-   * @param formParams The data to send.
-   * @param url The URL to send the data to.
+   * Utility method to POST data to a URL. This method encodes the data in UTF-8 as post data, rather than multipart
+   * MIME.
+   * 
+   * @param formParams
+   *          The data to send.
+   * @param url
+   *          The URL to send the data to.
    */
   private void send(List<NameValuePair> formParams, String url) {
     HttpResponse resp = null;
@@ -172,8 +175,7 @@ public class AgentStateJob implements Job {
       }
     } catch (TrustedHttpClientException e) {
       logger.warn("Unable to communicate with server at {}, message reads: {}.", url, e);
-    }
-    finally {
+    } finally {
       if (resp != null) {
         client.close(resp);
       }

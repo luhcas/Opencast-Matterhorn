@@ -24,10 +24,11 @@ import org.junit.Test;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 
 /**
- * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanVGA2USBV4LSubDeviceBin}.
+ * Test class for {@Link
+ * org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanVGA2USBV4LSubDeviceBin}.
  */
 public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
-  
+
   @Test
   public void subDeviceBinTest() throws Exception {
     if (!readyTestEnvironment())
@@ -69,11 +70,11 @@ public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
     Assert.assertEquals(deviceBin.sink.get(GStreamerProperties.EMIT_SIGNALS), false);
     Assert.assertEquals(deviceBin.sink.get(GStreamerProperties.DROP), true);
     Assert.assertEquals(deviceBin.sink.get(GStreamerProperties.MAX_BUFFERS), 1);
-//    if (deviceBin.getCaps() != null) {
-      //TODO: can not convert to Caps
-//      Assert.assertEquals(deviceBin.capsfilter.get("caps"), Caps.fromString(deviceBin.getCaps()));
-//      Assert.assertEquals(deviceBin.sink.get("caps"), Caps.fromString(deviceBin.getCaps()));
-//    }
+    // if (deviceBin.getCaps() != null) {
+    // TODO: can not convert to Caps
+    // Assert.assertEquals(deviceBin.capsfilter.get("caps"), Caps.fromString(deviceBin.getCaps()));
+    // Assert.assertEquals(deviceBin.sink.get("caps"), Caps.fromString(deviceBin.getCaps()));
+    // }
   }
 
   @Test
@@ -83,7 +84,7 @@ public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
 
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
     EpiphanVGA2USBV4LSubDeviceBin deviceBin = epiphanBin.deviceBin;
-    
+
     // src -> colorspace
     Pad pad = deviceBin.src.getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());

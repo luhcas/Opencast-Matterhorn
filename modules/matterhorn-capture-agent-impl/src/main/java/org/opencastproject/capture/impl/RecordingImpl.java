@@ -45,8 +45,8 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 /**
- * This class is a container for the properties relating a certain recording -- 
- * a set of Properties and a MediaPackage with all the metadata/attachments/etc. associated 
+ * This class is a container for the properties relating a certain recording -- a set of Properties and a MediaPackage
+ * with all the metadata/attachments/etc. associated
  */
 public class RecordingImpl implements AgentRecording, Serializable {
 
@@ -63,15 +63,14 @@ public class RecordingImpl implements AgentRecording, Serializable {
   /** Directory in the filesystem where the files related with this recording are */
   protected File baseDir = null;
 
-  /** The recording's state.  Defined in {@code RecordingState}. */
+  /** The recording's state. Defined in {@code RecordingState}. */
   protected String state = RecordingState.UNKNOWN;
 
   /**
-   * The time at which the recording last checked in with this service.
-   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than
-   *  a relative timestamp (ie, it's been 3000 ms since it last checked in). 
+   * The time at which the recording last checked in with this service. Note that this is an absolute timestamp (ie,
+   * milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in).
    */
-  protected Long lastHeardFrom; 
+  protected Long lastHeardFrom;
 
   /** Keeps the properties associated with this recording */
   protected XProperties props = null;
@@ -79,11 +78,15 @@ public class RecordingImpl implements AgentRecording, Serializable {
   /** The MediaPackage containing all the metadata/attachments/any file related with this recording */
   protected transient MediaPackage mPkg = null;
 
-  /** 
+  /**
    * Constructs a RecordingImpl object using the Properties and MediaPackage provided
-   * @param Xproperties The {@code XProperties} object associated to this recording
-   * @param mp    The {@code MediaPackage} with this recording files
-   * @throws IOException If the base directory could not be fetched
+   * 
+   * @param Xproperties
+   *          The {@code XProperties} object associated to this recording
+   * @param mp
+   *          The {@code MediaPackage} with this recording files
+   * @throws IOException
+   *           If the base directory could not be fetched
    */
   public RecordingImpl(MediaPackage mp, XProperties properties) throws IOException {
     // Stores the MediaPackage
@@ -95,7 +98,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
       logger.warn("Properties parameter was null, this recording will be in a very weird state!");
     }
 
-    //If the mediapackage is null create a new one
+    // If the mediapackage is null create a new one
     if (mPkg == null) {
       try {
         mPkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
@@ -109,32 +112,32 @@ public class RecordingImpl implements AgentRecording, Serializable {
     determineRootURLandID();
     mPkg.setIdentifier(new IdImpl(id));
 
-    //Setup the root capture dir, also make sure that it exists.
+    // Setup the root capture dir, also make sure that it exists.
     if (!baseDir.exists()) {
       try {
         FileUtils.forceMkdir(baseDir);
       } catch (IOException e) {
         logger.error("IOException creating required directory {}.", baseDir.toString());
-        //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        // setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
         throw e;
       }
-      //Should have been created.  Let's make sure of that.
+      // Should have been created. Let's make sure of that.
       if (!baseDir.exists()) {
         logger.error("Unable to start capture, could not create required directory {}.", baseDir.toString());
-        //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
-        throw new IOException ("Unable to create base directory");
+        // setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
+        throw new IOException("Unable to create base directory");
       }
     }
 
-    //Write out the metadata file needed by the core if it's not present
-    //TODO:  make this a constant?
+    // Write out the metadata file needed by the core if it's not present
+    // TODO: make this a constant?
     File metadataFile = new File(baseDir, "episode.xml");
     if (!metadataFile.exists()) {
       FileWriter out = new FileWriter(metadataFile);
       out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
-      out.write("<dublincore xmlns=\"http://www.opencastproject.org/xsd/1.0/dublincore/\"" +
-          " xmlns:dcterms=\"http://purl.org/dc/terms/\"" +
-          " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
+      out.write("<dublincore xmlns=\"http://www.opencastproject.org/xsd/1.0/dublincore/\""
+              + " xmlns:dcterms=\"http://purl.org/dc/terms/\""
+              + " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
       out.write("<dcterms:created xsi:type=\"dcterms:W3CDTF\">" + formatDate(new Date()) + "</dcterms:created>");
       out.write("<dcterms:identifier>" + id + "</dcterms:identifier>");
       out.write("<dcterms:title>" + id + "</dcterms:title>");
@@ -147,11 +150,11 @@ public class RecordingImpl implements AgentRecording, Serializable {
   }
 
   /**
-   * Determines the root URL and ID from the recording's properties
-   * //TODO:  What if the properties object contains a character in the recording id
-   *  or root url fields that is invalid for the filesystem? 
-   * @throws URISyntaxException 
-   * @throws IOException 
+   * Determines the root URL and ID from the recording's properties //TODO: What if the properties object contains a
+   * character in the recording id or root url fields that is invalid for the filesystem?
+   * 
+   * @throws URISyntaxException
+   * @throws IOException
    */
   private void determineRootURLandID() throws IOException {
 
@@ -161,26 +164,26 @@ public class RecordingImpl implements AgentRecording, Serializable {
       props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, System.getProperty("java.io.tmpdir"));
     }
 
-    //Figures out where captureDir lives
+    // Figures out where captureDir lives
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));
       if (props.containsKey(CaptureParameters.RECORDING_ID)) {
-        //In this case they've set both the root URL and the recording ID, so we're done.
+        // In this case they've set both the root URL and the recording ID, so we're done.
         id = props.getProperty(CaptureParameters.RECORDING_ID);
       } else {
-        //In this case they've set the root URL, but not the recording ID.  Get the id from that url instead then.
+        // In this case they've set the root URL, but not the recording ID. Get the id from that url instead then.
         logger.debug("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
         id = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL)).getName();
         props.put(CaptureParameters.RECORDING_ID, id);
       }
     } else {
       File cacheDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
-      //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
+      // If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
       if (props.containsKey(CaptureParameters.RECORDING_ID)) {
         id = props.getProperty(CaptureParameters.RECORDING_ID);
         baseDir = new File(cacheDir, id);
       } else {
-        //Unscheduled capture, use a timestamp value instead
+        // Unscheduled capture, use a timestamp value instead
         id = "Unscheduled-" + props.getProperty(CaptureParameters.AGENT_NAME) + "-" + System.currentTimeMillis();
         props.setProperty(CaptureParameters.RECORDING_ID, id);
         baseDir = new File(cacheDir, id);
@@ -191,6 +194,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.api.AgentRecording#getProperties()
    */
   public XProperties getProperties() {
@@ -199,6 +203,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.api.AgentRecording#setProperties(java.util.Properties)
    */
   public void setProps(XProperties props) {
@@ -207,10 +212,11 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.api.AgentRecording#setProperties(java.util.Properties)
    */
   public void setProperties(Properties props) {
-    //Preserve the bundle context between property lists
+    // Preserve the bundle context between property lists
     BundleContext ctx = null;
     if (this.props != null) {
       ctx = this.props.getBundleContext();
@@ -225,6 +231,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.api.AgentRecording#getMediaPackage()
    */
   public MediaPackage getMediaPackage() {
@@ -233,6 +240,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#getID()
    */
   public String getID() {
@@ -241,15 +249,16 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.api.AgentRecording#getDir()
    */
   public File getBaseDir() {
     return baseDir;
   }
 
-
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.api.AgentRecording#getProperty(java.lang.String)
    */
   public String getProperty(String key) {
@@ -258,6 +267,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.api.AgentRecording#setProperty(java.lang.String, java.lang.String)
    */
   public String setProperty(String key, String value) {
@@ -266,6 +276,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#setState(java.lang.String)
    */
   public void setState(String state) {
@@ -279,6 +290,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#getState()
    */
   public String getState() {
@@ -287,6 +299,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.Recording#getLastCheckinTime()
    */
   public Long getLastCheckinTime() {
@@ -295,7 +308,9 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * Formats a Date object to UTC time and according to the dublin core rules for dcterms:created
-   * @param d The Date to format
+   * 
+   * @param d
+   *          The Date to format
    * @return The formatted Date
    */
   private static synchronized String formatDate(Date d) {
@@ -304,9 +319,11 @@ public class RecordingImpl implements AgentRecording, Serializable {
   }
 
   /**
-   * Overrides the default serialization behaviour.
-   * This method writes the mediapackage to the mediapackage.xml file in the base directory of this capture
-   * @param out The ObjectOutputStream for the serialization
+   * Overrides the default serialization behaviour. This method writes the mediapackage to the mediapackage.xml file in
+   * the base directory of this capture
+   * 
+   * @param out
+   *          The ObjectOutputStream for the serialization
    * @throws IOException
    */
   private void writeObject(ObjectOutputStream out) throws IOException {
@@ -319,9 +336,11 @@ public class RecordingImpl implements AgentRecording, Serializable {
   }
 
   /**
-   * Overrides the default serialization behaviour.
-   * This method reads the mediapackage from the mediapackage.xml file in the base directory of this capture 
-   * @param in The ObjectInputStream for the serialization
+   * Overrides the default serialization behaviour. This method reads the mediapackage from the mediapackage.xml file in
+   * the base directory of this capture
+   * 
+   * @param in
+   *          The ObjectInputStream for the serialization
    * @throws IOException
    * @throws ClassNotFoundException
    */

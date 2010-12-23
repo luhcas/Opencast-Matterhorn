@@ -28,7 +28,7 @@ public class CaptureAgentShellCommands {
 
   /** The agent that is being controlled */
   private CaptureAgentImpl agent = null;
-  
+
   /** Current recording identifier */
   private String recordingId = null;
 
@@ -60,15 +60,15 @@ public class CaptureAgentShellCommands {
       System.err.println("Skipping recording " + recordingId + "");
     }
     recordingId = agent.startCapture();
-    System.out.println("Recording " + recordingId +  " started");
+    System.out.println("Recording " + recordingId + " started");
   }
-  
+
   /**
    * Tells the capture agent to stop capturing.
    */
   public void stop() {
     agent.stopCapture(recordingId, true);
-    System.out.println("Recording " + recordingId +  " stopped");
+    System.out.println("Recording " + recordingId + " stopped");
   }
 
   /**
@@ -116,13 +116,13 @@ public class CaptureAgentShellCommands {
   public void reset() {
     recordingId = null;
   }
-  
+
   /**
    * Starts and then stops a fake capture, then ingests the "captured" media. Same as calling
    * <ul>
-   *  <li><code>start()</code></li>
-   *  <li><code>stop()</code></li>
-   *  <li><code>ingest()</code></li>
+   * <li><code>start()</code></li>
+   * <li><code>stop()</code></li>
+   * <li><code>ingest()</code></li>
    * </ul>
    */
   public void capture() {

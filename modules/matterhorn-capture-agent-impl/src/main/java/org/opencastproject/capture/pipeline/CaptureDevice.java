@@ -27,13 +27,13 @@ public class CaptureDevice {
 
   /** Device name */
   private DeviceName name;
-  
+
   /** Friendly name defined in properties file */
   private String friendlyName;
 
   /** Name of the file to save the stream to */
   private String outputPath;
-  
+
   /** A list of properties set for this device */
   public Properties properties;
 
@@ -54,7 +54,7 @@ public class CaptureDevice {
     this.name = name;
     this.outputPath = output;
     this.friendlyName = fname;
-    
+
     properties = new Properties();
 
   }
@@ -74,7 +74,7 @@ public class CaptureDevice {
   public String toString() {
     return "[" + name + ", " + location + ": " + outputPath + "]";
   }
-  
+
   public String getFriendlyName() {
     return friendlyName;
   }

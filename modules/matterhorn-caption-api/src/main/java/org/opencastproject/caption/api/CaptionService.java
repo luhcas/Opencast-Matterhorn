@@ -25,7 +25,7 @@ import org.opencastproject.mediapackage.Catalog;
  */
 public interface CaptionService extends JobProducer {
 
-  final String JOB_TYPE = "org.opencastproject.caption";
+  String JOB_TYPE = "org.opencastproject.caption";
 
   /**
    * Converts captions from one format to another. Language parameter is used for those formats that store information
@@ -84,4 +84,5 @@ public interface CaptionService extends JobProducer {
    */
   String[] getLanguageList(Catalog input, String format) throws UnsupportedCaptionFormatException,
           CaptionConverterException;
+  
 }

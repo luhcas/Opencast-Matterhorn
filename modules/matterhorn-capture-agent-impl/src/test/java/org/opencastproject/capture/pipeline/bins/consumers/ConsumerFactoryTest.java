@@ -75,10 +75,10 @@ public class ConsumerFactoryTest {
 
     captureAgentMock = createMock(CaptureAgent.class);
 
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
-            null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB,
-            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null,
+            null, null, null, null, null, null);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
 
     properties = BinTestHelpers.createConfidenceMonitoringProperties();
   }
@@ -117,7 +117,7 @@ public class ConsumerFactoryTest {
     } catch (UnableToCreateElementException e) {
       logger.error("Unable to create an Video File Sink in SinkFactoryTest", e);
     }
-   
+
   }
 
   @Test
@@ -152,7 +152,7 @@ public class ConsumerFactoryTest {
     } catch (CaptureDeviceNullPointerException e) {
       logger.error("Error Creating the Sink ", e);
       Assert.fail(e.getMessage());
-    } 
+    }
     return sinkBin;
   }
 }

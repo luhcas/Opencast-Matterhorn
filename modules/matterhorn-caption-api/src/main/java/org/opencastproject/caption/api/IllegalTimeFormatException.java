@@ -17,13 +17,12 @@ package org.opencastproject.caption.api;
 
 /**
  * Indicates that unexpected time format was encountered for specific caption format.
- *
  */
 public class IllegalTimeFormatException extends Exception {
 
   private static final long serialVersionUID = -7364407512766273943L;
 
-  public IllegalTimeFormatException(String error){
+  public IllegalTimeFormatException(String error) {
     super("Illegal time format: " + error);
   }
 }

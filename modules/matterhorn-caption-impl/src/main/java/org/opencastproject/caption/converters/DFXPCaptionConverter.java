@@ -185,7 +185,7 @@ public class DFXPCaptionConverter implements CaptionConverter {
     for (int i = 0; i < list.getLength(); i++) {
       if (list.item(i).getNodeType() == Node.TEXT_NODE) {
         captionText.append(list.item(i).getTextContent());
-      } else if (list.item(i).getNodeName().equals("br")) {
+      } else if ("br".equals(list.item(i).getNodeName())) {
         captionText.append("\n");
       } else {
         captionText.append(getTextCore(list.item(i)));
@@ -289,7 +289,7 @@ public class DFXPCaptionConverter implements CaptionConverter {
       DefaultHandler handler = new DefaultHandler() {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-          if (qName.equals("div")) {
+          if ("div".equals(qName)) {
             // we found div tag - let's make a lookup for language
             String lang = attributes.getValue("xml:lang");
             if (lang == null) {

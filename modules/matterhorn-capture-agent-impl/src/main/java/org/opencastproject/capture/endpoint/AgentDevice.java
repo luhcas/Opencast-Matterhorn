@@ -47,14 +47,17 @@ public class AgentDevice {
   /**
    * Default constructor for serialization. Do not use it otherwise.
    */
-  public AgentDevice() {}
+  public AgentDevice() {
+  }
 
   /**
    * Constructor.
-   * @param device friendly device name
-   * @param type device capture type 
-   *    ({@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_AUDIO} or
-   *     {@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_VIDEO})
+   * 
+   * @param device
+   *          friendly device name
+   * @param type
+   *          device capture type ({@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_AUDIO} or
+   *          {@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_VIDEO})
    */
   public AgentDevice(String device, String type) {
     this.name = device;
@@ -63,6 +66,7 @@ public class AgentDevice {
 
   /**
    * Get device friendly name.
+   * 
    * @return device friendly name
    */
   public String getDevice() {
@@ -71,9 +75,9 @@ public class AgentDevice {
 
   /**
    * Get device capture type.
-   * @return device capture type
-   *    ({@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_AUDIO} or
-   *     {@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_VIDEO})
+   * 
+   * @return device capture type ({@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_AUDIO} or
+   *         {@link org.opencastproject.capture.impl.CaptureAgent#CAPTURE_TYPE_VIDEO})
    */
   public String getType() {
     return this.type;
@@ -81,6 +85,7 @@ public class AgentDevice {
 
   /**
    * Get {@link AgentDevice} as a {@link org.w3c.dom.Node} representation.
+   * 
    * @return XML {@link org.w3c.dom.Node} representation of the {@link AgentDevice}
    */
   public Node toXml(Document document) {

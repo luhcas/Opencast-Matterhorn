@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class AgentStateUpdateTest {
+  
   private Agent agent = null;
   private AgentStateUpdate asu = null;
 
@@ -46,9 +47,9 @@ public class AgentStateUpdateTest {
 
   @Test
   public void correctInformation() {
-    Assert.assertEquals("test", asu.name);
-    Assert.assertEquals(AgentState.IDLE, asu.state);
-    if (asu.time_since_last_update <= 1) {
+    Assert.assertEquals("test", asu.getName());
+    Assert.assertEquals(AgentState.IDLE, asu.getState());
+    if (asu.getTimeSinceLastUpdate() <= 1) {
       Assert.fail("Invalid update time in agent state update");
     }
   }
@@ -58,8 +59,9 @@ public class AgentStateUpdateTest {
   public void blank() {
     asu = new AgentStateUpdate();
     Assert.assertNotNull(asu);
-    Assert.assertNull(asu.name);
-    Assert.assertNull(asu.state);
-    Assert.assertNull(asu.time_since_last_update);
+    Assert.assertNull(asu.getName());
+    Assert.assertNull(asu.getState());
+    Assert.assertNull(asu.getTimeSinceLastUpdate());
   }
+
 }

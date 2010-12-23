@@ -24,64 +24,73 @@ public interface Agent {
 
   /**
    * Gets the name of the agent.
-   *
+   * 
    * @return The name of the agent.
    */
   String getName();
 
   /**
    * Sets the state of the agent, and updates the time it was last heard from.
-   *
-   * @param newState The new state of the agent.  This should defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.  This can be equal to the current one if the goal is to update the timestamp.
+   * 
+   * @param newState
+   *          The new state of the agent. This should defined from the constants in
+   *          {@link org.opencastproject.capture.admin.api.AgentState}. This can be equal to the current one if the goal
+   *          is to update the timestamp.
    * @see AgentState
    */
-  public void setState(String newState);
+  void setState(String newState);
 
   /**
    * Gets the state of the agent.
-   *
-   * @return The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
+   * 
+   * @return The state of the agent. This should be defined from the constants in
+   *         {@link org.opencastproject.capture.admin.api.AgentState}.
    * @see AgentState
    */
-  public String getState();
-  
+  String getState();
+
   /**
    * Sets the url of the agent.
-   * @param agentUrl The url of the agent as determined by the referer header field of its request while registering
+   * 
+   * @param agentUrl
+   *          The url of the agent as determined by the referer header field of its request while registering
    */
-  public void setUrl(String agentUrl);
-  
+  void setUrl(String agentUrl);
+
   /**
    * Gets the url of the agent.
+   * 
    * @return the url of the agent.
    */
-  public String getUrl();
+  String getUrl();
 
   /**
    * Sets the time at which the agent last checked in.
-   *
-   * @param time The number of milliseconds since 1970 when the agent last checked in.
+   * 
+   * @param time
+   *          The number of milliseconds since 1970 when the agent last checked in.
    */
-  public void setLastHeardFrom(Long time);
+  void setLastHeardFrom(Long time);
 
   /**
    * Gets the time at which the agent last checked in.
-   *
+   * 
    * @return The number of milliseconds since 1970 when the agent last checked in.
    */
-  public Long getLastHeardFrom();
+  Long getLastHeardFrom();
 
   /**
    * Gets the capture agent's capability list.
    * 
    * @return The agent's capabilities, or null if there is an error.
    */
-  public Properties getCapabilities();
+  Properties getCapabilities();
 
   /**
    * Sets the capture agent's capability list.
-   *
-   * @param capabilities The agent's capabilities.
-  */
-  public void setCapabilities(Properties capabilities);
+   * 
+   * @param capabilities
+   *          The agent's capabilities.
+   */
+  void setCapabilities(Properties capabilities);
 }

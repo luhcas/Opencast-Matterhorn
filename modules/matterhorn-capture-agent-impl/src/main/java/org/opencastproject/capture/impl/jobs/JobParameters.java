@@ -16,8 +16,8 @@
 package org.opencastproject.capture.impl.jobs;
 
 /**
- * Defines contants used in many of the jobs.
- * If you have a constant you need to add, this is the class it should live in.
+ * Defines contants used in many of the jobs. If you have a constant you need to add, this is the class it should live
+ * in.
  */
 public interface JobParameters {
   /** Constant used to define the key for the pointer to the state service. */
@@ -37,7 +37,7 @@ public interface JobParameters {
 
   /** Constant used to define the key for the CaptureAgentImpl object which is pulled out of the execution context. */
   String CAPTURE_AGENT = "capture_agent";
-  
+
   /** Constant used to define the key for the SchedulerImpl object which is pulled out of the execution context. */
   String SCHEDULER_IMPL = "scheduler_impl";
 
@@ -46,10 +46,10 @@ public interface JobParameters {
 
   /** Constant used to define the key for the IngestJob object which is pulled out of the execution context. */
   String INGEST_JOB = "ingest_job";
-  
+
   /** Constant used to define the key for the Parent Job's context which is pulled out of the execution context. */
   String PARENT_CONTEXT = "parent_context";
-  
+
   /**
    * Constant used to define the scheduler which should be used to schedule post-capture jobs.
    */
