@@ -24,7 +24,7 @@ public interface GStreamerElements {
   String IDENTITY = "identity";
   String QUEUE = "queue";
   String TEE = "tee";
-  
+
   /** Source Module: gst-plugins-base **/
   String AUDIOCONVERT = "audioconvert";
   String AUDIOTESTSRC = "audiotestsrc";
@@ -38,7 +38,7 @@ public interface GStreamerElements {
   // Available only in Linux
   String ALSASRC = "alsasrc";
   String XVIMAGESINK = "xvimagesink";
-  
+
   /** Source Module: gst-plugins-good **/
   String DV1394SRC = "dv1394src";
   String DVDEC = "dvdec";
@@ -47,7 +47,7 @@ public interface GStreamerElements {
   String PNGDEC = "pngdec";
   String PULSESRC = "pulsesrc";
   String V4L2SRC = "v4l2src";
-  
+
   /** Source Module: gst-plugins-bad **/
   String FAAC = "faac";
   String INPUT_SELECTOR = "input-selector";
@@ -55,13 +55,13 @@ public interface GStreamerElements {
   String MPEGPSDEMUX = "mpegpsdemux";
   String MPEGPSMUX = "mpegpsmux";
   String MPEGVIDEOPARSE = "mpegvideoparse";
-  
+
   /** Source Module: gst-plugins-ugly **/
   String MPEG2DEC = "mpeg2dec";
   String TWOLAME = "twolame";
   String X264ENC = "x264enc";
-  
+
   /** Source Module: gst-ffmpeg **/
-  String FFENC_MPEG2VIDEO= "ffenc_mpeg2video";
+  String FFENC_MPEG2VIDEO = "ffenc_mpeg2video";
   String FFVIDEOSCALE = "ffvideoscale";
 }

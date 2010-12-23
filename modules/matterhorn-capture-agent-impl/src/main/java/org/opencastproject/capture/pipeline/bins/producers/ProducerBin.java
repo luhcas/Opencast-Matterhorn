@@ -32,9 +32,14 @@ import org.gstreamer.Pad;
 
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public abstract class ProducerBin extends PartialBin {
+  
   public static final String GHOST_PAD_NAME = GStreamerProperties.SRC;
-  Element queue;
+  
+  protected Element queue;
 
   /**
    * ProducerBin is the super class for all sources for matterhorn including both audio and video sources.

@@ -46,9 +46,16 @@ import javax.imageio.ImageIO;
  * Class containing video monitoring services that can be incorporated into GStreamer pipelines and used for confidence
  * monitoring.
  */
-public class VideoMonitoring {
+public final class VideoMonitoring {
 
   private static final Logger logger = LoggerFactory.getLogger(VideoMonitoring.class);
+
+  /**
+   * Prevents the instantiation of this static utility class.
+   */
+  private VideoMonitoring() {
+    // Nothing to do here
+  }
 
   /**
    * Add a method for confidence monitoring to a {@code Pipeline} capturing video by teeing the raw data a pulling it to
@@ -71,7 +78,13 @@ public class VideoMonitoring {
   public static boolean addVideoMonitor(Bin bin, Element src, Element sink, final long interval, final String location,
           final String device, final boolean trace) {
 
-    Element tee, queue0, queue1, decodebin, capsfilter, jpegenc, queue2;
+    Element tee;
+    Element queue0;
+    Element queue1;
+    Element decodebin;
+    Element capsfilter;
+    Element jpegenc;
+    Element queue2;
     final Element ffmpegcolorspace;
     AppSink appsink;
 
@@ -144,7 +157,7 @@ public class VideoMonitoring {
     // from the pipeline capturing the video. For confidence monitoring
     // it is not necessary to use every buffer
     appsink.connect(new AppSink.NEW_BUFFER() {
-      long previous = -1;
+      private long previous = -1;
 
       public void newBuffer(Element elem, Pointer userData) {
         AppSink appsink = (AppSink) elem;
@@ -196,7 +209,11 @@ public class VideoMonitoring {
    *          The {@code Properties} that define the interval and location for the confidence monitoring
    */
   public static void getConfidencePipeline(Pipeline pipeline, CaptureDevice capdev, Properties properties) {
-    Element src, queue, decodebin, jpegenc, queue2;
+    Element src;
+    Element queue;
+    Element decodebin;
+    Element jpegenc;
+    Element queue2;
     final Element ffmpegcolorspace;
     AppSink appsink;
     boolean success = true;
@@ -280,7 +297,7 @@ public class VideoMonitoring {
     // from the pipeline capturing the video. For confidence monitoring
     // it is not necessary to use every buffer
     appsink.connect(new AppSink.NEW_BUFFER() {
-      long previous = -1;
+      private long previous = -1;
 
       public void newBuffer(Element elem, Pointer userData) {
         AppSink appsink = (AppSink) elem;

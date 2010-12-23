@@ -30,50 +30,64 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 
 /**
- * Epiphan VGA2USB device sub bin to use in {@link EpiphanVGA2USBV4LProducer}.
- * Creates a bin with v4lsrc Element to grab signal from Epiphan device,
- * videoscale Element to rescale video frame if needed
- * (by replugging the cable with another resolution as captured file)
- * and AppSink Element to connect with {@link EpiphanVGA2USBV4LProducer}.
+ * Epiphan VGA2USB device sub bin to use in {@link EpiphanVGA2USBV4LProducer}. Creates a bin with v4lsrc Element to grab
+ * signal from Epiphan device, videoscale Element to rescale video frame if needed (by replugging the cable with another
+ * resolution as captured file) and AppSink Element to connect with {@link EpiphanVGA2USBV4LProducer}.
  */
 public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractBin {
 
   /** CaptureDevice */
-  CaptureDevice captureDevice;
+  private CaptureDevice captureDevice;
+  
   /** Caps */
-  String caps = null;
+  private String caps = null;
 
   /** Elements */
-  Element src, colorspace, videoscale, capsfilter;
+  private Element src;
+  
+  private Element colorspace;
+  
+  private Element videoscale;
+  
+  private Element capsfilter;
+  
   /** AppSink, the last element. */
-  AppSink sink;
+  private AppSink sink;
 
   /** True if no VGA signal detected. Will be set automaticly, do not set it manually! */
-  static boolean broken = false;
+  private static boolean broken = false;
 
   /**
    * Constructor. Creates Epiphan VGA2USB device sub bin.
-   * @param captureDevice CaptureDevice
-   * @param caps Caps
-   * @trows UnableToCreateElementException
-   *        If the required GStreamer Modules are not installed to create
-   *        all of the Elements this Exception will be thrown.
+   * 
+   * @param captureDevice
+   *          CaptureDevice
+   * @param caps
+   *          Caps
+   * @trows UnableToCreateElementException If the required GStreamer Modules are not installed to create all of the
+   *        Elements this Exception will be thrown.
    * @throws UnableToLinkGStreamerElementsException
-   *        If our elements fail to link together we will throw an exception.
+   *           If our elements fail to link together we will throw an exception.
    */
-  public EpiphanVGA2USBV4LSubDeviceBin(CaptureDevice captureDevice, String caps)
-          throws UnableToCreateElementException, UnableToLinkGStreamerElementsException {
+  public EpiphanVGA2USBV4LSubDeviceBin(CaptureDevice captureDevice, String caps) throws UnableToCreateElementException,
+          UnableToLinkGStreamerElementsException {
 
-    super(captureDevice.getFriendlyName()+"_SubDeviceBin");
+    super(captureDevice.getFriendlyName() + "_SubDeviceBin");
     this.captureDevice = captureDevice;
     this.caps = caps;
-    
 
     createElements();
     setElementProperties();
     linkElements();
     setEOSListener();
     bin.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, bin.getName(), false);
+  }
+  
+  /**
+   * @return the src
+   */
+  public Element getSource() {
+    return src;
   }
 
   /**
@@ -84,40 +98,59 @@ public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractB
   public AppSink getSink() {
     if (!isBroken())
       return sink;
-    else return null;
+    else
+      return null;
   }
 
   /**
    * Returns Caps.
+   * 
    * @return Caps.
    */
   public String getCaps() {
     return caps;
   }
+  
+  /**
+   * @return the colorspace
+   */
+  public Element getColorspace() {
+    return colorspace;
+  }
+  
+  /**
+   * @return the videoscale
+   */
+  public Element getVideoscale() {
+    return videoscale;
+  }
+  
+  /**
+   * @return the capsfilter
+   */
+  public Element getCapsfilter() {
+    return capsfilter;
+  }
 
   /**
    * Create elements and add these to bin.
+   * 
    * @throws UnableToCreateElementException
-   *           If any of the Elements fail to be created because the GStreamer module
-   *           for the Element isn't present then this Exception will be thrown.
+   *           If any of the Elements fail to be created because the GStreamer module for the Element isn't present then
+   *           this Exception will be thrown.
    */
   protected void createElements() throws UnableToCreateElementException {
-    src = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.V4LSRC,
-            captureDevice.getLocation()+"_v4lsrc");
-    colorspace = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.FFMPEGCOLORSPACE,
-            captureDevice.getLocation()+"_ffmpegcolorspace");
-    videoscale = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.FFVIDEOSCALE,
-            captureDevice.getLocation()+"_ffvideoscale");
-    capsfilter = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.CAPSFILTER,
-            captureDevice.getLocation()+"_v4l_caps");
-    sink = (AppSink) GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.APPSINK,
-            captureDevice.getLocation()+"_appsink");
-    
+    src = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.V4LSRC, captureDevice.getLocation() + "_v4lsrc");
+    colorspace = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.FFMPEGCOLORSPACE, captureDevice.getLocation() + "_ffmpegcolorspace");
+    videoscale = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.FFVIDEOSCALE, captureDevice.getLocation() + "_ffvideoscale");
+    capsfilter = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.CAPSFILTER, captureDevice.getLocation() + "_v4l_caps");
+    sink = (AppSink) GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.APPSINK, captureDevice.getLocation() + "_appsink");
+
     bin.addMany(src, colorspace, videoscale, capsfilter, sink);
   }
 
@@ -138,8 +171,9 @@ public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractB
 
   /**
    * Link elements together.
+   * 
    * @throws UnableToLinkGStreamerElementsException
-   *        If Elements can not be linked together.
+   *           If Elements can not be linked together.
    */
   protected void linkElements() throws UnableToLinkGStreamerElementsException {
 
@@ -170,7 +204,9 @@ public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractB
 
   /**
    * Start bin and manage vga-signal-broken state.
-   * @param time time to check, if bin is started, -1 skip checks.
+   * 
+   * @param time
+   *          time to check, if bin is started, -1 skip checks.
    * @return true, if bin is started.
    */
   @Override
@@ -187,10 +223,11 @@ public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractB
 
   /**
    * Return broken state.
+   * 
    * @return true if vga signal is broken.
    */
   protected synchronized boolean isBroken() {
-      return broken;
+    return broken;
   }
 
   /**

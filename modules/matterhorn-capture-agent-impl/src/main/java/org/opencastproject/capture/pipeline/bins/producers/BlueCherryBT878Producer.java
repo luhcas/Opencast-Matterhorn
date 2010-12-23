@@ -31,8 +31,12 @@ import org.gstreamer.Pad;
 import java.io.File;
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public class BlueCherryBT878Producer extends V4L2Producer {
-  Element v4l2src;
+  
+  private Element v4l2src;
 
   /**
    * Creates a Producer specifically designed to handle a BlueCherry Provideo Card using the BT 878 chipset. Mainly a
@@ -71,12 +75,12 @@ public class BlueCherryBT878Producer extends V4L2Producer {
    *           supported only on Linux a Windows or Mac system will throw this Exception.
    **/
   @Override
-  protected void createElements() throws UnableToCreateElementException{
+  protected void createElements() throws UnableToCreateElementException {
     super.createElements();
     v4l2src = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
             GStreamerElements.V4L2SRC, null);
   }
-  
+
   /**
    * Set the location of the v4l2src
    * 
@@ -84,7 +88,7 @@ public class BlueCherryBT878Producer extends V4L2Producer {
    *           If the v4l2src is null then this Exception is thrown
    **/
   @Override
-  protected synchronized void setElementProperties() throws UnableToSetElementPropertyBecauseElementWasNullException{
+  protected synchronized void setElementProperties() throws UnableToSetElementPropertyBecauseElementWasNullException {
     super.setElementProperties();
     if (v4l2src == null) {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(v4l2src, captureDevice.getLocation());
@@ -95,7 +99,7 @@ public class BlueCherryBT878Producer extends V4L2Producer {
     }
     v4l2src.set(GStreamerProperties.DEVICE, captureDevice.getLocation());
   }
-  
+
   /** Add the v4l2src, queue, videorate corrector and fpsfilter to the bin. **/
   @Override
   protected void addElementsToBin() {
@@ -107,16 +111,14 @@ public class BlueCherryBT878Producer extends V4L2Producer {
    * 
    * @throws UnableToLinkGStreamerElementsException
    *           When something in the bin doesn't link together correctly we throw an exception.
-   **/ 
+   **/
   @Override
   protected void linkElements() throws UnableToLinkGStreamerElementsException {
-    if (!v4l2src.link(queue)){
+    if (!v4l2src.link(queue)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, v4l2src, queue);
-    }
-    else if (!queue.link(videorate)){
+    } else if (!queue.link(videorate)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, queue, videorate);
-    }
-    else if (!videorate.link(fpsfilter)){
+    } else if (!videorate.link(fpsfilter)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, videorate, fpsfilter);
     }
   }

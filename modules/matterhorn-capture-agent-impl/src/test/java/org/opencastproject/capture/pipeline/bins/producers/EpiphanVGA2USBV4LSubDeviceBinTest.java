@@ -35,9 +35,9 @@ public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
       return;
 
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
-    Assert.assertNotNull(epiphanBin.deviceBin);
-    Assert.assertTrue(epiphanBin.deviceBin instanceof EpiphanVGA2USBV4LSubDeviceBin);
-    Assert.assertEquals(epiphanBin.getCaps(), epiphanBin.deviceBin.getCaps());
+    Assert.assertNotNull(epiphanBin.getDeviceBin());
+    Assert.assertTrue(epiphanBin.getDeviceBin() instanceof EpiphanVGA2USBV4LSubDeviceBin);
+    Assert.assertEquals(epiphanBin.getCaps(), epiphanBin.getDeviceBin().getCaps());
   }
 
   @Test
@@ -46,13 +46,13 @@ public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
       return;
 
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
-    EpiphanVGA2USBV4LSubDeviceBin deviceBin = epiphanBin.deviceBin;
-    Assert.assertNotNull(deviceBin.src);
-    Assert.assertNotNull(deviceBin.colorspace);
-    Assert.assertNotNull(deviceBin.videoscale);
-    Assert.assertNotNull(deviceBin.capsfilter);
-    Assert.assertNotNull(deviceBin.sink);
-    Assert.assertTrue(deviceBin.sink instanceof AppSink);
+    EpiphanVGA2USBV4LSubDeviceBin deviceBin = epiphanBin.getDeviceBin();
+    Assert.assertNotNull(deviceBin.getSource());
+    Assert.assertNotNull(deviceBin.getColorspace());
+    Assert.assertNotNull(deviceBin.getVideoscale());
+    Assert.assertNotNull(deviceBin.getCapsfilter());
+    Assert.assertNotNull(deviceBin.getSink());
+    Assert.assertTrue(deviceBin.getSink() instanceof AppSink);
 
     List<Element> elements = deviceBin.bin.getElements();
     Assert.assertEquals(elements.size(), 5);
@@ -64,12 +64,12 @@ public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
       return;
 
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
-    EpiphanVGA2USBV4LSubDeviceBin deviceBin = epiphanBin.deviceBin;
-    Assert.assertEquals(deviceBin.src.get(GStreamerProperties.DEVICE), epiphanLocation);
-    Assert.assertEquals(deviceBin.src.get(GStreamerProperties.DO_TIMESTAP), false);
-    Assert.assertEquals(deviceBin.sink.get(GStreamerProperties.EMIT_SIGNALS), false);
-    Assert.assertEquals(deviceBin.sink.get(GStreamerProperties.DROP), true);
-    Assert.assertEquals(deviceBin.sink.get(GStreamerProperties.MAX_BUFFERS), 1);
+    EpiphanVGA2USBV4LSubDeviceBin deviceBin = epiphanBin.getDeviceBin();
+    Assert.assertEquals(deviceBin.getSource().get(GStreamerProperties.DEVICE), epiphanLocation);
+    Assert.assertEquals(deviceBin.getSource().get(GStreamerProperties.DO_TIMESTAP), false);
+    Assert.assertEquals(deviceBin.getSink().get(GStreamerProperties.EMIT_SIGNALS), false);
+    Assert.assertEquals(deviceBin.getSink().get(GStreamerProperties.DROP), true);
+    Assert.assertEquals(deviceBin.getSink().get(GStreamerProperties.MAX_BUFFERS), 1);
     // if (deviceBin.getCaps() != null) {
     // TODO: can not convert to Caps
     // Assert.assertEquals(deviceBin.capsfilter.get("caps"), Caps.fromString(deviceBin.getCaps()));
@@ -83,27 +83,27 @@ public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
       return;
 
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
-    EpiphanVGA2USBV4LSubDeviceBin deviceBin = epiphanBin.deviceBin;
+    EpiphanVGA2USBV4LSubDeviceBin deviceBin = epiphanBin.getDeviceBin();
 
     // src -> colorspace
-    Pad pad = deviceBin.src.getSrcPads().get(0);
+    Pad pad = deviceBin.getSource().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.colorspace);
+    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.getColorspace());
 
     // colorspace -> videoscale
-    pad = deviceBin.colorspace.getSrcPads().get(0);
+    pad = deviceBin.getColorspace().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.videoscale);
+    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.getVideoscale());
 
     // videoscale -> capsfilter
-    pad = deviceBin.videoscale.getSrcPads().get(0);
+    pad = deviceBin.getVideoscale().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.capsfilter);
+    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.getCapsfilter());
 
     // capsfilter -> sink
-    pad = deviceBin.capsfilter.getSrcPads().get(0);
+    pad = deviceBin.getCapsfilter().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.sink);
+    Assert.assertTrue(pad.getPeer().getParentElement() == deviceBin.getSink());
   }
 
   @Test
@@ -113,8 +113,8 @@ public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
 
     EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
 
-    epiphanBin.deviceBin.removeElements();
-    List<Element> elements = epiphanBin.deviceBin.bin.getElements();
+    epiphanBin.getDeviceBin().removeElements();
+    List<Element> elements = epiphanBin.getDeviceBin().bin.getElements();
     Assert.assertTrue(elements.isEmpty());
   }
 }

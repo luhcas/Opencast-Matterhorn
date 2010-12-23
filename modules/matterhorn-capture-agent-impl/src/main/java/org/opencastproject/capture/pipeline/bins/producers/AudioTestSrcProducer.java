@@ -32,7 +32,7 @@ import java.util.Properties;
 
 public class AudioTestSrcProducer extends AudioProducer {
 
-  Element audiotestsrc;
+  private Element audiotestsrc;
 
   /**
    * Used to create an audiotestsrc GStreamer Element Producer great for testing the capture agent without needing any
@@ -67,21 +67,23 @@ public class AudioTestSrcProducer extends AudioProducer {
    *           If the current system cannot create an audiotestsrc Element this Exception is thrown.
    **/
   @Override
-  protected void createElements() throws UnableToCreateElementException{
+  protected void createElements() throws UnableToCreateElementException {
     audiotestsrc = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
             GStreamerElements.AUDIOTESTSRC, null);
   }
-  
+
   /** Add the audiotestsrc to the bin we will return as a source. **/
   @Override
   protected void addElementsToBin() {
     bin.add(audiotestsrc);
   }
 
-  /** The sink for this source is the audiotestsrc itself that will be used to
-   * create the ghost pads for this bin. **/
+  /**
+   * The sink for this source is the audiotestsrc itself that will be used to create the ghost pads for this bin.
+   **/
   @Override
   public Pad getSrcPad() {
     return audiotestsrc.getStaticPad(GStreamerProperties.SRC);
   }
+
 }

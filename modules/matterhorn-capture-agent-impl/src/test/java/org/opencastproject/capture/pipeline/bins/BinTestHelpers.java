@@ -20,7 +20,11 @@ import java.util.Properties;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
 
+/**
+ * TODO: Comment me!
+ */
 public class BinTestHelpers {
+  
   public static final String V4L_LOCATION = "/dev/vga";
   public static final String V4L2_LOCATION = "/dev/video2";
   public static final String HAUPPAGE_LOCATION = "/dev/video0";
@@ -84,4 +88,5 @@ public class BinTestHelpers {
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION, "/tmp/testpipe/confidence");
     return properties;
   }
+  
 }

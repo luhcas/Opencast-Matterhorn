@@ -43,74 +43,79 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinEx
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
-
 /**
- * Extended {@link V4LProducer} for Epiphan VGA2USB devices.
- * {@code EpiphanVGA2USBV4LProducer}  will create a {@link EpiphanVGA2USBV4LSubDeviceBin}
- * where to grab video signal from and a {@link EpiphanVGA2USBV4LSubBin}
- * if epiphan device is unplugged.
- * This concept is needed, because Epiphan kernel module does not support
- * unplugging VGA cable.
+ * Extended {@link V4LProducer} for Epiphan VGA2USB devices. {@code EpiphanVGA2USBV4LProducer} will create a
+ * {@link EpiphanVGA2USBV4LSubDeviceBin} where to grab video signal from and a {@link EpiphanVGA2USBV4LSubBin} if
+ * epiphan device is unplugged. This concept is needed, because Epiphan kernel module does not support unplugging VGA
+ * cable.
  */
 public class EpiphanVGA2USBV4LProducer extends V4LProducer {
 
   /** The default resolution (width). */
   public static final int DEFAULT_CAPTURE_WIDTH = 1024;
+
   /** The default resolution (height). */
+
   public static final int DEFAULT_CAPTURE_HEIGHT = 768;
   /** The default framerate. */
+
   public static final int DEFAULT_CAPTURE_FRAMERATE = 25;
 
   /** The default start time for device bin (in seconds). */
-  static final int DEVICEBIN_START_TIME = 5;
+  private static final int DEVICEBIN_START_TIME = 5;
+
   /** The default start time for sub bin (in seconds). */
-  static final int SUBBIN_START_TIME = -1;
+  private static final int SUBBIN_START_TIME = -1;
 
   /** Device sub bin. */
-  EpiphanVGA2USBV4LSubDeviceBin deviceBin;
+  private EpiphanVGA2USBV4LSubDeviceBin deviceBin;
+
   /** Secondary sub bin. */
-  EpiphanVGA2USBV4LSubBin subBin;
+  private EpiphanVGA2USBV4LSubBin subBin;
 
   /** Thread poll permanently if vga signal was lost to restore it (when replugged the cable). */
-  Thread epiphanPoll;
+  private Thread epiphanPoll;
 
   /** Elements. */
-  Element identity, videorate, colorspace;
+  private Element identity;
+
+  private Element videorate;
+
+  private Element colorspace;
+
   /** Source element. */
-  AppSrc src;
+  private AppSrc src;
+
   /** Caps (from device or default). */
-  String caps;
+  private String caps;
 
   /**
    * Creates a Producer specifically designed to captured from the Epiphan VGA2USB cards to the main pipeline.
-   *
+   * 
    * The video data will be grabed by AppSrc from {@link EpiphanVGA2USBV4LSubDeviceBin} or
    * {@link EpiphanVGA2USBV4LSubBin} if the VGA cable was unplugged.
-   *
+   * 
    * @param captureDevice
-   *        The VGA2USB {@code CaptureDevice} to create a source out of
+   *          The VGA2USB {@code CaptureDevice} to create a source out of
    * @param properties
-   *        The {@code Properties} of the confidence monitoring.
+   *          The {@code Properties} of the confidence monitoring.
    * @throws UnableToSetElementPropertyBecauseElementWasNullException
-   *        If the Elements are not created before we try to set their properties
-   *        this Exception will be thrown.
+   *           If the Elements are not created before we try to set their properties this Exception will be thrown.
    * @throws UnableToCreateGhostPadsForBinException
-   *        If this Producer cannot create its ghost pads this Exception will be thrown.
+   *           If this Producer cannot create its ghost pads this Exception will be thrown.
    * @throws UnableToLinkGStreamerElementsException
-   *        If our elements fail to link together we will throw an exception.
+   *           If our elements fail to link together we will throw an exception.
    * @throws CaptureDeviceNullPointerException
-   *        The captureDevice parameter is required and this Exception
-   *        will be thrown if it is null.
+   *           The captureDevice parameter is required and this Exception will be thrown if it is null.
    * @throws UnableToCreateElementException
-   *        If the required GStreamer Modules are not installed to create 
-   *        all of the Elements this Exception will be thrown.
+   *           If the required GStreamer Modules are not installed to create all of the Elements this Exception will be
+   *           thrown.
    */
   public EpiphanVGA2USBV4LProducer(CaptureDevice captureDevice, Properties properties)
-          throws UnableToLinkGStreamerElementsException,
-          UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException, UnableToCreateElementException {
-    
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
+
     super(captureDevice, properties);
 
     // creates Epiphan sub bin
@@ -120,7 +125,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     String fallbackPng = properties.getProperty(CaptureParameters.FALLBACK_PNG);
     if (fallbackPng != null) {
       if (!new File(fallbackPng).isFile()) {
-        logger.warn("'"+CaptureParameters.FALLBACK_PNG+"' does not reference a png file ("+fallbackPng+"). "
+        logger.warn("'" + CaptureParameters.FALLBACK_PNG + "' does not reference a png file (" + fallbackPng + "). "
                 + "VideoTestSrc will be shown by loosing VGA signal!");
         fallbackPng = null;
       }
@@ -142,27 +147,77 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
   }
 
   /**
+   * Returns the device bin
+   * 
+   * @return the bin
+   */
+  public EpiphanVGA2USBV4LSubDeviceBin getDeviceBin() {
+    return deviceBin;
+  }
+
+  /**
+   * Returns the sub bin.
+   * 
+   * @return the bin
+   */
+  public EpiphanVGA2USBV4LSubBin getSubBin() {
+    return subBin;
+  }
+
+  /**
+   * Returns the epiphan polling thread.
+   * 
+   * @return the polling thread
+   */
+  public Thread getEpiphanPoll() {
+    return epiphanPoll;
+  }
+
+  /**
+   * Returns the app source.
+   * 
+   * @return the source
+   */
+  public AppSrc getSource() {
+    return src;
+  }
+
+  /**
+   * Returns the color space.
+   * 
+   * @return the color space
+   */
+  public Element getColorspace() {
+    return colorspace;
+  }
+
+  /**
+   * Returns the identity.
+   * 
+   * @return the identity
+   */
+  public Element getIdentity() {
+    return identity;
+  }
+  
+  /**
    * Create all of the Elements that we will need to grab videodata from sub bins.
-   *
+   * 
    * @throws UnableToCreateElementException
-   *           If any of the Elements fail to be created because the GStreamer module
-   *           for the Element isn't present then this Exception will be thrown.
+   *           If any of the Elements fail to be created because the GStreamer module for the Element isn't present then
+   *           this Exception will be thrown.
    */
   @Override
   protected void createElements() throws UnableToCreateElementException {
     GStreamerElements elements;
-    src = (AppSrc) GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.APPSRC,
-            captureDevice.getFriendlyName()+"_appsrc");
-    identity = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.IDENTITY,
-            captureDevice.getFriendlyName()+"_identity");
-    colorspace = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.FFMPEGCOLORSPACE,
-            captureDevice.getFriendlyName()+"_ffmpegcolorspace");
-    videorate = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.VIDEORATE,
-            captureDevice.getFriendlyName()+"_videorate");
+    src = (AppSrc) GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.APPSRC, captureDevice.getFriendlyName() + "_appsrc");
+    identity = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.IDENTITY, captureDevice.getFriendlyName() + "_identity");
+    colorspace = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.FFMPEGCOLORSPACE, captureDevice.getFriendlyName() + "_ffmpegcolorspace");
+    videorate = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.VIDEORATE, captureDevice.getFriendlyName() + "_videorate");
   }
 
   /**
@@ -188,7 +243,9 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
 
   /**
    * Link elements.
-   * @throws UnableToLinkGStreamerElementsException if Elements can not be linked together.
+   * 
+   * @throws UnableToLinkGStreamerElementsException
+   *           if Elements can not be linked together.
    */
   @Override
   public void linkElements() throws UnableToLinkGStreamerElementsException {
@@ -204,10 +261,9 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
   }
 
   /**
-   * Return the ffmpegcolorspace as the sink for our Epiphan source bin
-   * to be used to create ghost pads to connect this Producer to the tee
-   * in {@code CaptureDeviceBin} and from that tee to the Consumers.
-   *
+   * Return the ffmpegcolorspace as the sink for our Epiphan source bin to be used to create ghost pads to connect this
+   * Producer to the tee in {@code CaptureDeviceBin} and from that tee to the Consumers.
+   * 
    * @return ffmpegcolorspace srcpad
    */
   @Override
@@ -217,6 +273,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
 
   /**
    * Returns Gstreamer device caps or defaults.
+   * 
    * @return Caps
    */
   protected String getCaps() {
@@ -226,22 +283,24 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
         V4LInfo v4linfo = JV4LInfo.getV4LInfo(captureDevice.getLocation());
         int width = v4linfo.getVideoCapability().getMaxwidth();
         int height = v4linfo.getVideoCapability().getMaxheight();
-        caps = GStreamerProperties.VIDEO_X_RAW_YUV+", "+
-               GStreamerProperties.WIDTH+"="+width+", "+
-               GStreamerProperties.HEIGHT+"="+height+
-               ", format=(fourcc)I420, "+      // this part is needed by AppSrc
-               // static framerate, otherwise the pipeline will not start
-               // framerate limitations should be done in ConsumerBin
-               GStreamerProperties.FRAMERATE+"="+DEFAULT_CAPTURE_FRAMERATE+"/1";
-        
+        caps = GStreamerProperties.VIDEO_X_RAW_YUV + ", " + GStreamerProperties.WIDTH + "=" + width + ", "
+                + GStreamerProperties.HEIGHT + "=" + height + ", format=(fourcc)I420, " + // this part is needed by
+                                                                                          // AppSrc
+                // static framerate, otherwise the pipeline will not start
+                // framerate limitations should be done in ConsumerBin
+                GStreamerProperties.FRAMERATE + "=" + DEFAULT_CAPTURE_FRAMERATE + "/1";
+
       } catch (JV4LInfoException e) {
-        caps = GStreamerProperties.VIDEO_X_RAW_YUV+", "+
-               GStreamerProperties.WIDTH+"="+DEFAULT_CAPTURE_WIDTH+", "+
-               GStreamerProperties.HEIGHT+"="+DEFAULT_CAPTURE_HEIGHT+
-               ", format=(fourcc)I420, "+      // this part is needed by AppSrc
-               // static framerate, otherwise the pipeline will not start
-               // framerate limitations should be done in ConsumerBin
-               GStreamerProperties.FRAMERATE+"="+DEFAULT_CAPTURE_FRAMERATE+"/1";
+        caps = GStreamerProperties.VIDEO_X_RAW_YUV + ", " + GStreamerProperties.WIDTH + "=" + DEFAULT_CAPTURE_WIDTH
+                + ", " + GStreamerProperties.HEIGHT + "=" + DEFAULT_CAPTURE_HEIGHT + ", format=(fourcc)I420, " + // this
+                                                                                                                 // part
+                                                                                                                 // is
+                                                                                                                 // needed
+                                                                                                                 // by
+                                                                                                                 // AppSrc
+                // static framerate, otherwise the pipeline will not start
+                // framerate limitations should be done in ConsumerBin
+                GStreamerProperties.FRAMERATE + "=" + DEFAULT_CAPTURE_FRAMERATE + "/1";
       }
     }
     return caps;
@@ -258,18 +317,22 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
         AppSrc src = (AppSrc) elem;
         AppSink sink = null;
         Buffer buffer = null;
-        try{
+        try {
           // try to get buffer from epiphan pipeline
           sink = deviceBin.getSink();
-          if (sink == null) throw new NullPointerException("AppSink is null");
-          if (sink.isEOS()) throw new IllegalStateException("AppSink is EOS");
+          if (sink == null)
+            throw new NullPointerException("AppSink is null");
+          if (sink.isEOS())
+            throw new IllegalStateException("AppSink is EOS");
           buffer = sink.pullBuffer();
-          if (buffer == null) throw new NullPointerException("Buffer is null");
+          if (buffer == null)
+            throw new NullPointerException("Buffer is null");
         } catch (Exception ex) {
-          //logger.debug(ex.getMessage());
+          // logger.debug(ex.getMessage());
           // epiphan pipeline is down, try to get buffer from testsrc pipeline
           sink = subBin.getSink();
-          if (sink == null) src.endOfStream();
+          if (sink == null)
+            src.endOfStream();
           buffer = sink.pullBuffer();
           if (buffer == null) {
             src.endOfStream();
@@ -314,10 +377,10 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
 
   /** TODO - Make this part platform independent **/
   /**
-   * When we have lost a VGA signal, this method can be continually executed
-   * to test for a new signal.
-   *
-   * @param device the absolute path to the device
+   * When we have lost a VGA signal, this method can be continually executed to test for a new signal.
+   * 
+   * @param device
+   *          the absolute path to the device
    * @return true if there is a VGA signal
    */
   protected static synchronized boolean checkEpiphan(String device) {
@@ -334,8 +397,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
   }
 
   /**
-   * Epiphan polling thread.
-   * Restore Epiphan sub pipeline, if the signal has been reconnected.
+   * Epiphan polling thread. Restore Epiphan sub pipeline, if the signal has been reconnected.
    */
   class EpiphanPoll extends Thread {
 
@@ -351,8 +413,8 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     public void run() {
 
       logger.debug("Start Epiphan VGA2USB polling thread!");
-      
-      while(!interrupted()) {
+
+      while (!interrupted()) {
         if (deviceBin.isBroken() && checkEpiphan(location)) {
           try {
             EpiphanVGA2USBV4LSubDeviceBin newBin = new EpiphanVGA2USBV4LSubDeviceBin(captureDevice, caps);
@@ -369,7 +431,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
             logger.error("Can not create epiphan bin!", ex);
           }
         }
-        
+
         try {
           sleep(DELAY_BETWEEN_POLLS);
         } catch (InterruptedException ex) {

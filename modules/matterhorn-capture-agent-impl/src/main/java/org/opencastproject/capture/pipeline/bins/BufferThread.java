@@ -30,14 +30,16 @@ public class BufferThread implements Runnable {
   private boolean run = true;
 
   /**
-   * A Quick and dirty logging class.  This will only be created when the logging level is set to TRACE.
-   * It's sole purpose is to output the three limits on the buffer for each device
-   * @param newQueue The GStreamer Element queue that we will be logging. 
+   * A Quick and dirty logging class. This will only be created when the logging level is set to TRACE. It's sole
+   * purpose is to output the three limits on the buffer for each device
+   * 
+   * @param newQueue
+   *          The GStreamer Element queue that we will be logging.
    */
   public BufferThread(Element newQueue) {
     log.info("Buffer monitoring thread started for device " + newQueue.getName());
     queue = newQueue;
-    
+
     queue.getBus().connect(new Bus.MESSAGE() {
       @Override
       public void busMessage(Bus arg0, Message arg1) {

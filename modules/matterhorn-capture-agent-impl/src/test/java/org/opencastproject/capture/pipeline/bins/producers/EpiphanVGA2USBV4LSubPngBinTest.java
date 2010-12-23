@@ -59,9 +59,9 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
 
     EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
 
-    Assert.assertNotNull(epiphanBin.subBin);
-    Assert.assertTrue(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubPngBin);
-    Assert.assertEquals(epiphanBin.getCaps(), ((EpiphanVGA2USBV4LSubPngBin) epiphanBin.subBin).caps);
+    Assert.assertNotNull(epiphanBin.getSubBin());
+    Assert.assertTrue(epiphanBin.getSubBin() instanceof EpiphanVGA2USBV4LSubPngBin);
+    Assert.assertEquals(epiphanBin.getCaps(), ((EpiphanVGA2USBV4LSubPngBin) epiphanBin.getSubBin()).getCaps());
   }
 
   @Test
@@ -71,19 +71,19 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
 
     EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
 
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubPngBin)) {
+    if (!(epiphanBin.getSubBin() instanceof EpiphanVGA2USBV4LSubPngBin)) {
       Assert.fail();
       return;
     }
 
-    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.subBin;
-    Assert.assertNotNull(subBin.src);
-    Assert.assertNotNull(subBin.pngdec);
-    Assert.assertNotNull(subBin.colorspace);
-    Assert.assertNotNull(subBin.scale);
-    Assert.assertNotNull(subBin.caps_filter);
-    Assert.assertNotNull(subBin.sink);
-    Assert.assertTrue(subBin.sink instanceof AppSink);
+    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.getSubBin();
+    Assert.assertNotNull(subBin.getSource());
+    Assert.assertNotNull(subBin.getPngdec());
+    Assert.assertNotNull(subBin.getColorspace());
+    Assert.assertNotNull(subBin.getScale());
+    Assert.assertNotNull(subBin.getCapsFilter());
+    Assert.assertNotNull(subBin.getSink());
+    Assert.assertTrue(subBin.getSink() instanceof AppSink);
 
     List<Element> elements = subBin.bin.getElements();
     Assert.assertEquals(elements.size(), 6);
@@ -96,16 +96,16 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
 
     EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
 
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubPngBin)) {
+    if (!(epiphanBin.getSubBin() instanceof EpiphanVGA2USBV4LSubPngBin)) {
       Assert.fail();
       return;
     }
 
-    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.subBin;
-    Assert.assertEquals(subBin.src.get(GStreamerProperties.LOCATION), imageMockPath);
-    Assert.assertEquals(subBin.sink.get(GStreamerProperties.EMIT_SIGNALS), false);
-    Assert.assertEquals(subBin.sink.get(GStreamerProperties.DROP), true);
-    Assert.assertEquals(subBin.sink.get(GStreamerProperties.MAX_BUFFERS), 1);
+    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.getSubBin();
+    Assert.assertEquals(subBin.getSource().get(GStreamerProperties.LOCATION), imageMockPath);
+    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.EMIT_SIGNALS), false);
+    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.DROP), true);
+    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.MAX_BUFFERS), 1);
     // if (subBin.caps != null) {
     // //TODO: can not convert to Caps
     // Assert.assertEquals(subBin.caps_filter.get("caps"), Caps.fromString(subBin.caps));
@@ -119,37 +119,37 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
 
     EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
 
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubPngBin)) {
+    if (!(epiphanBin.getSubBin() instanceof EpiphanVGA2USBV4LSubPngBin)) {
       Assert.fail();
       return;
     }
 
-    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.subBin;
+    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.getSubBin();
 
     // src -> jpegdec
-    Pad pad = subBin.src.getSrcPads().get(0);
+    Pad pad = subBin.getSource().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.pngdec);
+    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.getPngdec());
 
     // jpegdec -> colorspace
-    pad = subBin.pngdec.getSrcPads().get(0);
+    pad = subBin.getPngdec().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.colorspace);
+    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.getColorspace());
 
     // colorspace -> scale
-    pad = subBin.colorspace.getSrcPads().get(0);
+    pad = subBin.getColorspace().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.scale);
+    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.getScale());
 
     // scale -> caps_filter
-    pad = subBin.scale.getSrcPads().get(0);
+    pad = subBin.getScale().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.caps_filter);
+    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.getCapsFilter());
 
     // caps_filter -> sink
-    pad = subBin.caps_filter.getSrcPads().get(0);
+    pad = subBin.getCapsFilter().getSrcPads().get(0);
     Assert.assertTrue(pad.isLinked());
-    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.sink);
+    Assert.assertEquals(pad.getPeer().getParentElement(), subBin.getSink());
   }
 
   @Test
@@ -159,12 +159,12 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
 
     EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
 
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubPngBin)) {
+    if (!(epiphanBin.getSubBin() instanceof EpiphanVGA2USBV4LSubPngBin)) {
       Assert.fail();
       return;
     }
 
-    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.subBin;
+    EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.getSubBin();
     subBin.removeElements();
 
     List<Element> elements = subBin.bin.getElements();

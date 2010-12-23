@@ -35,7 +35,7 @@ public class CaptureDevice {
   private String outputPath;
 
   /** A list of properties set for this device */
-  public Properties properties;
+  private Properties properties;
 
   /**
    * Create a representation of a capture device for the PipelineFactory
@@ -77,6 +77,15 @@ public class CaptureDevice {
 
   public String getFriendlyName() {
     return friendlyName;
+  }
+
+  /**
+   * Returns the device properties.
+   * 
+   * @return the properties
+   */
+  public Properties getProperties() {
+    return properties;
   }
 
 }

@@ -31,7 +31,7 @@ import java.util.Properties;
 public class CustomVideoProducer extends ProducerBin {
 
   private static final boolean LINK_UNUSED_GHOST_PADS = true;
-  
+
   /**
    * The GStreamer commandline syntax can be used to create a custom video Producer.
    * 
@@ -57,10 +57,9 @@ public class CustomVideoProducer extends ProducerBin {
 
   @Override
   protected Pad getSrcPad() {
-    if(bin.getSinks().size() >= 1){
+    if (bin.getSinks().size() >= 1) {
       return bin.getSinks().get(0).getStaticPad(GStreamerProperties.SRC);
-    }
-    else{
+    } else {
       return null;
     }
   }
@@ -70,19 +69,19 @@ public class CustomVideoProducer extends ProducerBin {
    * this way using a gst-launch like syntax (e.g. "fakesrc ! fakesink")
    **/
   @Override
-  protected void createElements(){
+  protected void createElements() {
     bin = Bin.launch(captureDeviceProperties.getCustomProducer(), LINK_UNUSED_GHOST_PADS);
   }
-  
- /** Need an empty method for createGhostPads because the Bin.launch will create the ghost pads all on its own.**/
+
+  /** Need an empty method for createGhostPads because the Bin.launch will create the ghost pads all on its own. **/
   @Override
   protected void createGhostPads() throws UnableToCreateGhostPadsForBinException {
-    
+
   }
 
   /** Set to true so that only Video Consumers will be used. **/
   @Override
-  public boolean isVideoDevice(){
+  public boolean isVideoDevice() {
     return true;
   }
 }

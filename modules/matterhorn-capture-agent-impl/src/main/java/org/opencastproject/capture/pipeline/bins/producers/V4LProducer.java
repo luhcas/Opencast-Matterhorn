@@ -31,9 +31,12 @@ import org.gstreamer.Pad;
 import java.io.File;
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public class V4LProducer extends VideoProducer {
 
-  Element v4lsrc;
+  protected Element v4lsrc;
 
   /**
    * V4LProducer captures from a generic V4L src such as the Epiphan VGA2USB.

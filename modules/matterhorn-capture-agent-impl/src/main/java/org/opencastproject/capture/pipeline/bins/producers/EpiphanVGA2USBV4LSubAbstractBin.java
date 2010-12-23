@@ -20,13 +20,13 @@ import org.gstreamer.State;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
 
 /**
- * Abstract implementation of {@link EpiphanVGA2USBV4LSubBin}.
- * Creates a empty Bin and implements sub bin state change methods.
+ * Abstract implementation of {@link EpiphanVGA2USBV4LSubBin}. Creates a empty Bin and implements sub bin state change
+ * methods.
  */
 public abstract class EpiphanVGA2USBV4LSubAbstractBin implements EpiphanVGA2USBV4LSubBin {
 
   /** Bin where to store Elements. */
-  Bin bin;
+  protected Bin bin;
 
   /**
    * Constructor. Creates a empty sub bin.
@@ -37,10 +37,21 @@ public abstract class EpiphanVGA2USBV4LSubAbstractBin implements EpiphanVGA2USBV
 
   /**
    * Constructor. Creates a named empty sub bin.
-   * @param binName sub bin name
+   * 
+   * @param binName
+   *          sub bin name
    */
   public EpiphanVGA2USBV4LSubAbstractBin(String binName) {
     bin = new Bin(binName);
+  }
+
+  /**
+   * Returns the bin.
+   * 
+   * @return the bin
+   */
+  public Bin getBin() {
+    return bin;
   }
 
   /**
@@ -74,4 +85,5 @@ public abstract class EpiphanVGA2USBV4LSubAbstractBin implements EpiphanVGA2USBV
       return bin.getState(time * CaptureAgentImpl.GST_SECOND) == state;
     }
   }
+
 }

@@ -28,8 +28,12 @@ import org.gstreamer.Element;
 
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public class XVImagesinkConsumer extends ConsumerBin {
-  Element xvimagesink;
+  
+  private Element xvimagesink;
 
   /**
    * Available in Linux only. Streams Producer video data in real time to the screen so that it can be watched by using
@@ -65,16 +69,17 @@ public class XVImagesinkConsumer extends ConsumerBin {
     xvimagesink = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
             GStreamerElements.XVIMAGESINK, null);
   }
-  
+
   /** Adds the xvimagesink to the bin **/
   @Override
-  protected void addElementsToBin(){
+  protected void addElementsToBin() {
     bin.add(xvimagesink);
   }
 
-  /** Returns the xvimagesink as the source so that we can attach the ghostpads of this bin to a Producer **/ 
+  /** Returns the xvimagesink as the source so that we can attach the ghostpads of this bin to a Producer **/
   @Override
   public Element getSrc() {
     return xvimagesink;
   }
+
 }

@@ -25,13 +25,16 @@ interface EpiphanVGA2USBV4LSubBin {
 
   /**
    * Returns AppSink Element to get buffer from.
+   * 
    * @return AppSink, the last Element in a bin.
    */
   AppSink getSink();
 
   /**
    * Start bin.
-   * @param time time to check, if bin is starting, -1 skip checks.
+   * 
+   * @param time
+   *          time to check, if bin is starting, -1 skip checks.
    * @return true, if the bin started.
    */
   boolean start(long time);
@@ -43,8 +46,11 @@ interface EpiphanVGA2USBV4LSubBin {
 
   /**
    * Set bin to specified State.
-   * @param state state to set.
-   * @param time time to check state, -1 skip checks.
+   * 
+   * @param state
+   *          state to set.
+   * @param time
+   *          time to check state, -1 skip checks.
    * @return true, if bin is in specified state.
    */
   boolean setState(State state, long time);

@@ -32,11 +32,15 @@ import org.gstreamer.PadLinkReturn;
 import java.io.File;
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public class HauppaugePVR350VideoProducer extends FileProducer {
-  Element filesrc;
-  Element mpegpsdemux;
-  Element decoder;
-  Element mpegvideoparse;
+
+  private Element filesrc;
+  private Element mpegpsdemux;
+  private Element decoder;
+  private Element mpegvideoparse;
   private Element queue;
 
   /**
@@ -109,8 +113,7 @@ public class HauppaugePVR350VideoProducer extends FileProducer {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(filesrc, captureDevice.getLocation());
     }
     if (!new File(captureDevice.getLocation()).canRead()) {
-      throw new IllegalArgumentException("HauppaugePVR350VideoProducer cannot read from " 
-              + captureDevice.getLocation());
+      throw new IllegalArgumentException("HauppaugePVR350VideoProducer cannot read from " + captureDevice.getLocation());
     }
     filesrc.set(GStreamerProperties.LOCATION, captureDevice.getLocation());
   }

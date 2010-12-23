@@ -27,6 +27,7 @@ import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
 import net.luniks.linux.jv4linfo.V4LInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.gstreamer.Gst;
 import org.gstreamer.Pipeline;
 import org.slf4j.Logger;
@@ -41,17 +42,20 @@ import java.util.Properties;
  * Given a Properties object describing devices this class will create a suitable pipeline to capture from all those
  * devices simultaneously.
  */
-public class PipelineFactory {
+public final class PipelineFactory {
 
-  public static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
+  private static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
 
   private static Properties properties;
 
-  public static boolean broken;
+  private static CaptureAgent captureAgent = null;
 
-  public static int v4LSrcIndex;
-
-  protected static CaptureAgent captureAgent = null;
+  /**
+   * Private constructor preventing instantiation of this static utility class.
+   */
+  private PipelineFactory() {
+    // Nothing to do here
+  }
 
   /**
    * Create a bin that contains multiple pipelines using each source in the properties object as the gstreamer source
@@ -106,7 +110,7 @@ public class PipelineFactory {
       throw new NoCaptureDevicesSpecifiedException("Insufficient number of capture devices listed.  Aborting!");
     } else if (friendlyNames.length == 1) {
       // Java gives us an array even if the string being split is blank...
-      if (friendlyNames[0].trim().equals("")) {
+      if (StringUtils.isBlank(friendlyNames[0])) {
         throw new NoCaptureDevicesSpecifiedException("Invalid capture device listed.  Aborting!");
       }
     }
@@ -136,12 +140,13 @@ public class PipelineFactory {
           boolean confidence) {
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
     for (String name : friendlyNames) {
+      String deviceName = null;
       try {
-        name = createDevice(outputDirectory, confidence, devices, name);
+        deviceName = createDevice(outputDirectory, confidence, devices, name);
       } catch (CannotFindSourceFileOrDeviceException e) {
         logger.error("Can't find source file or device: ", e);
       } catch (InvalidDeviceNameException e) {
-        logger.error("Invalid device name: " + name, e);
+        logger.error("Invalid device name: " + deviceName, e);
       } catch (UnableToCreateSampleOutputFileException e) {
         logger.error("Unable to create sample output file " + outputDirectory, e);
       } catch (UnrecognizedDeviceException e) {

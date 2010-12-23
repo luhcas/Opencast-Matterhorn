@@ -15,16 +15,16 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-  
 public class UnableToCreateElementException extends Exception {
   private static final long serialVersionUID = -5253223965630359510L;
   private String message = "";
-  public UnableToCreateElementException(String friendlyName, String elementName){
+
+  public UnableToCreateElementException(String friendlyName, String elementName) {
     message = friendlyName + " could not create " + elementName;
   }
-  
+
   @Override
-  public String getMessage(){
+  public String getMessage() {
     return message;
   }
 }

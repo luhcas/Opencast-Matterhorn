@@ -28,18 +28,18 @@ import java.util.Properties;
 public class ProducerFactory {
   /** The actual singleton factory **/
   private static ProducerFactory factory;
-  
+
   /** Singleton factory pattern ensuring only one instance of the factory is created even with multiple threads. **/
-  public static synchronized ProducerFactory getInstance(){
-    if(factory == null){
+  public static synchronized ProducerFactory getInstance() {
+    if (factory == null) {
       factory = new ProducerFactory();
     }
     return factory;
   }
-  
+
   /** Constructor made private so that the number of Factories can be kept to one. **/
-  private ProducerFactory(){
-    
+  private ProducerFactory() {
+
   }
 
   /**
@@ -96,7 +96,7 @@ public class ProducerFactory {
       return new CustomVideoProducer(captureDevice, properties);
     else if (captureDevice.getName() == ProducerType.CUSTOM_AUDIO_SRC)
       return new CustomAudioProducer(captureDevice, properties);
-    else{
+    else {
       throw new NoProducerFoundException("No valid Producer found for device " + captureDevice.getName());
     }
   }

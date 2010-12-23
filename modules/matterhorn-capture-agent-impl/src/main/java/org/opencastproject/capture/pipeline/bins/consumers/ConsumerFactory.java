@@ -24,22 +24,21 @@ import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecau
 
 import java.util.Properties;
 
-
 public class ConsumerFactory {
   /** The actual singleton factory **/
   private static ConsumerFactory factory;
-  
+
   /** Singleton factory pattern ensuring only one instance of the factory is created even with multiple threads. **/
-  public static synchronized ConsumerFactory getInstance(){
-    if(factory == null){
+  public static synchronized ConsumerFactory getInstance() {
+    if (factory == null) {
       factory = new ConsumerFactory();
     }
     return factory;
   }
-  
+
   /** Constructor made private so that the number of Factories can be kept to one. **/
-  private ConsumerFactory(){
-    
+  private ConsumerFactory() {
+
   }
 
   /**
@@ -74,11 +73,11 @@ public class ConsumerFactory {
           CaptureDeviceNullPointerException, UnableToCreateElementException {
     if (consumerType == ConsumerType.AUDIO_FILE_SINK)
       return new AudioFilesinkConsumer(captureDevice, properties);
-    else if(consumerType == ConsumerType.XVIMAGE_SINK)
+    else if (consumerType == ConsumerType.XVIMAGE_SINK)
       return new XVImagesinkConsumer(captureDevice, properties);
-    else if(consumerType == ConsumerType.VIDEO_FILE_SINK)
+    else if (consumerType == ConsumerType.VIDEO_FILE_SINK)
       return new VideoFilesinkConsumer(captureDevice, properties);
-    else{
+    else {
       throw new NoConsumerFoundException("No valid SinkBin found for device " + consumerType);
     }
   }

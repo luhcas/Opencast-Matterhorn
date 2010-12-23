@@ -58,10 +58,9 @@ public class CustomAudioProducer extends ProducerBin {
   @Override
   protected Pad getSrcPad() throws UnableToCreateGhostPadsForBinException {
     synchronized (bin) {
-      if(bin.getSinks().size() >= 1){
+      if (bin.getSinks().size() >= 1) {
         return bin.getSinks().get(0).getStaticPad(GStreamerProperties.SRC);
-      }
-      else{
+      } else {
         throw new UnableToCreateGhostPadsForBinException("Unable to ghost pads for Custom Audio Source");
       }
     }

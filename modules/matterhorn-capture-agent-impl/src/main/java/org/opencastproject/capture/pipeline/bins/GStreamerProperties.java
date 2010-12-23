@@ -15,8 +15,9 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-/** Constant class that defines all of the GStreamerProperties that we use to prevent typos and increase 
- * readability. **/
+/**
+ * Constant class that defines all of the GStreamerProperties that we use to prevent typos and increase readability.
+ **/
 public interface GStreamerProperties {
   /** General Properties **/
   String SINK = "sink";
@@ -24,42 +25,41 @@ public interface GStreamerProperties {
   String SRCTEMPLATE = "src%d";
   String VIDEO = "video";
   String SYNC = "sync";
-  String IS_LIVE = "is-live"; 
-  
+  String IS_LIVE = "is-live";
+
   /** Source Properties **/
   String DEVICE = "device";
-  
- /** Queue and FileSink properties. **/
+
+  /** Queue and FileSink properties. **/
   String LOCATION = "location";
- 
- /** Queue Properties **/
- String MAX_SIZE_BUFFERS = "max-size-buffers";
- String MAX_SIZE_BYTES = "max-size-bytes";
- String MAX_SIZE_TIME = "max-size-time";
- 
- /** Encoder Properties **/
- String BITRATE = "bitrate";
- 
- /** x264 Properties **/
- String PASS = "pass";
- String QUANTIZER = "quantizer";
- 
- /** Caps Properties **/
- String VIDEO_X_RAW_YUV = "video/x-raw-yuv";
- String FRAMERATE = "framerate";
- String CAPS = "caps";
- 
- /** Video Test Src Properties **/
- String PATTERN = "pattern";
- String WIDTH = "width";
- String HEIGHT = "height";
 
+  /** Queue Properties **/
+  String MAX_SIZE_BUFFERS = "max-size-buffers";
+  String MAX_SIZE_BYTES = "max-size-bytes";
+  String MAX_SIZE_TIME = "max-size-time";
 
- /** Other Properties **/
- String DO_TIMESTAP = "do-timestamp";
- String BLOCK = "block";
- String SINGLE_SEGMENT = "single-segment";
- String EMIT_SIGNALS = "emit-signals";
- String DROP = "drop";
- String MAX_BUFFERS = "max-buffers";
+  /** Encoder Properties **/
+  String BITRATE = "bitrate";
+
+  /** x264 Properties **/
+  String PASS = "pass";
+  String QUANTIZER = "quantizer";
+
+  /** Caps Properties **/
+  String VIDEO_X_RAW_YUV = "video/x-raw-yuv";
+  String FRAMERATE = "framerate";
+  String CAPS = "caps";
+
+  /** Video Test Src Properties **/
+  String PATTERN = "pattern";
+  String WIDTH = "width";
+  String HEIGHT = "height";
+
+  /** Other Properties **/
+  String DO_TIMESTAP = "do-timestamp";
+  String BLOCK = "block";
+  String SINGLE_SEGMENT = "single-segment";
+  String EMIT_SIGNALS = "emit-signals";
+  String DROP = "drop";
+  String MAX_BUFFERS = "max-buffers";
 }

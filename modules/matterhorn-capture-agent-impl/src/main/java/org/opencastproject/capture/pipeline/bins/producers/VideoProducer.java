@@ -30,11 +30,16 @@ import org.gstreamer.Element;
 
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public abstract class VideoProducer extends ProducerBin {
+
   // Filter used to make a change in the FPS in a video output
-  Element fpsfilter;
+  protected Element fpsfilter;
+
   // Corrects the time stamps for the output media after an FPS change.
-  Element videorate;
+  protected Element videorate;
 
   public VideoProducer(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
@@ -98,10 +103,28 @@ public abstract class VideoProducer extends ProducerBin {
               + captureDeviceProperties.getFramerate() + "/1");
       logger.debug("{} fps: {}", captureDevice.getName(), captureDeviceProperties.getFramerate());
     } else {
-      // No FPS is set, so set the Caps to any so that it just passes through data. 
+      // No FPS is set, so set the Caps to any so that it just passes through data.
       fpsCaps = Caps.anyCaps();
     }
     fpsfilter.setCaps(fpsCaps);
+  }
+
+  /**
+   * Returns the frame per second filter.
+   * 
+   * @return the fpsfilter
+   */
+  public Element getFpsfilter() {
+    return fpsfilter;
+  }
+
+  /**
+   * Returns the producer's video rate.
+   * 
+   * @return the videorate
+   */
+  public Element getVideorate() {
+    return videorate;
   }
 
   /** Set the isVideoDevice return value to true so that all descendants will be attached to video Consumers. **/
@@ -109,4 +132,5 @@ public abstract class VideoProducer extends ProducerBin {
   public boolean isVideoDevice() {
     return true;
   }
+
 }

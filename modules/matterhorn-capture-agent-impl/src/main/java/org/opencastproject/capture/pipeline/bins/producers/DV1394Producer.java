@@ -107,8 +107,8 @@ public class DV1394Producer extends VideoProducer {
     demux.connect(new Element.PAD_ADDED() {
       public void padAdded(Element element, Pad pad) {
         logger.info("Element: {}, Pad: {}", element.getName(), pad.getName());
-        Element.linkPadsFiltered(demux, GStreamerProperties.VIDEO, decoder, GStreamerProperties.SINK, Caps
-                .fromString(VIDEO_X_DV));
+        Element.linkPadsFiltered(demux, GStreamerProperties.VIDEO, decoder, GStreamerProperties.SINK,
+                Caps.fromString(VIDEO_X_DV));
       }
     });
   }

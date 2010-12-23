@@ -30,9 +30,12 @@ import org.gstreamer.Pad;
 
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public class PulseAudioProducer extends AudioProducer {
 
-  Element pulseAudioSrc;
+  protected Element pulseAudioSrc;
 
   /**
    * PulseAudioProducer captures from a pulse audio source such as a desktop linux distro.
@@ -78,4 +81,5 @@ public class PulseAudioProducer extends AudioProducer {
   protected void addElementsToBin() {
     bin.add(pulseAudioSrc);
   }
+
 }

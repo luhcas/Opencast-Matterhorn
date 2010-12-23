@@ -27,59 +27,101 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 
 /**
- * Videotestsrc sub bin to use in {@link EpiphanVGA2USBV4LProducer}.
- * Creates a bin with videotestsrc Element to grab signal from
- * and AppSink Element to connect with {@link EpiphanVGA2USBV4LProducer}.
+ * Videotestsrc sub bin to use in {@link EpiphanVGA2USBV4LProducer}. Creates a bin with videotestsrc Element to grab
+ * signal from and AppSink Element to connect with {@link EpiphanVGA2USBV4LProducer}.
  */
 public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstractBin {
-  
+
   /** CaptureDevice */
-  CaptureDevice captureDevice;
+  private CaptureDevice captureDevice;
 
   /** Caps */
-  String caps = null;
+  private String caps = null;
 
   /** Elements */
-  Element src, capsFilter;
+  private Element src;
+
+  private Element capsFilter;
+
   /** AppSink, the last element */
-  AppSink sink = null;
+  private AppSink sink = null;
 
   /**
    * Constructor. Creates a videotestsrc sub bin.
-   * @param captureDevice CaptureDevice
-   * @param caps Caps
+   * 
+   * @param captureDevice
+   *          CaptureDevice
+   * @param caps
+   *          Caps
    * @throws UnableToCreateElementException
-   *        If the required GStreamer Modules are not installed to create
-   *        all of the Elements this Exception will be thrown.
+   *           If the required GStreamer Modules are not installed to create all of the Elements this Exception will be
+   *           thrown.
    * @throws UnableToLinkGStreamerElementsException
-   *        If our elements fail to link together we will throw an exception.
+   *           If our elements fail to link together we will throw an exception.
    */
   public EpiphanVGA2USBV4LSubTestSrcBin(CaptureDevice captureDevice, String caps)
           throws UnableToCreateElementException, UnableToLinkGStreamerElementsException {
 
     this.captureDevice = captureDevice;
     this.caps = caps;
-    
+
     createElements();
     setElementProperties();
     linkElements();
-    
+
     bin.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, bin.getName(), false);
   }
 
   /**
+   * Returns the capture defice.
+   * 
+   * @return the capture device
+   */
+  public CaptureDevice getCaptureDevice() {
+    return captureDevice;
+  }
+
+  /**
+   * Returns the caps.
+   * 
+   * @return the caps
+   */
+  public String getCaps() {
+    return caps;
+  }
+
+  /**
+   * Returns the source.
+   * 
+   * @return the source
+   */
+  public Element getSource() {
+    return src;
+  }
+
+  /**
+   * Returns the caps filter.
+   * 
+   * @return the capsFilter
+   */
+  public Element getCapsFilter() {
+    return capsFilter;
+  }
+
+  /**
    * Create elements and add these to bin.
+   * 
    * @throws UnableToCreateElementException
-   *           If any of the Elements fail to be created because the GStreamer module
-   *           for the Element isn't present then this Exception will be thrown.
+   *           If any of the Elements fail to be created because the GStreamer module for the Element isn't present then
+   *           this Exception will be thrown.
    */
   protected void createElements() throws UnableToCreateElementException {
-    src = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.VIDEOTESTSRC, null);
-    capsFilter = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.CAPSFILTER, null);
-    sink = (AppSink) GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.APPSINK, null);
+    src = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.VIDEOTESTSRC, null);
+    capsFilter = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.CAPSFILTER, null);
+    sink = (AppSink) GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.APPSINK, null);
     bin.addMany(src, capsFilter, sink);
   }
 
@@ -99,15 +141,16 @@ public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstract
 
   /**
    * Link elements together.
+   * 
    * @throws UnableToLinkGStreamerElementsException
-   *        If Elements can not be linked together.
+   *           If Elements can not be linked together.
    */
   protected void linkElements() throws UnableToLinkGStreamerElementsException {
     if (!src.link(capsFilter)) {
       removeElements();
       throw new UnableToLinkGStreamerElementsException(captureDevice, src, capsFilter);
     }
-    
+
     if (!capsFilter.link(sink)) {
       removeElements();
       throw new UnableToLinkGStreamerElementsException(captureDevice, capsFilter, sink);

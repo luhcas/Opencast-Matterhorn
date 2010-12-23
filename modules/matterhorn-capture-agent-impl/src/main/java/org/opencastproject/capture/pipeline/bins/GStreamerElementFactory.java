@@ -17,13 +17,11 @@ package org.opencastproject.capture.pipeline.bins;
 
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class GStreamerElementFactory {
+public final class GStreamerElementFactory {
+
   private static GStreamerElementFactory factory;
-  protected static final Logger logger = LoggerFactory.getLogger(GStreamerElementFactory.class);
-
+ 
   /** Singleton factory pattern **/
   public static synchronized GStreamerElementFactory getInstance() {
     if (factory == null) {
@@ -34,7 +32,7 @@ public class GStreamerElementFactory {
 
   /** Private so that we can control how many factories there are. **/
   private GStreamerElementFactory() {
-
+    // Nothing to do here
   }
 
   /**
@@ -58,4 +56,5 @@ public class GStreamerElementFactory {
       throw new UnableToCreateElementException(captureDeviceName, elementType);
     }
   }
+
 }

@@ -17,16 +17,21 @@ package org.opencastproject.capture.pipeline.bins;
 
 import org.gstreamer.Element;
 
+/**
+ * TODO: Comment me!
+ */
 public class UnableToSetElementPropertyBecauseElementWasNullException extends Exception {
-  String message;
   
+  private String message;
+
   private static final long serialVersionUID = -2613833830552791683L;
-  public UnableToSetElementPropertyBecauseElementWasNullException(Element element, String property){
+
+  public UnableToSetElementPropertyBecauseElementWasNullException(Element element, String property) {
     message = "Unable to set property " + property + " on element " + element.getName();
   }
-  
+
   @Override
-  public String getMessage(){
+  public String getMessage() {
     return message;
   }
 }

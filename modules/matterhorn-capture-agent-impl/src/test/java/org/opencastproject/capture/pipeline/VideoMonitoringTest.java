@@ -73,4 +73,5 @@ public class VideoMonitoringTest {
     Assert.assertTrue(ret);
     Assert.assertEquals(11, pipeline.getElements().size());
   }
+  
 }

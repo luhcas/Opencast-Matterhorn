@@ -55,9 +55,9 @@ public class AudioFilesinkConsumer extends ConsumerBin {
    *           We cannot create sources or sinks without proper information contained in the CaptureDevice parameter,
    *           therefore this cannot be null and an exception will be thrown.
    * @throws UnableToCreateElementException
-   *           If GStreamer is installed but the module that this element comes from is not (please see {@code
-   *           GStreamerElements} for which modules Elements are from) or the Element is platform specific to another OS
-   *           (e.g. XVImageSink is available only on Linux) this Exception is thrown.
+   *           If GStreamer is installed but the module that this element comes from is not (please see
+   *           {@code GStreamerElements} for which modules Elements are from) or the Element is platform specific to
+   *           another OS (e.g. XVImageSink is available only on Linux) this Exception is thrown.
    * 
    */
   public AudioFilesinkConsumer(CaptureDevice captureDevice, Properties properties)
@@ -77,7 +77,7 @@ public class AudioFilesinkConsumer extends ConsumerBin {
    *           plugins please specify a codec in the capture agent's properties file.
    **/
   @Override
-  protected synchronized void createElements() throws UnableToCreateElementException{
+  protected synchronized void createElements() throws UnableToCreateElementException {
     super.createElements();
     createEncoder();
     createMuxer();
@@ -93,17 +93,16 @@ public class AudioFilesinkConsumer extends ConsumerBin {
    *           please see http://gstreamer.freedesktop.org/documentation/plugins.html. To check to see which plugins are
    *           installed on your system run gst-inspect on the command line.
    **/
-  protected synchronized void createEncoder() throws UnableToCreateElementException{
-    if (captureDeviceProperties.getCodec()!= null) {
+  protected synchronized void createEncoder() throws UnableToCreateElementException {
+    if (captureDeviceProperties.getCodec() != null) {
       logger.debug("{} setting encoder to: {}", captureDevice.getName(), captureDeviceProperties.getCodec());
       encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
               captureDeviceProperties.getCodec(), null);
-    }
-    else {
+    } else {
       logger.debug("{} setting encoder to: {}", captureDevice.getName(), DEFAULT_ENCODER);
       encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_ENCODER,
               null);
-    }   
+    }
   }
 
   /**
@@ -124,22 +123,21 @@ public class AudioFilesinkConsumer extends ConsumerBin {
       else
         muxer = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_MUXER,
                 null);
-    }
-    else {
+    } else {
       muxer = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_MUXER, null);
     }
-    
+
     if (captureDeviceProperties.getContainer() != null) {
       logger.debug("{} setting muxing to: {}", captureDevice.getName(), captureDeviceProperties.getContainer());
       muxer = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
               captureDeviceProperties.getContainer(), null);
     }
   }
-  
+
   /** Adds all the elements required to put audio data into a file. **/
   @Override
-  protected void addElementsToBin(){
-    bin.addMany(queue, encoder, muxer, filesink); 
+  protected void addElementsToBin() {
+    bin.addMany(queue, encoder, muxer, filesink);
   }
 
   /**
@@ -180,17 +178,15 @@ public class AudioFilesinkConsumer extends ConsumerBin {
    * **/
   private synchronized void setFileSinkProperties() throws UnableToSetElementPropertyBecauseElementWasNullException,
           IllegalArgumentException {
-    if(filesink == null){
+    if (filesink == null) {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(filesink, GStreamerProperties.LOCATION);
-    }
-    else if(captureDevice.getOutputPath().equals("")){
+    } else if (captureDevice.getOutputPath().equals("")) {
       throw new IllegalArgumentException("File location must be set, it cannot be an empty String.");
-    }
-    else{
+    } else {
       filesink.set(GStreamerProperties.LOCATION, captureDevice.getOutputPath());
     }
   }
-  
+
   /** Links all the Elements needed to make an audio filesink. **/
   @Override
   protected void linkElements() throws UnableToLinkGStreamerElementsException {
@@ -201,13 +197,13 @@ public class AudioFilesinkConsumer extends ConsumerBin {
     else if (!muxer.link(filesink))
       throw new UnableToLinkGStreamerElementsException(captureDevice, muxer, filesink);
   }
-  
+
   /**
    * Returns the first Element in the file sink chain so that the ghostpads can be created and used to link this sink to
    * the src.
    **/
   @Override
-  public Element getSrc(){
+  public Element getSrc() {
     return queue;
   }
 }

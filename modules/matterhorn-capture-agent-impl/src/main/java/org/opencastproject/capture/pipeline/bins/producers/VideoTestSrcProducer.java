@@ -32,7 +32,7 @@ import java.util.Properties;
 
 public class VideoTestSrcProducer extends VideoProducer {
 
-  Element videotestsrc;
+  private Element videotestsrc;
 
   /**
    * Used to create a videotestsrc GStreamer Element Producer great for testing the capture agent without needing any

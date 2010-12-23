@@ -76,7 +76,7 @@ public class VideoFilesinkConsumer extends ConsumerBin {
    *           for the encoder or muxer this exception is thrown.
    **/
   @Override
-  protected void createElements() throws UnableToCreateElementException{
+  protected void createElements() throws UnableToCreateElementException {
     super.createElements();
     createEncoder();
     createMuxer();
@@ -90,14 +90,13 @@ public class VideoFilesinkConsumer extends ConsumerBin {
    *           If the current GStreamer install doesn't support the default codec if no codec is specified or if the
    *           specified codec is not supported by one of the GStreamer modules installed then this Exception is thrown,
    */
-  protected void createEncoder() throws UnableToCreateElementException{
+  protected void createEncoder() throws UnableToCreateElementException {
     if (captureDeviceProperties.getCodec() != null) {
       /** The user has specified a codec so we will try to create it. **/
       logger.debug("{} setting encoder to: {}", captureDevice.getName(), captureDeviceProperties.getCodec());
       encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
               captureDeviceProperties.getCodec(), null);
-    }
-    else {
+    } else {
       /** No codec is specified by the user so we will create the default encoder. **/
       logger.debug("{} setting encoder to: {}", captureDevice.getName(), DEFAULT_ENCODER);
       encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_ENCODER,
@@ -113,7 +112,7 @@ public class VideoFilesinkConsumer extends ConsumerBin {
    *           installed this Exception is thrown.
    **/
   private void createMuxer() throws UnableToCreateElementException {
-    
+
     if (captureDeviceProperties.getCodec() != null
             && captureDeviceProperties.getCodec().equalsIgnoreCase(GStreamerElements.X264ENC)) {
       /**
@@ -122,25 +121,25 @@ public class VideoFilesinkConsumer extends ConsumerBin {
        **/
       encoder.set(GStreamerProperties.PASS, DEFAULT_X264_PASS);
       if (captureDevice.getProperties().contains(GStreamerProperties.QUANTIZER))
-        encoder.set(GStreamerProperties.QUANTIZER, captureDevice.getProperties().getProperty(GStreamerProperties.QUANTIZER));
+        encoder.set(GStreamerProperties.QUANTIZER,
+                captureDevice.getProperties().getProperty(GStreamerProperties.QUANTIZER));
     }
     if (captureDeviceProperties.getContainer() != null) {
       /** The user has specified a different container than H.264 **/
       logger.debug("{} setting muxing to: {}", captureDevice.getName(), captureDeviceProperties.getContainer());
       muxer = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
               captureDeviceProperties.getContainer(), null);
-    }
-    else {
+    } else {
       /** No container is specifed by the user so we are using the DEFAULT_MUXER **/
       logger.debug("{} setting muxing to: {}", captureDevice.getName(), DEFAULT_MUXER);
       muxer = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_MUXER, null);
     }
   }
-  
+
   /** Adds all of the Elements to the Bin that are necessary to create the VideoFileSinkConsumerBin. **/
   @Override
-  protected void addElementsToBin(){
-    bin.addMany(queue, encoder, muxer, filesink); 
+  protected void addElementsToBin() {
+    bin.addMany(queue, encoder, muxer, filesink);
   }
 
   /**
@@ -160,8 +159,6 @@ public class VideoFilesinkConsumer extends ConsumerBin {
     setEncoderProperties();
   }
 
-  
-  
   /**
    * Defines the location of the filesink that will be the file that is created by the capture.
    * 
@@ -173,17 +170,15 @@ public class VideoFilesinkConsumer extends ConsumerBin {
    * **/
   private synchronized void setFileSinkProperties() throws IllegalArgumentException,
           UnableToSetElementPropertyBecauseElementWasNullException {
-    if(filesink == null){
+    if (filesink == null) {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(filesink, GStreamerProperties.LOCATION);
-    }
-    else if(captureDevice.getOutputPath().equals("")){
+    } else if (captureDevice.getOutputPath().equals("")) {
       throw new IllegalArgumentException("File location must be set, it cannot be an empty String.");
-    }
-    else{
+    } else {
       filesink.set(GStreamerProperties.LOCATION, captureDevice.getOutputPath());
     }
   }
-  
+
   /**
    * Sets the bitrate for the encoder if the user specified it. If not it is set to DEFAULT_BITRATE.
    * 
@@ -191,18 +186,17 @@ public class VideoFilesinkConsumer extends ConsumerBin {
    *           If encoder is null at this point this Exception is thrown.
    **/
   private void setEncoderProperties() throws UnableToSetElementPropertyBecauseElementWasNullException {
-    if(encoder == null){
+    if (encoder == null) {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(encoder, captureDeviceProperties.getBitrate());
     }
     if (captureDeviceProperties.getBitrate() != null) {
-      logger.debug("{} bitrate set to: {}", captureDevice.getName(), captureDeviceProperties.getBitrate());      
+      logger.debug("{} bitrate set to: {}", captureDevice.getName(), captureDeviceProperties.getBitrate());
       encoder.set(GStreamerProperties.BITRATE, captureDeviceProperties.getBitrate());
-    }
-    else{
-      encoder.set(GStreamerProperties.BITRATE, DEFAULT_BITRATE); 
+    } else {
+      encoder.set(GStreamerProperties.BITRATE, DEFAULT_BITRATE);
     }
   }
-  
+
   /**
    * Links the queue to the encoder to the muxer to the filesink.
    * 
@@ -218,7 +212,7 @@ public class VideoFilesinkConsumer extends ConsumerBin {
     else if (!muxer.link(filesink))
       throw new UnableToLinkGStreamerElementsException(captureDevice, muxer, filesink);
   }
-  
+
   /**
    * Returns the queue as the Sink for this Consumer. Will be used to create the ghostpads to link this Consumer to the
    * Producer.

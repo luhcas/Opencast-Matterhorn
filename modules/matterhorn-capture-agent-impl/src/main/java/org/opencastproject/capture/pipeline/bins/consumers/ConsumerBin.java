@@ -33,7 +33,7 @@ import org.gstreamer.Pad;
 
 import java.util.Properties;
 
-public abstract class ConsumerBin extends PartialBin{
+public abstract class ConsumerBin extends PartialBin {
   public static final String GHOST_PAD_NAME = "SinkBin Ghost Pad";
   protected Element queue;
   protected Element encoder;
@@ -137,25 +137,25 @@ public abstract class ConsumerBin extends PartialBin{
    * 
    * @throws UnableToSetElementPropertyBecauseElementWasNullException
    *           If the queue is null because this function is called before createElements this exception is thrown.
-   **/ 
+   **/
   private void setQueueProperties() throws UnableToSetElementPropertyBecauseElementWasNullException {
     if (queue == null) {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(queue, "all properties.");
     }
     synchronized (queue) {
       if (captureDeviceProperties.getBufferCount() != null) {
-        logger.debug("{} bufferCount is being set to {}.", captureDevice.getName(), captureDeviceProperties
-                .getBufferCount());
+        logger.debug("{} bufferCount is being set to {}.", captureDevice.getName(),
+                captureDeviceProperties.getBufferCount());
         queue.set(GStreamerProperties.MAX_SIZE_BUFFERS, captureDeviceProperties.getBufferCount());
       }
       if (captureDeviceProperties.getBufferBytes() != null) {
-        logger.debug("{} bufferBytes is being set to {}.", captureDevice.getName(), captureDeviceProperties
-                .getBufferBytes());
+        logger.debug("{} bufferBytes is being set to {}.", captureDevice.getName(),
+                captureDeviceProperties.getBufferBytes());
         queue.set(GStreamerProperties.MAX_SIZE_BYTES, captureDeviceProperties.getBufferBytes());
       }
       if (captureDeviceProperties.getBufferTime() != null) {
-        logger.debug("{} bufferTime is being set to {}.", captureDevice.getName(), captureDeviceProperties
-                .getBufferTime());
+        logger.debug("{} bufferTime is being set to {}.", captureDevice.getName(),
+                captureDeviceProperties.getBufferTime());
         queue.set(GStreamerProperties.MAX_SIZE_TIME, captureDeviceProperties.getBufferTime());
       }
     }
@@ -170,18 +170,18 @@ public abstract class ConsumerBin extends PartialBin{
    **/
   @Override
   protected void createGhostPads() throws UnableToCreateGhostPadsForBinException {
-    Pad ghostPadElement = getSrc().getStaticPad(GStreamerProperties.SINK);    
-    if(ghostPadElement!= null && !bin.addPad(new GhostPad(GHOST_PAD_NAME, ghostPadElement))){
+    Pad ghostPadElement = getSrc().getStaticPad(GStreamerProperties.SINK);
+    if (ghostPadElement != null && !bin.addPad(new GhostPad(GHOST_PAD_NAME, ghostPadElement))) {
       throw new UnableToCreateGhostPadsForBinException("Could not create new Ghost Pad with " + this.getSrc().getName()
               + " in this SinkBin.");
     }
   }
-  
+
   /** Is used by createGhostPads, set to the first Element in your Bin so that we can link your SinkBin to Sources. **/
   public abstract Element getSrc();
-  
+
   /** If the system is setup to have trace level error tracking we will add a thread to monitor the queue **/
-  private void addTrace(){
+  private void addTrace() {
     if (logger.isTraceEnabled()) {
       Thread traceThread = new Thread(new BufferThread(queue));
       traceThread.start();

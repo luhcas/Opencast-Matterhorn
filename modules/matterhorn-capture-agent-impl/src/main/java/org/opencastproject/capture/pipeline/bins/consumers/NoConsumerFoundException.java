@@ -17,15 +17,18 @@ package org.opencastproject.capture.pipeline.bins.consumers;
 
 /** If ConsumerFactory cannot find a Consumer to match the ConsumerType this exception is thrown. **/
 public class NoConsumerFoundException extends Exception {
+
   private static final long serialVersionUID = 7225881836258836049L;
-  String message; 
-  
+
+  private String message;
+
   public NoConsumerFoundException(String message) {
     this.message = message;
   }
-  
+
   @Override
-  public String getMessage(){
+  public String getMessage() {
     return message;
   }
+
 }

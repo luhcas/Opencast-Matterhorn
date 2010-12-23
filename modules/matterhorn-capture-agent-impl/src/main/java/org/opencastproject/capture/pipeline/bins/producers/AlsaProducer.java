@@ -30,7 +30,8 @@ import org.gstreamer.Element;
 import java.util.Properties;
 
 public class AlsaProducer extends AudioProducer {
-  Element alsasrc;
+  
+  private Element alsasrc;
 
   /**
    * Creates a ProducerBin specifically designed to capture from an ALSA source.
@@ -108,4 +109,5 @@ public class AlsaProducer extends AudioProducer {
       throw new UnableToLinkGStreamerElementsException(captureDevice, queue, audioconvert);
     }
   }
+
 }

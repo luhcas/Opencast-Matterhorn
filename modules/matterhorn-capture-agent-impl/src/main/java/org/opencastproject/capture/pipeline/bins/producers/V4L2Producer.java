@@ -31,9 +31,12 @@ import org.gstreamer.Pad;
 import java.io.File;
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public class V4L2Producer extends VideoProducer {
 
-  Element v4l2src;
+  protected Element v4l2src;
 
   /**
    * V4L2Producer captures from a generic V4L2 src such as a webcam.

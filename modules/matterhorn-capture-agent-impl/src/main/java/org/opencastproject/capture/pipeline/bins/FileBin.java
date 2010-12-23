@@ -20,9 +20,13 @@ import org.gstreamer.Element;
 import java.io.File;
 import java.util.Properties;
 
+/**
+ * TODO: Comment me!
+ */
 public class FileBin extends PartialBin {
-  Element filesrc;
-  Element filesink;
+  
+  private Element filesrc;
+  private Element filesink;
 
   /**
    * Adds a pipeline for a media file that just copies it to a new location
