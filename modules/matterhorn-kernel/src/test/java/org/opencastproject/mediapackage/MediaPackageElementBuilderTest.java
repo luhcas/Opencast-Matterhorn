@@ -52,8 +52,7 @@ public class MediaPackageElementBuilderTest {
   }
 
   /**
-   * Test method for
-   * {@link org.opencastproject.mediapackage.MediaPackageElementBuilderImpl#elementFromFile(File file)}.
+   * Test method for {@link org.opencastproject.mediapackage.MediaPackageElementBuilderImpl#elementFromFile(File file)}.
    */
   @Test
   public void testElementFromFile() {

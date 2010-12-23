@@ -16,7 +16,6 @@
 
 package org.opencastproject.mediapackage;
 
-
 /**
  * Exception thrown by {@link CatalogImpl} in case of any namespace binding errors.
  */

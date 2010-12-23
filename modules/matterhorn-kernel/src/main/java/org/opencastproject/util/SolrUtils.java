@@ -25,7 +25,11 @@ import java.util.Date;
 /**
  * Utility class for the solr database.
  */
-public class SolrUtils {
+public final class SolrUtils {
+
+  /** Disallow construction of this utility class */
+  private SolrUtils() {
+  }
 
   /** The solr date format string tag. */
   public static final String SOLR_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";

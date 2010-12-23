@@ -83,6 +83,7 @@ public final class HandleImpl extends IdImpl implements Handle {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.identifier.Handle#getLocalName()
    */
   public String getLocalName() {
@@ -91,6 +92,7 @@ public final class HandleImpl extends IdImpl implements Handle {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.identifier.Handle#getNamingAuthority()
    */
   public String getNamingAuthority() {
@@ -99,6 +101,7 @@ public final class HandleImpl extends IdImpl implements Handle {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.identifier.Handle#getFullName()
    */
   public String getFullName() {
@@ -111,6 +114,7 @@ public final class HandleImpl extends IdImpl implements Handle {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.identifier.Handle#resolve()
    */
   public URL resolve() throws HandleException {

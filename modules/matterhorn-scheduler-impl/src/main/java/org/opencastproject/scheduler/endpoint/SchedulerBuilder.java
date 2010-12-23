@@ -32,28 +32,28 @@ public class SchedulerBuilder {
 
   /** Builder singleton */
   private static SchedulerBuilder instance = null;
-  
+
   protected JAXBContext jaxbContext = null;
-  
+
   /**
-   *  Set up the JAXBContext.
-   *
+   * Set up the JAXBContext.
+   * 
    */
   private SchedulerBuilder() throws JAXBException {
-    jaxbContext = JAXBContext.newInstance("org.opencastproject.scheduler.impl", SchedulerBuilder.class.getClassLoader());
+    jaxbContext = JAXBContext
+            .newInstance("org.opencastproject.scheduler.impl", SchedulerBuilder.class.getClassLoader());
   }
-  
+
   /**
    * Returns an instance of the {@link SchedulerBuilder}
-   *
+   * 
    * @return a factory
    */
   public static SchedulerBuilder getInstance() {
-    if(instance == null){
+    if (instance == null) {
       try {
         instance = new SchedulerBuilder();
-      }
-      catch (JAXBException e) {
+      } catch (JAXBException e) {
         throw new IllegalStateException(e.getLinkedException() != null ? e.getLinkedException() : e);
       }
     }
@@ -63,27 +63,27 @@ public class SchedulerBuilder {
   public EventImpl parseEvent(String in) throws Exception {
     return parseEvent(IOUtils.toInputStream(in, "UTF8"));
   }
-  
+
   public EventImpl parseEvent(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  EventImpl.class).getValue();
+    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), EventImpl.class)
+            .getValue();
   }
-  
-  public String marshallEvent (EventImpl e) throws Exception {
+
+  public String marshallEvent(EventImpl e) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     StringWriter writer = new StringWriter();
     marshaller.marshal(e, writer);
     return writer.toString();
-  }    
-  
+  }
+
   public MetadataImpl parseMetadata(String in) throws Exception {
     return parseMetadata(IOUtils.toInputStream(in, "UTF8"));
   }
-  
+
   public MetadataImpl parseMetadata(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  MetadataImpl.class).getValue();
-  }   
+            MetadataImpl.class).getValue();
+  }
 }

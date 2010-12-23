@@ -35,37 +35,37 @@ import javax.xml.bind.annotation.XmlType;
 public abstract class AbstractStreamImpl implements Stream {
 
   @XmlID
-  @XmlAttribute(name="id")
+  @XmlAttribute(name = "id")
   protected String identifier;
 
-
-  @XmlElement(name="device")
+  @XmlElement(name = "device")
   protected Device device = new Device();
-  
-  @XmlElement(name="encoder")
+
+  @XmlElement(name = "encoder")
   protected Encoder encoder = new Encoder();
 
-  @XmlType(name="device")
+  @XmlType(name = "device")
   static class Device {
-    @XmlAttribute(name="type")
+    @XmlAttribute(name = "type")
     protected String type;
-    @XmlAttribute(name="version")
+    @XmlAttribute(name = "version")
     protected String version;
-    @XmlAttribute(name="vendor")
-    protected String vendor;
-  }
-  
-  @XmlType(name="encoder")
-  static class Encoder {
-    @XmlAttribute(name="type")
-    protected String type;
-    @XmlAttribute(name="version")
-    protected String version;
-    @XmlAttribute(name="vendor")
+    @XmlAttribute(name = "vendor")
     protected String vendor;
   }
 
-  protected AbstractStreamImpl() {}
+  @XmlType(name = "encoder")
+  static class Encoder {
+    @XmlAttribute(name = "type")
+    protected String type;
+    @XmlAttribute(name = "version")
+    protected String version;
+    @XmlAttribute(name = "vendor")
+    protected String vendor;
+  }
+
+  protected AbstractStreamImpl() {
+  }
 
   protected AbstractStreamImpl(String identifier) {
     this.identifier = identifier;
@@ -74,7 +74,7 @@ public abstract class AbstractStreamImpl implements Stream {
   public String getIdentifier() {
     return identifier;
   }
-  
+
   public void setIdentifier(String identifier) {
     this.identifier = identifier;
   }
@@ -129,7 +129,9 @@ public abstract class AbstractStreamImpl implements Stream {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document, org.opencastproject.mediapackage.MediaPackageSerializer)
+   * 
+   * @see org.opencastproject.mediapackage.ManifestContributor#toManifest(org.w3c.dom.Document,
+   *      org.opencastproject.mediapackage.MediaPackageSerializer)
    */
   @Override
   public Node toManifest(Document document, MediaPackageSerializer serializer) {

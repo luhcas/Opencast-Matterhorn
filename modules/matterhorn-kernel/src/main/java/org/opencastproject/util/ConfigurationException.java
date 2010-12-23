@@ -17,8 +17,7 @@
 package org.opencastproject.util;
 
 /**
- * This exception is thrown on various occasions where the system detects a
- * state of malconfiguration.
+ * This exception is thrown on various occasions where the system detects a state of malconfiguration.
  */
 public class ConfigurationException extends RuntimeException {
 
@@ -36,8 +35,7 @@ public class ConfigurationException extends RuntimeException {
   }
 
   /**
-   * Creates a new configuration exception with the given message and cause of
-   * the malconfiguration.
+   * Creates a new configuration exception with the given message and cause of the malconfiguration.
    * 
    * @param message
    *          the message

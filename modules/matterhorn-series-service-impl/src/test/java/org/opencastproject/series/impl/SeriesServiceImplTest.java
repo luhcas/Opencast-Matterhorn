@@ -131,10 +131,10 @@ public class SeriesServiceImplTest {
     series.updateMetadata(dc);
 
     // Ensure that the in-memory series has been updated to reflect the xml catalog's values
-    Assert.assertEquals(dc.getFirst(DublinCore.PROPERTY_TITLE), series
-            .getFromMetadata(DublinCore.PROPERTY_TITLE.getLocalName()));
+    Assert.assertEquals(dc.getFirst(DublinCore.PROPERTY_TITLE),
+            series.getFromMetadata(DublinCore.PROPERTY_TITLE.getLocalName()));
   }
-  
+
   @Test
   public void testSeriesBuilder() throws Exception {
     String seriesXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><series><description>Description</description><additionalMetadata><metadata><key>title</key><value>title</value></metadata></additionalMetadata></series>";
@@ -144,7 +144,7 @@ public class SeriesServiceImplTest {
     Assert.assertEquals("Description", s.getDescription());
     Assert.assertEquals("title", s.getFromMetadata("title"));
     String marshalledSeries = builder.marshallSeries(s);
-    Assert.assertEquals(seriesXml,marshalledSeries);
+    Assert.assertEquals(seriesXml, marshalledSeries);
   }
 
 }

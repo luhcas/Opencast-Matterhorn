@@ -48,7 +48,7 @@ public class TextAnnotationImpl implements TextAnnotation {
 
   /** Free text annotations */
   protected List<FreeTextAnnotation> freeTextAnnotations = null;
-  
+
   static {
     standardSymbols.setDecimalSeparator('.');
   }

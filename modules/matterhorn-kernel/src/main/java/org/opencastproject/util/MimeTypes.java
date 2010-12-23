@@ -44,35 +44,40 @@ import javax.xml.parsers.SAXParserFactory;
  * <p>
  * The registry is initialized from the file <code>org.opencastproject.util.MimeTypes.xml</code>.
  */
-public class MimeTypes {
+public final class MimeTypes {
+
+  /** Disallow construction of this utility class */
+  private MimeTypes() {
+  }
 
   /** Name of the mime type files */
-  public final static String DEFINITION_FILE = "/org/opencastproject/util/MimeTypes.xml";
+  public static final String DEFINITION_FILE = "/org/opencastproject/util/MimeTypes.xml";
 
   /** The mime types */
-  private static List<MimeType> mimeTypes_ = null;
+  private static final List<MimeType> mimeTypes = new ArrayList<MimeType>();
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(MimeType.class);
+  private static final Logger logger = LoggerFactory.getLogger(MimeType.class);
 
   /** Common mime types */
-  public static MimeType XML = null;
-  public static MimeType TEXT = null;
-  public static MimeType JSON = null;
-  public static MimeType JPG = null;
-  public static MimeType MJPEG = null;
-  public static MimeType MPEG4 = null;
-  public static MimeType MPEG4_AAC = null;
-  public static MimeType DV = null;
-  public static MimeType MJPEG2000 = null;
-  public static MimeType MP3 = null;
-  public static MimeType AAC = null;
-  public static MimeType CALENDAR = null;
-  public static MimeType ZIP = null;
-  public static MimeType JAR = null;
+  public static final MimeType XML;
+  public static final MimeType TEXT;
+  public static final MimeType JSON;
+  public static final MimeType JPG;
+  public static final MimeType MJPEG;
+  public static final MimeType MPEG4;
+  public static final MimeType MPEG4_AAC;
+  public static final MimeType DV;
+  public static final MimeType MJPEG2000;
+  public static final MimeType MP3;
+  public static final MimeType AAC;
+  public static final MimeType CALENDAR;
+  public static final MimeType ZIP;
+  public static final MimeType JAR;
 
   // Initialize common mime types
   static {
+    initFromFile();
     XML = MimeTypes.parseMimeType("text/xml");
     TEXT = MimeTypes.parseMimeType("text/plain");
     JSON = MimeTypes.parseMimeType("application/json");
@@ -96,7 +101,6 @@ public class MimeTypes {
     InputStream is = null;
     InputStreamReader isr = null;
     try {
-      mimeTypes_ = new ArrayList<MimeType>();
       String definitions = null;
       is = MimeTypes.class.getResourceAsStream(DEFINITION_FILE);
       StringBuffer buf = new StringBuffer();
@@ -107,14 +111,15 @@ public class MimeTypes {
       char[] chars = new char[1024];
       int count = 0;
       while ((count = isr.read(chars)) > 0) {
-        for (int i = 0; i < count; buf.append(chars[i++]))
-          ;
+        for (int i = 0; i < count; i++) {
+          buf.append(chars[i]);
+        }
       }
 
       definitions = buf.toString();
       SAXParserFactory parserFactory = SAXParserFactory.newInstance();
       SAXParser parser = parserFactory.newSAXParser();
-      DefaultHandler handler = new MimeTypeParser(mimeTypes_);
+      DefaultHandler handler = new MimeTypeParser(mimeTypes);
       parser.parse(new InputSource(new StringReader(definitions)), handler);
     } catch (FileNotFoundException e) {
       logger.error("Error initializing mime type registry: definition file not found!");
@@ -139,41 +144,41 @@ public class MimeTypes {
 
     // Plain Text
     mimeType = new MimeType("text", "plain", "txt");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
     // TYPE_XML
     mimeType = new MimeType("text", "xml", "xml");
-    mimeTypes_.add(mimeType);
-    
+    mimeTypes.add(mimeType);
+
     // JSON
     mimeType = new MimeType("application", "json", "json");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
     // MPEG-4
     mimeType = new MimeType("video", "mp4", "mp4");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
     // MPEG-4 with AAC Audio
     mimeType = new MimeType("video", "x-m4v", "m4v");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
     // DV
     mimeType = new MimeType("video", "x-dv", "dv");
     mimeType.addEquivalent("application", "x-dv");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
     // ISO Motion JPEG 2000
     mimeType = new MimeType("video", "mj2", "mj2");
     mimeType.addSuffix("mjp2");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
     // MPEG Audio
     mimeType = new MimeType("audio", "mpeg", "mp3");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
     // AAC Audio
     mimeType = new MimeType("audio", "x-m4a", "m4a");
-    mimeTypes_.add(mimeType);
+    mimeTypes.add(mimeType);
 
   }
 
@@ -192,17 +197,12 @@ public class MimeTypes {
     if (mimeType == null)
       throw new IllegalArgumentException("Argument 'mimeType' was null");
 
-    // Check if registry has been initialized
-    if (mimeTypes_ == null) {
-      initFromFile();
-    }
-
     String[] t = mimeType.trim().split("/");
     if (t.length < 2) {
       throw new IllegalArgumentException("Argument 'mimeType' is malformed");
     }
 
-    for (MimeType m : mimeTypes_) {
+    for (MimeType m : mimeTypes) {
       if (m.getType().equals(t[0]) && m.getSubtype().equals(t[1]))
         try {
           return m.clone();
@@ -213,7 +213,7 @@ public class MimeTypes {
 
     logger.debug("Discovered previously unknown mime type '" + mimeType + "'");
     MimeType m = new MimeType(t[0], t[1]);
-    mimeTypes_.add(m);
+    mimeTypes.add(m);
     return m;
   }
 
@@ -234,12 +234,7 @@ public class MimeTypes {
     if (suffix == null)
       throw new IllegalArgumentException("Argument 'suffix' was null!");
 
-    // Check if registry has been initialized
-    if (mimeTypes_ == null) {
-      initFromFile();
-    }
-
-    for (MimeType m : mimeTypes_) {
+    for (MimeType m : mimeTypes) {
       if (m.supportsSuffix(suffix))
         try {
           return m.clone();
@@ -269,26 +264,26 @@ public class MimeTypes {
       throw new IllegalArgumentException("Argument 'url' is null");
     return fromString(url.getFile());
   }
-  
-    /**
-     * Returns a mime type for the provided file.
-     * <p>
-     * This method tries various ways to extract mime type information from the files name or its contents.
-     * <p>
-     * If no mime type can be derived from either the file name or its contents, a <code>UnknownFileTypeException</code>
-     * is thrown.
-     * 
-     * @param uri
-     *          the file
-     * @return the corresponding mime type
-     * @throws UnknownFileTypeException
-     *           if the mime type cannot be derived from the file
-     */
-    public static MimeType fromURI(URI uri) throws UnknownFileTypeException {
-      if (uri == null)
-        throw new IllegalArgumentException("Argument 'uri' is null");
-      return fromString(uri.getPath());
-    }
+
+  /**
+   * Returns a mime type for the provided file.
+   * <p>
+   * This method tries various ways to extract mime type information from the files name or its contents.
+   * <p>
+   * If no mime type can be derived from either the file name or its contents, a <code>UnknownFileTypeException</code>
+   * is thrown.
+   * 
+   * @param uri
+   *          the file
+   * @return the corresponding mime type
+   * @throws UnknownFileTypeException
+   *           if the mime type cannot be derived from the file
+   */
+  public static MimeType fromURI(URI uri) throws UnknownFileTypeException {
+    if (uri == null)
+      throw new IllegalArgumentException("Argument 'uri' is null");
+    return fromString(uri.getPath());
+  }
 
   /**
    * Returns a mime type for the provided file name.

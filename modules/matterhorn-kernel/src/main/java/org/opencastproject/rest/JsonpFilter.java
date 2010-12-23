@@ -132,7 +132,7 @@ public class JsonpFilter implements Filter {
     }
 
     public void flushWrapper() throws IOException {
-      if(enableWrapping) {
+      if (enableWrapping) {
         if (bufferWriter != null)
           bufferWriter.close();
         if (buffer != null)
@@ -204,7 +204,8 @@ public class JsonpFilter implements Filter {
 
     @Override
     public void flushBuffer() throws IOException {
-      if( ! enableWrapping) getResponse().flushBuffer();
+      if (!enableWrapping)
+        getResponse().flushBuffer();
     }
 
     @Override
@@ -227,7 +228,7 @@ public class JsonpFilter implements Filter {
 
   static class ByteArrayServletOutputStream extends ServletOutputStream {
 
-    protected byte buf[];
+    protected byte[] buf;
 
     protected int count;
 

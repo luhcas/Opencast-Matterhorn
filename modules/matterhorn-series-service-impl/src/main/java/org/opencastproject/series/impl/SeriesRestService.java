@@ -324,29 +324,26 @@ public class SeriesRestService {
             "addSeries",
             RestEndpoint.Method.PUT,
             "/",
-            "Accepts an XML form parameter representing a new Series and stores it in the database. " +
-            "Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no series is supplied. " +
-            "500 (Internal Server Error) if there was an error creating the series.");
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("Series was created successfully."));
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("No seriesId was supplied."));
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("The series was not created successfully."));
+            "Accepts an XML form parameter representing a new Series and stores it in the database. "
+                    + "Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no series is supplied. "
+                    + "500 (Internal Server Error) if there was an error creating the series.");
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Series was created successfully."));
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.badRequest("No seriesId was supplied."));
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.error("The series was not created successfully."));
     addEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(),
             "The XML or JSON representation of the series to be stored."));
     addEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);
 
     // update Series
-    RestEndpoint updateEndpoint = new RestEndpoint(
-            "updateSeries",
-            RestEndpoint.Method.POST,
-            "/{seriesId}",
-            "Accepts an XML or JSON form parameter representing the series to be updated. The series has to be stored " +
-            "in the database already.");
-    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Series has be successfully updated."));
-    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("No seriesId was supplied."));
+    RestEndpoint updateEndpoint = new RestEndpoint("updateSeries", RestEndpoint.Method.POST, "/{seriesId}",
+            "Accepts an XML or JSON form parameter representing the series to be updated. The series has to be stored "
+                    + "in the database already.");
+    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.noContent("Series has be successfully updated."));
+    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.badRequest("No seriesId was supplied."));
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("A Series matching the supplied seriesId was not found."));
-    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("The Series was not successfully updated."));
+            .notFound("A Series matching the supplied seriesId was not found."));
+    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.error("The Series was not successfully updated."));
     updateEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
             "The UUID of the series to be updated."));
     updateEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(),
@@ -357,9 +354,9 @@ public class SeriesRestService {
     // remove Series
     RestEndpoint removeEndpoint = new RestEndpoint("deleteSeries", RestEndpoint.Method.DELETE, "/{seriesId}",
             "Removes the specified series from the database. Returns true if the series could be removed.");
-    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Series has been successfully deleted."));
+    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.noContent("Series has been successfully deleted."));
     removeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("A Series matching the supplied seriesId was not found."));
+            .notFound("A Series matching the supplied seriesId was not found."));
     removeEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
             "The UUID of the series."));
     removeEndpoint.setTestForm(RestTestForm.auto());
@@ -372,9 +369,9 @@ public class SeriesRestService {
     getEndpoint.addFormat(Format.json("JSON Representation of a series."));
     getEndpoint.setAutoPathFormat(true);
     getEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Series found and response contains XML or JSON representation of the series."));
+            .ok("Series found and response contains XML or JSON representation of the series."));
     getEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NO_CONTENT("A Series matching the supplied seriesId was not found."));
+            .noContent("A Series matching the supplied seriesId was not found."));
     getEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
             "The UUID of the Series."));
     getEndpoint.setTestForm(RestTestForm.auto());
@@ -386,7 +383,7 @@ public class SeriesRestService {
     getAllEndpoint.addFormat(Format.xml("XML Representation of a series."));
     getAllEndpoint.addFormat(Format.json("JSON Representation of a series."));
     getAllEndpoint.setAutoPathFormat(true);
-    getAllEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("List of Series as XML or JSON returned"));
+    getAllEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("List of Series as XML or JSON returned"));
     getAllEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getAllEndpoint);
 
@@ -394,7 +391,7 @@ public class SeriesRestService {
     RestEndpoint dcEndpoint = new RestEndpoint("getDublinCoreForSeries", RestEndpoint.Method.GET,
             "/{seriesID}/dublincore", "Get the DublinCore metdata for a specific Series.");
     dcEndpoint.addFormat(Format.xml("Dublin Core representation"));
-    dcEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Dublincore XML representation of Series."));
+    dcEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Dublincore XML representation of Series."));
     dcEndpoint.addPathParam(new Param("seriesID", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
             "The UUID of the Series."));
     dcEndpoint.setTestForm(RestTestForm.auto());
@@ -405,7 +402,7 @@ public class SeriesRestService {
             "Get all Series that match this pattern in their Metadata.");
     searchEndpoint.addFormat(Format.json("A JSON list of Series matching the search pattern."));
     searchEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("JSON Object with UUID of the series and a String describing the series"));
+            .ok("JSON Object with UUID of the series and a String describing the series"));
     searchEndpoint.addPathParam(new Param("pattern", Type.STRING, "lecturer", "a part of a metadat value"));
     searchEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, searchEndpoint);
@@ -418,16 +415,16 @@ public class SeriesRestService {
       SeriesBuilder builder = SeriesBuilder.getInstance();
 
       SeriesImpl series = new SeriesImpl();
-      series.setDescription("A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. " +
-        "A rather long description that would overwhelm a typical 255 character varchar column. ");
+      series.setDescription("A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. "
+              + "A rather long description that would overwhelm a typical 255 character varchar column. ");
       LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
 
       metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));

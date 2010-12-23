@@ -19,18 +19,18 @@ package org.opencastproject.security.api;
  * Provides access to the current user's username and roles, if any.
  */
 public interface SecurityService {
-  
+
   /** The anonymous role array */
-  String[] ANONYMOUS = new String[] {"ROLE_ANONYMOUS"};
-  
+  String[] ANONYMOUS = new String[] { "ROLE_ANONYMOUS" };
+
   /**
    * Gets the current user's username, or null if the user has not been authenticated.
    */
   String getUserName();
 
   /**
-   * Gets the current user's roles.  For anonymous users, this will return {@link Anonymous}.
+   * Gets the current user's roles. For anonymous users, this will return {@link Anonymous}.
    */
   String[] getRoles();
-  
+
 }

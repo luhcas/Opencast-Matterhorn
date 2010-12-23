@@ -25,26 +25,26 @@ import javax.xml.bind.annotation.XmlType;
  * A record of a service that creates and manages receipts.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="service", namespace="http://serviceregistry.opencastproject.org")
-@XmlRootElement(name="service", namespace="http://serviceregistry.opencastproject.org")
+@XmlType(name = "service", namespace = "http://serviceregistry.opencastproject.org")
+@XmlRootElement(name = "service", namespace = "http://serviceregistry.opencastproject.org")
 public class JaxbServiceRegistration implements ServiceRegistration {
 
-  @XmlElement(name="type")
+  @XmlElement(name = "type")
   protected String serviceType;
 
-  @XmlElement(name="host")
+  @XmlElement(name = "host")
   protected String host;
 
-  @XmlElement(name="path")
+  @XmlElement(name = "path")
   protected String path;
 
-  @XmlElement(name="online")
+  @XmlElement(name = "online")
   protected boolean online;
 
-  @XmlElement(name="maintenance")
+  @XmlElement(name = "maintenance")
   protected boolean maintenanceMode;
 
-  @XmlElement(name="jobproducer")
+  @XmlElement(name = "jobproducer")
   protected boolean jobProducer;
 
   /**
@@ -57,6 +57,7 @@ public class JaxbServiceRegistration implements ServiceRegistration {
 
   /**
    * Creates a new JAXB annotated service registration based on an existing service registration
+   * 
    * @param serviceRegistration
    */
   public JaxbServiceRegistration(ServiceRegistration serviceRegistration) {

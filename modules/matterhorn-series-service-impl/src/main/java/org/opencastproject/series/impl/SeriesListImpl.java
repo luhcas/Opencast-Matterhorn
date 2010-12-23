@@ -26,26 +26,26 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * A List of {@link SeriesJaxbImpl}s
  */
-@XmlRootElement(name="seriesList")
+@XmlRootElement(name = "seriesList")
 public class SeriesListImpl {
 
   @XmlElement
   protected List<SeriesImpl> series;
-  
+
   public SeriesListImpl() {
     this.series = new LinkedList<SeriesImpl>();
   }
-  
+
   public SeriesListImpl(List<Series> s) {
     this.series = new LinkedList<SeriesImpl>();
     this.setSeriesList(s);
   }
-  
+
   public void setSeriesList(List<Series> series) {
-    if(!this.series.isEmpty()){
+    if (!this.series.isEmpty()) {
       this.series.clear();
     }
-    for(Series s : series){
+    for (Series s : series) {
       this.series.add((SeriesImpl) s);
     }
   }

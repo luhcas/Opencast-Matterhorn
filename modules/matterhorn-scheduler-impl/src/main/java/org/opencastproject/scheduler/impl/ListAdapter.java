@@ -24,20 +24,21 @@ import org.opencastproject.scheduler.api.Metadata;
 
 public class ListAdapter extends XmlAdapter<Metadata[], List<Metadata>> {
 
-  public ListAdapter () {
-    
+  public ListAdapter() {
+
   }
 
   @Override
   public Metadata[] marshal(List<Metadata> arg0) throws Exception {
-    return arg0.toArray(new Metadata [0]);
+    return arg0.toArray(new Metadata[0]);
   }
 
   @Override
   public List<Metadata> unmarshal(Metadata[] arg0) throws Exception {
     ArrayList<Metadata> list = new ArrayList<Metadata>(arg0.length);
-    for (Metadata data : arg0) list.add(data);
+    for (Metadata data : arg0)
+      list.add(data);
     return list;
   }
-  
+
 }

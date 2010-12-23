@@ -29,8 +29,8 @@ import java.net.URI;
  * This implementation of the {@link MediaPackageElementBuilderPlugin} recognizes arbitrary attachments and creates
  * media package element representations for them.
  * <p>
- * A media package element is considered an attachment by this plugin if it is of type
- * {@link Attachment} and does not have any specializing flavor.
+ * A media package element is considered an attachment by this plugin if it is of type {@link Attachment} and does not
+ * have any specializing flavor.
  */
 public class AttachmentBuilderPlugin extends AbstractAttachmentBuilderPlugin implements MediaPackageElementBuilder {
 

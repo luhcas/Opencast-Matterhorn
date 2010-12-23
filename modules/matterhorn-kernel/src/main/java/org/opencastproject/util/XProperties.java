@@ -29,13 +29,10 @@ import java.util.regex.Pattern;
 /**
  * An extension to the {@code Properties} class which performs the following when you call getProperty:
  * 
- * 1.  Checks to see if there are any variables in the property
- * 2.  If so it replaces the variable with with the first match it finds in the following order
- *   - The java properties (java -Dkey=value)
- *   - The component context properties (set using setBundleContext)
- *   - The properties set in the object itself
- *   - The container's environment variables 
- * This class operates identically to a standard Properties object in all other respects.
+ * 1. Checks to see if there are any variables in the property 2. If so it replaces the variable with with the first
+ * match it finds in the following order - The java properties (java -Dkey=value) - The component context properties
+ * (set using setBundleContext) - The properties set in the object itself - The container's environment variables This
+ * class operates identically to a standard Properties object in all other respects.
  */
 public class XProperties extends Properties {
 
@@ -44,19 +41,19 @@ public class XProperties extends Properties {
   public static final String START_REPLACEMENT = "${";
 
   public static final String END_REPLACEMENT = "}";
-  
+
   /** Logging facility provided by log4j */
   private static final Logger log = LoggerFactory.getLogger(XProperties.class);
 
   /** The {@code BundleContext} for this properties object */
-  transient private BundleContext context = null;
+  private transient BundleContext context = null;
 
   /** The {@link Bundle} that loaded this object */
-  transient private Bundle bundle = null;
-  
+  private transient Bundle bundle = null;
+
   /**
-   * {@inheritDoc}
-   * See the class description for more details.
+   * {@inheritDoc} See the class description for more details.
+   * 
    * @see java.util.Properties#getProperty(java.lang.String)
    */
   @Override
@@ -84,9 +81,14 @@ public class XProperties extends Properties {
   }
 
   /**
-   * Wrapper around the actual search and replace functionality.  This function will value with all of the instances of subkey replaced.
-   * @param value The original string you wish to replace.
-   * @param subkey The substring you wish to replace.  This must be the substring rather than the full variable - M2_REPO rather than ${M2_REPO} 
+   * Wrapper around the actual search and replace functionality. This function will value with all of the instances of
+   * subkey replaced.
+   * 
+   * @param value
+   *          The original string you wish to replace.
+   * @param subkey
+   *          The substring you wish to replace. This must be the substring rather than the full variable - M2_REPO
+   *          rather than ${M2_REPO}
    * @return The value string with all instances of subkey replaced, or null in the case of an error.
    */
   private String findReplacement(String value, String subkey) {
@@ -95,26 +97,29 @@ public class XProperties extends Properties {
     }
     Pattern p = Pattern.compile(START_REPLACEMENT + subkey + END_REPLACEMENT, Pattern.LITERAL);
     String replacement = null;
-    
+
     if (System.getProperty(subkey) != null) {
       replacement = System.getProperty(subkey);
     } else if (this.getProperty(subkey) != null) {
       replacement = this.getProperty(subkey);
-    } else if (this.context != null && this.bundle != null && this.bundle.getState() == Bundle.ACTIVE &&
-            this.context.getProperty(subkey) != null) {
+    } else if (this.context != null && this.bundle != null && this.bundle.getState() == Bundle.ACTIVE
+            && this.context.getProperty(subkey) != null) {
       replacement = this.context.getProperty(subkey);
     } else if (System.getenv(subkey) != null) {
       replacement = System.getenv(subkey);
     }
-    
+
     if (replacement != null)
       return p.matcher(value).replaceAll(Matcher.quoteReplacement(replacement));
-    else return null;
+    else
+      return null;
   }
 
   /**
    * Returns the value of a variable with the same priority replacement scheme as getProperty.
-   * @param variable The variable you need the replacement for.
+   * 
+   * @param variable
+   *          The variable you need the replacement for.
    * @return The value for variable.
    * @see org.opencastproject.util.XProperties#getProperty(String)
    */
@@ -124,7 +129,9 @@ public class XProperties extends Properties {
 
   /**
    * A wrapper around the old getProperty behaviour, this method does not do any variable expansion.
-   * @param key The key of the property
+   * 
+   * @param key
+   *          The key of the property
    * @return The property exactly as it appears in the properties list without any variable expansion
    */
   public String getUninterpretedProperty(String key) {
@@ -133,7 +140,9 @@ public class XProperties extends Properties {
 
   /**
    * Merges the properties from p into this properties object
-   * @param p The {@code Dictionary} you wish to add to this object
+   * 
+   * @param p
+   *          The {@code Dictionary} you wish to add to this object
    */
   public void merge(Dictionary<String, String> p) {
     Enumeration<String> keys = p.keys();
@@ -144,19 +153,22 @@ public class XProperties extends Properties {
   }
 
   /**
-   * Sets the {@code BundleContext} for this object.
-   * Set this to null if you wish to skip checking the context for a property.
-   * @param ctx The {@code BundleContext} for this instance.
+   * Sets the {@code BundleContext} for this object. Set this to null if you wish to skip checking the context for a
+   * property.
+   * 
+   * @param ctx
+   *          The {@code BundleContext} for this instance.
    */
   public void setBundleContext(BundleContext ctx) {
     context = ctx;
-    if(ctx != null) {
+    if (ctx != null) {
       bundle = ctx.getBundle();
     }
   }
 
   /**
    * Return the current {@code BundleContext} that's in use by this object.
+   * 
    * @return The current {@code BundleContext}
    */
   public BundleContext getBundleContext() {

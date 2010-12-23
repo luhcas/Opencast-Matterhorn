@@ -35,37 +35,38 @@ public class SecurityServiceSpringImpl implements SecurityService {
   @Override
   public String getUserName() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if(auth == null) {
+    if (auth == null) {
       return null;
     } else {
       Object principal = auth.getPrincipal();
-      if(principal == null) {
+      if (principal == null) {
         return null;
       }
-      if(principal instanceof UserDetails) {
-        UserDetails userDetails = (UserDetails)principal;
+      if (principal instanceof UserDetails) {
+        UserDetails userDetails = (UserDetails) principal;
         return userDetails.getUsername();
       } else {
         return principal.toString();
       }
     }
   }
-  
+
   @Override
   public String[] getRoles() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if(auth == null) {
+    if (auth == null) {
       return ANONYMOUS;
     } else {
       Collection<GrantedAuthority> authorities = auth.getAuthorities();
-      if(auth == null || authorities.size() == 0) return ANONYMOUS;
+      if (auth == null || authorities.size() == 0)
+        return ANONYMOUS;
       List<String> roles = new ArrayList<String>(authorities.size());
-      for(GrantedAuthority ga : authorities) {
+      for (GrantedAuthority ga : authorities) {
         roles.add(ga.getAuthority());
       }
       Collections.sort(roles);
       return roles.toArray(new String[roles.size()]);
     }
   }
-  
+
 }

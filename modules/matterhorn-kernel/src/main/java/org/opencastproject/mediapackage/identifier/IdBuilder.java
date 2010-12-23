@@ -22,8 +22,7 @@ package org.opencastproject.mediapackage.identifier;
 public interface IdBuilder {
 
   /**
-   * Creates a new identifier. The identifier is supposed to be unique within a
-   * running system.
+   * Creates a new identifier. The identifier is supposed to be unique within a running system.
    * <p>
    * The default implementation will return a uuid-style identifier.
    * </p>
@@ -33,9 +32,8 @@ public interface IdBuilder {
   Id createNew();
 
   /**
-   * This method can be used to determine if <code>id</code> is in fact a vaild
-   * identifier as expected by this id builder. If this is not the case, an
-   * {@link IllegalArgumentException} is thrown.
+   * This method can be used to determine if <code>id</code> is in fact a vaild identifier as expected by this id
+   * builder. If this is not the case, an {@link IllegalArgumentException} is thrown.
    * 
    * @return the id
    * @throws IllegalArgumentException

@@ -38,8 +38,7 @@ import java.net.URISyntaxException;
 public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
 
   /**
-   * Test method for
-   * {@link org.opencastproject.mediapackage.MediaPackageReferenceImpl#matches(MediaPackageReference)}.
+   * Test method for {@link org.opencastproject.mediapackage.MediaPackageReferenceImpl#matches(MediaPackageReference)}.
    */
   @Test
   public void testMatches() {

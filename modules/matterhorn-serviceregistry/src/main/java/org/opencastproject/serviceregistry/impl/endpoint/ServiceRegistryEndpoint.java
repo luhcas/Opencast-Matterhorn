@@ -335,7 +335,7 @@ public class ServiceRegistryEndpoint {
     statistics.addPathParam(new Param("format", Type.STRING, "xml", "the output format"));
     statistics.addFormat(new Format("xml", null, null));
     statistics.addFormat(new Format("json", null, null));
-    statistics.addStatus(org.opencastproject.util.doc.Status.OK("Returns the service statistics."));
+    statistics.addStatus(org.opencastproject.util.doc.Status.ok("Returns the service statistics."));
     statistics.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, statistics);
 
@@ -348,7 +348,7 @@ public class ServiceRegistryEndpoint {
     getServicesEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The format, xml or json"));
     getServicesEndpoint.addFormat(new Format("xml", null, null));
     getServicesEndpoint.addFormat(new Format("json", null, null));
-    getServicesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the services list."));
+    getServicesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the services list."));
     getServicesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getServicesEndpoint);
 
@@ -361,7 +361,7 @@ public class ServiceRegistryEndpoint {
     getServicesByLoadEndpoint.addFormat(new Format("xml", null, null));
     getServicesByLoadEndpoint.addFormat(new Format("json", null, null));
     getServicesByLoadEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Returns the services list, ordered from least to most loaded."));
+            .ok("Returns the services list, ordered from least to most loaded."));
     getServicesByLoadEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getServicesByLoadEndpoint);
 
@@ -377,7 +377,7 @@ public class ServiceRegistryEndpoint {
     registerEndpoint.addRequiredParam(new Param("jobProducer", Type.BOOLEAN, "false",
             "whether this service produces jobs, which track long running operations"));
     registerEndpoint.addFormat(new Format("xml", null, null));
-    registerEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the service registration."));
+    registerEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the service registration."));
     registerEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, registerEndpoint);
 
@@ -390,7 +390,7 @@ public class ServiceRegistryEndpoint {
             "The host's base URL for this service"));
     unRegisterEndpoint.addFormat(new Format("xml", null, null));
     unRegisterEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NO_CONTENT("The service registration was removed."));
+            .noContent("The service registration was removed."));
     unRegisterEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, unRegisterEndpoint);
 
@@ -401,7 +401,7 @@ public class ServiceRegistryEndpoint {
     maintenanceEndpoint.addRequiredParam(new Param("maintenance", Type.STRING, Boolean.TRUE.toString(),
             "The maintenance status"));
     maintenanceEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NO_CONTENT("The host's maintenance status was set"));
+            .noContent("The host's maintenance status was set"));
     maintenanceEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, maintenanceEndpoint);
 
@@ -415,7 +415,7 @@ public class ServiceRegistryEndpoint {
     countEndpoint.addOptionalParam(new Param("host", Type.STRING, serverUrl, "The host's base URL for this service"));
     countEndpoint.addFormat(new Format("plain", null, null));
     countEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("The number of jobs matching the request criteria has been returned in the http body."));
+            .ok("The number of jobs matching the request criteria has been returned in the http body."));
     countEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, countEndpoint);
 
@@ -430,7 +430,7 @@ public class ServiceRegistryEndpoint {
     getJobsEndpoint.addFormat(new Format("xml", null, null));
     getJobsEndpoint.addFormat(new Format("json", null, null));
     getJobsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("The jobs matching the request criteria are returned in the http body."));
+            .ok("The jobs matching the request criteria are returned in the http body."));
     getJobsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getJobsEndpoint);
 
@@ -440,7 +440,7 @@ public class ServiceRegistryEndpoint {
     createJobEndpoint.addRequiredParam(new Param("jobType", Type.STRING, "org.opencastproject.[type]",
             "The service that is creating and handling this job"));
     createJobEndpoint.addFormat(new Format("xml", null, null));
-    createJobEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the new job."));
+    createJobEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the new job."));
     createJobEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, createJobEndpoint);
 
@@ -451,8 +451,8 @@ public class ServiceRegistryEndpoint {
     getJobEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The format, xml or json"));
     getJobEndpoint.addFormat(new Format("xml", null, null));
     getJobEndpoint.addFormat(new Format("json", null, null));
-    getJobEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the job."));
-    getJobEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("No job with this identifier exists."));
+    getJobEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the job."));
+    getJobEndpoint.addStatus(org.opencastproject.util.doc.Status.notFound("No job with this identifier exists."));
     getJobEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getJobEndpoint);
 

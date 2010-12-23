@@ -43,12 +43,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "SERIES_METADATA")
 @Access(AccessType.FIELD)
 @XmlType(name = "seriesMetadata", namespace = "http://series.opencastproject.org")
-@XmlRootElement(name="metadata")
+@XmlRootElement(name = "metadata")
 @XmlAccessorType(XmlAccessType.NONE)
 public class SeriesMetadataImpl implements SeriesMetadata {
 
   private static final Logger logger = LoggerFactory.getLogger(SeriesMetadataImpl.class);
-  
+
   @Id
   @Column(name = "METADATA_KEY", length = 128)
   @XmlElement(name = "key")

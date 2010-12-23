@@ -28,6 +28,7 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -54,7 +55,7 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
   /**
    * the logging facility provided by log4j
    */
-  private final static Logger logger = LoggerFactory.getLogger(CatalogBuilderPlugin.class);
+  private static final Logger logger = LoggerFactory.getLogger(CatalogBuilderPlugin.class);
 
   /**
    * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.mediapackage.MediaPackageElement.Type,
@@ -69,7 +70,7 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
    */
   public boolean accept(Node elementNode) {
     String name = elementNode.getNodeName();
-    if(name.contains(":")) {
+    if (name.contains(":")) {
       name = name.substring(name.indexOf(":") + 1);
     }
     return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString());
@@ -106,15 +107,18 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#cleanup()
+   * 
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#destroy()
    */
   @Override
-  public void cleanup() {
+  public void destroy() {
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node, org.opencastproject.mediapackage.MediaPackageSerializer)
+   * 
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node,
+   *      org.opencastproject.mediapackage.MediaPackageSerializer)
    */
   @Override
   public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
@@ -148,28 +152,28 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
       String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
-      if (checksumValue != null && !checksumValue.equals("") && checksumType != null)
+      if (StringUtils.isNotEmpty(checksumValue) && checksumType != null)
         checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // mimetype
       String mimeTypeValue = (String) xpath.evaluate("mimetype/text()", elementNode, XPathConstants.STRING);
-      if (mimeTypeValue != null && !mimeTypeValue.equals(""))
+      if (StringUtils.isNotEmpty(mimeTypeValue))
         mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       // create the catalog
       Catalog dc = CatalogImpl.fromURI(url);
-      if (id != null && !id.equals(""))
+      if (StringUtils.isNotEmpty(id))
         dc.setIdentifier(id);
 
       // Add url
       dc.setURI(url);
 
       // Add flavor
-      if(flavor != null)
+      if (flavor != null)
         dc.setFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
-      
+
       // Add reference
-      if (reference != null && !reference.equals(""))
+      if (StringUtils.isNotEmpty(reference))
         dc.referTo(MediaPackageReferenceImpl.fromString(reference));
 
       // Set size
@@ -183,7 +187,7 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
       // Set Mimetype
       if (mimeType != null)
         dc.setMimeType(mimeType);
-      
+
       // Tags
       NodeList tagNodes = (NodeList) xpath.evaluate("tags/tag", elementNode, XPathConstants.NODESET);
       for (int i = 0; i < tagNodes.getLength(); i++) {
@@ -202,7 +206,9 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#newElement(org.opencastproject.mediapackage.MediaPackageElement.Type, org.opencastproject.mediapackage.MediaPackageElementFlavor)
+   * 
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#newElement(org.opencastproject.mediapackage.MediaPackageElement.Type,
+   *      org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
   @Override
   public MediaPackageElement newElement(Type type, MediaPackageElementFlavor flavor) {
@@ -213,10 +219,11 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#setup()
+   * 
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#init()
    */
   @Override
-  public void setup() throws Exception {
+  public void init() throws Exception {
   }
 
 }

@@ -45,7 +45,7 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   private String externalForm = null;
 
   /** The properties that describe this reference */
-  Map<String, String> properties = null;
+  private Map<String, String> properties = null;
 
   /**
    * Creates a reference to the containing media package (<code>self</code>).
@@ -219,9 +219,9 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
     // identifier
     if (identifier.equals(reference.getIdentifier()))
       return true;
-    else if (identifier.equals("*") || reference.getIdentifier().equals("*"))
+    else if (ANY.equals(identifier) || ANY.equals(reference.getIdentifier()))
       return true;
-    else if (identifier.equals("self") || reference.getIdentifier().equals("self"))
+    else if (SELF.equals(identifier) || SELF.equals(reference.getIdentifier()))
       return true;
 
     return false;

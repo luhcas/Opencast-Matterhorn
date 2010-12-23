@@ -16,6 +16,8 @@
 
 package org.opencastproject.metadata.mpeg7;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -35,6 +37,9 @@ import javax.xml.parsers.SAXParserFactory;
  * but only deals with those parts relevant to matterhorn, mainly temporal decompositions.
  */
 public class Mpeg7Parser extends DefaultHandler {
+
+  /** the logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(Mpeg7Parser.class.getName());
 
   /** The current parser state */
   enum ParserState {
@@ -82,7 +87,7 @@ public class Mpeg7Parser extends DefaultHandler {
 
   /** The text annoation */
   private TextAnnotation textAnnotation = null;
-  
+
   /** The videotext element */
   private VideoText videoText = null;
 
@@ -100,7 +105,7 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   public Mpeg7Parser() {
   }
-  
+
   public Mpeg7Parser(Mpeg7CatalogImpl catalog) {
     this.mpeg7Doc = catalog;
   }
@@ -149,7 +154,7 @@ public class Mpeg7Parser extends DefaultHandler {
 
     // Make sure this is an mpeg-7 catalog
     // TODO: Improve this test, add namespace awareness
-    if (!isMpeg7 && name.equals("Mpeg7"))
+    if (!isMpeg7 && "Mpeg7".equals(name))
       isMpeg7 = true;
 
     // Handle parser state
@@ -205,7 +210,7 @@ public class Mpeg7Parser extends DefaultHandler {
       }
       textAnnotation = segment.createTextAnnotation(confidence, relevance, language);
     }
-    
+
     // Spatiotemporal decomposition
     if ("SpatioTemporalDecomposition".equals(localName)) {
       String hasGap = attributes.getValue("gap");
@@ -214,11 +219,11 @@ public class Mpeg7Parser extends DefaultHandler {
         throw new IllegalStateException("Can't have a spatio temporal decomposition outside of a video segment");
       boolean gap = "true".equalsIgnoreCase(attributes.getValue("gap"));
       boolean overlap = "true".equalsIgnoreCase(attributes.getValue("overlap"));
-      spatioTemporalDecomposition = ((VideoSegment)segment).createSpatioTemporalDecomposition(gap, overlap);
+      spatioTemporalDecomposition = ((VideoSegment) segment).createSpatioTemporalDecomposition(gap, overlap);
       spatioTemporalDecomposition.setGap("true".equals(hasGap));
       spatioTemporalDecomposition.setOverlapping("overlap".equals(isOverlapping));
     }
-    
+
     // Video Text
     if ("VideoText".equals(localName)) {
       String id = attributes.getValue("id");
@@ -313,7 +318,7 @@ public class Mpeg7Parser extends DefaultHandler {
     if ("VideoText".equals(localName)) {
       spatioTemporalDecomposition.addVideoText(videoText);
     }
-    
+
     // SpatioTemporalLocator
     if ("SpatioTemporalLocator".equals(localName)) {
       videoText.setSpatioTemporalLocator(new SpatioTemporalLocatorImpl(mediaTime));
@@ -331,8 +336,8 @@ public class Mpeg7Parser extends DefaultHandler {
       if (coords.length != 4)
         throw new IllegalStateException("Box coordinates '" + tagContent + "' is malformatted");
       int[] coordsL = new int[4];
-      for (int i=0; i < 4; i++)
-        coordsL[i] = (int)Float.parseFloat(coords[i]);
+      for (int i = 0; i < 4; i++)
+        coordsL[i] = (int) Float.parseFloat(coords[i]);
       videoText.setBoundary(new Rectangle(coordsL[0], coordsL[1], (coordsL[2] - coordsL[0]), coordsL[3] - coordsL[1]));
     }
 
@@ -362,7 +367,7 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   @Override
   public void error(SAXParseException e) throws SAXException {
-    Mpeg7CatalogImpl.logger.warn("Error while parsing mpeg-7 catalog: " + e.getMessage());
+    logger.warn("Error while parsing mpeg-7 catalog: " + e.getMessage());
     super.error(e);
   }
 
@@ -371,7 +376,7 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   @Override
   public void fatalError(SAXParseException e) throws SAXException {
-    Mpeg7CatalogImpl.logger.warn("Fatal error while parsing mpeg-7 catalog: " + e.getMessage());
+    logger.warn("Fatal error while parsing mpeg-7 catalog: " + e.getMessage());
     super.fatalError(e);
   }
 
@@ -380,7 +385,7 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   @Override
   public void warning(SAXParseException e) throws SAXException {
-    Mpeg7CatalogImpl.logger.warn("Warning while parsing mpeg-7 catalog: " + e.getMessage());
+    logger.warn("Warning while parsing mpeg-7 catalog: " + e.getMessage());
     super.warning(e);
   }
 

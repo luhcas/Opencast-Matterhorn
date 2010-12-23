@@ -73,7 +73,6 @@ import javax.persistence.spi.PersistenceProvider;
  */
 public class SchedulerServiceImpl implements SchedulerService, ManagedService {
 
-  
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 
@@ -82,7 +81,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
 
   /** The metadata key used to store the workflow definition in an event's metadata */
   public static final String WORKFLOW_DEFINITION_ID_KEY = "org.opencastproject.workflow.definition";
-  
+
   /** The schedule workflow operation identifier */
   public static final String SCHEDULE_OPERATION_ID = "schedule";
 
@@ -171,7 +170,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       IOUtils.closeQuietly(is);
     }
   }
-  
+
   public WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException {
     InputStream in = null;
     try {
@@ -241,7 +240,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     } catch (MediaPackageException mediaPackageException) {
       throw new SchedulerException(mediaPackageException);
     }
-    
+
     try {
       event.setEventId(workflow.getId());
       event.setMetadataList(event.getMetadataList());
@@ -321,7 +320,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @param RecurringEvent
    *          e
    * @throws SchedulerException
-   *         if a workflow
+   *           if a workflow
    * @return The recurring event that has been persisted
    */
   public void addRecurringEvent(Event recurrence) throws SchedulerException {
@@ -383,7 +382,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     EntityManager em = emf.createEntityManager();
     CriteriaBuilder builder = emf.getCriteriaBuilder();
     CriteriaQuery<EventImpl> query = builder.createQuery(EventImpl.class);
-    
+
     Root<EventImpl> rootEvent = query.from(EventImpl.class);
     query.select(rootEvent);
 
@@ -469,7 +468,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     for (EventImpl event : results) {
       returnList.add((Event) event);
     }
-    
+
     return returnList;
   }
 
@@ -614,20 +613,21 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
 
   /**
    * Updates each event with an id in the list with the passed event.
+   * 
    * @param eventIdList
-   *        List of event ids.
+   *          List of event ids.
    * @param e
-   *        Event containing metadata to be updated.
+   *          Event containing metadata to be updated.
    */
   public void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException {
     EntityManager em = emf.createEntityManager();
     em.getTransaction().begin();
-    try{
-      for(Long eventId : eventIdList) {
+    try {
+      for (Long eventId : eventIdList) {
         e.setEventId(eventId);
         Event storedEvent = getEvent(e.getEventId());
         logger.debug("Found stored event. {} -", storedEvent);
-        if (storedEvent == null){
+        if (storedEvent == null) {
           em.getTransaction().rollback();
           em.close();
           throw new NotFoundException("Couldn't find event" + eventId.toString());
@@ -637,7 +637,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
         em.getTransaction().commit();
         updateWorkflow(storedEvent);
       }
-    } catch( Exception ex) {
+    } catch (Exception ex) {
       logger.warn("Unable to update events: {}", ex);
       em.getTransaction().rollback();
       throw new SchedulerException(ex);
@@ -645,7 +645,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       em.close();
     }
   }
-  
+
   /**
    * @param e
    * @return A list of events that conflict with the start, or end dates of provided event.
@@ -682,8 +682,8 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     for (Event event : events) {
       cal.addEvent(event);
     }
-    // Only validate calendars with events.  Without any events, the icalendar won't validate
-    if(events.size() > 0) {
+    // Only validate calendars with events. Without any events, the icalendar won't validate
+    if (events.size() > 0) {
       try {
         cal.getCalendar().validate();
       } catch (ValidationException e1) {
@@ -746,7 +746,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
   public Event getNewEvent() {
     return new EventImpl();
   }
-  
+
   /**
    * resolves the appropriate Filter for the Capture Agent
    * 

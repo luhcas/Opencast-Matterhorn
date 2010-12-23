@@ -36,12 +36,6 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
    */
   private static final long serialVersionUID = 1L;
 
-  int NO_MATCH = -1;
-  int MATCH_TYPE = 1;
-  int MATCH_SPECIFIC_TYPE = 2;
-  int MATCH_SUBTYPE = 3;
-  int MATCH_SPECIFIC_SUBTYPE = 4;
-
   /**
    * String representation of type
    */
@@ -82,7 +76,8 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
     this.description = description;
   }
 
-  public MediaPackageElementFlavor() {}
+  public MediaPackageElementFlavor() {
+  }
 
   /**
    * Creates a new element type with the given type and subtype.
@@ -160,7 +155,7 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
    */
   @Override
   public MediaPackageElementFlavor clone() throws CloneNotSupportedException {
-    MediaPackageElementFlavor m = (MediaPackageElementFlavor)super.clone();
+    MediaPackageElementFlavor m = (MediaPackageElementFlavor) super.clone();
     m.type = this.type;
     m.subtype = this.subtype;
     m.description = this.description;
@@ -241,34 +236,17 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
      */
     private static final long serialVersionUID = 1L;
 
-    String type_;
+    private String innerType;
 
-    String subtype_;
+    private String innerSubtype;
 
     ElementTypeEquivalent(String type, String subtype) {
-      type_ = type.trim().toLowerCase();
-      subtype_ = subtype.trim().toLowerCase();
+      innerType = type.trim().toLowerCase();
+      innerSubtype = subtype.trim().toLowerCase();
     }
 
-//    String getType() {
-//      return type_;
-//    }
-//
-//    String getSubtype() {
-//      return subtype_;
-//    }
-
-//    @Override
-//    public boolean equals(Object o) {
-//      if (o instanceof ElementTypeEquivalent) {
-//        ElementTypeEquivalent e = (ElementTypeEquivalent) o;
-//        return this.matches(e.getType(), e.getSubtype());
-//      }
-//      return super.equals(o);
-//    }
-
     boolean matches(String type, String subtype) {
-      return type_.equalsIgnoreCase(type) && subtype_.equalsIgnoreCase(subtype);
+      return innerType.equalsIgnoreCase(type) && innerSubtype.equalsIgnoreCase(subtype);
     }
 
     @Override
@@ -276,8 +254,8 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
       final int prime = 31;
       int result = 1;
       result = prime * result + getOuterType().hashCode();
-      result = prime * result + ((subtype_ == null) ? 0 : subtype_.hashCode());
-      result = prime * result + ((type_ == null) ? 0 : type_.hashCode());
+      result = prime * result + ((innerSubtype == null) ? 0 : innerSubtype.hashCode());
+      result = prime * result + ((innerType == null) ? 0 : innerType.hashCode());
       return result;
     }
 
@@ -292,15 +270,15 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
       ElementTypeEquivalent other = (ElementTypeEquivalent) obj;
       if (!getOuterType().equals(other.getOuterType()))
         return false;
-      if (subtype_ == null) {
-        if (other.subtype_ != null)
+      if (innerSubtype == null) {
+        if (other.innerSubtype != null)
           return false;
-      } else if (!subtype_.equals(other.subtype_))
+      } else if (!innerSubtype.equals(other.innerSubtype))
         return false;
-      if (type_ == null) {
-        if (other.type_ != null)
+      if (innerType == null) {
+        if (other.innerType != null)
           return false;
-      } else if (!type_.equals(other.type_))
+      } else if (!innerType.equals(other.innerType))
         return false;
       return true;
     }
@@ -317,12 +295,13 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
   static class FlavorAdapter extends XmlAdapter<String, MediaPackageElementFlavor> {
     @Override
     public String marshal(MediaPackageElementFlavor flavor) throws Exception {
-      if(flavor == null) {
+      if (flavor == null) {
         return null;
       } else {
         return flavor.toString();
       }
     }
+
     @Override
     public MediaPackageElementFlavor unmarshal(String str) throws Exception {
       MediaPackageElementFlavor f = parseFlavor(str);

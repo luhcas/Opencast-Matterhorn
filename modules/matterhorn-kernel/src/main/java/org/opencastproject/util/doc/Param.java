@@ -25,19 +25,19 @@ import java.util.Vector;
 /**
  * Represents a single parameter for an endpoint (required or optional)
  */
-public class Param {
+public final class Param {
   public static enum Type {
     TEXT, STRING, BOOLEAN, FILE, ENUM
   };
 
-  String name; // unique key
-  String defaultValue;
-  String type;
-  String description;
-  List<String> choices;
-  Map<String, String> attributes = new HashMap<String, String>();
-  boolean required = false;
-  boolean path = false;
+  private String name; // unique key
+  private String defaultValue;
+  private String type;
+  private String description;
+  private List<String> choices;
+  private Map<String, String> attributes = new HashMap<String, String>();
+  private boolean required = false;
+  private boolean path = false;
 
   /**
    * Create a parameter for this endpoint, the thing you are adding it to indicates if required or optional
@@ -93,7 +93,7 @@ public class Param {
     }
     choices.add(choice);
   }
-  
+
   public void setChoices(String[] choices) {
     if (choices == null) {
       this.choices = null;
@@ -106,10 +106,12 @@ public class Param {
   }
 
   /**
-   * Attributes are used for adjusting rendering of form elements
-   * related to this parameter
-   * @param key the attribute key (e.g. size)
-   * @param value the attribute value (e.g. 80)
+   * Attributes are used for adjusting rendering of form elements related to this parameter
+   * 
+   * @param key
+   *          the attribute key (e.g. size)
+   * @param value
+   *          the attribute value (e.g. 80)
    */
   public void setAttribute(String key, String value) {
     if (key == null) {
@@ -140,7 +142,7 @@ public class Param {
   public String getDefaultValueHtml() {
     if (defaultValue != null) {
       if (defaultValue.length() > 20) {
-        return "<strong title=\""+StringEscapeUtils.escapeHtml(defaultValue)+"\">TEXT</strong>";
+        return "<strong title=\"" + StringEscapeUtils.escapeHtml(defaultValue) + "\">TEXT</strong>";
       }
     }
     return StringEscapeUtils.escapeHtml(defaultValue);
@@ -157,7 +159,7 @@ public class Param {
   public List<String> getChoices() {
     return choices;
   }
-  
+
   public Map<String, String> getAttributes() {
     return attributes;
   }
@@ -168,6 +170,10 @@ public class Param {
 
   public boolean isPath() {
     return path;
+  }
+  
+  public void setPath(boolean path) {
+    this.path = path;
   }
 
   /**
@@ -180,7 +186,6 @@ public class Param {
 
   @Override
   public String toString() {
-    return "PAR:"+name + ":(" + type + "):" + defaultValue + ":" + choices;
+    return "PAR:" + name + ":(" + type + "):" + defaultValue + ":" + choices;
   }
 }
-

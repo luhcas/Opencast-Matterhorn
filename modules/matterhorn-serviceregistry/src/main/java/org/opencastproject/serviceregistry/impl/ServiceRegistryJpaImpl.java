@@ -69,7 +69,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * A static list of statuses that influence how load balancing is calculated
    */
-  protected static List<Status> JOB_STATUSES_INFLUINCING_LOAD_BALANCING;
+  protected static final List<Status> JOB_STATUSES_INFLUINCING_LOAD_BALANCING;
 
   static {
     JOB_STATUSES_INFLUINCING_LOAD_BALANCING = new ArrayList<Status>();
@@ -199,7 +199,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       }
       Status status = start ? Status.RUNNING : Status.QUEUED;
       JobJpaImpl job = new JobJpaImpl(status, serviceRegistration);
-      ;
+
       serviceRegistration.jobs.add(job);
       em.persist(job);
       tx.commit();
@@ -685,6 +685,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
           case FINISHED:
             stats.setMeanRunTime(meanRunTime.longValue());
             stats.setMeanQueueTime(meanQueueTime.longValue());
+            break;
+          default:
             break;
           }
         }

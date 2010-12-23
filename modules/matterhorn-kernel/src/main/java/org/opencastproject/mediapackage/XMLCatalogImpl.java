@@ -111,7 +111,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
   protected XMLCatalogImpl() {
     super();
   }
-  
+
   /**
    * Creates an abstract metadata container.
    * 
@@ -614,12 +614,12 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
     private EName name;
 
-    String value = null;
+    private String value = null;
 
     /**
      * The attributes of this element
      */
-    Map<EName, String> attributes = null;
+    private Map<EName, String> attributes = null;
 
     /**
      * Creates a new catalog element representation.
@@ -792,8 +792,8 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
       String namespace = name.getNamespaceName();
       // Do not bind the "xml" namespace. It is bound by default
       if (!XMLConstants.XML_NS_URI.equals(namespace)) {
-        root.setAttribute(XMLConstants.XMLNS_ATTRIBUTE + ":" + bindings.lookupPrefix(name.getNamespaceName()), name
-                .getNamespaceName());
+        root.setAttribute(XMLConstants.XMLNS_ATTRIBUTE + ":" + bindings.lookupPrefix(name.getNamespaceName()),
+                name.getNamespaceName());
       }
     }
   }
@@ -837,7 +837,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
       // Strip trailing slash to make sure lookups are not failing because of this
       if (namespace.endsWith("/"))
         namespace = namespace.substring(0, namespace.length() - 1);
-      
+
       if (!allowRebind) {
         String namespaceCurrent = prefix2Namespace.get(prefix);
         if (namespaceCurrent != null && !namespaceCurrent.equals(namespace)) {
@@ -887,6 +887,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.XMLCatalog#toXml()
    */
   @Override
@@ -894,6 +895,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.XMLCatalog#toXml(java.io.OutputStream, boolean)
    */
   @Override
@@ -913,6 +915,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.XMLCatalog#toXmlString()
    */
   @Override

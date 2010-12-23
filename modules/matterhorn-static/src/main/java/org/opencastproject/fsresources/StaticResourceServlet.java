@@ -40,15 +40,39 @@ import javax.servlet.http.HttpServletResponse;
  * apache httpd or another web server optimized for serving static content.
  */
 public class StaticResourceServlet extends HttpServlet {
+  /** The serialization UID */
   private static final long serialVersionUID = 1L;
-  private static final Logger logger = LoggerFactory.getLogger(StaticResourceServlet.class);
-  private static final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap();
 
+  /** Full range marker. */
+  private static final ArrayList<Range> FULL_RANGE;
+
+  /** The mime types map */
+  private static final MimetypesFileTypeMap MIME_TYPES_MAP;
+
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(StaticResourceServlet.class);
+
+  /** static initializer */
+  static {
+    FULL_RANGE = new ArrayList<Range>();
+    MIME_TYPES_MAP = new MimetypesFileTypeMap();
+  }
+
+  /** The filesystem directory to serve files fro */
   protected String distributionDirectory;
 
+  /**
+   * No-arg constructor
+   */
   public StaticResourceServlet() {
   }
 
+  /**
+   * OSGI Activation callback
+   * 
+   * @param cc
+   *          the component context
+   */
   public void activate(ComponentContext cc) {
     if (cc != null) {
       String ccDistributionDirectory = cc.getBundleContext().getProperty("org.opencastproject.download.directory");
@@ -63,6 +87,9 @@ public class StaticResourceServlet extends HttpServlet {
               + "static";
   }
 
+  /**
+   * OSGI Deactivation callback
+   */
   public void deactivate() {
   }
 
@@ -96,7 +123,7 @@ public class StaticResourceServlet extends HttpServlet {
         return;
       }
       resp.setHeader("ETag", eTag);
-      String contentType = mimeMap.getContentType(f);
+      String contentType = MIME_TYPES_MAP.getContentType(f);
       if (!"application/octet-stream".equals(contentType)) {
         resp.setContentType(contentType);
       }
@@ -106,7 +133,7 @@ public class StaticResourceServlet extends HttpServlet {
       resp.setHeader("Accept-Ranges", "bytes");
       ArrayList<Range> ranges = parseRange(req, resp, eTag, f.lastModified(), f.length());
 
-      if ((((ranges == null) || (ranges.isEmpty())) && (req.getHeader("Range") == null)) || (ranges == FULL)) {
+      if ((((ranges == null) || (ranges.isEmpty())) && (req.getHeader("Range") == null)) || (ranges == FULL_RANGE)) {
         IOException e = copyRange(new FileInputStream(f), resp.getOutputStream(), 0, f.length());
         if (e != null) {
           try {
@@ -213,11 +240,6 @@ public class StaticResourceServlet extends HttpServlet {
   }
 
   /**
-   * Full range marker.
-   */
-  protected static ArrayList<Range> FULL = new ArrayList<Range>();
-
-  /**
    * MIME multipart separation string
    */
   protected static final String mimeSeparation = "MATTERHORN_MIME_BOUNDARY";
@@ -248,13 +270,13 @@ public class StaticResourceServlet extends HttpServlet {
         // If the ETag the client gave does not match the entity
         // etag, then the entire entity is returned.
         if (!eTag.equals(headerValue.trim()))
-          return FULL;
+          return FULL_RANGE;
       } else {
         // If the timestamp of the entity the client got is older than
         // the last modification date of the entity, the entire entity
         // is returned.
         if (lastModified > (headerValueTime + 1000))
-          return FULL;
+          return FULL_RANGE;
       }
     }
 
@@ -350,7 +372,7 @@ public class StaticResourceServlet extends HttpServlet {
     }
     IOException exception = null;
     long bytesToRead = end - start + 1;
-    byte buffer[] = new byte[2048];
+    byte[] buffer = new byte[2048];
     int len = buffer.length;
     while ((bytesToRead > 0) && (len >= buffer.length)) {
       try {
@@ -373,9 +395,9 @@ public class StaticResourceServlet extends HttpServlet {
   }
 
   protected class Range {
-    public long start;
-    public long end;
-    public long length;
+    protected long start;
+    protected long end;
+    protected long length;
 
     /**
      * Validate range.

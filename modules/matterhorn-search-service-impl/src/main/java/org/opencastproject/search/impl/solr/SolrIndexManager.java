@@ -82,7 +82,7 @@ import java.util.TreeSet;
 public class SolrIndexManager {
 
   /** Logging facility */
-  static Logger logger = LoggerFactory.getLogger(SolrIndexManager.class);
+  private static final Logger logger = LoggerFactory.getLogger(SolrIndexManager.class);
 
   /** Connection to the database */
   private SolrServer solrServer = null;
@@ -268,7 +268,7 @@ public class SolrIndexManager {
 
     // Add mpeg7
     logger.debug("Looking for mpeg-7 catalogs containing segment texts");
-    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.TEXTS);
+    Catalog[] mpeg7Catalogs = mediaPackage.getCatalogs(MediaPackageElements.TEXTS);
     if (mpeg7Catalogs.length == 0) {
       logger.debug("No text catalogs found, trying segments only");
       mpeg7Catalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS);
@@ -326,7 +326,7 @@ public class SolrIndexManager {
     }
 
     // If this is the case, try to get a hold on it
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.SERIES);
+    Catalog[] dcCatalogs = mediaPackage.getCatalogs(MediaPackageElements.SERIES);
     DublinCoreCatalog dublinCore = loadDublinCoreCatalog(dcCatalogs[0]);
     String seriesId = dublinCore.getFirst(DublinCore.PROPERTY_IDENTIFIER);
 
@@ -394,7 +394,7 @@ public class SolrIndexManager {
 
     // Add dublin core
     DublinCoreCatalog dc = null;
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(flavor);
+    Catalog[] dcCatalogs = mediaPackage.getCatalogs(flavor);
     if (dcCatalogs != null && dcCatalogs.length > 0) {
       dc = loadDublinCoreCatalog(dcCatalogs[0]);
     } else {
@@ -408,19 +408,19 @@ public class SolrIndexManager {
       throw new IllegalStateException("Found media package without a title");
 
     // dc:title. Use the value from the mediapackage over the dublin core setting if this is an episode
-    solrInput.addField(SolrFields.DC_TITLE, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_TITLE), mediaPackage
-            .getTitle()));
+    solrInput.addField(SolrFields.DC_TITLE,
+            getValue(flavor, dc.getFirst(DublinCore.PROPERTY_TITLE), mediaPackage.getTitle()));
 
     // dc:subject
     if (dc.hasValue(DublinCore.PROPERTY_SUBJECT)) {
-      solrInput.addField(SolrFields.DC_SUBJECT, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_SUBJECT), mediaPackage
-              .getSubjects()));
+      solrInput.addField(SolrFields.DC_SUBJECT,
+              getValue(flavor, dc.getFirst(DublinCore.PROPERTY_SUBJECT), mediaPackage.getSubjects()));
     }
 
     // dc:creator
     if (dc.hasValue(DublinCore.PROPERTY_CREATOR)) {
-      solrInput.addField(SolrFields.DC_CREATOR, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_CREATOR), mediaPackage
-              .getCreators()));
+      solrInput.addField(SolrFields.DC_CREATOR,
+              getValue(flavor, dc.getFirst(DublinCore.PROPERTY_CREATOR), mediaPackage.getCreators()));
     }
 
     // dc:extent
@@ -438,8 +438,8 @@ public class SolrIndexManager {
 
     // dc:contributor
     if (dc.hasValue(DublinCore.PROPERTY_CONTRIBUTOR)) {
-      solrInput.addField(SolrFields.DC_CONTRIBUTOR, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_CONTRIBUTOR),
-              mediaPackage.getContributors()));
+      solrInput.addField(SolrFields.DC_CONTRIBUTOR,
+              getValue(flavor, dc.getFirst(DublinCore.PROPERTY_CONTRIBUTOR), mediaPackage.getContributors()));
     }
 
     // dc:abstract
@@ -473,8 +473,8 @@ public class SolrIndexManager {
 
     // dc:language
     if (dc.hasValue(DublinCore.PROPERTY_LANGUAGE)) {
-      solrInput.addField(SolrFields.DC_LANGUAGE, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_LANGUAGE),
-              mediaPackage.getLanguage()));
+      solrInput.addField(SolrFields.DC_LANGUAGE,
+              getValue(flavor, dc.getFirst(DublinCore.PROPERTY_LANGUAGE), mediaPackage.getLanguage()));
     }
 
     // dc:rightsholder
@@ -509,8 +509,8 @@ public class SolrIndexManager {
 
     // dc:license
     if (dc.hasValue(DublinCore.PROPERTY_LICENSE)) {
-      solrInput.addField(SolrFields.DC_LICENSE, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_LICENSE), mediaPackage
-              .getLicense()));
+      solrInput.addField(SolrFields.DC_LICENSE,
+              getValue(flavor, dc.getFirst(DublinCore.PROPERTY_LICENSE), mediaPackage.getLicense()));
     }
 
     // dc:available
@@ -716,8 +716,7 @@ public class SolrIndexManager {
           // here the importance value is calculated
           // from relevance, confidence and frequency of occurence.
           imp = (RELEVANCE_BOOST * getMaxRelevance(keyword, sortedAnnotations) + getMaxConfidence(keyword,
-                  sortedAnnotations))
-                  * (occ + 1);
+                  sortedAnnotations)) * (occ + 1);
           importance.put(keyword, imp);
         }
       }

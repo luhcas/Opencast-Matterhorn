@@ -25,6 +25,8 @@ import org.opencastproject.feed.api.FeedExtension;
 import org.opencastproject.feed.api.Link;
 import org.opencastproject.feed.api.Person;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -106,11 +108,11 @@ public class FeedEntryImpl implements FeedEntry {
   public FeedEntryImpl(Feed feed, String title, String description, Link link, String uri) {
     if (feed == null)
       throw new IllegalArgumentException("Argument 'feed' must not be null");
-    if (title == null || title.equals(""))
+    if (StringUtils.isEmpty(title))
       throw new IllegalArgumentException("Entry title must not be null");
-    if (link == null || link.equals(""))
+    if (link == null || StringUtils.isEmpty(link.getHref()))
       throw new IllegalArgumentException("Entry link must not be null");
-    if (uri == null || uri.equals(""))
+    if (StringUtils.isEmpty(uri))
       throw new IllegalArgumentException("Entry uri must not be null");
     this.feed = feed;
     this.title = new ContentImpl(title);
@@ -376,9 +378,10 @@ public class FeedEntryImpl implements FeedEntry {
   public Feed getSource() {
     return feed;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#toString()
    */
   @Override

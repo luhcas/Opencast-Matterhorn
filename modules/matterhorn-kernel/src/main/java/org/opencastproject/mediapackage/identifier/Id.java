@@ -39,14 +39,17 @@ public interface Id {
 
   static class Adapter extends XmlAdapter<IdImpl, Id> {
     public IdImpl marshal(Id id) throws Exception {
-      if(id instanceof IdImpl) {
-        return (IdImpl)id;
-      } else if(id instanceof HandleImpl) {
-        return (HandleImpl)id;
+      if (id instanceof IdImpl) {
+        return (IdImpl) id;
+      } else if (id instanceof HandleImpl) {
+        return (HandleImpl) id;
       } else {
         throw new IllegalStateException("an unknown ID is un use: " + id);
       }
     }
-    public Id unmarshal(IdImpl id) throws Exception {return id;}
+
+    public Id unmarshal(IdImpl id) throws Exception {
+      return id;
+    }
   }
 }

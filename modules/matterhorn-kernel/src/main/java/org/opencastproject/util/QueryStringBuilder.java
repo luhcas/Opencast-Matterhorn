@@ -19,7 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
- * Support for building a querystring.  Not threadsafe.
+ * Support for building a querystring. Not threadsafe.
  */
 public class QueryStringBuilder {
 
@@ -37,8 +37,8 @@ public class QueryStringBuilder {
   }
 
   /**
-   * Add a key/value pair to the querystring. This method may be called multiple times for a given key, and each\
-   * value will be added to the querystring.
+   * Add a key/value pair to the querystring. This method may be called multiple times for a given key, and each\ value
+   * will be added to the querystring.
    * 
    * @param key
    *          the parameter key

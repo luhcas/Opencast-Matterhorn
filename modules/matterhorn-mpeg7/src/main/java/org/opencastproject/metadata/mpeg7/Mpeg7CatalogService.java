@@ -37,17 +37,20 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#accepts(org.opencastproject.mediapackage.Catalog)
    */
   @Override
   public boolean accepts(Catalog catalog) {
-    if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
+    if (catalog == null)
+      throw new IllegalArgumentException("Catalog must not be null");
     MediaPackageElementFlavor flavor = catalog.getFlavor();
     return flavor != null && (flavor.equals(Mpeg7Catalog.ANY_MPEG7));
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#serialize(org.opencastproject.metadata.api.MetadataCatalog)
    */
   @Override
@@ -62,7 +65,7 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
       throw new IOException(e);
     }
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -70,7 +73,8 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
    */
   @Override
   public Mpeg7Catalog load(InputStream in) throws IOException {
-    if(in == null) throw new IllegalArgumentException("Stream must not be null");
+    if (in == null)
+      throw new IllegalArgumentException("Stream must not be null");
     return new Mpeg7CatalogImpl(in);
   }
 

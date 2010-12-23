@@ -105,7 +105,7 @@ public class JobJpaImpl extends JaxbJob {
   }
 
   /** The service that produced this job */
-  ServiceRegistrationJpaImpl serviceRegistration;
+  protected ServiceRegistrationJpaImpl serviceRegistration;
 
   /**
    * {@inheritDoc}

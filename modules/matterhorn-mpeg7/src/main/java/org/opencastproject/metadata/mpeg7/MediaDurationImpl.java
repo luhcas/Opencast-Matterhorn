@@ -280,24 +280,26 @@ public class MediaDurationImpl implements MediaDuration {
       s += (fractions * 1000L / fractionsPerSecond);
     return s;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
   public int hashCode() {
     return super.hashCode();
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof MediaDuration)
-      return ((MediaDuration)obj).getDurationInMilliseconds() == getDurationInMilliseconds(); 
+      return ((MediaDuration) obj).getDurationInMilliseconds() == getDurationInMilliseconds();
     return false;
   }
 

@@ -205,12 +205,14 @@ public class AudioVisualElementSelector extends AbstractMediaPackageElementSelec
         foundVideo |= t.hasVideo();
         result.add(t);
       } else {
-        if (audioFlavor != null && t.hasAudio() && audioFlavor.matches(t.getFlavor()) && !(videoFlavor == null && t.hasVideo())) {
+        if (audioFlavor != null && t.hasAudio() && audioFlavor.matches(t.getFlavor())
+                && !(videoFlavor == null && t.hasVideo())) {
           foundAudio = true;
           audioTrack = t;
           result.add(t);
         }
-        if (videoFlavor != null && t.hasVideo() && videoFlavor.matches(t.getFlavor()) && !(audioFlavor == null && t.hasAudio())) {
+        if (videoFlavor != null && t.hasVideo() && videoFlavor.matches(t.getFlavor())
+                && !(audioFlavor == null && t.hasAudio())) {
           foundVideo = true;
           videoTrack = t;
           result.add(t);

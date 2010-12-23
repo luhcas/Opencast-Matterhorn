@@ -29,7 +29,7 @@ public interface MediaPackageSerializer {
    *          the url to encode
    * @return the encoded path
    */
-  public String encodeURI(URI uri);
+  String encodeURI(URI uri);
 
   /**
    * This method is called every time a url is being read from a media package manifest. By implementing this method,
@@ -42,6 +42,6 @@ public interface MediaPackageSerializer {
    * @throws URISyntaxException
    *           if the path cannot be converted into a url
    */
-  public URI resolvePath(String path) throws URISyntaxException;
+  URI resolvePath(String path) throws URISyntaxException;
 
 }

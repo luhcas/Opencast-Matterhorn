@@ -29,7 +29,7 @@ import java.nio.channels.FileChannel;
 /**
  * Utility class, dealing with files.
  */
-public class FileSupport {
+public final class FileSupport {
 
   /** Only files will be deleted, the directory structure remains untouched. */
   public static final int DELETE_FILES = 0;
@@ -41,13 +41,17 @@ public class FileSupport {
   public static final int DELETE_CONTENT = 2;
 
   /** Name of the java environment variable for the temp directory */
-  private static String IO_TMPDIR = "java.io.tmpdir";
+  private static final String IO_TMPDIR = "java.io.tmpdir";
 
   /** Work directory */
   private static File tmpDir = null;
 
   /** Logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(FileSupport.class);
+  private static final Logger logger = LoggerFactory.getLogger(FileSupport.class);
+
+  /** Disable construction of this utility class */
+  private FileSupport() {
+  }
 
   /**
    * Moves the specified file or directory from <code>sourceLocation</code> to <code>targetDirectory</code>. If
@@ -560,7 +564,7 @@ public class FileSupport {
    */
   public static boolean delete(File dir, int mode) {
     if (dir.isDirectory()) {
-      boolean ok = _delete(dir.listFiles(), mode != DELETE_FILES);
+      boolean ok = delete(dir.listFiles(), mode != DELETE_FILES);
       if (mode == DELETE_ROOT) {
         ok &= dir.delete();
       }
@@ -574,11 +578,11 @@ public class FileSupport {
    * Deletes the content of directory <code>dir</code> and, if specified, the directory itself. If <code>dir</code> is a
    * normal file it will be deleted always.
    */
-  private static boolean _delete(File[] files, boolean deleteDir) {
+  private static boolean delete(File[] files, boolean deleteDir) {
     boolean ok = true;
     for (File f : files) {
       if (f.isDirectory()) {
-        _delete(f.listFiles(), deleteDir);
+        delete(f.listFiles(), deleteDir);
         if (deleteDir) {
           ok &= f.delete();
         }

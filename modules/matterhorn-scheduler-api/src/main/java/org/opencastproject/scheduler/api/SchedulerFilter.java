@@ -148,8 +148,8 @@ public class SchedulerFilter {
   public SchedulerFilter withOrder(String order) {
     return withOrderAscending(order, true);
   }
-  
-    /**
+
+  /**
    * Sets the attribute by which the results should be ordered and in what direction.
    * 
    * @param order
@@ -171,7 +171,7 @@ public class SchedulerFilter {
   public String getOrder() {
     return order;
   }
-  
+
   public boolean isOrderAscending() {
     return isAscending;
   }

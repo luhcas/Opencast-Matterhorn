@@ -59,283 +59,335 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * An Event has a unique ID, a relation to the recurring event from which it was created and a set of metadata. Even the
- * start- and end-time is stored in the set of metadata, with the keys "timeStart" and "timeEnd" as long value
- * converted to string. Resources and Attendees are store in the metadata too, as
+ * start- and end-time is stored in the set of metadata, with the keys "timeStart" and "timeEnd" as long value converted
+ * to string. Resources and Attendees are store in the metadata too, as
  */
 
-@NamedQueries( { @NamedQuery(name = "Event.getAll", query = "SELECT e FROM Event e") })
+@NamedQueries({ @NamedQuery(name = "Event.getAll", query = "SELECT e FROM Event e") })
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.NONE)
 @Entity(name = "Event")
 @Access(AccessType.FIELD)
 @Table(name = "SCHED_EVENT")
 public class EventImpl implements Event {
-  
-  @XmlAttribute(name="id")
+
+  @XmlAttribute(name = "id")
   @Id
   @GeneratedValue
   @Column(name = "EVENT_ID", length = 36)
   protected Long eventId;
-  
-  @XmlElement(name="contributor")
+
+  @XmlElement(name = "contributor")
   protected String contributor;
-  @XmlElement(name="creator")
+  @XmlElement(name = "creator")
   protected String creator;
-  @XmlElement(name="description")
+  @XmlElement(name = "description")
   @Lob
   @Column
   protected String description;
-  @XmlElement(name="device")
+  @XmlElement(name = "device")
   protected String device;
-  @XmlElement(name="duration")
+  @XmlElement(name = "duration")
   protected long duration;
-  @XmlElement(name="endDate")
-  @XmlJavaTypeAdapter(value=DateAdapter.class, type=Date.class)
+  @XmlElement(name = "endDate")
+  @XmlJavaTypeAdapter(value = DateAdapter.class, type = Date.class)
   @Temporal(TemporalType.TIMESTAMP)
-  protected Date   endDate;
-  @XmlElement(name="language")
+  protected Date endDate;
+  @XmlElement(name = "language")
   protected String language;
-  @XmlElement(name="license")
+  @XmlElement(name = "license")
   protected String license;
-  @XmlElement(name="recurrence")
+  @XmlElement(name = "recurrence")
   protected String recurrence;
-  @XmlElement(name="recurrencePattern")
+  @XmlElement(name = "recurrencePattern")
   protected String recurrencePattern;
-  @XmlElement(name="resources")
+  @XmlElement(name = "resources")
   protected String resources;
-  @XmlElement(name="series")
+  @XmlElement(name = "series")
   protected String series;
-  @XmlElement(name="seriesId")
+  @XmlElement(name = "seriesId")
   protected String seriesId;
-  @XmlElement(name="startDate")
-  @XmlJavaTypeAdapter(value=DateAdapter.class, type=Date.class)
+  @XmlElement(name = "startDate")
+  @XmlJavaTypeAdapter(value = DateAdapter.class, type = Date.class)
   @Temporal(TemporalType.TIMESTAMP)
-  protected Date   startDate;
-  @XmlElement(name="subject")
+  protected Date startDate;
+  @XmlElement(name = "subject")
   protected String subject;
-  @XmlElement(name="title")
+  @XmlElement(name = "title")
   protected String title;
-  
+
   // FIXME: Do we really need a join table here? How about a composite key (event id + metadata key) in the metadata
   // table?
   @XmlElementWrapper(name = "additionalMetadata")
   @XmlElement(name = "metadata")
   @OneToMany(fetch = FetchType.EAGER, targetEntity = MetadataImpl.class, cascade = CascadeType.ALL, mappedBy = "event")
   protected List<MetadataImpl> additionalMetadata = new LinkedList<MetadataImpl>();
-  
-  public EventImpl() {}
-  
+
+  public EventImpl() {
+  }
+
   private static final Logger logger = LoggerFactory.getLogger(Event.class);
-  
+
   /**
    * @return Event contributor
    */
   public String getContributor() {
     return contributor;
   }
+
   /**
-   * @param Event contributor
+   * @param Event
+   *          contributor
    */
-  public void setContributor(String contributor){
+  public void setContributor(String contributor) {
     this.contributor = contributor;
   }
+
   /**
    * @return Event creator
    */
-  public String getCreator(){
+  public String getCreator() {
     return creator;
   }
+
   /**
-   * @param Event creator
+   * @param Event
+   *          creator
    */
-  public void setCreator(String creator){
+  public void setCreator(String creator) {
     this.creator = creator;
   }
+
   /**
    * @return Event description
    */
-  public String getDescription(){
+  public String getDescription() {
     return description;
   }
+
   /**
-   * @param Event description
+   * @param Event
+   *          description
    */
-  public void setDescription(String description){
+  public void setDescription(String description) {
     this.description = description;
   }
+
   /**
    * @return Event capture device name
    */
-  public String getDevice(){
+  public String getDevice() {
     return device;
   }
+
   /**
-   * @param Event capture device name
+   * @param Event
+   *          capture device name
    */
-  public void setDevice(String device){
+  public void setDevice(String device) {
     this.device = device;
   }
+
   /**
    * @return Event duration
    */
-  public Long getDuration(){
-    if(duration == 0 && endDate != null && startDate != null){
+  public Long getDuration() {
+    if (duration == 0 && endDate != null && startDate != null) {
       duration = endDate.getTime() - startDate.getTime();
     }
     return duration;
   }
+
   /**
-   * @param Event duration
+   * @param Event
+   *          duration
    */
-  public void setDuration(long duration){
+  public void setDuration(long duration) {
     this.duration = duration;
   }
+
   /**
    * @return Event end date
    */
-  public Date getEndDate(){
+  public Date getEndDate() {
     return endDate;
   }
+
   /**
-   * @param Event end date
+   * @param Event
+   *          end date
    */
-  public void setEndDate(Date endDate){
+  public void setEndDate(Date endDate) {
     this.endDate = endDate;
   }
+
   /**
    * @return Event id
    */
-  public Long getEventId(){
+  public Long getEventId() {
     return eventId;
   }
+
   /**
    * @param eventId
    */
-  public void setEventId(Long eventId){
+  public void setEventId(Long eventId) {
     this.eventId = eventId;
   }
+
   /**
    * @return Event langauge
    */
-  public String getLanguage(){
+  public String getLanguage() {
     return language;
   }
+
   /**
-   * @param Event languge
+   * @param Event
+   *          languge
    */
-  public void setLanguage(String language){
+  public void setLanguage(String language) {
     this.language = language;
   }
+
   /**
    * @return Event license
    */
-  public String getLicense(){
+  public String getLicense() {
     return license;
   }
+
   /**
-   * @param Event license
+   * @param Event
+   *          license
    */
-  public void setLicense(String license){
+  public void setLicense(String license) {
     this.license = license;
   }
+
   /**
    * @return Event recurrence name
    */
-  public String getRecurrence(){
+  public String getRecurrence() {
     return recurrence;
   }
+
   /**
-   * @param Event recurrence name
+   * @param Event
+   *          recurrence name
    */
-  public void setRecurrence(String recurrence){
+  public void setRecurrence(String recurrence) {
     this.recurrence = recurrence;
   }
+
   /**
    * @return Event recurrence pattern
    */
-  public String getRecurrencePattern(){
+  public String getRecurrencePattern() {
     return recurrencePattern;
   }
+
   /**
-   * @param Event recurrence pattern
+   * @param Event
+   *          recurrence pattern
    */
-  public void setRecurrencePattern(String recurrence){
+  public void setRecurrencePattern(String recurrence) {
     this.recurrencePattern = recurrence;
   }
+
   /**
    * @return Capture agent resources
    */
-  public String getResources(){
+  public String getResources() {
     return resources;
   }
+
   /**
-   * @param Capture agent resources
+   * @param Capture
+   *          agent resources
    */
-  public void setResources(String resources){
+  public void setResources(String resources) {
     this.resources = resources;
   }
+
   /**
    * @return Event series name
    */
-  public String getSeries(){
+  public String getSeries() {
     return series;
   }
+
   /**
-   * @param Event series name
+   * @param Event
+   *          series name
    */
-  public void setSeries(String series){
+  public void setSeries(String series) {
     this.series = series;
   }
+
   /**
    * @return Event series id
    */
-  public String getSeriesId(){
+  public String getSeriesId() {
     return seriesId;
   }
+
   /**
-   * @param Event series id
+   * @param Event
+   *          series id
    */
-  public void setSeriesId(String seriesId){
+  public void setSeriesId(String seriesId) {
     this.seriesId = seriesId;
   }
+
   /**
    * @return Event start date
    */
-  public Date getStartDate(){
+  public Date getStartDate() {
     return startDate;
   }
+
   /**
-   * @param Event start date
+   * @param Event
+   *          start date
    */
-  public void setStartDate(Date startDate){
+  public void setStartDate(Date startDate) {
     this.startDate = startDate;
   }
+
   /**
    * @return String Event subject
    */
-  public String getSubject(){
+  public String getSubject() {
     return subject;
   }
+
   /**
-   * @param Event subject
+   * @param Event
+   *          subject
    */
-  public void setSubject(String subject){
+  public void setSubject(String subject) {
     this.subject = subject;
   }
+
   /**
    * @return String Event title
    */
-  public String getTitle(){
+  public String getTitle() {
     return title;
   }
+
   /**
-   * @param Event title
+   * @param Event
+   *          title
    */
-  public void setTitle(String title){
+  public void setTitle(String title) {
     this.title = title;
   }
+
   /**
    * 
    * {@inheritDoc}
@@ -347,9 +399,10 @@ public class EventImpl implements Event {
     if (found != null) {
       found.setValue(data.getValue());
     } else {
-      additionalMetadata.add((MetadataImpl)data);
+      additionalMetadata.add((MetadataImpl) data);
     }
   }
+
   /**
    * 
    * {@inheritDoc}
@@ -361,6 +414,7 @@ public class EventImpl implements Event {
     events.addAll(additionalMetadata);
     return events;
   }
+
   /**
    * 
    * {@inheritDoc}
@@ -368,14 +422,15 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#setMetadata()
    */
   public void setMetadataList(List<Metadata> metadata) {
-    if(!additionalMetadata.isEmpty()) {
+    if (!additionalMetadata.isEmpty()) {
       additionalMetadata.clear();
     }
-    for(Metadata m : metadata){
+    for (Metadata m : metadata) {
       m.setEvent(this);
-      this.additionalMetadata.add((MetadataImpl)m);
+      this.additionalMetadata.add((MetadataImpl) m);
     }
   }
+
   /**
    * 
    * {@inheritDoc}
@@ -384,11 +439,12 @@ public class EventImpl implements Event {
    */
   public String getMetadataValueByKey(String key) {
     Metadata m = this.findMetadata(key);
-    if(m != null) {
+    if (m != null) {
       return m.getValue();
     }
     return null;
   }
+
   /**
    * 
    * {@inheritDoc}
@@ -396,9 +452,10 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#getKeySet()
    */
   public Set<String> getKeySet() {
-    //TODO
+    // TODO
     return null;
   }
+
   /**
    * 
    * {@inheritDoc}
@@ -406,14 +463,14 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#containsKey()
    */
   public boolean containsKey(String key) {
-    for(Metadata m : additionalMetadata){
-      if(m.getKey().equals(key)){
+    for (Metadata m : additionalMetadata) {
+      if (m.getKey().equals(key)) {
         return true;
       }
     }
     return false;
   }
-  
+
   /**
    * 
    * {@inheritDoc}
@@ -422,13 +479,13 @@ public class EventImpl implements Event {
    */
   public Metadata findMetadata(String key) {
     for (Metadata m : additionalMetadata) {
-      if (m.getKey().equals(key)){
+      if (m.getKey().equals(key)) {
         return m;
       }
     }
     return null;
   }
-  
+
   /**
    * 
    * {@inheritDoc}
@@ -436,19 +493,19 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#update()
    */
   public void update(Event e) {
-    if(e.getEventId() != null){
+    if (e.getEventId() != null) {
       this.setEventId(e.getEventId());
     }
     this.setCreator(e.getCreator());
     this.setContributor(e.getContributor());
     this.setDescription(e.getDescription());
-    if(e.getDevice() != null){
+    if (e.getDevice() != null) {
       this.setDevice(e.getDevice());
     }
-    if(e.getDuration() != null){
+    if (e.getDuration() != null) {
       this.setDuration(e.getDuration());
     }
-    if(e.getEndDate() != null){
+    if (e.getEndDate() != null) {
       this.setEndDate(e.getEndDate());
     }
     this.setLanguage(e.getLanguage());
@@ -457,7 +514,7 @@ public class EventImpl implements Event {
     this.setRecurrencePattern(e.getRecurrencePattern());
     this.setResources(e.getResources());
     this.setSeries(e.getSeries());
-    if(e.getStartDate() != null) {
+    if (e.getStartDate() != null) {
       this.setStartDate(e.getStartDate());
     }
     this.setSubject(e.getSubject());
@@ -478,11 +535,11 @@ public class EventImpl implements Event {
       }
     }
   }
-  
+
   public String toString() {
     return "Event {" + this.eventId + "}";
   }
-  
+
   /**
    * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
    * 
@@ -493,11 +550,10 @@ public class EventImpl implements Event {
   public static EventImpl valueOf(String xmlString) throws Exception {
     return SchedulerBuilder.getInstance().parseEvent(xmlString);
   }
-  
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -510,7 +566,7 @@ public class EventImpl implements Event {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -536,25 +592,25 @@ public class EventImpl implements Event {
    * 
    * @see org.opencastproject.scheduler.api.Event#addMetadata()
    */
-  public void addMetadata(Metadata m){
+  public void addMetadata(Metadata m) {
     m.setEvent(this);
-    this.additionalMetadata.add((MetadataImpl)m);
+    this.additionalMetadata.add((MetadataImpl) m);
   }
-  
+
   /**
    * 
    * {@inheritDoc}
    * 
    * @see org.opencastproject.scheduler.api.Event#removeMetadata()
    */
-  public void removeMetadata(Metadata m){
+  public void removeMetadata(Metadata m) {
     this.additionalMetadata.remove(m);
   }
-  
+
   public String generateId() {
     return UUID.randomUUID().toString();
   }
-  
+
   public void initializeFromEvent(Event e) {
     this.setCreator(e.getCreator());
     this.setContributor(e.getContributor());
@@ -573,9 +629,9 @@ public class EventImpl implements Event {
     this.setTitle(e.getTitle());
     this.setMetadataList(e.getMetadataList());
   }
-  
+
   public List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException {
-    if(getRecurrencePattern() == null || getRecurrencePattern().isEmpty()){
+    if (getRecurrencePattern() == null || getRecurrencePattern().isEmpty()) {
       throw new IncompleteDataException("Event has no recurrence pattern.");
     }
     Recur recur = new RRule(getRecurrencePattern()).getRecur();
@@ -597,34 +653,34 @@ public class EventImpl implements Event {
     int i = 1;
     for (Object date : dates) {
       Date d = (Date) date;
-      //Adjust for DST, if start of event 
-      //Create timezone based on CA's reported TZ.
+      // Adjust for DST, if start of event
+      // Create timezone based on CA's reported TZ.
       TimeZone tz = null;
-      if(!this.getMetadataValueByKey("agentTimeZone").isEmpty()){
+      if (!this.getMetadataValueByKey("agentTimeZone").isEmpty()) {
         tz = TimeZone.getTimeZone(this.getMetadataValueByKey("agentTimeZone"));
       }
-      if(tz == null){ //No timezone was present, assume the serve's local timezone.
+      if (tz == null) { // No timezone was present, assume the serve's local timezone.
         tz = TimeZone.getDefault();
       }
-      if(tz.inDaylightTime(seed)){ //Event starts in DST
-        if(!tz.inDaylightTime(d)){//Date not in DST?
-          d.setTime(d.getTime() + tz.getDSTSavings()); //Ajust for Fall back one hour
+      if (tz.inDaylightTime(seed)) { // Event starts in DST
+        if (!tz.inDaylightTime(d)) {// Date not in DST?
+          d.setTime(d.getTime() + tz.getDSTSavings()); // Ajust for Fall back one hour
         }
-      }else{ //Event doesn't start in DST
-        if(tz.inDaylightTime(d)){
-          d.setTime(d.getTime() - tz.getDSTSavings()); //Adjust for Spring forward one hour
+      } else { // Event doesn't start in DST
+        if (tz.inDaylightTime(d)) {
+          d.setTime(d.getTime() - tz.getDSTSavings()); // Adjust for Spring forward one hour
         }
       }
       Event event = new EventImpl();
-      event.initializeFromEvent((Event)this);
+      event.initializeFromEvent((Event) this);
       event.setSeriesId(this.getSeriesId());
       event.setTitle(getTitle() + " " + i);
       event.setStartDate(d);
       event.setEndDate(new Date(d.getTime() + getDuration()));
-      events.add((Event)event);
+      events.add((Event) event);
       i++;
     }
     return events;
   }
-  
+
 }

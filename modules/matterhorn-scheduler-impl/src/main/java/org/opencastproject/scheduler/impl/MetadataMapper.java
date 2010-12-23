@@ -86,21 +86,21 @@ public class MetadataMapper {
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
       if (key != null && mappingAvailable(key) && metadataSet.get(key) != null) {
-        logger.debug("Mapping {} on {} value: {}", new Object [] {key, resolveKey(key), metadataSet.get(key)} );
+        logger.debug("Mapping {} on {} value: {}", new Object[] { key, resolveKey(key), metadataSet.get(key) });
         updatedMetadata.put(resolveKey(key), metadataSet.get(key));
       }
     }
 
     return updatedMetadata;
   }
-  
-  public Hashtable<String, String> convert (List<Metadata> list) {
+
+  public Hashtable<String, String> convert(List<Metadata> list) {
     Hashtable<String, String> updatedMetadata = new Hashtable<String, String>();
     for (Metadata m : list) {
-     if (m.getKey() != null && mappingAvailable(m.getKey()) && m.getValue() != null) {
-       logger.debug("Mapping {} on {} value: {}", new Object[] {m.getKey(), resolveKey(m.getKey()), m.getValue()});
-       updatedMetadata.put(resolveKey(m.getKey()), m.getValue());
-     }
+      if (m.getKey() != null && mappingAvailable(m.getKey()) && m.getValue() != null) {
+        logger.debug("Mapping {} on {} value: {}", new Object[] { m.getKey(), resolveKey(m.getKey()), m.getValue() });
+        updatedMetadata.put(resolveKey(m.getKey()), m.getValue());
+      }
     }
     return updatedMetadata;
   }

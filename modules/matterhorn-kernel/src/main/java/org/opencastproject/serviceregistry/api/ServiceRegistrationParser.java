@@ -31,9 +31,12 @@ import org.apache.commons.io.IOUtils;
 /**
  * Marshals and unmarshals {@link ServiceRegistration}s.
  */
-public class ServiceRegistrationParser {
+public final class ServiceRegistrationParser {
+
+  /** The jaxb context to use when creating marshallers and unmarshallers */
   private static final JAXBContext jaxbContext;
 
+  /** Static initializer to setup the jaxb context */
   static {
     try {
       jaxbContext = JAXBContext.newInstance("org.opencastproject.serviceregistry.api",
@@ -41,6 +44,10 @@ public class ServiceRegistrationParser {
     } catch (JAXBException e) {
       throw new IllegalStateException(e);
     }
+  }
+
+  /** Disallow construction of this utility class */
+  private ServiceRegistrationParser() {
   }
 
   /**
@@ -105,7 +112,7 @@ public class ServiceRegistrationParser {
       throw new IOException(e);
     }
   }
-  
+
   public static JaxbServiceStatisticsList parseStatistics(InputStream in) throws IOException {
     Unmarshaller unmarshaller;
     try {

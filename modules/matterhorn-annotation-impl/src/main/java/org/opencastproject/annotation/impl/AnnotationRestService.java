@@ -219,7 +219,7 @@ public class AnnotationRestService {
     // add
     RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.PUT, "/", "Add an annotation on an episode");
     addEndpoint.addFormat(new Format("XML", null, null));
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("The URL to this annotation is returned in the "
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.created("The URL to this annotation is returned in the "
             + "Location header, and the annotation itelf is returned in the response body."));
     addEndpoint.addRequiredParam(new Param("episode", Type.STRING, null, "The ID of the episode"));
     addEndpoint.addRequiredParam(new Param("in", Type.STRING, null, "The time, or inpoint, of the annotation"));
@@ -234,7 +234,7 @@ public class AnnotationRestService {
             "Get annotations by key and day");
     annotationEndpoint.addFormat(new Format("XML", null, null));
     annotationEndpoint.addFormat(new Format("JSON", null, null));
-    annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotations, expressed as xml or json"));
+    annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The annotations, expressed as xml or json"));
     annotationEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
     annotationEndpoint.addOptionalParam(new Param("type", Type.STRING, null, "The type of annotation"));
     annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));

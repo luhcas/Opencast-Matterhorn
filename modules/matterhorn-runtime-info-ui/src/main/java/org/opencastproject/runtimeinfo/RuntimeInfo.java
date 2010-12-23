@@ -155,7 +155,7 @@ public class RuntimeInfo {
     RestEndpoint servicesEndpoint = new RestEndpoint("services", RestEndpoint.Method.GET, "/components.json", "List "
             + "the REST services and user interfaces running on this host");
     servicesEndpoint.addFormat(new Format("JSON", null, null));
-    servicesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The components running on this host"));
+    servicesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The components running on this host"));
     servicesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, servicesEndpoint);
 
@@ -163,7 +163,7 @@ public class RuntimeInfo {
     RestEndpoint meEndpoint = new RestEndpoint("me", RestEndpoint.Method.GET, "/me.json",
             "Information about the curent user");
     meEndpoint.addFormat(new Format("JSON", null, null));
-    meEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns information about the current user"));
+    meEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns information about the current user"));
     meEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, meEndpoint);
 

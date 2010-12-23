@@ -63,7 +63,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
   /** The default feed encoding */
   public static final String ENCODING = "UTF-8";
-  
+
   /** Default rss media type */
   public static final String PROP_RSS_MEDIA_TYPE_DEFAULT = "*";
 
@@ -107,7 +107,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   protected String description = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(AbstractFeedGenerator.class);
+  private static final Logger logger = LoggerFactory.getLogger(AbstractFeedGenerator.class);
 
   /**
    * Creates a new abstract feed generator.
@@ -253,7 +253,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    *          the starting entry
    * @return the feed data
    */
-  protected abstract SearchResult loadFeedData(Feed.Type type, String query[], int limit, int offset);
+  protected abstract SearchResult loadFeedData(Feed.Type type, String[] query, int limit, int offset);
 
   /**
    * Creates a new feed.
@@ -764,13 +764,13 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     Set<String> tags = new HashSet<String>();
 
     switch (feed.getType()) {
-    case RSS:
-      flavors.addAll(rssTrackFlavors);
-      tags.addAll(rssTags);
-      break;
     case Atom:
       flavors.addAll(atomTrackFlavors);
       tags.addAll(atomTags);
+      break;
+    default:
+      flavors.addAll(rssTrackFlavors);
+      tags.addAll(rssTags);
       break;
     }
 
@@ -781,7 +781,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
         if (feed.getType().equals(Feed.Type.RSS)) {
           for (String mediaType : rssMediaTypes) {
             for (MediaPackageElement element : elements) {
-              if(mediaType.equals(PROP_RSS_MEDIA_TYPE_DEFAULT)) {
+              if (mediaType.equals(PROP_RSS_MEDIA_TYPE_DEFAULT)) {
                 if (element.containsTag(tags)) {
                   candidateElements.add(element);
                   break selectElements;
@@ -790,14 +790,14 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
               if (!(element instanceof Track)) {
                 continue;
               }
-              Track track = (Track)element;
-              if (mediaType.equals("video") && track.hasVideo()) {
+              Track track = (Track) element;
+              if ("video".equals(mediaType) && track.hasVideo()) {
                 if (element.containsTag(tags)) {
                   candidateElements.add(element);
                   break selectElements;
                 }
               }
-              if (mediaType.equals("audio") && track.hasAudio() && track.hasVideo()) {
+              if ("audio".equals(mediaType) && track.hasAudio() && track.hasVideo()) {
                 if (element.containsTag(tags)) {
                   candidateElements.add(element);
                   break selectElements;

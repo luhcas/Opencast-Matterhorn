@@ -19,12 +19,11 @@ package org.opencastproject.mediapackage.identifier;
 import org.opencastproject.util.ConfigurationException;
 
 /**
- * This class is used to create instances of an id builder. To specify your own
- * implementation of the id builder, you simply have to provide the class name
- * of the desired implementation by setting the system property
+ * This class is used to create instances of an id builder. To specify your own implementation of the id builder, you
+ * simply have to provide the class name of the desired implementation by setting the system property
  * <code>opencast.idbuilder</code> accordingly.
  */
-public class IdBuilderFactory {
+public final class IdBuilderFactory {
 
   /** Class name for the default id builder */
   private static final String BUILDER_CLASS = "org.opencastproject.mediapackage.identifier.UUIDIdBuilderImpl";
@@ -65,11 +64,10 @@ public class IdBuilderFactory {
   /**
    * Factory method that returns an instance of an id builder.
    * <p>
-   * It uses the following ordered lookup procedure to determine which
-   * implementation of the {@link IdBuilder} interface to use:
+   * It uses the following ordered lookup procedure to determine which implementation of the {@link IdBuilder} interface
+   * to use:
    * <ul>
-   * <li>Implementation specified using the <code>opencast.idbuilder</code>
-   * system property</li>
+   * <li>Implementation specified using the <code>opencast.idbuilder</code> system property</li>
    * <li>Platform default implementation</li>
    * </ul>
    * 
@@ -83,15 +81,11 @@ public class IdBuilderFactory {
         Class<?> builderClass = Class.forName(builderClassName);
         builder = (IdBuilder) builderClass.newInstance();
       } catch (ClassNotFoundException e) {
-        throw new ConfigurationException(
-            "Class not found while creating id builder: " + e.getMessage(), e);
+        throw new ConfigurationException("Class not found while creating id builder: " + e.getMessage(), e);
       } catch (InstantiationException e) {
-        throw new ConfigurationException(
-            "Instantiation exception while creating id builder: "
-                + e.getMessage(), e);
+        throw new ConfigurationException("Instantiation exception while creating id builder: " + e.getMessage(), e);
       } catch (IllegalAccessException e) {
-        throw new ConfigurationException(
-            "Access exception while creating id builder: " + e.getMessage(), e);
+        throw new ConfigurationException("Access exception while creating id builder: " + e.getMessage(), e);
       }
     }
     return builder;

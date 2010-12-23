@@ -42,10 +42,10 @@ public class TemporalDecompositionImpl<T extends Segment> implements TemporalDec
   protected List<T> segments = null;
 
   /** Indicator for the presence of gaps in between segments */
-  boolean hasGap = false;
+  protected boolean hasGap = false;
 
   /** Indicator for the presence of overlapping segments */
-  boolean isOverlapping = false;
+  protected boolean isOverlapping = false;
 
   /** The segment type */
   private Segment.Type segmentType = null;

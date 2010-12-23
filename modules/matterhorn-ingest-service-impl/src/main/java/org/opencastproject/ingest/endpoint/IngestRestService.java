@@ -746,8 +746,8 @@ public class IngestRestService {
     RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET, "/createMediaPackage",
             "Create an empty media package");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -756,8 +756,8 @@ public class IngestRestService {
             "Get un updated workflow instance");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addPathParam(new Param("id", Param.Type.STRING, null, "The ID of the given workflow instance"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns workflow instance"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns workflow instance"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -768,8 +768,8 @@ public class IngestRestService {
     endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null, "The location of the media"));
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -780,9 +780,9 @@ public class IngestRestService {
     endpoint.addBodyParam(true, null, "The media track file");
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media track"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -793,8 +793,8 @@ public class IngestRestService {
     endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null, "The location of the catalog"));
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of catalog"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -805,9 +805,9 @@ public class IngestRestService {
     endpoint.addBodyParam(true, null, "The metadata catalog file");
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media catalog"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -818,8 +818,8 @@ public class IngestRestService {
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
     endpoint.addRequiredParam(new Param("dublinCore", Param.Type.STRING, null, "DublinCore catalog as XML"));
     endpoint.addOptionalParam(new Param("flavor", Param.Type.STRING, "dublincore/episode", "DublinCore Flavor"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -830,9 +830,9 @@ public class IngestRestService {
     endpoint.addBodyParam(true, null, "The attachment file");
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of attachment"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -843,8 +843,8 @@ public class IngestRestService {
     endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null, "The location of the attachment"));
     endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of attachment"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -853,8 +853,8 @@ public class IngestRestService {
             "Ingest the completed media package into the system, retrieving all URL-referenced files");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The ID of the given media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -867,8 +867,8 @@ public class IngestRestService {
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addPathParam(new Param("wdID", Param.Type.STRING, null, "Workflow definition id"));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The ID of the given media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -877,8 +877,8 @@ public class IngestRestService {
             "Discard a media package");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "Given media package to be destroyed"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -916,9 +916,9 @@ public class IngestRestService {
     endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null, "Metadata value"));
     endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null, "Metadata value"));
     endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -956,9 +956,9 @@ public class IngestRestService {
     endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null, "Metadata value"));
     endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null, "Metadata value"));
     endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.addPathParam(new Param("wdID", Param.Type.STRING, null, "Workflow definition id"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
@@ -971,8 +971,8 @@ public class IngestRestService {
             "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addBodyParam(true, null, "The compressed (application/zip) media package file");
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -985,8 +985,8 @@ public class IngestRestService {
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addPathParam(new Param("wdID", Param.Type.STRING, null, "Workflow definition id"));
     endpoint.addBodyParam(true, null, "The compressed (application/zip) media package file");
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -997,8 +997,8 @@ public class IngestRestService {
             "/filechooser",
             "Creates an upload job and returns an html form ready to submit the selected file to /addTrackMonitored with the newly created upload job Id.");
     endpoint.addFormat(new Format("HTML", "HTML form for submitting the file with the newly created upload job", null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -1019,9 +1019,9 @@ public class IngestRestService {
             "The flavor of the file in the MediaPackage (eg. presenter/source, presentation/source etc)"));
     endpoint.addBodyParam(false, "presenter/source", "flavor : ");
     endpoint.addBodyParam(true, null, "file : binary content of the uploaded file");
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -1031,9 +1031,9 @@ public class IngestRestService {
     endpoint.addFormat(new Format("JSON",
             "JSON object reporting the status of the upload with the provided upload job id.", null));
     endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id."));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 

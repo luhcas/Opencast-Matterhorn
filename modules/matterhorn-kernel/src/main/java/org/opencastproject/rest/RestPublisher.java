@@ -69,7 +69,7 @@ public class RestPublisher {
 
   /** A map that sets default xml namespaces in {@link XMLStreamWriter}s */
   protected static final ConcurrentHashMap<String, String> NAMESPACE_MAP;
-  
+
   static {
     NAMESPACE_MAP = new ConcurrentHashMap<String, String>();
     NAMESPACE_MAP.put("http://www.w3.org/2001/XMLSchema-instance", "");
@@ -84,10 +84,10 @@ public class RestPublisher {
   /** The base URL for this server */
   protected String baseServerUri;
 
-  /** Holds references to servlets that this class publishes, so they can be unpublished later  */
+  /** Holds references to servlets that this class publishes, so they can be unpublished later */
   protected Map<String, ServiceRegistration> servletRegistrationMap;
 
-  /**  Activates this rest publisher */
+  /** Activates this rest publisher */
   protected void activate(ComponentContext componentContext) {
     logger.debug("activate()");
     this.baseServerUri = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");
@@ -183,7 +183,7 @@ public class RestPublisher {
    * Extends the CXF JSONProvider for the grand purpose of removing '@' symbols from json and padded jsonp.
    */
   private static class MatterhornJSONProvider extends JSONProvider {
-    private final Charset UTF8 = Charset.forName("utf-8");
+    private static final Charset UTF8 = Charset.forName("utf-8");
 
     /**
      * {@inheritDoc}
@@ -201,14 +201,19 @@ public class RestPublisher {
         public void writeStartElement(String prefix, String local, String uri) throws XMLStreamException {
           super.writeStartElement("", local, "");
         }
+
         @Override
         public void writeStartElement(String uri, String local) throws XMLStreamException {
           super.writeStartElement("", local, "");
         }
+
         @Override
-        public void setPrefix(String pfx, String uri) throws XMLStreamException {}
+        public void setPrefix(String pfx, String uri) throws XMLStreamException {
+        }
+
         @Override
-        public void setDefaultNamespace(String uri) throws XMLStreamException {}
+        public void setDefaultNamespace(String uri) throws XMLStreamException {
+        }
       };
     }
   }

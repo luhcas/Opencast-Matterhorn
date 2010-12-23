@@ -15,10 +15,8 @@
  */
 package org.opencastproject.serviceregistry.api;
 
-import org.opencastproject.job.api.Job;
-
 /**
- * Manages clustered services and the {@link Job}s they may create to enable asynchronous job handling.
+ * Manages clustered services and the Jobs they may create to enable asynchronous job handling.
  */
 public interface ServiceRegistration {
 
@@ -38,10 +36,10 @@ public interface ServiceRegistration {
   String getPath();
 
   /**
-   * @return Whether the service performs long running operations using {@link Job}s.
+   * @return Whether the service performs long running operations using Jobs.
    */
   boolean isJobProducer();
-  
+
   /**
    * @return Whether the service is online
    */

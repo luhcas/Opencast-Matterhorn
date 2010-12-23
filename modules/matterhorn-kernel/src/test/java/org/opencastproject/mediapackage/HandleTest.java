@@ -142,7 +142,7 @@ public class HandleTest {
       fail("Error creating new handle url: " + e.getMessage());
     }
   }
-  
+
   /**
    * Test method for {@link org.opencastproject.mediapackage.identifier.HandleImpl#compact()} .
    */

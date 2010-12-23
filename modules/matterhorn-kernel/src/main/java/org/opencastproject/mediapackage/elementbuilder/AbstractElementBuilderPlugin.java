@@ -49,7 +49,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
   protected int priority = -1;
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(AbstractElementBuilderPlugin.class);
+  private static final Logger logger = LoggerFactory.getLogger(AbstractElementBuilderPlugin.class);
 
   /**
    * Creates a new abstract element builder plugin.
@@ -60,17 +60,17 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
   /**
    * This is a convenience implementation for subclasses doing nothing.
    * 
-   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#setup()
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#init()
    */
-  public void setup() throws Exception {
+  public void init() throws Exception {
   }
 
   /**
    * This is a convenience implementation for subclasses doing nothing.
    * 
-   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#cleanup()
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#destroy()
    */
-  public void cleanup() {
+  public void destroy() {
   }
 
   /**

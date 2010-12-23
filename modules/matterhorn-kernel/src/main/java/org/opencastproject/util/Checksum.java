@@ -42,11 +42,11 @@ public final class Checksum implements Serializable {
 
   /** The checksum value */
   @XmlValue
-  protected String value_ = null;
+  protected String value = null;
 
   /** The checksum type */
   @XmlAttribute(name = "type")
-  protected ChecksumType type_ = null;
+  protected ChecksumType type = null;
 
   /** Needed by JAXB */
   public Checksum() {
@@ -65,8 +65,8 @@ public final class Checksum implements Serializable {
       throw new IllegalArgumentException("Checksum value is null");
     if (type == null)
       throw new IllegalArgumentException("Checksum type is null");
-    value_ = value;
-    type_ = type;
+    this.value = value;
+    this.type = type;
   }
 
   /**
@@ -75,7 +75,7 @@ public final class Checksum implements Serializable {
    * @return the type
    */
   public ChecksumType getType() {
-    return type_;
+    return type;
   }
 
   /**
@@ -84,7 +84,7 @@ public final class Checksum implements Serializable {
    * @return the value
    */
   public String getValue() {
-    return value_;
+    return value;
   }
 
   /**
@@ -98,14 +98,14 @@ public final class Checksum implements Serializable {
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < data.length; i++) {
       int halfbyte = (data[i] >>> 4) & 0x0F;
-      int two_halfs = 0;
+      int twoHalfs = 0;
       do {
         if ((0 <= halfbyte) && (halfbyte <= 9))
           buf.append((char) ('0' + halfbyte));
         else
           buf.append((char) ('a' + (halfbyte - 10)));
         halfbyte = data[i] & 0x0F;
-      } while (two_halfs++ < 1);
+      } while (twoHalfs++ < 1);
     }
     return buf.toString();
   }
@@ -114,19 +114,19 @@ public final class Checksum implements Serializable {
   public boolean equals(Object obj) {
     if (obj instanceof Checksum) {
       Checksum c = (Checksum) obj;
-      return type_.equals(c.type_) && value_.equals(c.value_);
+      return type.equals(c.type) && value.equals(c.value);
     }
     return false;
   }
 
   @Override
   public int hashCode() {
-    return value_.hashCode();
+    return value.hashCode();
   }
 
   @Override
   public String toString() {
-    return value_ + " (" + type_ + ")";
+    return value + " (" + type + ")";
   }
 
   /**
@@ -140,8 +140,7 @@ public final class Checksum implements Serializable {
    * @throws NoSuchAlgorithmException
    *           if the checksum of the specified type cannot be created
    */
-  public static Checksum create(String type, String value)
-          throws NoSuchAlgorithmException {
+  public static Checksum create(String type, String value) throws NoSuchAlgorithmException {
     ChecksumType t = ChecksumType.fromString(type);
     return new Checksum(value, t);
   }
@@ -172,8 +171,7 @@ public final class Checksum implements Serializable {
    * @throws IOException
    *           if the file cannot be accessed
    */
-  public static Checksum create(ChecksumType type, File file)
-          throws IOException {
+  public static Checksum create(ChecksumType type, File file) throws IOException {
     MessageDigest checksum;
     try {
       checksum = MessageDigest.getInstance(type.getName());
@@ -192,5 +190,5 @@ public final class Checksum implements Serializable {
     }
     return new Checksum(convertToHex(checksum.digest()), type);
   }
-  
+
 }

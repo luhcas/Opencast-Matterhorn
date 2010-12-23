@@ -518,7 +518,8 @@ public class UserTrackingServiceImpl implements UserTrackingService {
         }
       }
       FootprintList list = new FootprintsListImpl();
-      int current, last = -1;
+      int current = -1;
+      int last = -1;
       int lastPositionAdded = -1;
       for (int i = 0; i < resultArray.length; i++) {
         current = resultArray[i];
@@ -538,10 +539,10 @@ public class UserTrackingServiceImpl implements UserTrackingService {
       }
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.usertracking.api.UserTrackingService#getUserAction(java.lang.Long)
    */
   @Override
@@ -551,14 +552,14 @@ public class UserTrackingServiceImpl implements UserTrackingService {
     try {
       em = emf.createEntityManager();
       result = em.find(UserActionImpl.class, id);
-    }catch(Exception e) {
+    } catch (Exception e) {
       throw new UserTrackingException(e);
     } finally {
-      if(em != null && em.isOpen()) {
+      if (em != null && em.isOpen()) {
         em.close();
       }
     }
-    if(result == null) {
+    if (result == null) {
       throw new NotFoundException("No UserAction found with id='" + id + "'");
     } else {
       return result;

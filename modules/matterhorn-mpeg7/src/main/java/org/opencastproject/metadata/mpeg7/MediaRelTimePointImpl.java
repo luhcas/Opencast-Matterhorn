@@ -133,25 +133,27 @@ public class MediaRelTimePointImpl extends MediaTimePointImpl implements MediaTi
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
   public int hashCode() {
     return super.hashCode();
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof MediaRelTimePointImpl) {
-      return ((MediaRelTimePointImpl)obj).getTimeInMilliseconds() == getTimeInMilliseconds();
+      return ((MediaRelTimePointImpl) obj).getTimeInMilliseconds() == getTimeInMilliseconds();
     }
     return false;
   }
-  
+
   /**
    * @see java.lang.Object#toString()
    */

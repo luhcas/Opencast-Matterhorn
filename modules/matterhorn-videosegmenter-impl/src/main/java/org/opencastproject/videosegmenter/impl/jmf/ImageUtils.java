@@ -32,6 +32,10 @@ import javax.media.Buffer;
  */
 public class ImageUtils {
 
+  /** Disallow construction of this utility class */
+  private ImageUtils() {
+  }
+
   /**
    * Convers the frame buffer to a <code>BufferedImage</code>. This method returns <code>null</code> if the buffer
    * couldn't be created
@@ -41,7 +45,7 @@ public class ImageUtils {
    * @return a <code>BufferedImage</code>
    */
   public static BufferedImage createImage(Buffer buf) throws IOException {
-    InputStream is = new ByteArrayInputStream((byte[])buf.getData());
+    InputStream is = new ByteArrayInputStream((byte[]) buf.getData());
     BufferedImage bufferedImage = ImageIO.read(new MemoryCacheImageInputStream(is));
     return bufferedImage;
   }

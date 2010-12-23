@@ -36,42 +36,42 @@ public interface MediaDuration extends XmlElement {
    * 
    * @return the days
    */
-  public int getDays();
+  int getDays();
 
   /**
    * Returns the fractions.
    * 
    * @return the fractions
    */
-  public int getFractions();
+  int getFractions();
 
   /**
    * Returns the fractions per second.
    * 
    * @return the fractions per second
    */
-  public int getFractionsPerSecond();
+  int getFractionsPerSecond();
 
   /**
    * Returns the number of hours.
    * 
    * @return the hours
    */
-  public int getHours();
+  int getHours();
 
   /**
    * Returns the number of minutes.
    * 
    * @return the minutes
    */
-  public int getMinutes();
+  int getMinutes();
 
   /**
    * Returns the number of seconds.
    * 
    * @return the seconds
    */
-  public int getSeconds();
+  int getSeconds();
 
   /**
    * Returns the duration in milliseconds.

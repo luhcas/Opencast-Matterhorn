@@ -28,7 +28,7 @@ import java.util.List;
 public class ITunesFeedExtension implements FeedExtension {
 
   /** The dublin core module uri */
-  public static String URI = "http://www.itunes.com/dtds/podcast-1.0.dtd";
+  public static final String URI = "http://www.itunes.com/dtds/podcast-1.0.dtd";
 
   /** The episode author */
   private String author = null;
@@ -145,7 +145,8 @@ public class ITunesFeedExtension implements FeedExtension {
    *          the keyword to add
    */
   public void addKeyword(String keyword) {
-    if (keywords == null) keywords = new ArrayList<String>();
+    if (keywords == null)
+      keywords = new ArrayList<String>();
     keywords.add(keyword);
   }
 

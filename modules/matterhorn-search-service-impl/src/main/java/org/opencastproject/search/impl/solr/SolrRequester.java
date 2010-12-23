@@ -181,7 +181,7 @@ public class SolrRequester {
         }
 
         // Add the list of most important keywords
-        String kw[] = toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)).split(" ");
+        String[] kw = toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)).split(" ");
         logger.trace(toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)));
         for (String keyword : kw) {
           item.addKeyword(keyword);
@@ -211,7 +211,7 @@ public class SolrRequester {
    */
   private List<MediaSegmentImpl> createSearchResultSegments(SolrDocument doc, SolrQuery query) {
     List<MediaSegmentImpl> segments = new ArrayList<MediaSegmentImpl>();
-    
+
     // The maximum number of hits in a segment
     int maxHits = 0;
 
@@ -250,7 +250,7 @@ public class SolrRequester {
       // get preview urls
       for (Entry<Object, Object> entry : segmentHints.entrySet()) {
         if (entry.getKey().toString().startsWith("preview.")) {
-          String parts[] = entry.getKey().toString().split("\\.");
+          String[] parts = entry.getKey().toString().split("\\.");
           segment.addPreview(entry.getValue().toString(), parts[1]);
         }
       }
@@ -276,7 +276,7 @@ public class SolrRequester {
               startIndex = foundAt + t.length();
             }
           }
-          
+
           // for now, just store the number of hits, but keep track of the maximum hit count
           segment.setRelevance(segmentHits);
           if (segmentHits > maxHits)
@@ -286,11 +286,11 @@ public class SolrRequester {
 
       segments.add(segment);
     }
-    
+
     for (MediaSegmentImpl segment : segments) {
       int hitsInSegment = segment.getRelevance();
       if (hitsInSegment > 0)
-        segment.setRelevance((int)((100 * hitsInSegment) / maxHits));
+        segment.setRelevance((int) ((100 * hitsInSegment) / maxHits));
     }
 
     return segments;
@@ -477,11 +477,11 @@ public class SolrRequester {
 
     SolrQuery query = new SolrQuery(sb.toString());
 
-    if (q.isIncludeSeries() && ! q.isIncludeEpisodes()) {
+    if (q.isIncludeSeries() && !q.isIncludeEpisodes()) {
       query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
     }
 
-    if (q.isIncludeEpisodes() && ! q.isIncludeSeries()) {
+    if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
       query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     }
 

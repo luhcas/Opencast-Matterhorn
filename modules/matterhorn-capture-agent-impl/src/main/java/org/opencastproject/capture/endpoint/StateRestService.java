@@ -148,7 +148,7 @@ public class StateRestService {
     RestEndpoint endpoint = new RestEndpoint("state", RestEndpoint.Method.GET, "/state",
             "Return the state of the capture agent");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.OK(null));
+    endpoint.addStatus(Status.ok(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -156,8 +156,8 @@ public class StateRestService {
     endpoint = new RestEndpoint("recordings", RestEndpoint.Method.GET, "/recordings",
             "Return a list of the capture agent's recordings");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.OK(null));
-    endpoint.addStatus(Status.SERVICE_UNAVAILABLE("State Service is unavailable"));
+    endpoint.addStatus(Status.ok(null));
+    endpoint.addStatus(Status.serviceUnavailable("State Service is unavailable"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 

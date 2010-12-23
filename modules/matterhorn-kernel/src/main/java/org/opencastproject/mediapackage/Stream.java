@@ -16,7 +16,6 @@
 
 package org.opencastproject.mediapackage;
 
-
 /**
  * A {@link org.opencastproject.mediapackage.Track} consists out of one or more streams.
  */
@@ -28,4 +27,3 @@ public interface Stream extends ManifestContributor {
   String getIdentifier();
 
 }
-

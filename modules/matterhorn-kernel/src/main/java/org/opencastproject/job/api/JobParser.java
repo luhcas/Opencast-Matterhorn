@@ -31,8 +31,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 /**
  * Marshals and unmarshals {@link Job}s.
  */
-public class JobParser {
+public final class JobParser {
   private static final JAXBContext jaxbContext;
+  
+  /** Disallow constructing this utility class */
+  private JobParser() {
+  }
 
   static {
     StringBuilder sb = new StringBuilder();
@@ -69,14 +73,14 @@ public class JobParser {
     try {
       unmarshaller = jaxbContext.createUnmarshaller();
       return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), JaxbJob.class)
-      .getValue();
+              .getValue();
     } catch (Exception e) {
       throw new IOException(e);
     } finally {
       IOUtils.closeQuietly(in);
     }
   }
-  
+
   public static String toXml(Job job) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     Writer writer = new StringWriter();
@@ -98,15 +102,16 @@ public class JobParser {
   /**
    * Parses a stream representing a {@link JaxbJobList}
    * 
-   * @param content the serialized data
+   * @param content
+   *          the serialized data
    * @return the job list
    */
   public static JaxbJobList parseJobList(InputStream in) throws IOException {
     Unmarshaller unmarshaller;
     try {
       unmarshaller = jaxbContext.createUnmarshaller();
-      return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), JaxbJobList.class)
-      .getValue();
+      return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+              JaxbJobList.class).getValue();
     } catch (Exception e) {
       throw new IOException(e);
     } finally {

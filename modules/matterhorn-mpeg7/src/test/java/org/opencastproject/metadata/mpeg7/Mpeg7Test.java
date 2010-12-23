@@ -49,7 +49,7 @@ public class Mpeg7Test {
 
   /** Temp file for mpeg7 catalog contents */
   private File mpeg7TempFile = null;
- 
+
   /**
    * @throws java.lang.Exception
    */
@@ -97,7 +97,7 @@ public class Mpeg7Test {
     InputStream in = mpeg7Service.serialize(mpeg7Sample);
     FileOutputStream out = new FileOutputStream(mpeg7TempFile);
     IOUtils.copy(in, out);
-    
+
     // Re-read the saved catalog and test for its content
     Mpeg7Catalog mpeg7NewFromDisk = new Mpeg7CatalogImpl(mpeg7TempFile.toURI().toURL().openStream());
 
@@ -223,10 +223,10 @@ public class Mpeg7Test {
     assertEquals("en", textual.getLanguage());
     Rectangle boundingBox = videoText.getBoundary();
     assertNotNull(boundingBox);
-    assertEquals(10, (int)boundingBox.getX());
-    assertEquals(150, (int)boundingBox.getWidth());
-    assertEquals(20, (int)boundingBox.getY());
-    assertEquals(15, (int)boundingBox.getHeight());
+    assertEquals(10, (int) boundingBox.getX());
+    assertEquals(150, (int) boundingBox.getWidth());
+    assertEquals(20, (int) boundingBox.getY());
+    assertEquals(15, (int) boundingBox.getHeight());
 
     //
     // Check video track (track-3)

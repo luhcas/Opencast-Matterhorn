@@ -26,49 +26,49 @@ public interface MediaSegment {
    * 
    * @return The number.
    */
-  public abstract int getIndex();
+  int getIndex();
 
   /**
    * Get the segment time.
    * 
    * @return The time.
    */
-  public abstract long getTime();
+  long getTime();
 
   /**
    * Get the segment duration.
    * 
    * @return The duration.
    */
-  public abstract long getDuration();
+  long getDuration();
 
   /**
    * Get the image url.
    * 
    * @return the image
    */
-  public abstract String getImageUrl();
+  String getImageUrl();
 
   /**
    * Get the segment text.
    * 
    * @return The text.
    */
-  public abstract String getText();
+  String getText();
 
   /**
    * Get the 'segment is a hit' flag.
    * 
    * @return The flag.
    */
-  public abstract boolean isHit();
+  boolean isHit();
 
   /**
    * Get the segment relevance.
    * 
    * @return The relevance.
    */
-  public abstract int getRelevance();
+  int getRelevance();
 
   /**
    * Adds a preview url.

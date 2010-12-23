@@ -87,10 +87,10 @@ public abstract class AbstractMediaPackageElementSelector<T extends MediaPackage
    */
   @SuppressWarnings("unchecked")
   private Class getParametrizedType(Object object) {
-//    Class<T> c = (Class<T>) this.getClass();
-//    ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());
-//    Class<T> actualType = (Class<T>) type.getActualTypeArguments()[0];
-//    return actualType;
+    // Class<T> c = (Class<T>) this.getClass();
+    // ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());
+    // Class<T> actualType = (Class<T>) type.getActualTypeArguments()[0];
+    // return actualType;
 
     Class current = getClass();
     Type superclass;

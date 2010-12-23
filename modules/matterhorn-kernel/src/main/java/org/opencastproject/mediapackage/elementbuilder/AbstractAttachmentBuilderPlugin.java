@@ -27,6 +27,7 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -46,7 +47,7 @@ import javax.xml.xpath.XPathExpressionException;
 public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBuilderPlugin {
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(AbstractAttachmentBuilderPlugin.class);
+  private static final Logger logger = LoggerFactory.getLogger(AbstractAttachmentBuilderPlugin.class);
 
   /** The candidate type */
   protected MediaPackageElement.Type type = MediaPackageElement.Type.Attachment;
@@ -101,7 +102,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
     try {
       // Test for attachment
       String nodeName = elementNode.getNodeName();
-      if(nodeName.contains(":")) {
+      if (nodeName.contains(":")) {
         nodeName = nodeName.substring(nodeName.indexOf(":") + 1);
       }
       if (!MediaPackageElement.Type.Attachment.toString().equalsIgnoreCase(nodeName))
@@ -171,29 +172,29 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
       String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
-      if (checksumValue != null && !checksumValue.equals("") && checksumType != null)
+      if (StringUtils.isNotEmpty(checksumValue) && checksumType != null)
         checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // mimetype
       String mimeTypeValue = (String) xpath.evaluate("mimetype/text()", elementNode, XPathConstants.STRING);
-      if (mimeTypeValue != null && !mimeTypeValue.equals(""))
+      if (StringUtils.isNotEmpty(mimeTypeValue))
         mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       // create the attachment
       AttachmentImpl attachment = (AttachmentImpl) AttachmentImpl.fromURI(uri);
 
-      if (id != null && !id.equals(""))
+      if (StringUtils.isNotEmpty(id))
         attachment.setIdentifier(id);
 
       // Add url
       attachment.setURI(uri);
 
       // Add reference
-      if (reference != null && !reference.equals(""))
+      if (StringUtils.isNotEmpty(reference))
         attachment.referTo(MediaPackageReferenceImpl.fromString(reference));
 
       // Add type/flavor information
-      if (attachmentFlavor != null && !attachmentFlavor.equals("")) {
+      if (StringUtils.isNotEmpty(attachmentFlavor)) {
         try {
           MediaPackageElementFlavor flavor = MediaPackageElementFlavor.parseFlavor(attachmentFlavor);
           attachment.setFlavor(flavor);
@@ -216,7 +217,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
 
       // Set the description
       String description = xpath.evaluate("description/text()", elementNode);
-      if (description != null && !description.equals(""))
+      if (StringUtils.isNotEmpty(description))
         attachment.setElementDescription(description.trim());
 
       // Set tags

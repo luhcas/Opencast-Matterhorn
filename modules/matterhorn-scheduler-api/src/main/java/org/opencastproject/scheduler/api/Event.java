@@ -22,149 +22,199 @@ import java.util.Set;
 import java.text.ParseException;
 
 /**
- * Event provides methods and properties belonging to single events. It contains {@link Metadata),
- * as well as JAXB and JPA Annotations. 
+ * Event provides methods and properties belonging to single events. It contains {@link Metadata), as well as JAXB and
+ * JPA Annotations.
  */
 public interface Event {
   /**
    * @return Event contributor
    */
   String getContributor();
+
   /**
-   * @param Event contributor
+   * @param Event
+   *          contributor
    */
   void setContributor(String contributor);
+
   /**
    * @return Event creator
    */
   String getCreator();
+
   /**
-   * @param Event creator
+   * @param Event
+   *          creator
    */
   void setCreator(String creator);
+
   /**
    * @return Event description
    */
   String getDescription();
+
   /**
-   * @param Event description
+   * @param Event
+   *          description
    */
   void setDescription(String description);
+
   /**
    * @return Event capture device name
    */
   String getDevice();
+
   /**
-   * @param Event capture device name
+   * @param Event
+   *          capture device name
    */
   void setDevice(String device);
+
   /**
    * @return Event duration
    */
   Long getDuration();
+
   /**
-   * @param Event duration
+   * @param Event
+   *          duration
    */
   void setDuration(long duration);
+
   /**
    * @return Event end date
    */
   Date getEndDate();
+
   /**
-   * @param Event end date
+   * @param Event
+   *          end date
    */
   void setEndDate(Date endDate);
+
   /**
    * @return Event id
    */
   Long getEventId();
+
   /**
    * @param eventId
    */
   void setEventId(Long eventId);
+
   /**
    * @return Event langauge
    */
   String getLanguage();
+
   /**
-   * @param Event languge
+   * @param Event
+   *          languge
    */
   void setLanguage(String langauge);
+
   /**
    * @return Event license
    */
   String getLicense();
+
   /**
-   * @param Event license
+   * @param Event
+   *          license
    */
   void setLicense(String license);
+
   /**
    * @return Event recurrence name
    */
   String getRecurrence();
+
   /**
-   * @param Event recurrence name
+   * @param Event
+   *          recurrence name
    */
   void setRecurrence(String recurrence);
+
   /**
    * @return Event recurrence pattern
    */
   String getRecurrencePattern();
+
   /**
-   * @param Event recurrence pattern
+   * @param Event
+   *          recurrence pattern
    */
   void setRecurrencePattern(String recurrence);
+
   /**
    * @return Capture agent resources
    */
   String getResources();
+
   /**
-   * @param Capture agent resources
+   * @param Capture
+   *          agent resources
    */
   void setResources(String resources);
+
   /**
    * @return Event series name
    */
   String getSeries();
+
   /**
-   * @param Event series name
+   * @param Event
+   *          series name
    */
   void setSeries(String series);
+
   /**
    * @return Event series id
    */
   String getSeriesId();
+
   /**
-   * @param Event series id
+   * @param Event
+   *          series id
    */
   void setSeriesId(String seriesId);
+
   /**
    * @return Event start date
    */
   Date getStartDate();
+
   /**
-   * @param Event start date
+   * @param Event
+   *          start date
    */
   void setStartDate(Date startDate);
+
   /**
    * @return String Event subject
    */
   String getSubject();
+
   /**
-   * @param Event subject
+   * @param Event
+   *          subject
    */
   void setSubject(String subject);
+
   /**
    * @return String Event title
    */
   String getTitle();
+
   /**
-   * @param Event title
+   * @param Event
+   *          title
    */
   void setTitle(String title);
 
   /**
    * Update a specific metadata field in the Event.
+   * 
    * @param data
    */
   void updateMetadata(Metadata data);
@@ -179,10 +229,9 @@ public interface Event {
    */
   void setMetadataList(List<Metadata> metadata);
 
-
   /**
    * @param key
-   *        The name of a specific metadata field
+   *          The name of a specific metadata field
    * @return The value of a specific metadata field in the metadataTable
    */
   String getMetadataValueByKey(String key);
@@ -203,23 +252,26 @@ public interface Event {
    * @return A specific metadata field in the metadata list for this event (not metadataTable)
    */
   Metadata findMetadata(String key);
-  
+
   /**
    * Add new metadata to this event's metadata list.
+   * 
    * @param m
    */
   void addMetadata(Metadata m);
-  
+
   /**
    * Remove a specific metadata field from this event's metadata list.
+   * 
    * @param m
    */
   void removeMetadata(Metadata m);
 
   /**
    * Update the event and persist it in the database
+   * 
    * @param e
-   *        Event to update this one with
+   *          Event to update this one with
    */
   void update(Event e);
 
@@ -228,9 +280,9 @@ public interface Event {
   boolean equals(Object o);
 
   int hashCode();
-    
+
   void initializeFromEvent(Event e);
-  
+
   List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException;
 
 }

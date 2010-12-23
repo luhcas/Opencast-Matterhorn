@@ -230,20 +230,20 @@ public interface WorkingFileRepository {
    * 
    * @return Number of all bytes in storage
    */
-  public long getTotalSpace();
+  long getTotalSpace();
 
   /**
    * Gets the available space of storage in Bytes This is free storage that is not reserved
    * 
    * @return Number of available bytes in storage
    */
-  public long getUsableSpace();
+  long getUsableSpace();
 
   /**
    * A textual representation of available and total storage
    * 
    * @return Percentage and numeric values of used storage space
    */
-  public String getDiskSpace();
+  String getDiskSpace();
 
 }

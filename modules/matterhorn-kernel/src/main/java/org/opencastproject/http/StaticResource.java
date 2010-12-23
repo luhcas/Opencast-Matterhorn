@@ -41,12 +41,12 @@ public class StaticResource extends HttpServlet {
   private static final Logger logger = LoggerFactory.getLogger(StaticResource.class);
   private final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap(getClass().getClassLoader()
           .getResourceAsStream("mimetypes"));
-  String classpath;
-  String alias;
-  String welcomeFile;
-  URL defaultUrl;
+  protected String classpath;
+  protected String alias;
+  protected String welcomeFile;
+  protected URL defaultUrl;
 
-  BundleContext bundleContext;
+  protected BundleContext bundleContext;
 
   /**
    * Default no-arg constructor called by OSGI's declarative services. The static resource will be configured via DS

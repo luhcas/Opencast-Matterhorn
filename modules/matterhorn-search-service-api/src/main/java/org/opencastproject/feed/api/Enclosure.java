@@ -29,7 +29,7 @@ public interface Enclosure {
    * 
    * @return the enclosure URL, <b>null</b> if none
    */
-  public String getUrl();
+  String getUrl();
 
   /**
    * Sets the enclosure URL.
@@ -37,14 +37,14 @@ public interface Enclosure {
    * @param url
    *          the enclosure URL to set, <b>null</b> if none
    */
-  public void setUrl(String url);
+  void setUrl(String url);
 
   /**
    * Returns the enclosure length.
    * 
    * @return the enclosure length, <b>null</b> if none
    */
-  public long getLength();
+  long getLength();
 
   /**
    * Sets the enclosure length.
@@ -52,14 +52,14 @@ public interface Enclosure {
    * @param length
    *          the enclosure length to set, <b>null</b> if none
    */
-  public void setLength(long length);
+  void setLength(long length);
 
   /**
    * Returns the enclosure type.
    * 
    * @return the enclosure type, <b>null</b> if none
    */
-  public String getType();
+  String getType();
 
   /**
    * Sets the enclosure type.
@@ -67,6 +67,6 @@ public interface Enclosure {
    * @param type
    *          the enclosure type to set, <b>null</b> if none
    */
-  public void setType(String type);
+  void setType(String type);
 
 }

@@ -21,34 +21,35 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * Adapter class for JaxB to represent a Hashtable for the Metadata
- *
+ * 
  */
 public class HashtableAdapter extends XmlAdapter<MetadataEntry[], Hashtable<String, String>> {
-  public HashtableAdapter () {
+  public HashtableAdapter() {
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
    */
   @Override
   public MetadataEntry[] marshal(Hashtable<String, String> myHashtable) throws Exception {
-    String [] keys = myHashtable.keySet().toArray(new String[0]);
-    MetadataEntry [] meta = new MetadataEntry [keys.length];
-    for (int i = 0; i < keys.length; i++) meta[i] = new MetadataEntry(keys[i], myHashtable.get(keys[i])); 
+    String[] keys = myHashtable.keySet().toArray(new String[0]);
+    MetadataEntry[] meta = new MetadataEntry[keys.length];
+    for (int i = 0; i < keys.length; i++)
+      meta[i] = new MetadataEntry(keys[i], myHashtable.get(keys[i]));
     return meta;
   }
 
-
-
   /**
    * {@inheritDoc}
+   * 
    * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
    */
   @Override
   public Hashtable<String, String> unmarshal(MetadataEntry[] data) throws Exception {
     Hashtable<String, String> myHashtable = new Hashtable<String, String>();
-    for (int i=0; i < data.length; i++) {
+    for (int i = 0; i < data.length; i++) {
       myHashtable.put(data[i].getKey(), data[i].getValue());
     }
     return myHashtable;

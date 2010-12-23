@@ -53,22 +53,22 @@ public class HostRegistration {
   /** The base URL for this host */
   @Id
   @Column(name = "HOST", nullable = false)
-  String baseUrl;
+  protected String baseUrl;
 
   /**
    * The maximum number of concurrent jobs this host can run. Typically, this is the number of cores available to the
    * JVM.
    */
   @Column(name = "MAX_JOBS", nullable = false)
-  int maxJobs;
+  protected int maxJobs;
 
   /** Whether this host is available */
   @Column(name = "ONLINE", nullable = false)
-  boolean online;
+  protected boolean online;
 
   /** Whether this host is in maintenance mode */
   @Column(name = "MAINTENANCE", nullable = false)
-  boolean maintenanceMode;
+  protected boolean maintenanceMode;
 
   /**
    * @return the baseUrl for this host

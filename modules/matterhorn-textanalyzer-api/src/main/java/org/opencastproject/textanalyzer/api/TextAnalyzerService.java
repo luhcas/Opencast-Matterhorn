@@ -19,7 +19,6 @@ package org.opencastproject.textanalyzer.api;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.MediaPackageElement;
 
 /**
  * Api for text analysis implementations, aimed at extracting text from an image.
@@ -27,10 +26,10 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 public interface TextAnalyzerService extends JobProducer {
 
   /** Receipt type */
-  public static final String JOB_TYPE = "org.opencastproject.textanalyzer";
+  String JOB_TYPE = "org.opencastproject.textanalyzer";
 
   /**
-   * Takes the given image and returns a receipt that can be used to get the resulting {@link MediaPackageElement}.
+   * Takes the given image and returns a receipt that can be used to get the resulting catalog.
    * 
    * @param image
    *          element to analyze

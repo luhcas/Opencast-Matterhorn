@@ -36,16 +36,16 @@ import java.util.Properties;
  * Installs feeds matching "*.properties" in the feeds watch directory.
  */
 public class FeedRegistrationScanner implements ArtifactInstaller {
-  public static final String FEED_CLASS="feed.class";
-  public static final String FEED_URI="feed.uri";
-  public static final String FEED_SELECTOR="feed.selector";
-  public static final String FEED_ENTRY="feed.entry";
-  
+  public static final String FEED_CLASS = "feed.class";
+  public static final String FEED_URI = "feed.uri";
+  public static final String FEED_SELECTOR = "feed.selector";
+  public static final String FEED_ENTRY = "feed.entry";
+
   private static final Logger logger = LoggerFactory.getLogger(FeedRegistrationScanner.class);
 
   /** A map to keep track of each feed registration file and feed generator it produces */
   protected Map<File, ServiceRegistration> generators = new HashMap<File, ServiceRegistration>();
-  
+
   /** The search service to use in each feed generator */
   protected SearchService searchService;
 
@@ -59,7 +59,9 @@ public class FeedRegistrationScanner implements ArtifactInstaller {
 
   /**
    * Activates the component
-   * @param cc the component's context
+   * 
+   * @param cc
+   *          the component's context
    */
   protected void activate(ComponentContext cc) {
     this.bundleContext = cc.getBundleContext();
@@ -71,19 +73,20 @@ public class FeedRegistrationScanner implements ArtifactInstaller {
   protected void deactivate() {
     this.bundleContext = null;
   }
-  
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
    */
   @Override
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("feeds") && artifact.getName().endsWith(".properties");
+    return "feeds".equals(artifact.getParentFile().getName()) && artifact.getName().endsWith(".properties");
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
    */
   @Override
@@ -100,28 +103,30 @@ public class FeedRegistrationScanner implements ArtifactInstaller {
     // Always include the server URL obtained from the bundle context
     props.put("org.opencastproject.server.url", bundleContext.getProperty("org.opencastproject.server.url"));
     Class<?> clazz = getClass().getClassLoader().loadClass(props.getProperty(FEED_CLASS));
-    FeedGenerator generator = (FeedGenerator)clazz.newInstance();
+    FeedGenerator generator = (FeedGenerator) clazz.newInstance();
     generator.setSearchService(searchService);
     generator.initialize(props);
     ServiceRegistration reg = bundleContext.registerService(FeedGenerator.class.getName(), generator, null);
     generators.put(artifact, reg);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactInstaller#uninstall(java.io.File)
    */
   @Override
   public void uninstall(File artifact) throws Exception {
     ServiceRegistration reg = generators.get(artifact);
-    if(reg != null) {
+    if (reg != null) {
       reg.unregister();
       generators.remove(artifact);
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactInstaller#update(java.io.File)
    */
   @Override

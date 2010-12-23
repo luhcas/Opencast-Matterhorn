@@ -32,7 +32,6 @@ import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.videosegmenter.api.VideoSegmenterService;
-import org.opencastproject.videosegmenter.impl.VideoSegmenterServiceImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
@@ -54,7 +53,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
- * The REST endpoint for the {@link VideoSegmenterServiceImpl} service
+ * The REST endpoint for the {@link VideoSegmenterService} service
  */
 @Path("")
 public class VideoSegmenterRestEndpoint {
@@ -62,7 +61,7 @@ public class VideoSegmenterRestEndpoint {
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenterRestEndpoint.class);
 
   protected String docs;
-  
+
   protected VideoSegmenterService videoSegmenter;
 
   /**
@@ -82,7 +81,7 @@ public class VideoSegmenterRestEndpoint {
   public void setVideoSegmenter(VideoSegmenterService videoSegmenter) {
     this.videoSegmenter = videoSegmenter;
   }
-  
+
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("/")
@@ -92,8 +91,8 @@ public class VideoSegmenterRestEndpoint {
       Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml, "UTF-8"));
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      if(element instanceof Track) {
-        Job job = videoSegmenter.segment((Track)element, false);
+      if (element instanceof Track) {
+        Job job = videoSegmenter.segment((Track) element, false);
         return Response.ok(new JaxbJob(job)).build();
       } else {
         return Response.status(Status.BAD_REQUEST).build();
@@ -137,16 +136,15 @@ public class VideoSegmenterRestEndpoint {
     RestEndpoint analyzeEndpoint = new RestEndpoint("segment", RestEndpoint.Method.POST, "/",
             "Submit a track for segmentation");
     analyzeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("The job ID to use when polling for the resulting mpeg7 catalog"));
-    analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "",
-            "The track to segment."));
+            .ok("The job ID to use when polling for the resulting mpeg7 catalog"));
+    analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "", "The track to segment."));
     analyzeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, analyzeEndpoint);
 
     // job
     RestEndpoint receiptEndpoint = new RestEndpoint("job", RestEndpoint.Method.GET, "/{id}.xml",
             "Retrieve a job for a segmentation task");
-    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the "
+    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Results in an xml document containing the "
             + "status of the analysis job, and the catalog produced by this analysis job if it the task is finished"));
     receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the job id"));
     receiptEndpoint.addFormat(new Format("xml", null, null));

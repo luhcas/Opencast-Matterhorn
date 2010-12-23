@@ -97,7 +97,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
   private String ocropusbinary = OcropusTextAnalyzer.OCROPUS_BINARY_DEFAULT;
 
   protected void activate(ComponentContext cc) {
-    
+
     // Set the number of concurrent threads
     int threads = DEFAULT_THREADS;
     String threadsConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(CONFIG_THREADS));
@@ -142,6 +142,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
     Callable<Void> command = new Callable<Void>() {
       /**
        * {@inheritDoc}
+       * 
        * @see java.util.concurrent.Callable#call()
        */
       @SuppressWarnings("unchecked")
@@ -186,8 +187,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
 
           URI uri;
           try {
-            uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml",
-                    mpeg7CatalogService.serialize(mpeg7));
+            uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
           } catch (IOException e) {
             throw new TextAnalyzerException("Unable to put mpeg7 into the workspace", e);
           }
@@ -201,7 +201,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
 
           logger.info("Finished text extraction of {}", imageUrl);
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error extracting text from " + imageUrl, e);
           try {
             job.setStatus(Status.FAILED);
@@ -236,7 +236,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
         }
       }
     }
-    
+
     return job;
   }
 
@@ -263,8 +263,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
-   *      java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
    */
   public long countJobs(Status status, String host) throws ServiceRegistryException {
     if (status == null)
@@ -380,7 +379,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
   public void setDictionaryService(DictionaryService dictionaryService) {
     this.dictionaryService = dictionaryService;
   }
-  
+
   /**
    * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
    * {@link TextAnalyzerException}.

@@ -29,7 +29,7 @@ public interface Link {
    * 
    * @return the link rel, <b>null</b> if none
    */
-  public abstract String getRel();
+  String getRel();
 
   /**
    * Sets the link rel.
@@ -37,14 +37,14 @@ public interface Link {
    * @param rel
    *          the link rel, <b>null</b> if none
    */
-  public abstract void setRel(String rel);
+  void setRel(String rel);
 
   /**
    * Returns the link type.
    * 
    * @return the link type, <b>null</b> if none
    */
-  public abstract String getType();
+  String getType();
 
   /**
    * Sets the link type.
@@ -52,14 +52,14 @@ public interface Link {
    * @param type
    *          the link type, <b>null</b> if none
    */
-  public abstract void setType(String type);
+  void setType(String type);
 
   /**
    * Returns the link href.
    * 
    * @return the link href, <b>null</b> if none
    */
-  public abstract String getHref();
+  String getHref();
 
   /**
    * Sets the link href.
@@ -67,14 +67,14 @@ public interface Link {
    * @param href
    *          the link href, <b>null</b> if none
    */
-  public abstract void setHref(String href);
+  void setHref(String href);
 
   /**
    * Returns the link title.
    * 
    * @return the link title, <b>null</b> if none
    */
-  public abstract String getTitle();
+  String getTitle();
 
   /**
    * Sets the link title.
@@ -82,14 +82,14 @@ public interface Link {
    * @param title
    *          the link title, <b>null</b> if none
    */
-  public abstract void setTitle(String title);
+  void setTitle(String title);
 
   /**
    * Returns the hreflang.
    * 
    * @return Returns the hreflang
    */
-  public abstract String getHreflang();
+  String getHreflang();
 
   /**
    * Set the hreflang.
@@ -97,14 +97,14 @@ public interface Link {
    * @param hreflang
    *          The hreflang to set
    */
-  public abstract void setHreflang(String hreflang);
+  void setHreflang(String hreflang);
 
   /**
    * Returns the length.
    * 
    * @return Returns the length
    */
-  public abstract long getLength();
+  long getLength();
 
   /**
    * Set the length.
@@ -112,6 +112,6 @@ public interface Link {
    * @param length
    *          The length to set
    */
-  public abstract void setLength(long length);
+  void setLength(long length);
 
 }

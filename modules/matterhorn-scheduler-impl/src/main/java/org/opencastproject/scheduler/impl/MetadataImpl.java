@@ -33,10 +33,10 @@ import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 
-@Entity(name="Metadata")
-@Table(name="SCHED_METADATA")
+@Entity(name = "Metadata")
+@Table(name = "SCHED_METADATA")
 @Access(AccessType.FIELD)
-@XmlType(name="Metadata")
+@XmlType(name = "Metadata")
 public class MetadataImpl implements Metadata {
 
   @Id
@@ -44,92 +44,100 @@ public class MetadataImpl implements Metadata {
   @JoinColumn(name = "EVENT_ID")
   @XmlTransient
   protected EventImpl event;
-  
+
   @Id
-  @Column(name="MD_KEY")
+  @Column(name = "MD_KEY")
   protected String key;
-  @Column(name="MD_VAL")
+  @Column(name = "MD_VAL")
   protected String value;
-  
-  public MetadataImpl () {
+
+  public MetadataImpl() {
     super();
   }
-  
-  public MetadataImpl (Event event, String key, String value) {
-    if(event != null) {
+
+  public MetadataImpl(Event event, String key, String value) {
+    if (event != null) {
       setEvent(event);
     }
     setKey(key);
     setValue(value);
   }
-  
+
   @XmlTransient
   public void setEvent(Event event) {
     this.event = (EventImpl) event;
   }
-  
+
   public Event getEvent() {
     return this.event;
   }
-  
+
   @Override
   public String getKey() {
     return key;
   }
+
   @Override
   public void setKey(String key) {
     this.key = key;
   }
+
   @Override
   public String getValue() {
     return value;
   }
+
   @Override
   public void setValue(String value) {
     this.value = value;
-  }  
-  
-  @Override
-  public String toString () {
-    return key+":"+value;
   }
-  
+
   @Override
-  public boolean equals (Object o) {
-    if (o == null) return false;
-    if (! (o instanceof Metadata)) return false;
+  public String toString() {
+    return key + ":" + value;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null)
+      return false;
+    if (!(o instanceof Metadata))
+      return false;
     Metadata m = (Metadata) o;
-    if (m.getKey().equals(getKey()) && m.getValue().equals(getValue())) return true;
+    if (m.getKey().equals(getKey()) && m.getValue().equals(getValue()))
+      return true;
     return false;
   }
-  
+
   @Override
-  public int hashCode () {
+  public int hashCode() {
     return getKey().hashCode();
   }
-  
+
   /**
    * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
-   *
-   *  @param    xmlString string representation of an event.
-   *  @return   instantiated event SchdeulerEventJaxbImpl.
+   * 
+   * @param xmlString
+   *          string representation of an event.
+   * @return instantiated event SchdeulerEventJaxbImpl.
    */
   public static MetadataImpl valueOf(String xmlString) throws Exception {
     return SchedulerBuilder.getInstance().parseMetadata(xmlString);
   }
-  
+
   static class Adapter extends XmlAdapter<MetadataImpl, Metadata> {
     @Override
     public MetadataImpl marshal(Metadata v) throws Exception {
-      return (MetadataImpl)v;
+      return (MetadataImpl) v;
     }
+
     @Override
     public Metadata unmarshal(MetadataImpl v) throws Exception {
       return v;
     }
   }
-  
+
   public void afterUnmarshal(Unmarshaller u, Object parent) {
-    this.event = (EventImpl)parent;
+    this.event = (EventImpl) parent;
   }
 }

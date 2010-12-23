@@ -22,16 +22,14 @@ import java.lang.reflect.Method;
 /**
  * Enum utility methods.
  */
-public class EnumSupport {
+public final class EnumSupport {
 
   private EnumSupport() {
   }
 
   /**
-   * Support method to help enums implement an enhanced
-   * <code>valueOf(String)</code> method, that does not throw an
-   * IllegalArgumentException in case of incoming values, that do not match any
-   * of the enum's values.
+   * Support method to help enums implement an enhanced <code>valueOf(String)</code> method, that does not throw an
+   * IllegalArgumentException in case of incoming values, that do not match any of the enum's values.
    * 
    * @param enumClass
    *          the enum's class

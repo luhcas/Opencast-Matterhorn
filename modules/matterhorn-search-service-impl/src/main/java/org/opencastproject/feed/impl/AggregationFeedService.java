@@ -63,7 +63,7 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
    * @see org.opencastproject.feed.impl.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
    *      java.lang.String[], int, int)
    */
-  protected SearchResult loadFeedData(Type type, String query[], int limit, int offset) {
+  protected SearchResult loadFeedData(Type type, String[] query, int limit, int offset) {
     try {
       return searchService.getByQuery(solrQuery, limit, offset);
     } catch (Exception e) {
@@ -97,6 +97,7 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.impl.AbstractFeedService#initialize(java.util.Properties)
    */
   @Override

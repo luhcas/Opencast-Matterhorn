@@ -214,25 +214,26 @@ public class UserTrackingRestService {
           @FormParam("out") String outString, @FormParam("type") String type, @Context HttpServletRequest request) {
     String sessionId = request.getSession().getId();
     String userId = securityService.getUserName();
-    
+
     // Parse the in and out strings, which might be empty (hence, we can't let jax-rs handle them properly)
-    if(StringUtils.isEmpty(inString)) {
-      throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("in must be a non null integer").build());
+    if (StringUtils.isEmpty(inString)) {
+      throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("in must be a non null integer")
+              .build());
     }
     Integer in = null;
     try {
       in = Integer.parseInt(StringUtils.trim(inString));
-    } catch(NumberFormatException e) {
+    } catch (NumberFormatException e) {
       throw new WebApplicationException(e);
     }
-    
+
     Integer out = null;
-    if(StringUtils.isEmpty(outString)) {
+    if (StringUtils.isEmpty(outString)) {
       out = in;
     } else {
       try {
         out = Integer.parseInt(StringUtils.trim(outString));
-      } catch(NumberFormatException e) {
+      } catch (NumberFormatException e) {
         throw new WebApplicationException(e);
       }
     }
@@ -345,7 +346,7 @@ public class UserTrackingRestService {
             "Get the statistics for an episode");
     statsEndpoint.addFormat(new Format("XML", null, null));
     statsEndpoint.addFormat(new Format("JSON", null, null));
-    statsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The statistics, expressed as xml or json"));
+    statsEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The statistics, expressed as xml or json"));
     statsEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
     statsEndpoint.addOptionalParam(new Param("id", Type.STRING, null,
             "The ID of the single episode to return the statistics for, if it exists"));
@@ -355,7 +356,7 @@ public class UserTrackingRestService {
     // add
     RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.PUT, "/", "Record a user action");
     addEndpoint.addFormat(new Format("XML", null, null));
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("The user action, expressed as xml, is returned"
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.created("The user action, expressed as xml, is returned"
             + " in the response body, and the URL to the user action is returned in the 'Location' header."));
     addEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the single episode"));
     addEndpoint.addRequiredParam(new Param("in", Type.STRING, null, "The inpoint of the user action"));
@@ -369,7 +370,7 @@ public class UserTrackingRestService {
             "Get footprints");
     footprintEndpoint.addFormat(new Format("XML", null, null));
     footprintEndpoint.addFormat(new Format("JSON", null, null));
-    footprintEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The footprints, expressed as xml or json"));
+    footprintEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The footprints, expressed as xml or json"));
     footprintEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
     footprintEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The mediapackage ID"));
     footprintEndpoint.setTestForm(RestTestForm.auto());
@@ -380,7 +381,7 @@ public class UserTrackingRestService {
             "Get user actions by type and day");
     userActionsEndpoint.addFormat(new Format("XML", null, null));
     userActionsEndpoint.addFormat(new Format("JSON", null, null));
-    userActionsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The user actions, expressed as xml or json"));
+    userActionsEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The user actions, expressed as xml or json"));
     userActionsEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
     userActionsEndpoint.addOptionalParam(new Param("type", Type.STRING, null, "The type of the user action"));
     userActionsEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));

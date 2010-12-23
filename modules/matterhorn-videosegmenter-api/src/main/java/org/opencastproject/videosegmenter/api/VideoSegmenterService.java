@@ -18,7 +18,6 @@ package org.opencastproject.videosegmenter.api;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.Track;
 
 /**
@@ -27,16 +26,16 @@ import org.opencastproject.mediapackage.Track;
 public interface VideoSegmenterService extends JobProducer {
 
   /** Receipt type */
-  public static final String JOB_TYPE = "org.opencastproject.videosegmenter";
+  String JOB_TYPE = "org.opencastproject.videosegmenter";
 
   /**
-   * Takes the given element and returns a receipt that can be used to get the resulting {@link MediaPackageElement}.
+   * Takes the given track and returns the job that can be used to get the resulting mpeg7 catalog.
    * 
    * @param track
-   *          element to segment
+   *          track to segment
    * @param block
    *          whether to block the calling thread until the analysis is complete
-   * @return the metadata
+   * @return the job with which we can obtain the extracted metadata
    */
   Job segment(Track track, boolean block) throws VideoSegmenterException;
 

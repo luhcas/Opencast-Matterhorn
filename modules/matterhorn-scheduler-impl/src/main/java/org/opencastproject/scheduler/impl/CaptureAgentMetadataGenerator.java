@@ -33,73 +33,80 @@ import java.util.Map.Entry;
 /**
  * 
  * Generate a properties list with key in the capture agents namespace from SchedulerEvent Metadata
- *
+ * 
  */
 public class CaptureAgentMetadataGenerator {
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentMetadataGenerator.class);
-  
+
   MetadataMapper mapper;
-  
+
   /**
    * Constructor needs the reference to the metadata mapping information.
-   * @param caMappingFile Mapping File with Capture Agent specific mapping
+   * 
+   * @param caMappingFile
+   *          Mapping File with Capture Agent specific mapping
    * @throws FileNotFoundException
    * @throws IOException
    */
-  public CaptureAgentMetadataGenerator (InputStream caMappingFile) throws FileNotFoundException, IOException {
+  public CaptureAgentMetadataGenerator(InputStream caMappingFile) throws FileNotFoundException, IOException {
     logger.debug("Initialising Capture Agent Metadata Generator");
-    mapper = new MetadataMapper(caMappingFile);  
+    mapper = new MetadataMapper(caMappingFile);
   }
-  
+
   /**
-   * Generates a Properties list with the Capture Agent metadata from the provided event 
-   * @param event The SchedulerEvent from which the metadata should be generated as Capture Agent specific data 
-   * @return A  Properties List with Capture Agent specific Data
+   * Generates a Properties list with the Capture Agent metadata from the provided event
+   * 
+   * @param event
+   *          The SchedulerEvent from which the metadata should be generated as Capture Agent specific data
+   * @return A Properties List with Capture Agent specific Data
    */
-  public Properties generate (Event event) {
+  public Properties generate(Event event) {
     logger.debug("generating Capture Agent metadata");
-    
-    Hashtable<String, String> caMetadata =  mapper.convert(event.getMetadataList());
+
+    Hashtable<String, String> caMetadata = mapper.convert(event.getMetadataList());
 
     // add to (and override, if necessary) the metadata values defined in the event properties.
     // TODO: I think it's time to remove the mapper altogether (jmh)
     caMetadata.put("event.title", event.getTitle());
-    if(event.getSeriesId() != null) caMetadata.put("event.series", event.getSeriesId());
+    if (event.getSeriesId() != null)
+      caMetadata.put("event.series", event.getSeriesId());
     caMetadata.put("capture.device.id", event.getDevice());
-    
+
     // Not sure about these mappings
-    //title = event.title
-    //seriesId = event.series
-    //device = capture.device.id
-    //channelId = event.source
-    //location = capture.device.location
-    //ingest-url = capture.ingest.endpoint.url
-    //distribution = distribution.channel
-    
-    // pass through all workflow metadata to capture agent 
+    // title = event.title
+    // seriesId = event.series
+    // device = capture.device.id
+    // channelId = event.source
+    // location = capture.device.location
+    // ingest-url = capture.ingest.endpoint.url
+    // distribution = distribution.channel
+
+    // pass through all workflow metadata to capture agent
     for (Metadata m : event.getMetadataList()) {
       String key = m.getKey();
       if (key.startsWith("org.opencastproject.workflow.")) {
         caMetadata.put(key, m.getValue());
       }
     }
-    
+
     Properties caCatalog = new Properties();
     if (event.containsKey("resources"))
       caCatalog.setProperty("capture.device.names", event.getResources());
     for (Entry<String, String> e : caMetadata.entrySet()) {
-      caCatalog.put (e.getKey(), e.getValue());
-    }       
+      caCatalog.put(e.getKey(), e.getValue());
+    }
     return caCatalog;
   }
 
   /**
-   * Generates a Properties list with the Capture Agent metadata from the provided event 
-   * @param event The SchedulerEvent from which the metadata should be generated as Capture Agent specific data 
+   * Generates a Properties list with the Capture Agent metadata from the provided event
+   * 
+   * @param event
+   *          The SchedulerEvent from which the metadata should be generated as Capture Agent specific data
    * @return A String with a Properties List with Capture Agent specific Data
    */
-  public String generateAsString (Event event) {
+  public String generateAsString(Event event) {
     StringWriter writer = new StringWriter();
     try {
       generate(event).store(writer, "Capture Agent specific data");

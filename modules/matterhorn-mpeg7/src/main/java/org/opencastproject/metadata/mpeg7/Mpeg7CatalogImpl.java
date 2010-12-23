@@ -16,8 +16,6 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -45,9 +43,6 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
 
   /** The default element namespace */
   public static final String NS = "mpeg7";
-  
-  /** the logging facility provided by log4j */
-  final static Logger logger = LoggerFactory.getLogger(Mpeg7CatalogImpl.class.getName());
 
   /**
    * Creates a new mpeg-7 metadata container.
@@ -67,7 +62,8 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
   /**
    * Populates the catalog.
    * 
-   * @param in The input stream containing the content
+   * @param in
+   *          The input stream containing the content
    * @throws IllegalStateException
    *           if reading the catalog fails
    */
@@ -152,8 +148,7 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
 
   /**
    * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#addAudioContent(java.lang.String,
-   *      org.opencastproject.mediapackage.mpeg7.MediaTime,
-   *      org.opencastproject.mediapackage.mpeg7.MediaLocator)
+   *      org.opencastproject.mediapackage.mpeg7.MediaTime, org.opencastproject.mediapackage.mpeg7.MediaLocator)
    */
   @SuppressWarnings("unchecked")
   public Audio addAudioContent(String id, MediaTime time, MediaLocator locator) {
@@ -200,8 +195,7 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
 
   /**
    * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#addVideoContent(java.lang.String,
-   *      org.opencastproject.mediapackage.mpeg7.MediaTime,
-   *      org.opencastproject.mediapackage.mpeg7.MediaLocator)
+   *      org.opencastproject.mediapackage.mpeg7.MediaTime, org.opencastproject.mediapackage.mpeg7.MediaLocator)
    */
   @SuppressWarnings("unchecked")
   public Video addVideoContent(String id, MediaTime time, MediaLocator locator) {
@@ -248,8 +242,7 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
 
   /**
    * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#addAudioVisualContent(java.lang.String,
-   *      org.opencastproject.mediapackage.mpeg7.MediaTime,
-   *      org.opencastproject.mediapackage.mpeg7.MediaLocator)
+   *      org.opencastproject.mediapackage.mpeg7.MediaTime, org.opencastproject.mediapackage.mpeg7.MediaLocator)
    */
   @SuppressWarnings("unchecked")
   public AudioVisual addAudioVisualContent(String id, MediaTime time, MediaLocator locator) {
@@ -347,7 +340,8 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
   @Override
   public Mpeg7Catalog clone() {
     Mpeg7CatalogImpl clone = new Mpeg7CatalogImpl();
-    clone.multimediaContent = (HashMap<MultimediaContent.Type, MultimediaContentImpl<? extends MultimediaContentType>>)this.multimediaContent.clone();
+    clone.multimediaContent = (HashMap<MultimediaContent.Type, MultimediaContentImpl<? extends MultimediaContentType>>) this.multimediaContent
+            .clone();
     return clone;
   }
 }

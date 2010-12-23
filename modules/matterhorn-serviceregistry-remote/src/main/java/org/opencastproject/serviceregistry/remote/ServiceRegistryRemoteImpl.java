@@ -113,7 +113,8 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *          the component context
    */
   protected void activate(ComponentContext context) {
-    String serviceURLProperty = StringUtils.trimToNull((String) context.getBundleContext().getProperty(OPT_SERVICE_REGISTRY_URL));
+    String serviceURLProperty = StringUtils.trimToNull((String) context.getBundleContext().getProperty(
+            OPT_SERVICE_REGISTRY_URL));
     if (serviceURLProperty == null)
       throw new ServiceException("Remote service registry can't find " + OPT_SERVICE_REGISTRY_URL);
     try {
@@ -135,10 +136,10 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
           throws ServiceRegistryException {
     return registerService(serviceType, host, path, false);
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#registerHost(java.lang.String, int)
    */
   @Override
@@ -172,7 +173,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unregisterHost(java.lang.String)
    */
   @Override
@@ -202,7 +203,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     }
     throw new ServiceRegistryException("Unable to unregister '" + host + "'. HTTP status=" + responseStatusCode);
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -309,13 +310,12 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
         return;
       }
     } catch (Exception e) {
-      throw new ServiceRegistryException("Unable to set maintenance mode on "+ host + " to '"
-              + maintenance + "'", e);
+      throw new ServiceRegistryException("Unable to set maintenance mode on " + host + " to '" + maintenance + "'", e);
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to set maintenace mode on '" + host
-            + "' to '" + maintenance + "'. HTTP status=" + responseStatusCode);
+    throw new ServiceRegistryException("Unable to set maintenace mode on '" + host + "' to '" + maintenance
+            + "'. HTTP status=" + responseStatusCode);
   }
 
   /**
@@ -675,7 +675,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getLoad()
    */
   @Override
@@ -683,7 +683,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     // TODO Auto-generated method stub
     return null;
   }
-  
+
   /**
    * Gets an xml representation of a {@link Job}
    * 

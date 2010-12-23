@@ -135,8 +135,7 @@ public class SchedulerServiceImplTest {
     EasyMock.expect(
             workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
                     (Map<String, String>) EasyMock.anyObject())).andReturn(workflowInstance);
-    EasyMock.expect(workflowService.getWorkflowById(EasyMock.anyLong())).andReturn(workflowInstance)
-            .anyTimes();
+    EasyMock.expect(workflowService.getWorkflowById(EasyMock.anyLong())).andReturn(workflowInstance).anyTimes();
     EasyMock.expect(workflowService.stop(EasyMock.anyLong())).andReturn(workflowInstance);
     workflowService.update((WorkflowInstance) EasyMock.anyObject());
     EasyMock.replay(workflowService);
@@ -232,7 +231,8 @@ public class SchedulerServiceImplTest {
     Event eventModified = service.getEvent(eventLoaded.getEventId());
     logger.info("State of the loaded event {}.", eventModified);
 
-    eventModified.getMetadataList().add((Metadata) new MetadataImpl(eventModified, "stupid.unused.key", "no matter what"));
+    eventModified.getMetadataList().add(
+            (Metadata) new MetadataImpl(eventModified, "stupid.unused.key", "no matter what"));
     for (int i = 0; i < eventModified.getMetadataList().size(); i++) {
       if (eventModified.getMetadataList().get(i).getKey().equals("creator")
               || eventModified.getMetadataList().get(i).getKey().equals("seriesId"))
@@ -367,7 +367,7 @@ public class SchedulerServiceImplTest {
     try {
       service.getEvent(eventUpdated.getEventId());
       Assert.fail();
-    } catch(NotFoundException e) {
+    } catch (NotFoundException e) {
       // this is an expected exception
     }
   }

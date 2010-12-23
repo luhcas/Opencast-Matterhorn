@@ -41,7 +41,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @Entity(name = "UserAction")
 @Table(name = "USER_ACTION")
-@NamedQueries( {
+@NamedQueries({
         @NamedQuery(name = "findUserActions", query = "SELECT a FROM UserAction a"),
         @NamedQuery(name = "countSessionsGroupByMediapackage", query = "SELECT a.mediapackageId, COUNT(distinct a.sessionId), SUM(a.length) FROM UserAction a GROUP BY a.mediapackageId"),
         @NamedQuery(name = "countSessionsGroupByMediapackageByIntervall", query = "SELECT a.mediapackageId, COUNT(distinct a.sessionId), SUM(a.length) FROM UserAction a WHERE :begin <= a.created AND a.created <= :end GROUP BY a.mediapackageId"),
@@ -64,7 +64,7 @@ import javax.xml.bind.annotation.XmlType;
 public class UserActionImpl implements UserAction {
 
   @Id
-  @Column(name="ID")
+  @Column(name = "ID")
   @GeneratedValue(strategy = GenerationType.AUTO)
   @XmlElement(name = "id")
   private Long id;

@@ -77,9 +77,9 @@ public class CaptureRestService {
     RestEndpoint startNoParamEndpoint = new RestEndpoint("startNP", RestEndpoint.Method.GET, "/startCapture",
             "Starts a capture with the default parameters");
     startNoParamEndpoint.addFormat(new Format("String", "The recording ID for the capture started", null));
-    startNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("valid request, results returned"));
+    startNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("valid request, results returned"));
     startNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ERROR("couldn't start capture with default parameters"));
+            .error("couldn't start capture with default parameters"));
     startNoParamEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, startNoParamEndpoint);
     // startCapture(Properties)
@@ -90,9 +90,9 @@ public class CaptureRestService {
                     "String",
                     "The recording ID for the capture started",
                     "http://opencast.jira.com/svn/MH/trunk/docs/felix/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties"));
-    startPropEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("valid request, results returned"));
+    startPropEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("valid request, results returned"));
     startPropEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ERROR("couldn't start capture with provided parameters"));
+            .error("couldn't start capture with provided parameters"));
     // This is to get the default value for capture.properties from source.opencastproject.org
     Param config = new Param(
             "config",
@@ -112,9 +112,9 @@ public class CaptureRestService {
     // stopCapture()
     RestEndpoint stopNoParamEndpoint = new RestEndpoint("stopNP", RestEndpoint.Method.GET, "/stopCapture",
             "Stops the current capture");
-    stopNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("recording properly stopped"));
+    stopNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("recording properly stopped"));
     stopNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ERROR("failed to stop the capture, or no current active capture"));
+            .error("failed to stop the capture, or no current active capture"));
     stopNoParamEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, stopNoParamEndpoint);
     // stopCapture(recordingID)
@@ -122,11 +122,11 @@ public class CaptureRestService {
             "Stops the current capture if its ID matches the argument");
     stopIDEndpoint.addRequiredParam(new Param("recordingID", Type.STRING, null, "The ID for the recording to stop"));
     stopIDEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("current capture with the specified ID stopped succesfully"));
+            .ok("current capture with the specified ID stopped succesfully"));
     // TODO: check if this can be returned
     // stopIDEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
     stopIDEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ERROR("failed to stop the capture, no current active capture, or no matching ID"));
+            .error("failed to stop the capture, no current active capture, or no matching ID"));
     stopIDEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, stopIDEndpoint);
 
@@ -134,8 +134,8 @@ public class CaptureRestService {
     RestEndpoint ingestEndpoint = new RestEndpoint("ingest", RestEndpoint.Method.POST, "/ingest",
             "Ingests the specified capture");
     ingestEndpoint.addRequiredParam(new Param("recordingID", Type.STRING, null, "The ID for the recording to ingest"));
-    ingestEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("capture ingested succesfully"));
-    ingestEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("ingest failed"));
+    ingestEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("capture ingested succesfully"));
+    ingestEndpoint.addStatus(org.opencastproject.util.doc.Status.error("ingest failed"));
     ingestEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, ingestEndpoint);
 
@@ -145,20 +145,20 @@ public class CaptureRestService {
             RestEndpoint.Method.GET,
             "/configuration",
             "Returns a list with the default agent configuration properties.  This is in the same format as the startCapture endpoint.");
-    configEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the configuration values are returned"));
+    configEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("the configuration values are returned"));
     configEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ERROR("the configuration properties could not be retrieved"));
-    configEndpoint.addStatus(org.opencastproject.util.doc.Status.SERVICE_UNAVAILABLE("Capture Agent is unavailable"));
+            .error("the configuration properties could not be retrieved"));
+    configEndpoint.addStatus(org.opencastproject.util.doc.Status.serviceUnavailable("Capture Agent is unavailable"));
     configEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, configEndpoint);
 
     // // configuration()
     RestEndpoint scheduleEndpoint = new RestEndpoint("schedule", RestEndpoint.Method.GET, "/schedule",
             "Returns an XML formatted list of the capture agent's current schedule");
-    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the agent's schedule is returned"));
+    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("the agent's schedule is returned"));
     scheduleEndpoint
-            .addStatus(org.opencastproject.util.doc.Status.ERROR("the agent's schedule could not be retrieved"));
-    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.SERVICE_UNAVAILABLE("Capture Agent is unavailable"));
+            .addStatus(org.opencastproject.util.doc.Status.error("the agent's schedule could not be retrieved"));
+    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.serviceUnavailable("Capture Agent is unavailable"));
     scheduleEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, scheduleEndpoint);
 

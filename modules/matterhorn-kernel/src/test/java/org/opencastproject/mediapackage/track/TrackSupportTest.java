@@ -33,11 +33,11 @@ import org.junit.Test;
 
 import java.net.URI;
 
-
 public class TrackSupportTest {
   @Test
   public void testByType() throws Exception {
-    TrackImpl t = new TrackImpl(MediaPackageElements.PRESENTER_SOURCE, MimeTypes.parseMimeType("video/avi"), new URI("http://foo"), 100L, Checksum.create(ChecksumType.DEFAULT_TYPE, "1234"));
+    TrackImpl t = new TrackImpl(MediaPackageElements.PRESENTER_SOURCE, MimeTypes.parseMimeType("video/avi"), new URI(
+            "http://foo"), 100L, Checksum.create(ChecksumType.DEFAULT_TYPE, "1234"));
     t.addStream(new AudioStreamImpl("audio-1"));
     t.addStream(new VideoStreamImpl("video-1"));
     Assert.assertEquals(1, TrackSupport.byType(t.getStreams(), AudioStream.class).length);

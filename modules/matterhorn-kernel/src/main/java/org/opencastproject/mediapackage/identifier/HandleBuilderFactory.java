@@ -23,7 +23,7 @@ import org.opencastproject.util.ConfigurationException;
  * you simply have to provide the class name of the desired implementation by setting the system property
  * <code>opencast.handlebuilder</code> accordingly.
  */
-public class HandleBuilderFactory {
+public final class HandleBuilderFactory {
 
   /** Class name for the default handle builder */
   private static final String BUILDER_CLASS = "org.opencastproject.mediapackage.identifier.HandleBuilderImpl";

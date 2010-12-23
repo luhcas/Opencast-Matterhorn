@@ -63,7 +63,7 @@ public class DocUtilTest {
     endpoint = new RestEndpoint("name1", RestEndpoint.Method.GET, "/path1/{rp1}", null);
     endpoint.addPathParam(new Param("rp1", Param.Type.STRING, null, null, null));
     endpoint.addFormat(Format.json());
-    endpoint.addStatus(Status.OK(null));
+    endpoint.addStatus(Status.ok(null));
     endpoint.addStatus(new Status(500, null));
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
     RestEndpoint endpoint2 = new RestEndpoint("name2", RestEndpoint.Method.POST, "/path2/{rp2}",
@@ -81,8 +81,8 @@ public class DocUtilTest {
     endpoint2.addFormat(new Format(Format.JSON, "json is a format that is cool or something", null));
     endpoint2.addFormat(Format.xml());
     endpoint2.addStatus(new Status(201, "created the new thingy"));
-    endpoint2.addStatus(Status.BAD_REQUEST("oopsy"));
-    endpoint2.addStatus(Status.ERROR("Something is broke!"));
+    endpoint2.addStatus(Status.badRequest("oopsy"));
+    endpoint2.addStatus(Status.error("Something is broke!"));
     endpoint2.addNote("this is the first note for this endpoint");
     endpoint2.addNote("this is the second note for this endpoint");
     endpoint2.setTestForm(RestTestForm.auto());
@@ -97,7 +97,7 @@ public class DocUtilTest {
     // test out the new format handling - MH-1752
     data = new DocRestData(name, title, "/azservice/rest", null);
     RestEndpoint endpointDot = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path3/stuff.xml", null);
-    endpointDot.addStatus(Status.OK(null));
+    endpointDot.addStatus(Status.ok(null));
     data.addEndpoint(RestEndpoint.Type.READ, endpointDot);
     document = DocUtil.generate(data);
     assertNotNull(document);
@@ -111,7 +111,7 @@ public class DocUtilTest {
     endpoint3.addOptionalParam(new Param("sample", Param.Type.BOOLEAN, "true", null));
     endpoint3.addFormat(Format.json());
     endpoint3.addFormat(Format.xml());
-    endpoint3.addStatus(Status.OK(null));
+    endpoint3.addStatus(Status.ok(null));
     endpoint3.addStatus(new Status(500, null));
     data.addEndpoint(RestEndpoint.Type.READ, endpoint3);
     document = DocUtil.generate(data);

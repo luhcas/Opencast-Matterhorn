@@ -17,7 +17,6 @@
 package org.opencastproject.search.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.search.api.MediaSegmentImpl;
 
 import java.util.ArrayList;
 import java.util.Date;

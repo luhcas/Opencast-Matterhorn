@@ -81,9 +81,8 @@ public class ConfidenceMonitorRestService {
     RestEndpoint grabFrameEndpoint = new RestEndpoint("grabFrame", RestEndpoint.Method.GET, "/{name}",
             "Loads a JPEG image from the device specified");
     grabFrameEndpoint.addFormat(new Format("jpeg", "The image of the device", null));
-    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
-    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ERROR("Couldn't grab a frame from specified device"));
+    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("OK, valid request, results returned"));
+    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.error("Couldn't grab a frame from specified device"));
     Param device = new Param("name", Type.STRING, null, "The device to grab a frame from");
     grabFrameEndpoint.addPathParam(device);
     grabFrameEndpoint.setTestForm(RestTestForm.auto());
@@ -93,17 +92,17 @@ public class ConfidenceMonitorRestService {
     RestEndpoint getDevices = new RestEndpoint("getDevices", RestEndpoint.Method.GET, "/devices",
             "Lists devices accessible on capture agent");
     getDevices.addFormat(new Format("XML", "Devices that support confidence monitoring", null));
-    getDevices.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
-    getDevices.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't list devices"));
-    getDevices.addStatus(org.opencastproject.util.doc.Status.SERVICE_UNAVAILABLE("Confidence monitor unavailable"));
+    getDevices.addStatus(org.opencastproject.util.doc.Status.ok("OK, valid request, results returned"));
+    getDevices.addStatus(org.opencastproject.util.doc.Status.error("Couldn't list devices"));
+    getDevices.addStatus(org.opencastproject.util.doc.Status.serviceUnavailable("Confidence monitor unavailable"));
     getDevices.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getDevices);
 
     // audio rms endpoint
     RestEndpoint getRMSValues = new RestEndpoint("getRMSValues", RestEndpoint.Method.GET, "/audio/{name}/{timestamp}",
             "Retrieve all RMS data for device {name} after Unix time {timestamp}");
-    getRMSValues.addStatus(org.opencastproject.util.doc.Status.OK(("NONE")));
-    getRMSValues.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't grab RMS values"));
+    getRMSValues.addStatus(org.opencastproject.util.doc.Status.ok(("NONE")));
+    getRMSValues.addStatus(org.opencastproject.util.doc.Status.error("Couldn't grab RMS values"));
     getRMSValues.addFormat(new Format("JSON",
             "start:Unix time to start getting values, interval: time between samples (ns), samples:list of RMS values",
             null));

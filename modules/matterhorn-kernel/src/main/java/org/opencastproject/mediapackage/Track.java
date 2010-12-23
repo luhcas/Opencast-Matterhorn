@@ -21,8 +21,7 @@ import org.opencastproject.mediapackage.track.TrackImpl;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * This interface describes methods and fields for audio and video tracks as
- * part of a media package.
+ * This interface describes methods and fields for audio and video tracks as part of a media package.
  */
 @XmlJavaTypeAdapter(TrackImpl.Adapter.class)
 public interface Track extends MediaPackageElement {
@@ -33,8 +32,7 @@ public interface Track extends MediaPackageElement {
   Type TYPE = Type.Track;
 
   /**
-   * Return the streams that make up the track. Tracks consist of at least one
-   * stream.
+   * Return the streams that make up the track. Tracks consist of at least one stream.
    */
   Stream[] getStreams();
 

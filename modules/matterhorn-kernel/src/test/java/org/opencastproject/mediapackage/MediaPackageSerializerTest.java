@@ -44,7 +44,7 @@ import javax.xml.xpath.XPathFactory;
  */
 @Ignore
 public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
-  
+
   /** a uri pointing to a web resource */
   URI webURI = null;
 
@@ -59,7 +59,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
 
   /** a uri pointing to a windows file system resource */
   URI windowsURI = null;
-  
+
   @Before
   public void setup() throws Exception {
     webURI = new URI("http://www.opencastproject.org/dc.xml");
@@ -68,7 +68,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
     windowsRootURI = new URI("file://c:\\\\Users\\John+Doe\\My+Mediapackage");
     windowsURI = new URI("file://c:\\\\Users\\John+Doe\\My+Mediapackage\\dc.xml");
   }
-  
+
   @Test
   public void testRelativeNativePaths() {
     try {
@@ -82,7 +82,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile());
       Document xml = mediaPackage.toXml(serializer);
-      
+
       // Test linux file relative to media package root
       String expected = dcFile.getAbsolutePath().substring(packageDir.getAbsolutePath().length() + 1);
       assertEquals(expected, xPath.evaluate("//url", xml));
@@ -112,7 +112,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(new File(linuxRootURI));
       Document xml = mediaPackage.toXml(serializer);
-      
+
       // Test linux file relative to media package root
       String expected = linuxURI.toString().substring(linuxRootURI.toString().length() + 1);
       assertEquals(expected, xPath.evaluate("//url", xml));
@@ -142,7 +142,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(new File(windowsRootURI));
       Document xml = mediaPackage.toXml(serializer);
-      
+
       // Test windows file relative to media package root
       String expected = windowsURI.toString().substring(windowsRootURI.toString().length() + 1);
       assertEquals(expected, xPath.evaluate("//url", xml));
@@ -159,5 +159,4 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
     }
   }
 
-  
 }

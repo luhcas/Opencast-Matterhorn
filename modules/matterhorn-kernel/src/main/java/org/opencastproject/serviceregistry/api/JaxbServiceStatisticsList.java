@@ -15,7 +15,6 @@
  */
 package org.opencastproject.serviceregistry.api;
 
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,28 +29,31 @@ import javax.xml.bind.annotation.XmlType;
  * A wrapper for service statistics.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="statistics", namespace="http://serviceregistry.opencastproject.org")
-@XmlRootElement(name="statistics", namespace="http://serviceregistry.opencastproject.org")
+@XmlType(name = "statistics", namespace = "http://serviceregistry.opencastproject.org")
+@XmlRootElement(name = "statistics", namespace = "http://serviceregistry.opencastproject.org")
 public class JaxbServiceStatisticsList {
   /** A list of search items. */
-  @XmlElement(name="service")
+  @XmlElement(name = "service")
   protected List<JaxbServiceStatistics> stats = new ArrayList<JaxbServiceStatistics>();
 
-  public JaxbServiceStatisticsList() {}
-  
-  public JaxbServiceStatisticsList(Collection<ServiceStatistics> stats) {
-    for(ServiceStatistics stat : stats) this.stats.add((JaxbServiceStatistics)stat);
+  public JaxbServiceStatisticsList() {
   }
-  
+
+  public JaxbServiceStatisticsList(Collection<ServiceStatistics> stats) {
+    for (ServiceStatistics stat : stats)
+      this.stats.add((JaxbServiceStatistics) stat);
+  }
+
   /**
    * @return the stats
    */
   public List<JaxbServiceStatistics> getStats() {
     return stats;
   }
-  
+
   /**
-   * @param stats the stats to set
+   * @param stats
+   *          the stats to set
    */
   public void setStats(List<JaxbServiceStatistics> stats) {
     this.stats = stats;

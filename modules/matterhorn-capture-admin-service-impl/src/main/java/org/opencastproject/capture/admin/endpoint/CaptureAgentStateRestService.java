@@ -349,8 +349,8 @@ public class CaptureAgentStateRestService {
             "Return the state of a given capture agent");
     endpoint.addPathParam(new Param("name", Param.Type.STRING, null, "The name of a given capture agent"));
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.OK("{agentState}"));
-    endpoint.addStatus(Status.NOT_FOUND("The agent {agentName} does not exist"));
+    endpoint.addStatus(Status.ok("{agentState}"));
+    endpoint.addStatus(Status.notFound("The agent {agentName} does not exist"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -360,9 +360,9 @@ public class CaptureAgentStateRestService {
     endpoint.addPathParam(new Param("name", Param.Type.STRING, null, "The name of a given capture agent"));
     endpoint.addRequiredParam(new Param("state", Param.Type.STRING, null, "The state of the capture agent"));
     endpoint.addFormat(new Format("HTML", null, null));
-    endpoint.addStatus(Status.OK("{agentName} set to {state}"));
-    endpoint.addStatus(Status.BAD_REQUEST("{state} is null or empty"));
-    endpoint.addStatus(Status.NOT_FOUND("The agent {agentName} does not exist"));
+    endpoint.addStatus(Status.ok("{agentName} set to {state}"));
+    endpoint.addStatus(Status.badRequest("{state} is null or empty"));
+    endpoint.addStatus(Status.notFound("The agent {agentName} does not exist"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -371,8 +371,8 @@ public class CaptureAgentStateRestService {
             "Remove record of a given capture agent");
     endpoint.addPathParam(new Param("name", Param.Type.STRING, null, "The name of a given capture agent"));
     endpoint.addFormat(new Format("HTML", null, null));
-    endpoint.addStatus(Status.OK("{agentName} removed"));
-    endpoint.addStatus(Status.NOT_FOUND("The agent {agentname} does not exist"));
+    endpoint.addStatus(Status.ok("{agentName} removed"));
+    endpoint.addStatus(Status.notFound("The agent {agentname} does not exist"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -381,8 +381,8 @@ public class CaptureAgentStateRestService {
             "Return the capabilities of a given capture agent");
     endpoint.addPathParam(new Param("name", Param.Type.STRING, null, "The name of a given capture agent"));
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.OK("An XML representation of the agent capabilities"));
-    endpoint.addStatus(Status.NOT_FOUND("The agent {name} does not exist in the system"));
+    endpoint.addStatus(Status.ok("An XML representation of the agent capabilities"));
+    endpoint.addStatus(Status.notFound("The agent {name} does not exist in the system"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -395,8 +395,8 @@ public class CaptureAgentStateRestService {
                     + "(friendly names as keys, device locations as their corresponding values)");
     endpoint.addFormat(new Format(Format.XML, "The capabilities that have just been set in the agent",
             "http://java.sun.com/dtd/properties.dtd"));
-    endpoint.addStatus(Status.OK("{agentName} set to {state}"));
-    endpoint.addStatus(Status.BAD_REQUEST("The capabilities format is incorrect OR the agent name is blank or null"));
+    endpoint.addStatus(Status.ok("{agentName} set to {state}"));
+    endpoint.addStatus(Status.badRequest("The capabilities format is incorrect OR the agent name is blank or null"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -404,7 +404,7 @@ public class CaptureAgentStateRestService {
     endpoint = new RestEndpoint("getKnownAgents", RestEndpoint.Method.GET, "/agents",
             "Return all registered capture agents and their state");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.OK(null));
+    endpoint.addStatus(Status.ok(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -413,8 +413,8 @@ public class CaptureAgentStateRestService {
             "Return the state of a given recording");
     endpoint.addPathParam(new Param("id", Param.Type.STRING, null, "The ID of a given recording"));
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.OK(null));
-    endpoint.addStatus(Status.NOT_FOUND("The recording with the specified ID does not exist"));
+    endpoint.addStatus(Status.ok(null));
+    endpoint.addStatus(Status.notFound("The recording with the specified ID does not exist"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -424,7 +424,7 @@ public class CaptureAgentStateRestService {
     endpoint.addPathParam(new Param("id", Param.Type.STRING, null, "The ID of a given recording"));
     endpoint.addRequiredParam(new Param("state", Param.Type.STRING, null, "The state of the recording"));
     endpoint.addFormat(new Format("HTML", null, null));
-    endpoint.addStatus(Status.OK("{id} set to {state}"));
+    endpoint.addStatus(Status.ok("{id} set to {state}"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -433,7 +433,7 @@ public class CaptureAgentStateRestService {
             "Remove record of a given recording");
     endpoint.addPathParam(new Param("id", Param.Type.STRING, null, "The ID of a given recording"));
     endpoint.addFormat(new Format("HTML", null, null));
-    endpoint.addStatus(Status.OK("{id} removed"));
+    endpoint.addStatus(Status.ok("{id} removed"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -441,7 +441,7 @@ public class CaptureAgentStateRestService {
     endpoint = new RestEndpoint("getAllRecordings", RestEndpoint.Method.GET, "/recordings",
             "Return all registered recordings and their state");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.OK(null));
+    endpoint.addStatus(Status.ok(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 

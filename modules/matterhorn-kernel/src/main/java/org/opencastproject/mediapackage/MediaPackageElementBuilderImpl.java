@@ -42,7 +42,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   private List<Class<? extends MediaPackageElementBuilderPlugin>> plugins = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(MediaPackageElementBuilderImpl.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(MediaPackageElementBuilderImpl.class.getName());
 
   // Create the list of available element builder pugins
   public MediaPackageElementBuilderImpl() {
@@ -96,7 +96,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.elementFromURI(uri);
     element.setFlavor(flavor);
-    builderPlugin.cleanup();
+    builderPlugin.destroy();
     return element;
   }
 
@@ -139,7 +139,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     // Create a new media package element
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.elementFromManifest(node, serializer);
-    builderPlugin.cleanup();
+    builderPlugin.destroy();
     return element;
   }
 
@@ -172,7 +172,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     // Create a new media package element
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.newElement(type, flavor);
-    builderPlugin.cleanup();
+    builderPlugin.destroy();
     return element;
   }
 
@@ -190,7 +190,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       throw new RuntimeException(e);
     }
     try {
-      plugin.setup();
+      plugin.init();
     } catch (Exception e) {
       throw new RuntimeException("An error occured while setting up media package element builder plugin " + plugin);
     }

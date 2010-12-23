@@ -36,6 +36,10 @@ import java.net.URL;
  */
 public final class SolrServerFactory {
 
+  /** Disallow construction of this utility class */
+  private SolrServerFactory() {
+  }
+
   /**
    * Constructor. Prepares solr connection.
    * 

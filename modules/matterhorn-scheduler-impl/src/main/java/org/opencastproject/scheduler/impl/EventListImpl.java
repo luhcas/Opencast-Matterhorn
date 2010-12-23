@@ -24,26 +24,26 @@ import java.util.LinkedList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="events")
+@XmlRootElement(name = "events")
 public class EventListImpl {
 
-  @XmlElement(name="event")
+  @XmlElement(name = "event")
   protected List<EventImpl> events;
 
   public EventListImpl() {
     this.events = new LinkedList<EventImpl>();
   }
-  
-  public EventListImpl(List<Event> eventList){
+
+  public EventListImpl(List<Event> eventList) {
     this.events = new LinkedList<EventImpl>();
     this.setEvents(eventList);
   }
-  
+
   public void setEvents(List<Event> eventList) {
-    if(!this.events.isEmpty()){
+    if (!this.events.isEmpty()) {
       this.events.clear();
     }
-    for(Event e : eventList){
+    for (Event e : eventList) {
       this.events.add((EventImpl) e);
     }
   }

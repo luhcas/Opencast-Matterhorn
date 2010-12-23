@@ -96,9 +96,9 @@ public class ProcessExecutor<T extends Exception> {
       if (errorStreamHelper != null) {
         msg = errorStreamHelper.contentBuffer.toString();
       }
-      
+
       // TODO: What if the error stream has been redirected? Can we still get the error messgae?
-      
+
       throw new ProcessExcecutorException(msg, t);
     } finally {
       IoSupport.closeQuietly(process);

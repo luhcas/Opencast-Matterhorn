@@ -20,76 +20,93 @@ package org.opencastproject.util.doc;
  */
 public class Status {
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status OK(String desc) {
+  public static Status ok(String desc) {
     return new Status(200, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status CREATED(String desc) {
+  public static Status created(String desc) {
     return new Status(201, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status NO_CONTENT(String desc) {
+  public static Status noContent(String desc) {
     return new Status(204, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status BAD_REQUEST(String desc) {
+  public static Status badRequest(String desc) {
     return new Status(400, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status UNAUTHORIZED(String desc) {
+  public static Status unauthorized(String desc) {
     return new Status(401, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status FORBIDDEN(String desc) {
+  public static Status forbidden(String desc) {
     return new Status(403, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status NOT_FOUND(String desc) {
+  public static Status notFound(String desc) {
     return new Status(404, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status ERROR(String desc) {
+  public static Status error(String desc) {
     return new Status(500, desc);
   }
+
   /**
-   * @param desc [optional] description to add to this status
+   * @param desc
+   *          [optional] description to add to this status
    * @return the status
    */
-  public static Status SERVICE_UNAVAILABLE(String desc) {
+  public static Status serviceUnavailable(String desc) {
     return new Status(503, desc);
   }
 
-  int code;
-  String name;
-  String description;
+  private int code;
+  private String name;
+  private String description;
 
   public Status(int code, String description) {
     if (code < 100 || code > 1100) {
-      throw new IllegalArgumentException("code ("+code+") is outside of the valid range: 100-1100");
+      throw new IllegalArgumentException("code (" + code + ") is outside of the valid range: 100-1100");
     }
     this.code = code;
     this.name = findName(code);
@@ -98,7 +115,9 @@ public class Status {
 
   /**
    * Allows overriding of the name which is set from the code
-   * @param name the name to display with the code
+   * 
+   * @param name
+   *          the name to display with the code
    */
   public void setName(String name) {
     this.name = name;
@@ -106,7 +125,7 @@ public class Status {
 
   @Override
   public String toString() {
-    return "SC:"+code+":"+name;
+    return "SC:" + code + ":" + name;
   }
 
   public int getCode() {
@@ -121,14 +140,16 @@ public class Status {
     return description;
   }
 
-// CHECKSTYLE:OFF
+  // CHECKSTYLE:OFF
 
   /**
    * This will resolve a human readable name for all known status codes
    * 
-   * @param code the status code
+   * @param code
+   *          the status code
    * @return the name OR UNKNOWN if none found
-   * @throws IllegalArgumentException if the code is outside the valid range
+   * @throws IllegalArgumentException
+   *           if the code is outside the valid range
    */
   public static String findName(int code) {
     // list from http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
@@ -307,6 +328,5 @@ public class Status {
     }
     return result;
   }
-// CHECKSTYLE:ON
+  // CHECKSTYLE:ON
 }
-

@@ -22,7 +22,7 @@
  * felix confing with the key "capture.ingest.enpoint.url". If this is missing, the value will be constructed from the 
  * "org.opencastproject.server.url" that is in the felix-config too.  
  */
-@javax.xml.bind.annotation.XmlSchema(elementFormDefault=XmlNsForm.UNSET, attributeFormDefault=XmlNsForm.UNSET)
+@javax.xml.bind.annotation.XmlSchema(elementFormDefault = XmlNsForm.UNSET, attributeFormDefault = XmlNsForm.UNSET)
 package org.opencastproject.scheduler.impl;
 
 import javax.xml.bind.annotation.XmlNsForm;

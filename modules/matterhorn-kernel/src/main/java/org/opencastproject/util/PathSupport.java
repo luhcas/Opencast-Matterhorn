@@ -26,7 +26,7 @@ import java.util.UUID;
 /**
  * <code>PathSupport</code> is a helper class to deal with filesystem paths.
  */
-public class PathSupport {
+public final class PathSupport {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(PathSupport.class);
@@ -211,7 +211,7 @@ public class PathSupport {
    */
   private static String adjustSeparator(String path) {
     String sp = File.separator;
-    if (sp.equals("\\"))
+    if ("\\".equals(sp))
       sp = "\\\\";
     return path.replaceAll("/", sp);
   }

@@ -27,7 +27,7 @@ public class UnknownFileTypeException extends Exception {
   private static final long serialVersionUID = -3505640764857664931L;
 
   /** The file in question */
-  private File file_ = null;
+  private File file = null;
 
   /**
    * Creates a new exception with the given message.
@@ -40,8 +40,7 @@ public class UnknownFileTypeException extends Exception {
   }
 
   /**
-   * Creates a new exception with the given message and a reference to the file
-   * causing the exception.
+   * Creates a new exception with the given message and a reference to the file causing the exception.
    * 
    * @param message
    *          the error message
@@ -50,7 +49,7 @@ public class UnknownFileTypeException extends Exception {
    */
   public UnknownFileTypeException(String message, File file) {
     super(message);
-    file_ = file;
+    this.file = file;
   }
 
   /**
@@ -59,7 +58,7 @@ public class UnknownFileTypeException extends Exception {
    * @return the file
    */
   public File getFile() {
-    return file_;
+    return file;
   }
 
 }

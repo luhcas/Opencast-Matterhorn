@@ -29,6 +29,7 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
@@ -51,7 +52,7 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
   /**
    * the logging facility provided by log4j
    */
-  private final static Logger logger = LoggerFactory.getLogger(TrackBuilderPlugin.class);
+  private static final Logger logger = LoggerFactory.getLogger(TrackBuilderPlugin.class);
 
   /**
    * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.mediapackage.MediaPackageElement.Type,
@@ -66,7 +67,7 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
    */
   public boolean accept(Node elementNode) {
     String name = elementNode.getNodeName();
-    if(name.contains(":")) {
+    if (name.contains(":")) {
       name = name.substring(name.indexOf(":") + 1);
     }
     return name.equalsIgnoreCase(MediaPackageElement.Type.Track.toString());
@@ -132,18 +133,18 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
 
       // flavor
       String flavorValue = (String) xpath.evaluate("@type", elementNode, XPathConstants.STRING);
-      if (flavorValue != null && !flavorValue.equals(""))
+      if (StringUtils.isNotEmpty(flavorValue))
         flavor = MediaPackageElementFlavor.parseFlavor(flavorValue);
 
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
       String checksumType = (String) xpath.evaluate("checksum/@type", elementNode, XPathConstants.STRING);
-      if (checksumValue != null && !checksumValue.equals("") && checksumType != null)
+      if (StringUtils.isNotEmpty(checksumValue) && checksumType != null)
         checksum = Checksum.create(checksumType.trim(), checksumValue.trim());
 
       // mimetype
       String mimeTypeValue = (String) xpath.evaluate("mimetype/text()", elementNode, XPathConstants.STRING);
-      if (mimeTypeValue != null && !mimeTypeValue.equals(""))
+      if (StringUtils.isNotEmpty(mimeTypeValue))
         mimeType = MimeTypes.parseMimeType(mimeTypeValue);
 
       //
@@ -151,14 +152,14 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
 
       TrackImpl track = TrackImpl.fromURI(url);
 
-      if (id != null && !id.equals(""))
+      if (StringUtils.isNotBlank(id))
         track.setIdentifier(id);
 
       // Add url
       track.setURI(url);
 
       // Add reference
-      if (reference != null && !reference.equals(""))
+      if (StringUtils.isNotEmpty(reference))
         track.referTo(MediaPackageReferenceImpl.fromString(reference));
 
       // Set size
@@ -172,13 +173,13 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
       // Set mimetpye
       if (mimeType != null)
         track.setMimeType(mimeType);
-      
-      if(flavor != null)
+
+      if (flavor != null)
         track.setFlavor(flavor);
 
       // description
       String description = (String) xpath.evaluate("description/text()", elementNode, XPathConstants.STRING);
-      if (description != null && !description.trim().equals(""))
+      if (StringUtils.isNotBlank(description))
         track.setElementDescription(description.trim());
 
       // tags
@@ -190,7 +191,7 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
       // duration
       try {
         String strDuration = (String) xpath.evaluate("duration/text()", elementNode, XPathConstants.STRING);
-        if (strDuration != null && !strDuration.equals("")) {
+        if (StringUtils.isNotEmpty(strDuration)) {
           long duration = Long.parseLong(strDuration.trim());
           track.setDuration(duration);
         }
@@ -205,10 +206,11 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
           AudioStreamImpl as = AudioStreamImpl.fromManifest(createStreamID(track), audioSettingsNode, xpath);
           track.addStream(as);
         } catch (IllegalStateException e) {
-          throw new UnsupportedElementException("Illegal state encountered while reading audio settings from " + url + ": "
-                  + e.getMessage());
+          throw new UnsupportedElementException("Illegal state encountered while reading audio settings from " + url
+                  + ": " + e.getMessage());
         } catch (XPathException e) {
-          throw new UnsupportedElementException("Error while parsing audio settings from " + url + ": " + e.getMessage());
+          throw new UnsupportedElementException("Error while parsing audio settings from " + url + ": "
+                  + e.getMessage());
         }
       }
 
@@ -219,10 +221,11 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
           VideoStreamImpl vs = VideoStreamImpl.fromManifest(createStreamID(track), videoSettingsNode, xpath);
           track.addStream(vs);
         } catch (IllegalStateException e) {
-          throw new UnsupportedElementException("Illegal state encountered while reading video settings from " + url + ": "
-                  + e.getMessage());
+          throw new UnsupportedElementException("Illegal state encountered while reading video settings from " + url
+                  + ": " + e.getMessage());
         } catch (XPathException e) {
-          throw new UnsupportedElementException("Error while parsing video settings from " + url + ": " + e.getMessage());
+          throw new UnsupportedElementException("Error while parsing video settings from " + url + ": "
+                  + e.getMessage());
         }
       }
 

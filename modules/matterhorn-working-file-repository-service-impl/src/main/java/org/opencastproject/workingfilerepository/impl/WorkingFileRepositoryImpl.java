@@ -73,13 +73,13 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   }
 
   /* The root directory for storing files */
-  String rootDirectory = null;
+  protected String rootDirectory = null;
 
   /** The Base URL for this server */
-  String serverUrl = null;
+  protected String serverUrl = null;
 
   /** The URL for the services provided by the working file repository */
-  URI serviceUrl = null;
+  protected URI serviceUrl = null;
 
   /**
    * Activate the component

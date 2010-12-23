@@ -64,13 +64,13 @@ public class CustomFeedService extends AbstractFeedService implements FeedGenera
    * @see org.opencastproject.feed.impl.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
    *      java.lang.String[], int, int)
    */
-  protected SearchResult loadFeedData(Type type, String query[], int limit, int offset) {
+  protected SearchResult loadFeedData(Type type, String[] query, int limit, int offset) {
     try {
       String q = solrQuery;
       if (query != null && query.length > 1) {
         Object[] args = new Object[query.length - 1];
-        for (int i=1; i<query.length; i++)
-          args[i-1] = query[i];
+        for (int i = 1; i < query.length; i++)
+          args[i - 1] = query[i];
         q = MessageFormat.format(solrQuery, args);
       }
       return searchService.getByQuery(q, limit, offset);
@@ -79,9 +79,10 @@ public class CustomFeedService extends AbstractFeedService implements FeedGenera
       return null;
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.impl.AbstractFeedService#initialize(java.util.Properties)
    */
   @Override

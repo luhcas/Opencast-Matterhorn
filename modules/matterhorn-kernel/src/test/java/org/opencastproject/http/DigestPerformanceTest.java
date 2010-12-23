@@ -25,10 +25,10 @@ import java.net.URL;
 
 public class DigestPerformanceTest {
   private static final Logger logger = LoggerFactory.getLogger(DigestPerformanceTest.class);
-  
+
   /**
-   * Verifying that running an md5 on a classpath resource is quick enough to do on each request.  With a mean of around
-   * one millisecond to md5 a large javascript library, this seems like an acceptable cost to support ETags.  Testing
+   * Verifying that running an md5 on a classpath resource is quick enough to do on each request. With a mean of around
+   * one millisecond to md5 a large javascript library, this seems like an acceptable cost to support ETags. Testing
    * concurrent md5 hashing is difficult since it seems to run so quickly, but 100 more-or-less concurrent threads still
    * seem to perform OK.
    * 
@@ -40,23 +40,25 @@ public class DigestPerformanceTest {
     InputStream in = url.openStream();
     Statistics stats = new Statistics();
     long count = 100;
-    for(int i=0; i<count; i++) {
+    for (int i = 0; i < count; i++) {
       long start = System.currentTimeMillis();
       DigestUtils.md5Hex(in);
       long elapsed = (System.currentTimeMillis() - start);
-      if(elapsed > stats.getMax()) stats.setMax(elapsed);
-      if(elapsed < stats.getMin()) stats.setMin(elapsed);
+      if (elapsed > stats.getMax())
+        stats.setMax(elapsed);
+      if (elapsed < stats.getMin())
+        stats.setMin(elapsed);
       stats.setTotalElapsed(stats.getTotalElapsed() + elapsed);
     }
-    logger.info("One thread running {} md5 hashes of InfusionAll.js took min {}ms, max {}ms, mean {}ms",
-            new Long[] {count, stats.getMin(), stats.getMax(), (stats.getTotalElapsed()/count)});
+    logger.info("One thread running {} md5 hashes of InfusionAll.js took min {}ms, max {}ms, mean {}ms", new Long[] {
+            count, stats.getMin(), stats.getMax(), (stats.getTotalElapsed() / count) });
   }
 
   @Test
   public void testMultiThreadedMd5Digest() throws Exception {
     final Statistics stats = new Statistics();
     long count = 100;
-    for(int i=0; i<count; i++) {
+    for (int i = 0; i < count; i++) {
       new Thread(new Runnable() {
         public void run() {
           stats.addThread();
@@ -66,10 +68,12 @@ public class DigestPerformanceTest {
             long start = System.currentTimeMillis();
             DigestUtils.md5Hex(in);
             long elapsed = (System.currentTimeMillis() - start);
-            if(elapsed > stats.getMax()) stats.setMax(elapsed);
-            if(elapsed < stats.getMin()) stats.setMin(elapsed);
+            if (elapsed > stats.getMax())
+              stats.setMax(elapsed);
+            if (elapsed < stats.getMin())
+              stats.setMin(elapsed);
             stats.setTotalElapsed(stats.getTotalElapsed() + elapsed);
-          } catch(Exception e) {
+          } catch (Exception e) {
             throw new RuntimeException(e);
           } finally {
             stats.removeThread();
@@ -77,8 +81,10 @@ public class DigestPerformanceTest {
         }
       }).start();
     }
-    logger.info("{} threads running ({} max concurrent) md5 hashes of InfusionAll.js took min {}ms, max {}ms, mean {}ms",
-            new Long[] {count, stats.getMaxConcurrentThreads(), stats.getMin(), stats.getMax(), (stats.getTotalElapsed()/count)});
+    logger.info(
+            "{} threads running ({} max concurrent) md5 hashes of InfusionAll.js took min {}ms, max {}ms, mean {}ms",
+            new Long[] { count, stats.getMaxConcurrentThreads(), stats.getMin(), stats.getMax(),
+                    (stats.getTotalElapsed() / count) });
   }
 }
 
@@ -88,17 +94,42 @@ class Statistics {
   private long totalElapsed = 0;
   private long maxConcurrentThreads = 0;
   private long concurrentThreads = 0;
-  
-  long getMin() {return min;}
-  long getMax() {return max;}
-  long getTotalElapsed() {return totalElapsed;}
-  void setMin(long min) {this.min = min;}
-  void setMax(long max) {this.max = max;}
-  void setTotalElapsed(long total) {this.totalElapsed = total;}
-  long getMaxConcurrentThreads() {return maxConcurrentThreads;}
+
+  long getMin() {
+    return min;
+  }
+
+  long getMax() {
+    return max;
+  }
+
+  long getTotalElapsed() {
+    return totalElapsed;
+  }
+
+  void setMin(long min) {
+    this.min = min;
+  }
+
+  void setMax(long max) {
+    this.max = max;
+  }
+
+  void setTotalElapsed(long total) {
+    this.totalElapsed = total;
+  }
+
+  long getMaxConcurrentThreads() {
+    return maxConcurrentThreads;
+  }
+
   void addThread() {
     this.concurrentThreads++;
-    if(this.concurrentThreads > maxConcurrentThreads) maxConcurrentThreads = concurrentThreads;
+    if (this.concurrentThreads > maxConcurrentThreads)
+      maxConcurrentThreads = concurrentThreads;
   }
-  void removeThread() {this.concurrentThreads--;}
+
+  void removeThread() {
+    this.concurrentThreads--;
+  }
 }

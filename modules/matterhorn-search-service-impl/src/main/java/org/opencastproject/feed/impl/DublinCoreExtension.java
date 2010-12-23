@@ -28,7 +28,7 @@ import java.util.List;
 public class DublinCoreExtension implements FeedExtension {
 
   /** The dublin core module uri */
-  public static String URI = "http://purl.org/dc/elements/1.1/";
+  public static final String URI = "http://purl.org/dc/elements/1.1/";
 
   private String title;
   private List<String> creators;
@@ -425,9 +425,9 @@ public class DublinCoreExtension implements FeedExtension {
    */
   public class Subject {
 
-    String taxonomyUri = null;
+    protected String taxonomyUri = null;
 
-    String value = null;
+    protected String value = null;
 
     /**
      * Creates a new subject definition.

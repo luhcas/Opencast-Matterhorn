@@ -123,8 +123,8 @@ public class StreamingDistributionRestService {
     endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null,
             "The media package identifier"));
     endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, null, "A media package element"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -132,8 +132,8 @@ public class StreamingDistributionRestService {
     RestEndpoint retractEndpoint = new RestEndpoint("retract", RestEndpoint.Method.POST, "/retract",
             "Retract a media package from the streaming server");
     retractEndpoint.addRequiredParam(new Param("mediapackageId", Param.Type.STRING, null, "The media package ID"));
-    retractEndpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
-    retractEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    retractEndpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+    retractEndpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     retractEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, retractEndpoint);
 

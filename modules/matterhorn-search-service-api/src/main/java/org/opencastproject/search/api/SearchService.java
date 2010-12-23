@@ -27,8 +27,8 @@ public interface SearchService {
   /**
    * Identifier for service registration and location
    */
-  String JOB_TYPE="org.opencastproject.search";
-  
+  String JOB_TYPE = "org.opencastproject.search";
+
   /**
    * Adds the media package to the search index.
    * 
@@ -59,7 +59,9 @@ public interface SearchService {
 
   /**
    * Find search results based on the specified query object
-   * @param q The {@link SearchQuery} containing the details of the desired results
+   * 
+   * @param q
+   *          The {@link SearchQuery} containing the details of the desired results
    * @return The search result
    * @throws SearchException
    *           if an error occurs while searching for media packages

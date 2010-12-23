@@ -115,15 +115,17 @@ public class SpatioTemporalDecompositionImpl implements SpatioTemporalDecomposit
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#getVideoText()
    */
   @Override
   public VideoText[] getVideoText() {
     return videoTexts.toArray(new VideoText[videoTexts.size()]);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#getVideoText(java.lang.String)
    */
   @Override
@@ -134,7 +136,7 @@ public class SpatioTemporalDecompositionImpl implements SpatioTemporalDecomposit
     }
     return null;
   }
-  
+
   /**
    * @see org.opencastproject.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */

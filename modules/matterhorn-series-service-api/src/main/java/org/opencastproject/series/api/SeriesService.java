@@ -33,7 +33,7 @@ public interface SeriesService {
    * @throws IllegalArgumentException
    *           if a series already exists with this identifier
    */
-  public void addSeries(Series s) throws IllegalArgumentException;
+  void addSeries(Series s) throws IllegalArgumentException;
 
   /**
    * Removes the series with the given seriesID
@@ -43,7 +43,7 @@ public interface SeriesService {
    * @throws NotFoundException
    *           if the series doesn't exist
    */
-  public void removeSeries(String seriesID) throws NotFoundException;
+  void removeSeries(String seriesID) throws NotFoundException;
 
   /**
    * updates an series in the database
@@ -53,7 +53,7 @@ public interface SeriesService {
    * @throws NotFoundException
    *           if the series doesn't exist
    */
-  public void updateSeries(Series s) throws NotFoundException;
+  void updateSeries(Series s) throws NotFoundException;
 
   /**
    * returns the series with the provided ID
@@ -62,14 +62,14 @@ public interface SeriesService {
    *          The ID of the requested series
    * @return The requested series
    */
-  public Series getSeries(String seriesID) throws NotFoundException;
+  Series getSeries(String seriesID) throws NotFoundException;
 
   /**
    * returns all series as a List
    * 
    * @return A List with the series'
    */
-  public List<Series> getAllSeries();
+  List<Series> getAllSeries();
 
   /**
    * returns the Dublin Core metadata set for the series specified by the ID
@@ -78,7 +78,7 @@ public interface SeriesService {
    *          The ID of the demanded series
    * @return A dublin Core Element
    */
-  public DublinCoreCatalog getDublinCore(String seriesID) throws NotFoundException;
+  DublinCoreCatalog getDublinCore(String seriesID) throws NotFoundException;
 
   /**
    * Adds or updates an existing series based on a dublin core catalog.
@@ -87,7 +87,7 @@ public interface SeriesService {
    *          The dublin core metadata catalog
    * @return The updated series
    */
-  public Series addOrUpdate(DublinCoreCatalog dcCatalog);
+  Series addOrUpdate(DublinCoreCatalog dcCatalog);
 
   /**
    * Searches for all series' that fit into a certain pattern
@@ -96,6 +96,6 @@ public interface SeriesService {
    *          a part the value of a metadata field
    * @return a List of all series that match that pattern
    */
-  public List<Series> searchSeries(String pattern) throws NotFoundException;
+  List<Series> searchSeries(String pattern) throws NotFoundException;
 
 }

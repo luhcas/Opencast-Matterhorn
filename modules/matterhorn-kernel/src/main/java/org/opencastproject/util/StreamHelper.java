@@ -46,11 +46,10 @@ public class StreamHelper extends Thread {
   protected Logger logger = null;
 
   /** True to keep reading the streams */
-  boolean keepReading = true;
+  protected boolean keepReading = true;
 
   /**
-   * Creates a new stream helper and immediately starts capturing output from
-   * the given stream.
+   * Creates a new stream helper and immediately starts capturing output from the given stream.
    * 
    * @param inputStream
    *          the input stream
@@ -60,8 +59,8 @@ public class StreamHelper extends Thread {
   }
 
   /**
-   * Creates a new stream helper and immediately starts capturing output from
-   * the given stream. Output will be captured to the given buffer.
+   * Creates a new stream helper and immediately starts capturing output from the given stream. Output will be captured
+   * to the given buffer.
    * 
    * @param inputStream
    *          the input stream to read from
@@ -73,8 +72,8 @@ public class StreamHelper extends Thread {
   }
 
   /**
-   * Creates a new stream helper and immediately starts capturing output from
-   * the given stream. Output will be captured to the given buffer.
+   * Creates a new stream helper and immediately starts capturing output from the given stream. Output will be captured
+   * to the given buffer.
    * 
    * @param inputStream
    *          the input stream to read from
@@ -83,15 +82,13 @@ public class StreamHelper extends Thread {
    * @param contentBuffer
    *          the buffer to write the captured output to
    */
-  public StreamHelper(InputStream inputStream, Logger logger,
-      StringBuffer contentBuffer) {
+  public StreamHelper(InputStream inputStream, Logger logger, StringBuffer contentBuffer) {
     this(inputStream, null, logger, contentBuffer);
   }
 
   /**
-   * Creates a new stream helper and immediately starts capturing output from
-   * the given stream. Output will be captured to the given buffer and also
-   * redirected to the provided output stream.
+   * Creates a new stream helper and immediately starts capturing output from the given stream. Output will be captured
+   * to the given buffer and also redirected to the provided output stream.
    * 
    * @param inputStream
    *          the input stream to read from
@@ -100,15 +97,13 @@ public class StreamHelper extends Thread {
    * @param contentBuffer
    *          the buffer to write the captured output to
    */
-  public StreamHelper(InputStream inputStream, OutputStream redirect,
-      StringBuffer contentBuffer) {
+  public StreamHelper(InputStream inputStream, OutputStream redirect, StringBuffer contentBuffer) {
     this(inputStream, redirect, null, contentBuffer);
   }
 
   /**
-   * Creates a new stream helper and immediately starts capturing output from
-   * the given stream. Output will be captured to the given buffer and also
-   * redirected to the provided output stream.
+   * Creates a new stream helper and immediately starts capturing output from the given stream. Output will be captured
+   * to the given buffer and also redirected to the provided output stream.
    * 
    * @param inputStream
    *          the input stream to read from
@@ -119,8 +114,7 @@ public class StreamHelper extends Thread {
    * @param contentBuffer
    *          the buffer to write the captured output to
    */
-  public StreamHelper(InputStream inputStream, OutputStream redirect,
-      Logger logger, StringBuffer contentBuffer) {
+  public StreamHelper(InputStream inputStream, OutputStream redirect, Logger logger, StringBuffer contentBuffer) {
     this.inputStream = inputStream;
     this.outputStream = redirect;
     this.logger = logger;
@@ -148,13 +142,16 @@ public class StreamHelper extends Thread {
       }
       isreader = new InputStreamReader(inputStream);
       reader = new BufferedReader(isreader);
-      String line = null;
-      while (keepReading && reader.ready() && (line = reader.readLine()) != null) {
-        append(line);
-        log(line);
+      if(reader.ready()) {
+        String line = reader.readLine();
+        while (keepReading && reader.ready() && line != null) {
+          append(line);
+          log(line);
+          line = reader.readLine();
+        }
+        if (writer != null)
+          writer.flush();
       }
-      if (writer != null)
-        writer.flush();
     } catch (IOException ioe) {
       ioe.printStackTrace();
     } finally {
@@ -165,8 +162,7 @@ public class StreamHelper extends Thread {
   }
 
   /**
-   * This method will write any output from the stream to the the content buffer
-   * and the logger.
+   * This method will write any output from the stream to the the content buffer and the logger.
    * 
    * @param output
    *          the stream output
@@ -187,8 +183,7 @@ public class StreamHelper extends Thread {
   }
 
   /**
-   * If a logger has been specified, the output is written to the logger using
-   * the defined log level.
+   * If a logger has been specified, the output is written to the logger using the defined log level.
    * 
    * @param output
    *          the stream output

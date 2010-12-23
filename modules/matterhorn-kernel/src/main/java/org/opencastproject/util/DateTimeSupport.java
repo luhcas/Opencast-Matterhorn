@@ -24,11 +24,14 @@ import java.util.TimeZone;
 /**
  * Utility class used to convert from and to <code>UTC</code> time.
  */
-public class DateTimeSupport {
+public final class DateTimeSupport {
+
+  /** Disable construction of this utility class */
+  private DateTimeSupport() {
+  }
 
   /**
-   * This methods reads a utc date string and returns it's unix time equivalent
-   * in milliseconds.
+   * This methods reads a utc date string and returns it's unix time equivalent in milliseconds.
    * 
    * @param s
    *          the utc string
@@ -37,13 +40,12 @@ public class DateTimeSupport {
    * @throws ParseException
    *           if the date string is malformed
    */
-  public static long fromUTC(String s) throws IllegalStateException,
-      ParseException {
+  public static long fromUTC(String s) throws IllegalStateException, ParseException {
     if (s == null) {
       throw new IllegalArgumentException("UTC date string is null");
     }
     if (s.endsWith("Z")) {
-      s = s.substring(0, s.length() - 1); //cut off the Z
+      s = s.substring(0, s.length() - 1); // cut off the Z
     }
     String[] parts = s.split("T");
     if (parts.length != 2)

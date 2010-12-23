@@ -16,7 +16,6 @@
 
 package org.opencastproject.mediapackage.identifier;
 
-
 import java.net.URL;
 
 /**

@@ -108,7 +108,7 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
    * @see org.opencastproject.feed.impl.AbstractFeedGenerator#loadFeedData(org.opencastproject.feed.api.Feed.Type,
    *      java.lang.String[], int, int)
    */
-  protected SearchResult loadFeedData(Type type, String query[], int limit, int offset) {
+  protected SearchResult loadFeedData(Type type, String[] query, int limit, int offset) {
     return seriesData.get();
   }
 

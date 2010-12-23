@@ -53,10 +53,10 @@ public class MediaPackageMergeTest {
   /** tmp directory */
   protected File tmpDir = null;
 
-  /** Media package directories  */
+  /** Media package directories */
   protected File packageDir1 = null;
   protected File packageDir2 = null;
-  
+
   /** The media package builder */
   protected MediaPackageBuilder mediaPackageBuilder = null;
 
@@ -140,7 +140,7 @@ public class MediaPackageMergeTest {
    * 
    * @throws IOException
    * @throws MediaPackageException
-   * @throws URISyntaxException 
+   * @throws URISyntaxException
    */
   private void setUpTargeMediaPackage() throws IOException, MediaPackageException, URISyntaxException {
     // Create the media package directory

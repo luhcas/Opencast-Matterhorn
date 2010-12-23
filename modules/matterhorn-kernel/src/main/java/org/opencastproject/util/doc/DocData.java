@@ -25,6 +25,7 @@ import java.util.Vector;
 
 /**
  * This is the document model class which is the basis for all doc data models
+ * 
  * @see DocRestData if you want to create rest endpoint docs
  */
 public class DocData {
@@ -40,12 +41,15 @@ public class DocData {
   /**
    * Create a new DocData object
    * 
-   * @param name the name of the document (must be alphanumeric (includes _) and no spaces or special chars)
-   * @param title [OPTIONAL] the title of the document
-   * @param notes [OPTIONAL] an array of notes to add into the document
+   * @param name
+   *          the name of the document (must be alphanumeric (includes _) and no spaces or special chars)
+   * @param title
+   *          [OPTIONAL] the title of the document
+   * @param notes
+   *          [OPTIONAL] an array of notes to add into the document
    */
   public DocData(String name, String title, String[] notes) {
-    if (! isValidName(name)) {
+    if (!isValidName(name)) {
       throw new IllegalArgumentException("name must be set and only alphanumeric");
     }
     if (isBlank(title)) {
@@ -66,7 +70,8 @@ public class DocData {
 
   /**
    * @return the map version of the data in this doc data holder
-   * @throws IllegalArgumentException if the data cannot be turned into a valid map
+   * @throws IllegalArgumentException
+   *           if the data cannot be turned into a valid map
    */
   public Map<String, Object> toMap() {
     LinkedHashMap<String, Object> m = new LinkedHashMap<String, Object>();
@@ -84,10 +89,12 @@ public class DocData {
 
   /**
    * Add a note to the document
-   * @param note the text of the note
+   * 
+   * @param note
+   *          the text of the note
    */
   public void addNote(String note) {
-    if (note != null && ! "".equals(note)) {
+    if (note != null && !"".equals(note)) {
       this.notes.add(note);
     }
   }
@@ -115,9 +122,11 @@ public class DocData {
   public String getMetaData(String key) {
     return meta.get(key);
   }
+
   public Map<String, String> getMeta() {
     return meta; // never null
   }
+
   public List<String> getNotes() {
     return notes; // never null
   }

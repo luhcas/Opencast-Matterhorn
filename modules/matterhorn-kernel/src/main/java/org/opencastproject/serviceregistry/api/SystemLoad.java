@@ -74,30 +74,32 @@ public class SystemLoad {
     /** This node's current load */
     @XmlAttribute
     protected float loadFactor;
-    
+
     /**
      * @return the host
      */
     public String getHost() {
       return host;
     }
-    
+
     /**
-     * @param host the host to set
+     * @param host
+     *          the host to set
      */
     public void setHost(String host) {
       this.host = host;
     }
-    
+
     /**
      * @return the loadFactor
      */
     public float getLoadFactor() {
       return loadFactor;
     }
-    
+
     /**
-     * @param loadFactor the loadFactor to set
+     * @param loadFactor
+     *          the loadFactor to set
      */
     public void setLoadFactor(float loadFactor) {
       this.loadFactor = loadFactor;

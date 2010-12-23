@@ -27,11 +27,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This <code>MediaPackageElementSelector</code> selects tracks
- * from a <code>MediaPackage</code> that contain audio stream.
+ * This <code>MediaPackageElementSelector</code> selects tracks from a <code>MediaPackage</code> that contain audio
+ * stream.
  */
-public class AudioElementSelector extends
-        AbstractMediaPackageElementSelector<Track> {
+public class AudioElementSelector extends AbstractMediaPackageElementSelector<Track> {
 
   /** Explicit audio flavor */
   protected MediaPackageElementFlavor audioFlavor = null;
@@ -43,8 +42,7 @@ public class AudioElementSelector extends
   }
 
   /**
-   * Creates a new selector that will restrict the result of
-   * <code>select()</code> to the given flavor.
+   * Creates a new selector that will restrict the result of <code>select()</code> to the given flavor.
    * 
    * @param flavor
    *          the flavor
@@ -54,8 +52,7 @@ public class AudioElementSelector extends
   }
 
   /**
-   * Creates a new selector that will restrict the result of
-   * <code>select()</code> to the given flavor.
+   * Creates a new selector that will restrict the result of <code>select()</code> to the given flavor.
    * 
    * @param flavor
    *          the flavor
@@ -91,8 +88,7 @@ public class AudioElementSelector extends
   }
 
   /**
-   * Returns the explicit audio flavor or <code>null</code> if none was
-   * specified.
+   * Returns the explicit audio flavor or <code>null</code> if none was specified.
    * 
    * @return the audio flavor
    */
@@ -101,16 +97,15 @@ public class AudioElementSelector extends
   }
 
   /**
-   * Returns a track or a number of tracks from the media package that together
-   * contain audio and video. If no such combination can be found, e. g. there
-   * is no audio or video at all, an empty array is returned.
+   * Returns a track or a number of tracks from the media package that together contain audio and video. If no such
+   * combination can be found, e. g. there is no audio or video at all, an empty array is returned.
    * 
    * @see org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public Collection<Track> select(MediaPackage mediaPackage) {
     // instead of relying on the broken superclass, we'll inspect every track
-    //  Collection<Track> candidates = super.select(mediaPackage);
+    // Collection<Track> candidates = super.select(mediaPackage);
     Collection<Track> candidates = Arrays.asList(mediaPackage.getTracks());
     Set<Track> result = new HashSet<Track>();
 

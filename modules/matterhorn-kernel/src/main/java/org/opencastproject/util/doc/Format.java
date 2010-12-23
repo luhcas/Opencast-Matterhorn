@@ -18,11 +18,11 @@ package org.opencastproject.util.doc;
 /**
  * Represents one possible output format for a REST endpoint
  */
-public class Format {
-  public static String JSON = "json";
-  public static String XML = "xml";
-  public static String JSON_URL = "http://www.json.org/";
-  public static String XML_URL = "http://www.w3.org/XML/";
+public final class Format {
+  public static final String JSON = "json";
+  public static final String XML = "xml";
+  public static final String JSON_URL = "http://www.json.org/";
+  public static final String XML_URL = "http://www.w3.org/XML/";
 
   /**
    * @return the standard format object for use with JSON
@@ -30,30 +30,35 @@ public class Format {
   public static Format json() {
     return new Format(JSON, null, JSON_URL);
   }
+
   /**
    * @return the standard format object for use with XML
    */
   public static Format xml() {
     return new Format(XML, null, XML_URL);
   }
+
   /**
-   * @param desc [optional] description to display with the format
+   * @param desc
+   *          [optional] description to display with the format
    * @return the standard format object for use with JSON with a description
    */
   public static Format json(String desc) {
     return new Format(JSON, desc, JSON_URL);
   }
+
   /**
-   * @param desc [optional] description to display with the format
+   * @param desc
+   *          [optional] description to display with the format
    * @return the standard format object for use with XML with a description
    */
   public static Format xml(String desc) {
     return new Format(XML, desc, XML_URL);
   }
 
-  String name; // unique key
-  String description;
-  String url;
+  private String name; // unique key
+  private String description;
+  private String url;
 
   /**
    * @param name
@@ -80,12 +85,13 @@ public class Format {
   public String getName() {
     return name;
   }
+
   public String getDescription() {
     return description;
   }
+
   public String getUrl() {
     return url;
   }
 
 }
-

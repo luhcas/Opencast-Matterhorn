@@ -15,34 +15,32 @@
  */
 package org.opencastproject.scheduler.api;
 
-import java.util.List;
-
-import org.opencastproject.scheduler.api.SchedulerException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 
-public interface SchedulerService{
+import java.util.List;
+
+public interface SchedulerService {
 
   /** The metadata key used to store the workflow identifier in an event's metadata */
-  public static final String WORKFLOW_INSTANCE_ID_KEY = "org.opencastproject.workflow.id";
+  String WORKFLOW_INSTANCE_ID_KEY = "org.opencastproject.workflow.id";
 
   /** The metadata key used to store the workflow definition in an event's metadata */
-  public static final String WORKFLOW_DEFINITION_ID_KEY = "org.opencastproject.workflow.definition";
-  
+  String WORKFLOW_DEFINITION_ID_KEY = "org.opencastproject.workflow.definition";
+
   /** The schedule workflow operation identifier */
-  public static final String SCHEDULE_OPERATION_ID = "schedule";
+  String SCHEDULE_OPERATION_ID = "schedule";
 
   /** The workflow operation property that stores the event start time, as milliseconds since 1970 */
-  public static final String WORKFLOW_OPERATION_KEY_SCHEDULE_START = "schedule.start";
+  String WORKFLOW_OPERATION_KEY_SCHEDULE_START = "schedule.start";
 
   /** The workflow operation property that stores the event stop time, as milliseconds since 1970 */
-  public static final String WORKFLOW_OPERATION_KEY_SCHEDULE_STOP = "schedule.stop";
+  String WORKFLOW_OPERATION_KEY_SCHEDULE_STOP = "schedule.stop";
 
   /** The workflow operation property that stores the event location */
-  public static final String WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION = "schedule.location";
-  
-  public WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException;
-  
+  String WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION = "schedule.location";
+
+  WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException;
 
   /**
    * Persist an event
@@ -52,7 +50,7 @@ public interface SchedulerService{
    * 
    * @return The event that has been persisted
    */
-  public Event addEvent(Event event) throws SchedulerException;
+  Event addEvent(Event event) throws SchedulerException;
 
   /**
    * Persist a recurring event
@@ -61,7 +59,7 @@ public interface SchedulerService{
    *          e
    * @return The recurring event that has been persisted
    */
-  public void addRecurringEvent(Event recurrence) throws SchedulerException;
+  void addRecurringEvent(Event recurrence) throws SchedulerException;
 
   /**
    * Gets an event by its identifier
@@ -76,37 +74,37 @@ public interface SchedulerService{
    * @throws NotFoundException
    *           if no event with this identifier exists
    */
-  public Event getEvent(Long eventId) throws NotFoundException;
+  Event getEvent(Long eventId) throws NotFoundException;
 
   /**
    * @param filter
    * @return List of events that match the supplied filter, or all events if no filter is supplied
    */
-  public List<Event> getEvents(SchedulerFilter filter);
+  List<Event> getEvents(SchedulerFilter filter);
 
   /**
    * @return A list of all events
    */
-  public List<Event> getAllEvents();
+  List<Event> getAllEvents();
 
   /**
    * @return List of all events that start after the current time.
    */
-  public List<Event> getUpcomingEvents();
+  List<Event> getUpcomingEvents();
 
   /**
    * @param list
    * @return The list of events in a list of events that occur after the current time.
    */
-  public List<Event> getUpcomingEvents(List<Event> list);
+  List<Event> getUpcomingEvents(List<Event> list);
 
   /**
    * @param Long
-   *        the eventId of the event to be removed.
+   *          the eventId of the event to be removed.
    * @throws NotFoundException
-   *        If the eventId cannot be found.
+   *           If the eventId cannot be found.
    */
-  public void removeEvent(Long eventID) throws NotFoundException;
+  void removeEvent(Long eventID) throws NotFoundException;
 
   /**
    * Updates an event.
@@ -118,7 +116,7 @@ public interface SchedulerService{
    * @throws SchedulerException
    *           if the event's persistent representation can not be updated
    */
-  public void updateEvent(Event e) throws NotFoundException, SchedulerException;
+  void updateEvent(Event e) throws NotFoundException, SchedulerException;
 
   /**
    * Updates an event.
@@ -132,31 +130,32 @@ public interface SchedulerService{
    * @throws NotFoundException
    *           if this event hasn't previously been saved
    */
-  public void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException;
+  void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException;
 
   /**
    * Updates each event with an id in the list with the passed event.
+   * 
    * @param eventIdList
-   *        List of event ids.
+   *          List of event ids.
    * @param e
-   *        Event containing metadata to be updated.
+   *          Event containing metadata to be updated.
    */
-  public void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException;
-  
+  void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException;
+
   /**
    * @param e
    * @return A list of events that conflict with the start, or end dates of provided event.
    */
-  public List<Event> findConflictingEvents(Event e);
-  
+  List<Event> findConflictingEvents(Event e);
+
   /**
    * 
    * @param captureAgentID
-   *        The name of the capture agent
+   *          The name of the capture agent
    * @return An iCalendar containing all of the events for the specified capture agent.
    */
 
-  public String getCalendarForCaptureAgent(String captureAgentID);
+  String getCalendarForCaptureAgent(String captureAgentID);
 
   /**
    * 
@@ -164,7 +163,7 @@ public interface SchedulerService{
    * @return The DublinCore metadata document of an event
    * @throws NotFoundException
    */
-  public String getDublinCoreMetadata(Long eventID) throws NotFoundException;
+  String getDublinCoreMetadata(Long eventID) throws NotFoundException;
 
   /**
    * 
@@ -172,12 +171,12 @@ public interface SchedulerService{
    * @return
    * @throws NotFoundException
    */
-  public String getCaptureAgentMetadata(Long eventID) throws NotFoundException;
+  String getCaptureAgentMetadata(Long eventID) throws NotFoundException;
 
   /**
    * @return An empty Event
    */
-  public Event getNewEvent();
+  Event getNewEvent();
 
   /**
    * resolves the appropriate Filter for the Capture Agent
@@ -186,6 +185,6 @@ public interface SchedulerService{
    *          The ID as provided by the capture agent
    * @return the Filter for this capture Agent.
    */
-  public SchedulerFilter getFilterForCaptureAgent(String captureAgentID);
+  SchedulerFilter getFilterForCaptureAgent(String captureAgentID);
 
 }

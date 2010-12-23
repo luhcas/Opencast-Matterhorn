@@ -23,8 +23,7 @@ import org.w3c.dom.Node;
 /**
  * TODO: Comment me!
  */
-public class MultimediaContentTypeImpl<S extends Segment> implements MultimediaContentType, Audio, Video,
-        AudioVisual {
+public class MultimediaContentTypeImpl<S extends Segment> implements MultimediaContentType, Audio, Video, AudioVisual {
 
   /** The content type */
   protected MultimediaContentType.Type type = null;

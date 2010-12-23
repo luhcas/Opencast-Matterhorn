@@ -27,7 +27,7 @@ import java.util.List;
 public class ITunesFeedEntryExtension implements FeedExtension {
 
   /** The dublin core module uri */
-  public static String URI = "http://www.itunes.com/dtds/podcast-1.0.dtd";
+  public static final String URI = "http://www.itunes.com/dtds/podcast-1.0.dtd";
 
   /** The episode author */
   private String author = null;

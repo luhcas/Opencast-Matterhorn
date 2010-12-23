@@ -18,22 +18,22 @@ package org.opencastproject.series.api;
 
 public interface SeriesMetadata {
 
-  public abstract String getKey();
+  String getKey();
 
-  public abstract void setKey(String key);
+  void setKey(String key);
 
-  public abstract String getValue();
+  String getValue();
 
-  public abstract void setValue(String value);
+  void setValue(String value);
 
-  public abstract String toString();
+  String toString();
 
-  public abstract boolean equals(Object o);
+  boolean equals(Object o);
 
-  public abstract int hashCode();
-  
-  public void setSeries (Series s);
-  
+  int hashCode();
+
+  public void setSeries(Series s);
+
   public Series getSeries();
 
 }

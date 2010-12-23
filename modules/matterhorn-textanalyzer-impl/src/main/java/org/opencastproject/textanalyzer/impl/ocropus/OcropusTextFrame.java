@@ -17,6 +17,7 @@ package org.opencastproject.textanalyzer.impl.ocropus;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +44,8 @@ public class OcropusTextFrame {
   /**
    * Parses the ocropus output file and extracts the text information contained therein.
    * 
-   * TODO:
-   * This implementation right now only extracts the line itself, but there is more information available from
-   * the ocr processor that might be of value.
+   * TODO: This implementation right now only extracts the line itself, but there is more information available from the
+   * ocr processor that might be of value.
    * 
    * @param is
    *          the input stream
@@ -70,30 +70,29 @@ public class OcropusTextFrame {
         continue;
       }
 
-      // Note: this box is per line (instead of per text). 
-      Rectangle textBoundaries = new Rectangle(
-        Integer.parseInt(values[0]), 
-        Integer.parseInt(values[1]),
-        Integer.parseInt(values[2]) - Integer.parseInt(values[0]),
-        Integer.parseInt(values[3]) - Integer.parseInt(values[1])
-      );
+      // Note: this box is per line (instead of per text).
+      Rectangle textBoundaries = new Rectangle(Integer.parseInt(values[0]), Integer.parseInt(values[1]),
+              Integer.parseInt(values[2]) - Integer.parseInt(values[0]), Integer.parseInt(values[3])
+                      - Integer.parseInt(values[1]));
 
       // remove beginning and tailing whitespace and punctuation from every text
       List<String> words = new ArrayList<String>();
       for (String word : line.split(" ")) {
-        word = word.replaceAll("^[\\W]*|[\\W]*$", "");
-        if (!word.equals("")) {
-          words.add(word);
+        String result = word.replaceAll("^[\\W]*|[\\W]*$", "");
+        if (StringUtils.isNotBlank(result)) {
+          words.add(result);
         }
       }
-      if(words.size() == 0) continue;
+      if (words.size() == 0) {
+        continue;
+      }
       OcropusLine ocrLine = new OcropusLine(words.toArray(new String[words.size()]), textBoundaries);
       textFrame.lines.add(ocrLine);
     }
 
     return textFrame;
   }
-  
+
   /**
    * Returns <code>true</code> if text was found.
    * 
@@ -102,7 +101,7 @@ public class OcropusTextFrame {
   public boolean hasText() {
     return lines.size() > 0;
   }
-  
+
   /**
    * Returns the lines found on the frame or an empty array if no lines have been found at all.
    * 

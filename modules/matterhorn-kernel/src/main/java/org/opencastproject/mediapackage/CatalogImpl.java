@@ -32,19 +32,20 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * This is a basic implementation for handling simple catalogs of metadata.
  */
-@XmlRootElement(name="catalog", namespace="http://mediapackage.opencastproject.org")
-@XmlType(name="catalog", namespace="http://mediapackage.opencastproject.org")
+@XmlRootElement(name = "catalog", namespace = "http://mediapackage.opencastproject.org")
+@XmlType(name = "catalog", namespace = "http://mediapackage.opencastproject.org")
 @XmlAccessorType(XmlAccessType.NONE)
 public class CatalogImpl extends AbstractMediaPackageElement implements Catalog {
 
   /** Serial version UID */
   private static final long serialVersionUID = -908525367616L;
+
   /** Needed by JAXB */
   protected CatalogImpl() {
     // default to text/xml mimetype
     super(Type.Catalog, null, null, -1, null, MimeTypes.parseMimeType("text/xml"));
   }
-  
+
   /**
    * Creates an abstract metadata container.
    * 
@@ -85,8 +86,7 @@ public class CatalogImpl extends AbstractMediaPackageElement implements Catalog 
   }
 
   /**
-   * Reads the metadata from the specified file and returns it encapsulated in a
-   * {@link Catalog} object.
+   * Reads the metadata from the specified file and returns it encapsulated in a {@link Catalog} object.
    * 
    * @param catalog
    *          the dublin core metadata container file
@@ -97,8 +97,7 @@ public class CatalogImpl extends AbstractMediaPackageElement implements Catalog 
   }
 
   /**
-   * Reads the metadata from the specified file and returns it encapsulated in a
-   * {@link Catalog} object.
+   * Reads the metadata from the specified file and returns it encapsulated in a {@link Catalog} object.
    * 
    * @param uri
    *          the dublin core metadata container file
@@ -111,8 +110,13 @@ public class CatalogImpl extends AbstractMediaPackageElement implements Catalog 
   }
 
   public static class Adapter extends XmlAdapter<CatalogImpl, Catalog> {
-    public CatalogImpl marshal(Catalog cat) throws Exception {return (CatalogImpl)cat;}
-    public Catalog unmarshal(CatalogImpl cat) throws Exception {return cat;}
+    public CatalogImpl marshal(Catalog cat) throws Exception {
+      return (CatalogImpl) cat;
+    }
+
+    public Catalog unmarshal(CatalogImpl cat) throws Exception {
+      return cat;
+    }
   }
 
   /**

@@ -49,9 +49,14 @@ public interface AudioStream extends Stream {
 
   public static class Adapter extends XmlAdapter<AudioStreamImpl, Stream> {
     @Override
-    public AudioStreamImpl marshal(Stream v) throws Exception {return (AudioStreamImpl)v;}
+    public AudioStreamImpl marshal(Stream v) throws Exception {
+      return (AudioStreamImpl) v;
+    }
+
     @Override
-    public Stream unmarshal(AudioStreamImpl v) throws Exception {return v;}
+    public Stream unmarshal(AudioStreamImpl v) throws Exception {
+      return v;
+    }
   }
 
 }

@@ -23,7 +23,7 @@ import org.junit.Test;
 
 /**
  * Tests non-handle Identifiers
- *
+ * 
  */
 public class IdTest {
 

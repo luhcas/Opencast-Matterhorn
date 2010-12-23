@@ -6,3 +6,4 @@ package org.opencastproject.util;
 
 import javax.xml.bind.annotation.XmlSchema;
 import javax.xml.bind.annotation.XmlNsForm;
+

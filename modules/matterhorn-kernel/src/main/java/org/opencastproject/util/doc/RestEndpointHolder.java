@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Vector;
 
 public class RestEndpointHolder {
-  String name;
-  String title;
-  List<RestEndpoint> endpoints;
+  private String name;
+  private String title;
+  private List<RestEndpoint> endpoints;
 
   public RestEndpointHolder(String name, String title) {
     if (!DocData.isValidName(name)) {
@@ -45,7 +45,7 @@ public class RestEndpointHolder {
 
   @Override
   public String toString() {
-    return "HOLD:"+name+":"+endpoints;
+    return "HOLD:" + name + ":" + endpoints;
   }
 
   /**

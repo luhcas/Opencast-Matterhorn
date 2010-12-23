@@ -40,7 +40,7 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * This class provides factory methods for the creation of media packages from manifest files, directories or from
- * scratch.  This class is not thread safe, so create a new builder in each method invocation.
+ * scratch. This class is not thread safe, so create a new builder in each method invocation.
  */
 public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 
@@ -73,6 +73,7 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackageBuilder#createNew()
    */
   public MediaPackage createNew() throws MediaPackageException {
@@ -81,13 +82,13 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackageBuilder#createNew(org.opencastproject.mediapackage.identifier.Id)
    */
   public MediaPackage createNew(Id identifier) throws MediaPackageException {
     return new MediaPackageImpl(identifier);
   }
 
-  
   /**
    * {@inheritDoc}
    * 
@@ -101,8 +102,8 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
         Document xml = docBuilder.parse(is);
 
         XPath xPath = XPathFactory.newInstance().newXPath();
-        NodeList nodes = (NodeList)xPath.evaluate("//url", xml, XPathConstants.NODESET);
-        for (int i=0; i < nodes.getLength(); i++) {
+        NodeList nodes = (NodeList) xPath.evaluate("//url", xml, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++) {
           Node uri = nodes.item(i).getFirstChild();
           if (uri != null)
             uri.setNodeValue(serializer.resolvePath(uri.getNodeValue()).toString());
@@ -140,6 +141,7 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackageBuilder#loadFromXml(java.lang.String)
    */
   @Override

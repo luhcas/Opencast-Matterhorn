@@ -45,10 +45,10 @@ import javax.xml.transform.stream.StreamSource;
 public class SearchResultImpl implements SearchResult {
 
   /** Logging facility */
-  static Logger logger = LoggerFactory.getLogger(SearchResultImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(SearchResultImpl.class);
 
   /** Context for serializing and deserializing */
-  static JAXBContext context;
+  private static final JAXBContext context;
 
   static {
     try {

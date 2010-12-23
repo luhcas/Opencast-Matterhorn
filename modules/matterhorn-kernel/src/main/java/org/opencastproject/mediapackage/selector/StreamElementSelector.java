@@ -28,21 +28,19 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This <code>MediaPackageElementSelector</code> selects all tracks from a
- * <code>MediaPackage</code> that contain at least an audio stream while
- * optionally matching other requirements such as flavors and tags.
+ * This <code>MediaPackageElementSelector</code> selects all tracks from a <code>MediaPackage</code> that contain at
+ * least an audio stream while optionally matching other requirements such as flavors and tags.
  */
-public class StreamElementSelector<S extends Stream> extends
-        AbstractMediaPackageElementSelector<Track> {
+public class StreamElementSelector<S extends Stream> extends AbstractMediaPackageElementSelector<Track> {
 
   /**
    * Creates a new selector.
    */
-  public StreamElementSelector() { }
-  
+  public StreamElementSelector() {
+  }
+
   /**
-   * Creates a new selector that will restrict the result of
-   * <code>select()</code> to the given flavor.
+   * Creates a new selector that will restrict the result of <code>select()</code> to the given flavor.
    * 
    * @param flavor
    *          the flavor
@@ -52,8 +50,7 @@ public class StreamElementSelector<S extends Stream> extends
   }
 
   /**
-   * Creates a new selector that will restrict the result of
-   * <code>select()</code> to the given flavor.
+   * Creates a new selector that will restrict the result of <code>select()</code> to the given flavor.
    * 
    * @param flavor
    *          the flavor
@@ -63,10 +60,9 @@ public class StreamElementSelector<S extends Stream> extends
   }
 
   /**
-   * Returns all tracks from a <code>MediaPackage</code> that contain at least a
-   * <code>Stream</code> of the parametrized type while optionally matching
-   * other requirements such as flavors and tags. If no such combination can be
-   * found, i. g. there is no audio or video at all, an empty array is returned.
+   * Returns all tracks from a <code>MediaPackage</code> that contain at least a <code>Stream</code> of the parametrized
+   * type while optionally matching other requirements such as flavors and tags. If no such combination can be found, i.
+   * g. there is no audio or video at all, an empty array is returned.
    * 
    * @see org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.mediapackage.MediaPackage)
    */
@@ -84,8 +80,8 @@ public class StreamElementSelector<S extends Stream> extends
   }
 
   /**
-   * This constructor tries to determine the entity type from the type argument
-   * used by a concrete implementation of <code>GenericHibernateDao</code>.
+   * This constructor tries to determine the entity type from the type argument used by a concrete implementation of
+   * <code>GenericHibernateDao</code>.
    */
   @SuppressWarnings("unchecked")
   private Class getParametrizedStreamType() {
@@ -94,8 +90,7 @@ public class StreamElementSelector<S extends Stream> extends
     Class<? extends S> entityClass = null;
     while ((superclass = current.getGenericSuperclass()) != null) {
       if (superclass instanceof ParameterizedType) {
-        entityClass = (Class<S>) ((ParameterizedType) superclass)
-                .getActualTypeArguments()[0];
+        entityClass = (Class<S>) ((ParameterizedType) superclass).getActualTypeArguments()[0];
         break;
       } else if (superclass instanceof Class) {
         current = (Class) superclass;
@@ -104,10 +99,8 @@ public class StreamElementSelector<S extends Stream> extends
       }
     }
     if (entityClass == null) {
-      throw new IllegalStateException(
-              "DAO creation exception: Cannot determine entity type because "
-                      + getClass().getName()
-                      + " does not specify any type parameter.");
+      throw new IllegalStateException("DAO creation exception: Cannot determine entity type because "
+              + getClass().getName() + " does not specify any type parameter.");
     }
     return entityClass.getClass();
   }

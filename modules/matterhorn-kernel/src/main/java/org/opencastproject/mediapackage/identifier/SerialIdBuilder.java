@@ -20,8 +20,8 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
- * This serial id generator creates id's that are not unique across distributed
- * installations of a node but return padded representations.
+ * This serial id generator creates id's that are not unique across distributed installations of a node but return
+ * padded representations.
  */
 public class SerialIdBuilder implements IdBuilder {
 

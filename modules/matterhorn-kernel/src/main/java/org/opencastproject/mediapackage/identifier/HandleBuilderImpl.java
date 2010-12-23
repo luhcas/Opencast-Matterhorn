@@ -35,19 +35,19 @@ import java.util.regex.Pattern;
 public class HandleBuilderImpl implements HandleBuilder {
 
   /** The protocol prefix for a complete handle */
-  private final static String PROTOCOL_PREFIX = Handle.PROTOCOL + "://";
+  private static final String PROTOCOL_PREFIX = Handle.PROTOCOL + "://";
 
   /** Konfiguration key for the handle authority */
-  private final static String OPT_HANDLE_AUTHORITY = "handle.authority";
+  private static final String OPT_HANDLE_AUTHORITY = "handle.authority";
 
   /** Konfiguration key for the handle namespace */
-  private final static String OPT_HANDLE_NAMESPACE = "handle.namespace";
+  private static final String OPT_HANDLE_NAMESPACE = "handle.namespace";
 
   /** The default handle url */
-  private final static String DEFAULT_URL = "http://localhost";
+  private static final String DEFAULT_URL = "http://localhost";
 
   /** Regex used to verify proper handle identifier syntax */
-  private final static Pattern HANDLE_PATTERN = Pattern.compile("(?:" + PROTOCOL_PREFIX + ")?(" + Handle.PREFIX
+  private static final Pattern HANDLE_PATTERN = Pattern.compile("(?:" + PROTOCOL_PREFIX + ")?(" + Handle.PREFIX
           + "\\d{4})/(.+)");
 
   /** Handle naming authority */
@@ -60,7 +60,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   private URL defaultURL = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(HandleBuilderImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(HandleBuilderImpl.class);
 
   /**
    * Creates a new handle builder.

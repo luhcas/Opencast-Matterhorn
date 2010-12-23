@@ -1,5 +1,3 @@
-package org.opencastproject.videosegmenter.remote;
-
 /**
  *  Copyright 2009, 2010 The Regents of the University of California
  *  Licensed under the Educational Community License, Version 2.0
@@ -15,6 +13,7 @@ package org.opencastproject.videosegmenter.remote;
  *  permissions and limitations under the License.
  *
  */
+package org.opencastproject.videosegmenter.remote;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;

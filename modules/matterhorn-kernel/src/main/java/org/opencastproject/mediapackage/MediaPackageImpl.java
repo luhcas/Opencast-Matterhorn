@@ -71,7 +71,7 @@ import javax.xml.transform.stream.StreamSource;
 public final class MediaPackageImpl implements MediaPackage {
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(MediaPackageImpl.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(MediaPackageImpl.class.getName());
 
   /**
    * The prefix indicating that a tag should be excluded from a search for elements using
@@ -80,43 +80,43 @@ public final class MediaPackageImpl implements MediaPackage {
   public static final String NEGATE_TAG_PREFIX = "-";
 
   /** Context for serializing and deserializing */
-  static JAXBContext context;
+  static final JAXBContext context;
 
   /** The media media package meta data */
-  ManifestImpl manifest = null;
+  private ManifestImpl manifest = null;
 
   /** List of observers */
-  List<MediaPackageObserver> observers = new ArrayList<MediaPackageObserver>();
+  protected List<MediaPackageObserver> observers = new ArrayList<MediaPackageObserver>();
 
   /** The media package element builder, may remain <code>null</code> */
-  MediaPackageElementBuilder mediaPackageElementBuilder = null;
+  private MediaPackageElementBuilder mediaPackageElementBuilder = null;
 
   @XmlElement(name = "title")
-  String title = null;
+  protected String title = null;
 
   @XmlElement(name = "seriestitle")
-  String seriesTitle = null;
+  protected String seriesTitle = null;
 
   @XmlElement(name = "language")
-  String language = null;
+  protected String language = null;
 
   @XmlElement(name = "series")
-  String series = null;
+  protected String series = null;
 
   @XmlElement(name = "license")
-  String license = null;
+  protected String license = null;
 
   @XmlElementWrapper(name = "creators")
   @XmlElement(name = "creator")
-  Set<String> creators = null;
+  protected Set<String> creators = null;
 
   @XmlElementWrapper(name = "contributors")
   @XmlElement(name = "contributor")
-  Set<String> contributors = null;
+  protected Set<String> contributors = null;
 
   @XmlElementWrapper(name = "subjects")
   @XmlElement(name = "subject")
-  Set<String> subjects = null;
+  protected Set<String> subjects = null;
 
   static {
     try {

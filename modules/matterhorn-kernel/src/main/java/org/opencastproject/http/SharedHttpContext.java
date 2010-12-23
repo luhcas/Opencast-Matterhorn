@@ -88,7 +88,7 @@ public class SharedHttpContext implements HttpContext {
    */
   @Override
   public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    // Let the filters handle security.  If there are none, don't let the request through
+    // Let the filters handle security. If there are none, don't let the request through
     ServiceReference[] filterRefs;
     try {
       filterRefs = bundleContext.getAllServiceReferences(Filter.class.getName(), null);
@@ -103,8 +103,8 @@ public class SharedHttpContext implements HttpContext {
    * A {@link FilterChain} composed of {@link Filter}s with the
    */
   class Chain implements FilterChain {
-    int current = 0;
-    Filter[] filters;
+    private int current = 0;
+    private Filter[] filters;
 
     Chain(Filter[] filters) {
       this.filters = filters;

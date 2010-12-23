@@ -28,10 +28,10 @@ public class EdgeDetector {
 
   // statics
 
-  private final static float GAUSSIAN_CUT_OFF = 0.005f;
-  private final static float MAGNITUDE_SCALE = 100F;
-  private final static float MAGNITUDE_LIMIT = 1000F;
-  private final static int MAGNITUDE_MAX = (int) (MAGNITUDE_SCALE * MAGNITUDE_LIMIT);
+  private static final float GAUSSIAN_CUT_OFF = 0.005f;
+  private static final float MAGNITUDE_SCALE = 100F;
+  private static final float MAGNITUDE_LIMIT = 1000F;
+  private static final int MAGNITUDE_MAX = (int) (MAGNITUDE_SCALE * MAGNITUDE_LIMIT);
 
   // fields
 
@@ -242,8 +242,8 @@ public class EdgeDetector {
   private void computeGradients(float kernelRadius, int kernelWidth) {
 
     // generate the gaussian convolution masks
-    float kernel[] = new float[kernelWidth];
-    float diffKernel[] = new float[kernelWidth];
+    float[] kernel = new float[kernelWidth];
+    float[] diffKernel = new float[kernelWidth];
     int kwidth;
     for (kwidth = 0; kwidth < kernelWidth; kwidth++) {
       float g1 = gaussian(kwidth, kernelRadius);

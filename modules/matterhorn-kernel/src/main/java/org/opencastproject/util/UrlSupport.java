@@ -23,12 +23,11 @@ import java.util.TreeSet;
 /**
  * <code>UrlSupport</code> is a helper class to deal with urls.
  */
-public class UrlSupport {
+public final class UrlSupport {
   public static final String DEFAULT_BASE_URL = "http://localhost:8080";
-  
+
   /**
-   * This class should not be instanciated, since it only provides static
-   * utility methods.
+   * This class should not be instanciated, since it only provides static utility methods.
    */
   private UrlSupport() {
   }
@@ -56,8 +55,7 @@ public class UrlSupport {
   /**
    * Concatenates the two urls with respect to leading and trailing slashes.
    * <p>
-   * Note that returned path will only end with a slash if <code>suffix</code>
-   * does. If you need a trailing slash, see
+   * Note that returned path will only end with a slash if <code>suffix</code> does. If you need a trailing slash, see
    * {@link #concat(String, String, boolean)}.
    * 
    * @return the concatenated url of the two arguments
@@ -67,8 +65,8 @@ public class UrlSupport {
   }
 
   /**
-   * Concatenates the two urls with respect to leading and trailing slashes. The
-   * path will always end with a trailing slash.
+   * Concatenates the two urls with respect to leading and trailing slashes. The path will always end with a trailing
+   * slash.
    * 
    * @return the concatenated url of the two arguments
    */
@@ -111,7 +109,7 @@ public class UrlSupport {
       throw new IllegalArgumentException("Array parts is empty");
     String path = parts[0];
     for (int i = 1; i < parts.length; i++) {
-      if(parts[i] != null) {
+      if (parts[i] != null) {
         path = concat(path, parts[i]);
       }
     }
@@ -119,9 +117,8 @@ public class UrlSupport {
   }
 
   /**
-   * Returns the trimmed url. Trimmed means that the url is free from leading or
-   * trailing whitespace characters, and that a directory url like
-   * <code>/news/</code> is closed by a slash (<code>/</code>).
+   * Returns the trimmed url. Trimmed means that the url is free from leading or trailing whitespace characters, and
+   * that a directory url like <code>/news/</code> is closed by a slash (<code>/</code>).
    * 
    * @param url
    *          the url to trim
@@ -145,12 +142,11 @@ public class UrlSupport {
   }
 
   /**
-   * Checks that the path only contains the web path separator "/". If not,
-   * wrong ones are replaced.
+   * Checks that the path only contains the web path separator "/". If not, wrong ones are replaced.
    */
   private static String checkSeparator(String path) {
     String sp = File.separator;
-    if (sp.equals("\\"))
+    if ("\\".equals(sp))
       sp = "\\\\";
     return path.replaceAll(sp, "/");
   }
@@ -163,36 +159,36 @@ public class UrlSupport {
    * @return the corrected path
    */
   private static String removeDoubleSeparator(String path) {
-    int index = 0;
     String protocol = "";
+    int index = path.indexOf("://");
 
     // Strip off the protocol
-    if ((index = path.indexOf("://")) != -1) {
+    if (index != -1) {
       protocol = path.substring(0, index + 3);
       path = path.substring(index + 3);
     }
 
     // Search rest of path for double separators
-    while ((index = path.indexOf("//", index)) != -1) {
+    index = path.indexOf("//", index);
+    while (index != -1) {
       path = path.substring(0, index) + path.substring(index + 1);
+      index = path.indexOf("//", index);
     }
     return protocol + path;
   }
 
   /**
-   * Returns <code>true</code> if url <code>a</code> is a direct prefix of url
-   * <code>b</code>. For example, <code>/news</code> is the parent of
-   * <code>/news/today</code>.
+   * Returns <code>true</code> if url <code>a</code> is a direct prefix of url <code>b</code>. For example,
+   * <code>/news</code> is the parent of <code>/news/today</code>.
    * <p>
-   * Note that <code>a</code> is also an extended prefix of <code>b</code> if
-   * <code>a</code> and <code>b</code> are equal.
+   * Note that <code>a</code> is also an extended prefix of <code>b</code> if <code>a</code> and <code>b</code> are
+   * equal.
    * 
    * @param a
    *          the first url
    * @param b
    *          the second url
-   * @return <code>true</code> if <code>a</code> is the direct prefix of
-   *         <code>b</code>
+   * @return <code>true</code> if <code>a</code> is the direct prefix of <code>b</code>
    */
   public static boolean isPrefix(String a, String b) {
     if (isExtendedPrefix(a, b)) {
@@ -209,12 +205,11 @@ public class UrlSupport {
   }
 
   /**
-   * Returns <code>true</code> if url <code>a</code> is a prefix of url
-   * <code>b</code>. For example, <code>/news</code> is an ancestor of
-   * <code>/news/today/morning</code>.
+   * Returns <code>true</code> if url <code>a</code> is a prefix of url <code>b</code>. For example, <code>/news</code>
+   * is an ancestor of <code>/news/today/morning</code>.
    * <p>
-   * Note that <code>a</code> is also an extended prefix of <code>b</code> if
-   * <code>a</code> and <code>b</code> are equal.
+   * Note that <code>a</code> is also an extended prefix of <code>b</code> if <code>a</code> and <code>b</code> are
+   * equal.
    * 
    * @param a
    *          the first url
@@ -233,14 +228,11 @@ public class UrlSupport {
   }
 
   /**
-   * Returns the url extension that <code>url</code> defines over
-   * <code>prefix</code>. For example, the extension of url
-   * <code>/news/today</code> and prefix <code>/news</code> is
-   * <code>today</code>.
+   * Returns the url extension that <code>url</code> defines over <code>prefix</code>. For example, the extension of url
+   * <code>/news/today</code> and prefix <code>/news</code> is <code>today</code>.
    * <p>
-   * If <code>prefix</code> is not a prefix of <code>url</code>, this method
-   * returns <code>null</code>, if <code>url</code> and <code>prefix</code>
-   * match, the empty string is returned.
+   * If <code>prefix</code> is not a prefix of <code>url</code>, this method returns <code>null</code>, if
+   * <code>url</code> and <code>prefix</code> match, the empty string is returned.
    * 
    * @param prefix
    *          the url prefix
@@ -264,8 +256,7 @@ public class UrlSupport {
   }
 
   /**
-   * Returns the extension that is encoded into the url. Possible extensions
-   * are:
+   * Returns the extension that is encoded into the url. Possible extensions are:
    * <ul>
    * <li>/*</li>
    * <li>/**</li>
@@ -301,8 +292,7 @@ public class UrlSupport {
   }
 
   /**
-   * Returns <code>true</code> if the url is valid, that is, if it contains only
-   * allowed characters.
+   * Returns <code>true</code> if the url is valid, that is, if it contains only allowed characters.
    * 
    * @return <code>true</code> or the invalid character
    */
@@ -311,8 +301,8 @@ public class UrlSupport {
   }
 
   /**
-   * Returns <code>null</code> if the url is valid, that is, if it contains only
-   * allowed characters. Otherwhise, the invalid character is returned.
+   * Returns <code>null</code> if the url is valid, that is, if it contains only allowed characters. Otherwhise, the
+   * invalid character is returned.
    * 
    * @return <code>null</code> or the invalid character
    */
@@ -322,8 +312,8 @@ public class UrlSupport {
   }
 
   /**
-   * Returns <code>null</code> if the url is valid, that is, if it contains only
-   * allowed characters. Otherwhise, the invalid character is returned.
+   * Returns <code>null</code> if the url is valid, that is, if it contains only allowed characters. Otherwhise, the
+   * invalid character is returned.
    * 
    * @return <code>null</code> or the invalid character
    */
@@ -332,26 +322,20 @@ public class UrlSupport {
     for (int i = 0; i < original.length(); i++) {
       int value = (new Character(original.charAt(i))).charValue();
       // a-z
-      if (value >= new Character('a').charValue()
-          && value <= new Character('z').charValue()) {
+      if (value >= new Character('a').charValue() && value <= new Character('z').charValue()) {
         continue;
       }
       // A-Z
-      if (value >= new Character('A').charValue()
-          && value <= new Character('Z').charValue()) {
+      if (value >= new Character('A').charValue() && value <= new Character('Z').charValue()) {
         continue;
       }
       // 0-9
-      if (value >= new Character('0').charValue()
-          && value <= new Character('9').charValue()) {
+      if (value >= new Character('0').charValue() && value <= new Character('9').charValue()) {
         continue;
       }
       // Special characters
-      if ((value == new Character('-').charValue())
-          || (value == '_')
-          || (value == '.')
-          || (value == ',')
-          || (value == ';')) {
+      if ((value == new Character('-').charValue()) || (value == '_') || (value == '.') || (value == ',')
+              || (value == ';')) {
         continue;
       }
       return Character.valueOf(original.charAt(i));

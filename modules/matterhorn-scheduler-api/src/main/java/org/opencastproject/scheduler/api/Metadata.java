@@ -16,36 +16,37 @@
 package org.opencastproject.scheduler.api;
 
 public interface Metadata {
-  public void setEvent(Event event);
-  
-  public Event getEvent();
+  void setEvent(Event event);
+
+  Event getEvent();
+
   /**
    * @return This metadata's key
    */
-  public String getKey();
-  
+  String getKey();
+
   /**
    * @param key
    */
-  public void setKey(String key);
-  
+  void setKey(String key);
+
   /**
    * @return This metadata's value
    */
-  public String getValue();
-  
+  String getValue();
+
   /**
    * @param value
    */
-  public void setValue(String value);
-  
+  void setValue(String value);
+
   @Override
-  public String toString ();
-  
+  String toString();
+
   @Override
-  public boolean equals (Object o);
-  
+  boolean equals(Object o);
+
   @Override
-  public int hashCode ();
+  int hashCode();
 
 }

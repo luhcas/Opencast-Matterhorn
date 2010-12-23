@@ -38,19 +38,19 @@ import javax.xml.xpath.XPathException;
  * Implementation of {@link org.opencastproject.mediapackage.AudioStream}.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="audio", namespace="http://mediapackage.opencastproject.org")
+@XmlType(name = "audio", namespace = "http://mediapackage.opencastproject.org")
 public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
-  @XmlElement(name="bitdepth")
+  @XmlElement(name = "bitdepth")
   protected Integer bitdepth;
 
-  @XmlElement(name="channels")
+  @XmlElement(name = "channels")
   protected Integer channels;
-  
-  @XmlElement(name="samplingrate")
+
+  @XmlElement(name = "samplingrate")
   protected Integer samplingrate;
 
-  @XmlElement(name="bitrate")
+  @XmlElement(name = "bitrate")
   protected Float bitrate;
 
   public AudioStreamImpl() {
@@ -63,6 +63,7 @@ public class AudioStreamImpl extends AbstractStreamImpl implements AudioStream {
 
   /**
    * Construct an audio stream from another audio stream
+   * 
    * @param s
    */
   public AudioStreamImpl(AudioStreamImpl s) {

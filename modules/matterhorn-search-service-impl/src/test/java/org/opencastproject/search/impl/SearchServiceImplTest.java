@@ -246,7 +246,7 @@ public class SearchServiceImplTest {
     SearchQueryImpl q = new SearchQueryImpl();
     q.includeEpisodes(false);
     q.includeSeries(true);
-    
+
     SearchResult result = service.getByQuery(q);
     assertEquals(1, result.size());
     assertEquals("foobar-serie", result.getItems()[0].getId());

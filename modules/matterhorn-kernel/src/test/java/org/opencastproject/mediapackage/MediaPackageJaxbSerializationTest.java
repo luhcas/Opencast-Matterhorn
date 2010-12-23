@@ -58,11 +58,11 @@ public class MediaPackageJaxbSerializationTest {
     try {
       is = getClass().getResourceAsStream("/manifest-simple.xml");
       mediaPackage = mediaPackageBuilder.loadFromXml(is);
-  
+
       Assert.assertEquals(0, mediaPackage.getTracks().length);
       Assert.assertEquals(1, mediaPackage.getCatalogs().length);
       Assert.assertEquals(0, mediaPackage.getAttachments().length);
-  
+
       Assert.assertEquals("dublincore/episode", mediaPackage.getCatalogs()[0].getFlavor().toString());
     } finally {
       IOUtils.closeQuietly(is);

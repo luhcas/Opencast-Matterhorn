@@ -22,7 +22,6 @@ import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.serviceregistry.api.RemoteBase;
-import org.opencastproject.util.UrlSupport;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

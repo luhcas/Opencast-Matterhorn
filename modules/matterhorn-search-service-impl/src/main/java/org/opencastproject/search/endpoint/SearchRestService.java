@@ -50,15 +50,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * The REST endpoint 
+ * The REST endpoint
  */
 @Path("/")
 public class SearchRestService {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(SearchRestService.class);
-  
+
   protected SearchService searchService;
-  
+
   /**
    * Callback from OSGi that is called when this service is activated.
    * 
@@ -83,95 +83,125 @@ public class SearchRestService {
 
   protected String docs;
   private String[] notes = {
-    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
-  
+          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+
   protected String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("Search", "Search Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service indexes and queries available (distributed) episodes.");
     // episode
-    RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode{format}", "Search for episodes matching the query parameters");
+    RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode{format}",
+            "Search for episodes matching the query parameters");
     episodeEndpoint.addFormat(new Format("XML", null, null));
-    episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results"));
-    episodeEndpoint.addPathParam(new Param("format", Type.STRING, ".xml", "The output format (.xml or .json).  Defaults to xml."));
-    episodeEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode to be returned, if it exists"));
-    episodeEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any episode that matches this free-text query"));
-    episodeEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
+    episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The search results"));
+    episodeEndpoint.addPathParam(new Param("format", Type.STRING, ".xml",
+            "The output format (.xml or .json).  Defaults to xml."));
+    episodeEndpoint.addOptionalParam(new Param("id", Type.STRING, null,
+            "The ID of the single episode to be returned, if it exists"));
+    episodeEndpoint
+            .addOptionalParam(new Param("q", Type.STRING, null, "Any episode that matches this free-text query"));
+    episodeEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
+            "The maximum number of items to return per page"));
     episodeEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
     episodeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, episodeEndpoint);
 
     // series
-    RestEndpoint seriesEndpoint = new RestEndpoint("series", RestEndpoint.Method.GET, "/series{format}", "Search for series matching the query parameters");
+    RestEndpoint seriesEndpoint = new RestEndpoint("series", RestEndpoint.Method.GET, "/series{format}",
+            "Search for series matching the query parameters");
     seriesEndpoint.addFormat(new Format("XML", null, null));
     seriesEndpoint.addFormat(new Format("JSON", null, null));
-    seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results"));
-    seriesEndpoint.addPathParam(new Param("format", Type.STRING, ".xml", "The output format (.xml or .json).  Defaults to xml."));
-    seriesEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The series ID. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
-    seriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any series that matches this free-text query. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
-    seriesEndpoint.addOptionalParam(new Param("episodes", Type.BOOLEAN, "false", "Whether to include this series episodes.  This can be used in combination with id or q"));
-    seriesEndpoint.addOptionalParam(new Param("series", Type.BOOLEAN, "false", "Whether to include this series information itself.  This can be used in combination with id or q"));
-    seriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
+    seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The search results"));
+    seriesEndpoint.addPathParam(new Param("format", Type.STRING, ".xml",
+            "The output format (.xml or .json).  Defaults to xml."));
+    seriesEndpoint
+            .addOptionalParam(new Param(
+                    "id",
+                    Type.STRING,
+                    null,
+                    "The series ID. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
+    seriesEndpoint
+            .addOptionalParam(new Param(
+                    "q",
+                    Type.STRING,
+                    null,
+                    "Any series that matches this free-text query. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
+    seriesEndpoint.addOptionalParam(new Param("episodes", Type.BOOLEAN, "false",
+            "Whether to include this series episodes.  This can be used in combination with id or q"));
+    seriesEndpoint.addOptionalParam(new Param("series", Type.BOOLEAN, "false",
+            "Whether to include this series information itself.  This can be used in combination with id or q"));
+    seriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
+            "The maximum number of items to return per page"));
     seriesEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
     seriesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, seriesEndpoint);
 
     // episode and series
-    RestEndpoint episodeAndSeriesEndpoint = new RestEndpoint("episodeAndSeries", RestEndpoint.Method.GET, "/", "Search for episodes and series matching the query parameters");
+    RestEndpoint episodeAndSeriesEndpoint = new RestEndpoint("episodeAndSeries", RestEndpoint.Method.GET, "/",
+            "Search for episodes and series matching the query parameters");
     episodeAndSeriesEndpoint.addFormat(new Format("XML", null, null));
-    episodeAndSeriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
-    episodeAndSeriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any episode or series that matches this free-text query."));
-    episodeAndSeriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
+    episodeAndSeriesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The search results, expressed as xml"));
+    episodeAndSeriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null,
+            "Any episode or series that matches this free-text query."));
+    episodeAndSeriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
+            "The maximum number of items to return per page"));
     episodeAndSeriesEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
     episodeAndSeriesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, episodeAndSeriesEndpoint);
-    
+
     // remove
-    RestEndpoint removeEndpoint = new RestEndpoint("remove", RestEndpoint.Method.DELETE, "/{id}", "Removes a mediapackage from the search index");
-    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("The mediapackage was removed, no content to return"));
-    removeEndpoint.addPathParam(new Param("id", Type.STRING, "", "The media package ID to remove from the search index"));
+    RestEndpoint removeEndpoint = new RestEndpoint("remove", RestEndpoint.Method.DELETE, "/{id}",
+            "Removes a mediapackage from the search index");
+    removeEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .noContent("The mediapackage was removed, no content to return"));
+    removeEndpoint
+            .addPathParam(new Param("id", Type.STRING, "", "The media package ID to remove from the search index"));
     removeEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, removeEndpoint);    
-    
+    data.addEndpoint(RestEndpoint.Type.WRITE, removeEndpoint);
+
     // add
-    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.POST, "/add", "Adds a mediapackage to the search index");
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("The mediapackage was added, no content to return"));
-    addEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The media package to add to the search index"));
+    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.POST, "/add",
+            "Adds a mediapackage to the search index");
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .noContent("The mediapackage was added, no content to return"));
+    addEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(),
+            "The media package to add to the search index"));
     addEndpoint.addFormat(new Format("XML", null, null));
     addEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);    
+    data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);
 
     // clear
-    RestEndpoint clearEndpoint = new RestEndpoint("clear", RestEndpoint.Method.POST, "/clear", "Clears the entire search index");
-    clearEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("The search index was cleared, no content to return"));
+    RestEndpoint clearEndpoint = new RestEndpoint("clear", RestEndpoint.Method.POST, "/clear",
+            "Clears the entire search index");
+    clearEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .noContent("The search index was cleared, no content to return"));
     clearEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, clearEndpoint);    
+    data.addEndpoint(RestEndpoint.Type.WRITE, clearEndpoint);
 
     logger.debug("generated documentation for {}", data);
-    
+
     return DocUtil.generate(data);
   }
 
   protected String generateMediaPackage() {
-    return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n" +
-    "  <metadata>\n" +
-    "    <catalog id=\"catalog-1\" type=\"dublincore/episode\">\n" +
-    "      <mimetype>text/xml</mimetype>\n" +
-    "      <url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-kernel/src/test/resources/dublincore.xml</url>\n" +
-    "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +
-    "    </catalog>\n" +
-    "    <catalog id=\"catalog-3\" type=\"metadata/mpeg-7\" ref=\"track:track-1\">\n" +
-    "      <mimetype>text/xml</mimetype>\n" +
-    "      <url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-kernel/src/test/resources/mpeg7.xml</url>\n" +
-    "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n" +
-    "    </catalog>\n" +
-    "  </metadata>\n" +
-    "</ns2:mediapackage>";
+    return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n"
+            + "  <metadata>\n"
+            + "    <catalog id=\"catalog-1\" type=\"dublincore/episode\">\n"
+            + "      <mimetype>text/xml</mimetype>\n"
+            + "      <url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-kernel/src/test/resources/dublincore.xml</url>\n"
+            + "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n"
+            + "    </catalog>\n"
+            + "    <catalog id=\"catalog-3\" type=\"metadata/mpeg-7\" ref=\"track:track-1\">\n"
+            + "      <mimetype>text/xml</mimetype>\n"
+            + "      <url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-kernel/src/test/resources/mpeg7.xml</url>\n"
+            + "      <checksum type=\"md5\">2b8a52878c536e64e20e309b5d7c1070</checksum>\n"
+            + "    </catalog>\n"
+            + "  </metadata>\n" + "</ns2:mediapackage>";
   }
-  
+
   @POST
   @Path("add")
   public Response add(@FormParam("mediapackage") MediaPackageImpl mediaPackage) throws SearchException {
@@ -207,37 +237,29 @@ public class SearchRestService {
       return Response.serverError().build();
     }
   }
-  
+
   @GET
   @Path("series.json")
   @Produces(MediaType.APPLICATION_JSON)
-  public SearchResultImpl getEpisodeAndSeriesByIdAsJson(
-          @QueryParam("id") String id,
-          @QueryParam("q") String text,
-          @QueryParam("episodes") boolean includeEpisodes,
-          @QueryParam("series") boolean includeSeries,
-          @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset) {
+  public SearchResultImpl getEpisodeAndSeriesByIdAsJson(@QueryParam("id") String id, @QueryParam("q") String text,
+          @QueryParam("episodes") boolean includeEpisodes, @QueryParam("series") boolean includeSeries,
+          @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
     return getEpisodeAndSeriesById(id, text, includeEpisodes, includeSeries, limit, offset);
   }
 
   @GET
   @Path("series.xml")
   @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getEpisodeAndSeriesById(
-          @QueryParam("id") String id,
-          @QueryParam("q") String text,
-          @QueryParam("episodes") boolean includeEpisodes,
-          @QueryParam("series") boolean includeSeries,
-          @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset) {
+  public SearchResultImpl getEpisodeAndSeriesById(@QueryParam("id") String id, @QueryParam("q") String text,
+          @QueryParam("episodes") boolean includeEpisodes, @QueryParam("series") boolean includeSeries,
+          @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
     SearchQueryImpl query = new SearchQueryImpl();
-    
+
     // If id is specified, do a search based on id
     if (!StringUtils.isBlank(id)) {
       query.withId(id);
     }
-    
+
     // Include series data in the results?
     query.includeSeries(includeSeries);
 
@@ -248,7 +270,7 @@ public class SearchRestService {
     if (!StringUtils.isBlank(text)) {
       query.withText(text);
     }
-    
+
     query.withPublicationDateSort(true);
     query.withLimit(limit);
     query.withOffset(offset);
@@ -258,25 +280,17 @@ public class SearchRestService {
   @GET
   @Path("episode.json")
   @Produces(MediaType.APPLICATION_JSON)
-  public SearchResultImpl getEpisodeAsJson(
-          @QueryParam("id") String id,
-          @QueryParam("q") String text,
-          @QueryParam("tag") String[] tags,
-          @QueryParam("flavor") String[] flavors,
-          @QueryParam("limit") int limit,
+  public SearchResultImpl getEpisodeAsJson(@QueryParam("id") String id, @QueryParam("q") String text,
+          @QueryParam("tag") String[] tags, @QueryParam("flavor") String[] flavors, @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     return getEpisode(id, text, tags, flavors, limit, offset);
   }
-  
+
   @GET
   @Path("episode.xml")
   @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getEpisode(
-          @QueryParam("id") String id,
-          @QueryParam("q") String text,
-          @QueryParam("tag") String[] tags,
-          @QueryParam("flavor") String[] flavors,
-          @QueryParam("limit") int limit,
+  public SearchResultImpl getEpisode(@QueryParam("id") String id, @QueryParam("q") String text,
+          @QueryParam("tag") String[] tags, @QueryParam("flavor") String[] flavors, @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
 
     // Prepare the flavors
@@ -285,27 +299,25 @@ public class SearchRestService {
       for (String f : flavors) {
         try {
           flavorSet.add(MediaPackageElementFlavor.parseFlavor(f));
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
           logger.debug("invalid flavor '{}' specified in query", f);
         }
       }
     }
-    
+
     SearchQueryImpl search = new SearchQueryImpl();
-    search.withId(id).withElementFlavors(flavorSet.toArray(new MediaPackageElementFlavor[flavorSet.size()])).
-    withElementTags(tags).withLimit(limit).withOffset(offset);
+    search.withId(id).withElementFlavors(flavorSet.toArray(new MediaPackageElementFlavor[flavorSet.size()]))
+            .withElementTags(tags).withLimit(limit).withOffset(offset);
     if (!StringUtils.isBlank(text))
       search.withText(text);
     else
       search.withPublicationDateSort(true);
-    return (SearchResultImpl)searchService.getByQuery(search);
+    return (SearchResultImpl) searchService.getByQuery(search);
   }
 
   @GET
   @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getEpisodesAndSeries(
-          @QueryParam("q") String text,
-          @QueryParam("limit") int limit,
+  public SearchResultImpl getEpisodesAndSeries(@QueryParam("q") String text, @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     SearchQueryImpl query = new SearchQueryImpl();
     query.includeEpisodes(true);
@@ -318,13 +330,11 @@ public class SearchRestService {
       query.withPublicationDateSort(true);
     return (SearchResultImpl) searchService.getByQuery(query);
   }
-  
+
   @GET
   @Path("lucene.xml")
   @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getByLuceneQuery(
-          @QueryParam("q") String q,
-          @QueryParam("limit") int limit,
+  public SearchResultImpl getByLuceneQuery(@QueryParam("q") String q, @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     SearchQueryImpl query = new SearchQueryImpl();
     if (!StringUtils.isBlank(q))
@@ -339,9 +349,7 @@ public class SearchRestService {
   @GET
   @Path("lucene.json")
   @Produces(MediaType.APPLICATION_JSON)
-  public SearchResultImpl getByLuceneQueryAsJson(
-          @QueryParam("q") String q,
-          @QueryParam("limit") int limit,
+  public SearchResultImpl getByLuceneQueryAsJson(@QueryParam("q") String q, @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     return getByLuceneQuery(q, limit, offset);
   }

@@ -21,25 +21,28 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * JaxB implementation of the entry of a Hashtable, so that the element can be serialized in the intendet way
- * The Entry now looks <item key="key"><value>value</value></item>
- *
+ * JaxB implementation of the entry of a Hashtable, so that the element can be serialized in the intendet way The Entry
+ * now looks <item key="key"><value>value</value></item>
+ * 
  */
-@XmlType(name="MetadataEntry")
+@XmlType(name = "MetadataEntry")
 public class MetadataEntry implements Entry<String, String> {
-  @XmlAttribute(name="key") 
+  @XmlAttribute(name = "key")
   String key;
   // I would like this to be XmlValue but the JaxB parser the throws an exception
   String value;
-  
-  public MetadataEntry () {}
-  public MetadataEntry (String key, String value) {
+
+  public MetadataEntry() {
+  }
+
+  public MetadataEntry(String key, String value) {
     this.key = key;
     this.value = value;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.util.Map.Entry#getKey()
    */
   @Override
@@ -49,6 +52,7 @@ public class MetadataEntry implements Entry<String, String> {
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.util.Map.Entry#getValue()
    */
   @Override
@@ -58,6 +62,7 @@ public class MetadataEntry implements Entry<String, String> {
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.util.Map.Entry#setValue(java.lang.Object)
    */
   @Override
@@ -65,5 +70,5 @@ public class MetadataEntry implements Entry<String, String> {
     this.value = value;
     return this.value;
   }
-  
+
 }

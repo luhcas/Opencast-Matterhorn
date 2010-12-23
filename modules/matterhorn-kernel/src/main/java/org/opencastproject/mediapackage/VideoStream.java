@@ -52,10 +52,16 @@ public interface VideoStream extends Stream {
   String getFormatVersion();
 
   String getEncoderLibraryVendor();
+
   public static class Adapter extends XmlAdapter<VideoStreamImpl, Stream> {
     @Override
-    public VideoStreamImpl marshal(Stream v) throws Exception {return (VideoStreamImpl)v;}
+    public VideoStreamImpl marshal(Stream v) throws Exception {
+      return (VideoStreamImpl) v;
+    }
+
     @Override
-    public Stream unmarshal(VideoStreamImpl v) throws Exception {return v;}
+    public Stream unmarshal(VideoStreamImpl v) throws Exception {
+      return v;
+    }
   }
 }

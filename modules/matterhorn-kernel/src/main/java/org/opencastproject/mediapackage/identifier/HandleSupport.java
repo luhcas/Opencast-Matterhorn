@@ -21,7 +21,11 @@ import java.io.File;
 /**
  * Utility class used to deal with handle identifiers.
  */
-public class HandleSupport {
+public final class HandleSupport {
+
+  /** Disable constructing this utility class */
+  private HandleSupport() {
+  }
 
   /**
    * Converts the handle into a valid path name by replacing forward slashes with dots.

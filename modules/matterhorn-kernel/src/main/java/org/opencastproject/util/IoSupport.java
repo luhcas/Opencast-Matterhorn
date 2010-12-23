@@ -39,18 +39,17 @@ import java.net.URL;
 /**
  * Contains operations concerning IO.
  */
-public class IoSupport {
+public final class IoSupport {
 
   /** the logging facility provided by log4j */
-  private static Logger logger = LoggerFactory.getLogger(IoSupport.class
-      .getName());
+  private static Logger logger = LoggerFactory.getLogger(IoSupport.class.getName());
 
   public static String getSystemTmpDir() {
     String tmpdir = System.getProperty("java.io.tmpdir");
     if (tmpdir == null) {
       tmpdir = File.separator + "tmp" + File.separator;
     } else {
-      if (! tmpdir.endsWith(File.separator)) {
+      if (!tmpdir.endsWith(File.separator)) {
         tmpdir += File.separator;
       }
     }
@@ -79,8 +78,7 @@ public class IoSupport {
   }
 
   /**
-   * Closes a <code>StreamHelper</code> quietly so that no exceptions are
-   * thrown.
+   * Closes a <code>StreamHelper</code> quietly so that no exceptions are thrown.
    * 
    * @param s
    *          maybe null
@@ -118,9 +116,8 @@ public class IoSupport {
   }
 
   /**
-   * Extracts the content from the given input stream. This method is intended
-   * to faciliate handling of processes that have error, input and output
-   * streams.
+   * Extracts the content from the given input stream. This method is intended to faciliate handling of processes that
+   * have error, input and output streams.
    * 
    * @param is
    *          the input stream
@@ -150,10 +147,13 @@ public class IoSupport {
   }
 
   /**
-   * Writes the contents variable to the {@code URL}.  Note that the URL must be a local {@code URL}.
-   * @param file The {@code URL} of the local file you wish to write to.
-   * @param contents The contents of the file you wish to create.
-   * @throws URISyntaxException 
+   * Writes the contents variable to the {@code URL}. Note that the URL must be a local {@code URL}.
+   * 
+   * @param file
+   *          The {@code URL} of the local file you wish to write to.
+   * @param contents
+   *          The contents of the file you wish to create.
+   * @throws URISyntaxException
    */
   public static void writeUTF8File(URL file, String contents) throws IOException {
     try {
@@ -165,8 +165,11 @@ public class IoSupport {
 
   /**
    * Writes the contents variable to the {@code File}.
-   * @param file The {@code File} of the local file you wish to write to.
-   * @param contents The contents of the file you wish to create.
+   * 
+   * @param file
+   *          The {@code File} of the local file you wish to write to.
+   * @param contents
+   *          The contents of the file you wish to create.
    */
   public static void writeUTF8File(File file, String contents) throws IOException {
     writeUTF8File(file.getAbsolutePath(), contents);
@@ -174,8 +177,11 @@ public class IoSupport {
 
   /**
    * Writes the contents variable to the {@code File} located at the filename.
-   * @param file The {@code File} of the local file you wish to write to.
-   * @param contents The contents of the file you wish to create.
+   * 
+   * @param file
+   *          The {@code File} of the local file you wish to write to.
+   * @param contents
+   *          The contents of the file you wish to create.
    */
   public static void writeUTF8File(String filename, String contents) throws IOException {
     FileWriter out = new FileWriter(filename);
@@ -185,7 +191,9 @@ public class IoSupport {
 
   /**
    * Convenience method to read in a file from a local source.
-   * @param url The {@code URL} to read the source data from.
+   * 
+   * @param url
+   *          The {@code URL} to read the source data from.
    * @return A String containing the source data or null in the case of an error.
    */
   public static String readFileFromURL(URL url) {
@@ -194,9 +202,12 @@ public class IoSupport {
 
   /**
    * Convenience method to read in a file from either a remote or local source.
-   * @param url The {@code URL} to read the source data from.
+   * 
+   * @param url
+   *          The {@code URL} to read the source data from.
    * @param trustedClient
-       The {@code TrustedHttpClient} which should be used to communicate with the remote server.  This can be null for local file reads.
+   *          The {@code TrustedHttpClient} which should be used to communicate with the remote server. This can be null
+   *          for local file reads.
    * @return A String containing the source data or null in the case of an error.
    */
   public static String readFileFromURL(URL url, TrustedHttpClient trustedClient) {
@@ -204,8 +215,8 @@ public class IoSupport {
     DataInputStream in = null;
     HttpResponse response = null;
     try {
-      //Do different things depending on what we're reading...
-      if (url.getProtocol().equals("file")) {
+      // Do different things depending on what we're reading...
+      if ("file".equals(url.getProtocol())) {
         in = new DataInputStream(url.openStream());
       } else {
         if (trustedClient == null) {
@@ -239,7 +250,7 @@ public class IoSupport {
       return null;
     } finally {
       IOUtils.closeQuietly(in);
- 
+
       if (response != null && trustedClient != null) {
         trustedClient.close(response);
         response = null;

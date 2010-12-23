@@ -36,25 +36,24 @@ import java.net.URL;
  * Test for the IoSupporTest class
  */
 public class IoSupportTest {
-  
+
   private static File baseDir, spacesDir, spacesFile;
   private static URL spacesFileURL;
-  private static final String sampleText=
-    "En un lugar de la Mancha, de cuyo nombre no quiero acordarme,\n" +
-    "no ha mucho que vivia un hidalgo de los de lanza en astillero,\n" +
-    "adarga antigua, rocin flaco y galgo corredor.\n\n" +
-    "                                 Miguel de Cervantes Saavedra\n" +
-    "                      \"El ingenioso hidalgo don Quijote de la Mancha\"\n";
+  private static final String sampleText = "En un lugar de la Mancha, de cuyo nombre no quiero acordarme,\n"
+          + "no ha mucho que vivia un hidalgo de los de lanza en astillero,\n"
+          + "adarga antigua, rocin flaco y galgo corredor.\n\n"
+          + "                                 Miguel de Cervantes Saavedra\n"
+          + "                      \"El ingenioso hidalgo don Quijote de la Mancha\"\n";
 
   /**
-   * @throws URISyntaxException 
-   * @throws IOException 
+   * @throws URISyntaxException
+   * @throws IOException
    */
   @BeforeClass
   public static void setUpBeforeClass() throws IOException, URISyntaxException {
     baseDir = new File(IoSupportTest.class.getResource("/.").toURI()).getCanonicalFile();
-    spacesDir = new File(baseDir,"spaces in name").getCanonicalFile();
-    spacesFile = new File(spacesDir,"testfile.txt").getCanonicalFile();
+    spacesDir = new File(baseDir, "spaces in name").getCanonicalFile();
+    spacesFile = new File(spacesDir, "testfile.txt").getCanonicalFile();
     spacesFileURL = spacesFile.toURI().toURL();
   }
 
@@ -70,14 +69,13 @@ public class IoSupportTest {
 
   /**
    * Test method for {@link org.opencastproject.util.IoSupport#writeUTF8File(java.net.URL, java.lang.String)}.
-   * @throws IOException 
+   * 
+   * @throws IOException
    */
   @Test
   public void testWriteUTF8FileURLString() throws IOException {
     IoSupport.writeUTF8File(spacesFileURL, sampleText);
-    Assert.assertTrue(
-            "File " + spacesFile.getAbsolutePath() + " was not created or is not valid",
-            spacesFile.isFile());
+    Assert.assertTrue("File " + spacesFile.getAbsolutePath() + " was not created or is not valid", spacesFile.isFile());
     String line = null;
     StringBuilder sb = new StringBuilder();
     BufferedReader br = null;
@@ -91,19 +89,18 @@ public class IoSupportTest {
       if (br != null)
         br.close();
     }
-      Assert.assertEquals("File contents comparison", sampleText, sb.toString());
+    Assert.assertEquals("File contents comparison", sampleText, sb.toString());
   }
 
   /**
    * Test method for {@link org.opencastproject.util.IoSupport#writeUTF8File(java.io.File, java.lang.String)}.
-   * @throws IOException 
+   * 
+   * @throws IOException
    */
   @Test
   public void testWriteUTF8FileFileString() throws IOException {
     IoSupport.writeUTF8File(spacesFile, sampleText);
-    Assert.assertTrue(
-            "File " + spacesFile.getAbsolutePath() + " was not created or is not valid",
-            spacesFile.isFile());
+    Assert.assertTrue("File " + spacesFile.getAbsolutePath() + " was not created or is not valid", spacesFile.isFile());
     String line = null;
     StringBuilder sb = new StringBuilder();
     BufferedReader br = null;
@@ -117,7 +114,7 @@ public class IoSupportTest {
       if (br != null)
         br.close();
     }
-      Assert.assertEquals("File contents comparison", sampleText, sb.toString());
+    Assert.assertEquals("File contents comparison", sampleText, sb.toString());
   }
 
 }

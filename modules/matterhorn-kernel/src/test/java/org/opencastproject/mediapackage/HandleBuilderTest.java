@@ -153,8 +153,7 @@ public class HandleBuilderTest {
   }
 
   /**
-   * Test method for
-   * {@link org.opencastproject.mediapackage.identifier.HandleBuilderImpl#update(Id, java.net.URL)} .
+   * Test method for {@link org.opencastproject.mediapackage.identifier.HandleBuilderImpl#update(Id, java.net.URL)} .
    */
   @Test
   public void testUpdate() {

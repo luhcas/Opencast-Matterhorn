@@ -19,13 +19,12 @@ package org.opencastproject.scheduler.api;
 public class IncompleteDataException extends Exception {
 
   private static final long serialVersionUID = 1L;
-  
-  public IncompleteDataException () {
+
+  public IncompleteDataException() {
     super();
   }
-  
-  public IncompleteDataException (String message) {
-    super (message);
-  }
 
+  public IncompleteDataException(String message) {
+    super(message);
+  }
 }

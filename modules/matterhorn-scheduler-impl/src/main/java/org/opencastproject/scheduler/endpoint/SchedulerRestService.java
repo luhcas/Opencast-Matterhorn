@@ -34,7 +34,6 @@ import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
-
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -270,7 +269,7 @@ public class SchedulerRestService {
       try {
         service.removeEvent(eventId);
         return Response.noContent().type("").build(); // remove content-type, no message-body.
-      } catch(NotFoundException e) {
+      } catch (NotFoundException e) {
         return Response.status(Status.NOT_FOUND).build();
       } catch (Exception e) {
         logger.warn("Unable to delete event with id '{}': {}", eventId, e);
@@ -296,7 +295,7 @@ public class SchedulerRestService {
         return Response.noContent().type("").build(); // remove content-type, no message-body.
       } catch (NotFoundException e) {
         return Response.status(Status.NOT_FOUND).build();
-      } catch(Exception e) {
+      } catch (Exception e) {
         logger.warn("Unable to update event with id '{}': {}", eventId, e);
         return Response.serverError().build();
       }
@@ -304,14 +303,14 @@ public class SchedulerRestService {
       return Response.status(Status.BAD_REQUEST).build();
     }
   }
-  
+
   /**
    * Updates a list of existing event in the database. The event-id has to be stored in the database already.
    * 
    * @param e
    *          The SchedulerEvent that should be updated
    * @param eventIdList
-   *        A JSON array of event ids.
+   *          A JSON array of event ids.
    * @return true if the event was found and could be updated.
    */
   @SuppressWarnings("unchecked")
@@ -320,10 +319,10 @@ public class SchedulerRestService {
   public Response updateEvent(@FormParam("event") EventImpl event, @FormParam("idList") String idList) {
     JSONParser parser = new JSONParser();
     JSONArray ids = new JSONArray();
-    try{
-      ids = (JSONArray)parser.parse(idList);
-    } catch (ParseException e) { 
-    logger.warn("Unable to parse json id list: {}", e);
+    try {
+      ids = (JSONArray) parser.parse(idList);
+    } catch (ParseException e) {
+      logger.warn("Unable to parse json id list: {}", e);
       return Response.status(Status.BAD_REQUEST).build();
     }
     if (!ids.isEmpty() && event != null) {
@@ -353,60 +352,48 @@ public class SchedulerRestService {
    *          to search for pattern to search for
    *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
    * @return List of SchedulerEvents as XML
-   */ 
+   */
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("filter.xml")
-  public Response filterEventsXml(@QueryParam("co") String contributor,
-                                  @QueryParam("cr") String creator,
-                                  @QueryParam("de") String device,
-                                  @QueryParam("se") String series,
-                                  @QueryParam("st") Long startDate,
-                                  @QueryParam("ti") String title,
-                                  @QueryParam("so") boolean isAsc) {
-    return filterEvents(contributor, creator, device, series, startDate, title, isAsc);
-  }
-   
-  /** 
-  * returns scheduled events, that pass the filter. filter: an xml definition of the filter.
-  * Tags that are not included will not be filtered. Possible values for order by are
-  * title,creator,series,time-asc,time-desc,contributor,channel,location,device
-  * @param filter
-  *          exact id to search for pattern to search for pattern to search for A short description of the content of
-  *          the lecture begin of the period of valid events end of the period of valid events pattern to search for ID
-  *          of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern
-  *          to search for pattern to search for
-  *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
-  * @return List of SchedulerEvents as JSON
-  */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("filter.json") 
-  public Response filterEventsJson(@QueryParam("co") String contributor,
-                                  @QueryParam("cr") String creator,
-                                  @QueryParam("de") String device,
-                                  @QueryParam("se") String series,
-                                  @QueryParam("st") Long startDate,
-                                  @QueryParam("ti") String title,
-                                  @QueryParam("so") boolean isAsc) {
+  public Response filterEventsXml(@QueryParam("co") String contributor, @QueryParam("cr") String creator,
+          @QueryParam("de") String device, @QueryParam("se") String series, @QueryParam("st") Long startDate,
+          @QueryParam("ti") String title, @QueryParam("so") boolean isAsc) {
     return filterEvents(contributor, creator, device, series, startDate, title, isAsc);
   }
 
-  private Response filterEvents(String contributor, String creator, String device, String series, Long startDate, String title, boolean isAsc) {
-    /*if (filter != null) {
-      try {
-        logger.debug("Filter events with {}",filter);
-        EventListImpl eventList = new EventListImpl(service.getEvents(filter));
-        return Response.ok(eventList).type("").build();
-      } catch (Exception e) { return
-        Response.serverError().build();
-      }
-    } else {
-      return Response.status(Status.BAD_REQUEST).build();
-    }*/
+  /**
+   * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included
+   * will not be filtered. Possible values for order by are
+   * title,creator,series,time-asc,time-desc,contributor,channel,location,device
+   * 
+   * @param filter
+   *          exact id to search for pattern to search for pattern to search for A short description of the content of
+   *          the lecture begin of the period of valid events end of the period of valid events pattern to search for ID
+   *          of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern
+   *          to search for pattern to search for
+   *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
+   * @return List of SchedulerEvents as JSON
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("filter.json")
+  public Response filterEventsJson(@QueryParam("co") String contributor, @QueryParam("cr") String creator,
+          @QueryParam("de") String device, @QueryParam("se") String series, @QueryParam("st") Long startDate,
+          @QueryParam("ti") String title, @QueryParam("so") boolean isAsc) {
+    return filterEvents(contributor, creator, device, series, startDate, title, isAsc);
+  }
+
+  private Response filterEvents(String contributor, String creator, String device, String series, Long startDate,
+          String title, boolean isAsc) {
+    /*
+     * if (filter != null) { try { logger.debug("Filter events with {}",filter); EventListImpl eventList = new
+     * EventListImpl(service.getEvents(filter)); return Response.ok(eventList).type("").build(); } catch (Exception e) {
+     * return Response.serverError().build(); } } else { return Response.status(Status.BAD_REQUEST).build(); }
+     */
     return Response.status(Status.BAD_REQUEST).build();
   }
-   
+
   /**
    * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
    * 
@@ -584,7 +571,7 @@ public class SchedulerRestService {
     // Scheduler addEvent
     RestEndpoint addEventEndpoint = new RestEndpoint("addEvent", RestEndpoint.Method.PUT, "/",
             "Stores a new event in the database.");
-    addEventEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("Event was successfully created."));
+    addEventEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Event was successfully created."));
     addEventEndpoint
             .addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be stored."));
     addEventEndpoint.setTestForm(RestTestForm.auto());
@@ -593,12 +580,12 @@ public class SchedulerRestService {
     // Scheduler updateEvent
     RestEndpoint updateEventEndpoint = new RestEndpoint("updateEvent", RestEndpoint.Method.POST, "/{eventId}",
             "Updates an existing event in the database. The event-id has to be stored in the database already.");
-    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Event successfully updated."));
+    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.noContent("Event successfully updated."));
     updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied eventId or Event are incorrect or missing."));
+            .badRequest("Supplied eventId or Event are incorrect or missing."));
     updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("An event matching the supplied eventId was not found."));
-    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .notFound("An event matching the supplied eventId was not found."));
+    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     updateEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "", "The UUID of the event to update."));
     updateEventEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(),
             "The Event that should be updated."));
@@ -608,12 +595,12 @@ public class SchedulerRestService {
     // Scheduler removeEvent
     RestEndpoint removeEventEndpoint = new RestEndpoint("removeEvent", RestEndpoint.Method.DELETE, "/{eventId}",
             "Removes the specified event from the database.");
-    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Event successfully deleted."));
+    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.noContent("Event successfully deleted."));
     removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied eventId is incorrect or missing."));
+            .badRequest("Supplied eventId is incorrect or missing."));
     removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("An Event matching the supplied eventId was not found."));
-    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .notFound("An Event matching the supplied eventId was not found."));
+    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     removeEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "EventId", "The UUID of the event."));
     removeEventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, removeEventEndpoint);
@@ -624,12 +611,12 @@ public class SchedulerRestService {
     getEventEndpoint.addFormat(Format.xml("XML representation of the event."));
     getEventEndpoint.addFormat(Format.json("JSON representation of the event."));
     getEventEndpoint.setAutoPathFormat(true);
-    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of the Event."));
+    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("XML or JSON representation of the Event."));
     getEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied eventId is incorrect or missing."));
+            .badRequest("Supplied eventId is incorrect or missing."));
     getEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("An Event matching the supplied eventId was not found."));
-    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .notFound("An Event matching the supplied eventId was not found."));
+    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     getEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2",
             "The UUID of the event."));
     getEventEndpoint.addPathParam(new Param("format", Type.STRING, "json",
@@ -649,9 +636,9 @@ public class SchedulerRestService {
             .json("JSON representation of a list of the event conforming to the supplied filter."));
     filterEventsEndpoint.setAutoPathFormat(true);
     filterEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("XML or JSON representation of a list of events belonging to a recurring event."));
+            .ok("XML or JSON representation of a list of events belonging to a recurring event."));
     filterEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied filter is incorrect or missing."));
+            .badRequest("Supplied filter is incorrect or missing."));
     filterEventsEndpoint.addOptionalParam(new Param("filter", Type.TEXT, generateSchedulerFilter(),
             "The SchedulerFilter that should be applied."));
     filterEventsEndpoint.setTestForm(RestTestForm.auto());
@@ -664,8 +651,8 @@ public class SchedulerRestService {
     getAllEventsEndpoint.addFormat(Format.json("JSON representation of a list of all events."));
     getAllEventsEndpoint.setAutoPathFormat(true);
     getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("XML or JSON representation of a list of all events."));
-    getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .ok("XML or JSON representation of a list of all events."));
+    getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     getAllEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getAllEventsEndpoint);
 
@@ -676,8 +663,8 @@ public class SchedulerRestService {
     getUpcomingEventsEndpoint.addFormat(Format.json("JSON representation of a list of all events."));
     getUpcomingEventsEndpoint.setAutoPathFormat(true);
     getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("XML or JSON representation of a list of all upcoming events."));
-    getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .ok("XML or JSON representation of a list of all upcoming events."));
+    getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     getUpcomingEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getUpcomingEventsEndpoint);
 
@@ -691,10 +678,10 @@ public class SchedulerRestService {
             .json("JSON representation of a list of all events that conflict with supplied event."));
     findConflictingEventsEndpoint.setAutoPathFormat(true);
     findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("XML or JSON representation of a list of all upcoming events."));
+            .ok("XML or JSON representation of a list of all upcoming events."));
     findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied Event is invalid or missing."));
-    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .badRequest("Supplied Event is invalid or missing."));
+    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     findConflictingEventsEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(),
             "The Event that should be checked for conflicts."));
     findConflictingEventsEndpoint.setTestForm(RestTestForm.auto());
@@ -710,10 +697,10 @@ public class SchedulerRestService {
             .json("JSON representation of a list of all events that conflict with supplied recurring event."));
     findConflictingREventsEndpoint.setAutoPathFormat(true);
     findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("XML or JSON representation of a list of all upcoming events."));
+            .ok("XML or JSON representation of a list of all upcoming events."));
     findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied RecurringEvent is invalid or missing."));
-    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .badRequest("Supplied RecurringEvent is invalid or missing."));
+    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     findConflictingREventsEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateEvent(),
             "The RecurringEvent that should be checked for conflicts. "));
     findConflictingREventsEndpoint.setTestForm(RestTestForm.auto());
@@ -724,12 +711,12 @@ public class SchedulerRestService {
             "/event/{eventId}/dublincore", "Gets a XML with the Dublin Core metadata for the specified event. ");
     getDublinCoreMetadataEndpoint.addFormat(Format.xml("Dublincore metadata for the supplied eventId."));
     getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Dublinecore XML document containing the event's metadata."));
+            .ok("Dublinecore XML document containing the event's metadata."));
     getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied eventId is invalid or missing."));
+            .badRequest("Supplied eventId is invalid or missing."));
     getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("No Event matching the supplied eventId was found."));
-    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .notFound("No Event matching the supplied eventId was found."));
+    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     getDublinCoreMetadataEndpoint.addPathParam(new Param("eventId", Type.STRING,
             "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
     getDublinCoreMetadataEndpoint.setTestForm(RestTestForm.auto());
@@ -742,12 +729,12 @@ public class SchedulerRestService {
     getCaptureAgentMetadataEndpoint.addFormat(new Format("properties",
             "Java Properties files that is needed by the capture agent.", null));
     getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Java Properties file for the event."));
+            .ok("Java Properties file for the event."));
     getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied eventId is invalid or missing."));
+            .badRequest("Supplied eventId is invalid or missing."));
     getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("No Event matching the supplied eventId was found."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .notFound("No Event matching the supplied eventId was found."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     getCaptureAgentMetadataEndpoint.addPathParam(new Param("eventId", Type.STRING,
             "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
     getCaptureAgentMetadataEndpoint.setTestForm(RestTestForm.auto());
@@ -759,12 +746,12 @@ public class SchedulerRestService {
             "Gets the iCalendar with all upcoming events for the specified capture agent id. ");
     getCalendarForCaptureAgentEndpoint.addFormat(new Format("ics", "iCalendar", "http://tools.ietf.org/html/rfc2445"));
     getCalendarForCaptureAgentEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("iCalendar file containing the scheduled Events for the capture agent."));
+            .ok("iCalendar file containing the scheduled Events for the capture agent."));
     getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("Supplied captureAgentId is invalid or missing."));
+            .badRequest("Supplied captureAgentId is invalid or missing."));
     getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NOT_FOUND("No capture agent matching the supplied catureAgentId was found."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+            .notFound("No capture agent matching the supplied catureAgentId was found."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
     getCalendarForCaptureAgentEndpoint.addPathParam(new Param("captureAgentId", Type.STRING, "recorder",
             "The ID that specifies the capture agent."));
     getCalendarForCaptureAgentEndpoint.setTestForm(RestTestForm.auto());

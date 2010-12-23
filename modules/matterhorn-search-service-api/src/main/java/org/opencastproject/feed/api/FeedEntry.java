@@ -133,7 +133,7 @@ public interface FeedEntry {
    * 
    * @return a list of Enclosure elements with the entry enclosures, an empty list if none.
    */
-  public List<Enclosure> getEnclosures();
+  List<Enclosure> getEnclosures();
 
   /**
    * Sets the entry enclosures.
@@ -142,7 +142,7 @@ public interface FeedEntry {
    * @param enclosures
    *          the list of Enclosure elements with the entry enclosures to set, an empty list or <b>null</b> if none
    */
-  public void setEnclosures(List<Enclosure> enclosures);
+  void setEnclosures(List<Enclosure> enclosures);
 
   /**
    * Adds an entry enclosure.
@@ -288,7 +288,7 @@ public interface FeedEntry {
    *          the URI of the Module.
    * @return The module with the given URI, <b>null</b> if none
    */
-  public FeedExtension getModule(String uri);
+  FeedExtension getModule(String uri);
 
   /**
    * Returns the entry modules.

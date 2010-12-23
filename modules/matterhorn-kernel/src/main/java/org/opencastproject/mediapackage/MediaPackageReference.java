@@ -30,13 +30,13 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlJavaTypeAdapter(MediaPackageReferenceImpl.Adapter.class)
 public interface MediaPackageReference extends Cloneable {
 
-  public static final String TYPE_MEDIAPACKAGE = "mediapackage";
-  public static final String TYPE_TRACK = "track";
-  public static final String TYPE_CATALOG = "catalog";
-  public static final String TYPE_ATTACHMENT = "attachment";
-  public static final String TYPE_SERIES = "series";
-  public static final String SELF = "self";
-  public static final String ANY = "*";
+  String TYPE_MEDIAPACKAGE = "mediapackage";
+  String TYPE_TRACK = "track";
+  String TYPE_CATALOG = "catalog";
+  String TYPE_ATTACHMENT = "attachment";
+  String TYPE_SERIES = "series";
+  String SELF = "self";
+  String ANY = "*";
 
   /**
    * Returns the reference type.

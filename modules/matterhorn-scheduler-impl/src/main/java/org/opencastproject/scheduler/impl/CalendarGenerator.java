@@ -57,24 +57,27 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 /**
- *Create an iCalendar from the provided SchedulerEvents
- *
+ * Create an iCalendar from the provided SchedulerEvents
+ * 
  */
 public class CalendarGenerator {
   private static final Logger logger = LoggerFactory.getLogger(CalendarGenerator.class);
-  
+
   Calendar cal;
   DublinCoreGenerator dcGenerator;
   CaptureAgentMetadataGenerator caGenerator;
   SeriesService seriesService;
-  
-  
+
   /**
    * default constructor that creates a CalendarGenerator object
-   * @param dcGenerator A DublinCoreGenerator is needed but cannot be constructed in this object
-   * @param caGenerator A CaptureAgentMetadataGenerator is needed but cannot be constructed in this object
+   * 
+   * @param dcGenerator
+   *          A DublinCoreGenerator is needed but cannot be constructed in this object
+   * @param caGenerator
+   *          A CaptureAgentMetadataGenerator is needed but cannot be constructed in this object
    */
-  public CalendarGenerator (DublinCoreGenerator dcGenerator, CaptureAgentMetadataGenerator caGenerator, SeriesService seriesService) {
+  public CalendarGenerator(DublinCoreGenerator dcGenerator, CaptureAgentMetadataGenerator caGenerator,
+          SeriesService seriesService) {
     cal = new Calendar();
     cal.getProperties().add(new ProdId("Opencast Matterhorn Calendar File 0.5"));
     cal.getProperties().add(Version.VERSION_2_0);
@@ -83,9 +86,10 @@ public class CalendarGenerator {
     this.caGenerator = caGenerator;
     this.seriesService = seriesService;
   }
-  
+
   /**
    * gets the iCalendar creates by this object.
+   * 
    * @return the iCalendar
    */
   public Calendar getCalendar() {
@@ -94,26 +98,30 @@ public class CalendarGenerator {
 
   /**
    * Sets an iCalender to work with
-   * @param cal the iCalendar to set
+   * 
+   * @param cal
+   *          the iCalendar to set
    */
   public void setCalendar(Calendar cal) {
     this.cal = cal;
   }
-  
+
   /**
-   * adds an SchedulerEvent as a new entry to this iCalendar 
-   * @param e the event to add 
-   * @return true if the event could be added. 
+   * adds an SchedulerEvent as a new entry to this iCalendar
+   * 
+   * @param e
+   *          the event to add
+   * @return true if the event could be added.
    */
-  public boolean addEvent (Event e) {
+  public boolean addEvent(Event e) {
     logger.debug("creating iCal VEvent from SchedulerEvent: {}", e.toString());
     Date start = e.getStartDate();
     Date end = e.getEndDate();
-    if(start == null){
+    if (start == null) {
       logger.debug("Couldn't get startdate from event!");
       return false;
     }
-    if(end == null){
+    if (end == null) {
       logger.debug("Couldn't get enddate from event!");
       return false;
     }
@@ -122,16 +130,16 @@ public class CalendarGenerator {
     startDate.setUtc(true);
     endDate.setUtc(true);
     String seriesID = null;
-    
+
     VEvent event = new VEvent(startDate, endDate, e.getTitle());
     try {
       ParameterList pl = new ParameterList();
       pl.add(new Cn(e.getCreator()));
       event.getProperties().add(new Uid(Long.toString(e.getEventId())));
-      
+
       // TODO Organizer should be URI (email-address?) created fake address
       if (StringUtils.isNotEmpty(e.getCreator())) {
-        event.getProperties().add(new Organizer(pl ,e.getCreator().replace(" ", "_")+"@matterhorn.opencast"));
+        event.getProperties().add(new Organizer(pl, e.getCreator().replace(" ", "_") + "@matterhorn.opencast"));
       }
       if (StringUtils.isNotEmpty(e.getDescription())) {
         event.getProperties().add(new Description(e.getDescription()));
@@ -154,7 +162,7 @@ public class CalendarGenerator {
 
       String seriesDC = getSeriesDublinCoreString(seriesID);
       if (seriesDC != null) {
-        logger.debug("Attaching series {} information to event {}",seriesID, e.getEventId());
+        logger.debug("Attaching series {} information to event {}", seriesID, e.getEventId());
         ParameterList sDcParameters = new ParameterList();
         sDcParameters.add(new FmtType("application/xml"));
         sDcParameters.add(Value.BINARY);
@@ -165,45 +173,46 @@ public class CalendarGenerator {
       } else {
         logger.debug("No series provided for event {}.", e.getEventId());
       }
-      
-      ParameterList caParameters = new ParameterList(); 
-      caParameters.add(new FmtType("application/text"));        
+
+      ParameterList caParameters = new ParameterList();
+      caParameters.add(new FmtType("application/text"));
       caParameters.add(Value.BINARY);
       caParameters.add(Encoding.BASE64);
-      caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));    
+      caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));
       Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
       event.getProperties().add(agentsAttachment);
-        
+
     } catch (Exception e1) {
       logger.error("could not create Calendar entry for Event {}. Reason : {} ", e.toString(), e1);
       return false;
     }
     cal.getComponents().add(event);
-    
-    logger.debug("new VEvent = {} ", event.toString() );
+
+    logger.debug("new VEvent = {} ", event.toString());
     return true;
   }
-  
-  private String getSeriesDublinCoreString (String seriesID) {
-    if (seriesID == null || seriesID.length() == 0) return null;
+
+  private String getSeriesDublinCoreString(String seriesID) {
+    if (seriesID == null || seriesID.length() == 0)
+      return null;
     if (seriesService == null) {
       logger.warn("No SeriesService available");
       return null;
     }
-    
+
     try {
       Series series = seriesService.getSeries(seriesID);
       Document doc = (series.getDublinCore()).toXml();
-      
+
       Source source = new DOMSource(doc);
       StringWriter stringWriter = new StringWriter();
       Result result = new StreamResult(stringWriter);
       TransformerFactory factory = TransformerFactory.newInstance();
       Transformer transformer = factory.newTransformer();
       transformer.transform(source, result);
-    
-      return stringWriter.getBuffer().toString().trim(); 
-    } catch (NotFoundException e){
+
+      return stringWriter.getBuffer().toString().trim();
+    } catch (NotFoundException e) {
       logger.warn("Could not find series '" + seriesID + "': {}", e);
     } catch (ParserConfigurationException e) {
       logger.error("Could not parse DublinCoreCatalog for Series: {}", e.getMessage());

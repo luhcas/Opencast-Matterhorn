@@ -56,7 +56,7 @@ import javax.xml.xpath.XPathFactory;
 final class ManifestImpl {
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(ManifestImpl.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(ManifestImpl.class.getName());
 
   /** id builder, for internal use only */
   private static final IdBuilder idBuilder = new UUIDIdBuilderImpl();
@@ -134,7 +134,7 @@ final class ManifestImpl {
   long getStartDate() {
     return startTime;
   }
-  
+
   void setStartDate(long startTime) {
     this.startTime = startTime;
   }
@@ -191,8 +191,7 @@ final class ManifestImpl {
     if (element.getIdentifier() == null) {
       if (element instanceof AbstractMediaPackageElement) {
         ((AbstractMediaPackageElement) element).setIdentifier(id);
-      }
-      else
+      } else
         throw new UnsupportedElementException(element, "Found unkown element without id");
     }
   }
@@ -335,23 +334,24 @@ final class ManifestImpl {
       MediaPackageReference r = t.getReference();
       if (!reference.matches(r)) {
         boolean indirectHit = false;
-        
+
         // Create a reference that will match regardless of properties
         MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
 
         // Try to find a derived match if possible
-        while (includeDerived && (r = getElement(r).getReference()) != null) {
+        while (includeDerived && r != null) {
           if (r.matches(elementRef)) {
             indirectHit = true;
             break;
           }
+          r = getElement(r).getReference();
         }
-        
+
         if (!indirectHit)
           candidates.remove(t);
       }
-    }    
-    
+    }
+
     return candidates.toArray(new Track[candidates.size()]);
   }
 
@@ -441,7 +441,7 @@ final class ManifestImpl {
     }
     return result.toArray(new Attachment[result.size()]);
   }
-  
+
   /**
    * Returns the media package's attachments.
    * 
@@ -492,18 +492,19 @@ final class ManifestImpl {
       MediaPackageReference r = a.getReference();
       if (!reference.matches(r)) {
         boolean indirectHit = false;
-        
+
         // Create a reference that will match regardless of properties
         MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
 
         // Try to find a derived match if possible
-        while (includeDerived && getElement(r) != null && (r = getElement(r).getReference()) != null) {
+        while (includeDerived && getElement(r) != null && r != null) {
           if (r.matches(elementRef)) {
             indirectHit = true;
             break;
           }
+          r = getElement(r).getReference();
         }
-        
+
         if (!indirectHit)
           candidates.remove(a);
       }
@@ -514,7 +515,8 @@ final class ManifestImpl {
   /**
    * Returns the media package element that matches the given reference.
    * 
-   * @param reference the reference
+   * @param reference
+   *          the reference
    * @return the element
    */
   MediaPackageElement getElement(MediaPackageReference reference) {
@@ -546,23 +548,24 @@ final class ManifestImpl {
       MediaPackageReference r = e.getReference();
       if (!reference.matches(r)) {
         boolean indirectHit = false;
-        
+
         // Create a reference that will match regardless of properties
         MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
 
         // Try to find a derived match if possible
-        while (includeDerived && (r = getElement(r).getReference()) != null) {
+        while (includeDerived && r != null) {
           if (r.matches(elementRef)) {
             indirectHit = true;
             break;
           }
+          r = getElement(r).getReference();
         }
-        
+
         if (!indirectHit)
           candidates.remove(e);
       }
-    }    
-    
+    }
+
     return candidates.toArray(new MediaPackageElement[candidates.size()]);
   }
 
@@ -703,23 +706,24 @@ final class ManifestImpl {
       MediaPackageReference r = c.getReference();
       if (!reference.matches(r)) {
         boolean indirectHit = false;
-        
+
         // Create a reference that will match regardless of properties
         MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
 
         // Try to find a derived match if possible
-        while (includeDerived && (r = getElement(r).getReference()) != null) {
+        while (includeDerived && r != null) {
           if (r.matches(elementRef)) {
             indirectHit = true;
             break;
           }
+          r = getElement(r).getReference();
         }
-        
+
         if (!indirectHit)
           candidates.remove(c);
       }
     }
-    
+
     return candidates.toArray(new Catalog[candidates.size()]);
   }
 
@@ -1055,7 +1059,8 @@ final class ManifestImpl {
     for (int i = 0; i < catalogNodes.getLength(); i++) {
       try {
         MediaPackageElement catalog = elementBuilder.elementFromManifest(catalogNodes.item(i), serializer);
-        logger.debug("catalog node {} (#{} of {}) parsed to {}", new Object[] {catalogNodes.item(i), i+1, catalogNodes.getLength(), catalog});
+        logger.debug("catalog node {} (#{} of {}) parsed to {}", new Object[] { catalogNodes.item(i), i + 1,
+                catalogNodes.getLength(), catalog });
         if (catalog != null) {
           logger.debug("catalog flavor={}", catalog.getFlavor());
           URI elementUrl = catalog.getURI();

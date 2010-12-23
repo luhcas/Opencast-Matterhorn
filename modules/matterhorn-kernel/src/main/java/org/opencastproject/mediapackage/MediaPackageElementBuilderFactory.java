@@ -67,7 +67,8 @@ public final class MediaPackageElementBuilderFactory {
   public MediaPackageElementBuilder newElementBuilder() throws ConfigurationException {
     if (builder == null) {
       try {
-        Class<?> builderClass = Class.forName(builderClassName, true, MediaPackageElementBuilderFactory.class.getClassLoader());
+        Class<?> builderClass = Class.forName(builderClassName, true,
+                MediaPackageElementBuilderFactory.class.getClassLoader());
         builder = (MediaPackageElementBuilder) builderClass.newInstance();
       } catch (ClassNotFoundException e) {
         throw new ConfigurationException("Class not found while creating element builder: " + e.getMessage(), e);

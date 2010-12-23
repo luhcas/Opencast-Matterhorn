@@ -49,7 +49,8 @@ public class SimpleElementSelectorTest {
   protected AbstractMediaPackageElementSelector<? extends MediaPackageElement> selector = null;
 
   /** The media package element builder */
-  protected final MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+  protected final MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
+          .newElementBuilder();
 
   /** The media package */
   protected MediaPackage mediaPackage = null;
@@ -68,7 +69,7 @@ public class SimpleElementSelectorTest {
 
   /** Track uri (needed but irrelevant for this test) */
   protected URI uri = null;
-  
+
   /** A tag */
   protected String tag = "tag";
 
@@ -82,23 +83,25 @@ public class SimpleElementSelectorTest {
     selector.addFlavor(PRESENTER_SOURCE);
     setUpPreliminaries();
   }
-  
+
   protected void setUpPreliminaries() throws Exception {
     mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     uri = new URI("http://localhost/track.mov");
-    presentationTrack = (Track)elementBuilder.elementFromURI(uri, Type.Track, PRESENTATION_SOURCE);
+    presentationTrack = (Track) elementBuilder.elementFromURI(uri, Type.Track, PRESENTATION_SOURCE);
     presentationTrack.addTag(tag);
     mediaPackage.add(presentationTrack);
-    presenterTrack = (Track)elementBuilder.elementFromURI(uri, Type.Track, PRESENTATION_SOURCE);
+    presenterTrack = (Track) elementBuilder.elementFromURI(uri, Type.Track, PRESENTATION_SOURCE);
     mediaPackage.add(presenterTrack);
-    audienceTrack = (Track)elementBuilder.elementFromURI(uri, Type.Track, AUDIENCE_SOURCE);
+    audienceTrack = (Track) elementBuilder.elementFromURI(uri, Type.Track, AUDIENCE_SOURCE);
     mediaPackage.add(audienceTrack);
-    presentationAttachment = (Attachment)elementBuilder.elementFromURI(uri, Type.Attachment, PRESENTATION_SOURCE);
+    presentationAttachment = (Attachment) elementBuilder.elementFromURI(uri, Type.Attachment, PRESENTATION_SOURCE);
     mediaPackage.add(presentationAttachment);
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.mediapackage.MediaPackage)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#select(org.opencastproject.mediapackage.MediaPackage)}
+   * .
    */
   @Test
   public void testSelect() {
@@ -112,7 +115,8 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#setFlavors(java.util.List)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#setFlavors(java.util.List)}.
    */
   @Test
   public void testSetFlavors() {
@@ -124,7 +128,9 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavor(org.opencastproject.mediapackage.MediaPackageElementFlavor)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavor(org.opencastproject.mediapackage.MediaPackageElementFlavor)}
+   * .
    */
   @Test
   public void testAddFlavorMediaPackageElementFlavor() {
@@ -136,7 +142,8 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavor(java.lang.String)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavor(java.lang.String)}.
    */
   @Test
   public void testAddFlavorString() {
@@ -149,7 +156,9 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavorAt(int, org.opencastproject.mediapackage.MediaPackageElementFlavor)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavorAt(int, org.opencastproject.mediapackage.MediaPackageElementFlavor)}
+   * .
    */
   @Test
   public void testAddFlavorAtIntMediaPackageElementFlavor() {
@@ -167,7 +176,9 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavorAt(int, java.lang.String)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addFlavorAt(int, java.lang.String)}
+   * .
    */
   @Test
   public void testAddFlavorAtIntString() {
@@ -185,7 +196,9 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeFlavor(org.opencastproject.mediapackage.MediaPackageElementFlavor)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeFlavor(org.opencastproject.mediapackage.MediaPackageElementFlavor)}
+   * .
    */
   @Test
   public void testRemoveFlavorMediaPackageElementFlavor() {
@@ -197,7 +210,9 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeFlavor(java.lang.String)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeFlavor(java.lang.String)}
+   * .
    */
   @Test
   public void testRemoveFlavorString() {
@@ -209,7 +224,8 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeFlavorAt(int)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeFlavorAt(int)}.
    */
   @Test
   public void testRemoveFlavorAt() {
@@ -219,7 +235,8 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addTag(java.lang.String)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#addTag(java.lang.String)}.
    */
   @Test
   public void testAddTag() {
@@ -230,7 +247,8 @@ public class SimpleElementSelectorTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeTag(java.lang.String)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector#removeTag(java.lang.String)}.
    */
   @Test
   public void testRemoveTag() {

@@ -24,7 +24,7 @@ import java.util.List;
  * Utility class for handling {@link org.opencastproject.mediapackage.Track}s and
  * {@link org.opencastproject.mediapackage.Stream}s.
  */
-public class TrackSupport {
+public final class TrackSupport {
 
   private TrackSupport() {
   }

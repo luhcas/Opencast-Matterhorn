@@ -38,12 +38,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public final class ChecksumType implements Serializable {
 
   private static final Logger logger = LoggerFactory.getLogger(ChecksumType.class);
-  
+
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
   /** List of all known checksum types */
-  private static Map<String, ChecksumType> types_ = new HashMap<String, ChecksumType>();
+  private static final Map<String, ChecksumType> TYPES = new HashMap<String, ChecksumType>();
 
   /** Default type md5 */
   public static final ChecksumType DEFAULT_TYPE = new ChecksumType("md5");
@@ -64,7 +64,7 @@ public final class ChecksumType implements Serializable {
    */
   protected ChecksumType(String type) {
     this.type = type;
-    types_.put(type, this);
+    TYPES.put(type, this);
   }
 
   /**
@@ -77,8 +77,7 @@ public final class ChecksumType implements Serializable {
   }
 
   /**
-   * Returns a checksum type for the given string. <code>Type</code> is
-   * considered to be the name of a checksum type.
+   * Returns a checksum type for the given string. <code>Type</code> is considered to be the name of a checksum type.
    * 
    * @param type
    *          the type name
@@ -86,16 +85,15 @@ public final class ChecksumType implements Serializable {
    * @throws NoSuchAlgorithmException
    *           if the digest is not supported by the java environment
    */
-  public static ChecksumType fromString(String type)
-          throws NoSuchAlgorithmException {
+  public static ChecksumType fromString(String type) throws NoSuchAlgorithmException {
     if (type == null)
       throw new IllegalArgumentException("Argument 'type' is null");
     type = type.toLowerCase();
-    ChecksumType checksumType = types_.get(type);
+    ChecksumType checksumType = TYPES.get(type);
     if (checksumType == null) {
       MessageDigest.getInstance(type);
       checksumType = new ChecksumType(type);
-      types_.put(type, checksumType);
+      TYPES.put(type, checksumType);
     }
     return checksumType;
   }

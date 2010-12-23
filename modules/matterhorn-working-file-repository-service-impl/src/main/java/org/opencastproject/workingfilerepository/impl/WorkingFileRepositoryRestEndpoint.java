@@ -97,7 +97,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
             "ID of the element under which file will be stored"));
     endpoint.addBodyParam(true, null, "File that we want to store");
     endpoint.addFormat(new Format("HTML", null, null));
-    endpoint.addStatus(Status.OK("Message of successful storage with url to the stored file"));
+    endpoint.addStatus(Status.ok("Message of successful storage with url to the stored file"));
     endpoint.addStatus(new Status(400, "No file to store, invalid file location"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
@@ -108,7 +108,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
     endpoint.addPathParam(new Param("collectionId", Param.Type.STRING, null, "ID of the collection"));
     endpoint.addBodyParam(true, null, "File that we want to store");
     endpoint.addFormat(new Format("HTML", null, null));
-    endpoint.addStatus(Status.OK("Message of successful storage with url to the stored file"));
+    endpoint.addStatus(Status.ok("Message of successful storage with url to the stored file"));
     endpoint.addStatus(new Status(400, "No file to store, invalid file location"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
@@ -119,7 +119,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
             "Deletes a file from a collection");
     endpoint.addPathParam(new Param("collectionId", Param.Type.STRING, null, "ID of the collection"));
     endpoint.addPathParam(new Param("fileName", Param.Type.STRING, null, "The filename"));
-    endpoint.addStatus(Status.NO_CONTENT("The file was deleted"));
+    endpoint.addStatus(Status.noContent("The file was deleted"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -128,7 +128,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
             "Lists files in a collection");
     endpoint.addPathParam(new Param("collectionId", Param.Type.STRING, null, "ID of the collection"));
     endpoint.addFormat(new Format("json", null, null));
-    endpoint.addStatus(Status.OK("The collection was found, returning the contents of the collection"));
+    endpoint.addStatus(Status.ok("The collection was found, returning the contents of the collection"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -141,7 +141,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
     endpoint.addPathParam(new Param("toMediaPackage", Param.Type.STRING, null, "The destination mediapackage"));
     endpoint.addPathParam(new Param("toMediaPackageElement", Param.Type.STRING, null, "The destination element ID"));
     endpoint.addPathParam(new Param("toFileName", Param.Type.STRING, null, "The destination element file name"));
-    endpoint.addStatus(Status.OK("The file was copied to the URL in the response body"));
+    endpoint.addStatus(Status.ok("The file was copied to the URL in the response body"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -154,7 +154,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
     endpoint.addPathParam(new Param("toMediaPackage", Param.Type.STRING, null, "The destination mediapackage"));
     endpoint.addPathParam(new Param("toMediaPackageElement", Param.Type.STRING, null, "The destination element ID"));
     endpoint.addPathParam(new Param("toFileName", Param.Type.STRING, null, "The destination element file name"));
-    endpoint.addStatus(Status.OK("The file was moved to the URL in the response body"));
+    endpoint.addStatus(Status.ok("The file was moved to the URL in the response body"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -166,7 +166,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
             "ID of the media package where element is"));
     endpoint.addPathParam(new Param("mediaPackageElementID", Param.Type.STRING, null,
             "ID of the element that will be deleted"));
-    endpoint.addStatus(Status.OK("If given file exists it is deleted"));
+    endpoint.addStatus(Status.ok("If given file exists it is deleted"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
@@ -178,7 +178,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
             "ID of the media package with desired element"));
     endpoint.addPathParam(new Param("mediaPackageElementID", Param.Type.STRING, null, "ID of desired element"));
     // endpoint.addFormat(new Format(".*", "Data that is stored in this location", null));
-    endpoint.addStatus(Status.OK("Results in a header with retrieved file"));
+    endpoint.addStatus(Status.ok("Results in a header with retrieved file"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -192,7 +192,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
     endpoint
             .addPathParam(new Param("fileName", Param.Type.STRING, null, "Name under which the file will be retrieved"));
     // endpoint.addFormat(new Format(".*", "Data that is stored in this location", null));
-    endpoint.addStatus(Status.OK("Results in a header with retrieved file"));
+    endpoint.addStatus(Status.ok("Results in a header with retrieved file"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 

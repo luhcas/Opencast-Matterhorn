@@ -28,56 +28,56 @@ public interface MediaTimePoint extends XmlElement {
    * 
    * @return the day of month
    */
-  public int getDay();
+  int getDay();
 
   /**
    * Returns the hour of day (in 24-hour representation).
    * 
    * @return the hour
    */
-  public int getHour();
+  int getHour();
 
   /**
    * Returns the number of minutes.
    * 
    * @return the minutes
    */
-  public int getMinutes();
+  int getMinutes();
 
   /**
    * Returns the month.
    * 
    * @return the month
    */
-  public int getMonth();
+  int getMonth();
 
   /**
    * Returns the fractions.
    * 
    * @return the fractions
    */
-  public int getNFractions();
+  int getNFractions();
 
   /**
    * Returns the seconds.
    * 
    * @return the seconds
    */
-  public int getSeconds();
+  int getSeconds();
 
   /**
    * Returns the year.
    * 
    * @return the year
    */
-  public int getYear();
+  int getYear();
 
   /**
    * The fractions per second.
    * 
    * @return the fractions per second
    */
-  public int getFractionsPerSecond();
+  int getFractionsPerSecond();
 
   /**
    * Returns the media time point in milliseconds.

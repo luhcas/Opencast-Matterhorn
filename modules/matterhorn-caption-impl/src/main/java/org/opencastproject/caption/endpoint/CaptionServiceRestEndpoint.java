@@ -183,7 +183,7 @@ public class CaptionServiceRestEndpoint {
     RestEndpoint convertEndpoint = new RestEndpoint("convert", RestEndpoint.Method.POST, "/convert",
             "Convert captions from one format to another");
     convertEndpoint.addFormat(Format.xml());
-    convertEndpoint.addStatus(Status.OK("Conversion successfully completed."));
+    convertEndpoint.addStatus(Status.ok("Conversion successfully completed."));
     convertEndpoint.addRequiredParam(new Param("captions", Param.Type.STRING, generateCatalog(),
             "Captions to be converted."));
     convertEndpoint.addRequiredParam(new Param("input", Param.Type.STRING, "dfxp",
@@ -199,7 +199,7 @@ public class CaptionServiceRestEndpoint {
     RestEndpoint languageEndpoint = new RestEndpoint("languages", RestEndpoint.Method.POST, "/languages",
             "Get information about languages in caption catalog (if such information is available).");
     languageEndpoint.addFormat(Format.xml());
-    languageEndpoint.addStatus(Status.OK("Returned information about languages present in captions"));
+    languageEndpoint.addStatus(Status.ok("Returned information about languages present in captions"));
     languageEndpoint.addRequiredParam(new Param("captions", Param.Type.STRING, generateCatalog(),
             "Captions to be examined."));
     languageEndpoint.addRequiredParam(new Param("input", Param.Type.STRING, "dfxp",

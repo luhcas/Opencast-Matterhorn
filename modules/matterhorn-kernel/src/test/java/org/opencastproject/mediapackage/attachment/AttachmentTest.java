@@ -50,13 +50,15 @@ public class AttachmentTest {
     coverFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").toURI());
     assertTrue(coverFile.exists() && coverFile.canRead());
   }
-  
+
   /**
-   * Test method for {@link org.opencastproject.mediapackage.attachment.AttachmentImpl#toManifest(org.w3c.dom.Document, org.opencastproject.mediapackage.MediaPackageSerializer)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.attachment.AttachmentImpl#toManifest(org.w3c.dom.Document, org.opencastproject.mediapackage.MediaPackageSerializer)}
+   * .
    */
   @Test
   public void testToManifest() {
-    //fail("Not yet implemented"); // TODO
+    // fail("Not yet implemented"); // TODO
   }
 
   /**
@@ -68,21 +70,21 @@ public class AttachmentTest {
     MediaPackageElementBuilder builder = factory.newElementBuilder();
     MediaPackageElement packageElement = null;
     Attachment attachment = null;
-    
+
     // Create the element
     try {
       packageElement = builder.elementFromURI(coverFile.toURI());
     } catch (UnsupportedElementException e) {
       fail("Attachment is unsupported: " + e.getMessage());
     }
-    
+
     // Type test
     try {
-      attachment = (Attachment)packageElement;
+      attachment = (Attachment) packageElement;
     } catch (ClassCastException e) {
       fail("Type mismatch: " + e.getMessage());
     }
-    
+
   }
 
 }

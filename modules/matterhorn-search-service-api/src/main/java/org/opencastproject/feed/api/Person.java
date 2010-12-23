@@ -29,21 +29,22 @@ public interface Person {
    * 
    * @return the name
    */
-  public String getName();
+  String getName();
 
   /**
    * Sets name of person.
    * 
-   * @param name the name
+   * @param name
+   *          the name
    */
-  public void setName(String name);
+  void setName(String name);
 
   /**
    * Returns URI of person.
    * 
    * @return the uri
    */
-  public String getUri();
+  String getUri();
 
   /**
    * Sets URI of person.
@@ -51,12 +52,12 @@ public interface Person {
    * @param uri
    *          the uri identifying the person
    */
-  public void setUri(String uri);
+  void setUri(String uri);
 
   /**
    * Returns email of person.
    */
-  public String getEmail();
+  String getEmail();
 
   /**
    * Sets email of person.
@@ -64,6 +65,6 @@ public interface Person {
    * @param email
    *          the email address
    */
-  public void setEmail(String email);
+  void setEmail(String email);
 
 }

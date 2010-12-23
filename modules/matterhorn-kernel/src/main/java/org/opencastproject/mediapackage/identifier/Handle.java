@@ -16,7 +16,6 @@
 
 package org.opencastproject.mediapackage.identifier;
 
-
 import java.net.URL;
 
 /**
@@ -46,7 +45,8 @@ public interface Handle extends Id {
   String getLocalName();
 
   /**
-   * Returns the full name consisting of authority and local name, e.g. <code>10.3930/ETHZ/AV-0bf9cb23-5535-4c5c-940e-c1a7d91e3191</code>
+   * Returns the full name consisting of authority and local name, e.g.
+   * <code>10.3930/ETHZ/AV-0bf9cb23-5535-4c5c-940e-c1a7d91e3191</code>
    */
   String getFullName();
 

@@ -26,7 +26,11 @@ import java.io.File;
 /**
  * Utility class used for media package handling.
  */
-public class MediaPackageSupport {
+public final class MediaPackageSupport {
+
+  /** Disable construction of this utility class */
+  private MediaPackageSupport() {
+  }
 
   /**
    * Mode used when merging media packages.
@@ -38,12 +42,12 @@ public class MediaPackageSupport {
    * <li><code>Fail</code> fail in case of conflicting identifier</li>
    * </ul>
    */
-  public enum MergeMode {
+  enum MergeMode {
     Merge, Replace, Skip, Fail
   };
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(MediaPackageSupport.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(MediaPackageSupport.class.getName());
 
   /**
    * Merges the contents of media package located at <code>sourceDir</code> into the media package located at

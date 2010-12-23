@@ -269,7 +269,7 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    * 
    * @return The copy
    */
-  public Object clone();
+  Object clone();
 
   /**
    * Returns an xml representation of the media package element's manifest representation.
@@ -279,5 +279,5 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    *           if serialization fails
    */
   String getAsXml() throws MediaPackageException;
-  
+
 }

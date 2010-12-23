@@ -39,32 +39,34 @@ import javax.xml.xpath.XPathException;
  * Implementation of {@link org.opencastproject.mediapackage.VideoStream}.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="video", namespace="http://mediapackage.opencastproject.org")
+@XmlType(name = "video", namespace = "http://mediapackage.opencastproject.org")
 public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
-  @XmlElement(name="bitrate")
+  @XmlElement(name = "bitrate")
   protected Float bitRate;
 
-  @XmlElement(name="framerate")
+  @XmlElement(name = "framerate")
   protected Float frameRate;
 
-  @XmlElement(name="resolution")
+  @XmlElement(name = "resolution")
   protected String resolution;
-  
+
   protected Integer frameWidth;
   protected Integer frameHeight;
 
-  @XmlElement(name="scantype")
+  @XmlElement(name = "scantype")
   protected Scan scanType = null;
 
-
-  @XmlType(name="scantype")
+  @XmlType(name = "scantype")
   static class Scan {
-    @XmlAttribute(name="type")
+    @XmlAttribute(name = "type")
     protected ScanType type;
-    @XmlAttribute(name="order")
+    @XmlAttribute(name = "order")
     protected ScanOrder order;
-    public String toString() { return type.toString(); }
+
+    public String toString() {
+      return type.toString();
+    }
   }
 
   public VideoStreamImpl() {
@@ -106,7 +108,7 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     // bit rate
     try {
       String strBitrate = (String) xpath.evaluate("bitrate/text()", node, XPathConstants.STRING);
-      if (strBitrate != null && !strBitrate.trim().equals(""))
+      if (StringUtils.isNotEmpty(strBitrate))
         vs.bitRate = new Float(strBitrate.trim());
     } catch (NumberFormatException e) {
       throw new IllegalStateException("Bit rate was malformatted: " + e.getMessage());
@@ -115,7 +117,7 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     // frame rate
     try {
       String strFrameRate = (String) xpath.evaluate("framerate/text()", node, XPathConstants.STRING);
-      if (strFrameRate != null && !strFrameRate.trim().equals(""))
+      if (StringUtils.isNotEmpty(strFrameRate))
         vs.frameRate = new Float(strFrameRate.trim());
     } catch (NumberFormatException e) {
       throw new IllegalStateException("Frame rate was malformatted: " + e.getMessage());
@@ -123,63 +125,63 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
     // resolution
     String res = (String) xpath.evaluate("resolution/text()", node, XPathConstants.STRING);
-    if (res != null && !res.trim().equals("")) {
+    if (StringUtils.isNotEmpty(res)) {
       vs.resolution = res;
     }
 
     // interlacing
     String scanType = (String) xpath.evaluate("scantype/@type", node, XPathConstants.STRING);
-    if (scanType != null && !scanType.trim().equals("")) {
+    if (StringUtils.isNotEmpty(scanType)) {
       if (vs.scanType == null)
         vs.scanType = new Scan();
       vs.scanType.type = ScanType.fromString(scanType);
     }
 
     String scanOrder = (String) xpath.evaluate("interlacing/@order", node, XPathConstants.STRING);
-    if (scanOrder != null && !scanOrder.trim().equals("")) {
+    if (StringUtils.isNotEmpty(scanOrder)) {
       if (vs.scanType == null)
         vs.scanType = new Scan();
       vs.scanType.order = ScanOrder.fromString(scanOrder);
     }
     // device
     String deviceType = (String) xpath.evaluate("device/@type", node, XPathConstants.STRING);
-    if (deviceType != null && !deviceType.trim().equals("")) {
+    if (StringUtils.isNotEmpty(deviceType)) {
       if (vs.device == null)
         vs.device = new Device();
       vs.device.type = deviceType;
     }
 
     String deviceVersion = (String) xpath.evaluate("device/@version", node, XPathConstants.STRING);
-    if (deviceVersion != null && !deviceVersion.trim().equals("")) {
+    if (StringUtils.isNotEmpty(deviceVersion)) {
       if (vs.device == null)
         vs.device = new Device();
       vs.device.version = deviceVersion;
     }
-    
-    String DeviceVendor = (String) xpath.evaluate("device/@vendor", node, XPathConstants.STRING);
-    if (DeviceVendor != null && !DeviceVendor.trim().equals("")) {
+
+    String deviceVendor = (String) xpath.evaluate("device/@vendor", node, XPathConstants.STRING);
+    if (StringUtils.isNotEmpty(deviceVendor)) {
       if (vs.device == null)
         vs.device = new Device();
-      vs.device.vendor = DeviceVendor;
+      vs.device.vendor = deviceVendor;
     }
 
     // encoder
     String encoderType = (String) xpath.evaluate("encoder/@type", node, XPathConstants.STRING);
-    if (encoderType != null && !encoderType.trim().equals("")) {
+    if (StringUtils.isNotEmpty(encoderType)) {
       if (vs.encoder == null)
         vs.encoder = new Encoder();
       vs.encoder.type = encoderType;
     }
-    
+
     String encoderVersion = (String) xpath.evaluate("encoder/@version", node, XPathConstants.STRING);
-    if (encoderVersion != null && !encoderVersion.trim().equals("")) {
+    if (StringUtils.isNotEmpty(encoderVersion)) {
       if (vs.encoder == null)
         vs.encoder = new Encoder();
       vs.encoder.version = encoderVersion;
     }
 
     String encoderVendor = (String) xpath.evaluate("encoder/@vendor", node, XPathConstants.STRING);
-    if (encoderVendor != null && !encoderVendor.trim().equals("")) {
+    if (StringUtils.isNotEmpty(encoderVendor)) {
       if (vs.encoder == null)
         vs.encoder = new Encoder();
       vs.encoder.vendor = encoderVendor;
@@ -302,7 +304,6 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
     return scanType.order;
   }
 
-
   // Setter
 
   public void setBitRate(Float bitRate) {
@@ -315,12 +316,14 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
   public void setFrameWidth(Integer frameWidth) {
     this.frameWidth = frameWidth;
-    if(frameWidth != null && frameHeight != null) updateResolution();
+    if (frameWidth != null && frameHeight != null)
+      updateResolution();
   }
 
   public void setFrameHeight(Integer frameHeight) {
     this.frameHeight = frameHeight;
-    if(frameWidth != null && frameHeight != null) updateResolution();
+    if (frameWidth != null && frameHeight != null)
+      updateResolution();
   }
 
   private void updateResolution() {

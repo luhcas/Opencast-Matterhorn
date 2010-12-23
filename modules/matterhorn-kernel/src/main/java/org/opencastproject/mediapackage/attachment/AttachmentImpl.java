@@ -35,8 +35,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * Basic implementation of an attachment.
  */
-@XmlType(name="attachment", namespace="http://mediapackage.opencastproject.org")
-@XmlRootElement(name="attachment", namespace="http://mediapackage.opencastproject.org")
+@XmlType(name = "attachment", namespace = "http://mediapackage.opencastproject.org")
+@XmlRootElement(name = "attachment", namespace = "http://mediapackage.opencastproject.org")
 public class AttachmentImpl extends AbstractMediaPackageElement implements Attachment {
 
   /** Serial version UID */
@@ -48,7 +48,7 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   public AttachmentImpl() {
     super(Type.Attachment, null, null);
   }
-  
+
   /**
    * Creates an attachment.
    * 
@@ -91,7 +91,8 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   /**
    * Creates an attachment.
    * 
-   * @param identifier the attachment identifier
+   * @param identifier
+   *          the attachment identifier
    * @param uri
    *          the attachments location
    */
@@ -131,7 +132,12 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
   }
 
   public static class Adapter extends XmlAdapter<AttachmentImpl, Attachment> {
-    public AttachmentImpl marshal(Attachment mp) throws Exception {return (AttachmentImpl)mp;}
-    public Attachment unmarshal(AttachmentImpl mp) throws Exception {return mp;}
+    public AttachmentImpl marshal(Attachment mp) throws Exception {
+      return (AttachmentImpl) mp;
+    }
+
+    public Attachment unmarshal(AttachmentImpl mp) throws Exception {
+      return mp;
+    }
   }
 }

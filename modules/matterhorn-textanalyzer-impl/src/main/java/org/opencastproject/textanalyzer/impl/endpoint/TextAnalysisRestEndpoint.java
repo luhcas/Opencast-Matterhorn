@@ -136,7 +136,7 @@ public class TextAnalysisRestEndpoint {
     RestEndpoint analyzeEndpoint = new RestEndpoint("analyze", RestEndpoint.Method.POST, "/",
             "Submit a track for analysis");
     analyzeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("The receipt to use when polling for the resulting mpeg7 catalog"));
+            .ok("The receipt to use when polling for the resulting mpeg7 catalog"));
     analyzeEndpoint.addRequiredParam(new Param("image", Type.TEXT, "", "The image to analyze for text."));
     analyzeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, analyzeEndpoint);
@@ -144,7 +144,7 @@ public class TextAnalysisRestEndpoint {
     // receipt
     RestEndpoint receiptEndpoint = new RestEndpoint("receipt", RestEndpoint.Method.GET, "/{id}.xml",
             "Retrieve a receipt for an analysis task");
-    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the "
+    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Results in an xml document containing the "
             + "status of the analysis job, and the catalog produced by this analysis job if it the task is finished"));
     receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
     receiptEndpoint.addFormat(new Format("xml", null, null));

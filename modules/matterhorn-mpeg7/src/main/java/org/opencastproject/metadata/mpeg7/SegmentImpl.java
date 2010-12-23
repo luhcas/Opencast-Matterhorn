@@ -179,6 +179,7 @@ public class SegmentImpl implements Segment, AudioSegment, VideoSegment, AudioVi
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.VideoSegment#createSpatioTemporalDecomposition(boolean, boolean)
    */
   @Override

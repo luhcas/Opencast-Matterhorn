@@ -29,21 +29,23 @@ import javax.servlet.http.HttpServletResponse;
  * An {@link AuthenticationEntryPoint} that delegates to a default implementation unless a "X-Requested-Auth" header
  * with a value of "Digest".
  */
-public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPoint{
+public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPoint {
   public static final String REQUESTED_AUTH_HEADER = "X-Requested-Auth";
   public static final String DIGEST_AUTH = "Digest";
-  
+
   protected AuthenticationEntryPoint userEntryPoint;
   protected DigestAuthenticationEntryPoint systemAuthenticationEntryPoint;
-  
+
   /**
    * {@inheritDoc}
-   * @see org.springframework.security.web.AuthenticationEntryPoint#commence(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException)
+   * 
+   * @see org.springframework.security.web.AuthenticationEntryPoint#commence(javax.servlet.http.HttpServletRequest,
+   *      javax.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException)
    */
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
           throws IOException, ServletException {
-    if(DIGEST_AUTH.equals(request.getHeader(REQUESTED_AUTH_HEADER))) {
+    if (DIGEST_AUTH.equals(request.getHeader(REQUESTED_AUTH_HEADER))) {
       systemAuthenticationEntryPoint.commence(request, response, authException);
     } else {
       userEntryPoint.commence(request, response, authException);
@@ -57,6 +59,5 @@ public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPo
   public void setSystemAuthenticationEntryPoint(DigestAuthenticationEntryPoint systemAuthenticationEntryPoint) {
     this.systemAuthenticationEntryPoint = systemAuthenticationEntryPoint;
   }
-    
 
 }

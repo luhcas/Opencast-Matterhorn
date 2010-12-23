@@ -44,40 +44,41 @@ public class SecurityConfigurationScanner {
   protected BundleContext bundleContext;
   protected ServiceRegistration reg;
   protected Timer timer;
-  File securityConfig;
-  long lastModified = -1;
-  boolean warned = false;
-  
+  protected File securityConfig;
+  protected long lastModified = -1;
+  protected boolean warned = false;
 
   public void activate(ComponentContext cc) {
     this.bundleContext = cc.getBundleContext();
     this.securityConfig = getSecurityConfig();
-    if( ! securityConfig.exists() || ! securityConfig.canRead()) {
+    if (!securityConfig.exists() || !securityConfig.canRead()) {
       // TODO: This should be an illegal state, but allow it to pass for now
-      //  throw new IllegalStateException("can not read security configuraiton at " + this.securityConfig.getAbsolutePath());
+      // throw new IllegalStateException("can not read security configuraiton at " +
+      // this.securityConfig.getAbsolutePath());
     }
     this.timer = new Timer(SECURITY_CONFIG_FILE, true);
     timer.schedule(new ScannerTask(), new Date(), 5000); // poll for configuration changes, starting now
- }
-  
+  }
+
   public void deactivate() {
     timer.cancel();
-    if(reg != null) {
+    if (reg != null) {
       reg.unregister();
       reg = null;
     }
-    if(springContext != null && springContext.isRunning()) {
+    if (springContext != null && springContext.isRunning()) {
       springContext.close();
     }
   }
-  
+
   protected File getSecurityConfig() {
     return new File(bundleContext.getProperty(SECURITY_CONFIG_FILE));
   }
-  
+
   class ScannerTask extends TimerTask {
     /**
      * {@inheritDoc}
+     * 
      * @see java.util.TimerTask#run()
      */
     @SuppressWarnings("unchecked")
@@ -85,13 +86,14 @@ public class SecurityConfigurationScanner {
     public void run() {
       // If the file modification date has been set but it's last modified hasn't changed, there is nothing to do
       securityConfig = getSecurityConfig();
-      if(! securityConfig.exists() || ! securityConfig.canRead()) {
-        if(!warned) {
+      if (!securityConfig.exists() || !securityConfig.canRead()) {
+        if (!warned) {
           logger.error("Unable to read security configuration file at " + securityConfig.getAbsolutePath());
           // also print a stack trace so it's very obvious that there's something wrong
           try {
-            throw new IllegalStateException("Unable to read security configuration file at " + securityConfig.getAbsolutePath());
-          } catch(IllegalStateException e) {
+            throw new IllegalStateException("Unable to read security configuration file at "
+                    + securityConfig.getAbsolutePath());
+          } catch (IllegalStateException e) {
             e.printStackTrace();
           }
           warned = true;
@@ -99,18 +101,19 @@ public class SecurityConfigurationScanner {
         return;
       }
 
-      if(lastModified != -1 && lastModified == securityConfig.lastModified()) {
+      if (lastModified != -1 && lastModified == securityConfig.lastModified()) {
         logger.debug("security configuration is up to date");
         return;
       }
       logger.info("Updating the security configuration");
 
-      // This is the first access to the file, or the file has changed.  Update the lastModified time and (re)load.
+      // This is the first access to the file, or the file has changed. Update the lastModified time and (re)load.
       lastModified = securityConfig.lastModified();
 
       try {
-        if(springContext == null) {
-          springContext = new OsgiBundleXmlApplicationContext(new String[] {"file:" + securityConfig.getAbsolutePath()});
+        if (springContext == null) {
+          springContext = new OsgiBundleXmlApplicationContext(
+                  new String[] { "file:" + securityConfig.getAbsolutePath() });
           springContext.setBundleContext(bundleContext);
           logger.info("registered {}", springContext);
         }
@@ -118,20 +121,22 @@ public class SecurityConfigurationScanner {
         springContext.refresh();
 
         // Register the filter as an osgi service, unregistering the previous version if it has already been registered
+        @SuppressWarnings("rawtypes")
         Dictionary props = new Hashtable<String, Boolean>();
         props.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
         props.put("pattern", ".*");
         props.put("service.ranking", "1");
-        if(reg != null) {
+        if (reg != null) {
           reg.unregister();
           reg = null;
         }
-        reg = bundleContext.registerService(Filter.class.getName(), springContext.getBean("springSecurityFilterChain"), props);
+        reg = bundleContext.registerService(Filter.class.getName(), springContext.getBean("springSecurityFilterChain"),
+                props);
 
         // Reset the warning, in case we remove this successfully configured spring filter chain
         warned = false;
-      } catch(Exception e) {
-        // If we throw an exception, the scanner thread will stop.  Instead, just log the problem.
+      } catch (Exception e) {
+        // If we throw an exception, the scanner thread will stop. Instead, just log the problem.
         logger.warn("Unable to update the spring security configuration", e);
       }
     }

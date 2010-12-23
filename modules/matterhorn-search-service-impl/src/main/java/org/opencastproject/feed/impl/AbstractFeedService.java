@@ -34,8 +34,8 @@ import java.util.StringTokenizer;
  * service activation, reads a default set of properties (see below) and can be configured to track the opencast
  * {@link SearchService} by using {@link #setSearchService(SearchService)}.
  * <p>
- * By using this implementation as the basis for feed services, only the two methods accept and loadFeedData
- * need to be implemented by subclasses.
+ * By using this implementation as the basis for feed services, only the two methods accept and loadFeedData need to be
+ * implemented by subclasses.
  * <p>
  * The following properties are being read from the component properties:
  * <ul>
@@ -101,13 +101,13 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
 
   /** Property key for the feed atom media element flavor */
   public static final String PROP_ATOMTAGS = "feed.atomtags";
-  
+
   /** The selector used to match urls */
   protected String selector = null;
 
   /** The search service */
   protected SearchService searchService = null;
-  
+
   /**
    * Creates a new abstract feed generator.
    * <p>
@@ -167,22 +167,23 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    *      java.lang.String[], int, int)
    */
   protected abstract SearchResult loadFeedData(Type type, String[] query, int limit, int offset);
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.feed.api.FeedGenerator#initialize(java.util.Properties)
    */
   @Override
   public void initialize(Properties properties) {
     uri = (String) properties.get(PROP_URI);
-    String sizeAsString = (String)properties.get(PROP_SIZE);
+    String sizeAsString = (String) properties.get(PROP_SIZE);
     try {
-      if(StringUtils.isNotBlank(sizeAsString)) {
+      if (StringUtils.isNotBlank(sizeAsString)) {
         size = Integer.parseInt(sizeAsString);
         if (size == 0)
           size = Integer.MAX_VALUE;
       }
-    } catch(NumberFormatException e) {
+    } catch (NumberFormatException e) {
       logger.warn("Unable to set the size of the feed to {}", sizeAsString);
     }
     selector = (String) properties.get(PROP_SELECTOR);
@@ -218,9 +219,9 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
     }
     String rssTags = (String) properties.get(PROP_RSSTAGS);
     if (rssTags != null) {
-       for (String tag : rssTags.split("\\W")) {
-         addRSSTag(tag);
-       }
+      for (String tag : rssTags.split("\\W")) {
+        addRSSTag(tag);
+      }
     }
     String atomTags = (String) properties.get(PROP_ATOMTAGS);
     if (atomTags != null) {
@@ -231,10 +232,12 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
   }
 
   /**
-   * Ensures that this string is an absolute URL.  If not, prepend the local serverUrl to the string.
+   * Ensures that this string is an absolute URL. If not, prepend the local serverUrl to the string.
    * 
-   * @param string The absolute or relative URL
-   * @param baseUrl The base URL to prepend
+   * @param string
+   *          The absolute or relative URL
+   * @param baseUrl
+   *          The base URL to prepend
    * @return An absolute URL
    */
   protected String ensureUrl(String string, String baseUrl) {

@@ -19,7 +19,7 @@ import java.util.Date;
 
 /**
  * Provides metadata for a {@link MediaPackageMetadata}
- *
+ * 
  */
 public interface MediaPackageMetadata {
 
@@ -29,7 +29,7 @@ public interface MediaPackageMetadata {
    * @return The series title
    */
   String getSeriesTitle();
-  
+
   /**
    * Returns the title of the episode that this mediapackage represents.
    * 

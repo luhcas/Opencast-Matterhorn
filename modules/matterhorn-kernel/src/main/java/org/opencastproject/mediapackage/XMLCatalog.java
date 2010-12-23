@@ -55,8 +55,7 @@ public interface XMLCatalog {
    * @param out
    *          The output stream
    * @param format
-   *          Whether to format the output for readability, or not (false gives
-   *          better performance)
+   *          Whether to format the output for readability, or not (false gives better performance)
    */
   void toXml(OutputStream out, boolean format) throws IOException;
 

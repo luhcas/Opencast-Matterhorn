@@ -70,26 +70,27 @@ public class SeriesImpl implements Series {
   @Column(name = "SERIES_ID", length = 128)
   @XmlID
   @XmlAttribute(name = "id")
-  String seriesId;
+  protected String seriesId;
 
   @Lob
   @Column
   @XmlElement
-  String description;
+  protected String description;
 
   @Transient
-  DublinCoreCatalog dublinCore;
+  protected DublinCoreCatalog dublinCore;
 
   @XmlElementWrapper(name = "additionalMetadata")
   @XmlElement(name = "metadata")
   @OneToMany(cascade = CascadeType.ALL, targetEntity = SeriesMetadataImpl.class, mappedBy = "series", fetch = FetchType.EAGER)
-  List<SeriesMetadataImpl> metadata;
+  protected List<SeriesMetadataImpl> metadata;
 
   /**
    * Default constructor without any import.
    */
-  public SeriesImpl() {}
-  
+  public SeriesImpl() {
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -177,19 +178,19 @@ public class SeriesImpl implements Series {
    * @see org.opencastproject.series.api.Series#setMetadata(java.util.List)
    */
   public void setMetadata(List<SeriesMetadata> metadata) {
-    if(metadata == null) {
+    if (metadata == null) {
       this.metadata = null;
       return;
     }
-    if(this.metadata == null) {
+    if (this.metadata == null) {
       this.metadata = new LinkedList<SeriesMetadataImpl>();
     } else {
       this.metadata.clear();
     }
-    for(SeriesMetadata m : metadata) {
+    for (SeriesMetadata m : metadata) {
       m.setSeries(this);
-//      This does not work, because getMetadata() produces a new list
-//      this.getMetadata().add((SeriesMetadataImpl) m);
+      // This does not work, because getMetadata() produces a new list
+      // this.getMetadata().add((SeriesMetadataImpl) m);
       this.metadata.add(new SeriesMetadataImpl(m.getSeries(), m.getKey(), m.getValue()));
     }
     dublinCore = null;
@@ -308,5 +309,5 @@ public class SeriesImpl implements Series {
   public static SeriesImpl valueOf(String xmlString) throws Exception {
     return SeriesBuilder.getInstance().parseSeriesImpl(xmlString);
   }
-  
+
 }

@@ -22,20 +22,21 @@ import org.opencastproject.search.api.SearchQuery;
  * @see SearchQuery
  */
 public class SearchQueryImpl implements SearchQuery {
-  boolean includeEpisode = true;
-  boolean includeSeries = false;
-  boolean sortByCreationDate = false;
-  boolean sortByPublicationDate = false;
-  String id;
-  String text;
-  String query;
-  int limit = -1;
-  int offset = -1;
-  String[] tags = null;
-  MediaPackageElementFlavor[] flavors = null;
-  
+  protected boolean includeEpisode = true;
+  protected boolean includeSeries = false;
+  protected boolean sortByCreationDate = false;
+  protected boolean sortByPublicationDate = false;
+  protected String id;
+  protected String text;
+  protected String query;
+  protected int limit = -1;
+  protected int offset = -1;
+  protected String[] tags = null;
+  protected MediaPackageElementFlavor[] flavors = null;
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#includeEpisodes(boolean)
    */
   @Override
@@ -46,6 +47,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#includeSeries(boolean)
    */
   @Override
@@ -56,6 +58,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withId(java.lang.String)
    */
   @Override
@@ -66,6 +69,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withLimit(int)
    */
   @Override
@@ -76,6 +80,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withOffset(int)
    */
   @Override
@@ -86,6 +91,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withQuery(java.lang.String)
    */
   @Override
@@ -96,6 +102,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withText(java.lang.String)
    */
   @Override
@@ -106,6 +113,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#getId()
    */
   @Override
@@ -115,6 +123,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#getLimit()
    */
   @Override
@@ -124,6 +133,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#getOffset()
    */
   @Override
@@ -133,6 +143,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#getQuery()
    */
   @Override
@@ -142,6 +153,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#getText()
    */
   @Override
@@ -151,6 +163,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#isIncludeEpisodes()
    */
   @Override
@@ -160,6 +173,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#isIncludeSeries()
    */
   @Override
@@ -169,6 +183,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withCreationDateSort(boolean)
    */
   @Override
@@ -179,6 +194,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#isSortByCreationDate()
    */
   @Override
@@ -188,6 +204,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withPublicationDateSort(boolean)
    */
   @Override
@@ -198,6 +215,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#isSortByPublicationDate()
    */
   @Override
@@ -207,6 +225,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#getElementFlavors()
    */
   @Override
@@ -216,6 +235,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#getElementTags()
    */
   @Override
@@ -225,6 +245,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withElementFlavors(org.opencastproject.mediapackage.MediaPackageElementFlavor[])
    */
   @Override
@@ -235,11 +256,12 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchQuery#withElementTags(java.lang.String[])
    */
   @Override
   public SearchQuery withElementTags(String[] tags) {
     this.tags = tags;
     return this;
-  }  
+  }
 }

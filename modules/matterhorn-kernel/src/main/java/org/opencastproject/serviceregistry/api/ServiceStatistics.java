@@ -24,13 +24,13 @@ public interface ServiceStatistics {
 
   /** The number of milliseconds a job takes, on average, to run **/
   long getMeanRunTime();
-  
+
   /** The number of milliseconds a job sits in a queue, on average **/
   long getMeanQueueTime();
-  
+
   /** The number of job that this service is currently running **/
   int getRunningJobs();
-  
+
   /** The number of job that are currently waiting to be run by this service **/
   int getQueuedJobs();
 }

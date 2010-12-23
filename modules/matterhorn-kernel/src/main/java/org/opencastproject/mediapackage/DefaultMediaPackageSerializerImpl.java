@@ -147,7 +147,7 @@ public class DefaultMediaPackageSerializerImpl implements MediaPackageSerializer
       uri = new URI(UrlSupport.concat(packageRoot.toExternalForm(), path));
       return uri;
     }
-    
+
     return uri;
   }
 

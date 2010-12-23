@@ -42,12 +42,12 @@ public interface MediaPackageElementBuilderPlugin {
    * @throws Exception
    *           if some unrecoverable state is reached
    */
-  void setup() throws Exception;
+  void init() throws Exception;
 
   /**
    * This method is called before the plugin is abandoned by the element builder.
    */
-  void cleanup();
+  void destroy();
 
   /**
    * This method is called if the media package builder tries to create a new media package element of type
@@ -95,7 +95,8 @@ public interface MediaPackageElementBuilderPlugin {
    * given element definition.
    * </p>
    * <p>
-   * The element must then be constructed and returned in the call to {@link #elementFromManifest(Node, MediaPackageSerializer)}.
+   * The element must then be constructed and returned in the call to
+   * {@link #elementFromManifest(Node, MediaPackageSerializer)}.
    * </p>
    * 
    * @param elementNode

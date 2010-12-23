@@ -52,7 +52,7 @@ public class TrackTest {
 
   /** The track to test */
   TrackImpl track = null;
-  
+
   /** HTTP track url */
   URI httpUrl = null;
 
@@ -74,8 +74,8 @@ public class TrackTest {
    */
   @Test
   public void testFromURL() {
-    //track = TrackImpl.fromURL(httpUrl);
-    //track = TrackImpl.fromURL(rtmpUrl);
+    // track = TrackImpl.fromURL(httpUrl);
+    // track = TrackImpl.fromURL(rtmpUrl);
   }
 
   /**
@@ -96,25 +96,32 @@ public class TrackTest {
   }
 
   /**
-   * Test method for {@link PresenterTrackBuilderPlugin#accept(URI, org.opencastproject.mediapackage.MediaPackageElement.Type, org.opencastproject.mediapackage.MediaPackageElementFlavor)}
+   * Test method for
+   * {@link PresenterTrackBuilderPlugin#accept(URI, org.opencastproject.mediapackage.MediaPackageElement.Type, org.opencastproject.mediapackage.MediaPackageElementFlavor)}
+   * 
    * @throws Exception
    */
   @Test
   public void testPresenterTrackAccept() throws Exception {
     assertTrue(new TrackBuilderPlugin().accept(new URI("uri"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE));
   }
+
   /**
    * Test method for {@link org.opencastproject.mediapackage.track.TrackImpl#getStreams()}.
    */
-  @Test @Ignore
+  @Test
+  @Ignore
   public void testGetStreams() {
     fail("Not yet implemented"); // TODO
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.track.TrackImpl#addStream(org.opencastproject.mediapackage.track.AbstractStreamImpl)}.
+   * Test method for
+   * {@link org.opencastproject.mediapackage.track.TrackImpl#addStream(org.opencastproject.mediapackage.track.AbstractStreamImpl)}
+   * .
    */
-  @Test @Ignore
+  @Test
+  @Ignore
   public void testAddStream() {
     fail("Not yet implemented"); // TODO
   }
@@ -122,7 +129,8 @@ public class TrackTest {
   /**
    * Test method for {@link org.opencastproject.mediapackage.track.TrackImpl#getDescription()}.
    */
-  @Test @Ignore
+  @Test
+  @Ignore
   public void testGetDescription() {
     fail("Not yet implemented"); // TODO
   }
@@ -130,12 +138,15 @@ public class TrackTest {
   @Test
   public void testFlavorMarshalling() throws Exception {
     track.setFlavor(MediaPackageElements.PRESENTATION_SOURCE);
-    JAXBContext context = JAXBContext.newInstance("org.opencastproject.mediapackage:org.opencastproject.mediapackage.track", MediaPackage.class.getClassLoader());
+    JAXBContext context = JAXBContext.newInstance(
+            "org.opencastproject.mediapackage:org.opencastproject.mediapackage.track",
+            MediaPackage.class.getClassLoader());
     Marshaller marshaller = context.createMarshaller();
     StringWriter writer = new StringWriter();
     marshaller.marshal(track, writer);
     Unmarshaller unmarshaller = context.createUnmarshaller();
-    TrackImpl t1 = unmarshaller.unmarshal(new StreamSource(IOUtils.toInputStream(writer.toString(), "UTF-8")), TrackImpl.class).getValue();
+    TrackImpl t1 = unmarshaller.unmarshal(new StreamSource(IOUtils.toInputStream(writer.toString(), "UTF-8")),
+            TrackImpl.class).getValue();
     Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, t1.getFlavor());
 
     // Now again without namespaces
@@ -146,12 +157,12 @@ public class TrackTest {
     // Get the xml from the object itself
     String xmlFromTrack = track.getAsXml();
     Assert.assertTrue(xmlFromTrack.contains(MediaPackageElements.PRESENTATION_SOURCE.toString()));
-    
+
     // And finally, using the element builder
     DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
     Document doc = docBuilder.parse(IOUtils.toInputStream(xml));
-        
-    Track t3 = (Track)MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+
+    Track t3 = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
             .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
     Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, t3.getFlavor());
   }
