@@ -194,7 +194,6 @@
             <Private-Package>
               net.luniks.linux.jv4linfo,
               org.gstreamer,
-              net.java.dev.jna,
               org.json.*,
               net.fortuna.ical4j.*,
               ui.*
