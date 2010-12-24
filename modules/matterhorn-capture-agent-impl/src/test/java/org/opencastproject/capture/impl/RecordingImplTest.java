@@ -42,7 +42,7 @@ public class RecordingImplTest {
 
   @Before
   public void setup() throws org.osgi.service.cm.ConfigurationException, IOException {
-    //Setup the configuration manager
+    // Setup the configuration manager
     configManager = new ConfigurationManager();
     Properties sourceProps = new Properties();
     InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
@@ -65,9 +65,9 @@ public class RecordingImplTest {
   }
 
   @Test
-  public void testEdgeRecording()
-      throws IllegalArgumentException, ConfigurationException, IOException, MediaPackageException {
-    //Let's test some edge-casey recordings
+  public void testEdgeRecording() throws IllegalArgumentException, ConfigurationException, IOException,
+          MediaPackageException {
+    // Let's test some edge-casey recordings
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), null);
     Assert.assertNotNull(rec);
     Assert.assertEquals(System.getProperty("java.io.tmpdir"),
@@ -78,11 +78,11 @@ public class RecordingImplTest {
   }
 
   @Test
-  public void testUnscheduledRecording()
-      throws IllegalArgumentException, ConfigurationException, IOException, MediaPackageException {
-    //Create the recording for an unscheduled capture
+  public void testUnscheduledRecording() throws IllegalArgumentException, ConfigurationException, IOException,
+          MediaPackageException {
+    // Create the recording for an unscheduled capture
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(),
-                            configManager.getAllProperties());
+            configManager.getAllProperties());
     Assert.assertNotNull(rec);
     Assert.assertEquals(configManager.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
             rec.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
@@ -94,14 +94,13 @@ public class RecordingImplTest {
   }
 
   @Test
-  public void testScheduledCaptureWithRecordingID()
-      throws IllegalArgumentException, ConfigurationException, IOException,
-              MediaPackageException, org.osgi.service.cm.ConfigurationException {
+  public void testScheduledCaptureWithRecordingID() throws IllegalArgumentException, ConfigurationException,
+          IOException, MediaPackageException, org.osgi.service.cm.ConfigurationException {
     configManager.setItem(CaptureParameters.RECORDING_ID, "MyTestRecording");
 
-    //Create the recording for a scheduled capture which only has its recording id set
+    // Create the recording for a scheduled capture which only has its recording id set
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(),
-                            configManager.getAllProperties());
+            configManager.getAllProperties());
     Assert.assertNotNull(rec);
     Assert.assertEquals(configManager.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL),
             rec.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
@@ -112,14 +111,14 @@ public class RecordingImplTest {
   }
 
   @Test
-  public void testScheduledCaptureWithRootURL()
-      throws IllegalArgumentException, ConfigurationException, IOException, MediaPackageException {
+  public void testScheduledCaptureWithRootURL() throws IllegalArgumentException, ConfigurationException, IOException,
+          MediaPackageException {
     File baseDir = new File(configManager.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
     configManager.setItem(CaptureParameters.RECORDING_ROOT_URL, new File(baseDir, "MyTestRecording").getAbsolutePath());
 
-    //Create the recording for a scheduled capture which only has its root url set
+    // Create the recording for a scheduled capture which only has its root url set
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(),
-                            configManager.getAllProperties());
+            configManager.getAllProperties());
     Assert.assertNotNull(rec);
     Assert.assertEquals(new File(baseDir, "MyTestRecording"), rec.getBaseDir());
     Assert.assertEquals("MyTestRecording", rec.getID());
@@ -129,16 +128,16 @@ public class RecordingImplTest {
   }
 
   @Test
-  public void testFullySpecCapture()
-      throws IllegalArgumentException, ConfigurationException, IOException, MediaPackageException {
+  public void testFullySpecCapture() throws IllegalArgumentException, ConfigurationException, IOException,
+          MediaPackageException {
     File baseDir = new File(configManager.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
     String recordingID = "MyTestRecording";
     configManager.setItem(CaptureParameters.RECORDING_ID, recordingID);
     configManager.setItem(CaptureParameters.RECORDING_ROOT_URL, new File(baseDir, recordingID).getAbsolutePath());
 
-    //Create the recording for a scheduled capture which only has its root url set
+    // Create the recording for a scheduled capture which only has its root url set
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(),
-                            configManager.getAllProperties());
+            configManager.getAllProperties());
     Assert.assertNotNull(rec);
     Assert.assertEquals(new File(baseDir, recordingID), rec.getBaseDir());
     Assert.assertEquals(recordingID, rec.getID());
@@ -148,4 +147,3 @@ public class RecordingImplTest {
     configManager.setItem(CaptureParameters.RECORDING_ROOT_URL, null);
   }
 }
-

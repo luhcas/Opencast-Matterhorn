@@ -22,11 +22,10 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
 
 /**
- * Simple test the constructor and get methods for this basic class that 
- * represents a capture device.
+ * Simple test the constructor and get methods for this basic class that represents a capture device.
  */
 public class CaptureDeviceTest {
-  
+
   @Test
   public void testCaptureDevice() {
     ProducerType device = ProducerType.FILE;

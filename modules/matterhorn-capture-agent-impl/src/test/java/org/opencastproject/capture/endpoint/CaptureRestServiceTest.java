@@ -24,8 +24,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-
-
 /**
  * Tests the behavior of the composer rest endpoint, using a mock composer service.
  */
@@ -42,7 +40,8 @@ public class CaptureRestServiceTest {
     service.setService(agent);
   }
 
-  @Test @Ignore
+  @Test
+  @Ignore
   public void testGetEndpoints() {
     Assert.assertEquals(200, service.startCapture().getStatus());
   }

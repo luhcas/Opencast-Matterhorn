@@ -32,7 +32,6 @@ import java.util.Properties;
  * TODO: Comment me!
  */
 public class XVImagesinkConsumer extends ConsumerBin {
-  
   private Element xvimagesink;
 
   /**

@@ -35,7 +35,6 @@ import java.util.Properties;
  * TODO: Comment me!
  */
 public class BlueCherryBT878Producer extends V4L2Producer {
-  
   private Element v4l2src;
 
   /**

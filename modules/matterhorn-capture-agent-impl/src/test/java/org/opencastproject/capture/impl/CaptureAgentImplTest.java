@@ -38,11 +38,10 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 /**
- * Test the implementation of the Capture Agent, which uses gstreamer to 
- * generate pipelines that capture the media. 
+ * Test the implementation of the Capture Agent, which uses gstreamer to generate pipelines that capture the media.
  */
 public class CaptureAgentImplTest {
-  
+
   /** The single instance of CaptureAgentImpl needed */
   private CaptureAgentImpl agent = null;
 
@@ -50,22 +49,22 @@ public class CaptureAgentImplTest {
   private ConfigurationManager config = null;
 
   private SchedulerImpl sched = null;
-  
+
   /** Properties specifically designed for unit testing */
   private Properties properties = null;
-  
+
   /** Define a recording ID for the test */
   private static final String recordingID = "UnitTest1";
-  
+
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
-  
+
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
 
   /** Waits for a particular state to occur or times out waiting. **/
   private WaitForState waiter;
-  
+
   @BeforeClass
   public static void testGst() {
     try {
@@ -75,18 +74,18 @@ public class CaptureAgentImplTest {
       gstreamerInstalled = false;
     }
   }
-  
+
   @Before
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
-    
-    //Create the configuration manager
+
+    // Create the configuration manager
     config = new ConfigurationManager();
 
     Properties p = loadProperties("config/capture.properties");
-    p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "capture-agent-test")
-            .getAbsolutePath());
+    p.put("org.opencastproject.storage.dir",
+            new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
     p.put("org.opencastproject.server.url", "http://localhost:8080");
     p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
@@ -102,7 +101,7 @@ public class CaptureAgentImplTest {
     Assert.assertNull(agent.getAgentState());
     agent.activate(null);
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
-    
+
     // setup testing properties
     properties = new Properties();
     properties.setProperty(CaptureParameters.RECORDING_ID, recordingID);
@@ -145,10 +144,10 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(recordingID, id);
 
     File outputdir = new File(config.getItem("capture.filesystem.cache.capture.url"), id);
-    
+
     // even with a mock capture, the state should remain capturing until stopCapture has been called
     Assert.assertEquals(AgentState.CAPTURING, agent.getAgentState());
-    
+
     // affirm the captured media exists in the appropriate location
     String[] devnames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
     Assert.assertTrue(devnames.length >= 1);
@@ -163,8 +162,9 @@ public class CaptureAgentImplTest {
     // the appropriate files exists, so the capture can be stopped. The agent's state should return to idle.
     Assert.assertTrue(agent.stopCapture(recordingID, true));
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
-    Assert.assertEquals(RecordingState.CAPTURE_FINISHED, agent.loadRecording(
-            new File(agent.getKnownRecordings().get(id).getBaseDir(), id + ".recording")).getState());
+    Assert.assertEquals(RecordingState.CAPTURE_FINISHED,
+            agent.loadRecording(new File(agent.getKnownRecordings().get(id).getBaseDir(), id + ".recording"))
+                    .getState());
 
     Thread.sleep(2000);
 
@@ -201,13 +201,13 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(state, r.getState());
     Assert.assertEquals(newID, r.getID());
   }
-  
+
   @Test
   public void testRecordingLoadJob() throws ConfigurationException, IOException, InterruptedException {
     if (!gstreamerInstalled)
       return;
 
-    //Put a recording into the agent, then kill it mid-capture
+    // Put a recording into the agent, then kill it mid-capture
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     String id = agent.startCapture(properties);
     Assert.assertEquals(1, agent.getKnownRecordings().size());
@@ -215,7 +215,7 @@ public class CaptureAgentImplTest {
     agent.deactivate();
     agent = null;
 
-    //Bring the agent back up and check to make sure it reloads the recording
+    // Bring the agent back up and check to make sure it reloads the recording
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
     sched.setCaptureAgent(agent);
@@ -229,10 +229,9 @@ public class CaptureAgentImplTest {
     waiter.sleepWait(new CheckState() {
       @Override
       public boolean check() {
-        if(agent != null && agent.getKnownRecordings() != null){
+        if (agent != null && agent.getKnownRecordings() != null) {
           return agent.getKnownRecordings().size() == 1;
-        }
-        else{
+        } else {
           return false;
         }
       }
@@ -249,7 +248,7 @@ public class CaptureAgentImplTest {
     agent.deactivate();
     agent = null;
 
-    //Create the agent and verify some of the error handling logic
+    // Create the agent and verify some of the error handling logic
     agent = new CaptureAgentImpl();
 
     Assert.assertEquals(0, agent.getKnownRecordings().size());
@@ -265,7 +264,7 @@ public class CaptureAgentImplTest {
     sched.setCaptureAgent(agent);
     agent.activate(null);
 
-    //More error handling tests
+    // More error handling tests
     String backup = config.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL);
     config.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, null);
     agent.loadRecordingsFromDisk();

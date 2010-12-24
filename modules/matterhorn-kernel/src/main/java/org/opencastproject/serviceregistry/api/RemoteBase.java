@@ -225,10 +225,10 @@ public class RemoteBase implements JobProducer {
    */
   public class HttpClientClosingInputStream extends InputStream {
     /** The input stream delivering the actual data */
-    InputStream delegateStream = null;
+    protected InputStream delegateStream = null;
 
     /** The http response to close when the stream is closed */
-    HttpResponse httpResponse = null;
+    protected HttpResponse httpResponse = null;
 
     /**
      * Constructs an HttpClientClosingInputStream from a source stream and an http response.

@@ -46,17 +46,16 @@ public class IngestJobTest {
   Scheduler scheduler;
   ConfigurationManager configurationManager;
   private Waiter waiter = new Waiter();
+
   @Before
   public void before() throws SchedulerException {
     captureAgentMock = createMock(CaptureAgentImpl.class);
     scheduler = new StdSchedulerFactory().getScheduler();
     configurationManager = new ConfigurationManager();
-    recordingID = "Fake Recording ID:" + Math.random(); 
+    recordingID = "Fake Recording ID:" + Math.random();
     waiter = new Waiter();
   }
 
-  
-  
   @After
   public void after() {
     captureAgentMock = null;
@@ -69,24 +68,25 @@ public class IngestJobTest {
     configurationManager.setItem(CaptureParameters.INGEST_RETRY_LIMIT, retryLimit);
     configurationManager.setItem(CaptureParameters.INGEST_PAUSE_TIME, pauseTime);
   }
-  
-  class Waiter{
+
+  class Waiter {
     private int sleepTime = 100;
     private int maxSleepTime = 15000;
     private int sleepAccumulator = 0;
-    boolean done= false;
-    public void sleepWait() throws InterruptedException{
+    boolean done = false;
+
+    public void sleepWait() throws InterruptedException {
       sleepAccumulator = 0;
-      while(!done && sleepAccumulator < maxSleepTime){
+      while (!done && sleepAccumulator < maxSleepTime) {
         Thread.sleep(sleepTime);
         sleepAccumulator += sleepTime;
       }
-      if(sleepAccumulator >= maxSleepTime ){
+      if (sleepAccumulator >= maxSleepTime) {
         Assert.fail("Test Timed Out");
       }
     }
   }
-  
+
   @Test
   public void createIngestJobWithSuccessStops() throws ParseException, SchedulerException, InterruptedException {
     String pausetime = "5";
@@ -106,8 +106,6 @@ public class IngestJobTest {
     Assert.assertEquals("IngestJob hasn't removed itself.", 0, scheduler.getCurrentlyExecutingJobs().size());
   }
 
-
-
   private void verifyJobDetails(String intervaltime, JobDetailTriggerPair jobDetailTriggerPair) {
     Assert.assertEquals("JobDetail doesn't have  the correct name.", IngestJob.JOB_PREFIX + postfix,
             jobDetailTriggerPair.getJob().getName());
@@ -117,17 +115,18 @@ public class IngestJobTest {
             jobDetailTriggerPair.getTrigger().getCronExpression());
     Assert.assertEquals("CaptureAgent is the same", captureAgentMock, jobDetailTriggerPair.getTrigger().getJobDataMap()
             .get(JobParameters.CAPTURE_AGENT));
-    Assert.assertEquals("Scheduler is the same", scheduler, jobDetailTriggerPair.getTrigger().getJobDataMap().get(
-            JobParameters.SCHEDULER));
+    Assert.assertEquals("Scheduler is the same", scheduler,
+            jobDetailTriggerPair.getTrigger().getJobDataMap().get(JobParameters.SCHEDULER));
   }
-  
-  class VerifyCaptureAgentMockTriggerListener implements TriggerListener{
+
+  class VerifyCaptureAgentMockTriggerListener implements TriggerListener {
     public static final String NAME = "Verify Mock Capture Agent Failed to Ingest";
     private int runCount = 1;
-    public VerifyCaptureAgentMockTriggerListener(int triggers){
+
+    public VerifyCaptureAgentMockTriggerListener(int triggers) {
       this.runCount = triggers;
     }
-    
+
     @Override
     public String getName() {
       return NAME;
@@ -136,8 +135,8 @@ public class IngestJobTest {
     @Override
     public void triggerComplete(Trigger arg0, JobExecutionContext arg1, int arg2) {
       runCount--;
-      //System.out.println("Complete: " + runCount);
-      if(runCount <= 0){
+      // System.out.println("Complete: " + runCount);
+      if (runCount <= 0) {
         verify(captureAgentMock);
         waiter.done = true;
       }
@@ -145,21 +144,21 @@ public class IngestJobTest {
 
     @Override
     public void triggerFired(Trigger arg0, JobExecutionContext arg1) {
-      //System.out.println("Fired: " + runCount);
+      // System.out.println("Fired: " + runCount);
     }
 
     @Override
     public void triggerMisfired(Trigger arg0) {
-      //System.out.println("Oh no!");
+      // System.out.println("Oh no!");
     }
 
     @Override
     public boolean vetoJobExecution(Trigger arg0, JobExecutionContext arg1) {
       return false;
     }
-    
+
   }
-  
+
   @Test
   public void createIngestJobWithOneFailureAndOneSuccessStops() throws ParseException, SchedulerException,
           InterruptedException {
@@ -174,13 +173,13 @@ public class IngestJobTest {
     JobDetailTriggerPair jobDetailTriggerPair = JobCreator.createInjestJob(Long.parseLong(intervaltime), recordingID,
             postfix, captureAgentMock, scheduler, configurationManager);
     verifyJobDetails(intervaltime, jobDetailTriggerPair);
-    //jobDetailTriggerPair.getTrigger().addTriggerListener(VerifyCaptureAgentMockTriggerListener.NAME);
+    // jobDetailTriggerPair.getTrigger().addTriggerListener(VerifyCaptureAgentMockTriggerListener.NAME);
     scheduler.start();
     scheduler.scheduleJob(jobDetailTriggerPair.getJob(), jobDetailTriggerPair.getTrigger());
     waiter.sleepWait();
     Assert.assertEquals("IngestJob hasn't removed itself.", 0, scheduler.getCurrentlyExecutingJobs().size());
   }
-  
+
   @Test
   public void createIngestJobTestWith3TriesPausesSuccessfully() throws ParseException, SchedulerException,
           InterruptedException {
@@ -188,9 +187,9 @@ public class IngestJobTest {
     String intervaltime = "1";
     String retrytimes = "3";
     setProperties(intervaltime, retrytimes, pausetime);
-    
+
     scheduler.addGlobalTriggerListener(new VerifyCaptureAgentMockTriggerListener(5));
-    
+
     expect(captureAgentMock.ingest(recordingID)).andReturn(HttpURLConnection.HTTP_FORBIDDEN).times(
             Integer.parseInt(retrytimes));
     expect(captureAgentMock.getConfigService()).andReturn(configurationManager).times(1);
@@ -199,9 +198,9 @@ public class IngestJobTest {
 
     JobDetailTriggerPair jobDetailTriggerPair = JobCreator.createInjestJob(Long.parseLong(intervaltime), recordingID,
             postfix, captureAgentMock, scheduler, configurationManager);
-    // Verify that the job has been created properly. 
+    // Verify that the job has been created properly.
     verifyJobDetails(intervaltime, jobDetailTriggerPair);
-    //jobDetailTriggerPair.getTrigger().addTriggerListener(VerifyCaptureAgentMockTriggerListener.NAME);
+    // jobDetailTriggerPair.getTrigger().addTriggerListener(VerifyCaptureAgentMockTriggerListener.NAME);
     scheduler.start();
     scheduler.scheduleJob(jobDetailTriggerPair.getJob(), jobDetailTriggerPair.getTrigger());
     waiter.sleepWait();
@@ -217,7 +216,7 @@ public class IngestJobTest {
     scheduler.addGlobalTriggerListener(new VerifyCaptureAgentMockTriggerListener(3));
     expect(captureAgentMock.ingest(recordingID)).andReturn(HttpURLConnection.HTTP_FORBIDDEN).times(
             Integer.parseInt(retrytimes));
-    // Should grab the config service to try to schedule itself again. 
+    // Should grab the config service to try to schedule itself again.
     expect(captureAgentMock.getConfigService()).andReturn(configurationManager).times(1);
     expect(captureAgentMock.ingest(recordingID)).andReturn(HttpURLConnection.HTTP_OK).times(1);
     replay(captureAgentMock);
@@ -262,8 +261,8 @@ public class IngestJobTest {
     expect(captureAgentMock.ingest(recordingID)).andReturn(HttpURLConnection.HTTP_OK).times(1);
     replay(captureAgentMock);
 
-    JobDetailTriggerPair jobDetailTriggerPair = JobCreator.createInjestJob(-20, recordingID, postfix,
-            captureAgentMock, scheduler, configurationManager);
+    JobDetailTriggerPair jobDetailTriggerPair = JobCreator.createInjestJob(-20, recordingID, postfix, captureAgentMock,
+            scheduler, configurationManager);
     Assert.assertEquals("JobDetail has the correct name.", IngestJob.JOB_PREFIX + postfix, jobDetailTriggerPair
             .getJob().getName());
     Assert.assertEquals("Trigger has the correct name", IngestJob.TRIGGER_PREFIX + postfix, jobDetailTriggerPair
@@ -272,7 +271,7 @@ public class IngestJobTest {
             + " * * * * ?", jobDetailTriggerPair.getTrigger().getCronExpression());
     Assert.assertEquals("CaptureAgent is the same", captureAgentMock, jobDetailTriggerPair.getTrigger().getJobDataMap()
             .get(JobParameters.CAPTURE_AGENT));
-    Assert.assertEquals("Scheduler is the same", scheduler, jobDetailTriggerPair.getTrigger().getJobDataMap().get(
-            JobParameters.SCHEDULER));
+    Assert.assertEquals("Scheduler is the same", scheduler,
+            jobDetailTriggerPair.getTrigger().getJobDataMap().get(JobParameters.SCHEDULER));
   }
 }

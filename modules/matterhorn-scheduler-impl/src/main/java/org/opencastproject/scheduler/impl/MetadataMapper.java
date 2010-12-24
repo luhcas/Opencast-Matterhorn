@@ -15,17 +15,17 @@
  */
 package org.opencastproject.scheduler.impl;
 
-import java.io.FileNotFoundException;
+import org.opencastproject.scheduler.api.Metadata;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
-
-import org.opencastproject.scheduler.api.Metadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class maps the given metadata keys from a SchedulerEvent to other metadata keys for a different domain (i.e.
@@ -34,17 +34,16 @@ import org.slf4j.LoggerFactory;
  */
 public class MetadataMapper {
   private static final Logger logger = LoggerFactory.getLogger(MetadataMapper.class);
-  Properties mapping;
+  protected Properties mapping;
 
   /**
    * Constructor that needs the Mapping file
    * 
    * @param mappingFile
    *          An URL to a java Properties file
-   * @throws FileNotFoundException
    * @throws IOException
    */
-  public MetadataMapper(InputStream mappingFile) throws FileNotFoundException, IOException {
+  public MetadataMapper(InputStream mappingFile) throws IOException {
     mapping = new Properties();
     mapping.load(mappingFile);
   }

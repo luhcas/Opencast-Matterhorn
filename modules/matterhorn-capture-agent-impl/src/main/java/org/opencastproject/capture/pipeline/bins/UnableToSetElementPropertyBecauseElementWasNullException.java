@@ -21,7 +21,6 @@ import org.gstreamer.Element;
  * TODO: Comment me!
  */
 public class UnableToSetElementPropertyBecauseElementWasNullException extends Exception {
-  
   private String message;
 
   private static final long serialVersionUID = -2613833830552791683L;

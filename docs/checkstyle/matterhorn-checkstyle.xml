@@ -212,10 +212,6 @@
     <module name="MissingSwitchDefault">
       <property name="severity" value="warning" />
     </module>
-    <module name="RedundantThrows">
-      <property name="allowUnchecked" value="true"/>
-      <property name="severity" value="warning" />
-    </module>
     <module name="SimplifyBooleanExpression">
       <property name="severity" value="warning" />
     </module>
@@ -231,6 +227,11 @@
     <module name="SuperFinalize">
       <property name="severity" value="error" />
     </module>
+    <!--
+    <module name="RedundantThrows">
+      <property name="allowUnchecked" value="true"/>
+      <property name="severity" value="warning" />
+    </module>
     <module name="IllegalCatch">
       <property name="severity" value="warning" />
       <property name="illegalClassNames" value="java.lang.RuntimeException" />
@@ -238,6 +239,7 @@
     <module name="IllegalThrows">
       <property name="severity" value="error" />
     </module>
+    -->
     <module name="PackageDeclaration">
       <property name="severity" value="error" />
     </module>

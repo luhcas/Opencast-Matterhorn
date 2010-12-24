@@ -48,7 +48,11 @@ public final class PipelineFactory {
 
   private static Properties properties;
 
+  protected static boolean broken;
+
   private static CaptureAgent captureAgent = null;
+
+  protected static int v4LSrcIndex;
 
   /**
    * Private constructor preventing instantiation of this static utility class.
@@ -168,7 +172,7 @@ public final class PipelineFactory {
     String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST;
     String typeProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_TYPE;
 
-    if (outputDirectory == null && confidence == false) {
+    if (outputDirectory == null && !confidence) {
       logger.warn("Output directory is null, this may not work because we may not be able to write to the current "
               + "output dir!");
     }
@@ -230,7 +234,7 @@ public final class PipelineFactory {
     // ALSA source
     if (srcLoc.contains("hw:")) {
       return ProducerType.ALSASRC;
-    } else if (srcLoc.equals("dv1394")) {
+    } else if ("dv1394".equals(srcLoc)) {
       return ProducerType.DV_1394;
     } else { // V4L devices
       // Attempt to determine what the device is using the JV4LInfo library

@@ -387,7 +387,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     try {
       V4LInfo v4linfo = JV4LInfo.getV4LInfo(device);
       String deviceName = v4linfo.getVideoCapability().getName();
-      if (deviceName.equals("Epiphan VGA2USB")) {
+      if ("Epiphan VGA2USB".equals(deviceName)) {
         return true;
       }
     } catch (JV4LInfoException e) {

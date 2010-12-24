@@ -663,7 +663,7 @@ public class EventImpl implements Event {
         tz = TimeZone.getDefault();
       }
       if (tz.inDaylightTime(seed)) { // Event starts in DST
-        if (!tz.inDaylightTime(d)) {// Date not in DST?
+        if (!tz.inDaylightTime(d)) { // Date not in DST?
           d.setTime(d.getTime() + tz.getDSTSavings()); // Ajust for Fall back one hour
         }
       } else { // Event doesn't start in DST

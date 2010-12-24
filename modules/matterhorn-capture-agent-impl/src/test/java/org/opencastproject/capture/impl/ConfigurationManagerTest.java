@@ -15,7 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
@@ -45,7 +44,7 @@ import java.util.Properties;
  * Test the functionality of the ConfigurationManager
  */
 public class ConfigurationManagerTest {
-  
+
   /** the singleton object to test with */
   private ConfigurationManager configManager;
 
@@ -60,7 +59,7 @@ public class ConfigurationManagerTest {
     Assert.assertNotNull(configManager);
     configManager.activate(null);
 
-    //Checks on the basic operations before updated() has been called
+    // Checks on the basic operations before updated() has been called
     Assert.assertNull(configManager.getItem("nothing"));
     Assert.assertNull(configManager.getItem(null));
     configManager.setItem("anything", "nothing");
@@ -78,7 +77,7 @@ public class ConfigurationManagerTest {
     p.put("org.opencastproject.storage.dir",
             new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
 
-    configManager.updated(p);    
+    configManager.updated(p);
     configManager.updated(null);
   }
 
@@ -87,48 +86,48 @@ public class ConfigurationManagerTest {
     configManager.deactivate();
     configManager = null;
   }
-  
+
   @Test
   public void testMerge() {
-    //Setup the basic properties
+    // Setup the basic properties
     configManager.setItem("test", "foo");
     configManager.setItem("unchanged", "bar");
     Assert.assertEquals("foo", configManager.getItem("test"));
     Assert.assertEquals("bar", configManager.getItem("unchanged"));
 
-    //Setup the additions
+    // Setup the additions
     Properties p = new Properties();
-    p.setProperty("test","value");
+    p.setProperty("test", "value");
 
-    //Do some idiot checks to make sure that trying to merge a null properties object does nothing
+    // Do some idiot checks to make sure that trying to merge a null properties object does nothing
     Properties defaults = configManager.getAllProperties();
     configManager.merge(null, true);
     Assert.assertEquals(defaults, configManager.getAllProperties());
     configManager.merge(null, false);
     Assert.assertEquals(defaults, configManager.getAllProperties());
 
-    //Now test a basic merge
+    // Now test a basic merge
     Properties t = configManager.merge(p, false);
     Assert.assertEquals("value", t.getProperty("test"));
     Assert.assertEquals("bar", t.getProperty("unchanged"));
     t = null;
 
-    //Now overwrite the system settings
+    // Now overwrite the system settings
     t = configManager.merge(p, true);
     Assert.assertEquals("value", t.getProperty("test"));
     Assert.assertEquals("bar", t.getProperty("unchanged"));
     Assert.assertEquals("value", configManager.getItem("test"));
     Assert.assertEquals("bar", configManager.getItem("unchanged"));
   }
-  
+
   @Test
   public void testGetAllProperties() {
     Properties properties;
-    
+
     configManager.setItem("a", "1");
     configManager.setItem("b", "2");
     configManager.setItem("c", "3");
-    
+
     properties = configManager.getAllProperties();
     Assert.assertEquals("1", properties.get("a"));
     Assert.assertEquals("2", properties.get("b"));
@@ -145,8 +144,8 @@ public class ConfigurationManagerTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    configManager.setItem("org.opencastproject.storage.dir",
-            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"),
+            "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);
 
@@ -168,27 +167,26 @@ public class ConfigurationManagerTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    configManager.setItem("org.opencastproject.storage.dir",
-            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"),
+            "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.setItem("M2_REPO", getClass().getClassLoader().getResource("m2_repo").toURI().getPath());
     configManager.updated(sourceProps);
-    
+
     Properties caps = configManager.getCapabilities();
     Assert.assertNotNull(caps);
-    assertCaps(caps, "MOCK_SCREEN", "M2_REPO",
-            "org/opencastproject/samples/screen/1.0/screen-1.0.mpg", "screen_out.mpg", "presentation/source");
-    assertCaps(caps, "MOCK_PRESENTER", "M2_REPO",
-            "org/opencastproject/samples/camera/1.0/camera-1.0.mpg", "camera_out.mpg", "presentation/source");
-    assertCaps(caps, "MOCK_MICROPHONE", "M2_REPO",
-            "org/opencastproject/samples/audio/1.0/audio-1.0.mp3", "audio_out.mp3", "presentation/source");
+    assertCaps(caps, "MOCK_SCREEN", "M2_REPO", "org/opencastproject/samples/screen/1.0/screen-1.0.mpg",
+            "screen_out.mpg", "presentation/source");
+    assertCaps(caps, "MOCK_PRESENTER", "M2_REPO", "org/opencastproject/samples/camera/1.0/camera-1.0.mpg",
+            "camera_out.mpg", "presentation/source");
+    assertCaps(caps, "MOCK_MICROPHONE", "M2_REPO", "org/opencastproject/samples/audio/1.0/audio-1.0.mp3",
+            "audio_out.mp3", "presentation/source");
   }
 
   private void assertCaps(Properties caps, String name, String baseVar, String relPath, String dest, String flavour) {
     String devBase = CaptureParameters.CAPTURE_DEVICE_PREFIX + name;
     String devSource = devBase + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-    Assert.assertEquals("${"+baseVar+"}"+ "/" + relPath,
-            configManager.getUninterpretedItem(devSource));
+    Assert.assertEquals("${" + baseVar + "}" + "/" + relPath, configManager.getUninterpretedItem(devSource));
     Assert.assertTrue(new File(configManager.getItem(devSource)).exists());
     Assert.assertEquals(configManager.getVariable(baseVar) + "/" + relPath, caps.get(devSource));
     Assert.assertEquals(dest, caps.get(devBase + CaptureParameters.CAPTURE_DEVICE_DEST));
@@ -209,15 +207,16 @@ public class ConfigurationManagerTest {
     sourceProps.remove("capture.device.MOCK_PRESENTER.outputfile");
     configManager.setItem("capture.device.MOCK_PRESENTER.src", null);
     configManager.setItem("capture.device.MOCK_PRESENTER.outputfile", null);
-    configManager.setItem("org.opencastproject.storage.dir",
-            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"),
+            "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);
 
     Assert.assertNull(configManager.getCapabilities());
   }
 
-  @Test @Ignore
+  @Test
+  @Ignore
   public void testFileWrite() throws IOException, ConfigurationException {
     XProperties sourceProps = new XProperties();
     InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
@@ -227,7 +226,7 @@ public class ConfigurationManagerTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    //Add in two missing props
+    // Add in two missing props
     sourceProps.put("anything", "nothing");
     sourceProps.put("org.opencastproject.storage.dir", "${java.io.tmpdir}/configman-test");
     sourceProps.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
@@ -252,8 +251,8 @@ public class ConfigurationManagerTest {
       for (Object e : sourceProps.keySet()) {
         String key = (String) e;
         if (testProps.getProperty(key) != null && !testProps.getProperty(key).equals(sourceProps.getProperty(key))) {
-          System.out.println("testProps differs: " + key + " => "
-                  + sourceProps.getProperty(key) + " != " + testProps.getProperty(key));
+          System.out.println("testProps differs: " + key + " => " + sourceProps.getProperty(key) + " != "
+                  + testProps.getProperty(key));
         } else if (testProps.getProperty(key) == null) {
           System.out.println("testProps missing: " + key);
         }
@@ -261,7 +260,7 @@ public class ConfigurationManagerTest {
 
       for (Object e : testProps.keySet()) {
         String key = (String) e;
-        if (sourceProps.getProperty(key) == null){
+        if (sourceProps.getProperty(key) == null) {
           System.out.println("sourceProps missing: " + key);
         }
       }
@@ -269,22 +268,22 @@ public class ConfigurationManagerTest {
       Assert.fail();
     }
   }
-  
+
   @Test
-  public void configurationManagerNotifiesListenersCorrectly() throws ConfigurationException, InterruptedException{
+  public void configurationManagerNotifiesListenersCorrectly() throws ConfigurationException, InterruptedException {
     ConfigurationManager configurationManager = new ConfigurationManager();
-    // Setup a listener to be registered before the configuration manager update. 
+    // Setup a listener to be registered before the configuration manager update.
     ConfigurationManagerListener registersBefore = createMock(ConfigurationManagerListener.class);
     registersBefore.refresh();
     replay(registersBefore);
-    // Setup a listener to be registered after the configuration manager update. 
+    // Setup a listener to be registered after the configuration manager update.
     ConfigurationManagerListener registersAfter = createMock(ConfigurationManagerListener.class);
     registersAfter.refresh();
     replay(registersAfter);
     configurationManager.registerListener(registersBefore);
     configurationManager.updated(new XProperties());
     Thread.sleep(100);
-    // A listener registered before an update should be refreshed as soon as the ConfigurationManager is updated. 
+    // A listener registered before an update should be refreshed as soon as the ConfigurationManager is updated.
     verify(registersBefore);
     configurationManager.registerListener(registersAfter);
     // A listener registered after the update should be refreshed as soon as it is registered.

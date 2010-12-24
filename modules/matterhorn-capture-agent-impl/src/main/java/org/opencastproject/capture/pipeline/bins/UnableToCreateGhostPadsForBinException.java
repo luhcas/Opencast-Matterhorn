@@ -21,7 +21,6 @@ package org.opencastproject.capture.pipeline.bins;
 public class UnableToCreateGhostPadsForBinException extends Exception {
 
   private static final long serialVersionUID = 7225881836258836049L;
-  
   private String message;
 
   public UnableToCreateGhostPadsForBinException(String message) {

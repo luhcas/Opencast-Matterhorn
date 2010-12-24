@@ -67,7 +67,7 @@ public class SchedulerImplTest {
     setupWaiter();
     Assert.assertNull(schedulerImpl.getCaptureSchedule());
   }
-  
+
   private Properties setupCaptureProperties() {
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
     if (inputStream == null) {
@@ -125,7 +125,7 @@ public class SchedulerImplTest {
   private void setupWaiter() {
     waiter = new WaitForState();
   }
-  
+
   @AfterClass
   public static void afterClass() {
     FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-sched-test"));

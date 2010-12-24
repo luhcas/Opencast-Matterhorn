@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Vector;
 
-
 /**
  * Tests for the CleanCaptureJob class
  */
@@ -48,17 +47,12 @@ public class CleanCaptureJobTest {
 
   // The size of this array determines the number of recordings created, one for each element
   // It should only include recording states, as specified by the interface RecordingState
-  String[] states = new String[]{
-          RecordingState.UPLOAD_FINISHED,
-          RecordingState.UPLOAD_FINISHED,
-          RecordingState.CAPTURING,
-          RecordingState.MANIFEST,
-          RecordingState.UPLOADING
-  };
+  String[] states = new String[] { RecordingState.UPLOAD_FINISHED, RecordingState.UPLOAD_FINISHED,
+          RecordingState.CAPTURING, RecordingState.MANIFEST, RecordingState.UPLOADING };
 
   int numberOfRecordings = 5;
 
-  File baseDir; 
+  File baseDir;
 
   @Before
   public void setUp() throws URISyntaxException, IOException {
@@ -89,8 +83,8 @@ public class CleanCaptureJobTest {
       } catch (IOException e) {
         logger.error("Unexpected I/O Exception when creating test recordings: {}", e.getMessage());
         return;
-      } 
-    }    
+      }
+    }
   }
 
   @After
@@ -110,10 +104,10 @@ public class CleanCaptureJobTest {
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MIN_DISK_SPACE, "0");
 
     // Should clean all the ingested recordings
-    theJob.doCleaning(props,theRecordings);
+    theJob.doCleaning(props, theRecordings);
 
     // Check the cleaning was OK
-    for (AgentRecording aRec : theRecordings) 
+    for (AgentRecording aRec : theRecordings)
       if (aRec.getState() == RecordingState.UPLOAD_FINISHED) {
         Assert.assertFalse("Recording " + aRec.getID() + " exists when it should not.", aRec.getBaseDir().exists());
       } else {
@@ -134,14 +128,14 @@ public class CleanCaptureJobTest {
     // Should leave all the recordings untouched
     theJob.doCleaning(props, theRecordings);
 
-    //Check the cleaning was OK
+    // Check the cleaning was OK
     for (AgentRecording aRec : theRecordings)
       Assert.assertTrue(aRec.getBaseDir().exists());
   }
 
   /**
-   * The minimum free space in disk is a lot and the maximum archival time is "infinity".
-   * All recordings have been ingested
+   * The minimum free space in disk is a lot and the maximum archival time is "infinity". All recordings have been
+   * ingested
    */
   @Test
   public void diskLotsArchivalLotsAllIngested() {
@@ -151,10 +145,10 @@ public class CleanCaptureJobTest {
     // Create a capture.ingested file for the recordings that don't have it
     for (AgentRecording aRec : theRecordings) {
       aRec.setState(RecordingState.UPLOAD_FINISHED);
-    }       
+    }
 
     // Should clean all the recordings *because of the disk space*
-    theJob.doCleaning(props,theRecordings);
+    theJob.doCleaning(props, theRecordings);
 
     // Check the cleaning was OK
     for (AgentRecording aRec : theRecordings)
@@ -162,8 +156,8 @@ public class CleanCaptureJobTest {
   }
 
   /**
-   * The minimum free space in disk is a lot and the maximum archival time is "infinity".
-   * There are non-ingested recordings
+   * The minimum free space in disk is a lot and the maximum archival time is "infinity". There are non-ingested
+   * recordings
    */
   @Test
   public void diskLotsArchivalLots() {
@@ -172,10 +166,10 @@ public class CleanCaptureJobTest {
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MIN_DISK_SPACE, String.valueOf(Long.MAX_VALUE));
 
     // Should clean all the ingested recordings *because of the disk space*
-    theJob.doCleaning(props,theRecordings);
+    theJob.doCleaning(props, theRecordings);
 
     // Check the cleaning was OK
-    for (AgentRecording aRec : theRecordings) 
+    for (AgentRecording aRec : theRecordings)
       if (aRec.getState() == RecordingState.UPLOAD_FINISHED)
         Assert.assertFalse(aRec.getBaseDir().exists());
       else

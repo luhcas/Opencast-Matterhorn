@@ -35,7 +35,7 @@ import java.io.File;
 
 @Ignore
 public class AudioMonitoringTest {
-  
+
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBinTest.class);
 
@@ -55,7 +55,7 @@ public class AudioMonitoringTest {
     }
     Gst.init();
   }
-  
+
   @Test
   public void testAudioMonitor() {
     if (!gstreamerInstalled)

@@ -25,6 +25,7 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinEx
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
+import org.apache.commons.lang.StringUtils;
 import org.gstreamer.Element;
 
 import java.util.Properties;
@@ -172,7 +173,7 @@ public class VideoFilesinkConsumer extends ConsumerBin {
           UnableToSetElementPropertyBecauseElementWasNullException {
     if (filesink == null) {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(filesink, GStreamerProperties.LOCATION);
-    } else if (captureDevice.getOutputPath().equals("")) {
+    } else if (StringUtils.isEmpty(captureDevice.getOutputPath())) {
       throw new IllegalArgumentException("File location must be set, it cannot be an empty String.");
     } else {
       filesink.set(GStreamerProperties.LOCATION, captureDevice.getOutputPath());

@@ -19,9 +19,8 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 
 public final class GStreamerElementFactory {
-
   private static GStreamerElementFactory factory;
- 
+
   /** Singleton factory pattern **/
   public static synchronized GStreamerElementFactory getInstance() {
     if (factory == null) {

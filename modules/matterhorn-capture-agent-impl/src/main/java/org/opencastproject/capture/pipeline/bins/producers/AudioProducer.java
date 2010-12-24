@@ -33,6 +33,12 @@ import java.util.Properties;
 public abstract class AudioProducer extends ProducerBin {
 
   /**
+   * Audio convert is used to convert any input audio into a format usable by gstreamer. Might not be strictly
+   * necessary.
+   **/
+  protected Element audioconvert;
+
+  /**
    * Super class for all audio Producers whether they are test, pulse, alsa or other. To create a descendant to create a
    * new audio Producer:
    * 
@@ -65,12 +71,6 @@ public abstract class AudioProducer extends ProducerBin {
           UnableToCreateElementException {
     super(captureDevice, properties);
   }
-
-  /**
-   * Audio convert is used to convert any input audio into a format usable by gstreamer. Might not be strictly
-   * necessary.
-   **/
-  Element audioconvert;
 
   /**
    * Create all the common element for audio sources an audio converter.

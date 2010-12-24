@@ -22,13 +22,12 @@ import org.opencastproject.scheduler.api.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 /**
  * 
@@ -39,17 +38,16 @@ public class CaptureAgentMetadataGenerator {
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentMetadataGenerator.class);
 
-  MetadataMapper mapper;
+  protected MetadataMapper mapper;
 
   /**
    * Constructor needs the reference to the metadata mapping information.
    * 
    * @param caMappingFile
    *          Mapping File with Capture Agent specific mapping
-   * @throws FileNotFoundException
    * @throws IOException
    */
-  public CaptureAgentMetadataGenerator(InputStream caMappingFile) throws FileNotFoundException, IOException {
+  public CaptureAgentMetadataGenerator(InputStream caMappingFile) throws IOException {
     logger.debug("Initialising Capture Agent Metadata Generator");
     mapper = new MetadataMapper(caMappingFile);
   }

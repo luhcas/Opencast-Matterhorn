@@ -25,7 +25,6 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public interface IngestService {
    * Ingests the compressed mediapackage and starts the default workflow as defined by the
    * <code>org.opencastproject.workflow.default.definition</code> key, found in the system configuration.
    * 
-   * @param ZippedMediaPackage
+   * @param zippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @return Workflow instance.
    * @throws MediaPackageException
@@ -48,13 +47,13 @@ public interface IngestService {
    * @throws IngestException
    *           if an unexpected error occurs
    */
-  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException, IOException,
+  WorkflowInstance addZippedMediaPackage(InputStream zippedMediaPackage) throws MediaPackageException, IOException,
           IngestException;
 
   /**
    * Ingests the compressed mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>.
    * 
-   * @param ZippedMediaPackage
+   * @param zippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @param workflowDefinitionID
    *          workflow to be used with this media package
@@ -68,14 +67,14 @@ public interface IngestService {
    * @throws NotFoundException
    *           if the workflow definition was not found
    */
-  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
+  WorkflowInstance addZippedMediaPackage(InputStream zippedMediaPackage, String workflowDefinitionID)
           throws MediaPackageException, IngestException, IOException, NotFoundException;
 
   /**
    * Ingests the compressed mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>. The
    * properties specified in <code>properties</code> will be submitted as configuration data to the workflow.
    * 
-   * @param ZippedMediaPackage
+   * @param zippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @param workflowDefinitionID
    *          workflow to be used with this media package
@@ -91,7 +90,7 @@ public interface IngestService {
    * @throws NotFoundException
    *           if the workflow definition was not found
    */
-  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
+  WorkflowInstance addZippedMediaPackage(InputStream zippedMediaPackage, String workflowDefinitionID,
           Map<String, String> wfConfig) throws MediaPackageException, IOException, IngestException, NotFoundException;
 
   /**
@@ -102,7 +101,7 @@ public interface IngestService {
    * <code>workflowId</code>. If that workflow can't be found, a {@link NotFoundException} will be thrown. If the
    * <code>workflowId</code> is null, a new {@link WorkflowInstance} is created.
    * 
-   * @param ZippedMediaPackage
+   * @param zippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @param workflowDefinitionID
    *          workflow to be used with this media package
@@ -120,7 +119,7 @@ public interface IngestService {
    * @throws NotFoundException
    *           if either one of the workflow definition or workflow instance was not found
    */
-  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
+  WorkflowInstance addZippedMediaPackage(InputStream zippedMediaPackage, String workflowDefinitionID,
           Map<String, String> wfConfig, Long worfklowId) throws MediaPackageException, IOException, IngestException,
           NotFoundException;
 
@@ -203,7 +202,6 @@ public interface IngestService {
    *          The specific Matterhorn MediaPackage to which Media is being added
    * @return MediaPackage The updated Matterhorn MediaPackage element
    * @throws MediaPackageException
-   * @throws MalformedURLException
    * @throws IOException
    * @throws IngestException
    *           if an unexpected error occurs
@@ -240,7 +238,6 @@ public interface IngestService {
    *          The specific Matterhorn MediaPackage to which Media is being added
    * @return MediaPackage The updated Matterhorn MediaPackage element
    * @throws MediaPackageException
-   * @throws MalformedURLException
    * @throws IOException
    * @throws IngestException
    *           if an unexpected error occurs

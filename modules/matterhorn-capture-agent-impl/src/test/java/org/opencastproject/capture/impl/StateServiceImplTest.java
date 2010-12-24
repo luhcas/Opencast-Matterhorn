@@ -47,11 +47,11 @@ public class StateServiceImplTest {
   public void setup() {
     service = new CaptureAgentImpl();
     Assert.assertNotNull(service);
-    
+
     cfg = new ConfigurationManager();
     Assert.assertNotNull(cfg);
-    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL,
-            new File(System.getProperty("java.io.tmpdir"), "capture-state-test").getAbsolutePath());
+    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"),
+            "capture-state-test").getAbsolutePath());
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost");
     service.setConfigService(cfg);
@@ -68,11 +68,12 @@ public class StateServiceImplTest {
     if (dir.exists()) {
       try {
         FileUtils.deleteDirectory(dir);
-      } catch (IOException e) {}
+      } catch (IOException e) {
+      }
     }
   }
 
-  //Note:  This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself 
+  // Note: This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself
   @Test
   public void testValidPolling() throws ConfigurationException {
     InputStream s = getClass().getClassLoader().getResourceAsStream("config/scheduler.properties");
@@ -91,7 +92,7 @@ public class StateServiceImplTest {
 
   }
 
-  //Note:  This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself 
+  // Note: This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself
   @Test
   public void testInvalidPolling() throws ConfigurationException {
     Properties props = new Properties();
@@ -100,13 +101,13 @@ public class StateServiceImplTest {
     try {
       service.updated(null);
     } catch (ConfigurationException e) {
-      //Good, this is expected
+      // Good, this is expected
       return;
     }
     Assert.fail();
   }
 
-  //Note:  This test combines its subtests to verify that the code to handle the update functionality is working.
+  // Note: This test combines its subtests to verify that the code to handle the update functionality is working.
   @Test
   public void testPollingChanges() throws ConfigurationException {
     testValidPolling();

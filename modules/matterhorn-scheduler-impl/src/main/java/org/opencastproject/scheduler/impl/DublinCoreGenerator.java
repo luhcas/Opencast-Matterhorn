@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -53,7 +52,7 @@ public class DublinCoreGenerator {
 
   private static final Logger logger = LoggerFactory.getLogger(DublinCoreGenerator.class);
 
-  MetadataMapper mapper;
+  protected MetadataMapper mapper;
 
   public static String formatW3CDTF(Date date) {
     SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
@@ -68,10 +67,9 @@ public class DublinCoreGenerator {
    * @param dcMappingFile
    *          Properties File with mapping for Dublin Core metadata. This may come from different resources, so that is
    *          must be provided.
-   * @throws FileNotFoundException
    * @throws IOException
    */
-  public DublinCoreGenerator(InputStream dcMappingFile) throws FileNotFoundException, IOException {
+  public DublinCoreGenerator(InputStream dcMappingFile) throws IOException {
     logger.debug("Initialising Dublin Core Generator");
     mapper = new MetadataMapper(dcMappingFile);
   }

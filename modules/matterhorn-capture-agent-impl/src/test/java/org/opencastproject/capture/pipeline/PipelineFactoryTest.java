@@ -159,8 +159,8 @@ public class PipelineFactoryTest {
       e.printStackTrace();
       Assert.fail();
     }
-    p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "capture-agent-test")
-            .getAbsolutePath());
+    p.put("org.opencastproject.storage.dir",
+            new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
     p.put("org.opencastproject.server.url", "http://localhost:8080");
     p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());

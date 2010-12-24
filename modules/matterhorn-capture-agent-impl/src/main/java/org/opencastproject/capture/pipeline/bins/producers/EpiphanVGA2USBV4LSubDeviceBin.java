@@ -38,7 +38,7 @@ public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractB
 
   /** CaptureDevice */
   private CaptureDevice captureDevice;
-  
+
   /** Caps */
   private String caps = null;
 
@@ -50,7 +50,7 @@ public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractB
   private Element videoscale;
   
   private Element capsfilter;
-  
+
   /** AppSink, the last element. */
   private AppSink sink;
 

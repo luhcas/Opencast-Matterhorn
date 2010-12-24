@@ -63,10 +63,10 @@ import org.w3c.dom.Document;
 public class CalendarGenerator {
   private static final Logger logger = LoggerFactory.getLogger(CalendarGenerator.class);
 
-  Calendar cal;
-  DublinCoreGenerator dcGenerator;
-  CaptureAgentMetadataGenerator caGenerator;
-  SeriesService seriesService;
+  protected Calendar cal;
+  protected DublinCoreGenerator dcGenerator;
+  protected CaptureAgentMetadataGenerator caGenerator;
+  protected SeriesService seriesService;
 
   /**
    * default constructor that creates a CalendarGenerator object

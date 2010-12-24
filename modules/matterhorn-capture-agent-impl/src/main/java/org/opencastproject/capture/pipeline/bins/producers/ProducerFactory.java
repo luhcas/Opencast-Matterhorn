@@ -25,7 +25,7 @@ import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecau
 
 import java.util.Properties;
 
-public class ProducerFactory {
+public final class ProducerFactory {
   /** The actual singleton factory **/
   private static ProducerFactory factory;
 

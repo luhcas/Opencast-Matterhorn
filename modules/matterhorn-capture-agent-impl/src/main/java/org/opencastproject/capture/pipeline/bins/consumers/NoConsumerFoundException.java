@@ -19,7 +19,6 @@ package org.opencastproject.capture.pipeline.bins.consumers;
 public class NoConsumerFoundException extends Exception {
 
   private static final long serialVersionUID = 7225881836258836049L;
-
   private String message;
 
   public NoConsumerFoundException(String message) {

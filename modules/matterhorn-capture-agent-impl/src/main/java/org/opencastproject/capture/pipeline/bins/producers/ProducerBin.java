@@ -38,7 +38,6 @@ import java.util.Properties;
 public abstract class ProducerBin extends PartialBin {
   
   public static final String GHOST_PAD_NAME = GStreamerProperties.SRC;
-  
   protected Element queue;
 
   /**

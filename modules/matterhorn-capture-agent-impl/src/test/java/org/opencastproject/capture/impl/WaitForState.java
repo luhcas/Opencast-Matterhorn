@@ -14,30 +14,31 @@
  *
  */
 package org.opencastproject.capture.impl;
+
 import org.junit.Assert;
 
- /** A class that waits until a condition is met or a timeout occurs. **/
-  class WaitForState {
-    private int sleepTime = 100;
-    private int maxSleepTime = 20000;
-    private int sleepAccumulator = 0;
-    boolean done = false;
+/** A class that waits until a condition is met or a timeout occurs. **/
+class WaitForState {
+  private int sleepTime = 100;
+  private int maxSleepTime = 20000;
+  private int sleepAccumulator = 0;
+  boolean done = false;
 
-    /**
-     * Sleeps for a while, checks to see if a condition is made. Once it is the sleep wait ends.
-     * 
-     * @param CheckState
-     *          The function check will be used to check to see if the correct state has been obtained.
-     **/
-    public void sleepWait(CheckState checkState) throws InterruptedException {
-      sleepAccumulator = 0;
-      while (!done && sleepAccumulator < maxSleepTime) {
-        Thread.sleep(sleepTime);
-        sleepAccumulator += sleepTime;
-        done = checkState.check();
-      }
-      if (sleepAccumulator >= maxSleepTime) {
-        Assert.fail("Test Timed Out");
-      }
+  /**
+   * Sleeps for a while, checks to see if a condition is made. Once it is the sleep wait ends.
+   * 
+   * @param CheckState
+   *          The function check will be used to check to see if the correct state has been obtained.
+   **/
+  public void sleepWait(CheckState checkState) throws InterruptedException {
+    sleepAccumulator = 0;
+    while (!done && sleepAccumulator < maxSleepTime) {
+      Thread.sleep(sleepTime);
+      sleepAccumulator += sleepTime;
+      done = checkState.check();
+    }
+    if (sleepAccumulator >= maxSleepTime) {
+      Assert.fail("Test Timed Out");
     }
   }
+}

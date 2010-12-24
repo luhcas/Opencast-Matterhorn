@@ -28,9 +28,9 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "MetadataEntry")
 public class MetadataEntry implements Entry<String, String> {
   @XmlAttribute(name = "key")
-  String key;
+  protected String key;
   // I would like this to be XmlValue but the JaxB parser the throws an exception
-  String value;
+  protected String value;
 
   public MetadataEntry() {
   }

@@ -28,7 +28,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-public class SchedulerBuilder {
+public final class SchedulerBuilder {
 
   /** Builder singleton */
   private static SchedulerBuilder instance = null;

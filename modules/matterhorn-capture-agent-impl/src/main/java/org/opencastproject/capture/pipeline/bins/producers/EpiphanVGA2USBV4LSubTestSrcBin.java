@@ -36,7 +36,7 @@ public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstract
   private CaptureDevice captureDevice;
 
   /** Caps */
-  private String caps = null;
+  protected String caps = null;
 
   /** Elements */
   private Element src;

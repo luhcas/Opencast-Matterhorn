@@ -25,11 +25,11 @@ import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowService;
 
 import net.fortuna.ical4j.model.ValidationException;
@@ -41,7 +41,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.IllegalArgumentException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -386,35 +385,35 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     Root<EventImpl> rootEvent = query.from(EventImpl.class);
     query.select(rootEvent);
 
-    EntityType<EventImpl> Event_ = rootEvent.getModel();
+    EntityType<EventImpl> eventModel = rootEvent.getModel();
     Predicate wherePred = builder.conjunction();
 
     ParameterExpression<String> creatorParam = null;
     if (filter.getCreatorFilter() != null && !filter.getCreatorFilter().isEmpty()) {
       creatorParam = builder.parameter(String.class);
       wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(Event_.getSingularAttribute("creator", String.class)), creatorParam));
+              builder.like(rootEvent.get(eventModel.getSingularAttribute("creator", String.class)), creatorParam));
     }
 
     ParameterExpression<String> deviceParam = null;
     if (filter.getDeviceFilter() != null && !filter.getDeviceFilter().isEmpty()) {
       deviceParam = builder.parameter(String.class);
       wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(Event_.getSingularAttribute("device", String.class)), deviceParam));
+              builder.like(rootEvent.get(eventModel.getSingularAttribute("device", String.class)), deviceParam));
     }
 
     ParameterExpression<String> titleParam = null;
     if (filter.getTitleFilter() != null && !filter.getTitleFilter().isEmpty()) {
       titleParam = builder.parameter(String.class);
       wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(Event_.getSingularAttribute("title", String.class)), titleParam));
+              builder.like(rootEvent.get(eventModel.getSingularAttribute("title", String.class)), titleParam));
     }
 
     ParameterExpression<String> seriesParam = null;
     if (filter.getSeriesFilter() != null && !filter.getSeriesFilter().isEmpty()) {
       seriesParam = builder.parameter(String.class);
       wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(Event_.getSingularAttribute("series", String.class)), seriesParam));
+              builder.like(rootEvent.get(eventModel.getSingularAttribute("series", String.class)), seriesParam));
     }
 
     ParameterExpression<Date> startParam = null;
@@ -422,23 +421,23 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     if (filter.getStart() != null && filter.getStop() != null) { // Events with dates between start and stop
       startParam = builder.parameter(Date.class);
       stopParam = builder.parameter(Date.class);
-      wherePred = builder.between(rootEvent.get(Event_.getSingularAttribute("startDate", Date.class)), startParam,
+      wherePred = builder.between(rootEvent.get(eventModel.getSingularAttribute("startDate", Date.class)), startParam,
               stopParam);
     } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
       startParam = builder.parameter(Date.class);
-      wherePred = builder.greaterThan(rootEvent.get(Event_.getSingularAttribute("startDate", Date.class)), startParam);
+      wherePred = builder.greaterThan(rootEvent.get(eventModel.getSingularAttribute("startDate", Date.class)), startParam);
     } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
       stopParam = builder.parameter(Date.class);
-      wherePred = builder.lessThan(rootEvent.get(Event_.getSingularAttribute("endDate", Date.class)), stopParam);
+      wherePred = builder.lessThan(rootEvent.get(eventModel.getSingularAttribute("endDate", Date.class)), stopParam);
     }
 
     query.where(wherePred);
 
     if (filter.getOrder() != null) {
       if (filter.isOrderAscending()) {
-        query.orderBy(builder.asc(rootEvent.get(Event_.getSingularAttribute(filter.getOrder()))));
+        query.orderBy(builder.asc(rootEvent.get(eventModel.getSingularAttribute(filter.getOrder()))));
       } else {
-        query.orderBy(builder.desc(rootEvent.get(Event_.getSingularAttribute(filter.getOrder()))));
+        query.orderBy(builder.desc(rootEvent.get(eventModel.getSingularAttribute(filter.getOrder()))));
       }
     }
 

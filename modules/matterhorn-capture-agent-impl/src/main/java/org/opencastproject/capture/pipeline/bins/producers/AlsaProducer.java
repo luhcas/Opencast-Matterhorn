@@ -30,7 +30,6 @@ import org.gstreamer.Element;
 import java.util.Properties;
 
 public class AlsaProducer extends AudioProducer {
-  
   private Element alsasrc;
 
   /**

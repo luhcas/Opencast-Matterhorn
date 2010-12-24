@@ -82,7 +82,8 @@ public class ConfidenceMonitorRestService {
             "Loads a JPEG image from the device specified");
     grabFrameEndpoint.addFormat(new Format("jpeg", "The image of the device", null));
     grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("OK, valid request, results returned"));
-    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.error("Couldn't grab a frame from specified device"));
+    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .error("Couldn't grab a frame from specified device"));
     Param device = new Param("name", Type.STRING, null, "The device to grab a frame from");
     grabFrameEndpoint.addPathParam(device);
     grabFrameEndpoint.setTestForm(RestTestForm.auto());

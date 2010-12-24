@@ -32,8 +32,8 @@ public interface SeriesMetadata {
 
   int hashCode();
 
-  public void setSeries(Series s);
+  void setSeries(Series s);
 
-  public Series getSeries();
+  Series getSeries();
 
 }
