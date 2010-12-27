@@ -1,14 +1,78 @@
+@ECHO OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
+
 REM ##
 REM # Configure these variables to match your environment
 REM # If you have system-wide variables for FELIX_HOME and M2_REPO then you
 REM # should not have to make any changes to this file.
 REM ##
 
-REM # Make sure the following two path entries do *not* contain spaces
-REM # SET FELIX_HOME=C:\Libraries\felix-framework-2.0.0
-REM # SET M2_REPO=C:\Users\johndoe\.m2\repository
-REM # SET OPENCAST_LOGDIR=%FELIX_HOME%\logs
+REM ## NOTA BENE:
+REM ## Those programmers who, like me, are unfamiliar with the batch programming 
+REM ## constructs, may be shocked of the use of a 'for' loop when it does not
+REM ## seem necessary. For them, I would like to clarify that there is other way 
+REM ## (but using a for loop) to assign the output of a command to a variable.
+
+
+REM ## Try to guess the latest Java JDK location, if not already set
+if not defined JAVA_HOME (
+   REM ## Search java directory
+   if exist "%PROGRAMFILES%\Java" (
+      set search_dir=%PROGRAMFILES%\Java
+   ) else (
+      set search_dir=%PROGRAMFILES%
+   )
+
+   REM ## Chooses the directory starting with jdk with the highest alphabetical order (= latest version)
+   for /f "delims=" %%f in ('dir "%search_dir%\jdk*" /b /o-n') do (
+      set JAVA_HOME=%search_dir%\%%f
+      REM ## Exits after the first coincidence 
+      goto break_javahome
+   )
+
+   :break_javahome
+   REM ## If we get to here and JAVA_HOME is still not defined, exit with an error
+   if not defined JAVA_HOME (
+      echo JAVA_HOME is not defined!!! >&2
+      exit /b 1
+   )
+)
+
+REM ## Try to guess the latest Maven installation, if not already set
+if not defined M2_HOME (
+   REM ## Searches a directory under Program Files, starting by "apache-maven"
+   for /f "delims=" %%f in ('dir "%PROGRAMFILES%\apache-maven*" /b /ad /s /o-n') do (
+      set M2_HOME=%%f
+      goto break_m2home
+   )
+   
+   :break_m2home
+   REM ## If we get to here and M2_HOME is still not defined, exit with an error
+   if not defined M2_HOME (
+      echo M2_HOME is not defined!!! >&2
+      exit /b 1
+   )
+)
+
+REM ## Assumes the Maven repository is in its default location
+if not defined M2_REPO set M2_REPO=%USERPROFILE%\.m2\repository
+
+REM ## Try to guess the latest Felix installation
+if not defined FELIX_HOME (
+   REM ## Searches a directory named felix-framework-* under the home drive
+   for /f "delims=" %%f in ('dir "%HOMEDRIVE%\felix-framework-*" /b /s /ad /o-n') do (
+      set FELIX_HOME=%%f
+      goto break_felixhome
+   )
+
+   :break_felixhome
+   if not defined FELIX_HOME (
+      echo FELIX_HOME is not defined!!! >&2
+      exit /b 1
+   )
+)
+
+SET OPENCAST_LOGDIR=%FELIX_HOME%\logs
 
 REM # To enable the debugger on the vm, enable all of the following options
 SET DEBUG_PORT=8000
@@ -19,29 +83,24 @@ REM ##
 REM # Only change the lines below if you know what you are doing
 REM ##
 
-SET MAVEN_ARG=-DM2_REPO=%M2_REPO%
-SET FELIX_FILEINSTALL_OPTS=-Dfelix.fileinstall.dir=%FELIX_HOME%\load
-SET PAX_CONFMAN_OPTS=-Dbundles.configuration.location=%FELIX_HOME%\conf
-SET PAX_LOGGING_OPTS=-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=%OPENCAST_LOGDIR%
-SET UTIL_LOGGING_OPTS=-Djava.util.logging.config.file=%FELIX_HOME%\conf\services\java.util.logging.properties
+SET MAVEN_ARG=-DM2_REPO^^="%M2_REPO%"
+SET FELIX_FILEINSTALL_OPTS=-Dfelix.fileinstall.dir^^="%FELIX_HOME%\load"
+SET PAX_CONFMAN_OPTS=-Dbundles.configuration.location^^="%FELIX_HOME%\conf"
+SET PAX_LOGGING_OPTS=-Dorg.ops4j.pax.logging.DefaultServiceLog.level^^=WARN -Dopencast.logdir^^="%OPENCAST_LOGDIR%"
+SET UTIL_LOGGING_OPTS=-Djava.util.logging.config.file^^="%FELIX_HOME%\conf\services\java.util.logging.properties"
 SET FELIX_CACHE=%FELIX_HOME%\felix-cache
-SET GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
+SET GRAPHICS_OPTS=-Djava.awt.headless^^=true -Dawt.toolkit^^=sun.awt.HeadlessToolkit
 
 REM # Make sure matterhorn bundles are reloaded
-if exist %FELIX_CACHE% (
-	echo "Removing cached matterhorn bundles from %FELIX_CACHE%"
-	for /f %%f in ('dir %FELIX_CACHE%\bundle.location /s /b') do (
-		set linefound=0
-		for /f %%i in ('findstr /b /l "file:" %%f') do (
-			set linefound=1
-		)
-		if !linefound! equ 1 (
-			set file=%%f
-			rmdir /s /q !file:~0,-16!
-		)
-	)
+if exist "%FELIX_CACHE%" (
+   rmdir /s /q "%FELIX_CACHE%"
+   if not exist "%FELIX_CACHE%" mkdir "%FELIX_CACHE%"
 )
 
 REM # Finally start felix
-java %DEBUG_OPTS% %GRAPHICS_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar %FELIX_HOME%\bin\felix.jar %FELIX_CACHE%  
+
+pushd "%FELIX_HOME%"
+java %DEBUG_OPTS% %GRAPHICS_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar "%FELIX_HOME%\bin\felix.jar" "%FELIX_CACHE%"
+popd
+
 ENDLOCAL
