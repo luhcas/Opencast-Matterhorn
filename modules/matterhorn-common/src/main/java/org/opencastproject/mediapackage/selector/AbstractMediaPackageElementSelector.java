@@ -47,7 +47,7 @@ public abstract class AbstractMediaPackageElementSelector<T extends MediaPackage
    * 
    * @see org.opencastproject.mediapackage.MediaPackageElementSelector#select(org.opencastproject.mediapackage.MediaPackage)
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public Collection<T> select(MediaPackage mediaPackage) {
     Set<T> result = new HashSet<T>();
     Class type = getParametrizedType(result);
@@ -85,7 +85,7 @@ public abstract class AbstractMediaPackageElementSelector<T extends MediaPackage
    * <p>
    * Note: This code will only work for immediate specialization, and especially not for subclasses.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private Class getParametrizedType(Object object) {
     // Class<T> c = (Class<T>) this.getClass();
     // ParameterizedType type = ((ParameterizedType) c.getGenericSuperclass());

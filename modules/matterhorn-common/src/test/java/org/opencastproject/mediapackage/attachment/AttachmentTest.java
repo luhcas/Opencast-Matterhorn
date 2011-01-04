@@ -69,7 +69,6 @@ public class AttachmentTest {
     MediaPackageElementBuilderFactory factory = MediaPackageElementBuilderFactory.newInstance();
     MediaPackageElementBuilder builder = factory.newElementBuilder();
     MediaPackageElement packageElement = null;
-    Attachment attachment = null;
 
     // Create the element
     try {
@@ -79,11 +78,7 @@ public class AttachmentTest {
     }
 
     // Type test
-    try {
-      attachment = (Attachment) packageElement;
-    } catch (ClassCastException e) {
-      fail("Type mismatch: " + e.getMessage());
-    }
+    assertTrue("Type mismatch", packageElement instanceof Attachment);
 
   }
 

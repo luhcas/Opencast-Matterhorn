@@ -83,7 +83,7 @@ public class StreamElementSelector<S extends Stream> extends AbstractMediaPackag
    * This constructor tries to determine the entity type from the type argument used by a concrete implementation of
    * <code>GenericHibernateDao</code>.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private Class getParametrizedStreamType() {
     Class current = getClass();
     Type superclass;
