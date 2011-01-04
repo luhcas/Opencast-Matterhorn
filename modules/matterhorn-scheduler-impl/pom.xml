@@ -161,7 +161,7 @@
               org.opencastproject.scheduler.endpoint;version=${project.version},
             </Export-Package>
             <Import-Package>
-              org.opencastproject.http;version=${project.version},
+              org.opencastproject.kernel.http;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
               org.opencastproject.scheduler.api;version=${project.version},
               *;resolution:=optional

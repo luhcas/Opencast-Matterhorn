@@ -15,6 +15,9 @@
  */
 package org.opencastproject.capture.pipeline;
 
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.consumers.AudioMonitoring;
+
 import junit.framework.Assert;
 
 import org.gstreamer.ElementFactory;
@@ -25,9 +28,6 @@ import org.gstreamer.elements.FakeSrc;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
-import org.opencastproject.capture.pipeline.bins.consumers.AudioMonitoring;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

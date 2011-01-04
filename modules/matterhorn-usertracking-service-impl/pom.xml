@@ -27,8 +27,20 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
+      <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -108,7 +120,7 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.usertracking.*;version=${project.version} </Export-Package>
             <Import-Package>
-              org.opencastproject.http;version=${project.version},
+              org.opencastproject.kernel.http;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
               *;resolution:=optional
       			</Import-Package>

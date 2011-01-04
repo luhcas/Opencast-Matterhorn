@@ -15,9 +15,10 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
+import org.opencastproject.capture.impl.CaptureAgentImpl;
+
 import org.gstreamer.Bin;
 import org.gstreamer.State;
-import org.opencastproject.capture.impl.CaptureAgentImpl;
 
 /**
  * Abstract implementation of {@link EpiphanVGA2USBV4LSubBin}. Creates a empty Bin and implements sub bin state change

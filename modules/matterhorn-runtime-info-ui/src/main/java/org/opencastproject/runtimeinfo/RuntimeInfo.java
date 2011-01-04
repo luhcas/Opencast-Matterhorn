@@ -15,7 +15,7 @@
  */
 package org.opencastproject.runtimeinfo;
 
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -24,12 +24,6 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
@@ -40,17 +34,10 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.SortedSet;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Servlet;
 import javax.ws.rs.GET;
@@ -70,20 +57,23 @@ public class RuntimeInfo {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(RuntimeInfo.class);
 
+  /** The rest publisher looks for any non-servlet with the 'opencast.service.path' property */
+  public static final String SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))(" + RestConstants.SERVICE_PATH_PROPERTY
+          + "=*))";
+
   private SecurityService securityService;
   private BundleContext bundleContext;
   private String serverUrl;
   private String engageBaseUrl;
   private String adminBaseUrl;
   private String docs;
-  private Timer pingbackTimer = null;
 
   protected void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
   }
 
   protected ServiceReference[] getRestServiceReferences() throws InvalidSyntaxException {
-    return bundleContext.getAllServiceReferences(null, RestPublisher.SERVICE_FILTER);
+    return bundleContext.getAllServiceReferences(null, SERVICE_FILTER);
   }
 
   protected ServiceReference[] getUserInterfaceServiceReferences() throws InvalidSyntaxException {
@@ -101,47 +91,12 @@ public class RuntimeInfo {
       engageBaseUrl = serverUrl;
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
 
-    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     docs = generateDocs(serviceUrl);
-
-    // Pingback server, if enabled
-    String pingbackUrl = bundleContext.getProperty("org.opencastproject.anonymous.feedback.url");
-    if (StringUtils.isNotBlank(pingbackUrl)) {
-      try {
-        final URI uri = new URI(pingbackUrl);
-        pingbackTimer = new Timer("Anonymous Feedback Service", true);
-        pingbackTimer.schedule(new TimerTask() {
-          public void run() {
-            HttpClient httpClient = new DefaultHttpClient();
-            try {
-              HttpPost post = new HttpPost(uri);
-              List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-              // TODO: we are currently using drupal to store this information. Use something less demanding so
-              // we can simply post the data.
-              params.add(new BasicNameValuePair("form_id", "webform_client_form_1834"));
-              params.add(new BasicNameValuePair("submitted[data]", getRuntimeInfo()));
-              UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-              post.setEntity(entity);
-              HttpResponse response = httpClient.execute(post);
-              logger.debug("Received pingback response: {}", response);
-            } catch (Exception e) {
-              logger.info("Unable to send system configuration to opencastproject.org: {}", e.getMessage());
-            } finally {
-              httpClient.getConnectionManager().shutdown();
-            }
-          }
-        }, TimeUnit.MINUTES.toMillis(1), TimeUnit.DAYS.toMillis(7));
-        // wait one minute to send first message, and send once a week thereafter
-      } catch (URISyntaxException e1) {
-        logger.warn("Can not ping back to '{}'", pingbackUrl);
-      }
-    }
   }
 
   public void deactivate() {
-    if (pingbackTimer != null) {
-      pingbackTimer.cancel();
-    }
+    // Nothing to do
   }
 
   protected String generateDocs(String serviceUrl) {
@@ -222,7 +177,7 @@ public class RuntimeInfo {
     for (ServiceReference servletRef : sort(serviceRefs)) {
       String version = servletRef.getBundle().getVersion().toString();
       String description = (String) servletRef.getProperty(Constants.SERVICE_DESCRIPTION);
-      String servletContextPath = (String) servletRef.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
+      String servletContextPath = (String) servletRef.getProperty(RestConstants.SERVICE_PATH_PROPERTY);
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
       endpoint.put("version", version);

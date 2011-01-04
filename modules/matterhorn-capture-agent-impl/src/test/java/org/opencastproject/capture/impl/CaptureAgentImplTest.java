@@ -18,7 +18,6 @@ package org.opencastproject.capture.impl;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.util.XProperties;
 
 import org.apache.commons.io.FileUtils;
 import org.gstreamer.Gst;

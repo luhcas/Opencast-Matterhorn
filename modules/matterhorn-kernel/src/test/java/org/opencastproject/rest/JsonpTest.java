@@ -15,6 +15,8 @@
  */
 package org.opencastproject.rest;
 
+import org.opencastproject.kernel.rest.JsonpFilter;
+
 import org.junit.Assert;
 import org.junit.Test;
 

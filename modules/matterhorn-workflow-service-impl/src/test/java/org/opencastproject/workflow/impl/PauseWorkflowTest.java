@@ -20,7 +20,8 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -44,7 +45,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -75,7 +78,7 @@ public class PauseWorkflowTest {
 
     MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-    InputStream is = WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml");
+    InputStream is = PauseWorkflowTest.class.getResourceAsStream("/mediapackage-1.xml");
     mp = mediaPackageBuilder.loadFromXml(is);
     IOUtils.closeQuietly(is);
 
@@ -107,7 +110,7 @@ public class PauseWorkflowTest {
     service.setDao(dao);
     service.activate(null);
 
-    is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-pause.xml");
+    is = PauseWorkflowTest.class.getResourceAsStream("/workflow-definition-pause.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
@@ -141,7 +144,7 @@ public class PauseWorkflowTest {
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
   }
 
-  class SampleWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
+  class SampleWorkflowOperationHandler extends AbstractWorkflowOperationHandler implements ResumableWorkflowOperationHandler {
     MediaPackage mp;
     boolean called = false;
 
@@ -168,6 +171,34 @@ public class PauseWorkflowTest {
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       called = true;
       return createResult(mp, Action.PAUSE);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
+     */
+    @Override
+    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+            throws WorkflowOperationException {
+      return createResult(Action.CONTINUE);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldStateUserInterfaceURL(org.opencastproject.workflow.api.WorkflowInstance)
+     */
+    @Override
+    public URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+      return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldActionTitle()
+     */
+    @Override
+    public String getHoldActionTitle() {
+      return "Test";
     }
   }
 

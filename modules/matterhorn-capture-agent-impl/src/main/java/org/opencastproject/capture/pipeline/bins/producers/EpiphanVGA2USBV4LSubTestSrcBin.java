@@ -15,16 +15,17 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import org.gstreamer.Caps;
-import org.gstreamer.Element;
-import org.gstreamer.Pipeline;
-import org.gstreamer.elements.AppSink;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+
+import org.gstreamer.Caps;
+import org.gstreamer.Element;
+import org.gstreamer.Pipeline;
+import org.gstreamer.elements.AppSink;
 
 /**
  * Videotestsrc sub bin to use in {@link EpiphanVGA2USBV4LProducer}. Creates a bin with videotestsrc Element to grab

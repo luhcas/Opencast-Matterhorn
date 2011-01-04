@@ -16,14 +16,14 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.ConfidenceMonitor;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
 
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -69,7 +69,7 @@ public class ConfidenceMonitorRestService {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     docs = generateDocs(serviceUrl);
   }
 

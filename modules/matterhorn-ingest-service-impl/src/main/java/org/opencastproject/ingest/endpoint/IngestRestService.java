@@ -25,15 +25,15 @@ import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.fileupload.FileItemIterator;
@@ -136,7 +136,7 @@ public class IngestRestService {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
     }
     if (context != null) {
-      String serviceUrl = (String) context.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      String serviceUrl = (String) context.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
       docs = generateDocs(serviceUrl);
     }
   }

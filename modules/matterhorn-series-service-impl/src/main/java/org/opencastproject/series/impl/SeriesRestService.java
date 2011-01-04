@@ -16,7 +16,7 @@
 package org.opencastproject.series.impl;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
@@ -89,7 +89,7 @@ public class SeriesRestService {
       } else {
         serverUrl = ccServerUrl;
       }
-      String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
       docs = generateDocs(serviceUrl);
     }
   }

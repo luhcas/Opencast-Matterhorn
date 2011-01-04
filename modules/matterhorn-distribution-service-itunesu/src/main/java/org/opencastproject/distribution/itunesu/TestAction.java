@@ -16,8 +16,6 @@
 package org.opencastproject.distribution.itunesu;
 
 import org.opencastproject.deliver.schedule.Action;
-// import org.opencastproject.deliver.schedule.RetryException;
-// import org.opencastproject.deliver.schedule.FailedException;
 import org.opencastproject.deliver.store.InvalidKeyException;
 
 public class TestAction extends Action {

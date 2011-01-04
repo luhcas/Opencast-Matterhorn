@@ -20,7 +20,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.JaxbServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -793,7 +793,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   class RestServiceTracker extends ServiceTracker {
     protected static final String FILTER = "(&(objectClass=javax.servlet.Servlet)("
-            + RestPublisher.SERVICE_PATH_PROPERTY + "=*))";
+            + RestConstants.SERVICE_PATH_PROPERTY + "=*))";
 
     protected BundleContext bundleContext = null;
 
@@ -824,9 +824,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
     @Override
     public Object addingService(ServiceReference reference) {
-      String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
-      String servicePath = (String) reference.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
-      boolean jobProducer = (Boolean) reference.getProperty(RestPublisher.SERVICE_JOBPRODUCER_PROPERTY);
+      String serviceType = (String) reference.getProperty(RestConstants.SERVICE_TYPE_PROPERTY);
+      String servicePath = (String) reference.getProperty(RestConstants.SERVICE_PATH_PROPERTY);
+      boolean jobProducer = (Boolean) reference.getProperty(RestConstants.SERVICE_JOBPRODUCER_PROPERTY);
       try {
         registerService(serviceType, hostName, servicePath, jobProducer);
       } catch (ServiceRegistryException e) {
@@ -837,7 +837,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
     @Override
     public void removedService(ServiceReference reference, Object service) {
-      String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
+      String serviceType = (String) reference.getProperty(RestConstants.SERVICE_TYPE_PROPERTY);
       try {
         unRegisterService(serviceType, hostName);
       } catch (ServiceRegistryException e) {

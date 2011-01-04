@@ -15,7 +15,7 @@
  */
 package org.opencastproject.scheduler.endpoint;
 
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerFilter;
@@ -106,7 +106,7 @@ public class SchedulerRestService {
       } else {
         serverUrl = ccServerUrl;
       }
-      serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
       docs = generateDocs(serviceUrl);
     }
   }

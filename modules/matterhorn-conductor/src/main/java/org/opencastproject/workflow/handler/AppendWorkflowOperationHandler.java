@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -63,7 +62,7 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
    */
   @Override
   public void activate(ComponentContext componentContext) {
@@ -79,7 +78,7 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
@@ -94,7 +93,7 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#resume(org.opencastproject.workflow.api.WorkflowInstance,
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#resume(org.opencastproject.workflow.api.WorkflowInstance,
    *      java.util.Map)
    */
   @Override

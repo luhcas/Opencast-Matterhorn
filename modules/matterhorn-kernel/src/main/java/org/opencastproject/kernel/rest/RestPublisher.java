@@ -13,9 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.rest;
+package org.opencastproject.kernel.rest;
 
-import org.opencastproject.http.SharedHttpContext;
+import org.opencastproject.rest.RestConstants;
 
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
@@ -50,22 +50,14 @@ import javax.xml.stream.XMLStreamWriter;
 /**
  * Listens for JAX-RS annotated services and publishes them to the global URL space using a single shared HttpContext.
  */
-public class RestPublisher {
+public class RestPublisher implements RestConstants {
+  
   /** The logger **/
   private static final Logger logger = LoggerFactory.getLogger(RestPublisher.class);
 
-  /** The service property indicating the type of service. This is an arbitrary ID, not necessarily a java interface. */
-  public static final String SERVICE_TYPE_PROPERTY = "opencast.service.type";
-
-  /** The service property indicating the URL path that the service is attempting to claim */
-  public static final String SERVICE_PATH_PROPERTY = "opencast.service.path";
-
-  /** The service property indicating that this service should be registered in the remote service registry */
-  public static final String SERVICE_JOBPRODUCER_PROPERTY = "opencast.service.jobproducer";
-
   /** The rest publisher looks for any non-servlet with the 'opencast.service.path' property */
-  public static final String SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))("
-          + RestPublisher.SERVICE_PATH_PROPERTY + "=*))";
+  public static final String SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))(" + SERVICE_PATH_PROPERTY
+          + "=*))";
 
   /** A map that sets default xml namespaces in {@link XMLStreamWriter}s */
   protected static final ConcurrentHashMap<String, String> NAMESPACE_MAP;
@@ -125,7 +117,7 @@ public class RestPublisher {
     boolean jobProducer = Boolean.parseBoolean((String) ref.getProperty(SERVICE_JOBPRODUCER_PROPERTY));
     try {
       Dictionary<String, Object> props = new Hashtable<String, Object>();
-      props.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
+      props.put("contextId", RestConstants.HTTP_CONTEXT_ID);
       props.put("alias", servicePath);
       props.put(SERVICE_TYPE_PROPERTY, serviceType);
       props.put(SERVICE_PATH_PROPERTY, servicePath);

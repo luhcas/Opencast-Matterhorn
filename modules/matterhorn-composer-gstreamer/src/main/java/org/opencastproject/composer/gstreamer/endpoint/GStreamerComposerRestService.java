@@ -31,7 +31,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
@@ -97,7 +97,7 @@ public class GStreamerComposerRestService {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-      String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
       docs = generateDocs(serviceUrl);
     }
   }

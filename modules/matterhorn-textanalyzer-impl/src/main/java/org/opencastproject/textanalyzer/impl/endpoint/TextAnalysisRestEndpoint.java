@@ -21,7 +21,7 @@ import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.textanalyzer.api.TextAnalyzerService;
 import org.opencastproject.util.DocUtil;
@@ -71,7 +71,7 @@ public class TextAnalysisRestEndpoint {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     docs = generateDocs(serviceUrl);
   }
 

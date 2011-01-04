@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util;
+package org.opencastproject.capture.impl;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -121,7 +121,7 @@ public class XProperties extends Properties {
    * @param variable
    *          The variable you need the replacement for.
    * @return The value for variable.
-   * @see org.opencastproject.util.XProperties#getProperty(String)
+   * @see org.opencastproject.capture.impl.XProperties#getProperty(String)
    */
   public String expandVariable(String variable) {
     return findReplacement(START_REPLACEMENT + variable + END_REPLACEMENT, variable);

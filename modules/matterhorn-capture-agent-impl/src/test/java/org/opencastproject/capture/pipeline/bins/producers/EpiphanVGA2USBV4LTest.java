@@ -15,15 +15,6 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Properties;
-import org.apache.commons.io.FileUtils;
-import org.gstreamer.Gst;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
@@ -33,8 +24,19 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinEx
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 import org.opencastproject.util.ConfigurationException;
+
+import org.apache.commons.io.FileUtils;
+import org.gstreamer.Gst;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Properties;
 
 /**
  * Abstract class for Epiphan producer bins testing. (De)Initialize a JUnit test environment.

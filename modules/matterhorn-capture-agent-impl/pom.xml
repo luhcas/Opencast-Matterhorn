@@ -34,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
+      <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -186,7 +186,7 @@
             <Import-Package>
               org.opencastproject.capture.api.*;version=${project.version},
               org.opencastproject.mediapackage.*;version=${project.version},
-              org.opencastproject.http;version=${project.version},
+              org.opencastproject.kernel.http;version=${project.version},
               org.opencastproject.fsresources;version=${project.version},
               org.opencastproject.security.api;version=${project.version},
               *;resolution:=optional

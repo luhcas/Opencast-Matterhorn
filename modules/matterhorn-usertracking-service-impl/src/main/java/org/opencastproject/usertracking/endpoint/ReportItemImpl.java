@@ -15,13 +15,13 @@
  */
 package org.opencastproject.usertracking.endpoint;
 
+import org.opencastproject.usertracking.api.ReportItem;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.opencastproject.usertracking.api.ReportItem;
 
 /**
  * A JAXB-annotated implementation of ReportItem

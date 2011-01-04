@@ -145,7 +145,7 @@
               org.apache.mina.integration.ognl,
               org.apache.mina.integration.beans,
               org.opencastproject.stream.red5,
-              org.opencastproject.http,
+              org.opencastproject.kernel.http,
               *;resolution:=optional
             </Import-Package>
             <Embed-Dependency>

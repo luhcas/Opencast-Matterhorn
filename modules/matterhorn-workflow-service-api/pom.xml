@@ -17,7 +17,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
+      <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -55,10 +55,6 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>
-              org.opencastproject.mediapackage;version=${project.version},
-              *
-            </Import-Package>
             <Export-Package> org.opencastproject.workflow.api;version=${project.version} </Export-Package>
           </instructions>
         </configuration>

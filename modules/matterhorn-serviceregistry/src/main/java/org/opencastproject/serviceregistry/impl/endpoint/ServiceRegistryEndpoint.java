@@ -22,7 +22,7 @@ import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.JaxbJobList;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.JaxbServiceRegistration;
 import org.opencastproject.serviceregistry.api.JaxbServiceRegistrationList;
 import org.opencastproject.serviceregistry.api.JaxbServiceStatisticsList;
@@ -89,7 +89,7 @@ public class ServiceRegistryEndpoint {
    */
   public void activate(ComponentContext cc) {
     serverUrl = (String) cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    servicePath = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    servicePath = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     docs = generateDocs(servicePath);
   }
 

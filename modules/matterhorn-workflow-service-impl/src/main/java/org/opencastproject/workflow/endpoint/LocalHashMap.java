@@ -20,8 +20,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 /**
  * See this JAXB bug for the full explanation: https://jaxb.dev.java.net/issues/show_bug.cgi?id=223

@@ -15,13 +15,14 @@
  */
 package org.opencastproject.capture.admin.impl;
 
+import org.opencastproject.capture.admin.api.Agent;
+import org.opencastproject.capture.admin.api.AgentState;
+
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.admin.api.AgentState;
 
 public class AgentTest {
   private Agent agent = null;

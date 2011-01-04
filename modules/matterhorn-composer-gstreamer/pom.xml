@@ -71,10 +71,6 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-bundle-jaxrs</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.googlecode.gstreamer-java</groupId>
       <artifactId>gstreamer-java</artifactId>
       <version>1.4</version>
@@ -106,6 +102,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-bundle-jaxrs</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>

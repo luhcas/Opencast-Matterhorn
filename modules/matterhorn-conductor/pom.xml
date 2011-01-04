@@ -18,6 +18,11 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-kernel</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workflow-service-api</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -77,6 +82,10 @@
       <version>${project.version}</version>
     </dependency>    
     <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -117,11 +126,6 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>
-              org.osgi.service.component.*,
-              org.opencastproject.mediapackage;version=${project.version},
-              *;resolution:=optional
-            </Import-Package>
             <Export-Package>
               org.opencastproject.workflow.handler;version=${project.version}
             </Export-Package>

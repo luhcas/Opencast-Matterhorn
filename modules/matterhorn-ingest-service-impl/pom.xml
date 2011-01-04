@@ -195,7 +195,7 @@
               json_simple;inline=true
             </Embed-Dependency>
             <Import-Package>
-              org.opencastproject.http;version=${project.version},
+              org.opencastproject.kernel.http;version=${project.version},
               javax.persistence,
               *;resolution:=optional
             </Import-Package>

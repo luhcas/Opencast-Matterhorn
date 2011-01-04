@@ -15,6 +15,9 @@
  */
 package org.opencastproject.usertracking.impl;
 
+import org.opencastproject.usertracking.api.UserAction;
+import org.opencastproject.usertracking.api.UserActionList;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +27,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.opencastproject.usertracking.api.UserAction;
-import org.opencastproject.usertracking.api.UserActionList;
 
 /**
  * A {@link List} of {@link UserActionList}s

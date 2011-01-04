@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
@@ -73,7 +73,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     docs = generateDocs(serviceUrl);
     super.activate(cc);
   }

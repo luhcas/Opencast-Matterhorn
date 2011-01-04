@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.http;
+package org.opencastproject.kernel.http;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -41,9 +41,6 @@ import javax.servlet.http.HttpServletResponse;
 public class SharedHttpContext implements HttpContext {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SharedHttpContext.class);
-
-  /** The ID by which this http context is known by the extended http service */
-  public static final String HTTP_CONTEXT_ID = "opencast.httpcontext";
 
   /** This osgi bundle's bundlecontext */
   protected BundleContext bundleContext = null;

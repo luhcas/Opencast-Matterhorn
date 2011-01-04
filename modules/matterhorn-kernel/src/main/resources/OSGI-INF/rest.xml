@@ -1,21 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <components xmlns="http://www.osgi.org/xmlns/scr/v1.1.0">
 
-  <component name="org.opencastproject.rest.RestPublisher" activate="activate" deactivate="deactivate" immediate="true">
-    <implementation class="org.opencastproject.rest.RestPublisher" />
+  <component name="org.opencastproject.kernel.rest.RestPublisher" activate="activate" deactivate="deactivate" immediate="true">
+    <implementation class="org.opencastproject.kernel.rest.RestPublisher" />
     <property name="service.description" value="Opencast REST Endpoint Publisher" />
-  </component>
-
-  <component name="org.opencastproject.rest.ui" immediate="true" activate="activate">
-    <implementation class="org.opencastproject.http.StaticResource" />
-    <property name="service.description" value="Support files for REST documentation" />
-    <property name="alias" value="/restdocs" />
-    <property name="contextId" value="opencast.httpcontext" />
-    <property name="classpath" value="/ui/restdocs" />
-    <property name="welcome.file" value="template.xhtml" />
-    <service>
-      <provide interface="javax.servlet.Servlet" />
-    </service>
   </component>
 
 </components>

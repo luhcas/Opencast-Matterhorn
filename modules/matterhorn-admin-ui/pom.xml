@@ -19,9 +19,13 @@
   <dependencies>
 <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
+      <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -249,7 +253,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.http;version=${project.version}, *;resolution:=optional</Import-Package>
+            <Import-Package>org.opencastproject.kernel.http;version=${project.version}, *;resolution:=optional</Import-Package>
             <Private-Package>ui.*, uitests.*</Private-Package>
             <Service-Component>
               OSGI-INF/opencast-admin-ui.xml

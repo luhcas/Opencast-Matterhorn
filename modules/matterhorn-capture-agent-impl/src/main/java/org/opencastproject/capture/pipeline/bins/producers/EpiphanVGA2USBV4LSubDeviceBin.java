@@ -15,6 +15,13 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
+import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+
 import org.gstreamer.Bus.EOS;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
@@ -22,12 +29,6 @@ import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
 import org.gstreamer.elements.AppSink;
-import org.opencastproject.capture.pipeline.bins.CaptureDevice;
-import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
-import org.opencastproject.capture.pipeline.bins.GStreamerElements;
-import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
-import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
-import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 
 /**
  * Epiphan VGA2USB device sub bin to use in {@link EpiphanVGA2USBV4LProducer}. Creates a bin with v4lsrc Element to grab

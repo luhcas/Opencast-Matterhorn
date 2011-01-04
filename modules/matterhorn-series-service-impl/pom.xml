@@ -22,7 +22,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
+      <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
     </dependency>    
     <dependency>
@@ -148,7 +148,7 @@
               org.opencastproject.series.impl;version=${project.version}
             </Export-Package>
             <Import-Package>
-              org.opencastproject.http;version=${project.version},
+              org.opencastproject.kernel.http;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
               *;resolution:=optional
             </Import-Package>

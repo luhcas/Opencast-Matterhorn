@@ -21,6 +21,7 @@ import java.util.Vector;
 import org.apache.commons.lang.StringEscapeUtils;
 
 public class RestEndpoint {
+  
   public static enum Type {
     WRITE, READ
   };

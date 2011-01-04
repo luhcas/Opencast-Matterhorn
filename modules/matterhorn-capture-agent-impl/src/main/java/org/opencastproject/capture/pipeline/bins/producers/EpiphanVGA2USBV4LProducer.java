@@ -15,12 +15,23 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
+import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
+
 import com.sun.jna.Pointer;
-import java.io.File;
-import java.util.Properties;
+
 import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
 import net.luniks.linux.jv4linfo.V4LInfo;
+
 import org.gstreamer.Buffer;
 import org.gstreamer.Bus.STATE_CHANGED;
 import org.gstreamer.Caps;
@@ -32,16 +43,9 @@ import org.gstreamer.State;
 import org.gstreamer.elements.AppSink;
 import org.gstreamer.elements.AppSrc;
 import org.gstreamer.elements.AppSrc.NEED_DATA;
-import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.pipeline.bins.CaptureDevice;
-import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
-import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
-import org.opencastproject.capture.pipeline.bins.GStreamerElements;
-import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
-import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
-import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
-import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
-import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
+
+import java.io.File;
+import java.util.Properties;
 
 /**
  * Extended {@link V4LProducer} for Epiphan VGA2USB devices. {@code EpiphanVGA2USBV4LProducer} will create a

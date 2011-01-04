@@ -15,24 +15,21 @@
  */
 package org.opencastproject.deliver.itunesu;
 
-import java.io.IOException;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.UnsupportedEncodingException;
-
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import java.net.URLEncoder;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import org.opencastproject.deliver.schedule.FailedException;
 import org.opencastproject.deliver.schedule.RetryException;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**

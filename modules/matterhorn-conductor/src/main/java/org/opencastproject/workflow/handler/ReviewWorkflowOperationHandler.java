@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;

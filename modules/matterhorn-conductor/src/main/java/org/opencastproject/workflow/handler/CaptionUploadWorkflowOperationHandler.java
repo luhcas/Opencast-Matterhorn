@@ -18,7 +18,6 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -78,7 +77,7 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {

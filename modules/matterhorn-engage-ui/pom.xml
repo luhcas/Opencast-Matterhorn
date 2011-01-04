@@ -200,7 +200,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package> org.opencastproject.http;version=${project.version}, * </Import-Package>
+            <Import-Package> org.opencastproject.kernel.http;version=${project.version}, * </Import-Package>
             <Private-Package>ui.*</Private-Package>
             <Service-Component>
               OSGI-INF/engage-ui.xml

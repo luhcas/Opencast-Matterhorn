@@ -16,6 +16,10 @@
 
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.scheduler.api.Metadata;
+import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -28,10 +32,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.opencastproject.scheduler.api.Event;
-import org.opencastproject.scheduler.api.Metadata;
-import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 
 @Entity(name = "Metadata")
 @Table(name = "SCHED_METADATA")

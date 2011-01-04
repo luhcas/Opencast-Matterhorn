@@ -17,7 +17,7 @@ package org.opencastproject.annotation.impl;
 
 import org.opencastproject.annotation.api.Annotation;
 import org.opencastproject.annotation.api.AnnotationService;
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
@@ -97,7 +97,7 @@ public class AnnotationRestService {
       } else {
         serverUrl = ccServerUrl;
       }
-      serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
       docs = generateDocs(serviceUrl);
     }
   }

@@ -26,7 +26,6 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.util.ConfigurationException;
-import org.opencastproject.util.XProperties;
 
 import org.apache.commons.io.FileUtils;
 import org.osgi.framework.BundleContext;
@@ -153,7 +152,6 @@ public class RecordingImpl implements AgentRecording, Serializable {
    * Determines the root URL and ID from the recording's properties //TODO: What if the properties object contains a
    * character in the recording id or root url fields that is invalid for the filesystem?
    * 
-   * @throws URISyntaxException
    * @throws IOException
    */
   private void determineRootURLandID() throws IOException {

@@ -16,8 +16,8 @@
 package org.opencastproject.composer.gstreamer;
 
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
+import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.util.ConfigurationException;
 
 import org.apache.commons.io.IOUtils;
@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 public class GSEncodingProfileScanner implements ArtifactInstaller {
 

@@ -15,17 +15,18 @@
  */
 package org.opencastproject.distribution.youtube;
 
-import org.junit.Test;
-import junit.framework.Assert;
-
+import org.opencastproject.deliver.schedule.Action;
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
-import org.opencastproject.deliver.schedule.Action;
-import org.opencastproject.deliver.schedule.TaskSerializer;
 import org.opencastproject.deliver.schedule.Task.State;
+import org.opencastproject.deliver.schedule.TaskSerializer;
 import org.opencastproject.deliver.store.MemoryStore;
-import org.opencastproject.deliver.store.Store;
 import org.opencastproject.deliver.store.Serializer;
+import org.opencastproject.deliver.store.Store;
+
+import junit.framework.Assert;
+
+import org.junit.Test;
 
 public class DistributionServiceImplTest {
   @Test

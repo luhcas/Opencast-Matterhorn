@@ -18,7 +18,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
+      <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -36,6 +36,10 @@
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -130,6 +134,25 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-jquery</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/jquery</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/jquery</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -140,13 +163,26 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Import-Package>
+                org.opencastproject.kernel.http,
+                javax.servlet,
+                javax.ws.rs,
+                org.apache.commons.lang,
+                org.opencastproject.security.api,
+                org.opencastproject.util,
+                org.opencastproject.util.doc,
+                org.osgi.framework,
+                org.osgi.service.component,
+                org.slf4j
+            </Import-Package>
             <Private-Package>
               ui.*,
               org.json.*,
-              org.opencastproject.runtimeinfo
             </Private-Package>
-            <Import-Package>org.opencastproject.http, *;resolution:=optional</Import-Package>
-            <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
+            <Export-Package>org.opencastproject.runtimeinfo</Export-Package>
+            <Embed-Dependency>
+                json-simple
+            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/ui.xml,
               OSGI-INF/info.xml

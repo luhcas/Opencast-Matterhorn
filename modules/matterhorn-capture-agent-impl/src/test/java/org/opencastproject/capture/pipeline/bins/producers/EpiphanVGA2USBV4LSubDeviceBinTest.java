@@ -15,13 +15,15 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import java.util.List;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+
 import org.gstreamer.Element;
 import org.gstreamer.Pad;
 import org.gstreamer.elements.AppSink;
 import org.junit.Assert;
 import org.junit.Test;
-import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+
+import java.util.List;
 
 /**
  * Test class for {@Link

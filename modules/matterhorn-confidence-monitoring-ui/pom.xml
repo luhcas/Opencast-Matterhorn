@@ -72,7 +72,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.http;version=${project.version}, *</Import-Package>
+            <Import-Package>org.opencastproject.kernel.http;version=${project.version}, *</Import-Package>
             <Private-Package>ui.*, uitests.*</Private-Package>
             <Service-Component>
               OSGI-INF/confidence-monitoring-ui.xml

@@ -20,13 +20,10 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -44,10 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class PauseFinalOperationTest {
   /** The solr root directory */
@@ -59,7 +53,7 @@ public class PauseFinalOperationTest {
   private MediaPackage mp = null;
   private WorkflowServiceDaoSolrImpl dao = null;
   private Workspace workspace = null;
-  private OpHandler handler = null;
+  private ResumableTestWorkflowOperationHandler handler = null;
 
   @Before
   public void setup() throws Exception {
@@ -74,13 +68,13 @@ public class PauseFinalOperationTest {
 
     MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-    InputStream is = WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml");
+    InputStream is = PauseFinalOperationTest.class.getResourceAsStream("/mediapackage-1.xml");
     mp = mediaPackageBuilder.loadFromXml(is);
     IOUtils.closeQuietly(is);
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
-    handler = new OpHandler(mp);
+    handler = new ResumableTestWorkflowOperationHandler();
     handlerRegistrations.add(new HandlerRegistration("op1", handler));
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
@@ -103,7 +97,7 @@ public class PauseFinalOperationTest {
     service.setDao(dao);
     service.activate(null);
 
-    is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-pause-last.xml");
+    is = PauseFinalOperationTest.class.getResourceAsStream("/workflow-definition-pause-last.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
@@ -128,8 +122,8 @@ public class PauseFinalOperationTest {
       }
     }
     // Ensure that "start" was called on the first operation handler, but not resume
-    Assert.assertTrue(handler.startCalled);
-    Assert.assertTrue(!handler.resumeCalled);
+    Assert.assertTrue(handler.isStarted());
+    Assert.assertTrue(!handler.isResumed());
 
     // The workflow should be in the paused state
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
@@ -146,50 +140,6 @@ public class PauseFinalOperationTest {
     }
 
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
-  }
-
-  class OpHandler extends ResumableWorkflowOperationHandlerBase {
-    MediaPackage mp;
-    boolean startCalled = false;
-    boolean resumeCalled = false;
-
-    OpHandler(MediaPackage mp) {
-      this.mp = mp;
-    }
-
-    @Override
-    public SortedMap<String, String> getConfigurationOptions() {
-      return new TreeMap<String, String>();
-    }
-
-    @Override
-    public String getId() {
-      return this.getClass().getName();
-    }
-
-    @Override
-    public String getDescription() {
-      return "ContinuingWorkflowOperationHandler";
-    }
-
-    @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      startCalled = true;
-      return super.start(workflowInstance);
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-     *      java.util.Map)
-     */
-    @Override
-    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
-            throws WorkflowOperationException {
-      resumeCalled = true;
-      return super.resume(workflowInstance, properties);
-    }
   }
 
 }

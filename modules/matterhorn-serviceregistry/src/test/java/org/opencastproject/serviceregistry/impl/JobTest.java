@@ -16,8 +16,8 @@
 package org.opencastproject.serviceregistry.impl;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobParser;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;

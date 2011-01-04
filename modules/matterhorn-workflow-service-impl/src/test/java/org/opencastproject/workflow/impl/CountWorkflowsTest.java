@@ -23,14 +23,14 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import junit.framework.Assert;
@@ -60,7 +60,7 @@ public class CountWorkflowsTest {
   private WorkflowDefinition def = null;
   private MediaPackage mp = null;
   private WorkflowServiceDaoSolrImpl dao = null;
-  private HoldingWorkflowOperationHandler holdingOperationHandler;
+  private ResumableWorkflowOperationHandler holdingOperationHandler;
   private ServiceRegistry serviceRegistry = null;
 
   @Before
@@ -82,7 +82,7 @@ public class CountWorkflowsTest {
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
-    holdingOperationHandler = new HoldingWorkflowOperationHandler();
+    holdingOperationHandler = new ResumableTestWorkflowOperationHandler();
     handlerRegistrations.add(new HandlerRegistration("op1", holdingOperationHandler));
     handlerRegistrations.add(new HandlerRegistration("op2", new ContinuingWorkflowOperationHandler()));
 
@@ -103,7 +103,7 @@ public class CountWorkflowsTest {
     service.setDao(dao);
     service.activate(null);
 
-    is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
+    is = CountWorkflowsTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
@@ -159,28 +159,6 @@ public class CountWorkflowsTest {
     assertEquals(1, service.countWorkflowInstances(WorkflowState.PAUSED, null));
     assertEquals(1, service.countWorkflowInstances(WorkflowState.PAUSED, "op1"));
     assertEquals(1, service.countWorkflowInstances(WorkflowState.SUCCEEDED, null));
-  }
-
-  /**
-   * Test implementation for a workflow operation handler that will do nothing and not hold.
-   */
-  class HoldingWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
-
-    public SortedMap<String, String> getConfigurationOptions() {
-      return new TreeMap<String, String>();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-     *      java.util.Map)
-     */
-    @Override
-    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
-            throws WorkflowOperationException {
-      return createResult(Action.CONTINUE);
-    }
   }
 
   /**

@@ -17,7 +17,6 @@ package org.opencastproject.ingest.endpoint;
 
 import org.apache.commons.fileupload.ProgressListener;
 
-//import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 /**

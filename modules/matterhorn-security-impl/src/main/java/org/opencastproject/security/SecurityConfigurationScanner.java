@@ -15,7 +15,7 @@
  */
 package org.opencastproject.security;
 
-import org.opencastproject.http.SharedHttpContext;
+import org.opencastproject.rest.RestConstants;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -123,7 +123,7 @@ public class SecurityConfigurationScanner {
         // Register the filter as an osgi service, unregistering the previous version if it has already been registered
         @SuppressWarnings("rawtypes")
         Dictionary props = new Hashtable<String, Boolean>();
-        props.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
+        props.put("contextId", RestConstants.HTTP_CONTEXT_ID);
         props.put("pattern", ".*");
         props.put("service.ranking", "1");
         if (reg != null) {

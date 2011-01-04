@@ -23,9 +23,9 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowService;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;

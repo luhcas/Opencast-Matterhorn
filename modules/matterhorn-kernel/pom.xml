@@ -18,13 +18,14 @@
   <dependencies>
   
     <dependency>
+        <groupId>org.opencastproject</groupId>
+        <artifactId>matterhorn-common</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+  
+    <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
     </dependency>
 
     <dependency>
@@ -37,17 +38,6 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
 
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-      <version>2.3.15</version>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient-osgi</artifactId>
-    </dependency>
-    
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -69,24 +59,6 @@
     </dependency>
     
     <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>javax.persistence</artifactId>
-    </dependency>
-    
-    <!-- Embedding opencast version of truezip -->
-    <dependency>
-      <groupId>de.schlichtherle</groupId>
-      <artifactId>truezip</artifactId>
-      <version>6.8</version>
-      <exclusions>
-        <exclusion>
-          <groupId>bouncycastle</groupId>
-          <artifactId>bcprov-jdk15</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    
-    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -103,13 +75,14 @@
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
     </dependency>
+    
+    <!-- Testing -->
 
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
     </dependency>
-    
-    <!-- Testing -->
     
     <dependency>
       <groupId>junit</groupId>
@@ -123,12 +96,7 @@
       <version>2.5.1</version>
       <scope>test</scope>
     </dependency>
-    
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-    </dependency>
-    
+        
   </dependencies>
   
   <build>
@@ -142,8 +110,11 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Import-Package>
+              javax.activation,
               javax.servlet,
               javax.servlet.http,
+              javax.xml.stream,
+              javax.ws.rs,
               META-INF.cxf,
               META-INF.cxf.osgi,
               org.apache.cxf,
@@ -165,39 +136,40 @@
               org.apache.cxf.headers,
               org.apache.cxf.catalog,
               org.apache.cxf.jaxrs,
-              org.apache.cxf.jaxrs.utils,
               org.apache.cxf.jaxrs.impl,
+              org.apache.cxf.jaxrs.lifecycle,
+              org.apache.cxf.jaxrs.provider,
+              org.apache.cxf.jaxrs.utils,
               org.apache.cxf.wsdl,
               org.apache.cxf.wsdl11,
-              *;resolution:=optional
+              org.apache.commons.codec.digest,
+              org.apache.commons.io,
+              org.apache.commons.lang,
+              org.apache.http,
+              org.apache.http.client,
+              org.apache.http.client.entity,
+              org.apache.http.client.methods,
+              org.apache.http.conn,
+              org.apache.http.impl.client,
+              org.apache.http.message,
+              org.apache.http.util,
+              org.codehaus.jettison.mapped,
+              org.osgi.framework,
+              org.osgi.service.component,
+              org.osgi.service.http,
+              org.osgi.util.tracker,
+              org.slf4j,
+              org.opencastproject.security.api;version=${project.version},
+              org.opencastproject.rest;version=${project.version}
             </Import-Package>
-            <Embed-Dependency>
-              freemarker;inline=true,
-              truezip;inline=true
-            </Embed-Dependency>
             <Export-Package>
-              org.opencastproject.util.*;version=${project.version};-split-package:=merge-first,
-              org.opencastproject.mediapackage;version=${project.version},
-              org.opencastproject.mediapackage.attachment;version=${project.version},
-              org.opencastproject.mediapackage.track;version=${project.version},
-              org.opencastproject.mediapackage.identifier;version=${project.version},
-              org.opencastproject.mediapackage.elementbuilder;version=${project.version},
-              org.opencastproject.mediapackage.selector;version=${project.version},
-              org.opencastproject.http;version=${project.version},
-              org.opencastproject.rest;version=${project.version},
-              org.opencastproject.job.api;version=${project.version},
-              org.opencastproject.serviceregistry.api;version=${project.version},
-              org.opencastproject.security.api;version=${project.version}
+              org.opencastproject.kernel.http;version=${project.version},
+              org.opencastproject.kernel.rest;version=${project.version}
             </Export-Package>
-            <!-- 
-            <Private-Package>
-              META-INF.services;-split-package:=merge-first
-            </Private-Package>
-            -->
-            <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>
               OSGI-INF/httpContext.xml,
               OSGI-INF/jsonp.xml,
+              OSGI-INF/pingback.xml,
               OSGI-INF/rest.xml
             </Service-Component>
           </instructions>

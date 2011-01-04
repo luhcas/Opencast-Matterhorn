@@ -22,13 +22,13 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport;
 import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport.OperationReport;
@@ -105,7 +105,7 @@ public class WorkflowStatisticsTest {
         workflowDef.add(op);
 
         // Register a handler form the operation
-        HandlerRegistration handler = new HandlerRegistration(opId, new TestOperationHandler(opId));
+        HandlerRegistration handler = new HandlerRegistration(opId, new ResumableTestWorkflowOperationHandler(opId, Action.PAUSE, Action.CONTINUE));
         if (!workflowHandlers.contains(handler))
           workflowHandlers.add(handler);
       }
@@ -149,7 +149,7 @@ public class WorkflowStatisticsTest {
     try {
       MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
       mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-      is = WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml");
+      is = WorkflowStatisticsTest.class.getResourceAsStream("/mediapackage-1.xml");
       mediaPackage = mediaPackageBuilder.loadFromXml(is);
       IOUtils.closeQuietly(is);
       Assert.assertNotNull(mediaPackage.getIdentifier());
@@ -272,22 +272,6 @@ public class WorkflowStatisticsTest {
     stats.setDefinitions(reports);
 
     logger.info(WorkflowParser.toXml(stats));
-  }
-
-  /**
-   * Utility implementation for a resumable workflow operation handler.
-   */
-  public static class TestOperationHandler extends ResumableWorkflowOperationHandlerBase {
-
-    /**
-     * Creates a new test operation handler that is dealing with operations of id <code>operationId</code>.
-     * 
-     * @param operationId
-     *          the operation identifier
-     */
-    public TestOperationHandler(String operationId) {
-      super.id = operationId;
-    }
   }
 
 }

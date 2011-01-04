@@ -15,7 +15,7 @@
  */
 package org.opencastproject.usertracking.endpoint;
 
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.usertracking.api.UserTrackingException;
 import org.opencastproject.usertracking.api.UserTrackingService;
@@ -106,7 +106,7 @@ public class UserTrackingRestService {
       } else {
         serverUrl = ccServerUrl;
       }
-      serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
       docs = generateDocs(serviceUrl);
     }
   }

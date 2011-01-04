@@ -15,9 +15,10 @@
  */
 package org.opencastproject.scheduler.endpoint;
 
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.MetadataImpl;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
 import java.io.StringWriter;

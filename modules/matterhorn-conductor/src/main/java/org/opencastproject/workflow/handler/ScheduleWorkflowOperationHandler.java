@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -47,7 +46,7 @@ public class ScheduleWorkflowOperationHandler extends ResumableWorkflowOperation
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
    */
   @Override
   public void activate(ComponentContext componentContext) {
@@ -68,7 +67,7 @@ public class ScheduleWorkflowOperationHandler extends ResumableWorkflowOperation
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {

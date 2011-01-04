@@ -13,10 +13,15 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.api;
+package org.opencastproject.workflow.handler;
 
-import org.opencastproject.http.SharedHttpContext;
-import org.opencastproject.http.StaticResource;
+import org.opencastproject.kernel.http.StaticResource;
+import org.opencastproject.rest.RestConstants;
+import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationException;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.io.FilenameUtils;
@@ -121,7 +126,7 @@ public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOpera
     String welcomeFile = FilenameUtils.getName(resourcePath);
     staticResource = new StaticResource(componentContext.getBundleContext(), path, alias, welcomeFile);
     Dictionary<String, String> props = new Hashtable<String, String>();
-    props.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
+    props.put("contextId", RestConstants.HTTP_CONTEXT_ID);
     props.put("alias", alias);
     staticResourceRegistration = componentContext.getBundleContext().registerService(Servlet.class.getName(),
             staticResource, props);

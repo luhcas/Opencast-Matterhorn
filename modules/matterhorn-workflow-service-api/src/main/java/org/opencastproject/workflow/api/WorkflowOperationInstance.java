@@ -121,7 +121,8 @@ public interface WorkflowOperationInstance extends Configurable {
 
   /**
    * Returns <code>true</code> if this operation can be aborted by the user from an optional hold state. If a resumable
-   * operation is aborted from its hold state, the workflow is put into {@link WorkflowState#STOPPED}. A return value of
+   * operation is aborted from its hold state, the workflow is put into
+   * {@link org.opencastproject.workflow.api.WorkflowInstance.WorkflowState#STOPPED}. A return value of
    * <code>null</code> indicates that this operation instance does not have a hold state.
    * 
    * @return <code>true</code> if this operation instance is abortable

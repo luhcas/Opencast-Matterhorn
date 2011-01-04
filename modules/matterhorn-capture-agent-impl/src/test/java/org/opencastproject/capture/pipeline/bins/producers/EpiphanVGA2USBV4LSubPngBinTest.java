@@ -15,19 +15,21 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
+import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.util.ConfigurationException;
+
 import org.gstreamer.Element;
 import org.gstreamer.Pad;
 import org.gstreamer.elements.AppSink;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
-import org.opencastproject.util.ConfigurationException;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.EpiphanVGA2USBV4LSubPngBin}.

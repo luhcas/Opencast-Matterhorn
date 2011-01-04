@@ -15,18 +15,6 @@
  */
 package org.opencastproject.scheduler.impl;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.Date;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesService;
@@ -55,6 +43,19 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Date;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Create an iCalendar from the provided SchedulerEvents

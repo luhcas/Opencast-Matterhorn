@@ -215,44 +215,44 @@ public class WorkflowStatistics {
   public static class WorkflowDefinitionReport {
     /** The workflow definition id */
     @XmlAttribute
-    String id;
+    private String id;
 
     /** The total number of instances of this workflow definition */
     @XmlAttribute
-    long total = 0;
+    private long total = 0;
 
     /** The total number of instantiated (not yet running) instances of this workflow definition */
     @XmlAttribute
-    long instantiated = 0;
+    private long instantiated = 0;
 
     /** The total number of running instances of this workflow definition */
     @XmlAttribute
-    long running = 0;
+    private long running = 0;
 
     /** The total number of paused instances of this workflow definition */
     @XmlAttribute
-    long paused = 0;
+    private long paused = 0;
 
     /** The total number of stopped instances of this workflow definition */
     @XmlAttribute
-    long stopped = 0;
+    private long stopped = 0;
 
     /** The total number of finished instances of this workflow definition */
     @XmlAttribute
-    long finished = 0;
+    private long finished = 0;
 
     /** The total number of failing instances of this workflow definition */
     @XmlAttribute
-    long failing = 0;
+    private long failing = 0;
 
     /** The total number of failed instances of this workflow definition */
     @XmlAttribute
-    long failed = 0;
+    private long failed = 0;
 
     /** The workflow operation reports */
     @XmlElementWrapper(name = "operations")
     @XmlElement(name = "operation")
-    List<OperationReport> operations = new ArrayList<WorkflowStatistics.WorkflowDefinitionReport.OperationReport>();
+    private List<OperationReport> operations = new ArrayList<WorkflowStatistics.WorkflowDefinitionReport.OperationReport>();
 
     /**
      * @return the id
@@ -413,42 +413,42 @@ public class WorkflowStatistics {
     public static class OperationReport {
       /** The workflow operation id */
       @XmlAttribute
-      String id;
+      private String id;
 
       /** The total number of instances of this workflow definition currently in this operation */
       @XmlAttribute
-      long total = 0;
+      private long total = 0;
 
       /**
        * The total number of instantiated (not yet running) instances of this workflow definition currently in this
        * operation
        */
       @XmlAttribute
-      long instantiated = 0;
+      private long instantiated = 0;
 
       /** The total number of running instances of this workflow definition currently in this operation */
       @XmlAttribute
-      long running = 0;
+      private long running = 0;
 
       /** The total number of paused instances of this workflow definition currently in this operation */
       @XmlAttribute
-      long paused = 0;
+      private long paused = 0;
 
       /** The total number of stopped instances of this workflow definition currently in this operation */
       @XmlAttribute
-      long stopped = 0;
+      private long stopped = 0;
 
       /** The total number of finished instances of this workflow definition currently in this operation */
       @XmlAttribute
-      long finished = 0;
+      private long finished = 0;
 
       /** The total number of failing instances of this workflow definition currently in this operation */
       @XmlAttribute
-      long failing = 0;
+      private long failing = 0;
 
       /** The total number of failed instances of this workflow definition currently in this operation */
       @XmlAttribute
-      long failed = 0;
+      private long failed = 0;
 
       /**
        * @return the id

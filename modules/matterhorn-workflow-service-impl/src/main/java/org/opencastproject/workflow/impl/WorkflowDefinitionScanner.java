@@ -15,8 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowService;
 
 import org.apache.commons.io.IOUtils;

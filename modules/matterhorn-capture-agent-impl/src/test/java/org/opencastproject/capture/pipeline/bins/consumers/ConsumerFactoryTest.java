@@ -17,16 +17,6 @@ package org.opencastproject.capture.pipeline.bins.consumers;
 
 import static org.easymock.EasyMock.createMock;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Properties;
-
-import org.gstreamer.Gst;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
@@ -38,9 +28,19 @@ import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsEx
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
 
+import org.gstreamer.Gst;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Properties;
 
 public class ConsumerFactoryTest {
 

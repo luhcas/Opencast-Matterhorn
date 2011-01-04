@@ -15,10 +15,10 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-import java.util.Properties;
-
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+
+import java.util.Properties;
 
 /**
  * TODO: Comment me!

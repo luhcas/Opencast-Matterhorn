@@ -15,12 +15,12 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.scheduler.api.Metadata;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.opencastproject.scheduler.api.Metadata;
 
 public class ListAdapter extends XmlAdapter<Metadata[], List<Metadata>> {
 

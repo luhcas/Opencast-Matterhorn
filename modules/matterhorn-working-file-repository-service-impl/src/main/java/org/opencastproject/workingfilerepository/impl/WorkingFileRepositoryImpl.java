@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
-import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.NotFoundException;
@@ -94,7 +94,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       throw new IllegalStateException("Server URL must be set");
 
     // working file repository 'facade' configuration
-    String servicePath = (String)cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    String servicePath = (String)cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     String canonicalFileRepositoryUrl = cc.getBundleContext().getProperty("org.opencastproject.file.repo.url");
     if (StringUtils.isNotBlank(canonicalFileRepositoryUrl)) {
       try {

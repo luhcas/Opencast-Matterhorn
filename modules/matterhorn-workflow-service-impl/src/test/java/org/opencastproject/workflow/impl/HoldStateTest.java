@@ -21,7 +21,6 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -59,7 +58,7 @@ public class HoldStateTest {
   private WorkflowInstance workflow = null;
   private MediaPackage mp = null;
   private WorkflowServiceDaoSolrImpl dao = null;
-  private HoldingWorkflowOperationHandler holdingOperationHandler;
+  private ResumableTestWorkflowOperationHandler holdingOperationHandler;
 
   @Before
   public void setup() throws Exception {
@@ -80,7 +79,7 @@ public class HoldStateTest {
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
-    holdingOperationHandler = new HoldingWorkflowOperationHandler();
+    holdingOperationHandler = new ResumableTestWorkflowOperationHandler();
     handlerRegistrations.add(new HandlerRegistration("op1", holdingOperationHandler));
     handlerRegistrations.add(new HandlerRegistration("op2", new ContinuingWorkflowOperationHandler()));
 
@@ -101,7 +100,7 @@ public class HoldStateTest {
     service.setDao(dao);
     service.activate(null);
 
-    is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
+    is = HoldStateTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
@@ -164,7 +163,7 @@ public class HoldStateTest {
     }
 
     // Simulate a user resuming the workflow, but the handler still keeps the workflow in a hold state
-    holdingOperationHandler.pauseOnResume = true;
+    holdingOperationHandler.setResumeAction(Action.PAUSE);
     service.resume(workflow.getId());
 
     // The workflow is running again, but should very quickly reenter the paused state
@@ -180,7 +179,7 @@ public class HoldStateTest {
     Assert.assertEquals(WorkflowState.PAUSED, fromDb.getState());
 
     // Resume the workflow again, and this time continue with the workflow
-    holdingOperationHandler.pauseOnResume = false;
+    holdingOperationHandler.setResumeAction(Action.CONTINUE);
     service.resume(workflow.getId());
 
     while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
@@ -191,29 +190,6 @@ public class HoldStateTest {
       }
     }
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
-  }
-
-  class HoldingWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
-
-    /** Whether to return pause or continue when {@link #resume(WorkflowInstance)} is called */
-    boolean pauseOnResume;
-
-    public SortedMap<String, String> getConfigurationOptions() {
-      return new TreeMap<String, String>();
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-     *      java.util.Map)
-     */
-    @Override
-    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
-            throws WorkflowOperationException {
-      Action action = pauseOnResume ? Action.PAUSE : Action.CONTINUE;
-      return createResult(action);
-    }
   }
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
