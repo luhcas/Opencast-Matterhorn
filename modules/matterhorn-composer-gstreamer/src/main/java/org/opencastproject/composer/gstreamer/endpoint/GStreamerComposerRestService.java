@@ -378,14 +378,14 @@ public class GStreamerComposerRestService {
     RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles.xml",
             "Retrieve the encoding profiles");
     profilesEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document describing the available encoding profiles"));
+            .ok("Results in an xml document describing the available encoding profiles"));
     profilesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, profilesEndpoint);
 
     RestEndpoint profileEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profile/{id}.xml",
             "Retrieve an encoding profile");
     profileEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document describing the requested encoding profile"));
+            .ok("Results in an xml document describing the requested encoding profile"));
     profileEndpoint.addPathParam(new Param("id", Param.Type.STRING, "mov-low.http", "the profile ID"));
     profileEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, profileEndpoint);
@@ -394,7 +394,7 @@ public class GStreamerComposerRestService {
     RestEndpoint jobEndpoint = new RestEndpoint("job", RestEndpoint.Method.GET, "/job/{id}.xml",
             "Retrieve a job for an encoding task");
     jobEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the status of the encoding job, and the track produced by this "
+            .ok("Results in an xml document containing the status of the encoding job, and the track produced by this "
                     + "encoding job if it the task is finished"));
     jobEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the job id"));
     jobEndpoint.addFormat(new Format("xml", null, null));
@@ -405,7 +405,7 @@ public class GStreamerComposerRestService {
     RestEndpoint countEndpoint = new RestEndpoint("count", RestEndpoint.Method.GET, "/count",
             "Count the number of jobs");
     countEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Result body contains the number of jobs matching the query parameters"));
+            .ok("Result body contains the number of jobs matching the query parameters"));
     countEndpoint.addOptionalParam(new Param("status", Param.Type.STRING, "FINISHED",
             "the job status (QUEUED, RUNNING, FINISHED, FAILED)"));
     countEndpoint.addOptionalParam(new Param("host", Param.Type.STRING, serverUrl,
@@ -417,7 +417,7 @@ public class GStreamerComposerRestService {
     RestEndpoint encodeEndpoint = new RestEndpoint("encode", RestEndpoint.Method.POST, "/encode",
             "Starts an encoding process, based on the specified encoding profile ID and the track");
     encodeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the job for the encoding task"));
+            .ok("Results in an xml document containing the job for the encoding task"));
     encodeEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
             "The track containing the stream"));
     encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
@@ -428,11 +428,11 @@ public class GStreamerComposerRestService {
     RestEndpoint trimEndpoint = new RestEndpoint("trim", RestEndpoint.Method.POST, "/trim",
             "Starts a trimming process, based on the specified track, start time and duration in ms");
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the job for the trimming task"));
+            .ok("Results in an xml document containing the job for the trimming task"));
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("if the start time is negative or exceeds the track duration"));
+            .badRequest("if the start time is negative or exceeds the track duration"));
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .BAD_REQUEST("if the duration is negative or, including the new start time, exceeds the track duration"));
+            .badRequest("if the duration is negative or, including the new start time, exceeds the track duration"));
     trimEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
             "The track containing the stream"));
     trimEndpoint.addRequiredParam(new Param("start", Type.STRING, "0", "The start time in milisecond"));
@@ -444,7 +444,7 @@ public class GStreamerComposerRestService {
     RestEndpoint muxEndpoint = new RestEndpoint("mux", RestEndpoint.Method.POST, "/mux",
             "Starts an encoding process, which will mux the two tracks using the given encoding profile");
     muxEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the job for the encoding task"));
+            .ok("Results in an xml document containing the job for the encoding task"));
     muxEndpoint.addRequiredParam(new Param("sourceAudioTrack", Type.STRING, generateAudioTrack(),
             "The track containing the audio stream"));
     muxEndpoint.addRequiredParam(new Param("sourceVideoTrack", Type.STRING, generateVideoTrack(),
@@ -457,7 +457,7 @@ public class GStreamerComposerRestService {
     RestEndpoint imageEndpoint = new RestEndpoint("image", RestEndpoint.Method.POST, "/image",
             "Starts an image extraction process, based on the specified encoding profile ID and the source track");
     imageEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the image attachment"));
+            .ok("Results in an xml document containing the image attachment"));
     imageEndpoint.addRequiredParam(new Param("time", Type.STRING, "1",
             "The number of seconds into the video to extract the image"));
     imageEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
@@ -471,7 +471,7 @@ public class GStreamerComposerRestService {
     RestEndpoint captionsEndpoint = new RestEndpoint("captions", RestEndpoint.Method.POST, "/captions",
             "Starts caption embedding process, based on the specified source track and captions");
     captionsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Result in an xml document containing resulting media file."));
+            .ok("Result in an xml document containing resulting media file."));
     captionsEndpoint.addRequiredParam(new Param("mediaTrack", Type.STRING, generateMediaTrack(),
             "QuickTime file containg video stream"));
     captionsEndpoint.addRequiredParam(new Param("captions", Type.STRING, generateCaptionsCatalogs(),
