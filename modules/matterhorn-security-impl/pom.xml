@@ -33,6 +33,10 @@
       <artifactId>org.springframework.security.openid</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.security.oauth</groupId>
+      <artifactId>spring-security-oauth</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-cas-client</artifactId>
     </dependency>
@@ -99,6 +103,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Embed-Dependency>spring-security-oauth;inline=true</Embed-Dependency>
             <Import-Package>
               javax.servlet,
               javax.management,
@@ -108,6 +113,13 @@
               org.jasig.cas.client.util;resolution:=optional,
               org.jasig.cas.client.validation;resolution:=optional,
               org.opencastproject.security.api;version=${project.version},
+              org.springframework.beans,
+              org.springframework.beans.factory,
+              org.springframework.beans.factory.config,
+              org.springframework.beans.factory.support,
+              org.springframework.beans.factory.xml,
+              org.springframework.context,
+              org.springframework.context.annotation,
               org.springframework.dao,
               org.springframework.security,
               org.springframework.security.access,
@@ -117,6 +129,7 @@
               org.springframework.security.cas;resolution:=optional,
               org.springframework.security.cas.authentication;resolution:=optional,
               org.springframework.security.cas.web;resolution:=optional,
+              org.springframework.security.config,
               org.springframework.security.core,
               org.springframework.security.core.userdetails,
               org.springframework.security.core.userdetails.cache,
@@ -125,9 +138,18 @@
               org.springframework.security.web,
               org.springframework.security.web.authentication,
               org.springframework.security.web.authentication.www,
+              org.springframework.util,
               *;resolution:=optional
             </Import-Package>
-            <Export-Package> org.opencastproject.security;version=${project.version} </Export-Package>
+            <Export-Package>
+              org.opencastproject.security;version=${project.version},
+              org.springframework.security.oauth;version=1.0.0.M1,
+              org.springframework.security.oauth.common;version=1.0.0.M1,
+              org.springframework.security.oauth.config;version=1.0.0.M1,
+              org.springframework.security.oauth.consumer;version=1.0.0.M1,
+              org.springframework.security.oauth.provider;version=1.0.0.M1,
+              org.springframework.security.oauth.provider.token;version=1.0.0.M1
+            </Export-Package>
             <Service-Component>
               OSGI-INF/http-client.xml,
               OSGI-INF/security-service.xml,

@@ -32,9 +32,10 @@ import javax.servlet.http.HttpServletResponse;
 public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPoint {
   public static final String REQUESTED_AUTH_HEADER = "X-Requested-Auth";
   public static final String DIGEST_AUTH = "Digest";
+  public static final String OAUTH_SIGNATURE = "oauth_signature";
 
   protected AuthenticationEntryPoint userEntryPoint;
-  protected DigestAuthenticationEntryPoint systemAuthenticationEntryPoint;
+  protected DigestAuthenticationEntryPoint digestAuthenticationEntryPoint;
 
   /**
    * {@inheritDoc}
@@ -46,18 +47,25 @@ public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPo
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
           throws IOException, ServletException {
     if (DIGEST_AUTH.equals(request.getHeader(REQUESTED_AUTH_HEADER))) {
-      systemAuthenticationEntryPoint.commence(request, response, authException);
+      digestAuthenticationEntryPoint.commence(request, response, authException);
     } else {
       userEntryPoint.commence(request, response, authException);
     }
   }
 
+  /**
+   * @param userEntryPoint
+   *          the user entrypoint to set
+   */
   public void setUserEntryPoint(AuthenticationEntryPoint userEntryPoint) {
     this.userEntryPoint = userEntryPoint;
   }
 
-  public void setSystemAuthenticationEntryPoint(DigestAuthenticationEntryPoint systemAuthenticationEntryPoint) {
-    this.systemAuthenticationEntryPoint = systemAuthenticationEntryPoint;
+  /**
+   * @param digestAuthenticationEntryPoint
+   *          the digest auth entrypoint to set
+   */
+  public void setDigestAuthenticationEntryPoint(DigestAuthenticationEntryPoint digestAuthenticationEntryPoint) {
+    this.digestAuthenticationEntryPoint = digestAuthenticationEntryPoint;
   }
-
 }

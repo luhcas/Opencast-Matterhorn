@@ -42,6 +42,7 @@
         <module>modules/matterhorn-ingest-service-api</module>
         <module>modules/matterhorn-ingest-service-impl</module>
         <module>modules/matterhorn-kernel</module>
+        <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
@@ -147,6 +148,7 @@
         <module>modules/matterhorn-annotation-api</module>
         <module>modules/matterhorn-annotation-impl</module>
         <module>modules/matterhorn-kernel</module>
+        <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
@@ -178,6 +180,7 @@
 
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-kernel</module>
+        <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
@@ -866,6 +869,12 @@
         <groupId>org.springframework.security</groupId>
         <artifactId>org.springframework.security.openid</artifactId>
         <version>3.0.2.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework.security.oauth</groupId>
+        <artifactId>spring-security-oauth</artifactId>
+        <version>1.0.0.M1</version>
       </dependency>
 
       <dependency>
