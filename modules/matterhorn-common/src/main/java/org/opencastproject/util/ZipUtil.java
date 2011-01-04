@@ -170,7 +170,7 @@ public final class ZipUtil {
         boolean success = false;
         if (f.exists()) {
           if (!f.isDirectory() || recursive) {
-            success = new File(zipFile, f.getName()).archiveCopyAllFrom(f);
+            success = new File(zipFile, f.getName()).copyAllFrom(f);
             if (success)
               logger.debug("File {} zipped successfuly", f.getAbsolutePath());
             else {
@@ -252,7 +252,7 @@ public final class ZipUtil {
           throw new IOException("Cannot create destination directory", e);
         }
 
-        success = f.archiveCopyAllTo(destination);
+        success = f.copyAllTo(destination);
 
         if (success)
           logger.debug("File {} unzipped successfully", zipFile.getCanonicalPath());
