@@ -97,6 +97,7 @@ ocIngest.createDublinCoreCatalog = function(data) {
 }
 
 ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
+  var serxml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
   ocUtils.log("Adding DublinCore catalog");
   ocUpload.setProgress('100%','adding Metadata',' ', ' ');
   $.ajax({
@@ -106,7 +107,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
     data       : {
       flavor : flavor,
       mediaPackage: mediaPackage,
-      dublinCore  : ocUtils.xmlToString(dcCatalog)
+      dublinCore  : serxml + ocUtils.xmlToString(dcCatalog)
     },
     error      : function(XHR,status,e){
       showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
