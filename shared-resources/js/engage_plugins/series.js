@@ -11,7 +11,7 @@ Opencast.Series = ( function () {
     var mediaPackageId;
     var series_id;
     var series_visible = false;
-var position_set = false;
+    var position_set = false;
 
     /**
      * @memberOf Opencast.Series
@@ -152,7 +152,19 @@ var position_set = false;
                 series_id = data['search-results'].result.dcIsPartOf;
                 if(series_id != '')
                 {
-                    $('#oc_player-head-see-more').show();
+                  $.ajax(
+                  {
+                      url: '../../search/rest/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
+                      dataType: 'jsonp',
+                      jsonp: 'jsonp',
+                      success: function (data)
+                      {
+                        if(data['search-results'].result.length > 1)
+                        {
+                            $('#oc_player-head-see-more').show();
+                        }
+                      }
+                  });
                 }
             }
         });
