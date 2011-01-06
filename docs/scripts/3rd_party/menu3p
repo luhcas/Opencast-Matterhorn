@@ -141,16 +141,24 @@ while [ true ]; do
         ACT=1
         ;;
     c ) # clean up build directories
-        LOGFILE=`mktemp /tmp/${0##*/}-clean.log.XXXXX`
-        time ./clean-up 2>&1 | tee $LOGFILE
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=1; fi
+        chksudo
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-clean.log.XXXXX`
+          time ./clean-up 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=1; fi
+        fi
         ;;
     ca) # clean up all (including downloads)
-        LOGFILE=`mktemp /tmp/${0##*/}-clean-all.log.XXXXX`
-        time ./clean-up all 2>&1 | tee $LOGFILE
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=1; fi
+        chksudo
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-clean-all.log.XXXXX`
+          time ./clean-up all 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=1; fi
+        fi
         ;;
     xyzzy ) # see http://en.wikipedia.org/wiki/xyzzy
         echo "Nothing happens"

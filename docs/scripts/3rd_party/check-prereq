@@ -80,6 +80,20 @@ install_prog() {
               ;;
           esac
           ;;
+        yacc )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              #rpms="flex-2.5.4a-41.fc6.i386.rpm bison-2.3-2.1.i386.rpm"
+              rpms="byacc-1.9-29.2.2.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              #rpms="flex-2.5.4a-41.fc6.x86_64.rpm bison-2.3-2.1.x86_64.rpm"
+              rpms="byacc-1.9-29.2.2.x86_64.rpm"
+              ;;
+          esac
+          ;;
         git ) 
           case `arch` in
             i386 )
@@ -175,7 +189,8 @@ install_prog() {
     Ubuntu )
       case "$1" in
         xz ) prog=xz-utils ;;
-        yacc ) prog="flex bison" ;;
+      # yacc ) prog="flex bison" ;;
+        yacc ) prog=byacc ;;
         git ) prog=git-core ;;
         ImageMagick ) prog=imagemagick ;;
         gsl-devel ) prog=libgsl0-dev ;;
@@ -308,6 +323,7 @@ check_prereq() {
     CentOS | RHEL )
       chkprog wget  || install_prog wget  || return 1
       chkprog xz    || install_prog xz    || return 1
+      chkprog yacc  || install_prog yacc  || return 1
       chkprog git   || install_prog git   || return 1
       # These are needed for Windows compile
       chkprog jam   || install_prog jam   || return 1

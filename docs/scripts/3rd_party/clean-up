@@ -18,6 +18,8 @@ cleanup qtembedder   "$1" || exit 1
 #
 if [ "$1" = "all" ]; then
   [ -z "$HOME3P" ] && HOME3P=.
+  rm -fr "${HOME3P}/packages"
+  [ $? -ne 0 ] && exit 1
   rm -fr "${HOME3P}/usr"
   [ $? -ne 0 ] && exit 1
 fi
