@@ -53,7 +53,9 @@ Opencast.WorkflowInspect = (function() {
     mp.metadata.catalog = Opencast.RenderUtils.ensureArray(mp.metadata.catalog);
     out.mediapackage = mp;
 
-    return {workflow : out};
+    return {
+      workflow : out
+    };
   }
 
   /** Render workflow view to specified container
@@ -71,6 +73,43 @@ Opencast.WorkflowInspect = (function() {
         $content.show('fast');
       }
     });
+    renderWorkflowPerformance(workflow);
+  }
+
+  /** render workflow performance chart
+   */
+  function renderWorkflowPerformance(data) {
+    // Make a graph object with canvas id and width
+    var g = new Bluff.SideStackedBar('graph', '600x300');
+
+    // Set theme and options
+    g.theme_keynote();
+    g.title = 'Processing times for ' + data.workflow.mediapackage.title;
+    g.x_axis_label = 'Seconds';
+
+    // Add data and labels
+    var queue = [];
+    var run = [];
+    var labels = {};
+    jQuery.each(data.workflow.operations, function(index, operationInstance) {
+      var op = data.workflow.operations[index];
+      if(op.state == 'SUCCEEDED') {
+        var runtime = (op.completed - op.started) / 1000;
+        if(runtime < 1) {
+          return;
+        }
+        run.push(runtime);
+        queue.push(op['time-in-queue'] / 1000);
+        labels['' + run.length-1] = op.id;
+      }
+    });
+
+    g.data('Queue', queue);
+    g.data('Run', run);
+    g.labels = labels;
+
+    // Render the graph
+    g.draw();
   }
 
   /** Build an object that can be rendered easily from the Configuration objects

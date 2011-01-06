@@ -11,6 +11,9 @@
     <script type="text/javascript" src="jquery/jquery-ui-1.8.6.custom.min.js"></script>
     <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
     <script type="text/javascript" src="js/oc.utils.js"></script>
+    <!--[if IE]><script type="text/javascript" language="javascript" src="js/excanvas.js"></script><![endif]-->
+    <script type="text/javascript" language="javascript" src="js/js-class.js"></script>
+    <script type="text/javascript" language="javascript" src="js/bluff-min.js"></script>
     <script type="text/javascript" src="js/oc.inspect.js"></script>
 
     <style>
@@ -222,7 +225,9 @@
         </table>
       </div>
 
-      <div id="performance"></div>
+      <div id="performance">
+        <canvas id="graph" width="600" height="300"></canvas>
+      </div>
     </textarea>
   </body>
 </html>
