@@ -41,6 +41,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 public class IngestServiceImplTest {
@@ -118,11 +119,15 @@ public class IngestServiceImplTest {
     EasyMock.expect(workflowInstance.getId()).andReturn(workflowInstanceID);
 
     workflowService = EasyMock.createNiceMock(WorkflowService.class);
-    EasyMock.expect(workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(), (Map) EasyMock.anyObject())).andReturn(
-            workflowInstance);
-    EasyMock.expect(workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(), (Map) EasyMock.anyObject())).andReturn(
-            workflowInstance);
-    EasyMock.expect(workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject())).andReturn(workflowInstance);
+    EasyMock.expect(
+            workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
+                    (Map) EasyMock.anyObject())).andReturn(workflowInstance);
+    EasyMock.expect(
+            workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
+                    (Map) EasyMock.anyObject())).andReturn(workflowInstance);
+    EasyMock.expect(
+            workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject()))
+            .andReturn(workflowInstance);
 
     EasyMock.replay(workspace);
     EasyMock.replay(workflowInstance);
@@ -134,25 +139,27 @@ public class IngestServiceImplTest {
     IOUtils.closeQuietly(is);
     EasyMock.expect(entity.getContent()).andReturn(new ByteArrayInputStream(movie)).anyTimes();
     EasyMock.replay(entity);
-    
+
     StatusLine statusLine = EasyMock.createMock(StatusLine.class);
     EasyMock.expect(statusLine.getStatusCode()).andReturn(200).anyTimes();
     EasyMock.replay(statusLine);
-    
+
     HttpResponse httpResponse = EasyMock.createMock(HttpResponse.class);
     EasyMock.expect(httpResponse.getStatusLine()).andReturn(statusLine).anyTimes();
     EasyMock.expect(httpResponse.getEntity()).andReturn(entity).anyTimes();
     EasyMock.replay(httpResponse);
-    
+
     TrustedHttpClient httpClient = EasyMock.createMock(TrustedHttpClient.class);
-    EasyMock.expect(httpClient.execute((HttpGet)EasyMock.anyObject())).andReturn(httpResponse).anyTimes();
+    EasyMock.expect(httpClient.execute((HttpGet) EasyMock.anyObject())).andReturn(httpResponse).anyTimes();
     EasyMock.replay(httpClient);
-    
+
     Job job = new JaxbJob();
     ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(job).anyTimes();
+    EasyMock.expect(
+            serviceRegistry.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (List<String>) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(job).anyTimes();
     EasyMock.replay(serviceRegistry);
-    
+
     service = new IngestServiceImpl();
     service.setHttpClient(httpClient);
     service.setTempFolder("target/temp/");
@@ -161,7 +168,6 @@ public class IngestServiceImplTest {
     service.setServiceRegistry(serviceRegistry);
     service.defaultWorkflowDefinionId = "sample";
   }
-
 
   @Test
   public void testThinClient() throws Exception {

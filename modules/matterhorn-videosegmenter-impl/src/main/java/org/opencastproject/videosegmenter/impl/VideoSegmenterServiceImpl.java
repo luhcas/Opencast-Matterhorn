@@ -259,10 +259,10 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
    * @return a receipt containing the resulting mpeg-7 catalog
    * @throws VideoSegmenterException
    */
-  public Job segment(final Track track, boolean block) throws VideoSegmenterException {
+  public Job segment(final Track track, boolean block) throws VideoSegmenterException, MediaPackageException {
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, OPERATION, Arrays.asList(track.getAsXml()));
     } catch (ServiceUnavailableException e) {
       throw new VideoSegmenterException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {

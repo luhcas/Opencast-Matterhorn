@@ -18,6 +18,7 @@ package org.opencastproject.videosegmenter.api;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 
 /**
@@ -25,8 +26,11 @@ import org.opencastproject.mediapackage.Track;
  */
 public interface VideoSegmenterService extends JobProducer {
 
-  /** Receipt type */
+  /** Job type */
   String JOB_TYPE = "org.opencastproject.videosegmenter";
+
+  /** Operation */
+  String OPERATION = "segment";
 
   /**
    * Takes the given track and returns the job that can be used to get the resulting mpeg7 catalog.
@@ -36,7 +40,11 @@ public interface VideoSegmenterService extends JobProducer {
    * @param block
    *          whether to block the calling thread until the analysis is complete
    * @return the job with which we can obtain the extracted metadata
+   * @throws VideoSegmenterException
+   *           if the track could not be segmented
+   * @throws MediaPackageException
+   *           if the track is invalid
    */
-  Job segment(Track track, boolean block) throws VideoSegmenterException;
+  Job segment(Track track, boolean block) throws VideoSegmenterException, MediaPackageException;
 
 }

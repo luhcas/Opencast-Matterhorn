@@ -52,8 +52,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -63,7 +65,7 @@ import java.util.concurrent.Future;
 
 /**
  * @author nejc
- *
+ * 
  */
 public class GStreamerComposerService implements ComposerService {
 
@@ -99,7 +101,7 @@ public class GStreamerComposerService implements ComposerService {
 
   /** The default number of concurrent encoding threads to run */
   public static final int DEFAULT_THREADS = 2;
-  
+
   /**
    * Sets the media inspection service
    * 
@@ -138,7 +140,7 @@ public class GStreamerComposerService implements ComposerService {
   public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.serviceRegistry = remoteServiceManager;
   }
-  
+
   /**
    * Activator that will make sure the encoding profiles are loaded.
    */
@@ -157,18 +159,19 @@ public class GStreamerComposerService implements ComposerService {
     }
     setExecutorThreads(threads);
   }
-  
+
   void setExecutorThreads(int threads) {
     executor = Executors.newFixedThreadPool(threads);
     logger.info("Thread pool size = {}", threads);
   }
 
-  
   public void setProfileScanner(GSEncodingProfileScanner scanner) {
     this.profileScanner = scanner;
   }
-  
-  /* (non-Javadoc)
+
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.opencastproject.job.api.JobProducer#getJob(long)
    */
   @Override
@@ -176,7 +179,9 @@ public class GStreamerComposerService implements ComposerService {
     return serviceRegistry.getJob(id);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   @Override
@@ -184,7 +189,9 @@ public class GStreamerComposerService implements ComposerService {
     return serviceRegistry.count(JOB_TYPE, status);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
    */
   @Override
@@ -192,41 +199,56 @@ public class GStreamerComposerService implements ComposerService {
     return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track, java.lang.String)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
+   * java.lang.String)
    */
   @Override
-  public Job encode(Track sourceTrack, String profileId) throws EncoderException {
+  public Job encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException {
     return encode(sourceTrack, profileId, false);
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track, java.lang.String, boolean)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
+   * java.lang.String, boolean)
    */
   @Override
-  public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
+  public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException, MediaPackageException {
     return encode(sourceTrack, null, profileId, null, block);
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track, org.opencastproject.mediapackage.Track, java.lang.String)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
+   * org.opencastproject.mediapackage.Track, java.lang.String)
    */
   @Override
-  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
+  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException, MediaPackageException {
     return encode(sourceVideoTrack, sourceAudioTrack, profileId, null, false);
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track, org.opencastproject.mediapackage.Track, java.lang.String, boolean)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
+   * org.opencastproject.mediapackage.Track, java.lang.String, boolean)
    */
   @Override
   public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block)
-          throws EncoderException {
+          throws EncoderException, MediaPackageException {
     return encode(sourceVideoTrack, sourceAudioTrack, profileId, null, block);
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track, java.lang.String, long, long)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
+   * java.lang.String, long, long)
    */
   @Override
   public Job trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
@@ -234,17 +256,21 @@ public class GStreamerComposerService implements ComposerService {
     return trim(sourceTrack, profileId, start, duration, false);
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track, java.lang.String, long, long, boolean)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
+   * java.lang.String, long, long, boolean)
    */
   @Override
   public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration, boolean block)
           throws EncoderException, MediaPackageException {
-    
+
     final String targetTrackId = idBuilder.createNew().toString();
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, TRIM_OPERATION,
+              Arrays.asList(sourceTrack.getAsXml(), profileId, Long.toString(start), Long.toString(duration)));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -327,7 +353,7 @@ public class GStreamerComposerService implements ComposerService {
           updateJob(job);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error trimming " + sourceTrack, e);
           try {
             job.setStatus(Status.FAILED);
@@ -366,23 +392,31 @@ public class GStreamerComposerService implements ComposerService {
     return job;
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track, java.lang.String, long)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
+   * java.lang.String, long)
    */
   @Override
-  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException {
+  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException, MediaPackageException {
     return image(sourceTrack, profileId, time, false);
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track, java.lang.String, long, boolean)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
+   * java.lang.String, long, boolean)
    */
   @Override
-  public Job image(final Track sourceTrack, final String profileId, final long time, boolean block) throws EncoderException {
-    
+  public Job image(final Track sourceTrack, final String profileId, final long time, boolean block)
+          throws EncoderException, MediaPackageException {
+
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, IMAGE_OPERATION,
+              Arrays.asList(sourceTrack.getAsXml(), profileId, Long.toString(time)));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -477,7 +511,7 @@ public class GStreamerComposerService implements ComposerService {
           updateJob(job);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error extracting image from " + sourceTrack, e);
           try {
             job.setStatus(Status.FAILED);
@@ -516,23 +550,31 @@ public class GStreamerComposerService implements ComposerService {
     return job;
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track, org.opencastproject.mediapackage.Catalog[])
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
+   * org.opencastproject.mediapackage.Catalog[])
    */
   @Override
   public Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException {
     throw new NotImplementedException("Adding captions not implemented in gstreamer composer");
   }
 
-  /* (non-Javadoc)
-   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track, org.opencastproject.mediapackage.Catalog[], boolean)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
+   * org.opencastproject.mediapackage.Catalog[], boolean)
    */
   @Override
   public Job captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
     throw new NotImplementedException("Adding captions not implemented in gstreamer composer");
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.opencastproject.composer.api.ComposerService#listProfiles()
    */
   @Override
@@ -541,14 +583,16 @@ public class GStreamerComposerService implements ComposerService {
     return profiles.toArray(new EncodingProfile[profiles.size()]);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see org.opencastproject.composer.api.ComposerService#getProfile(java.lang.String)
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
     return profileScanner.getProfiles().get(profileId);
   }
-  
+
   /**
    * Encodes audio and video track to a file. If both an audio and a video track are given, they are muxed together into
    * one movie container.
@@ -568,12 +612,27 @@ public class GStreamerComposerService implements ComposerService {
    *           if encoding fails
    */
   private Job encode(final Track videoTrack, final Track audioTrack, final String profileId,
-          Dictionary<String, String> properties, final boolean block) throws EncoderException {
+          Dictionary<String, String> properties, final boolean block) throws EncoderException, MediaPackageException {
+
+    String video = videoTrack == null ? null : videoTrack.getAsXml();
+    String audio = audioTrack == null ? null : audioTrack.getAsXml();
+    StringBuilder propertiesAsString = new StringBuilder();
+    if(properties != null) {
+      Enumeration<String> elements = properties.elements();
+      while(elements.hasMoreElements()) {
+        String key = elements.nextElement();
+        propertiesAsString.append(key);
+        propertiesAsString.append("=");
+        propertiesAsString.append(properties.get(key));
+        propertiesAsString.append("\n");
+      }
+    }
 
     final String targetTrackId = idBuilder.createNew().toString();
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, ENCODE_OPERATION,
+              Arrays.asList(video, audio, profileId, propertiesAsString.toString()));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -670,7 +729,7 @@ public class GStreamerComposerService implements ComposerService {
           updateJob(job);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error encoding " + videoTrack + " and " + audioTrack, e);
           try {
             job.setStatus(Status.FAILED);
@@ -729,7 +788,7 @@ public class GStreamerComposerService implements ComposerService {
       throw new EncoderException("No service of type '" + JOB_TYPE + "' available", e);
     }
   }
-  
+
   private File getTrack(Track track) throws EncoderException {
     try {
       return workspace.get(track.getURI());
@@ -739,5 +798,5 @@ public class GStreamerComposerService implements ComposerService {
       throw new EncoderException("Unable to access track " + track);
     }
   }
-  
+
 }

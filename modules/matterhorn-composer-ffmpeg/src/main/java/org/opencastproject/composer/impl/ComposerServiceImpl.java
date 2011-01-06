@@ -56,9 +56,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -191,7 +195,7 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String)
    */
   @Override
-  public Job encode(Track sourceTrack, String profileId) throws EncoderException {
+  public Job encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException {
     return encode(sourceTrack, profileId, false);
   }
 
@@ -202,7 +206,7 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String, java.lang.String, boolean)
    */
   @Override
-  public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
+  public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException, MediaPackageException {
     return encode(sourceTrack, null, profileId, null, block);
   }
 
@@ -226,12 +230,13 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration, boolean block)
-          throws EncoderException {
+          throws EncoderException, MediaPackageException {
 
     final String targetTrackId = idBuilder.createNew().toString();
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, TRIM_OPERATION,
+              Arrays.asList(sourceTrack.getAsXml(), profileId, Long.toString(start), Long.toString(duration)));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -364,7 +369,8 @@ public class ComposerServiceImpl implements ComposerService {
    *      org.opencastproject.mediapackage.Track, java.lang.String)
    */
   @Override
-  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
+  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException,
+          MediaPackageException {
     return encode(sourceVideoTrack, sourceAudioTrack, profileId, null, false);
   }
 
@@ -376,7 +382,7 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public Job mux(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
-          throws EncoderException {
+          throws EncoderException, MediaPackageException {
     return encode(videoTrack, audioTrack, profileId, null, block);
   }
 
@@ -399,12 +405,26 @@ public class ComposerServiceImpl implements ComposerService {
    *           if encoding fails
    */
   private Job encode(final Track videoTrack, final Track audioTrack, final String profileId,
-          Dictionary<String, String> properties, final boolean block) throws EncoderException {
+          Dictionary<String, String> properties, final boolean block) throws EncoderException, MediaPackageException {
+    String video = videoTrack == null ? null : videoTrack.getAsXml();
+    String audio = audioTrack == null ? null : audioTrack.getAsXml();
+    StringBuilder propertiesAsString = new StringBuilder();
+    if (properties != null) {
+      Enumeration<String> elements = properties.elements();
+      while (elements.hasMoreElements()) {
+        String key = elements.nextElement();
+        propertiesAsString.append(key);
+        propertiesAsString.append("=");
+        propertiesAsString.append(properties.get(key));
+        propertiesAsString.append("\n");
+      }
+    }
 
     final String targetTrackId = idBuilder.createNew().toString();
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, ENCODE_OPERATION,
+              Arrays.asList(video, audio, profileId, propertiesAsString.toString()));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -577,7 +597,7 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
    *      java.lang.String, long)
    */
-  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException {
+  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException, MediaPackageException {
     return image(sourceTrack, profileId, time, false);
   }
 
@@ -588,11 +608,11 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String, long, boolean)
    */
   public Job image(final Track sourceTrack, final String profileId, final long time, boolean block)
-          throws EncoderException {
+          throws EncoderException, MediaPackageException {
 
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, IMAGE_OPERATION, Arrays.asList(sourceTrack.getAsXml(), profileId));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -736,7 +756,7 @@ public class ComposerServiceImpl implements ComposerService {
    *      org.opencastproject.mediapackage.Attachment, java.lang.String)
    */
   @Override
-  public Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException {
+  public Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException, MediaPackageException {
     return captions(mediaTrack, captions, false);
   }
 
@@ -748,12 +768,18 @@ public class ComposerServiceImpl implements ComposerService {
    *      org.opencastproject.mediapackage.Attachment, java.lang.String, boolean)
    */
   @Override
-  public Job captions(final Track mediaTrack, final Catalog[] captions, boolean block) throws EmbedderException {
+  public Job captions(final Track mediaTrack, final Catalog[] captions, boolean block) throws EmbedderException,
+          MediaPackageException {
 
+    List<String> args = new ArrayList<String>();
+    args.set(0, mediaTrack.getAsXml());
+    for (int i = 0; i < captions.length; i++) {
+      args.set(i + 1, captions[i].getAsXml());
+    }
     final String targetTrackId = idBuilder.createNew().toString();
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, CAPTION_OPERATION, args);
     } catch (ServiceUnavailableException e) {
       throw new EmbedderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);

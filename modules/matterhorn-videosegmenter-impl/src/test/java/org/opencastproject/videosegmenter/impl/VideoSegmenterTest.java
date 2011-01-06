@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Test class for video segmentation.
@@ -105,6 +106,7 @@ public class VideoSegmenterTest {
    * @throws Exception
    *           if setup fails
    */
+  @SuppressWarnings("unchecked")
   @Before
   public void setUp() throws Exception {
     mpeg7Service = new Mpeg7CatalogService();
@@ -121,10 +123,12 @@ public class VideoSegmenterTest {
       }
     });
     EasyMock.replay(workspace);
-    Job receipt = new JobStub();
+    Job job = new JobStub();
 
     ServiceRegistry remoteServiceManager = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(remoteServiceManager.createJob((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
+    EasyMock.expect(
+            remoteServiceManager.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (List<String>) EasyMock.anyObject())).andReturn(job).anyTimes();
     EasyMock.replay(remoteServiceManager);
 
     vsegmenter = new VideoSegmenterServiceImpl();
@@ -190,7 +194,7 @@ public class VideoSegmenterTest {
     String payload;
     Status status;
 
-    public String getHost() {
+    public String getProcessingHost() {
       return null;
     }
 
@@ -241,6 +245,22 @@ public class VideoSegmenterTest {
     
     public void setPayload(String payload) {
       this.payload = payload;
+    }
+
+    public int getVersion() {
+      return 0;
+    }
+
+    public String getOperationType() {
+      return null;
+    }
+
+    public List<String> getArguments() {
+      return null;
+    }
+
+    public String getCreatedHost() {
+      return null;
     }
   }
 

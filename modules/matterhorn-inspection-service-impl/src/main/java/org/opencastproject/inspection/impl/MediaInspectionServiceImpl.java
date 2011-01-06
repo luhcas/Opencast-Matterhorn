@@ -29,6 +29,7 @@ import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Stream;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.UnsupportedElementException;
@@ -55,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -77,6 +79,12 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 1;
+
+  /** The inspect job operation name */
+  public static final String INSPECT_URL = "inspect";
+
+  /** The enrich job operation name */
+  public static final String ENRICH_ELEMENT = "enrich";
 
   protected Workspace workspace;
   protected ServiceRegistry serviceRegistry;
@@ -170,7 +178,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     // Construct a receipt for this operation
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, INSPECT_URL, Arrays.asList(uri.toString()));
     } catch (ServiceUnavailableException e) {
       throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
@@ -299,11 +307,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    */
   @Override
   public Job enrich(final MediaPackageElement element, final boolean override, final boolean block)
-          throws MediaInspectionException {
+          throws MediaInspectionException, MediaPackageException {
     Callable<MediaPackageElement> command;
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, ENRICH_ELEMENT, Arrays.asList(element.getAsXml(), Boolean.toString(override)));
     } catch (ServiceUnavailableException e) {
       throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {

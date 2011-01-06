@@ -114,13 +114,18 @@ public interface ServiceRegistry {
    * 
    * @param type
    *          the type of service responsible for this job
+   * @param operation
+   *          the operation for this service to run
+   * @param arguments
+   *          the arguments to the operation
    * @return the job
    * @throws ServiceRegistryException
    *           if there is a problem creating the job
    * @throws ServiceUnavailableException
    *           if no service registration exists for this job type on this host
    */
-  Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException;
+  Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
+          ServiceRegistryException;
 
   /**
    * Create and store a new job on this host. If start is true, the job will be in the {@link Status#RUNNING} state.
@@ -128,6 +133,10 @@ public interface ServiceRegistry {
    * 
    * @param type
    *          the type of service responsible for this job
+   * @param operation
+   *          the operation for this service to run
+   * @param arguments
+   *          the arguments to the operation
    * @param start
    *          whether the job should be created in the running state (true) or the queued state (false)
    * @return the job
@@ -136,12 +145,14 @@ public interface ServiceRegistry {
    * @throws ServiceUnavailableException
    *           if no service registration exists for this job type on this host
    */
-  Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException;
+  Job createJob(String type, String operation, List<String> arguments, boolean start)
+          throws ServiceUnavailableException, ServiceRegistryException;
 
   /**
    * Update the job in the database
    * 
    * @param job
+   * @return the updated job
    * @throws ServiceRegistryException
    *           if there is a problem updating the job
    * @throws NotFoundException
@@ -149,7 +160,7 @@ public interface ServiceRegistry {
    * @throws ServiceUnavailableException
    *           if no service registration exists for this job
    */
-  void updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException;
+  Job updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException;
 
   /**
    * Gets a receipt by its ID, or null if not found

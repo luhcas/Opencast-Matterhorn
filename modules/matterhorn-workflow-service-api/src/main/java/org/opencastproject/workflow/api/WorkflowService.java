@@ -105,9 +105,11 @@ public interface WorkflowService {
    * @return The new workflow instance
    * @throws WorkflowDatabaseException
    *           if there is a problem storing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing or serializing workflow entities
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          Map<String, String> properties) throws WorkflowDatabaseException;
+          Map<String, String> properties) throws WorkflowDatabaseException, WorkflowParsingException;
 
   /**
    * Creates a new workflow instance and starts the workflow.
@@ -125,9 +127,11 @@ public interface WorkflowService {
    *           if the parent workflow does not exist
    * @throws WorkflowDatabaseException
    *           if there is a problem storing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing or serializing workflow entities
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage, Long parentWorkflowId,
-          Map<String, String> properties) throws WorkflowDatabaseException, NotFoundException;
+          Map<String, String> properties) throws WorkflowDatabaseException, WorkflowParsingException, NotFoundException;
 
   /**
    * Creates a new workflow instance and starts the workflow.
@@ -139,9 +143,11 @@ public interface WorkflowService {
    * @return The new workflow instance
    * @throws WorkflowDatabaseException
    *           if there is a problem storing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing or serializing workflow entities
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage)
-          throws WorkflowDatabaseException;
+          throws WorkflowDatabaseException, WorkflowParsingException;
 
   /**
    * Gets the total number of workflows that have been created to date.

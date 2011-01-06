@@ -19,6 +19,7 @@ package org.opencastproject.textanalyzer.api;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.MediaPackageException;
 
 /**
  * Api for text analysis implementations, aimed at extracting text from an image.
@@ -28,6 +29,9 @@ public interface TextAnalyzerService extends JobProducer {
   /** Receipt type */
   String JOB_TYPE = "org.opencastproject.textanalyzer";
 
+  /** The operation type */
+  String OPERATION = "extract";
+
   /**
    * Takes the given image and returns a receipt that can be used to get the resulting catalog.
    * 
@@ -36,7 +40,11 @@ public interface TextAnalyzerService extends JobProducer {
    * @param block
    *          whether to block the calling thread until the analysis is complete
    * @return the metadata
+   * @throws TextAnalyzerException
+   *           if the text in this image can not be analyzed
+   * @throws MediaPackageException
+   *           if this attachment is not valid
    */
-  Job extract(Attachment image, boolean block) throws TextAnalyzerException;
+  Job extract(Attachment image, boolean block) throws TextAnalyzerException, MediaPackageException;
 
 }

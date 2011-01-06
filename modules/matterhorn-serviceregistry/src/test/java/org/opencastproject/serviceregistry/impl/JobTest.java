@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ import java.util.Map;
 public class JobTest {
   private static final String JOB_TYPE_1 = "testing1";
   private static final String JOB_TYPE_2 = "testing2";
+  private static final String OPERATION_NAME = "op";
   private static final String LOCALHOST = UrlSupport.DEFAULT_BASE_URL;
   private static final String HOST_2 = "host2";
   private static final String PATH = "/path";
@@ -73,7 +75,7 @@ public class JobTest {
     // register the hosts
     serviceRegistry.registerHost(LOCALHOST, 1);
     serviceRegistry.registerHost(HOST_2, 1);
-    
+
     // register some service instances
     regType1Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, LOCALHOST, PATH);
     regType1Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, HOST_2, PATH);
@@ -93,13 +95,13 @@ public class JobTest {
 
   @Test
   public void testGetJob() throws Exception {
-    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
 
     Job jobFromDb = serviceRegistry.getJob(job.getId());
     Assert.assertEquals(Status.QUEUED, jobFromDb.getStatus());
 
-    Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
-            new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
+    Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+            .elementFromURI(new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     t.setIdentifier("track-1");
     job.setPayload(t.getAsXml());
 
@@ -117,14 +119,14 @@ public class JobTest {
 
   @Test
   public void testGetJobs() throws Exception {
-    long id = serviceRegistry.createJob(JOB_TYPE_1).getId();
+    long id = serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null).getId();
     long queuedJobs = serviceRegistry.count(JOB_TYPE_1, Status.QUEUED);
     Assert.assertEquals(1, queuedJobs);
 
     // Search using both the job type and status
     List<Job> jobs = serviceRegistry.getJobs(JOB_TYPE_1, Status.QUEUED);
     Assert.assertEquals(1, jobs.size());
-    
+
     // Search using just the job type
     jobs = serviceRegistry.getJobs(JOB_TYPE_1, null);
     Assert.assertEquals(1, jobs.size());
@@ -132,7 +134,7 @@ public class JobTest {
     // Search using just the status
     jobs = serviceRegistry.getJobs(null, Status.QUEUED);
     Assert.assertEquals(1, jobs.size());
-    
+
     // Search using nulls (return everything)
     jobs = serviceRegistry.getJobs(null, null);
     Assert.assertEquals(1, jobs.size());
@@ -147,12 +149,12 @@ public class JobTest {
   @Test
   public void testCount() throws Exception {
     // create a receipt on each service instance
-    serviceRegistry.createJob(regType1Host1);
-    serviceRegistry.createJob(regType1Host2);
+    serviceRegistry.createJob(regType1Host1, OPERATION_NAME, null, true);
+    serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, true);
 
-    Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.QUEUED, LOCALHOST));
-    Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.QUEUED, HOST_2));
-    Assert.assertEquals(2, serviceRegistry.count(JOB_TYPE_1, Status.QUEUED));
+    Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING, LOCALHOST));
+    Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING, HOST_2));
+    Assert.assertEquals(2, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING));
   }
 
   @Test
@@ -163,15 +165,15 @@ public class JobTest {
 
   @Test
   public void testGetHostsCount() throws Exception {
-    JobJpaImpl localRunning1 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl localRunning1 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
     localRunning1.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localRunning1);
 
-    JobJpaImpl localRunning2 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl localRunning2 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
     localRunning2.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localRunning2);
 
-    JobJpaImpl localFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl localFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
     // Simulate starting the job
     localFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localFinished);
@@ -179,11 +181,11 @@ public class JobTest {
     localFinished.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(localFinished);
 
-    JobJpaImpl remoteRunning = (JobJpaImpl) serviceRegistry.createJob(regType1Host2);
+    JobJpaImpl remoteRunning = (JobJpaImpl) serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, false);
     remoteRunning.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteRunning);
 
-    JobJpaImpl remoteFinished = (JobJpaImpl) serviceRegistry.createJob(regType1Host2);
+    JobJpaImpl remoteFinished = (JobJpaImpl) serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, false);
     // Simulate starting the job
     remoteFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteFinished);
@@ -191,11 +193,11 @@ public class JobTest {
     remoteFinished.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(remoteFinished);
 
-    JobJpaImpl otherTypeRunning = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2);
+    JobJpaImpl otherTypeRunning = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2, OPERATION_NAME, null);
     otherTypeRunning.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(otherTypeRunning);
 
-    JobJpaImpl otherTypeFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2);
+    JobJpaImpl otherTypeFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2, OPERATION_NAME, null);
     // Simulate starting the job
     otherTypeFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(otherTypeFinished);
@@ -211,7 +213,7 @@ public class JobTest {
     Assert.assertEquals(HOST_2, type1Hosts.get(0).getHost());
     Assert.assertEquals(LOCALHOST, type1Hosts.get(1).getHost());
 
-    // There is just one running job of receipt type 2.  It is on the localhost.  Since host 2 has no type 2 jobs, it
+    // There is just one running job of receipt type 2. It is on the localhost. Since host 2 has no type 2 jobs, it
     // is the least loaded server, and takes precedence in the list.
     Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_2, Status.RUNNING));
     Assert.assertEquals(2, type2Hosts.size());
@@ -223,7 +225,7 @@ public class JobTest {
   public void testHandlerRegistration() throws Exception {
     String url = "http://type1handler:8080";
     serviceRegistry.registerHost(url, 1);
-    
+
     String receiptType = "type1";
     // we should start with no handlers
     List<ServiceRegistration> hosts = serviceRegistry.getServiceRegistrationsByLoad(receiptType);
@@ -276,7 +278,7 @@ public class JobTest {
     serviceRegistry.unregisterHost(url);
     serviceRegistry.registerHost(url, 1);
     serviceRegistry.registerService(receiptType, url, PATH);
-    
+
     // zero because it's still in maintenance mode
     Assert.assertEquals(0, serviceRegistry.getServiceRegistrationsByLoad(receiptType).size());
 
@@ -285,29 +287,70 @@ public class JobTest {
     hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
     Assert.assertEquals(0, hosts.size());
   }
-  
+
   @Test
   public void testMarshallingWithJsonPayload() throws Exception {
     final String payload = "{'foo' : 'bar'}";
     JobJpaImpl job = new JobJpaImpl();
     job.setPayload(payload);
-    
+
     String marshalledJob = JobParser.toXml(job);
     Job unmarshalledJob = JobParser.parseJob(marshalledJob);
-    
-    Assert.assertEquals("json from unmarshalled job should remain unchanged", StringUtils.trim(payload), StringUtils.trim(unmarshalledJob.getPayload()));
+
+    Assert.assertEquals("json from unmarshalled job should remain unchanged", StringUtils.trim(payload),
+            StringUtils.trim(unmarshalledJob.getPayload()));
   }
-  
+
   @Test
   public void testMarshallingWithXmlPayload() throws Exception {
     final String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<random xmlns:ns2=\"http://mediapackage.opencastproject.org\" xmlns:ns3=\"http://job.opencastproject.org/\">something</random>";
     JobJpaImpl job = new JobJpaImpl();
     job.setPayload(payload);
-    
+
     String marshalledJob = JobParser.toXml(job);
     Job unmarshalledJob = JobParser.parseJob(marshalledJob);
+
+    Assert.assertEquals("xml from unmarshalled job should remain unchanged", StringUtils.trim(payload),
+            StringUtils.trim(unmarshalledJob.getPayload()));
+  }
+  
+  @Test
+  public void testGetArguments() throws Exception {
+    String arg1 = "arg1";
+    String arg2 = "<some>xml</some>";
+    Job job = serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2)); 
+    Job jobFromDb = serviceRegistry.getJob(job.getId());
+    Assert.assertNotNull("No arguments persisted in job", jobFromDb.getArguments());
+    Assert.assertEquals("Wrong number of arguments persisted", 2, jobFromDb.getArguments().size());
+    Assert.assertEquals("Arguments not persisted in order", arg1, jobFromDb.getArguments().get(0));
+    Assert.assertEquals("Arguments not persisted in order", arg2, jobFromDb.getArguments().get(1));
+  }
+  
+  @Test
+  public void testOptimisticLocking() throws Exception {
+    // Create a job
+    String arg1 = "arg1";
+    String arg2 = "<some>xml</some>";
+    String arg3 = "another arg";
+    JobJpaImpl job = (JobJpaImpl)serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2)); 
+
+    // Grab another reference to this job
+    Job jobFromDb = serviceRegistry.getJob(job.getId());
+
+    // Modify the job and save it
+    job.getArguments().add(arg3);
+    serviceRegistry.updateJob(job);
     
-    Assert.assertEquals("xml from unmarshalled job should remain unchanged", StringUtils.trim(payload), StringUtils.trim(unmarshalledJob.getPayload()));
+    // Ensure that the job version is higher than the snapshot we loaded from the database
+    Assert.assertTrue("Version not incremented", job.getVersion() > jobFromDb.getVersion());
+
+    // Try to modify and save the outdated reference
+    try {
+      serviceRegistry.updateJob(jobFromDb);
+      Assert.fail();
+    } catch(Exception e) {
+      // do nothinng
+    }
   }
 
 }

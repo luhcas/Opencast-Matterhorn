@@ -27,6 +27,7 @@ import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowParser;
@@ -234,7 +235,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     WorkflowInstance workflow = null;
     try {
       workflow = startWorkflowInstance(event);
-    } catch (WorkflowDatabaseException workflowException) {
+    } catch (WorkflowException workflowException) {
       throw new SchedulerException(workflowException);
     } catch (MediaPackageException mediaPackageException) {
       throw new SchedulerException(mediaPackageException);
@@ -268,12 +269,12 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @param event
    *          the scheduled event
    * @return the workflow instance
-   * @throws WorkflowDatabaseException
+   * @throws WorkflowException
    *           if the workflow can not be created
    * @throws MediaPackageException
    *           if the mediapackage can not be created
    */
-  public WorkflowInstance startWorkflowInstance(Event event) throws WorkflowDatabaseException, MediaPackageException {
+  public WorkflowInstance startWorkflowInstance(Event event) throws WorkflowException, MediaPackageException {
     // Build a mediapackage using the event metadata
     MediaPackage mediapackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     mediapackage.setTitle(event.getTitle());

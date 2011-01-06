@@ -31,6 +31,7 @@ import org.opencastproject.workflow.api.Configurable;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
@@ -651,7 +652,7 @@ public class WorkflowRestService {
     }
     try {
       return (WorkflowInstanceImpl) service.start(workflowDefinition, mp, parentIdAsLong, properties);
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     } catch (NotFoundException e) {
       throw new WebApplicationException(e);

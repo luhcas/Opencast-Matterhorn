@@ -13,45 +13,44 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.workflow.api;
 
 /**
- * Exception that is thrown for failing database operations.
+ * The superclass for any workflow related exceptions.
  */
-public class WorkflowDatabaseException extends WorkflowException {
+public abstract class WorkflowException extends Exception {
 
-  /** Serial version uid */
-  private static final long serialVersionUID = -7411693851983157126L;
+  /** The java.io.serialization class version */
+  private static final long serialVersionUID = 1220788011273100329L;
 
   /**
-   * Constructs a new workflow database exception without a message or a cause.
+   * Constructs a new workflow exception without a message or a cause.
    */
-  public WorkflowDatabaseException() {
+  public WorkflowException() {
   }
 
   /**
-   * Constructs a new workflow database exception with a message.
+   * Constructs a new workflow exception with a message.
    * 
    * @param message
    *          the message describing the exception
    */
-  public WorkflowDatabaseException(String message) {
+  public WorkflowException(String message) {
     super(message);
   }
 
   /**
-   * Constructs a new workflow database exception with the throwable causing this exception to be thrown.
+   * Constructs a new workflow exception with the throwable causing this exception to be thrown.
    * 
    * @param cause
    *          the cause of this exception
    */
-  public WorkflowDatabaseException(Throwable cause) {
+  public WorkflowException(Throwable cause) {
     super(cause);
   }
 
   /**
-   * Constructs a new workflow database exception with a message and the throwable that caused this exception to be
+   * Constructs a new workflow exception with a message and the throwable that caused this exception to be
    * thrown.
    * 
    * @param message
@@ -59,8 +58,7 @@ public class WorkflowDatabaseException extends WorkflowException {
    * @param cause
    *          the cause of this exception
    */
-  public WorkflowDatabaseException(String message, Throwable cause) {
+  public WorkflowException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

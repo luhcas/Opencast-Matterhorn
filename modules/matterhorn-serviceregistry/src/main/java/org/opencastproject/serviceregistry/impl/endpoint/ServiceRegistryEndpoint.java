@@ -43,8 +43,10 @@ import org.opencastproject.util.doc.RestTestForm;
 import org.osgi.service.component.ComponentContext;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -54,6 +56,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -246,10 +249,18 @@ public class ServiceRegistryEndpoint {
   @POST
   @Path("/job")
   @Produces(MediaType.TEXT_XML)
-  public Response createJob(@FormParam("jobType") String jobType, @FormParam("host") String host,
-          @FormParam("start") boolean start) {
+  public Response createJob(@Context HttpServletRequest request) {
+    String[] argArray = request.getParameterValues("arg");
+    List<String> arguments = null;
+    if (argArray != null && argArray.length > 0) {
+      arguments = Arrays.asList(argArray);
+    }
+    String jobType = request.getParameter("jobType");
+    String operation = request.getParameter("operation");
+    String host = request.getParameter("host");
+    boolean start = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("start"));
     try {
-      Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(jobType, host, start);
+      Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(host, jobType, operation, arguments, start);
       URI uri = new URI(UrlSupport.concat(new String[] { serverUrl, servicePath, "job", job.getId() + ".xml" }));
       return Response.ok(new JaxbJob(job)).location(uri).build();
     } catch (Exception e) {
@@ -389,8 +400,8 @@ public class ServiceRegistryEndpoint {
     unRegisterEndpoint.addRequiredParam(new Param("host", Type.STRING, serverUrl,
             "The host's base URL for this service"));
     unRegisterEndpoint.addFormat(new Format("xml", null, null));
-    unRegisterEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .noContent("The service registration was removed."));
+    unRegisterEndpoint
+            .addStatus(org.opencastproject.util.doc.Status.noContent("The service registration was removed."));
     unRegisterEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, unRegisterEndpoint);
 

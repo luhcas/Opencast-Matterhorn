@@ -39,6 +39,7 @@ import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -62,6 +63,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +82,18 @@ public class IngestServiceImpl implements IngestService {
   protected static final String WORKFLOW_DEFINITION_DEFAULT = "org.opencastproject.workflow.default.definition";
 
   public static final String JOB_TYPE = "org.opencastproject.ingest";
+
+  /** Methods that ingest streams create jobs with this operation type */
+  public static final String INGEST_STREAM = "zip";
+
+  /** Methods that ingest tracks from a URI create jobs with this operation type */
+  public static final String INGEST_TRACK_FROM_URI = "track";
+
+  /** Methods that ingest attachments from a URI create jobs with this operation type */
+  public static final String INGEST_ATTACHMENT_FROM_URI = "attachment";
+
+  /** Methods that ingest catalogs from a URI create jobs with this operation type */
+  public static final String INGEST_CATALOG_FROM_URI = "catalog";
 
   /** The workflow service */
   private WorkflowService workflowService;
@@ -192,7 +206,7 @@ public class IngestServiceImpl implements IngestService {
     String tempPath = PathSupport.concat(tempFolder, UUID.randomUUID().toString());
 
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
 
       // locally unpack the mediaPackage
       // save inputStream to file
@@ -330,7 +344,8 @@ public class IngestServiceImpl implements IngestService {
           throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_TRACK_FROM_URI,
+              Arrays.asList(uri.toString(), flavor == null ? null : flavor.toString(), mediaPackage.toXml()), true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -365,7 +380,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -400,7 +415,8 @@ public class IngestServiceImpl implements IngestService {
           throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_CATALOG_FROM_URI,
+              Arrays.asList(uri.toString(), flavor.toString(), mediaPackage.toXml()), true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -459,7 +475,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -496,7 +512,8 @@ public class IngestServiceImpl implements IngestService {
           throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_ATTACHMENT_FROM_URI,
+              Arrays.asList(uri.toString(), flavor.toString(), mediaPackage.toXml()), true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
@@ -530,7 +547,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
@@ -660,7 +677,7 @@ public class IngestServiceImpl implements IngestService {
         // Return the updated workflow instance
         return workflowService.getWorkflowById(workflowId.longValue());
       }
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       throw new IngestException(e);
     }
   }

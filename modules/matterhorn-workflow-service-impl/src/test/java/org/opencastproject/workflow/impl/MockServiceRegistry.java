@@ -56,15 +56,16 @@ public class MockServiceRegistry implements ServiceRegistry {
   }
 
   @Override
-  public Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException, ServiceRegistryException {
     Job j = new MockJob();
     jobMap.put(j.getId(), j);
     return j;
   }
 
   @Override
-  public Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
-    Job j = createJob(type);
+  public Job createJob(String type, String operation, List<String> arguments, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
+    Job j = new MockJob();
+    jobMap.put(j.getId(), j);
     j.setStatus(Job.Status.RUNNING);
     return j;
   }
@@ -123,8 +124,9 @@ public class MockServiceRegistry implements ServiceRegistry {
   }
 
   @Override
-  public void updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException {
+  public Job updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException {
     jobMap.put(job.getId(), job);
+    return job;
   }
 
   /**

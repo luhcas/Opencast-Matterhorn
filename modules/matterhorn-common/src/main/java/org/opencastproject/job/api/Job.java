@@ -16,42 +16,113 @@
 package org.opencastproject.job.api;
 
 import java.util.Date;
+import java.util.List;
 
 /**
- * A receipt for an long running, asynchronous job. A Receipt may be used to track any task once it has been queued.
+ * Represents a long running, asynchronous process. A Job may be used to track any task, whether it is queued to run in
+ * the future, currently running, or has run in the past.
  */
 public interface Job {
 
   /** The status of the job that this receipt represents */
   static enum Status {
-    QUEUED, PAUSED, RUNNING, FINISHED, FAILED
+    QUEUED, PAUSED, RUNNING, FINISHED, FAILED, DELETED
   }
 
-  /** Gets the receipt identifier */
+  /**
+   * Gets the job identifier.
+   * 
+   * @return the identifier
+   */
   long getId();
 
-  /** Sets the receipt identifier */
+  /**
+   * Gets the version of this job. Each time the job is updated, the version number is incremented. If a process
+   * attempts to save a job that has been updated in another thread or on another host while the job was in memory, an
+   * optimistic locking exception will be thrown.
+   * 
+   * @return the version number of this job
+   */
+  int getVersion();
+
+  /**
+   * Sets the job identifier.
+   * 
+   * @param id
+   *          the job identifier
+   */
   void setId(long id);
 
-  /** Gets the job type, which determines the type of service that runs the job */
+  /**
+   * Gets the job type, which determines the type of service that runs the job.
+   * 
+   * @return the job type
+   */
   String getJobType();
 
-  /** Gets the receipt's current {@link Status} */
+  /**
+   * The operation type, which can be used by the service responsible for the job to determine the service method to
+   * execute.
+   * 
+   * @return The operation
+   */
+  String getOperationType();
+
+  /**
+   * The arguments passed to the service and operation. Each argument must be serializable to a string.
+   * 
+   * @return the arguments passed to the service operation
+   */
+  List<String> getArguments();
+
+  /**
+   * Gets the receipt's current {@link Status}
+   * 
+   * @return the current status
+   */
   Status getStatus();
 
-  /** Sets the receipt's current {@link Status} */
+  /**
+   * Sets the receipt's current {@link Status}.
+   * 
+   * @param status
+   *          the status to set
+   */
   void setStatus(Status status);
 
-  /** Gets the host responsible for queuing and running this job */
-  String getHost();
+  /**
+   * Gets the host that created this job.
+   * 
+   * @return the server that originally created the job
+   */
+  String getCreatedHost();
 
-  /** The date this receipt was created */
+  /**
+   * Gets the host responsible for running this job.
+   * 
+   * @return the server running the job, or null if the job hasn't yet started
+   */
+  String getProcessingHost();
+
+  /**
+   * The date this receipt was created.
+   * 
+   * @return the date the job was created
+   */
   Date getDateCreated();
 
-  /** The date this job was started. If the job was queued, this can be significantly later than the date created. */
+  /**
+   * The date this job was started. If the job was queued, this can be significantly later than the date created.
+   * 
+   * @return the date the job was started
+   */
   Date getDateStarted();
 
-  /** The date this job was completed */
+  /**
+   * The date this job was completed
+   * 
+   * @return the date completed
+   */
   Date getDateCompleted();
 
   /**
@@ -62,7 +133,12 @@ public interface Job {
    */
   String getPayload();
 
-  /** Sets the payload produced by this job. */
+  /**
+   * Sets the payload produced by this job.
+   * 
+   * @param payload
+   *          the result of the job to store in the job
+   */
   void setPayload(String payload);
 
 }

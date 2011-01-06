@@ -20,23 +20,31 @@ import org.opencastproject.job.api.JaxbJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OrderColumn;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -53,22 +61,22 @@ import javax.xml.bind.annotation.XmlType;
 @NamedQueries({
         // Job queries
         @NamedQuery(name = "Job", query = "SELECT j FROM Job j "
-                + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType"),
+                + "where j.status = :status and j.creatorServiceRegistration.serviceType = :serviceType"),
         @NamedQuery(name = "Job.type", query = "SELECT j FROM Job j "
-                + "where j.serviceRegistration.serviceType = :serviceType"),
+                + "where j.creatorServiceRegistration.serviceType = :serviceType"),
         @NamedQuery(name = "Job.status", query = "SELECT j FROM Job j " + "where j.status = :status "),
         @NamedQuery(name = "Job.all", query = "SELECT j FROM Job j"),
         // Job count queries
         @NamedQuery(name = "Job.count", query = "SELECT COUNT(j) FROM Job j "
-                + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType"),
+                + "where j.status = :status and j.creatorServiceRegistration.serviceType = :serviceType"),
         @NamedQuery(name = "Job.count.type", query = "SELECT COUNT(j) FROM Job j "
-                + "where j.serviceRegistration.serviceType = :serviceType"),
+                + "where j.creatorServiceRegistration.serviceType = :serviceType"),
         @NamedQuery(name = "Job.count.status", query = "SELECT COUNT(j) FROM Job j " + "where j.status = :status "),
         @NamedQuery(name = "Job.count.all", query = "SELECT COUNT(j) FROM Job j"),
         @NamedQuery(name = "Job.countByHost", query = "SELECT COUNT(j) FROM Job j "
-                + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType and "
-                + "j.serviceRegistration.host = :host") }
-)
+                + "where j.status = :status and j.processorServiceRegistration is not null and "
+                + "j.processorServiceRegistration.serviceType = :serviceType and "
+                + "j.creatorServiceRegistration.hostRegistration.baseUrl = :host") })
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name = "job", namespace = "http://job.opencastproject.org/")
 @XmlRootElement(name = "job", namespace = "http://job.opencastproject.org/")
@@ -86,26 +94,32 @@ public class JobJpaImpl extends JaxbJob {
    * Constructor with everything needed for a newly instantiated job, using a random ID and setting the status to
    * queued.
    */
-  public JobJpaImpl(ServiceRegistrationJpaImpl serviceRegistration) {
+  public JobJpaImpl(ServiceRegistrationJpaImpl creatorServiceRegistration, String operation, List<String> arguments,
+          boolean startImmediately) {
     this();
-    setStatus(Status.QUEUED);
-    setDateCreated(new Date());
-    setHost(serviceRegistration.getHost());
-    setJobType(serviceRegistration.getServiceType());
-    this.serviceRegistration = serviceRegistration;
-  }
-
-  /** Constructor with everything needed for a newly instantiated job, using a random ID. */
-  public JobJpaImpl(Status status, ServiceRegistrationJpaImpl serviceRegistration) {
-    this(serviceRegistration);
-    setStatus(status);
-    if (Status.RUNNING.equals(status)) {
-      setDateStarted(getDateCreated());
+    this.operationType = operation;
+    if(arguments != null) {
+      this.arguments = new ArrayList<String>(arguments);
     }
+    setDateCreated(new Date());
+    setCreatedHost(creatorServiceRegistration.getHost());
+    setJobType(creatorServiceRegistration.getServiceType());
+    this.creatorServiceRegistration = creatorServiceRegistration;
+    if (startImmediately) {
+      this.processorServiceRegistration = creatorServiceRegistration;
+      setDateStarted(getDateCreated());
+      setStatus(Status.RUNNING);
+    } else {
+      setStatus(Status.QUEUED);
+    }
+
   }
 
   /** The service that produced this job */
-  protected ServiceRegistrationJpaImpl serviceRegistration;
+  protected ServiceRegistrationJpaImpl creatorServiceRegistration;
+
+  /** The service that is processing, or processed, this job */
+  protected ServiceRegistrationJpaImpl processorServiceRegistration;
 
   /**
    * {@inheritDoc}
@@ -118,6 +132,18 @@ public class JobJpaImpl extends JaxbJob {
   @Override
   public long getId() {
     return id;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JaxbJob#getVersion()
+   */
+  @Column
+  @Version
+  @Override
+  public int getVersion() {
+    return version;
   }
 
   /**
@@ -147,13 +173,52 @@ public class JobJpaImpl extends JaxbJob {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#getHost()
+   * @see org.opencastproject.job.api.JaxbJob#getOperationType()
+   */
+  @Column(name = "operation")
+  @XmlAttribute
+  @Override
+  public String getOperationType() {
+    return operationType;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JaxbJob#getArguments()
+   */
+  @Lob
+  @Column(name = "argument")
+  @OrderColumn(name = "index")
+  @ElementCollection
+  @CollectionTable(name = "JOB_ARG", joinColumns = @JoinColumn(name = "ID", referencedColumnName = "ID"))
+  @Override
+  public List<String> getArguments() {
+    return arguments;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getProcessingHost()
    */
   @Transient
   @XmlElement
   @Override
-  public String getHost() {
-    return host;
+  public String getProcessingHost() {
+    return processingHost;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JaxbJob#getCreatedHost()
+   */
+  @Transient
+  @XmlElement
+  @Override
+  public String getCreatedHost() {
+    return createdHost;
   }
 
   /**
@@ -235,19 +300,39 @@ public class JobJpaImpl extends JaxbJob {
   }
 
   /**
-   * @return the serviceRegistration
+   * @return the serviceRegistration where this job was created
    */
   @ManyToOne
-  public ServiceRegistrationJpaImpl getServiceRegistration() {
-    return serviceRegistration;
+  @JoinColumns({ @JoinColumn(name = "CREATOR_SVC_TYPE", referencedColumnName = "SERVICE_TYPE", updatable = false),
+          @JoinColumn(name = "CREATOR_HOST", referencedColumnName = "HOST", updatable = false) })
+  public ServiceRegistrationJpaImpl getCreatorServiceRegistration() {
+    return creatorServiceRegistration;
   }
 
   /**
    * @param serviceRegistration
    *          the serviceRegistration to set
    */
-  public void setServiceRegistration(ServiceRegistrationJpaImpl serviceRegistration) {
-    this.serviceRegistration = serviceRegistration;
+  public void setCreatorServiceRegistration(ServiceRegistrationJpaImpl serviceRegistration) {
+    this.creatorServiceRegistration = serviceRegistration;
+  }
+
+  /**
+   * @return the processorServiceRegistration
+   */
+  @ManyToOne
+  @JoinColumns({ @JoinColumn(name = "PROCESSOR_SVC_TYPE", referencedColumnName = "SERVICE_TYPE", updatable = false),
+          @JoinColumn(name = "PROCESSOR_HOST", referencedColumnName = "HOST", updatable = false) })
+  public ServiceRegistrationJpaImpl getProcessorServiceRegistration() {
+    return processorServiceRegistration;
+  }
+
+  /**
+   * @param processorServiceRegistration
+   *          the processorServiceRegistration to set
+   */
+  public void setProcessorServiceRegistration(ServiceRegistrationJpaImpl processorServiceRegistration) {
+    this.processorServiceRegistration = processorServiceRegistration;
   }
 
   @PostLoad
@@ -255,11 +340,17 @@ public class JobJpaImpl extends JaxbJob {
     if (payload != null) {
       payload.getBytes(); // force the clob to load
     }
-    if (serviceRegistration == null) {
-      logger.warn("service registration is null");
+    if (creatorServiceRegistration == null) {
+      logger.warn("creator service registration is null");
     } else {
-      super.host = serviceRegistration.getHost();
-      super.jobType = serviceRegistration.getServiceType();
+      super.createdHost = creatorServiceRegistration.getHost();
+      super.jobType = creatorServiceRegistration.getServiceType();
+    }
+    if (processorServiceRegistration == null) {
+      logger.debug("processor service registration is null");
+    } else {
+      super.processingHost = creatorServiceRegistration.getHost();
+      super.jobType = creatorServiceRegistration.getServiceType();
     }
   }
 }

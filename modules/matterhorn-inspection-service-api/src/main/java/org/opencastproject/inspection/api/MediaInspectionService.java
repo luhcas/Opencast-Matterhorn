@@ -18,6 +18,7 @@ package org.opencastproject.inspection.api;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageException;
 
 import java.net.URI;
 
@@ -62,7 +63,10 @@ public interface MediaInspectionService extends JobProducer {
    *           if the analyzer cannot be loaded
    * @throws MediaInspectionException
    *           if there is a failure during media package update
+   * @throws MediaPackageException
+   *           if the element is invalid
    */
-  Job enrich(MediaPackageElement original, boolean override, boolean block) throws MediaInspectionException;
+  Job enrich(MediaPackageElement original, boolean override, boolean block) throws MediaInspectionException,
+          MediaPackageException;
 
 }

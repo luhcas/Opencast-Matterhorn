@@ -36,6 +36,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 public class DistributionServiceImplTest {
@@ -44,6 +45,7 @@ public class DistributionServiceImplTest {
   private MediaPackage mp = null;
   private File distributionRoot = null;
 
+  @SuppressWarnings("unchecked")
   @Before
   public void setup() throws Exception {
     File mediaPackageRoot = new File("./target/test-classes");
@@ -65,7 +67,7 @@ public class DistributionServiceImplTest {
     service.setWorkspace(workspace);
     Job job = EasyMock.createNiceMock(Job.class);
     ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject())).andReturn(job).anyTimes();
+    EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (List<String>)EasyMock.anyObject())).andReturn(job).anyTimes();
     EasyMock.replay(job, serviceRegistry);
     service.setRemoteServiceManager(serviceRegistry);
     service.executor = Executors.newFixedThreadPool(1);

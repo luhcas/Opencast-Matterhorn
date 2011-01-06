@@ -320,28 +320,34 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String)
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List)
    */
   @Override
-  public Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, false);
+  public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(type, operation, arguments, false);
   }
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, boolean)
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, boolean)
    */
   @Override
-  public Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String type, String operation, List<String> arguments, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
     String servicePath = "job";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
       params.add(new BasicNameValuePair("jobType", type));
+      params.add(new BasicNameValuePair("operation", operation));
       params.add(new BasicNameValuePair("host", this.serverUrl));
       params.add(new BasicNameValuePair("start", Boolean.toString(start)));
+      if(arguments != null && ! arguments.isEmpty()) {
+        for(String argument : arguments) {
+          params.add(new BasicNameValuePair("arg", argument));
+        }
+      }
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
     } catch (UnsupportedEncodingException e) {
@@ -371,7 +377,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#updateJob(org.opencastproject.job.api.Job)
    */
   @Override
-  public void updateJob(Job job) throws ServiceRegistryException {
+  public Job updateJob(Job job) throws ServiceRegistryException {
     String servicePath = "job/" + job.getId() + ".xml";
     String jobXml;
     try {
@@ -395,7 +401,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       responseStatusCode = response.getStatusLine().getStatusCode();
       if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
         logger.info("Updated job '{}'", job);
-        return;
+        return job;
       }
     } catch (Exception e) {
       throw new ServiceRegistryException("Unable to update " + job, e);

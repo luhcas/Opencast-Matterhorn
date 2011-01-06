@@ -18,6 +18,7 @@ package org.opencastproject.caption.api;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageException;
 
 /**
  * Provides captioning support. This service makes use of {@link CaptionConverter} instances that need to be registered
@@ -43,9 +44,11 @@ public interface CaptionService extends JobProducer {
    *           if there is no matching engine registered for given input or output
    * @throws CaptionConverterException
    *           if exception occurs while converting
+   * @throws MediaPackageException
+   *           if the catalog is invalid
    */
   Job convert(Catalog input, String inputFormat, String outputFormat, boolean block)
-          throws UnsupportedCaptionFormatException, CaptionConverterException;
+          throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException;
 
   /**
    * Converts captions from one format to another. Language parameter is used for those formats that store information
@@ -65,9 +68,11 @@ public interface CaptionService extends JobProducer {
    *           if there is no matching engine registered for given input or output
    * @throws CaptionConverterException
    *           if exception occurs while converting
+   * @throws MediaPackageException
+   *           if the catalog is invalid
    */
   Job convert(Catalog input, String inputFormat, String outputFormat, String language, boolean block)
-          throws UnsupportedCaptionFormatException, CaptionConverterException;
+          throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException;
 
   /**
    * Returns list of languages available in captions (if such information is stored).
@@ -84,5 +89,5 @@ public interface CaptionService extends JobProducer {
    */
   String[] getLanguageList(Catalog input, String format) throws UnsupportedCaptionFormatException,
           CaptionConverterException;
-  
+
 }

@@ -27,6 +27,7 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
@@ -42,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -218,7 +220,7 @@ public class YoutubeDistributionService implements DistributionService {
    */
   @Override
   public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
-          throws DistributionException {
+          throws DistributionException, MediaPackageException {
     if(mediaPackageId == null) {
       throw new DistributionException("Mediapackage ID must be specified");
     }
@@ -231,7 +233,7 @@ public class YoutubeDistributionService implements DistributionService {
 
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, DISTRIBUTE, Arrays.asList(mediaPackageId, element.getAsXml()));
     } catch (ServiceUnavailableException e) {
       throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {

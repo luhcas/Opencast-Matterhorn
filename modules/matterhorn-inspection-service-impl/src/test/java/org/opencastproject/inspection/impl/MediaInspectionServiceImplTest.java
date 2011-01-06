@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -78,6 +79,7 @@ public class MediaInspectionServiceImplTest {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Before
   public void setup() throws Exception {
     uriTrack = MediaInspectionServiceImpl.class.getResource("/av.mov").toURI();
@@ -92,7 +94,9 @@ public class MediaInspectionServiceImplTest {
     service.setWorkspace(workspace);
 
     ServiceRegistry rs = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(rs.createJob(MediaInspectionService.JOB_TYPE)).andReturn(new JobStub()).anyTimes();
+    EasyMock.expect(
+            rs.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (List<String>) EasyMock.anyObject())).andReturn(new JobStub()).anyTimes();
     EasyMock.replay(rs);
     service.setServiceRegistry(rs);
     service.executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(1);
@@ -152,7 +156,7 @@ public class MediaInspectionServiceImplTest {
     String payload;
     Status status;
 
-    public String getHost() {
+    public String getProcessingHost() {
       return null;
     }
 
@@ -196,11 +200,29 @@ public class MediaInspectionServiceImplTest {
     public Date getDateStarted() {
       return null;
     }
+    
     public String getPayload() {
       return payload;
     }
+
     public void setPayload(String payload) {
       this.payload = payload;
+    }
+    
+    public String getOperationType() {
+      return null;
+    }
+    
+    public List<String> getArguments() {
+      return null;
+    }
+    
+    public String getCreatedHost() {
+      return null;
+    }
+
+    public int getVersion() {
+      return 0;
     }
   }
 }

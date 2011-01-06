@@ -26,6 +26,7 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
@@ -49,6 +50,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -76,6 +78,9 @@ public class CaptionServiceImpl implements CaptionService {
 
   /** The collection name */
   public static final String COLLECTION = "captions";
+
+  /** The operation type for jobs */
+  public static final String CONVERT = "convert";
 
   /** Reference to workspace */
   protected Workspace workspace;
@@ -126,7 +131,7 @@ public class CaptionServiceImpl implements CaptionService {
    */
   @Override
   public Job convert(Catalog input, String inputFormat, String outputFormat, boolean block)
-          throws UnsupportedCaptionFormatException, CaptionConverterException {
+          throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
     return convert(input, inputFormat, outputFormat, null, block);
   }
 
@@ -138,11 +143,12 @@ public class CaptionServiceImpl implements CaptionService {
    */
   @Override
   public Job convert(final Catalog input, final String inputFormat, final String outputFormat, final String language,
-          boolean block) throws UnsupportedCaptionFormatException, CaptionConverterException {
+          boolean block) throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
 
     final Job job;
     try {
-      job = jobManager.createJob(JOB_TYPE);
+      job = jobManager.createJob(JOB_TYPE, CONVERT,
+              Arrays.asList(input.getAsXml(), inputFormat, outputFormat, language));
     } catch (ServiceRegistryException e) {
       throw new CaptionConverterException("Unable to create a job", e);
     } catch (ServiceUnavailableException e) {

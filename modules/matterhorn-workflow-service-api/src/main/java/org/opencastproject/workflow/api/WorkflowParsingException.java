@@ -19,39 +19,40 @@ package org.opencastproject.workflow.api;
 /**
  * Exception that is thrown for failing database operations.
  */
-public class WorkflowDatabaseException extends WorkflowException {
+public class WorkflowParsingException extends WorkflowException {
+
 
   /** Serial version uid */
-  private static final long serialVersionUID = -7411693851983157126L;
+  private static final long serialVersionUID = -8203912582435200347L;
 
   /**
-   * Constructs a new workflow database exception without a message or a cause.
+   * Constructs a new workflow parsing exception without a message or a cause.
    */
-  public WorkflowDatabaseException() {
+  public WorkflowParsingException() {
   }
 
   /**
-   * Constructs a new workflow database exception with a message.
+   * Constructs a new workflow parsing exception with a message.
    * 
    * @param message
    *          the message describing the exception
    */
-  public WorkflowDatabaseException(String message) {
+  public WorkflowParsingException(String message) {
     super(message);
   }
 
   /**
-   * Constructs a new workflow database exception with the throwable causing this exception to be thrown.
+   * Constructs a new workflow parsing exception with the throwable causing this exception to be thrown.
    * 
    * @param cause
    *          the cause of this exception
    */
-  public WorkflowDatabaseException(Throwable cause) {
+  public WorkflowParsingException(Throwable cause) {
     super(cause);
   }
 
   /**
-   * Constructs a new workflow database exception with a message and the throwable that caused this exception to be
+   * Constructs a new workflow parsing exception with a message and the throwable that caused this exception to be
    * thrown.
    * 
    * @param message
@@ -59,7 +60,7 @@ public class WorkflowDatabaseException extends WorkflowException {
    * @param cause
    *          the cause of this exception
    */
-  public WorkflowDatabaseException(String message, Throwable cause) {
+  public WorkflowParsingException(String message, Throwable cause) {
     super(message, cause);
   }
 

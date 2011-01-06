@@ -16,6 +16,7 @@
 package org.opencastproject.job.api;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -48,9 +49,12 @@ public class JaxbJob implements Job {
     this.dateCreated = job.getDateCreated();
     this.dateStarted = job.getDateStarted();
     this.payload = job.getPayload();
-    this.host = job.getHost();
+    this.processingHost = job.getProcessingHost();
+    this.createdHost = job.getCreatedHost();
     this.id = job.getId();
     this.jobType = job.getJobType();
+    this.operationType = job.getOperationType();
+    this.arguments = job.getArguments();
     this.status = job.getStatus();
     if (this.dateCreated != null && this.dateStarted != null) {
       this.queueTime = this.dateStarted.getTime() - this.dateCreated.getTime();
@@ -63,11 +67,23 @@ public class JaxbJob implements Job {
   /** The job ID */
   protected long id;
 
+  /** The version, used for optimistic locking */
+  protected int version;
+
   /** The job type */
   protected String jobType;
 
-  /** The host */
-  protected String host;
+  /** The operation type */
+  protected String operationType;
+
+  /** The arguments passed to the service operation */
+  protected List<String> arguments;
+
+  /** The server that created this job. */
+  protected String createdHost;
+
+  /** The server that is or was processing this job. Null if the job has not yet started. */
+  protected String processingHost;
 
   /** The job status */
   protected Status status;
@@ -100,6 +116,25 @@ public class JaxbJob implements Job {
   @Override
   public long getId() {
     return id;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getVersion()
+   */
+  @XmlAttribute
+  @Override
+  public int getVersion() {
+    return version;
+  }
+
+  /**
+   * @param version
+   *          the version to set
+   */
+  public void setVersion(int version) {
+    this.version = version;
   }
 
   /**
@@ -157,22 +192,79 @@ public class JaxbJob implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#getHost()
+   * @see org.opencastproject.job.api.Job#getOperationType()
    */
   @XmlElement
   @Override
-  public String getHost() {
-    return host;
+  public String getOperationType() {
+    return operationType;
+  }
+
+  /**
+   * @param operationType
+   *          the operationType to set
+   */
+  public void setOperationType(String operationType) {
+    this.operationType = operationType;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getArguments()
+   */
+  @XmlElement
+  @Override
+  public List<String> getArguments() {
+    return arguments;
+  }
+
+  /**
+   * @param arguments
+   *          the arguments to set
+   */
+  public void setArguments(List<String> arguments) {
+    this.arguments = arguments;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getProcessingHost()
+   */
+  @XmlElement
+  @Override
+  public String getProcessingHost() {
+    return processingHost;
   }
 
   /**
    * Sets the host url
    * 
-   * @param host
+   * @param processingHost
    *          the host's base URL
    */
-  public void setHost(String host) {
-    this.host = host;
+  public void setProcessingHost(String processingHost) {
+    this.processingHost = processingHost;
+  }
+
+  /**
+   * @param createdHost
+   *          the createdHost to set
+   */
+  public void setCreatedHost(String createdHost) {
+    this.createdHost = createdHost;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getCreatedHost()
+   */
+  @XmlElement
+  @Override
+  public String getCreatedHost() {
+    return createdHost;
   }
 
   /**

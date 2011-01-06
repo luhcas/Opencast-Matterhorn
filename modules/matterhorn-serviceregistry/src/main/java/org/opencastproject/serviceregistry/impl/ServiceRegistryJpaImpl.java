@@ -172,35 +172,51 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List)
    */
   @Override
-  public Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, this.hostName, false);
+  public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
+          ServiceRegistryException {
+    return createJob(this.hostName, type, operation, arguments, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List, boolean)
+   */
+  @Override
+  public Job createJob(String type, String operation, List<String> arguments, boolean start)
+          throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(this.hostName, type, operation, arguments, start);
   }
 
   /**
    * Creates a job on a remote host.
    */
-  public Job createJob(String type, String host, boolean start) throws ServiceUnavailableException,
-          ServiceRegistryException {
+  public Job createJob(String host, String serviceType, String operation, List<String> arguments, boolean start)
+          throws ServiceUnavailableException, ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationJpaImpl serviceRegistration = getServiceRegistration(em, type, host);
+      ServiceRegistrationJpaImpl serviceRegistration = getServiceRegistration(em, serviceType, host);
       if (serviceRegistration == null) {
-        throw new ServiceUnavailableException("No service registration exists for type '" + type + "' on host '" + host
-                + "'");
+        throw new ServiceUnavailableException("No service registration exists for type '" + serviceType + "' on host '"
+                + host + "'");
       }
       if (serviceRegistration.getHostRegistration().isMaintenanceMode()) {
         throw new ServiceUnavailableException(serviceRegistration.getHost()
                 + " is currently in maintenance mode.  Jobs may not be created on this host.");
       }
-      Status status = start ? Status.RUNNING : Status.QUEUED;
-      JobJpaImpl job = new JobJpaImpl(status, serviceRegistration);
+      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, start);
 
-      serviceRegistration.jobs.add(job);
+      serviceRegistration.creatorJobs.add(job);
+      if (start) {
+        serviceRegistration.processorJobs.add(job);
+      }
       em.persist(job);
       tx.commit();
       return job;
@@ -213,27 +229,21 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, boolean)
-   */
-  @Override
-  public Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, this.hostName, start);
-  }
-
-  /**
    * Creates a job for a specific service registration.
    * 
    * @return the new job
    */
-  JobJpaImpl createJob(ServiceRegistrationJpaImpl serviceRegistration) {
+  JobJpaImpl createJob(ServiceRegistrationJpaImpl serviceRegistration, String operation, List<String> arguments,
+          boolean startImmediately) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      JobJpaImpl job = new JobJpaImpl(serviceRegistration);
-      serviceRegistration.jobs.add(job);
+      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, startImmediately);
+      serviceRegistration.creatorJobs.add(job);
+      if (startImmediately) {
+        serviceRegistration.processorJobs.add(job);
+      }
       em.persist(job);
       tx.commit();
       return job;
@@ -274,7 +284,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#updateJob(org.opencastproject.job.api.Job)
    */
   @Override
-  public void updateJob(Job job) throws ServiceRegistryException {
+  public Job updateJob(Job job) throws ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -287,6 +297,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       }
       update(fromDb, (JaxbJob) job);
       tx.commit();
+      int version = fromDb.getVersion();
+      ((JaxbJob)job).setVersion(version);
+      return job;
     } catch (Exception e) {
       if (tx.isActive())
         tx.rollback();
@@ -310,6 +323,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     Status status = job.getStatus();
     fromDb.setPayload(job.getPayload());
     fromDb.setStatus(job.getStatus());
+    fromDb.setVersion(job.getVersion());
     if (Status.QUEUED.equals(status)) {
       job.setDateCreated(now);
       fromDb.setDateCreated(now);
@@ -854,7 +868,6 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   @Override
   public SystemLoad getLoad() throws ServiceRegistryException {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 }

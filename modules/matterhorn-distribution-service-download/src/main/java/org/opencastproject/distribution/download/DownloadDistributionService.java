@@ -20,6 +20,7 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
@@ -40,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -125,7 +127,7 @@ public class DownloadDistributionService implements DistributionService {
    */
   @Override
   public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
-          throws DistributionException {
+          throws DistributionException, MediaPackageException {
     if (mediaPackageId == null) {
       throw new DistributionException("Mediapackage ID must be specified");
     }
@@ -137,7 +139,7 @@ public class DownloadDistributionService implements DistributionService {
     }
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, DISTRIBUTE, Arrays.asList(mediaPackageId, element.getAsXml()));
     } catch (ServiceUnavailableException e) {
       throw new DistributionException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -243,7 +245,7 @@ public class DownloadDistributionService implements DistributionService {
   public Job retract(final String mediaPackageId, boolean block) throws DistributionException {
     final Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, RETRACT, Arrays.asList(mediaPackageId));
     } catch (ServiceUnavailableException e) {
       throw new DistributionException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);

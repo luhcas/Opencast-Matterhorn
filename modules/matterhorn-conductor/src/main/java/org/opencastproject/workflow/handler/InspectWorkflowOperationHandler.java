@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
@@ -129,7 +128,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       Job inspectJob;
       try {
         inspectJob = inspectionService.enrich(track, false, true);
-      } catch (MediaInspectionException e) {
+      } catch (Exception e) {
         throw new WorkflowOperationException(e);
       }
 

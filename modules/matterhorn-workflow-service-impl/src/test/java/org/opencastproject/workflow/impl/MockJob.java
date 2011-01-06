@@ -18,6 +18,7 @@ package org.opencastproject.workflow.impl;
 import org.opencastproject.job.api.Job;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * A mock job implementation for unit testing.
@@ -32,7 +33,7 @@ public class MockJob implements Job {
   Status status;
   String payload;
 
-  public String getHost() {
+  public String getProcessingHost() {
     return null;
   }
 
@@ -83,5 +84,21 @@ public class MockJob implements Job {
 
   public void setPayload(String payload) {
     this.payload = payload;
+  }
+
+  public int getVersion() {
+    return 0;
+  }
+
+  public String getOperationType() {
+    return null;
+  }
+
+  public List<String> getArguments() {
+    return null;
+  }
+
+  public String getCreatedHost() {
+    return null;
   }
 }

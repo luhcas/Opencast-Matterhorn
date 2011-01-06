@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.solr.SolrServerFactory;
@@ -809,16 +810,17 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#remove(long)
    */
   @Override
-  public void remove(long id) throws WorkflowDatabaseException, NotFoundException {
+  public Job remove(long id) throws WorkflowDatabaseException, NotFoundException {
     try {
       solrServer.deleteById(Long.toString(id));
       solrServer.commit();
 
-      // FIXME: jobs can not be deleted.
+      Job job = serviceRegistry.getJob(id);
+      job.setStatus(Status.DELETED);
+      serviceRegistry.updateJob(job);
 
-    } catch (SolrServerException e) {
-      throw new WorkflowDatabaseException(e);
-    } catch (IOException e) {
+      return job;
+    } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }
   }
@@ -829,7 +831,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public void update(WorkflowInstance instance) throws WorkflowDatabaseException {
+  public Job update(WorkflowInstance instance) throws WorkflowDatabaseException {
     String xml;
     try {
       xml = WorkflowParser.toXml(instance);
@@ -841,6 +843,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       job.setPayload(xml);
       serviceRegistry.updateJob(job);
       index(instance);
+      return job;
     } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }

@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
@@ -55,6 +56,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -126,10 +128,10 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
    * @throws TextAnalyzerException
    */
   @Override
-  public Job extract(final Attachment image, boolean block) throws TextAnalyzerException {
+  public Job extract(final Attachment image, boolean block) throws TextAnalyzerException, MediaPackageException {
     final Job job;
     try {
-      job = remoteServiceManager.createJob(JOB_TYPE);
+      job = remoteServiceManager.createJob(JOB_TYPE, OPERATION, Arrays.asList(image.getAsXml()));
     } catch (ServiceUnavailableException e) {
       throw new TextAnalyzerException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {

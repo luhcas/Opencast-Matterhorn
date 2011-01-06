@@ -28,6 +28,14 @@ public interface ComposerService extends JobProducer {
 
   String JOB_TYPE = "org.opencastproject.composer";
 
+  String ENCODE_OPERATION = "encode";
+
+  String TRIM_OPERATION = "trim";
+
+  String IMAGE_OPERATION = "image";
+
+  String CAPTION_OPERATION = "caption";
+
   /**
    * Encode one track, using that track's audio and video streams.
    * 
@@ -35,11 +43,11 @@ public interface ComposerService extends JobProducer {
    *          The source track
    * @param profileId
    *          The profile to use for encoding
-   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(long)}
-   *         to obtain the status of an encoding job.
+   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(long)} to
+   *         obtain the status of an encoding job.
    * @throws EncoderException
    */
-  Job encode(Track sourceTrack, String profileId) throws EncoderException;
+  Job encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException;
 
   /**
    * Encode one track, using that track's audio and video streams.
@@ -53,8 +61,10 @@ public interface ComposerService extends JobProducer {
    * @return The receipt for this encoding job
    * @throws EncoderException
    *           if encoding fails
+   * @throws MediaPackageException
+   *           if the mediapackage is invalid
    */
-  Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException;
+  Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException, MediaPackageException;
 
   /**
    * Encode the video stream from one track and the audio stream from another, into a new Track.
@@ -68,8 +78,11 @@ public interface ComposerService extends JobProducer {
    * @return The receipt for this encoding job
    * @throws EncoderException
    *           if encoding fails
+   * @throws MediaPackageException
+   *           if the mediapackage is invalid
    */
-  Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException;
+  Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException,
+          MediaPackageException;
 
   /**
    * Encode the video stream from one track and the audio stream from another, into a new Track.
@@ -85,8 +98,11 @@ public interface ComposerService extends JobProducer {
    * @return The receipt for this encoding job
    * @throws EncoderException
    *           if muxing fails
+   * @throws MediaPackageException
+   *           if the mediapackage is invalid
    */
-  Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block) throws EncoderException;
+  Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block) throws EncoderException,
+          MediaPackageException;
 
   /**
    * Trims the given track to the given start time and duration.
@@ -99,13 +115,15 @@ public interface ComposerService extends JobProducer {
    *          start time in miliseconds
    * @param duration
    *          duration in miliseconds
-   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(long)}
-   *         to obtain the status of an encoding job.
+   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(long)} to
+   *         obtain the status of an encoding job.
    * @throws EncoderException
    *           if trimming fails
    * @throws MediaPackageException
+   *           if the mediapackage is invalid
    */
-  Job trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException, MediaPackageException;
+  Job trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
+          MediaPackageException;
 
   /**
    * Trims the given track to the given start time and duration.
@@ -125,7 +143,8 @@ public interface ComposerService extends JobProducer {
    *           if trimming fails
    * @throws MediaPackageException
    */
-  Job trim(Track sourceTrack, String profileId, long start, long duration, boolean block) throws EncoderException, MediaPackageException;
+  Job trim(Track sourceTrack, String profileId, long start, long duration, boolean block) throws EncoderException,
+          MediaPackageException;
 
   /**
    * Extracts an image from the media package element identified by <code>sourceVideoTrackId</code>. The image is taken
@@ -140,8 +159,10 @@ public interface ComposerService extends JobProducer {
    * @return the extracted image as an attachment
    * @throws EncoderException
    *           if image extraction fails
+   * @throws MediaPackageException
+   *           if the mediapackage is invalid
    */
-  Job image(Track sourceTrack, String profileId, long time) throws EncoderException;
+  Job image(Track sourceTrack, String profileId, long time) throws EncoderException, MediaPackageException;
 
   /**
    * Extracts an image from the media package element identified by <code>sourceVideoTrackId</code>. The image is taken
@@ -158,8 +179,11 @@ public interface ComposerService extends JobProducer {
    * @return the extracted image as an attachment
    * @throws EncoderException
    *           if image extraction fails
+   * @throws MediaPackageException
+   *           if the track is invalid
    */
-  Job image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException;
+  Job image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException,
+          MediaPackageException;
 
   /**
    * Insert captions in media package element identified by <code>mediaTrack</code> from catalog which contains
@@ -174,8 +198,10 @@ public interface ComposerService extends JobProducer {
    * @return Receipt for this embedding job
    * @throws EmbedderException
    *           if exception occurs during embedding process
+   * @throws MediaPackageException
+   *           if the track is invalid
    */
-  Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException;
+  Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException, MediaPackageException;
 
   /**
    * Insert captions in media package element identified by <code>mediaTrack</code> from catalog which contains
@@ -192,8 +218,10 @@ public interface ComposerService extends JobProducer {
    * @return Receipt for this embedding job
    * @throws EmbedderException
    *           if exception occurs during embedding process
+   * @throws MediaPackageException
+   *           if the track is invalid
    */
-  Job captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException;
+  Job captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException, MediaPackageException;
 
   /**
    * @return All registered {@link EncodingProfile}s.

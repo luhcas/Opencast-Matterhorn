@@ -43,6 +43,7 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowParsingException;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
@@ -58,6 +59,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
@@ -409,7 +411,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          Long parentWorkflowId, Map<String, String> properties) throws WorkflowDatabaseException, NotFoundException {
+          Long parentWorkflowId, Map<String, String> properties) throws WorkflowDatabaseException,
+          WorkflowParsingException, NotFoundException {
     if (workflowDefinition == null)
       throw new IllegalArgumentException("workflow definition must not be null");
     if (mediaPackage == null)
@@ -417,9 +420,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
       throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
 
-    final Job job;
+    Job job;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE, JOB_TYPE, Arrays.asList(WorkflowParser.toXml(workflowDefinition)));
     } catch (ServiceUnavailableException e) {
       throw new WorkflowDatabaseException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -440,13 +443,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
       // Before we persist this, extract the metadata
       populateMediaPackageMetadata(configuredInstance.getMediaPackage());
-      dao.update(configuredInstance);
+      job = dao.update(configuredInstance);
 
       // Update the job status
       job.setStatus(Status.RUNNING);
-      updateJob(job);
+      job = updateJob(job);
 
-      // Have the job exectued
+      // Have the job executed
       run(configuredInstance);
 
       return configuredInstance;
@@ -468,7 +471,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    *      org.opencastproject.mediapackage.MediaPackage)
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          Map<String, String> properties) throws WorkflowDatabaseException {
+          Map<String, String> properties) throws WorkflowDatabaseException, WorkflowParsingException {
     try {
       return start(workflowDefinition, mediaPackage, null, properties);
     } catch (NotFoundException e) {
@@ -887,7 +890,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
             }
           }
         }
-
         // Update the job status
         Job job;
         Job.Status status = null;
@@ -895,7 +897,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
           status = workflow.getState() == WorkflowState.SUCCEEDED ? Status.FINISHED : Status.FAILED;
           job = serviceRegistry.getJob(workflow.getId());
           job.setStatus(status);
-          updateJob(job);
+          job = updateJob(job);
         } catch (ServiceRegistryException e2) {
           throw new IllegalStateException("Unable to update status of job " + workflow + " to '" + status + "'", e2);
         } catch (WorkflowDatabaseException e2) {
@@ -903,7 +905,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         } catch (NotFoundException e2) {
           throw new IllegalStateException("Job " + workflow + " not found", e2);
         }
-
       } else {
         workflow.setState(WorkflowState.PAUSED);
       }
@@ -929,7 +930,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage)
-          throws WorkflowDatabaseException {
+          throws WorkflowDatabaseException, WorkflowParsingException {
     if (workflowDefinition == null)
       throw new IllegalArgumentException("workflow definition must not be null");
     if (mediaPackage == null)
@@ -999,9 +1000,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @throws WorkflowDatabaseException
    *           the exception that is being thrown
    */
-  private void updateJob(Job job) throws WorkflowDatabaseException {
+  private Job updateJob(Job job) throws WorkflowDatabaseException {
     try {
       serviceRegistry.updateJob(job);
+      return job;
     } catch (NotFoundException notFound) {
       throw new WorkflowDatabaseException("Unable to find job " + job, notFound);
     } catch (ServiceRegistryException serviceRegException) {
