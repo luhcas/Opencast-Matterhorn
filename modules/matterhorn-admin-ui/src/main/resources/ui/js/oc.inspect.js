@@ -51,6 +51,22 @@ Opencast.WorkflowInspect = (function() {
     mp.attachments = Opencast.RenderUtils.ensureArray(mp.attachments.attachment);
     mp.media.track = Opencast.RenderUtils.ensureArray(mp.media.track);
     mp.metadata.catalog = Opencast.RenderUtils.ensureArray(mp.metadata.catalog);
+
+    // 'flatten' encoder and scantype properties
+    try {
+      $.each(mp.media.track, function(index, track) {
+        if (track.audio && track.audio.encoder) {
+          track.audio.encoder = track.audio.encoder.type;
+        }
+        if (track.video) {
+          if (track.video.encoder) track.video.encoder = track.video.encoder.type;
+          if (track.video.scantype) track.video.scantype = track.video.scantype.type;
+        }
+      });
+    } catch (e) {
+      ocUtils.log('Could not flatten encoder/scantype properties of tracks');
+    }
+
     out.mediapackage = mp;
 
     return {
