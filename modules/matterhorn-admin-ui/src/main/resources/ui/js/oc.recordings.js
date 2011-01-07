@@ -389,10 +389,12 @@ ocRecordings = new (function() {
       if (sortDesc) {
         ocRecordings.Configuration.sortField = sortField;
         ocRecordings.Configuration.sortOrder = 'ASC';
+        ocRecordings.Configuration.page = 0;
         ocRecordings.reload();
       } else {
         ocRecordings.Configuration.sortField = sortField;
         ocRecordings.Configuration.sortOrder = 'DESC';
+        ocRecordings.Configuration.page = 0;
         ocRecordings.reload();
       }
     });
@@ -564,6 +566,7 @@ ocRecordings = new (function() {
       ocRecordings.Configuration.filterText = '';
       ocRecordings.Configuration.filterField = null;
       ocRecordings.Configuration.state = $(this).val();
+      ocRecordings.Configuration.page = 0;
       ocRecordings.reload();
     })
 
