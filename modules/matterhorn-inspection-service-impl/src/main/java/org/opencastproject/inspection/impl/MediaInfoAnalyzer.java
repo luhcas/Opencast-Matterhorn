@@ -203,18 +203,6 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
     }
   }
 
-  /* Version check */
-
-  @Override
-  protected String getVersionCheckOptions() {
-    return "--Version";
-  }
-
-  @Override
-  protected boolean onVersionCheck(String line) {
-    return line.startsWith("MediaInfoLib - v0.7");
-  }
-
   // --------------------------------------------------------------------------------------------
 
   static String convertString(String value) {

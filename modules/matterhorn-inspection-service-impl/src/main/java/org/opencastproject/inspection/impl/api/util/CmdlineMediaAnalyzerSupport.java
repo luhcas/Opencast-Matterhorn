@@ -52,36 +52,6 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
 
     ProcessExecutor<MediaAnalyzerException> mediaAnalyzer = null;
 
-    // Version check (optional)
-    String versionCheck = getVersionCheckOptions();
-    if (versionCheck != null) {
-
-      // This is an array only because it needs to be final and hold a modifiable boolean
-      final boolean[] ok = new boolean[] { false };
-      mediaAnalyzer = new ProcessExecutor<MediaAnalyzerException>(binary, versionCheck) {
-        @Override
-        protected boolean onLineRead(String line) {
-          ok[0] |= onVersionCheck(line);
-          return true;
-        }
-
-        @Override
-        protected void onProcessFinished(int exitCode) throws MediaAnalyzerException {
-          onFinished(exitCode);
-        }
-      };
-
-      try {
-        mediaAnalyzer.execute();
-      } catch (ProcessExcecutorException e) {
-        throw new MediaAnalyzerException("Excecuting the version check on " + binary + " failed", e);
-      }
-
-      if (!ok[0]) {
-        throw new MediaAnalyzerException(this.getClass().getSimpleName() + ": Binary does not have the right version");
-      }
-    }
-
     // Analyze
     mediaAnalyzer = new ProcessExecutor<MediaAnalyzerException>(binary, getAnalysisOptions(media)) {
       @Override
@@ -118,10 +88,6 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
 
   protected String getVersionCheckOptions() {
     return null;
-  }
-
-  protected boolean onVersionCheck(String line) {
-    return false;
   }
 
   protected void onFinished(int exitCode) throws MediaAnalyzerException {
