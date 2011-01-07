@@ -30,8 +30,9 @@ import org.gstreamer.elements.AppSink;
 import java.io.File;
 
 /**
- * Png-sub-bin to use in {@link EpiphanVGA2USBV4LProducer}. Creates a bin witch convert a png image to video stream.
- * AppSink is the last Element where data can grabed from.
+ * Png-sub-bin to use in {@link EpiphanVGA2USBV4LProducer}. 
+ * Creates a bin which converts a png image to a video stream.
+ * AppSink is the last Element where data can be grabbed from.
  */
 public class EpiphanVGA2USBV4LSubPngBin extends EpiphanVGA2USBV4LSubAbstractBin {
 
