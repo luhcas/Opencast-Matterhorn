@@ -353,7 +353,9 @@ ocRecordings = new (function() {
     $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
     
     var page = parseInt(ocRecordings.Configuration.page) + 1;
-    $('#pageList').text( page + " of " + Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize));
+    var pageNum = Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize);
+    pageNum = pageNum == 0 ? 1 : pageNum;
+    $('#pageList').text( page + " of " + pageNum);
 
     // When table is ready, attach event handlers to its children
     $('.sortable')
@@ -573,11 +575,6 @@ ocRecordings = new (function() {
     // ocRecordings table
 
     // pager
-    this.pager = $( '#pagerBottom' ).spinner({
-      decIcon : 'ui-icon-circle-triangle-w',
-      incIcon : 'ui-icon-circle-triangle-e'
-    });
-    
     $('#pageSize').val(ocRecordings.Configuration.pageSize);
     
     $('#pageSize').change(function(){ 
@@ -597,28 +594,6 @@ ocRecordings = new (function() {
         ocRecordings.gotoPage($(this).val() - 1);
       }
     });
-    
-
-    // button to open the config dialog
-    /*$( '#configButton' ).button()
-    .click( function() {
-      $('#configDialog').dialog({
-        title : 'Configure View',
-        resizable: false,
-        buttons : {
-          Ok : function() {
-            // TODO save settings
-            $(this).dialog('close');
-          }
-        }
-      });
-    });
-    */
-    // set up config dialog
-    // FIXME doesn work really good (components look strange, size of dialog doesn't fit content
-    //$('#pageSize').spinner({min:1});
-    //$('#autoUpdate').button();
-    //$('#updateInterval').spinner({min:1});
 
     // set up statistics update
     refreshStatistics();
