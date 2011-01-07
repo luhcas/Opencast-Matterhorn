@@ -211,30 +211,14 @@
         <div class="layout-float-right">
           <!--<label for="page">Goto page: </label><input type="text" id="page" value="1" />-->
           <div id="pageWidget" class="layout-inline">
-            <a href="javascript:ocRecordings.Configuration.page=0;ocRecordings.reload();">&lt;&lt;first</a>
-            <a href="javascript:ocRecordings.previousPage();" id="previousPage">&lt;previous</a>
+            <a class="prevPage" href="javascript:ocRecordings.Configuration.page=0;ocRecordings.reload();">&lt;&lt;first</a>
+            <a class="prevPage" href="javascript:ocRecordings.previousPage();" id="previousPage">&lt;previous</a>
             <div id="pageList" class="layout-inline"></div>
-            <a href="javascript:ocRecordings.nextPage();" id="nextPage">next&gt;</a>
-            <a href="javascript:ocRecordings.lastPage();" id="lastPage">last&gt;&gt;</a>
+            <a class="nextPage" href="javascript:ocRecordings.nextPage();" id="nextPage">next&gt;</a>
+            <a class="nextPage" href="javascript:ocRecordings.lastPage();" id="lastPage">last&gt;&gt;</a>
           </div>
         </div>
       </div>
-      <!-- config dialog
-      <div id="configDialog" style="display:none;">
-        <div class="configRow ui-helper-clearfix">
-          <span>Number of items displayed per page</span>
-          <div id="pageSize"></div>
-        </div>
-        <div class="configRow ui-helper-clearfix">
-          <span>Update page automatically</span>
-          <div><input id="autoUpdate" type="checkbox"><label for="autoUpdate">Yes</label></div>
-        </div>
-        <div class="configRow ui-helper-clearfix">
-          <span>Time between updates</span>
-          <div id="updateInterval"></div>
-        </div>
-      </div>
-      -->
     </div>
 
     <!-- HoldAction panel -->
@@ -306,7 +290,6 @@
       <textarea id="operationTemplate">
 <div>
   <div class="status-column-operation-heading">
-  <span class="fold-icon ui-icon ui-icon-triangle-1-e"></span>
   <span class="operation-heading-text">${heading} (${state})</span>
   </div>
   <div class="status-column-operation-details" style="display:none;">

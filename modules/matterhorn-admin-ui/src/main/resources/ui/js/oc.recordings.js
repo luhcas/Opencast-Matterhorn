@@ -353,11 +353,25 @@ ocRecordings = new (function() {
     $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
     
     var page = parseInt(ocRecordings.Configuration.page) + 1;
-    var pageNum = Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize);
-    pageNum = pageNum == 0 ? 1 : pageNum;
-    $('#pageList').text( page + " of " + pageNum);
+    var pageCount = Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize);
+    pageCount = pageCount == 0 ? 1 : pageCount;
+    $('#pageList').text( page + " of " + pageCount);
+    if (page == 1) {
+      $('.prevPage').each(function() {
+        var text = $(this).text();
+        var $elm = $('<span></span>').text(text).css('color', 'gray');
+        $(this).replaceWith($elm);
+      });
+    }
+    if (page == pageCount) {
+      $('.nextPage').each(function() {
+        var text = $(this).text();
+        var $elm = $('<span></span>').text(text).css('color', 'gray');
+        $(this).replaceWith($elm);
+      })
+    }
 
-    // When table is ready, attach event handlers to its children
+    // When table is ready, attach event handlers
     $('.sortable')
     .mouseenter( function() {
       $(this).addClass('ui-state-hover');
@@ -681,7 +695,7 @@ RenderUtils = new (function() {
     links = [];
     for(i in actions){
       if(actions[i] === 'view') {
-        links.push('<a href="inspect.html?id=' + id + '">View</a>');
+        links.push('<a href="inspect.html?id=' + id + '">View Info</a>');
       } else if(actions[i] === 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
       } else if(actions[i] === 'delete') {
