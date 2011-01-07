@@ -18,7 +18,7 @@ and follow the steps in menu (starting with 0).
 
 Define some required variables and start the script:
 
-export HOME3P=<3rd_party_dir>
+export HOME3P=<3rd_party_dir>   # use absolute path, not "."
 export SUDOPWD=<sudo_password>  # if needed
 ./do-all
 
@@ -32,7 +32,8 @@ on Mac and packages (zip files) for installation on Windows.
 
 If you want to do some steps manually, for example if an error
 occurs during compilation, you need to define at least HOME3P
-variable, which must point to the top level 3rd_party directory.
+variable, which must point to the top level 3rd_party directory
+and should be defined as an absolute path.
 
 A note about root privileges/sudo password:
 
