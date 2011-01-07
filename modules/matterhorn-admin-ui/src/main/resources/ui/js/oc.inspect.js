@@ -99,7 +99,7 @@ Opencast.WorkflowInspect = (function() {
     var g = new Bluff.SideStackedBar('graph', '600x300');
 
     // Set theme and options
-    g.theme_keynote();
+    //g.theme_greyscale();
     g.title = 'Processing times for ' + data.workflow.mediapackage.title;
     g.x_axis_label = 'Seconds';
 
