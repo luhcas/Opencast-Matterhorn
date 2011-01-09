@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -213,7 +214,8 @@ public class JaxbJob implements Job {
    * 
    * @see org.opencastproject.job.api.Job#getArguments()
    */
-  @XmlElement
+  @XmlElement(name = "arg")
+  @XmlElementWrapper(name = "args")
   @Override
   public List<String> getArguments() {
     return arguments;
