@@ -571,7 +571,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     // date on quick changes (e.g. unit testing).
     try {
       Job job = serviceRegistry.getJob(workflowId);
-      if(Status.DELETED.equals(job.getStatus())) {
+      if (Status.DELETED.equals(job.getStatus())) {
         throw new NotFoundException("Workflow " + workflowId + " was deleted");
       }
       return WorkflowParser.parseWorkflowInstance(job.getPayload());
