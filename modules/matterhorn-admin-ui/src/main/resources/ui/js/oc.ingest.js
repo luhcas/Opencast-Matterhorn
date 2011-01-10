@@ -97,7 +97,6 @@ ocIngest.createDublinCoreCatalog = function(data) {
 }
 
 ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
-  var serxml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
   ocUtils.log("Adding DublinCore catalog");
   ocUpload.setProgress('100%','adding Metadata',' ', ' ');
   $.ajax({
@@ -107,7 +106,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
     data       : {
       flavor : flavor,
       mediaPackage: mediaPackage,
-      dublinCore  : serxml + ocUtils.xmlToString(dcCatalog)
+      dublinCore  : ocUtils.xmlToString(dcCatalog)
     },
     error      : function(XHR,status,e){
       showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
@@ -126,7 +125,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
 }
 
 ocIngest.addSeriesCatalog = function(seriesId) {
-  ocUtils.log("Getting sweries DublinCore");
+  ocUtils.log("Getting series DublinCore");
   ocUpload.setProgress('100%','Getting series Metadata',' ', ' ');
   $.ajax({
     url        : '../series/rest/'+seriesId+'/dublincore',
