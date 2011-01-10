@@ -11,7 +11,8 @@
 
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui-1.8.6.custom.min.js"></script>
-    <script type="text/javascript" src="js/jquery.tmpl.min.js"></script>
+    <!-- script type="text/javascript" src="js/jquery.tmpl.min.js"></script -->
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
     <script type="text/javascript" src="js/jquery.ui.spinner.js"></script>
     <script type="text/javascript" src="js/jquery.ui.searchbox.js"></script>
     <script type="text/javascript" src="js/oc.utils.js"></script>
@@ -246,43 +247,44 @@
     </tr>
   </thead>
   <tbody>
-    {{if recording.length > 0}}
-      {{each recording}}
+    {for recording in recordings}
       <tr valign="top">
         <td>
-          ${title}
+          ${recording.title}
         </td>
         <td>
-          ${creators}
+          ${recording.creators}
         </td>
         <td>
-          ${seriesTitle}
+          ${recording.seriesTitle}
         </td>
         <td>
-          ${start}
+          ${recording.start}
         </td>
-        <td class="status-column-cell">
-          {{if error}}
-            {{tmpl(error) 'errormessage'}}
-          {{else}}
-            {{tmpl(operation) 'operation'}}
-          {{/if}}
+        <td class="status-column-cell" title="Click inspect this workflow">
+          {if recording.error}
+            <span style="color:red;font-weight:bold;">FAILED</span>
+          {else}
+            <b>${recording.state}</b>
+            {if recording.operation}
+              &nbsp;${recording.operation}
+            {/if}
+          {/if}
         </td>
         <td>
-          {{html RenderUtils.makeActions(id, title, actions)}}
-          {{if holdAction}}
-          <br><a href="javascript:ocRecordings.displayHoldUI(${id});" title="${holdAction.description}">${holdAction.title}</a>
-          {{/if}}
+          ${ocRecordings.makeActions(recording.id, recording.actions)}
+          {if recording.holdAction}
+          <br><a href="javascript:ocRecordings.displayHoldUI(${recording.id});" title="${recording.holdAction.title}">${recording.holdAction.title}</a>
+          {/if}
         </td>
       </tr>
-      {{/each}}
-    {{else}}
+    {forelse}
       <tr>
         <td colspan="6" align="center">
           No Recordings found
         </td>
       </tr>
-    {{/if}}
+    {/for}
   </tbody>
 </table>
       </textarea>

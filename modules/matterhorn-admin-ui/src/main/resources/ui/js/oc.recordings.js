@@ -228,129 +228,113 @@ ocRecordings = new (function() {
     });
   }
 
-  /** Make an object representing a row in the recording table from a workflow
-   *  instance object delivered by the workflow endpoint
-   *
-   *  TODO make this a constructor
+  /** Construct an object representing a row in the recording table from a
+   *  workflow instance object delivered by the workflow endpoint.
    */
-  function makeRecording(wf) {
-    var rec = {      
-      id: '',
-      title: '',
-      creators : [],
-      start : '',
-      end : '',
-      operation : {
-        state:'',
-        heading : '',
-        details : '',
-        error : false,
-        time: false,
-        properties : false
-      },
-      actions : [],
-      holdAction : false
-    };
-    // Id
-    rec.id = wf.id;
-    
-    // Title
-    rec.title = wf.mediapackage.title;
-    
+  function Recording(wf) {
+    this.id = wf.id;
+    this.state = '';
+    this.operation = false;
+    this.creators='';
+    this.series = '';
+    this.seriesTitle = '';
+    this.start='';
+    this.end='';
+    this.actions=[];
+    this.holdAction=false;
+
+    if (wf.mediapackage && wf.mediapackage.title) {
+      this.title = wf.mediapackage.title;
+    } else {
+      this.title = 'NA';
+    }
+
     // Series id and title
-    rec.series = wf.mediapackage.series;
-    rec.seriesTitle = wf.mediapackage.seriestitle;
+    this.series = wf.mediapackage.series;
+    this.seriesTitle = wf.mediapackage.seriestitle;
 
     // Creator(s)
     if (wf.mediapackage.creators !== undefined) {
-      rec.creators = ocUtils.ensureArray(wf.mediapackage.creators.creator).join(', ');
+      this.creators = ocUtils.ensureArray(wf.mediapackage.creators.creator).join(', ');
     }
 
     // Start Time
     if (wf.mediapackage.start) {
-      rec.start = ocUtils.fromUTCDateString(wf.mediapackage.start);
-    }
-
-    // error
-    if (wf.errors !== undefined) {
-      rec.operation.error = ocUtils.ensureArray(wf.errors.error).join(', ');
+      this.start = ocUtils.fromUTCDateString(wf.mediapackage.start);
     }
 
     // Status
-    var op = ocRecordings.findCurrentOperation(wf);
-    if (op !== null) {
-      rec.operation.state = op.state;
-      rec.operation.heading = op.id;
-      rec.operation.details = op.description;
-      if (op.configurations) {
-        rec.operation.properties = [];
-        for (var k in op.configurations.configuration) {
-          var c = op.configurations.configuration[k];
-          rec.operation.properties.push({
-            key : c.key,
-            value : c.$
-          });
+    if (wf.state == 'SUCCEEDED') {
+      this.state = 'FINISHED';
+    } else if (wf.state == 'FAILING' || wf.state == 'FAILED') {
+      this.state = 'FAILED';
+      this.error = ocUtils.ensureArray(wf.errors.error).join(', ');
+    } else if (wf.state == 'PAUSED') {
+      op = ocRecordings.findCurrentOperation(wf);
+      if (op) {
+        if (op.id == 'schedule') {
+          this.state = 'UPCOMING';
+        } else if (op.holdurl) {
+          this.state = 'ON HOLD';
+          this.operation = op.description;
+          this.holdAction = {
+            url : op.holdurl,
+            title : op['hold-action-title']
+            };
         }
+      } else {
+        ocUtils.log('Warning could not find current operation for worklfow ' + wf.id);
+        this.state = 'PAUSED';
       }
-      // care for hold state UI
-      if (op.holdurl !== undefined && op.state == 'PAUSED') {
-        rec.operation.state = 'ON HOLD';
-        rec.holdAction = {
-          title : op['hold-action-title'],
-          description :  op.description
+    } else if (wf.state == 'RUNNING') {
+      op = ocRecordings.findCurrentOperation(wf);
+      if (op) {
+        if (op.id == 'capture') {
+          this.state = 'CAPTURING';
+        } else {
+          this.state = 'PROCESSING';
+          this.operation = op.description;
         }
+      } else {
+        ocUtils.log('Warning could not find current operation for worklfow ' + wf.id);
+        this.state = 'PAUSED';
       }
     } else {
-      ocUtils.log('Warning: current operation for workflow could not be found!');
-    }
-
-    // set state so it fits Recordings UI terminology
-    if (rec.operation.state == 'RUNNING') {
-      if (rec.operation.heading == 'capture') {
-        rec.operation.state = 'CAPTURING';
-      } else {
-        rec.operation.state = 'PROCESSING';
-      }
+      this.state = wf.state;
     }
 
     // Actions
-    if(rec.operation.heading === 'schedule') {
-      rec.state = 'UPCOMING';
-      rec.actions = ['view', 'edit', 'delete'];
+    if(this.state == 'UPCOMING') {
+      this.actions = ['view', 'edit', 'delete'];
     }else{
-      rec.actions = ['view', 'delete'];
+      this.actions = ['view', 'delete'];
     }
 
-    return rec;
+    return this;
   }
 
   /** Prepare data delivered by workflow instances list endpoint for template
-   *  rendering.
-   */
+ *  rendering.
+ */
   function makeRenderData(data) {
-    var tdata = {
-      recording:[]
+    var recordings = [];
+    var wfs = ocUtils.ensureArray(data.workflows.workflow);
+    $.each(wfs, function(index, wf) {
+      recordings.push(new Recording(wf));
+    });
+    return {
+      recordings : recordings
     };
-    if (data.workflows.workflow) {
-      ocRecordings.totalRecordings = data.workflows.totalCount;
-      if (data.workflows.workflow instanceof Array) {
-        for (var i in data.workflows.workflow) {
-          tdata.recording.push(makeRecording(data.workflows.workflow[i]));
-        }
-      } else {
-        tdata.recording.push(makeRecording(data.workflows.workflow));
-      }
-    }
-    return tdata;
   }
 
   /** JSONP callback for calls to the workflow instances list endpoint.
-   */
+ */
   this.render = function(data) {
     refreshing = false;
-    this.data = data;
-    $('#tableContainer').empty();
-    $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
+    ocRecordings.data = data;
+    ocRecordings.totalRecordings = data.workflows.totalCount;
+    var result = TrimPath.processDOMTemplate('tableTemplate', makeRenderData(data));
+    $( '#tableContainer' ).empty().append(result);
     
     var page = parseInt(ocRecordings.Configuration.page) + 1;
     var pageCount = Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize);
@@ -422,7 +406,7 @@ ocRecordings = new (function() {
   }
 
   /** Make the page reload with the currently set configuration
-   */
+ */
   this.reload = function() {
     var url = document.location.href.split('?', 2)[0];
     var pa = [];
@@ -435,9 +419,9 @@ ocRecordings = new (function() {
     document.location.href = url;
   }
 
-  /** Returns the workflow with the specified id from the currently loaded 
-   *  workflow data or false if workflow with given Id was not found.
-   */
+  /** Returns the workflow with the specified id from the currently loaded
+ *  workflow data or false if workflow with given Id was not found.
+ */
   this.getWorkflow = function(wfId) {
     var out = false;
     $.each(ocUtils.ensureArray(this.data.workflows.workflow), function(index, workflow) {
@@ -537,10 +521,6 @@ ocRecordings = new (function() {
  */
   this.init = function() {
 
-    $.template( 'table-all', $('#tableTemplate').val() );
-    $.template( 'operation', $('#operationTemplate').val() );
-    $.template( 'errormessage', $('#errorTemplate').val() );
-
     // upload/schedule button
     $('#uploadButton').button({
       icons:{
@@ -594,7 +574,7 @@ ocRecordings = new (function() {
     // pager
     $('#pageSize').val(ocRecordings.Configuration.pageSize);
     
-    $('#pageSize').change(function(){ 
+    $('#pageSize').change(function(){
       ocRecordings.Configuration.pageSize = $(this).val();
       ocRecordings.reload();
     });
@@ -672,29 +652,7 @@ ocRecordings = new (function() {
   
   $(document).ready(this.init);
 
-  return this;
-})();
-
-// Useful stuff that is called from JSONP callbacks / within table templates
-RenderUtils = new (function() {
-
-  this.makeList = function(a) {
-    try {
-      return a.join(', ');
-    } catch(e) {
-      return '';
-    }
-  }
-
-  this.getCurrentOperation = function(wf) {
-    var current = null;
-    for (i in wf.operations.operation) {
-      var op = wf.operations.operation[i];
-
-    }
-  }
-
-  this.makeActions = function(id, title, actions) {
+  this.makeActions = function(id, actions) {
     links = [];
     for(i in actions){
       if(actions[i] === 'view') {
@@ -708,9 +666,5 @@ RenderUtils = new (function() {
     return links.join(' \n');
   }
 
-  this.getTime = function(timestamp) {
-    var d = new Date();
-    d.setTime(timestamp);
-    return d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
-  }
+  return this;
 })();
