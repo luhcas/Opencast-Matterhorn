@@ -796,6 +796,15 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
                 name.getNamespaceName());
       }
     }
+    
+    /**
+     * {@inheritDoc}
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+      return value;
+    }
   }
 
   // --------------------------------------------------------------------------------------------

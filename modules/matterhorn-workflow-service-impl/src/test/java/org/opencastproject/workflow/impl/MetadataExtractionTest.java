@@ -17,7 +17,7 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageMetadata;
+import org.opencastproject.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
 
 import org.easymock.EasyMock;
@@ -32,7 +32,7 @@ public class MetadataExtractionTest {
 
   // mock services and objects
   private MediaPackageMetadataService metadataService;
-  private MediaPackageMetadata metadata;
+  private MediapackageMetadataImpl metadata;
 
   private static final String TITLE = "title";
   private static final String SERIES = "series";
@@ -43,10 +43,9 @@ public class MetadataExtractionTest {
     service = new WorkflowServiceImpl();
 
     // set up mock metadata and metadata service providing it
-    metadata = EasyMock.createNiceMock(MediaPackageMetadata.class);
-    EasyMock.expect(metadata.getTitle()).andReturn(TITLE).anyTimes();
-    EasyMock.expect(metadata.getSeriesTitle()).andReturn(SERIES).anyTimes();
-    EasyMock.replay(metadata);
+    metadata = new MediapackageMetadataImpl();
+    metadata.setTitle(TITLE);
+    metadata.setSeriesTitle(SERIES);
     metadataService = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.expect(metadataService.getMetadata((MediaPackage) EasyMock.anyObject())).andReturn(metadata);
     EasyMock.replay(metadataService);

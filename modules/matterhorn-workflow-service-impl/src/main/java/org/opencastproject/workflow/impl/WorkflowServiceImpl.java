@@ -953,30 +953,58 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     for (MediaPackageMetadataService metadataService : metadataServices) {
       MediaPackageMetadata metadata = metadataService.getMetadata(mp);
       if (metadata != null) {
-        if (mp.getDate().getTime() == 0 && metadata.getDate() != null) {
-          mp.setDate(metadata.getDate());
-        }
-        if (isBlank(mp.getLanguage()) && isNotBlank(metadata.getLanguage())) {
-          mp.setLanguage(metadata.getLanguage());
-        }
-        if (isBlank(mp.getLicense()) && isNotBlank(metadata.getLicense())) {
-          mp.setLicense(metadata.getLicense());
-        }
+
+        // Series identifier
         if (isBlank(mp.getSeries()) && isNotBlank(metadata.getSeriesIdentifier())) {
           mp.setSeries(metadata.getSeriesIdentifier());
         }
+        
+        // Series title
         if (isBlank(mp.getSeriesTitle()) && isNotBlank(metadata.getSeriesTitle())) {
           mp.setSeriesTitle(metadata.getSeriesTitle());
         }
+
+        // Episode title
         if (isBlank(mp.getTitle()) && isNotBlank(metadata.getTitle())) {
           mp.setTitle(metadata.getTitle());
         }
-        if (isBlank(mp.getSeries()) && isNotBlank(metadata.getSeriesIdentifier())) {
-          mp.setSeries(metadata.getSeriesIdentifier());
+
+        // Episode date
+        if (mp.getDate().getTime() == 0 && metadata.getDate() != null) {
+          mp.setDate(metadata.getDate());
         }
-        if (isBlank(mp.getSeriesTitle()) && isNotBlank(metadata.getSeriesIdentifier())) {
-          mp.setSeries(metadata.getSeriesIdentifier());
+
+        // Episode subjects
+        if (mp.getSubjects().length == 0 && metadata.getSubjects().length > 0) {
+          for (String subject : metadata.getSubjects()) {
+            mp.addSubject(subject);
+          }
         }
+
+        // Episode contributers
+        if (mp.getContributors().length == 0 && metadata.getContributors().length > 0) {
+          for (String contributor : metadata.getContributors()) {
+            mp.addContributor(contributor);
+          }
+        }
+
+        // Episode creators
+        if (mp.getCreators().length == 0 && metadata.getCreators().length > 0) {
+          for (String creator : metadata.getCreators()) {
+            mp.addCreator(creator);
+          }
+        }
+      
+        // Episode license
+        if (isBlank(mp.getLicense()) && isNotBlank(metadata.getLicense())) {
+          mp.setLicense(metadata.getLicense());
+        }
+
+        // Episode language
+        if (isBlank(mp.getLanguage()) && isNotBlank(metadata.getLanguage())) {
+          mp.setLanguage(metadata.getLanguage());
+        }
+
       }
     }
   }

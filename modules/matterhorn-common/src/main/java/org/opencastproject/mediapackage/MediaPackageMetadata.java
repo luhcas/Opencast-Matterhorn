@@ -38,7 +38,7 @@ public interface MediaPackageMetadata {
   String getTitle();
 
   /**
-   * The names of the creators.
+   * The names of the creators. If no creators were specified, an empty array is returned.
    * 
    * @return the creators for this mediapackage
    */
@@ -59,7 +59,7 @@ public interface MediaPackageMetadata {
   String getLicense();
 
   /**
-   * The contributors
+   * The contributors. If no contributors were specified, an empty array is returned.
    * 
    * @return the contributors for this mediapackage
    */
@@ -73,7 +73,7 @@ public interface MediaPackageMetadata {
   String getLanguage();
 
   /**
-   * The subjects
+   * The subjects. If no subjects were specified, an empty array is returned.
    * 
    * @return the subjects for this mediapackage
    */

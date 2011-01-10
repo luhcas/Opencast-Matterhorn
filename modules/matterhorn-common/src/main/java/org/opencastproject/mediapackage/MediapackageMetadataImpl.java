@@ -18,12 +18,12 @@ package org.opencastproject.mediapackage;
 import java.util.Date;
 
 /**
- * Provides metadata for a {@link MediaPackageMetadata}
+ * Provides metadata for a {@link MediaPackageMetadata}.
  */
 public class MediapackageMetadataImpl implements MediaPackageMetadata {
+
   protected String title;
   protected String seriesTitle;
-  protected String identifier;
   protected String seriesIdentifier;
   protected String[] creators;
   protected String[] contributors;
@@ -32,83 +32,176 @@ public class MediapackageMetadataImpl implements MediaPackageMetadata {
   protected String license;
   protected Date date;
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getTitle()
+   */
   public String getTitle() {
     return title;
   }
 
+  /**
+   * Sets the media package's title.
+   * 
+   * @param title
+   *          the title
+   */
   public void setTitle(String title) {
     this.title = title;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getSeriesTitle()
+   */
   public String getSeriesTitle() {
     return seriesTitle;
   }
 
+  /**
+   * Sets the series title.
+   * 
+   * @param seriesTitle
+   *          the series title
+   */
   public void setSeriesTitle(String seriesTitle) {
     this.seriesTitle = seriesTitle;
   }
 
-  public String getIdentifier() {
-    return identifier;
-  }
-
-  public void setIdentifier(String identifier) {
-    this.identifier = identifier;
-  }
-
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getSeriesIdentifier()
+   */
   public String getSeriesIdentifier() {
     return seriesIdentifier;
   }
 
+  /**
+   * Sets the series identifier
+   * 
+   * @param seriesIdentifier
+   *          the series identifier
+   */
   public void setSeriesIdentifier(String seriesIdentifier) {
     this.seriesIdentifier = seriesIdentifier;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getCreators()
+   */
   public String[] getCreators() {
+    if (creators == null)
+      return new String[] {};
     return creators;
   }
 
+  /**
+   * Sets the list of creators.
+   * 
+   * @param creators
+   *          the creators
+   */
   public void setCreators(String[] creators) {
     this.creators = creators;
   }
 
   public String[] getContributors() {
+    if (contributors == null)
+      return new String[] {};
     return contributors;
   }
 
+  /**
+   * Sets the mediapackage's contributors.
+   * 
+   * @param contributors
+   *          the contributors
+   */
   public void setContributors(String[] contributors) {
     this.contributors = contributors;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getSubjects()
+   */
   public String[] getSubjects() {
+    if (subjects == null)
+      return new String[] {};
     return subjects;
   }
 
+  /**
+   * Sets the mediapackage's subjects.
+   * 
+   * @param subjects
+   *          the subjects
+   */
   public void setSubjects(String[] subjects) {
     this.subjects = subjects;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getLanguage()
+   */
   public String getLanguage() {
     return language;
   }
 
+  /**
+   * Sets the mediapackage's language.
+   * 
+   * @param language
+   *          the language
+   */
   public void setLanguage(String language) {
     this.language = language;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getLicense()
+   */
   public String getLicense() {
     return license;
   }
 
+  /**
+   * Sets the mediapackage license.
+   * 
+   * @param license
+   *          the license
+   */
   public void setLicense(String license) {
     this.license = license;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageMetadata#getDate()
+   */
   public Date getDate() {
     return date;
   }
 
+  /**
+   * Sets the mediapackage's creation date.
+   * 
+   * @param date
+   *          the creation date
+   */
   public void setDate(Date date) {
     this.date = date;
   }
+
 }
