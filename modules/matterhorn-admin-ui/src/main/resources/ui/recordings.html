@@ -11,7 +11,6 @@
 
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui-1.8.6.custom.min.js"></script>
-    <!-- script type="text/javascript" src="js/jquery.tmpl.min.js"></script -->
     <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
     <script type="text/javascript" src="js/jquery.ui.spinner.js"></script>
     <script type="text/javascript" src="js/jquery.ui.searchbox.js"></script>
@@ -233,7 +232,7 @@
 <table id="recordingsTable" class="ui-widget" cellspacing="0" width="100%">
   <thead>
     <tr>
-      <th class="recordings-table-head"><span id="filterRecordingCount">0 Recordings Matching Filter</div>
+      <th class="recordings-table-head"><span id="filterRecordingCount"></span>
       <th colspan="4">&nbsp;</th>
       <th class="recordings-table-head"><a href="javascript:ocRecordings.displayBulkAction()">Bulk Action</a></th>
     </tr>
@@ -287,45 +286,6 @@
     {/for}
   </tbody>
 </table>
-      </textarea>
-
-      <textarea id="operationTemplate">
-<div>
-  <div class="status-column-operation-heading">
-  <span class="operation-heading-text">${heading} (${state})</span>
-  </div>
-  <div class="status-column-operation-details" style="display:none;">
-    ${details}
-    {{if time}}
-      (${time})
-    {{/if}}
-    {{if properties}}
-      <div class="operation-property-container">
-      {{each properties}}
-        <span class="operation-property-key">${key} = </span>
-        <span class="operation-property-value">${value}</span>
-        <br>
-      {{/each}}
-      </div>
-    {{/if}}
-  </div>
-</div>
-      </textarea>
-
-      <textarea id="errorTemplate">
-<div>
-  <div class="status-column-error-heading">
-  <span class="fold-icon ui-icon ui-icon-triangle-1-e"></span>
-  <span class="error-message">${message}</span>
-  </div>
-  <div class="status-column-error-details" style="display:none;">
-    ${details}
-  </div>
-</div>
-      </textarea>
-
-      <textarea id="noResultsTemplate">
-
       </textarea>
 
     </div>

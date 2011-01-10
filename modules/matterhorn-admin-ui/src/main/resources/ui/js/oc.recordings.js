@@ -280,7 +280,7 @@ ocRecordings = new (function() {
           this.holdAction = {
             url : op.holdurl,
             title : op['hold-action-title']
-            };
+          };
         }
       } else {
         ocUtils.log('Warning could not find current operation for worklfow ' + wf.id);
@@ -335,7 +335,24 @@ ocRecordings = new (function() {
     ocRecordings.totalRecordings = data.workflows.totalCount;
     var result = TrimPath.processDOMTemplate('tableTemplate', makeRenderData(data));
     $( '#tableContainer' ).empty().append(result);
-    
+
+    // display number of matches if filtered
+    if (ocRecordings.Configuration.filterText) {
+      var countText;
+      if (data.workflows.totalCount == '0') {
+        countText = 'No Recordings matching Filter';
+        $('#filterRecordingCount').css('color', 'red');
+      } else {
+        countText = data.workflows.totalCount;
+        countText += parseInt(data.workflows.totalCount) > 1 ? ' Recordings' : ' Recording';
+        countText += ' matching Filter';
+        $('#filterRecordingCount').css('color', 'black');
+      }
+      $('#filterRecordingCount').text(countText).show();
+    } else {
+      $('#filterRecordingCount').hide();
+    }
+
     var page = parseInt(ocRecordings.Configuration.page) + 1;
     var pageCount = Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize);
     pageCount = pageCount == 0 ? 1 : pageCount;
