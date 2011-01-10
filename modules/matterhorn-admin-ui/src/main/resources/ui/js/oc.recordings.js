@@ -561,7 +561,7 @@ ocRecordings = new (function() {
     $( '.state-filter-container' ).buttonset();
     $( '.state-filter-container input' ).click( function() {
       ocRecordings.Configuration.filterText = '';
-      ocRecordings.Configuration.filterField = null;
+      ocRecordings.Configuration.filterField = '';
       ocRecordings.Configuration.state = $(this).val();
       ocRecordings.Configuration.page = 0;
       ocRecordings.reload();
@@ -573,20 +573,20 @@ ocRecordings = new (function() {
         if (text.trim() != '') {
           ocRecordings.Configuration.filterField = field;
           ocRecordings.Configuration.filterText = text;
+          ocRecordings.Configuration.page = 0;
         }
         ocRecordings.reload();
       },
       clear : function() {
-        ocRecordings.Configuration.filterField = null;
+        ocRecordings.Configuration.filterField = '';
         ocRecordings.Configuration.filterText = '';
+        ocRecordings.Configuration.page = 0;
         ocRecordings.reload();
       },
       searchText : ocRecordings.Configuration.filterText,
       options : FILTER_FIELDS,
       selectedOption : ocRecordings.Configuration.filterField
     });
-
-    // ocRecordings table
 
     // pager
     $('#pageSize').val(ocRecordings.Configuration.pageSize);
