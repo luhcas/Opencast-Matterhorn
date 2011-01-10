@@ -92,7 +92,7 @@ public class VideoSegmenterRestEndpoint {
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
       if (element instanceof Track) {
-        Job job = videoSegmenter.segment((Track) element, false);
+        Job job = videoSegmenter.segment((Track) element);
         return Response.ok(new JaxbJob(job)).build();
       } else {
         return Response.status(Status.BAD_REQUEST).build();

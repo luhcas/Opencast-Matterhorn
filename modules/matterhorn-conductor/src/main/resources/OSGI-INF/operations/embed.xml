@@ -13,4 +13,6 @@
     policy="static" bind="setWorkspace" />
   <reference cardinality="1..1" interface="org.opencastproject.caption.api.CaptionService" name="CaptionService"
     policy="static" bind="setCaptionService" />
+  <reference name="ServiceRegistry" cardinality="1..1" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+    policy="static" bind="setServiceRegistry" />
 </scr:component>

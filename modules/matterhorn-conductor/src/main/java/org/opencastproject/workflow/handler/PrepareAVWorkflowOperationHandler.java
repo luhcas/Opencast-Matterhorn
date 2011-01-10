@@ -216,18 +216,18 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       throw new WorkflowOperationException("More than two tracks with flavor '" + sourceFlavor + "' found");
     }
 
-    Job receipt = null;
+    Job job = null;
     Track composedTrack = null;
 
     // Make sure we have a matching combination
     if (audioTrack == null && videoTrack != null) {
       if (rewrite) {
         logger.info("Encoding video only track {} to work version", videoTrack);
-        receipt = composerService.encode(videoTrack, PREPARE_VONLY_PROFILE, true);
-        if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
+        job = composerService.encode(videoTrack, PREPARE_VONLY_PROFILE);
+        if (!waitForStatus(job).isSuccess()) {
           throw new WorkflowOperationException("Rewriting container for video track " + videoTrack + " failed");
         }
-        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
         mediaPackage.add(composedTrack);
         String fileName = getFileNameFromElements(videoTrack, composedTrack);
 
@@ -244,11 +244,11 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     } else if (videoTrack == null && audioTrack != null) {
       if (rewrite) {
         logger.info("Encoding audio only track {} to work version", audioTrack);
-        receipt = composerService.encode(audioTrack, PREPARE_AONLY_PROFILE, true);
-        if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
+        job = composerService.encode(audioTrack, PREPARE_AONLY_PROFILE);
+        if (!waitForStatus(job).isSuccess()) {
           throw new WorkflowOperationException("Rewriting container for audio track " + audioTrack + " failed");
         }
-        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
         String fileName = getFileNameFromElements(audioTrack, composedTrack);
         mediaPackage.add(composedTrack);
         composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
@@ -261,11 +261,11 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     } else if (audioTrack == videoTrack) {
       if (rewrite) {
         logger.info("Encoding audiovisual track {} to work version", videoTrack);
-        receipt = composerService.encode(videoTrack, PREPARE_AV_PROFILE, true);
-        if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
+        job = composerService.encode(videoTrack, PREPARE_AV_PROFILE);
+        if (!waitForStatus(job).isSuccess()) {
           throw new WorkflowOperationException("Rewriting container for a/v track " + videoTrack + " failed");
         }
-        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
         mediaPackage.add(composedTrack);
         String fileName = getFileNameFromElements(videoTrack, composedTrack);
         composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
@@ -277,12 +277,12 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       }
     } else {
       logger.info("Muxing audio and video only track {} to work version", videoTrack);
-      receipt = composerService.mux(videoTrack, audioTrack, profile.getIdentifier(), true);
-      if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
+      job = composerService.mux(videoTrack, audioTrack, profile.getIdentifier());
+      if (!waitForStatus(job).isSuccess()) {
         throw new WorkflowOperationException("Muxing video track " + videoTrack + " and audio track " + audioTrack
                 + " failed");
       }
-      composedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+      composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
       mediaPackage.add(composedTrack);
       String fileName = getFileNameFromElements(videoTrack, composedTrack);
       composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
@@ -290,9 +290,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     }
 
     long timeInQueue = 0;
-    if (receipt != null) {
+    if (job != null) {
       // add this receipt's queue time to the total
-      timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+      timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
     }
 
     // Update the track's flavor

@@ -64,7 +64,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -170,9 +169,9 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
+   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI)
    */
-  public Job inspect(final URI uri, final boolean block) throws MediaInspectionException {
+  public Job inspect(final URI uri) throws MediaInspectionException {
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
     // Construct a receipt for this operation
@@ -276,26 +275,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       }
     };
 
-    Future<Track> future = executor.submit(command);
-
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof MediaInspectionException) {
-          throw (MediaInspectionException) e;
-        } else {
-          throw new MediaInspectionException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 
@@ -303,10 +283,10 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    * {@inheritDoc}
    * 
    * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.mediapackage.MediaPackageElement,
-   *      boolean, boolean)
+   *      boolean)
    */
   @Override
-  public Job enrich(final MediaPackageElement element, final boolean override, final boolean block)
+  public Job enrich(final MediaPackageElement element, final boolean override)
           throws MediaInspectionException, MediaPackageException {
     Callable<MediaPackageElement> command;
     final Job job;
@@ -324,25 +304,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       command = getEnrichElementCommand(element, override, job);
     }
 
-    Future<MediaPackageElement> future = executor.submit(command);
-
-    if (block) {
-      try {
-        future.get();
-      } catch (Throwable e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof MediaInspectionException) {
-          throw (MediaInspectionException) e;
-        } else {
-          throw new MediaInspectionException(e);
-        }
-      }
-    }
+    executor.submit(command);
     return job;
   }
 

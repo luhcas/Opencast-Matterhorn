@@ -55,7 +55,6 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -127,23 +126,22 @@ public class CaptionServiceImpl implements CaptionService {
    * {@inheritDoc}
    * 
    * @see org.opencastproject.caption.api.CaptionService#convert(org.opencastproject.mediapackage.Catalog,
-   *      java.lang.String, java.lang.String, boolean)
+   *      java.lang.String, java.lang.String)
    */
   @Override
-  public Job convert(Catalog input, String inputFormat, String outputFormat, boolean block)
+  public Job convert(Catalog input, String inputFormat, String outputFormat)
           throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
-    return convert(input, inputFormat, outputFormat, null, block);
+    return convert(input, inputFormat, outputFormat, null);
   }
 
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.caption.api.CaptionService#convert(org.opencastproject.mediapackage.Catalog,
-   *      java.lang.String, java.lang.String, java.lang.String, boolean)
+   *      java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public Job convert(final Catalog input, final String inputFormat, final String outputFormat, final String language,
-          boolean block) throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
+  public Job convert(final Catalog input, final String inputFormat, final String outputFormat, final String language) throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
 
     final Job job;
     try {
@@ -233,28 +231,7 @@ public class CaptionServiceImpl implements CaptionService {
       }
     };
 
-    Future<Catalog> future = executor.submit(command);
-
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof UnsupportedCaptionFormatException) {
-          throw (UnsupportedCaptionFormatException) e;
-        } else if (e instanceof CaptionConverterException) {
-          throw (CaptionConverterException) e;
-        } else {
-          throw new CaptionConverterException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 

@@ -173,10 +173,11 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    * @throws InterruptedException
    * @throws IOException
    * @throws NotFoundException
+   * @throws WorkflowOperationException 
    */
   private WorkflowOperationResult createPreviews(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
           throws EncoderException, InterruptedException, ExecutionException, NotFoundException, MediaPackageException,
-          IOException {
+          IOException, WorkflowOperationException {
     long totalTimeInQueue = 0;
 
     // Read the configuration properties
@@ -261,13 +262,16 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             // Choose a time
             long time = tp.getTimeInMilliseconds() / 1000;
 
-            Job receipt = composerService.image(t, profile.getIdentifier(), time, true);
+            Job job = composerService.image(t, profile.getIdentifier(), time);
+            if (!waitForStatus(job).isSuccess()) {
+              throw new WorkflowOperationException("Extracting preview image from " + t + " failed");
+            }
 
             // add this receipt's queue time to the total
-            long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+            long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
             totalTimeInQueue += timeInQueue;
 
-            Attachment composedImage = (Attachment) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+            Attachment composedImage = (Attachment) AbstractMediaPackageElement.getFromXml(job.getPayload());
             if (composedImage == null)
               throw new IllegalStateException("Unable to compose image");
 

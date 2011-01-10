@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Distributes media to the local media delivery directory.
@@ -129,10 +128,10 @@ public class StreamingDistributionService implements DistributionService {
    * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement, boolean)
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement)
    */
   @Override
-  public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
+  public Job distribute(final String mediaPackageId, final MediaPackageElement element)
           throws DistributionException, MediaPackageException {
     if (mediaPackageId == null) {
       throw new DistributionException("Mediapackage ID must be specified");
@@ -229,25 +228,7 @@ public class StreamingDistributionService implements DistributionService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof DistributionException) {
-          throw (DistributionException) e;
-        } else {
-          throw new DistributionException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 
@@ -257,7 +238,7 @@ public class StreamingDistributionService implements DistributionService {
    * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
    */
   @Override
-  public Job retract(final String mediaPackageId, boolean block) throws DistributionException {
+  public Job retract(final String mediaPackageId) throws DistributionException {
 
     final Job job;
     try {
@@ -307,25 +288,7 @@ public class StreamingDistributionService implements DistributionService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof DistributionException) {
-          throw (DistributionException) e;
-        } else {
-          throw new DistributionException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 

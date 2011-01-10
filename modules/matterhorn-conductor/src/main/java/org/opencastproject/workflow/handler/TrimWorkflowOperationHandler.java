@@ -155,8 +155,12 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
         Track trimmedTrack = null;
         try {
           // Trim the track
-          Job receipt = composerService.trim(t, profileId, start, duration, true);
-          trimmedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+          Job job = composerService.trim(t, profileId, start, duration);
+          if (!waitForStatus(job).isSuccess()) {
+            throw new WorkflowOperationException("Trimming of " + t + " failed");
+          }
+          
+          trimmedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
           if (trimmedTrack == null) {
             throw new WorkflowOperationException("Trimming failed to produce a track");
           }

@@ -192,10 +192,11 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       logger.info("Encoding track {} using encoding profile '{}'", t, profile);
 
       // Start encoding and wait for the result
-      final Job job = composerService.encode(t, profile.getIdentifier(), true);
-      if (job == null || job.getStatus().equals(Job.Status.FAILED)) {
+      Job job = composerService.encode(t, profile.getIdentifier());
+      if (!waitForStatus(job).isSuccess()) {
         throw new WorkflowOperationException("Encoding failed");
       }
+      
       Track composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
 
       // add this receipt's queue time to the total

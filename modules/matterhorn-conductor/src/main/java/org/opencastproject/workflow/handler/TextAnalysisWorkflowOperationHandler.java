@@ -214,10 +214,11 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @throws ExecutionException
    * @throws InterruptedException
    * @throws NotFoundException
+   * @throws WorkflowOperationException 
    */
   protected WorkflowOperationResult extractVideoText(final MediaPackage mediaPackage,
           WorkflowOperationInstance operation) throws EncoderException, InterruptedException, ExecutionException,
-          IOException, NotFoundException, MediaPackageException, TextAnalyzerException {
+          IOException, NotFoundException, MediaPackageException, TextAnalyzerException, WorkflowOperationException {
     long totalTimeInQueue = 0;
 
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
@@ -287,10 +288,13 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         try {
           long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
           long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
-          Job imageReceipt = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds + durationSeconds
-                  - stabilityThreshold + 1, true);
-          image = (Attachment) AbstractMediaPackageElement.getFromXml(imageReceipt.getPayload());
-          long timeInComposerQueue = imageReceipt.getDateStarted().getTime() - imageReceipt.getDateCreated().getTime();
+          Job imageJob = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds + durationSeconds
+                  - stabilityThreshold + 1);
+          if (!waitForStatus(imageJob).isSuccess()) {
+            throw new WorkflowOperationException("Extracting scene image from " + sourceTrack + " failed");
+          }
+          image = (Attachment) AbstractMediaPackageElement.getFromXml(imageJob.getPayload());
+          long timeInComposerQueue = imageJob.getDateStarted().getTime() - imageJob.getDateCreated().getTime();
           totalTimeInQueue += timeInComposerQueue;
         } catch (EncoderException e) {
           logger.error("Error creating still image from {}", sourceTrack);

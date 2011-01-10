@@ -80,7 +80,7 @@ public class YouTubeDistributionRestService {
 
     try {
       MediaPackageElement element = AbstractMediaPackageElement.getFromXml(elementXml);
-      receipt = service.distribute(mediaPackageId, element, false);
+      receipt = service.distribute(mediaPackageId, element);
     } catch (Exception e) {
       logger.warn("Error distributing element", e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -94,7 +94,7 @@ public class YouTubeDistributionRestService {
   public Response retract(@FormParam("mediapackageId") String mediaPackageId) throws Exception {
     Job receipt = null;
     try {
-      receipt = service.retract(mediaPackageId, false);
+      receipt = service.retract(mediaPackageId);
     } catch (Exception e) {
       logger.warn("Unable to retract mediapackage '{}' from youtube: {}", mediaPackageId, e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();

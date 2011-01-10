@@ -23,6 +23,7 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
@@ -61,7 +62,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * @author nejc
@@ -207,18 +207,7 @@ public class GStreamerComposerService implements ComposerService {
    */
   @Override
   public Job encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException {
-    return encode(sourceTrack, profileId, false);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
-   * java.lang.String, boolean)
-   */
-  @Override
-  public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException, MediaPackageException {
-    return encode(sourceTrack, null, profileId, null, block);
+    return encode(sourceTrack, profileId);
   }
 
   /*
@@ -228,20 +217,9 @@ public class GStreamerComposerService implements ComposerService {
    * org.opencastproject.mediapackage.Track, java.lang.String)
    */
   @Override
-  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException, MediaPackageException {
-    return encode(sourceVideoTrack, sourceAudioTrack, profileId, null, false);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
-   * org.opencastproject.mediapackage.Track, java.lang.String, boolean)
-   */
-  @Override
-  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block)
-          throws EncoderException, MediaPackageException {
-    return encode(sourceVideoTrack, sourceAudioTrack, profileId, null, block);
+  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException,
+          MediaPackageException {
+    return encode(sourceVideoTrack, sourceAudioTrack, profileId, null);
   }
 
   /*
@@ -251,19 +229,7 @@ public class GStreamerComposerService implements ComposerService {
    * java.lang.String, long, long)
    */
   @Override
-  public Job trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
-          MediaPackageException {
-    return trim(sourceTrack, profileId, start, duration, false);
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
-   * java.lang.String, long, long, boolean)
-   */
-  @Override
-  public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration, boolean block)
+  public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration)
           throws EncoderException, MediaPackageException {
 
     final String targetTrackId = idBuilder.createNew().toString();
@@ -291,12 +257,7 @@ public class GStreamerComposerService implements ComposerService {
           updateJob(job);
 
           // Get the track and make sure it exists
-          final File trackFile;
-          if (sourceTrack == null) {
-            trackFile = null;
-          } else {
-            trackFile = getTrack(sourceTrack);
-          }
+          final File trackFile = getTrack(sourceTrack);
 
           // Get the encoding profile
           final EncodingProfile profile = profileScanner.getProfile(profileId);
@@ -339,12 +300,15 @@ public class GStreamerComposerService implements ComposerService {
           // Have the encoded track inspected and return the result
           Job inspectionJob = null;
           try {
-            inspectionJob = inspectionService.inspect(returnURL, true);
+            inspectionJob = inspectionService.inspect(returnURL);
+            JobBarrier barrier = new JobBarrier(serviceRegistry, inspectionJob);
+            if (!barrier.waitForJobs().isSuccess()) {
+              throw new EncoderException("Media inspection of " + returnURL + " failed");
+            }
           } catch (MediaInspectionException e) {
             throw new EncoderException("Media inspection of " + returnURL + " failed", e);
           }
-          if (inspectionJob.getStatus() == Job.Status.FAILED)
-            throw new EncoderException("Media inspection of " + returnURL + " failed");
+
           Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionJob.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
@@ -370,25 +334,7 @@ public class GStreamerComposerService implements ComposerService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof EncoderException) {
-          throw (EncoderException) e;
-        } else {
-          throw new EncoderException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 
@@ -399,19 +345,11 @@ public class GStreamerComposerService implements ComposerService {
    * java.lang.String, long)
    */
   @Override
-  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException, MediaPackageException {
-    return image(sourceTrack, profileId, time, false);
-  }
+  public Job image(final Track sourceTrack, final String profileId, final long time) throws EncoderException,
+          MediaPackageException {
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
-   * java.lang.String, long, boolean)
-   */
-  @Override
-  public Job image(final Track sourceTrack, final String profileId, final long time, boolean block)
-          throws EncoderException, MediaPackageException {
+    if (sourceTrack == null)
+      throw new EncoderException("SourceTrack cannot be null");
 
     final Job job;
     try {
@@ -435,9 +373,6 @@ public class GStreamerComposerService implements ComposerService {
         try {
           job.setStatus(Status.RUNNING);
           updateJob(job);
-
-          if (sourceTrack == null)
-            throw new EncoderException("SourceTrack cannot be null");
 
           logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
 
@@ -528,25 +463,7 @@ public class GStreamerComposerService implements ComposerService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof EncoderException) {
-          throw (EncoderException) e;
-        } else {
-          throw new EncoderException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 
@@ -558,17 +475,6 @@ public class GStreamerComposerService implements ComposerService {
    */
   @Override
   public Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException {
-    throw new NotImplementedException("Adding captions not implemented in gstreamer composer");
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
-   * org.opencastproject.mediapackage.Catalog[], boolean)
-   */
-  @Override
-  public Job captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
     throw new NotImplementedException("Adding captions not implemented in gstreamer composer");
   }
 
@@ -612,14 +518,14 @@ public class GStreamerComposerService implements ComposerService {
    *           if encoding fails
    */
   private Job encode(final Track videoTrack, final Track audioTrack, final String profileId,
-          Dictionary<String, String> properties, final boolean block) throws EncoderException, MediaPackageException {
+          Dictionary<String, String> properties) throws EncoderException, MediaPackageException {
 
     String video = videoTrack == null ? null : videoTrack.getAsXml();
     String audio = audioTrack == null ? null : audioTrack.getAsXml();
     StringBuilder propertiesAsString = new StringBuilder();
-    if(properties != null) {
+    if (properties != null) {
       Enumeration<String> elements = properties.elements();
-      while(elements.hasMoreElements()) {
+      while (elements.hasMoreElements()) {
         String key = elements.nextElement();
         propertiesAsString.append(key);
         propertiesAsString.append("=");
@@ -715,12 +621,15 @@ public class GStreamerComposerService implements ComposerService {
           // Have the encoded track inspected and return the result
           Job inspectionJob = null;
           try {
-            inspectionJob = inspectionService.inspect(returnURL, true);
+            inspectionJob = inspectionService.inspect(returnURL);
+            JobBarrier barrier = new JobBarrier(serviceRegistry, inspectionJob);
+            if (!barrier.waitForJobs().isSuccess()) {
+              throw new EncoderException("Media inspection of " + returnURL + " failed");
+            }
           } catch (MediaInspectionException e) {
             throw new EncoderException("Media inspection of " + returnURL + " failed", e);
           }
-          if (inspectionJob.getStatus() == Job.Status.FAILED)
-            throw new EncoderException("Media inspection of " + returnURL + " failed");
+
           Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionJob.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
@@ -746,25 +655,7 @@ public class GStreamerComposerService implements ComposerService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof EncoderException) {
-          throw (EncoderException) e;
-        } else {
-          throw new EncoderException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 

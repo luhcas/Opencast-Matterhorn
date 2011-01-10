@@ -39,7 +39,7 @@ import java.util.Properties;
 public class GSEncodingProfileScanner implements ArtifactInstaller {
 
   /** Prefix for encoding profile property keys **/
-  private static String PROP_PREFIX = "profile.";
+  private static final String PROP_PREFIX = "profile.";
 
   /* Property names */
   private static final String PROP_NAME = ".name";
@@ -61,7 +61,7 @@ public class GSEncodingProfileScanner implements ArtifactInstaller {
    */
   @Override
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("gsencoding") && artifact.getName().endsWith(".properties");
+    return "gsencoding".equals(artifact.getParentFile().getName()) && artifact.getName().endsWith(".properties");
   }
 
   /*

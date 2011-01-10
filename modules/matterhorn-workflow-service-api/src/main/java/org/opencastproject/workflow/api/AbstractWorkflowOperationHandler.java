@@ -15,8 +15,11 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.io.FilenameUtils;
@@ -44,6 +47,9 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
 
   /** The configuration options for this operation handler */
   protected SortedMap<String, String> options = new TreeMap<String, String>();
+
+  /** Optional service registry */
+  protected ServiceRegistry serviceRegistry = null;
 
   /**
    * Activates this component with its properties once all of the collaborating services have been set
@@ -248,6 +254,65 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
   protected WorkflowOperationResult createResult(MediaPackage mediaPackage, Map<String, String> properties,
           Action action, long timeInQueue) {
     return new WorkflowOperationResultImpl(mediaPackage, properties, action, timeInQueue);
+  }
+
+  /**
+   * Sets the service registry. This method is here as a convenience for developers that need the registry to do job
+   * waiting.
+   * 
+   * @param serviceRegistry
+   *          the service registry
+   */
+  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * Waits until all of the jobs have reached either one of these statuses:
+   * <ul>
+   * <li>{@link Job.Status#FINISHED}</li>
+   * <li>{@link Job.Status#FAILED}</li>
+   * <li>{@link Job.Status#DELETED}</li>
+   * </ul>
+   * After that, the method returns with the actual outcomes of the jobs.
+   * 
+   * @param jobs
+   *          the jobs
+   * @return the jobs and their outcomes
+   * @throws IllegalStateException
+   *           if the service registry has not been set
+   * @throws IllegalArgumentException
+   *           if the jobs collecion is either <code>null</code> or empty
+   */
+  protected JobBarrier.Result waitForStatus(Job... jobs) throws IllegalStateException, IllegalArgumentException {
+    return waitForStatus(0, jobs);
+  }
+
+  /**
+   * Waits until all of the jobs have reached either one of these statuses:
+   * <ul>
+   * <li>{@link Job.Status#FINISHED}</li>
+   * <li>{@link Job.Status#FAILED}</li>
+   * <li>{@link Job.Status#DELETED}</li>
+   * </ul>
+   * After that, the method returns with the actual outcomes of the jobs.
+   * 
+   * @param timeout
+   *          the maximum amount of time in miliseconds to wait
+   * @param jobs
+   *          the jobs
+   * @return the jobs and their outcomes
+   * @throws IllegalStateException
+   *           if the service registry has not been set
+   * @throws IllegalArgumentException
+   *           if the jobs collecion is either <code>null</code> or empty
+   */
+  protected JobBarrier.Result waitForStatus(long timeout, Job... jobs) throws IllegalStateException,
+          IllegalArgumentException {
+    if (serviceRegistry == null)
+      throw new IllegalStateException("Can't wait for job status without providing a service registry first");
+    JobBarrier barrier = new JobBarrier(serviceRegistry, jobs);
+    return barrier.waitForJobs(timeout);
   }
 
   /**

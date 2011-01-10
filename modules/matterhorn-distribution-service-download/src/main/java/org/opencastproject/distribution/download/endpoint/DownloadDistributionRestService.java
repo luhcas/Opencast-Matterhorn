@@ -80,7 +80,7 @@ public class DownloadDistributionRestService {
     Job job = null;
     try {
       MediaPackageElement element = AbstractMediaPackageElement.getFromXml(elementXml);
-      job = service.distribute(mediaPackageId, element, false);
+      job = service.distribute(mediaPackageId, element);
     } catch (Exception e) {
       logger.warn("Error distributing element", e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -94,7 +94,7 @@ public class DownloadDistributionRestService {
   public Response retract(@FormParam("mediapackageId") String mediaPackageId) throws Exception {
     Job job = null;
     try {
-      job = service.retract(mediaPackageId, false);
+      job = service.retract(mediaPackageId);
     } catch (Exception e) {
       logger.warn("Unable to retract mediapackage '{}' from download channel: {}", new Object[] { mediaPackageId, e });
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();

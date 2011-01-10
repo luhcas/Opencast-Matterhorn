@@ -37,14 +37,12 @@ public interface VideoSegmenterService extends JobProducer {
    * 
    * @param track
    *          track to segment
-   * @param block
-   *          whether to block the calling thread until the analysis is complete
    * @return the job with which we can obtain the extracted metadata
    * @throws VideoSegmenterException
    *           if the track could not be segmented
    * @throws MediaPackageException
    *           if the track is invalid
    */
-  Job segment(Track track, boolean block) throws VideoSegmenterException, MediaPackageException;
+  Job segment(Track track) throws VideoSegmenterException, MediaPackageException;
 
 }

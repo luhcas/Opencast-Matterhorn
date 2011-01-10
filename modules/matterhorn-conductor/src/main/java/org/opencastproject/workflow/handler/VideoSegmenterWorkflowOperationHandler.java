@@ -122,9 +122,9 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     Catalog mpeg7Catalog = null;
     long timeInQueue = 0;
     try {
-      Job job = videosegmenter.segment(track, true);
-      if (job.getStatus().equals(Job.Status.FAILED)) {
-        throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
+      Job job = videosegmenter.segment(track);
+      if (!waitForStatus(job).isSuccess()) {
+        throw new WorkflowOperationException("Video segmentation of " + track + " failed");
       }
       timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
       mpeg7Catalog = (Catalog) AbstractMediaPackageElement.getFromXml(job.getPayload());

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
@@ -125,11 +126,16 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
 
-      Job inspectJob;
+      Job inspectJob = null;
       try {
-        inspectJob = inspectionService.enrich(track, false, true);
-      } catch (Exception e) {
-        throw new WorkflowOperationException(e);
+        inspectJob = inspectionService.enrich(track, false);
+        if (!waitForStatus(inspectJob).isSuccess()) {
+          throw new WorkflowOperationException("Track " + track + " could not be inspected");
+        }
+      } catch (MediaInspectionException e) {
+        throw new WorkflowOperationException("Error inspecting media package", e);
+      } catch (MediaPackageException e) {
+        throw new WorkflowOperationException("Error parsing media package", e);
       }
 
       // add this receipt's queue time to the total
@@ -139,8 +145,8 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       Track inspectedTrack;
       try {
         inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectJob.getPayload());
-      } catch (MediaPackageException e1) {
-        throw new WorkflowOperationException("Unable to parse track from job " + inspectJob.getId());
+      } catch (MediaPackageException e) {
+        throw new WorkflowOperationException("Unable to parse track from job " + inspectJob.getId(), e);
       }
       if (inspectedTrack == null)
         throw new WorkflowOperationException("Track " + track + " could not be inspected");

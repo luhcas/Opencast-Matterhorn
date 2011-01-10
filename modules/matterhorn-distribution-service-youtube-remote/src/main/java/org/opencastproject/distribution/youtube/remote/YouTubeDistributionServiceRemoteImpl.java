@@ -67,10 +67,10 @@ public class YouTubeDistributionServiceRemoteImpl extends RemoteBase implements 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement, boolean)
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement)
    */
   @Override
-  public Job distribute(String mediaPackageId, MediaPackageElement element, boolean block) throws DistributionException {
+  public Job distribute(String mediaPackageId, MediaPackageElement element) throws DistributionException {
     String elementXml = null;
     try {
       elementXml = element.getAsXml();
@@ -92,9 +92,6 @@ public class YouTubeDistributionServiceRemoteImpl extends RemoteBase implements 
         logger.info("distributed {} to {}", mediaPackageId, distributionChannel);
         try {
           receipt = JobParser.parseJob(response.getEntity().getContent());
-          if (block) {
-            receipt = poll(receipt.getId());
-          }
           return receipt;
         } catch (Exception e) {
           throw new DistributionException("Unable to distribute mediapackage '" + mediaPackageId
@@ -114,10 +111,10 @@ public class YouTubeDistributionServiceRemoteImpl extends RemoteBase implements 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String, boolean)
+   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
    */
   @Override
-  public Job retract(String mediaPackageId, boolean block) throws DistributionException {
+  public Job retract(String mediaPackageId) throws DistributionException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackageId", mediaPackageId));
     HttpPost post = new HttpPost();
@@ -136,9 +133,6 @@ public class YouTubeDistributionServiceRemoteImpl extends RemoteBase implements 
         logger.info("retracted {} from {}", mediaPackageId, distributionChannel);
         try {
           receipt = JobParser.parseJob(response.getEntity().getContent());
-          if (block) {
-            receipt = poll(receipt.getId());
-          }
           return receipt;
         } catch (Exception e) {
           throw new DistributionException("Unable to retract mediapackage '" + mediaPackageId

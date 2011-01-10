@@ -86,7 +86,7 @@ public class MediaInspectionRestEndpoint {
   public Response inspectTrack(@QueryParam("uri") URI uri) {
     checkNotNull(service);
     try {
-      Job job = service.inspect(uri, false);
+      Job job = service.inspect(uri);
       return Response.ok(new JaxbJob(job)).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
@@ -105,7 +105,7 @@ public class MediaInspectionRestEndpoint {
       Document doc = docBuilder.parse(IOUtils.toInputStream(mediaPackageElement, "UTF-8"));
       MediaPackageElement mpe = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      Job job = service.enrich(mpe, override, false);
+      Job job = service.enrich(mpe, override);
       return Response.ok(new JaxbJob(job)).build();
     } catch (Exception e) {
       logger.info(e.getMessage(), e);

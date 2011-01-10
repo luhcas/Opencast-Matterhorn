@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
@@ -72,13 +73,19 @@ public class DistributeWorkflowOperationHandlerTest {
     EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml());
     EasyMock.replay(job);
 
+    // set up mock service registry
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(serviceRegistry.getJob(EasyMock.anyLong())).andReturn(job).anyTimes();
+    EasyMock.replay(serviceRegistry);
+
     service = EasyMock.createNiceMock(DistributionService.class);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), track2, true)).andReturn(job);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1, true)).andReturn(job);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2, true)).andReturn(job);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), attachment1, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), track2)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), attachment1)).andReturn(job);
     EasyMock.replay(service);
     operationHandler.setDistributionService(service);
+    operationHandler.setServiceRegistry(serviceRegistry);
 
     // Source tags get tested by our mock
     String sourceTags = "engage,atom,rss";
@@ -105,12 +112,18 @@ public class DistributeWorkflowOperationHandlerTest {
     EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml()).times(2);
     EasyMock.replay(job);
 
+    // set up mock service registry
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(serviceRegistry.getJob(EasyMock.anyLong())).andReturn(job).anyTimes();
+    EasyMock.replay(serviceRegistry);
+
     service = EasyMock.createNiceMock(DistributionService.class);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1, true)).andReturn(job);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2, true)).andReturn(job);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), attachment1, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), attachment1)).andReturn(job);
     EasyMock.replay(service);
     operationHandler.setDistributionService(service);
+    operationHandler.setServiceRegistry(serviceRegistry);
 
     // Source tags get tested by our mock
     String sourceTags = "rss";
@@ -135,11 +148,17 @@ public class DistributeWorkflowOperationHandlerTest {
     EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml()).times(2);
     EasyMock.replay(job);
 
+    // set up mock service registry
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(serviceRegistry.getJob(EasyMock.anyLong())).andReturn(job).anyTimes();
+    EasyMock.replay(serviceRegistry);
+
     service = EasyMock.createNiceMock(DistributionService.class);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1, true)).andReturn(job);
-    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2)).andReturn(job);
     EasyMock.replay(service);
     operationHandler.setDistributionService(service);
+    operationHandler.setServiceRegistry(serviceRegistry);
 
     // Source tags get tested by our mock
     String sourceTags = "nosuchtag";

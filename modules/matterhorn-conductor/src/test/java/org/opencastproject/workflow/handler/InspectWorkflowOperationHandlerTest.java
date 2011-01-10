@@ -29,6 +29,7 @@ import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -120,15 +121,22 @@ public class InspectWorkflowOperationHandlerTest {
 
     // set up mock receipt and inspect service providing it
     job = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(job.getPayload()).andReturn(newTrack.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(newTrack.getAsXml()).anyTimes();
     EasyMock.expect(job.getId()).andReturn(new Long(123));
     EasyMock.expect(job.getStatus()).andReturn(Status.FINISHED);
     EasyMock.expect(job.getDateCreated()).andReturn(new Date());
     EasyMock.expect(job.getDateStarted()).andReturn(new Date());
     EasyMock.replay(job);
+    
+    // set up mock service registry
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(serviceRegistry.getJob(EasyMock.anyLong())).andReturn(job).anyTimes();
+    EasyMock.replay(serviceRegistry);
+    operationHandler.setServiceRegistry(serviceRegistry);
+
     inspectionService = EasyMock.createNiceMock(MediaInspectionService.class);
     EasyMock.expect(
-            inspectionService.enrich((Track) EasyMock.anyObject(), EasyMock.anyBoolean(), EasyMock.anyBoolean()))
+            inspectionService.enrich((Track) EasyMock.anyObject(), EasyMock.anyBoolean()))
             .andReturn(job);
     EasyMock.replay(inspectionService);
     operationHandler.setInspectionService(inspectionService);

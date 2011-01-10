@@ -19,6 +19,7 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -72,7 +73,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import javax.media.Buffer;
 import javax.media.Controller;
@@ -254,12 +254,10 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
    * 
    * @param track
    *          the element to analyze
-   * @param block
-   *          <code>true</code> to make this operation synchronous
    * @return a receipt containing the resulting mpeg-7 catalog
    * @throws VideoSegmenterException
    */
-  public Job segment(final Track track, boolean block) throws VideoSegmenterException, MediaPackageException {
+  public Job segment(final Track track) throws VideoSegmenterException, MediaPackageException {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, OPERATION, Arrays.asList(track.getAsXml()));
@@ -430,24 +428,7 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof VideoSegmenterException) {
-          throw (VideoSegmenterException) e;
-        } else {
-          throw new VideoSegmenterException(e);
-        }
-      }
-    }
+    executor.submit(command);
     return job;
   }
 
@@ -708,7 +689,12 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
 
     // Looks like we need to do the work ourselves
     logger.info("Requesting {} version of track {}", MJPEG_MIMETYPE, track);
-    final Job receipt = composer.encode(track, MJPEG_ENCODING_PROFILE, true);
+    final Job receipt = composer.encode(track, MJPEG_ENCODING_PROFILE);
+    JobBarrier barrier = new JobBarrier(serviceRegistry, receipt);
+    if (!barrier.waitForJobs().isSuccess()) {
+      throw new EncoderException("Unable to create motion jpeg version of " + track);
+    }
+
     Track composedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
     composedTrack.setReference(original);
     composedTrack.setMimeType(MJPEG_MIMETYPE);

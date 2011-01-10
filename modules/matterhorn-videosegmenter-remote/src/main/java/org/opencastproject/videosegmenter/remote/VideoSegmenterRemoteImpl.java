@@ -53,7 +53,7 @@ public class VideoSegmenterRemoteImpl extends RemoteBase implements VideoSegment
   }
 
   @Override
-  public Job segment(Track track, boolean block) throws VideoSegmenterException {
+  public Job segment(Track track) throws VideoSegmenterException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
     try {
@@ -72,9 +72,6 @@ public class VideoSegmenterRemoteImpl extends RemoteBase implements VideoSegment
       if (response != null) {
         try {
           receipt = JobParser.parseJob(response.getEntity().getContent());
-          if (block) {
-            receipt = poll(receipt.getId());
-          }
           return receipt;
         } catch (Exception e) {
           throw new VideoSegmenterException("Unable to analyze element '" + track

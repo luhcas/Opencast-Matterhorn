@@ -37,9 +37,6 @@ public interface MediaInspectionService extends JobProducer {
    * 
    * @param uri
    *          the uri to a track in a media package
-   * @param block
-   *          whether this operation should block the calling thread, or return the receipt immediately without the
-   *          inspected track.
    * @return the receipt of this job, that can be used to check the current status of inspect method and retrieve track
    *         with added metadata when done
    * @throws IllegalStateException
@@ -47,7 +44,7 @@ public interface MediaInspectionService extends JobProducer {
    * @throws MediaInspectionException
    *           if there is a failure during media package update
    */
-  Job inspect(URI uri, boolean block) throws MediaInspectionException;
+  Job inspect(URI uri) throws MediaInspectionException;
 
   /**
    * Equip an existing media package element with automatically generated metadata
@@ -66,7 +63,7 @@ public interface MediaInspectionService extends JobProducer {
    * @throws MediaPackageException
    *           if the element is invalid
    */
-  Job enrich(MediaPackageElement original, boolean override, boolean block) throws MediaInspectionException,
+  Job enrich(MediaPackageElement original, boolean override) throws MediaInspectionException,
           MediaPackageException;
 
 }

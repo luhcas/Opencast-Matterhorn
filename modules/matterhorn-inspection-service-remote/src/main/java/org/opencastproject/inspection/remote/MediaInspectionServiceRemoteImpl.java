@@ -56,10 +56,10 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
+   * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI)
    */
   @Override
-  public Job inspect(URI uri, boolean block) throws MediaInspectionException {
+  public Job inspect(URI uri) throws MediaInspectionException {
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
     String url = "/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
@@ -70,9 +70,6 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       response = getResponse(get);
       if (response != null) {
         Job job = JobParser.parseJob(response.getEntity().getContent());
-        if (block) {
-          job = poll(job.getId());
-        }
         logger.info("Completing inspection of media file at {} using a remote media inspection service", uri);
         return job;
       }
@@ -88,10 +85,10 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
    * {@inheritDoc}
    * 
    * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.mediapackage.AbstractMediaPackageElement,
-   *      boolean, boolean)
+   *      boolean)
    */
   @Override
-  public Job enrich(MediaPackageElement original, boolean override, boolean block) throws MediaInspectionException {
+  public Job enrich(MediaPackageElement original, boolean override) throws MediaInspectionException {
     String url = "/enrich";
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
@@ -109,9 +106,6 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       response = getResponse(post);
       if (response != null) {
         Job receipt = JobParser.parseJob(response.getEntity().getContent());
-        if (block) {
-          receipt = poll(receipt.getId());
-        }
         logger.info("Completing inspection of media file at {} using a remote media inspection service", original
                 .getURI());
         return receipt;

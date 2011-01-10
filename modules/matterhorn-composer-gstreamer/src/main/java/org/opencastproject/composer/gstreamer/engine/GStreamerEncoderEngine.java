@@ -19,6 +19,7 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.gstreamer.AbstractGSEncoderEngine;
 
+import org.apache.commons.lang.StringUtils;
 import org.gstreamer.Bus;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
@@ -102,7 +103,7 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
    */
   private GSPipeline createPipeline(String pipelineDefinition) throws EncoderException {
 
-    if (pipelineDefinition == null || pipelineDefinition.equals("")) {
+    if (StringUtils.isBlank(pipelineDefinition)) {
       logger.warn("No pipeline definition specified.");
       throw new EncoderException("Pipeline definition is null");
     }
@@ -333,23 +334,28 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
    * Used for monitoring pipeline state.
    */
   private interface MonitorObject {
-    public Object getMonitorLock();
+    
+    Object getMonitorLock();
 
-    public boolean getEOSReached();
+    boolean getEOSReached();
 
-    public void setStopPipeline(boolean reached);
+    void setStopPipeline(boolean reached);
 
-    public void addErrorMessage(String message);
+    void addErrorMessage(String message);
 
-    public String getFirstErrorMessage();
+    String getFirstErrorMessage();
+
   }
 
   /**
    * Container for Pipeline and MonitorObject
    */
   private interface GSPipeline {
-    public Pipeline getPipeline();
+    
+    Pipeline getPipeline();
 
-    public MonitorObject getMonitorObject();
+    MonitorObject getMonitorObject();
+
   }
+
 }

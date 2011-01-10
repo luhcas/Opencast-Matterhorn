@@ -16,11 +16,13 @@
 package org.opencastproject.distribution.download;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -36,16 +38,15 @@ import org.junit.Test;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.List;
 import java.util.concurrent.Executors;
 
-public class DistributionServiceImplTest {
+public class DownloadDistributionServiceImplTest {
   
   private DownloadDistributionService service = null;
   private MediaPackage mp = null;
   private File distributionRoot = null;
+  private ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setup() throws Exception {
     File mediaPackageRoot = new File("./target/test-classes");
@@ -65,10 +66,6 @@ public class DistributionServiceImplTest {
     service.serviceUrl = UrlSupport.DEFAULT_BASE_URL;
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
-    Job job = EasyMock.createNiceMock(Job.class);
-    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (List<String>)EasyMock.anyObject())).andReturn(job).anyTimes();
-    EasyMock.replay(job, serviceRegistry);
     service.setRemoteServiceManager(serviceRegistry);
     service.executor = Executors.newFixedThreadPool(1);
 
@@ -87,8 +84,11 @@ public class DistributionServiceImplTest {
   @Test
   public void testPartialDistribution() throws Exception {
     // Distribute only some of the elements in the mediapackage
-    service.distribute(mp.getIdentifier().compact(), mp.getTrack("track-1"), true); // "catalog-2" and "notes" are not to be distributed
-    service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-1"), true); // "catalog-2" and "notes" are not to be distributed
+    Job job1 = service.distribute(mp.getIdentifier().compact(), mp.getTrack("track-1")); // "catalog-2" and "notes" are not to be distributed
+    Job job2 = service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-1")); // "catalog-2" and "notes" are not to be distributed
+    JobBarrier jobBarrier = new JobBarrier(serviceRegistry, 500, job1, job2);
+    jobBarrier.waitForJobs();
+
     File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
     Assert.assertTrue(mpDir.exists());
     File mediaDir = new File(mpDir, "track-1");
@@ -106,10 +106,13 @@ public class DistributionServiceImplTest {
   @Test
   public void testRetract() throws Exception {
     // Distribute the mediapackage and all of its elements
-    service.distribute(mp.getIdentifier().compact(), mp.getTrack("track-1"), true);
-    service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-1"), true);
-    service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-2"), true);
-    service.distribute(mp.getIdentifier().compact(), mp.getAttachment("notes"), true);
+    Job job1 = service.distribute(mp.getIdentifier().compact(), mp.getTrack("track-1"));
+    Job job2 = service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-1"));
+    Job job3 = service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-2"));
+    Job job4 = service.distribute(mp.getIdentifier().compact(), mp.getAttachment("notes"));
+    JobBarrier jobBarrier = new JobBarrier(serviceRegistry, 500, job1, job2, job3, job4);
+    jobBarrier.waitForJobs();
+
     File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
     File mediaDir = new File(mpDir, "track-1");
     File metadata1Dir = new File(mpDir, "catalog-1");
@@ -125,10 +128,14 @@ public class DistributionServiceImplTest {
     Assert.assertTrue(new File(attachmentsDir, "attachment.txt").exists());
 
     // Now retract the mediapackage and ensure that the distributed files have been removed
-    service.retract(mp.getIdentifier().compact(), true);
+    Job job5 = service.retract(mp.getIdentifier().compact());
+    jobBarrier = new JobBarrier(serviceRegistry, 500, job5);
+    jobBarrier.waitForJobs();
+    
     Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("track-1")).isFile());
     Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-1")).isFile());
     Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-2")).isFile());
     Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("notes")).isFile());
   }
+
 }

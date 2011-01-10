@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElements;
@@ -34,6 +35,7 @@ import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -71,6 +73,9 @@ public class VideoSegmenterTest {
   /** Duration of the seconds segment */
   protected static final long secondSegmentDuration = mediaDuration - firstSegmentDuration;
 
+  /** The in-memory service registration */
+  protected ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+  
   /** The video segmenter */
   protected VideoSegmenterServiceImpl vsegmenter = null;
 
@@ -106,7 +111,6 @@ public class VideoSegmenterTest {
    * @throws Exception
    *           if setup fails
    */
-  @SuppressWarnings("unchecked")
   @Before
   public void setUp() throws Exception {
     mpeg7Service = new Mpeg7CatalogService();
@@ -123,19 +127,12 @@ public class VideoSegmenterTest {
       }
     });
     EasyMock.replay(workspace);
-    Job job = new JobStub();
-
-    ServiceRegistry remoteServiceManager = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(
-            remoteServiceManager.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (List<String>) EasyMock.anyObject())).andReturn(job).anyTimes();
-    EasyMock.replay(remoteServiceManager);
 
     vsegmenter = new VideoSegmenterServiceImpl();
     vsegmenter.setExecutorThreads(1);
     vsegmenter.setMpeg7CatalogService(mpeg7Service);
     vsegmenter.setWorkspace(workspace);
-    vsegmenter.setRemoteServiceManager(remoteServiceManager);
+    vsegmenter.setRemoteServiceManager(serviceRegistry);
   }
 
   /**
@@ -154,7 +151,10 @@ public class VideoSegmenterTest {
 
   @Test
   public void testAnalyze() throws Exception {
-    Job receipt = vsegmenter.segment(track, true);
+    Job receipt = vsegmenter.segment(track);
+    JobBarrier jobBarrier = new JobBarrier(serviceRegistry, 1000, receipt);
+    jobBarrier.waitForJobs();
+    
     Catalog catalog = (Catalog) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
 
     Mpeg7Catalog mpeg7 = new Mpeg7CatalogImpl(catalog.getURI().toURL().openStream());

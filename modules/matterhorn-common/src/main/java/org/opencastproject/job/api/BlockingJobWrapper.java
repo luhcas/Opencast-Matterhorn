@@ -22,6 +22,9 @@ import org.opencastproject.util.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
+import java.util.List;
+
 /**
  * This class is a wrapper around an existing job that will use a service registry to poll for job status changes.
  * <p>
@@ -33,13 +36,16 @@ import org.slf4j.LoggerFactory;
  * <li>{@link Job.Status#DELETED}</li>
  * </ul>
  */
-public class BlockingJob extends JaxbJob {
+public class BlockingJobWrapper implements Job {
 
   /** The logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(BlockingJob.class);
+  private static final Logger logger = LoggerFactory.getLogger(BlockingJobWrapper.class);
 
   /** Default polling interval is one minute */
   protected static final long DEFAULT_POLLING_INTERVAL = 60000L;
+
+  /** The wrapped job */
+  protected Job job = null;
 
   /** The service registry used to do the polling */
   protected ServiceRegistry serviceRegistry = null;
@@ -53,11 +59,13 @@ public class BlockingJob extends JaxbJob {
   /**
    * Creates a wrapper for <code>job</code>, using <code>registry</code> to poll for the job outcome.
    * 
+   * @param job
+   *          the job to poll
    * @param registry
    *          the registry
    */
-  public BlockingJob(ServiceRegistry registry) {
-    this(registry, DEFAULT_POLLING_INTERVAL);
+  public BlockingJobWrapper(Job job, ServiceRegistry registry) {
+    this(job, registry, DEFAULT_POLLING_INTERVAL);
   }
 
   /**
@@ -70,9 +78,19 @@ public class BlockingJob extends JaxbJob {
    * @param pollingInterval
    *          the time in miliseconds between two polling operations
    */
-  public BlockingJob(ServiceRegistry registry, long pollingInterval) {
+  public BlockingJobWrapper(Job job, ServiceRegistry registry, long pollingInterval) {
+    this.job = job;
     this.serviceRegistry = registry;
     this.pollingInterval = pollingInterval;
+  }
+
+  /**
+   * Returns the wrapped job.
+   * 
+   * @return the job
+   */
+  public Job getJob() {
+    return job;
   }
 
   /**
@@ -88,18 +106,168 @@ public class BlockingJob extends JaxbJob {
    * Waits for a status change.
    */
   public Status waitForStatus(long timeout) {
-    synchronized (this) {
+    synchronized (job) {
       JobStatusUpdater updater = new JobStatusUpdater();
       try {
         updater.start();
-        wait(timeout);
+        job.wait(timeout);
       } catch (InterruptedException e) {
         logger.debug("Interrupted while waiting for job");
       } finally {
         updater.interrupt();
       }
     }
-    return getStatus();
+    return job.getStatus();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getId()
+   */
+  @Override
+  public long getId() {
+    return job.getId();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getVersion()
+   */
+  @Override
+  public int getVersion() {
+    return job.getVersion();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#setId(long)
+   */
+  @Override
+  public void setId(long id) {
+    job.setId(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getJobType()
+   */
+  @Override
+  public String getJobType() {
+    return job.getJobType();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getOperationType()
+   */
+  @Override
+  public String getOperationType() {
+    return job.getOperationType();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getArguments()
+   */
+  @Override
+  public List<String> getArguments() {
+    return job.getArguments();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getStatus()
+   */
+  @Override
+  public Status getStatus() {
+    return job.getStatus();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#setStatus(org.opencastproject.job.api.Job.Status)
+   */
+  @Override
+  public void setStatus(Status status) {
+    job.setStatus(status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getCreatedHost()
+   */
+  @Override
+  public String getCreatedHost() {
+    return job.getCreatedHost();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getProcessingHost()
+   */
+  @Override
+  public String getProcessingHost() {
+    return job.getProcessingHost();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getDateCreated()
+   */
+  @Override
+  public Date getDateCreated() {
+    return job.getDateCreated();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getDateStarted()
+   */
+  @Override
+  public Date getDateStarted() {
+    return job.getDateStarted();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getDateCompleted()
+   */
+  @Override
+  public Date getDateCompleted() {
+    return job.getDateCompleted();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getPayload()
+   */
+  @Override
+  public String getPayload() {
+    return job.getPayload();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#setPayload(java.lang.String)
+   */
+  @Override
+  public void setPayload(String payload) {
+    job.setPayload(payload);
   }
 
   /**
@@ -117,7 +285,7 @@ public class BlockingJob extends JaxbJob {
       while (true) {
 
         try {
-          Job.Status jobStatus = serviceRegistry.getJob(BlockingJob.this.getId()).getStatus();
+          Job.Status jobStatus = serviceRegistry.getJob(job.getId()).getStatus();
           switch (jobStatus) {
           case DELETED:
           case FAILED:
@@ -127,7 +295,7 @@ public class BlockingJob extends JaxbJob {
           case PAUSED:
           case QUEUED:
           case RUNNING:
-            logger.trace("Job {} is still in the works", BlockingJob.this);
+            logger.trace("Job {} is still in the works", job);
             // Nothing to do, let's keep waiting
             break;
           default:
@@ -139,7 +307,7 @@ public class BlockingJob extends JaxbJob {
           break;
         } catch (ServiceRegistryException e) {
           logger.warn("Error polling service registry {} for job {}: {}",
-                  new Object[] { serviceRegistry, BlockingJob.this, e.getMessage() });
+                  new Object[] { serviceRegistry, job, e.getMessage() });
         }
 
         // Wait a little..
@@ -160,9 +328,9 @@ public class BlockingJob extends JaxbJob {
      *          the status
      */
     private void updateAndNotify(Job.Status status) {
-      BlockingJob.this.setStatus(status);
-      synchronized (BlockingJob.this) {
-        BlockingJob.this.notifyAll();
+      job.setStatus(status);
+      synchronized (job) {
+        job.notifyAll();
       }
     }
 

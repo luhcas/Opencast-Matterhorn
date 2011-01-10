@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -50,7 +51,7 @@ public class ComposeWorkflowOperationHandlerTest {
   // local resources
   private MediaPackage mp;
   private MediaPackage mpEncode;
-  private Job receipt;
+  private Job job;
   private Track[] encodedTracks;
   EncodingProfile[] profileList;
 
@@ -75,15 +76,30 @@ public class ComposeWorkflowOperationHandlerTest {
     mpEncode = builder.loadFromXml(uriMPEncode.toURL().openStream());
     encodedTracks = mpEncode.getTracks();
 
+    // set up mock workspace
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(
             workspace.moveTo((URI) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
                     (String) EasyMock.anyObject())).andReturn(uriMP);
     EasyMock.replay(workspace);
 
+    // set up mock receipt
+    job = EasyMock.createNiceMock(Job.class);
+    EasyMock.expect(job.getPayload()).andReturn(encodedTracks[0].getAsXml()).anyTimes();
+    EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED);
+    EasyMock.expect(job.getDateCreated()).andReturn(new Date());
+    EasyMock.expect(job.getDateStarted()).andReturn(new Date());
+    EasyMock.replay(job);
+
+    // set up mock service registry
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(serviceRegistry.getJob(EasyMock.anyLong())).andReturn(job);
+    EasyMock.replay(serviceRegistry);
+
     // set up service
     operationHandler = new ComposeWorkflowOperationHandler();
     operationHandler.setWorkspace(workspace);
+    operationHandler.setServiceRegistry(serviceRegistry);
   }
 
   @Test
@@ -97,20 +113,10 @@ public class ComposeWorkflowOperationHandlerTest {
     profileList = new EncodingProfile[] { profile };
     EasyMock.replay(profile);
 
-    // set up mock receipt
-    receipt = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(receipt.getPayload()).andReturn(encodedTracks[0].getAsXml());
-    EasyMock.expect(receipt.getStatus()).andReturn(Job.Status.FINISHED);
-    EasyMock.expect(receipt.getDateCreated()).andReturn(new Date());
-    EasyMock.expect(receipt.getDateStarted()).andReturn(new Date());
-    EasyMock.replay(receipt);
-
     // set up mock composer service
     composerService = EasyMock.createNiceMock(ComposerService.class);
     EasyMock.expect(composerService.getProfile(PROFILE_ID)).andReturn(profile);
-    EasyMock.expect(
-            composerService.encode((Track) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
-            .andReturn(receipt);
+    EasyMock.expect(composerService.encode((Track) EasyMock.anyObject(), (String) EasyMock.anyObject())).andReturn(job);
     EasyMock.replay(composerService);
     operationHandler.setComposerService(composerService);
 
@@ -145,17 +151,12 @@ public class ComposeWorkflowOperationHandlerTest {
     profileList = new EncodingProfile[] { profile };
     EasyMock.replay(profile);
 
-    // set up mock receipt
-    receipt = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(receipt.getPayload()).andReturn(encodedTracks[0].getAsXml());
-    EasyMock.replay(receipt);
-
     // set up mock composer service
     composerService = EasyMock.createNiceMock(ComposerService.class);
     EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
     EasyMock.expect(
-            composerService.encode((Track) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
-            .andReturn(receipt);
+            composerService.encode((Track) EasyMock.anyObject(), (String) EasyMock.anyObject()))
+            .andReturn(job);
     EasyMock.replay(composerService);
     operationHandler.setComposerService(composerService);
 

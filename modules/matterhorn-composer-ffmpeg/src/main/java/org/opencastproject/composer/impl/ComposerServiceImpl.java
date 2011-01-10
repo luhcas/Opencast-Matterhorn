@@ -26,6 +26,7 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
@@ -196,18 +197,7 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public Job encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException {
-    return encode(sourceTrack, profileId, false);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String, boolean)
-   */
-  @Override
-  public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException, MediaPackageException {
-    return encode(sourceTrack, null, profileId, null, block);
+    return encode(sourceTrack, null, profileId, null);
   }
 
   /**
@@ -217,19 +207,7 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String, long, long)
    */
   @Override
-  public Job trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
-          MediaPackageException {
-    return trim(sourceTrack, profileId, start, duration, false);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
-   *      java.lang.String, long, long, boolean)
-   */
-  @Override
-  public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration, boolean block)
+  public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration)
           throws EncoderException, MediaPackageException {
 
     final String targetTrackId = idBuilder.createNew().toString();
@@ -258,16 +236,12 @@ public class ComposerServiceImpl implements ComposerService {
 
           // Get the track and make sure it exists
           final File trackFile;
-          if (sourceTrack == null) {
-            trackFile = null;
-          } else {
-            try {
-              trackFile = workspace.get(sourceTrack.getURI());
-            } catch (NotFoundException e) {
-              throw new EncoderException("Requested track " + sourceTrack + " is not found");
-            } catch (IOException e) {
-              throw new EncoderException("Unable to access track " + sourceTrack);
-            }
+          try {
+            trackFile = workspace.get(sourceTrack.getURI());
+          } catch (NotFoundException e) {
+            throw new EncoderException("Requested track " + sourceTrack + " is not found");
+          } catch (IOException e) {
+            throw new EncoderException("Unable to access track " + sourceTrack);
           }
 
           // Get the encoding profile
@@ -309,12 +283,15 @@ public class ComposerServiceImpl implements ComposerService {
           // Have the encoded track inspected and return the result
           Job inspectionJob = null;
           try {
-            inspectionJob = inspectionService.inspect(returnURL, true);
+            inspectionJob = inspectionService.inspect(returnURL);
+            JobBarrier barrier = new JobBarrier(serviceRegistry, inspectionJob);
+            if (!barrier.waitForJobs().isSuccess()) {
+              throw new EncoderException("Media inspection of " + returnURL + " failed");
+            }
           } catch (MediaInspectionException e) {
             throw new EncoderException("Media inspection of " + returnURL + " failed", e);
           }
-          if (inspectionJob.getStatus() == Job.Status.FAILED)
-            throw new EncoderException("Media inspection of " + returnURL + " failed");
+
           Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionJob.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
@@ -340,25 +317,7 @@ public class ComposerServiceImpl implements ComposerService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof EncoderException) {
-          throw (EncoderException) e;
-        } else {
-          throw new EncoderException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 
@@ -369,21 +328,9 @@ public class ComposerServiceImpl implements ComposerService {
    *      org.opencastproject.mediapackage.Track, java.lang.String)
    */
   @Override
-  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException,
-          MediaPackageException {
-    return encode(sourceVideoTrack, sourceAudioTrack, profileId, null, false);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
-   *      org.opencastproject.mediapackage.Track, java.lang.String, boolean)
-   */
-  @Override
-  public Job mux(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
+  public Job mux(final Track videoTrack, final Track audioTrack, final String profileId)
           throws EncoderException, MediaPackageException {
-    return encode(videoTrack, audioTrack, profileId, null, block);
+    return encode(videoTrack, audioTrack, profileId, null);
   }
 
   /**
@@ -405,7 +352,7 @@ public class ComposerServiceImpl implements ComposerService {
    *           if encoding fails
    */
   private Job encode(final Track videoTrack, final Track audioTrack, final String profileId,
-          Dictionary<String, String> properties, final boolean block) throws EncoderException, MediaPackageException {
+          Dictionary<String, String> properties) throws EncoderException, MediaPackageException {
     String video = videoTrack == null ? null : videoTrack.getAsXml();
     String audio = audioTrack == null ? null : audioTrack.getAsXml();
     StringBuilder propertiesAsString = new StringBuilder();
@@ -518,12 +465,15 @@ public class ComposerServiceImpl implements ComposerService {
           // Have the encoded track inspected and return the result
           Job inspectionJob = null;
           try {
-            inspectionJob = inspectionService.inspect(returnURL, true);
+            inspectionJob = inspectionService.inspect(returnURL);
+            JobBarrier barrier = new JobBarrier(serviceRegistry, inspectionJob);
+            if (!barrier.waitForJobs().isSuccess()) {
+              throw new EncoderException("Media inspection of " + returnURL + " failed");
+            }
           } catch (MediaInspectionException e) {
             throw new EncoderException("Media inspection of " + returnURL + " failed", e);
           }
-          if (inspectionJob.getStatus() == Job.Status.FAILED)
-            throw new EncoderException("Media inspection of " + returnURL + " failed");
+
           Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionJob.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
@@ -549,25 +499,7 @@ public class ComposerServiceImpl implements ComposerService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof EncoderException) {
-          throw (EncoderException) e;
-        } else {
-          throw new EncoderException(e);
-        }
-      }
-    }
-
+    executor.submit(command);
     return job;
   }
 
@@ -610,6 +542,9 @@ public class ComposerServiceImpl implements ComposerService {
   public Job image(final Track sourceTrack, final String profileId, final long time, boolean block)
           throws EncoderException, MediaPackageException {
 
+    if (sourceTrack == null)
+      throw new EncoderException("SourceTrack cannot be null");
+
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, IMAGE_OPERATION, Arrays.asList(sourceTrack.getAsXml(), profileId));
@@ -631,9 +566,6 @@ public class ComposerServiceImpl implements ComposerService {
         try {
           job.setStatus(Status.RUNNING);
           updateJob(job);
-
-          if (sourceTrack == null)
-            throw new EncoderException("SourceTrack cannot be null");
 
           logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
 
@@ -756,19 +688,7 @@ public class ComposerServiceImpl implements ComposerService {
    *      org.opencastproject.mediapackage.Attachment, java.lang.String)
    */
   @Override
-  public Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException, MediaPackageException {
-    return captions(mediaTrack, captions, false);
-  }
-
-  /**
-   * 
-   * {@inheritDoc} Supports inserting captions in QuickTime files.
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
-   *      org.opencastproject.mediapackage.Attachment, java.lang.String, boolean)
-   */
-  @Override
-  public Job captions(final Track mediaTrack, final Catalog[] captions, boolean block) throws EmbedderException,
+  public Job captions(final Track mediaTrack, final Catalog[] captions) throws EmbedderException,
           MediaPackageException {
 
     List<String> args = new ArrayList<String>();
@@ -882,15 +802,18 @@ public class ComposerServiceImpl implements ComposerService {
           }
 
           // Have the encoded track inspected and return the result
-          Job inspectionReceipt;
+          Job inspectionJob;
           try {
-            inspectionReceipt = inspectionService.inspect(returnURL, true);
+            inspectionJob = inspectionService.inspect(returnURL);
+            JobBarrier barrier = new JobBarrier(serviceRegistry, inspectionJob);
+            if (!barrier.waitForJobs().isSuccess()) {
+              throw new EncoderException("Media inspection of " + returnURL + " failed");
+            }
           } catch (MediaInspectionException e) {
             throw new EmbedderException("Media inspection of " + returnURL + " failed", e);
           }
-          if (inspectionReceipt.getStatus() == Job.Status.FAILED)
-            throw new EmbedderException("Media inspection failed");
-          Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionReceipt.getPayload());
+
+          Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionJob.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
           job.setPayload(inspectedTrack.getAsXml());
@@ -915,24 +838,7 @@ public class ComposerServiceImpl implements ComposerService {
       }
     };
 
-    Future<?> future = executor.submit(command);
-    if (block) {
-      try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof EmbedderException) {
-          throw (EmbedderException) e;
-        } else {
-          throw new EmbedderException(e);
-        }
-      }
-    }
+    executor.submit(command);
     return job;
   }
 

@@ -125,8 +125,8 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
           MediaPackageElement element = mediaPackage.getElementById(elementId);
           if (element == null)
             throw new WorkflowOperationException("Unable to find element " + elementId);
-          Job job = distributionService.distribute(mediaPackage.getIdentifier().compact(), element, true);
-          if (job == null || !Job.Status.FINISHED.equals(job.getStatus())) {
+          Job job = distributionService.distribute(mediaPackage.getIdentifier().compact(), element);
+          if (!waitForStatus(job).isSuccess()) {
             throw new WorkflowOperationException("Distribution job " + job + " did not complete successfully");
           }
 

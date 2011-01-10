@@ -15,11 +15,12 @@
  */
 package org.opencastproject.inspection.impl;
 
-import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.IoSupport;
@@ -38,8 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -47,6 +46,7 @@ public class MediaInspectionServiceImplTest {
   
   private MediaInspectionServiceImpl service = null;
   private Workspace workspace = null;
+  private ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
 
   private URI uriTrack;
 
@@ -79,13 +79,13 @@ public class MediaInspectionServiceImplTest {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Before
   public void setup() throws Exception {
     uriTrack = MediaInspectionServiceImpl.class.getResource("/av.mov").toURI();
     File f = new File(uriTrack);
     // set up services and mock objects
     service = new MediaInspectionServiceImpl();
+
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.get(uriTrack)).andReturn(f);
     EasyMock.expect(workspace.get(uriTrack)).andReturn(f);
@@ -93,12 +93,7 @@ public class MediaInspectionServiceImplTest {
     EasyMock.replay(workspace);
     service.setWorkspace(workspace);
 
-    ServiceRegistry rs = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(
-            rs.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (List<String>) EasyMock.anyObject())).andReturn(new JobStub()).anyTimes();
-    EasyMock.replay(rs);
-    service.setServiceRegistry(rs);
+    service.setServiceRegistry(serviceRegistry);
     service.executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(1);
   }
 
@@ -108,8 +103,11 @@ public class MediaInspectionServiceImplTest {
       return;
     
     try {
-      Job receipt = service.inspect(uriTrack, true);
-      Track track = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+      Job job = service.inspect(uriTrack);
+      JobBarrier barrier = new JobBarrier(serviceRegistry, 1000, job);
+      barrier.waitForJobs();
+      
+      Track track = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
       // test the returned values
       Checksum cs = Checksum.create(ChecksumType.fromString("md5"), "9d3523e464f18ad51f59564acde4b95a");
       Assert.assertEquals(track.getChecksum(), cs);
@@ -128,7 +126,10 @@ public class MediaInspectionServiceImplTest {
 
     try {
       // init a track with inspect
-      Job job = service.inspect(uriTrack, true);
+      Job job = service.inspect(uriTrack);
+      JobBarrier barrier = new JobBarrier(serviceRegistry, 1000, job);
+      barrier.waitForJobs();
+
       Track track = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
       // make changes to metadata
       Checksum cs = track.getChecksum();
@@ -136,13 +137,19 @@ public class MediaInspectionServiceImplTest {
       MimeType mt = new MimeType("video", "flash");
       track.setMimeType(mt);
       // test the enrich scenario
-      Job newJob = service.enrich(track, false, true);
+      Job newJob = service.enrich(track, false);
+      barrier = new JobBarrier(serviceRegistry, newJob);
+      barrier.waitForJobs();
+
       Track newTrack = (Track) AbstractMediaPackageElement.getFromXml(newJob.getPayload());
       Assert.assertEquals(newTrack.getChecksum(), cs);
       Assert.assertEquals(newTrack.getMimeType(), mt);
       Assert.assertEquals(newTrack.getDuration(), 14546);
       // test the override scenario
-      newJob = service.enrich(track, true, true);
+      newJob = service.enrich(track, true);
+      barrier = new JobBarrier(serviceRegistry, newJob);
+      barrier.waitForJobs();
+
       newTrack = (Track) AbstractMediaPackageElement.getFromXml(newJob.getPayload());
       Assert.assertEquals(newTrack.getChecksum(), cs);
       Assert.assertNotSame(newTrack.getMimeType(), mt);
@@ -152,77 +159,4 @@ public class MediaInspectionServiceImplTest {
     }
   }
 
-  class JobStub implements Job {
-    String payload;
-    Status status;
-
-    public String getProcessingHost() {
-      return null;
-    }
-
-    public long getId() {
-      return -1;
-    }
-
-    public Status getStatus() {
-      return status;
-    }
-
-    public String getJobType() {
-      return MediaInspectionService.JOB_TYPE;
-    }
-
-    public void setHost(String host) {
-    }
-
-    public void setId(long id) {
-    }
-
-    public void setStatus(Status status) {
-      this.status = status;
-    }
-
-    public void setType(String type) {
-    }
-
-    public String toXml() {
-      return null;
-    }
-
-    public Date getDateCompleted() {
-      return null;
-    }
-
-    public Date getDateCreated() {
-      return null;
-    }
-
-    public Date getDateStarted() {
-      return null;
-    }
-    
-    public String getPayload() {
-      return payload;
-    }
-
-    public void setPayload(String payload) {
-      this.payload = payload;
-    }
-    
-    public String getOperationType() {
-      return null;
-    }
-    
-    public List<String> getArguments() {
-      return null;
-    }
-    
-    public String getCreatedHost() {
-      return null;
-    }
-
-    public int getVersion() {
-      return 0;
-    }
-  }
 }

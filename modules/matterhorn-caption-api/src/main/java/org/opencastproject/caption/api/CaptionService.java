@@ -38,8 +38,6 @@ public interface CaptionService extends JobProducer {
    *          format of imported captions
    * @param outputFormat
    *          format of exported captions
-   * @param block
-   *          <code>false</code> to make this an asynchronous call
    * @throws UnsupportedCaptionFormatException
    *           if there is no matching engine registered for given input or output
    * @throws CaptionConverterException
@@ -47,7 +45,7 @@ public interface CaptionService extends JobProducer {
    * @throws MediaPackageException
    *           if the catalog is invalid
    */
-  Job convert(Catalog input, String inputFormat, String outputFormat, boolean block)
+  Job convert(Catalog input, String inputFormat, String outputFormat)
           throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException;
 
   /**
@@ -62,8 +60,6 @@ public interface CaptionService extends JobProducer {
    *          format of exported captions
    * @param language
    *          language of captions
-   * @param block
-   *          <code>false</code> to make this an asynchronous call
    * @throws UnsupportedCaptionFormatException
    *           if there is no matching engine registered for given input or output
    * @throws CaptionConverterException
@@ -71,7 +67,7 @@ public interface CaptionService extends JobProducer {
    * @throws MediaPackageException
    *           if the catalog is invalid
    */
-  Job convert(Catalog input, String inputFormat, String outputFormat, String language, boolean block)
+  Job convert(Catalog input, String inputFormat, String outputFormat, String language)
           throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException;
 
   /**

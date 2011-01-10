@@ -43,26 +43,22 @@ public interface DistributionService extends JobProducer {
    *          The media package to distribute
    * @param element
    *          The element in the media package to distribute
-   * @param block
-   *          <code>true</code> to wait for this method to finish
    * @return The job
    * @throws DistributionException
    *           if there was a problem distributing the media
    * @throws MediaPackageException
    *           if there was a problem with the mediapackage element
    */
-  Job distribute(String mediaPackageId, MediaPackageElement element, boolean block) throws DistributionException, MediaPackageException;
+  Job distribute(String mediaPackageId, MediaPackageElement element) throws DistributionException, MediaPackageException;
 
   /**
    * Retract all media and metadata associated with this media package from the distribution channel.
    * 
    * @param mediaPackageId
    *          The identifier of the media package to retract
-   * @param block
-   *          <code>true</code> to wait for this method to finish
    * @throws DistributionException
    *           if there was a problem retracting the mediapackage
    */
-  Job retract(String mediaPackageId, boolean block) throws DistributionException;
+  Job retract(String mediaPackageId) throws DistributionException;
 
 }

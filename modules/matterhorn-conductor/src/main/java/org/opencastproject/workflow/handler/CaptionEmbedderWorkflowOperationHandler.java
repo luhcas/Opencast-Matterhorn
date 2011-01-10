@@ -20,6 +20,7 @@ import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -39,9 +40,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -157,13 +160,24 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
       return createResult(mp, Action.CONTINUE, 0);
     }
 
-    // perform embedding
+    // perform embedding, start all jobs at once
     long totalTimeInQueue = 0;
+    Map<Track, Job> jobs = new HashMap<Track, Job>();
     for (Track t : qtTracks) {
-      Job job = composerService.captions(t, convertedCaptions, true);
-      if (job == null || job.getStatus().equals(Job.Status.FAILED)) {
-        throw new WorkflowOperationException("Embedding failed");
-      }
+      Job job = composerService.captions(t, convertedCaptions);
+      jobs.put(t, job);
+    }
+
+    // Wait until all embedding jobs have returned
+    JobBarrier.Result embeddingResult = waitForStatus(jobs.values().toArray(new Job[jobs.size()]));  
+    if (!embeddingResult.isSuccess()) {
+      throw new WorkflowOperationException("Encoding failed");
+    }
+
+    // Process the results
+    for (Map.Entry<Track, Job> entry : jobs.entrySet()) {
+      Track t = entry.getKey();
+      Job job = entry.getValue();
       Track processedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
       if (targetMediaFlavor != null) {
         processedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetMediaFlavor));
@@ -247,8 +261,8 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
       }
       for (String language : languages) {
         if (!captionLanguages.contains(language)) {
-          Job job = captionService.convert(caption, flavor.getSubtype(), outputFormat, language, true);
-          if (job == null || job.getStatus().equals(Job.Status.FAILED)) {
+          Job job = captionService.convert(caption, flavor.getSubtype(), outputFormat, language);
+          if (!waitForStatus(job).isSuccess()) {
             throw new WorkflowOperationException("Caption converting failed.");
           }
           Catalog convertedCaption = (Catalog) AbstractMediaPackageElement.getFromXml(job.getPayload());

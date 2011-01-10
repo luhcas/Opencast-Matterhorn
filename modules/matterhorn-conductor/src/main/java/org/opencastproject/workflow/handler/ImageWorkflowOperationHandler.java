@@ -134,9 +134,10 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
    * @throws ExecutionException
    * @throws IOException
    * @throws NotFoundException
+   * @throws WorkflowOperationException 
    */
   private WorkflowOperationResult image(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
-          throws EncoderException, ExecutionException, NotFoundException, MediaPackageException, IOException {
+          throws EncoderException, ExecutionException, NotFoundException, MediaPackageException, IOException, WorkflowOperationException {
 
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -175,13 +176,18 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       // take the minimum of the specified time and the video track duration
       long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration() / 1000L);
 
-      Job receipt = composerService.image(t, profile.getIdentifier(), time, true);
+      // Start encoding and wait for the result
+      Job job = composerService.image(t, profile.getIdentifier(), time);
+      if (!waitForStatus(job).isSuccess()) {
+        throw new WorkflowOperationException("Encoding failed");
+      }
+
 
       // add this receipt's queue time to the total
-      long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+      long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
       totalTimeInQueue += timeInQueue;
 
-      Attachment composedImage = (Attachment) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+      Attachment composedImage = (Attachment) AbstractMediaPackageElement.getFromXml(job.getPayload());
       if (composedImage == null)
         throw new IllegalStateException("Composer service did not return an image");
 

@@ -50,4 +50,5 @@ public interface ServiceRegistration {
    * maintenance mode when it comes back online
    */
   boolean isInMaintenanceMode();
+
 }
