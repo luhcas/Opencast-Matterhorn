@@ -536,6 +536,7 @@ public class WorkflowRestService {
     q.withCount(count);
     q.withStartPage(startPage);
     if (states != null && states.size() > 0) {
+      try {
       for (String state : states) {
         if (StringUtils.isBlank(state))
           continue;
@@ -544,6 +545,9 @@ public class WorkflowRestService {
         } else {
           q.withState(WorkflowState.valueOf(state.toUpperCase()));
         }
+      }
+      } catch (IllegalArgumentException e) {
+        logger.debug("Unknown workflow state.", e);
       }
     }
 

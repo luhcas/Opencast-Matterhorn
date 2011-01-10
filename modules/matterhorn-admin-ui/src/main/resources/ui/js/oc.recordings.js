@@ -39,6 +39,8 @@ ocRecordings = new (function() {
 
   var refreshing = false;      // indicates if JSONP requesting recording data is in progress
   this.refreshingStats = false; // indicates if JSONP requesting statistics data is in progress
+  
+  this.bulkEditComponents = {};
 
   // object that holds the workflow and the operation object for the hold state UI currently displayed
   this.Hold = {
@@ -61,6 +63,10 @@ ocRecordings = new (function() {
     this.sortOrder = null;
     this.filterField = null;
     this.filterText = '';
+    
+    this.lastState = 'all'
+    this.lastPageSize = 10;
+    this.lastPage = 0;
 
     // parse url parameters
     try {
@@ -118,6 +124,16 @@ ocRecordings = new (function() {
       }
       else if (state == 'failed') {
         params.push('state=failed');
+      }
+      else if (state === 'bulkedit' || state === 'bulkdelete') {
+        ocRecordings.Configuration.pageSize = 100;
+        ocRecordings.Configuration.page = 0;
+        
+        if(state === 'bulkedit') {
+          params.push('state=paused');
+          params.push('state=running');
+          params.push('op=schedule');
+        }
       }
       // sorting if specified
       if (ocRecordings.Configuration.sortField != null) {
@@ -330,10 +346,17 @@ ocRecordings = new (function() {
   /** JSONP callback for calls to the workflow instances list endpoint.
  */
   this.render = function(data) {
+    var template = 'tableTemplate';
+    if(ocRecordings.Configuration.state === 'bulkedit' || ocRecordings.Configuration.state === 'bulkdelete') {
+      template = 'tableSelectTemplate'
+      $('#controlsFoot').hide();
+    } else {
+      $('#controlsFoot').show();
+    }
     refreshing = false;
     ocRecordings.data = data;
     ocRecordings.totalRecordings = data.workflows.totalCount;
-    var result = TrimPath.processDOMTemplate('tableTemplate', makeRenderData(data));
+    var result = TrimPath.processDOMTemplate(template, makeRenderData(data));
     $( '#tableContainer' ).empty().append(result);
 
     // display number of matches if filtered
@@ -587,6 +610,23 @@ ocRecordings = new (function() {
       options : FILTER_FIELDS,
       selectedOption : ocRecordings.Configuration.filterField
     });
+    
+    // Bulk Actions
+    $('.oc-ui-collapsible-widget .ui-widget-header').click(
+    function() {
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+      $(this).next().toggle();
+      return false;
+    });
+    
+    $('#bulkActionSelect').change(function(){
+      ocRecordings.bulkActionHandler($(this).val());
+    });
+    
+    $('#cancelBulkAction').click(ocRecordings.cancelBulkAction);
+    
+    $('#applyBulkAction').click(ocRecordings.applyBulkEdit); 
 
     // pager
     $('#pageSize').val(ocRecordings.Configuration.pageSize);
@@ -612,8 +652,13 @@ ocRecordings = new (function() {
     // set up statistics update
     refreshStatistics();
     window.setInterval(refreshStatistics, STATISTICS_DELAY);
-
-    refresh();    // load and render data for currently set configuration
+    if (ocRecordings.Configuration.state === 'bulkedit') {
+      ocRecordings.bulkActionHandler('edit');
+    } else if (ocRecordings.Configuration.state === 'bulkdelete') {
+      ocRecordings.bulkActionHandler('delete');
+    } else {
+      refresh();    // load and render data for currently set configuration
+    }
 
   };
   
@@ -665,6 +710,160 @@ ocRecordings = new (function() {
       ocRecordings.Configuration.page = page;
       ocRecordings.reload();
     }
+  }
+
+  this.displayBulkAction = function(filter) {
+    $('#bulkEditPanel').hide();
+    $('#bulkDeletePanel').hide();
+    $('#bulkActionPanel').show();
+    ocRecordings.Configuration.lastState = ocRecordings.Configuration.state
+    ocRecordings.Configuration.lastPageSize = ocRecordings.Configuration.pageSize;
+    ocRecordings.Configuration.lastPage = ocRecordings.Configuration.page;
+  }
+
+  this.cancelBulkAction = function() {
+    ocRecordings.resetBulkActionPanel();
+    ocRecordings.Configuration.state = ocRecordings.Configuration.lastState;
+    ocRecordings.Configuration.pageSize = ocRecordings.Configuration.lastPageSize;
+    ocRecordings.Configuration.page = ocRecordings.Configuration.lastPage;
+    refresh();
+  }
+
+  this.resetBulkActionPanel = function() {
+    $('#bulkActionSelect').val('select');
+    $('#bulkActionSelect').change();
+    $('#bulkActionPanel').hide();
+    ocRecordings.bulkEditComponents = [];
+  }
+
+  this.bulkActionHandler = function(action) {
+    $('#bulkActionPanel').show();
+    if (action === 'select') {
+      $('#bulkEditPanel').hide();
+      $('#bulkDeletePanel').hide();
+      $('#cancelBulkAction').show();
+    } else {
+      if(action === 'edit'){
+        $('#bulkEditPanel').show();
+        $('#bulkDeletePanel').hide();
+        $('#cancelBulkAction').hide();
+        ocRecordings.registerBulkEditComponents();
+        ocRecordings.Configuration.state = 'bulkedit'
+        refresh();
+      } else if (action === 'delete') {
+        $('#bulkEditPanel').hide();
+        $('#bulkDeletePanel').show();
+        $('#cancelBulkAction').hide();
+        ocRecordings.Configuration.state = 'bulkdelete'
+        refresh();
+      }
+    }
+  }
+
+  this.selectAll = function(checked) {
+    if(ocRecordings.Configuration.state != 'bulkedit' && ocRecordings.Configuration.state != 'bulkdelete'){
+      return;
+    }
+    if(checked){
+      $.each($('.selectRecording'), function(i,v){
+        v.checked = true;
+      });
+    } else {
+      $.each($('.selectRecording'), function(i,v){
+        v.checked = false;
+      });
+    }
+  }
+
+  this.applyBulkEdit = function() {
+    var manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
+    var event = manager.serialize();
+    var eventIdList = [];
+    $.each($('.selectRecording'), function(i,v){
+      if(v.checked === true) {
+        eventIdList.push(v.value);
+      }
+    });
+    $.post('/scheduler/rest/', 
+      {event: event, idList: '[' + eventIdList.toString() + ']'},
+      ocRecordings.bulkEditComplete);
+  }
+
+  this.bulkEditComplete = function() {
+    ocRecordings.cancelBulkAction();
+  }
+
+  this.registerBulkEditComponents = function() {
+    ocRecordings.bulkEditComponents.title = new ocAdmin.Component(['title'], {label: 'titleLabel'});
+    ocRecordings.bulkEditComponents.creator = new ocAdmin.Component(['creator'], {label: 'creatorLabel'});
+    ocRecordings.bulkEditComponents.contributor = new ocAdmin.Component(['contributor'], {label: 'contributorLabel'});
+    ocRecordings.bulkEditComponents.seriesId = new ocAdmin.Component(['series', 'seriesSelect'],
+      { label: 'seriesLabel', errorField: 'missingSeries', nodeKey: ['seriesId', 'series']},
+      { getValue: function(){ 
+          if(this.fields.series){
+            this.value = this.fields.series.val();
+          }
+          return this.value;
+        },
+        setValue: function(value){
+          this.fields.series.val(value.id);
+          this.fields.seriesSelect.val(value.label)
+        },
+        asString: function(){
+          if(this.fields.seriesSelect){
+            return this.fields.seriesSelect.val();
+          }
+          return this.getValue() + '';
+        },
+        validate: function(){
+          if(this.fields.seriesSelect.val() !== '' && this.fields.series.val() === ''){ //have text and no idea
+            return this.createSeriesFromSearchText();
+          }
+          return true; //nothing, or we have an id.
+        },
+        toNode: function(parent){
+          if(parent){
+            doc = parent.ownerDocument;
+          }else{
+            doc = document;
+          }
+          if(this.getValue() != "" && this.asString() != ""){ //only add series if we have both id and name.
+            seriesId = doc.createElement(this.nodeKey[0]);
+            seriesId.appendChild(doc.createTextNode(this.getValue()));
+            seriesName = doc.createElement(this.nodeKey[1]);
+            seriesName.appendChild(doc.createTextNode(this.asString()));
+            if(parent && parent.nodeType){
+              parent.appendChild(seriesId);
+              parent.appendChild(seriesName);
+            }else{
+              ocUtils.log('Unable to append node to document. ', parent, seriesId, seriesName);
+            }
+          }
+        },
+        createSeriesFromSearchText: function(){
+          var series, seriesComponent, seriesId;
+          var creationSucceeded = false;
+          if(this.fields.seriesSelect !== ''){
+            series = '<series><metadataList><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></metadataList></series>';
+            seriesComponent = this;
+            $.ajax({
+              async: false,
+              type: 'PUT',
+              url: SERIES_URL + '/',
+              data: { series: series },
+              dataType: 'json',
+              success: function(data){
+                creationSucceeded = true;
+                seriesComponent.fields.series.val(data.series['@id']);
+              }
+            });
+          }
+          return creationSucceeded;
+        }
+      });
+    ocRecordings.bulkEditComponents.subject = new ocAdmin.Component(['subject'], {label: 'subjectLabel'});
+    ocRecordings.bulkEditComponents.language = new ocAdmin.Component(['language'], {label: 'languageLabel'});
+    ocRecordings.bulkEditComponents.description = new ocAdmin.Component(['description'], {label: 'descriptionLabel'});
   }
   
   $(document).ready(this.init);

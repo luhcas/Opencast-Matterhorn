@@ -148,8 +148,8 @@ public class CalendarGenerator {
       if (e.containsKey("location") && StringUtils.isNotEmpty(e.getMetadataValueByKey("location"))) {
         event.getProperties().add(new Location(e.getMetadataValueByKey("location")));
       }
-      if (StringUtils.isNotEmpty(e.getSeries())) {
-        seriesID = e.getSeries();
+      if (StringUtils.isNotEmpty(e.getSeriesId())) {
+        seriesID = e.getSeriesId();
         event.getProperties().add(new RelatedTo(seriesID));
       }
 

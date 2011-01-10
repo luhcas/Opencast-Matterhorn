@@ -360,6 +360,8 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     EventImpl e = null;
     try {
       e = em.find(EventImpl.class, eventId);
+    } catch (Exception ex) {
+      logger.debug("Could not find event {}: {}", eventId, ex);
     } finally {
       em.close();
     }
@@ -632,11 +634,11 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
           em.close();
           throw new NotFoundException("Couldn't find event" + eventId.toString());
         }
-        storedEvent.update(e);
+        storedEvent.update(e,false);
         em.merge(storedEvent);
-        em.getTransaction().commit();
         updateWorkflow(storedEvent);
       }
+      em.getTransaction().commit();
     } catch (Exception ex) {
       logger.warn("Unable to update events: {}", ex);
       em.getTransaction().rollback();

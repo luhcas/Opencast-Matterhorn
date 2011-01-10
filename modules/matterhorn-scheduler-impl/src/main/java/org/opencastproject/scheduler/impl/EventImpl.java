@@ -60,6 +60,8 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * An Event has a unique ID, a relation to the recurring event from which it was created and a set of metadata. Even the
  * start- and end-time is stored in the set of metadata, with the keys "timeStart" and "timeEnd" as long value converted
@@ -485,7 +487,7 @@ public class EventImpl implements Event {
     }
     return null;
   }
-
+  
   /**
    * 
    * {@inheritDoc}
@@ -493,12 +495,22 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#update()
    */
   public void update(Event e) {
+    update(e, true);
+  }
+
+  public void update(Event e, boolean updateWithEmptyValues) {
     if (e.getEventId() != null) {
       this.setEventId(e.getEventId());
     }
-    this.setCreator(e.getCreator());
-    this.setContributor(e.getContributor());
-    this.setDescription(e.getDescription());
+    if(StringUtils.isNotEmpty(e.getCreator()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getCreator()))) {
+      this.setCreator(e.getCreator());
+    }
+    if(StringUtils.isNotEmpty(e.getContributor()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getContributor()))) {
+      this.setContributor(e.getContributor());
+    }
+    if(StringUtils.isNotEmpty(e.getDescription()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getDescription()) )) {
+      this.setDescription(e.getDescription());
+    }
     if (e.getDevice() != null) {
       this.setDevice(e.getDevice());
     }
@@ -508,21 +520,40 @@ public class EventImpl implements Event {
     if (e.getEndDate() != null) {
       this.setEndDate(e.getEndDate());
     }
-    this.setLanguage(e.getLanguage());
-    this.setLicense(e.getLicense());
-    this.setRecurrence(e.getRecurrence());
-    this.setRecurrencePattern(e.getRecurrencePattern());
-    this.setResources(e.getResources());
-    this.setSeries(e.getSeries());
+    if(StringUtils.isNotEmpty(e.getLanguage()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getLanguage()))) {
+      this.setLanguage(e.getLanguage());
+    }
+    if(StringUtils.isNotEmpty(e.getLicense()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getLicense()))) {
+      this.setLicense(e.getLicense());
+    }
+    if(StringUtils.isNotEmpty(e.getRecurrence()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getRecurrence()))) {
+      this.setRecurrence(e.getRecurrence());
+    }
+    if(StringUtils.isNotEmpty(e.getRecurrencePattern()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getRecurrencePattern()))) {
+      this.setRecurrencePattern(e.getRecurrencePattern());
+    }
+    if(StringUtils.isNotEmpty(e.getResources()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getResources()))) {
+      this.setResources(e.getResources());
+    }
+    if(StringUtils.isNotEmpty(e.getSeries()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getSeries()))) {
+      this.setSeries(e.getSeries());
+    }
     if (e.getStartDate() != null) {
       this.setStartDate(e.getStartDate());
     }
-    this.setSubject(e.getSubject());
-    this.setTitle(e.getTitle());
-    // eliminate removed keys
-    for (Metadata m : getMetadataList()) {
-      if (e.findMetadata(m.getKey()) == null) {
-        removeMetadata(m);
+    if(StringUtils.isNotEmpty(e.getSubject()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getSubject()))) {
+      this.setSubject(e.getSubject());
+    }
+    if(StringUtils.isNotEmpty(e.getTitle()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getTitle()))) {
+      this.setTitle(e.getTitle());
+    }
+    
+    if(updateWithEmptyValues) {
+      // eliminate removed keys
+      for (Metadata m : getMetadataList()) {
+        if (e.findMetadata(m.getKey()) == null) {
+          removeMetadata(m);
+        }
       }
     }
     // update the list

@@ -268,12 +268,26 @@ public interface Event {
   void removeMetadata(Metadata m);
 
   /**
-   * Update the event and persist it in the database
+   * Update the event and persist it in the database.
+   * Shortcut method that calls update(e, true), assumes
+   * updateWithEmptyValues is true.
    * 
    * @param e
    *          Event to update this one with
    */
   void update(Event e);
+  
+  /**
+   * Update the event and persist it in the database,
+   * if updateWithEmptyValues is true, properties of the event being updated
+   * will be replaced with empty strings for missing or empty values.
+   * 
+   * @param e
+   *          Event to update this one with
+   * @param updateWithEmptyValues
+   *          whether or not to update with empty values
+   */
+  void update(Event e, boolean updateWithEmptyValues);
 
   String toString();
 
