@@ -43,7 +43,7 @@ public class AnnotationServiceJpaImplTest {
     // Set up the database
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
-    pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis() + ";LOCK_MODE=1;MVCC=TRUE");
+    pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis());
     pooledDataSource.setUser("sa");
     pooledDataSource.setPassword("sa");
 

@@ -183,12 +183,12 @@ public class WorkflowServiceImplTest {
     // And ensure that they are really gone
     try {
       service.getWorkflowById(instance.getId());
-      Assert.fail();
+      Assert.fail("Workflow should have been deleted");
     } catch (NotFoundException e) {
     }
     try {
       service.getWorkflowById(instance2.getId());
-      Assert.fail();
+      Assert.fail("Workflow should have been deleted");
     } catch (NotFoundException e) {
     }
     Assert.assertEquals(0, service.countWorkflowInstances());

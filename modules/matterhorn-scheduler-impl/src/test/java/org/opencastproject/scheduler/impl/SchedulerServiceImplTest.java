@@ -95,8 +95,7 @@ public class SchedulerServiceImplTest {
       storageDirectory = new File(File.separator + "tmp" + File.separator + "opencast" + File.separator
               + "scheduler-db");
     }
-    JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:" + storageDirectory + ";LOCK_MODE=1;MVCC=TRUE", "sa",
-            "sa");
+    JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:" + storageDirectory, "sa", "sa");
     return cp;
   }
 

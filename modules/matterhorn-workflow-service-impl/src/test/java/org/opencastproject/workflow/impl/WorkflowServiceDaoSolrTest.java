@@ -62,6 +62,7 @@ public class WorkflowServiceDaoSolrTest {
     ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.expect(serviceRegistry.count(WorkflowService.JOB_TYPE, null)).andReturn(new Long(1));
     EasyMock.expect(serviceRegistry.getJobs(WorkflowService.JOB_TYPE, null)).andReturn(jobs);
+    EasyMock.expect(serviceRegistry.getJob(123)).andReturn(job);
     EasyMock.replay(serviceRegistry);
 
     // Now create the dao
@@ -126,7 +127,7 @@ public class WorkflowServiceDaoSolrTest {
 
   @Test
   public void testPopulateSolr() throws Exception {
-    // this method uses the solr index, so if the workflow is
+    // this method uses the service registry
     Assert.assertNotNull(dao.getWorkflowById(123));
   }
 

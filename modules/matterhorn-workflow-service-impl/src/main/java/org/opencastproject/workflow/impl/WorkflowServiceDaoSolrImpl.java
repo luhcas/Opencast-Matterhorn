@@ -19,6 +19,7 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
@@ -28,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowParsingException;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowQuery.QueryTerm;
 import org.opencastproject.workflow.api.WorkflowQuery.Sort;
@@ -565,20 +567,18 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    */
   @Override
   public WorkflowInstance getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException {
+    // Use the service registry, since it's fast and accurate to look up jobs by their primary key. Solr can be out of
+    // date on quick changes (e.g. unit testing).
     try {
-      QueryResponse response = solrServer.query(new SolrQuery(ID_KEY + ":" + workflowId));
-      if (response.getResults().size() == 0) {
-        throw new NotFoundException("Unable to find a workflow with id=" + workflowId);
-      } else {
-        String xml = (String) response.getResults().get(0).get(XML_KEY);
-        try {
-          return WorkflowParser.parseWorkflowInstance(xml);
-        } catch (Exception e) {
-          throw new IllegalStateException("can not parse workflow xml", e);
-        }
+      Job job = serviceRegistry.getJob(workflowId);
+      if(Status.DELETED.equals(job.getStatus())) {
+        throw new NotFoundException("Workflow " + workflowId + " was deleted");
       }
-    } catch (SolrServerException e) {
+      return WorkflowParser.parseWorkflowInstance(job.getPayload());
+    } catch (ServiceRegistryException e) {
       throw new WorkflowDatabaseException(e);
+    } catch (WorkflowParsingException e) {
+      throw new IllegalStateException("can not parse workflow xml", e);
     }
   }
 

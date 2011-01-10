@@ -74,7 +74,7 @@ public class Activator implements BundleActivator {
     String jdbcDriver = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.driver"),
             "org.h2.Driver");
     String jdbcUrl = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.url"), "jdbc:h2:"
-            + rootDir + ";LOCK_MODE=1;MVCC=TRUE");
+            + rootDir);
     String jdbcUser = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.user"), "sa");
     String jdbcPass = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.pass"), "sa");
     pooledDataSource = new ComboPooledDataSource();
