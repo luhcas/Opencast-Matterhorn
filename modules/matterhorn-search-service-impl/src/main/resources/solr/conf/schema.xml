@@ -259,10 +259,11 @@
    <!--  Opencast fields -->
 
    <field name="oc_mediatype" type="string" indexed="true" stored="true" omitNorms="true"/>
-   <field name="oc_mediapackage" type="text" indexed="false" stored="true"/>
+   <field name="oc_mediapackage" type="string" indexed="false" stored="true"/>
    <field name="oc_keywords" type="text" indexed="true" stored="true" omitNorms="true"/>
    <field name="oc_cover" type="string" indexed="false" stored="true" />
    <field name="oc_modified" type="date" indexed="true" stored="true" omitNorms="true"/>
+   <field name="oc_deleted" type="date" indexed="true" stored="true" omitNorms="true"/>
    <field name="oc_elementtags" type="text" indexed="true" stored="true" omitNorms="true"/>
    <field name="oc_elementflavors" type="text" indexed="true" stored="true" omitNorms="true"/>
    

@@ -50,6 +50,7 @@ public interface SolrFields {
   String OC_KEYWORDS = "oc_keywords";
   String OC_COVER = "oc_cover";
   String OC_MODIFIED = "oc_modified";
+  String OC_DELETED = "oc_deleted";
   String OC_MEDIATYPE = "oc_mediatype";
   String OC_ELEMENTTAGS = "oc_elementtags";
   String OC_ELEMENTFLAVORS = "oc_elementflavors";
