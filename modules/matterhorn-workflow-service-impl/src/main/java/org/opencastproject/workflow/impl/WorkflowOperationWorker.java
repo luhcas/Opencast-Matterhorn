@@ -17,13 +17,14 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
-import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workflow.api.WorkflowParsingException;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ final class WorkflowOperationWorker implements Runnable {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowOperationWorker.class);
 
   protected WorkflowOperationHandler handler = null;
-  protected WorkflowInstance workflow = null;
+  protected WorkflowInstanceImpl workflow = null;
   protected WorkflowServiceImpl service = null;
   protected Map<String, String> properties = null;
 
@@ -55,7 +56,7 @@ final class WorkflowOperationWorker implements Runnable {
    * @param service
    *          the workflow service.
    */
-  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow,
+  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstanceImpl workflow,
           WorkflowServiceImpl service) {
     this.handler = handler;
     this.workflow = workflow;
@@ -76,7 +77,7 @@ final class WorkflowOperationWorker implements Runnable {
    * @param service
    *          the workflow service.
    */
-  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow,
+  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstanceImpl workflow,
           Map<String, String> properties, WorkflowServiceImpl service) {
     this(handler, workflow, service);
     this.properties = properties;
@@ -130,8 +131,11 @@ final class WorkflowOperationWorker implements Runnable {
    *           if executing the workflow operation handler fails
    * @throws WorkflowDatabaseException
    *           if updating the workflow fails
+   * @throws WorkflowParsingException
+   *           if serializing the workflow fails
    */
-  public WorkflowOperationResult start() throws WorkflowOperationException, WorkflowDatabaseException {
+  public WorkflowOperationResult start() throws WorkflowOperationException, WorkflowDatabaseException,
+          WorkflowParsingException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
 
     // Do we need to execute the operation?
@@ -147,7 +151,7 @@ final class WorkflowOperationWorker implements Runnable {
     } else {
       operation.setState(OperationState.RUNNING);
     }
-    service.update(workflow);
+
     try {
       WorkflowOperationResult result = null;
       if (OperationState.SKIPPED.equals(operation.getState())) {
@@ -188,18 +192,19 @@ final class WorkflowOperationWorker implements Runnable {
    *           if executing the workflow operation handler fails
    * @throws WorkflowDatabaseException
    *           if updating the workflow fails
+   * @throws WorkflowParsingException
+   *           if serializing the workflow fails
    * @throws IllegalStateException
    *           if the workflow operation cannot be resumed
    */
   public WorkflowOperationResult resume() throws WorkflowOperationException, WorkflowDatabaseException,
-          IllegalStateException {
+          WorkflowParsingException, IllegalStateException {
     if (!(handler instanceof ResumableWorkflowOperationHandler)) {
       throw new IllegalStateException("an attempt was made to resume a non-resumable operation");
     }
     ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     operation.setState(OperationState.RUNNING);
-    service.update(workflow);
 
     try {
       WorkflowOperationResult result = resumableHandler.resume(workflow, properties);

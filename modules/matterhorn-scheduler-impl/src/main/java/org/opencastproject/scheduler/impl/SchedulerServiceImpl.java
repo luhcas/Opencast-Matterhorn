@@ -25,7 +25,6 @@ import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -309,7 +308,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
   public void stopWorkflowInstance(Event event) throws NotFoundException {
     try {
       workflowService.stop(event.getEventId());
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       logger.warn("can not stop workflow {}, {}", event.getEventId(), e);
     }
   }
@@ -428,7 +427,8 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
               stopParam);
     } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
       startParam = builder.parameter(Date.class);
-      wherePred = builder.greaterThan(rootEvent.get(eventModel.getSingularAttribute("startDate", Date.class)), startParam);
+      wherePred = builder.greaterThan(rootEvent.get(eventModel.getSingularAttribute("startDate", Date.class)),
+              startParam);
     } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
       stopParam = builder.parameter(Date.class);
       wherePred = builder.lessThan(rootEvent.get(eventModel.getSingularAttribute("endDate", Date.class)), stopParam);
@@ -582,7 +582,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     }
   }
 
-  public void updateWorkflow(Event event) throws NotFoundException, WorkflowDatabaseException, SchedulerException {
+  public void updateWorkflow(Event event) throws NotFoundException, WorkflowException, SchedulerException {
     WorkflowInstance workflow = workflowService.getWorkflowById(event.getEventId());
     WorkflowOperationInstance scheduleOperation = workflow.getCurrentOperation();
 

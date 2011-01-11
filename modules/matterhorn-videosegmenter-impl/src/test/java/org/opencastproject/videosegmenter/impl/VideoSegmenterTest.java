@@ -52,9 +52,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * Test class for video segmentation.
@@ -188,80 +186,6 @@ public class VideoSegmenterTest {
 
     // There should be no third segment
     assertFalse("Found an unexpected third video segment", si.hasNext());
-  }
-
-  class JobStub implements Job {
-    String payload;
-    Status status;
-
-    public String getProcessingHost() {
-      return null;
-    }
-
-    public long getId() {
-      return -1;
-    }
-
-    public Status getStatus() {
-      return status;
-    }
-
-    public String getJobType() {
-      return "analysis-test";
-    }
-
-    public void setHost(String host) {
-    }
-
-    public void setId(long id) {
-    }
-
-    public void setStatus(Status status) {
-      this.status = status;
-    }
-
-    public void setType(String type) {
-    }
-
-    public String toXml() {
-      return null;
-    }
-
-    public Date getDateCompleted() {
-      return null;
-    }
-
-    public Date getDateCreated() {
-      return null;
-    }
-
-    public Date getDateStarted() {
-      return null;
-    }
-    
-    public String getPayload() {
-      return payload;
-    }
-    
-    public void setPayload(String payload) {
-      this.payload = payload;
-    }
-
-    public int getVersion() {
-      return 0;
-    }
-
-    public String getOperationType() {
-      return null;
-    }
-
-    public List<String> getArguments() {
-      return null;
-    }
-
-    public String getCreatedHost() {
-      return null;
-    }
   }
 
 }

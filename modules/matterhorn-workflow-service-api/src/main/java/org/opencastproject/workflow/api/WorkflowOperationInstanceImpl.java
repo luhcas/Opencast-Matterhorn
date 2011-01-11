@@ -451,7 +451,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    */
   @Override
   public String toString() {
-    return "WorkflowOperation {" + id + "}";
+    return "operation '" + id + "', position " + position;
   }
 
   /**

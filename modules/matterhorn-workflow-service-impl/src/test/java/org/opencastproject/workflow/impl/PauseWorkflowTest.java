@@ -20,6 +20,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -96,8 +97,7 @@ public class PauseWorkflowTest {
       }
     };
 
-    ServiceRegistry serviceRegistry = new MockServiceRegistry();
-    service.setServiceRegistry(serviceRegistry);
+    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
 
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);

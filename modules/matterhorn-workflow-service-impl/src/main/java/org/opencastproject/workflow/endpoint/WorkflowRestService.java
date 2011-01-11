@@ -672,7 +672,7 @@ public class WorkflowRestService {
       return Response.ok(workflow).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     }
   }
@@ -686,7 +686,7 @@ public class WorkflowRestService {
       return Response.ok(workflow).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     }
   }
@@ -706,7 +706,7 @@ public class WorkflowRestService {
       return Response.ok(workflow).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     }
   }
@@ -730,7 +730,7 @@ public class WorkflowRestService {
       }
       service.resume(workflowInstanceId, map);
       return Response.ok(workflow).build();
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
@@ -743,7 +743,7 @@ public class WorkflowRestService {
     try {
       service.update(workflowInstance);
       return Response.noContent().build();
-    } catch (WorkflowDatabaseException e) {
+    } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     }
   }

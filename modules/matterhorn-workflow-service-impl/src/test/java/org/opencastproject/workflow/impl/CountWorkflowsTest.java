@@ -22,6 +22,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -93,8 +94,7 @@ public class CountWorkflowsTest {
       }
     };
 
-    serviceRegistry = new MockServiceRegistry();
-    service.setServiceRegistry(serviceRegistry);
+    serviceRegistry = new ServiceRegistryInMemoryImpl();
 
     dao = new WorkflowServiceDaoSolrImpl();
     dao.setServiceRegistry(serviceRegistry);

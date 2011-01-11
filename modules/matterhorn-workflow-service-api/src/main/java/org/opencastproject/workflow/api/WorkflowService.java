@@ -191,8 +191,10 @@ public interface WorkflowService {
    *           if no running workflow with this identifier exists
    * @throws WorkflowDatabaseException
    *           if there is a problem accessing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing the workflow instance from persistence
    */
-  WorkflowInstance stop(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException;
+  WorkflowInstance stop(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException, WorkflowParsingException;
 
   /**
    * Temporarily suspends a started workflow instance.
@@ -204,8 +206,11 @@ public interface WorkflowService {
    *           if no running workflow with this identifier exists
    * @throws WorkflowDatabaseException
    *           if there is a problem accessing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing the workflow instance from persistence
    */
-  WorkflowInstance suspend(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException;
+  WorkflowInstance suspend(long workflowInstanceId) throws WorkflowDatabaseException, WorkflowParsingException,
+          NotFoundException;
 
   /**
    * Resumes a suspended workflow instance.
@@ -217,8 +222,11 @@ public interface WorkflowService {
    *           if no paused workflow with this identifier exists
    * @throws WorkflowDatabaseException
    *           if there is a problem accessing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing the workflow instance from persistence
    */
-  WorkflowInstance resume(long workflowInstanceId) throws NotFoundException, WorkflowDatabaseException;
+  WorkflowInstance resume(long workflowInstanceId) throws NotFoundException, WorkflowDatabaseException,
+          WorkflowParsingException;
 
   /**
    * Resumes a suspended workflow instance, applying new properties to the workflow.
@@ -232,9 +240,11 @@ public interface WorkflowService {
    *           if no paused workflow with this identifier exists
    * @throws WorkflowDatabaseException
    *           if there is a problem accessing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing the workflow instance from persistence
    */
   WorkflowInstance resume(long workflowInstanceId, Map<String, String> properties) throws NotFoundException,
-          WorkflowDatabaseException;
+          WorkflowDatabaseException, WorkflowParsingException;
 
   /**
    * Updates the given workflow instance with regard to the media package, the properties and the operations involved.
@@ -243,8 +253,10 @@ public interface WorkflowService {
    *          the workflow instance
    * @throws WorkflowDatabaseException
    *           if there is a problem storing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem serializing the workflow instance for persistence
    */
-  void update(WorkflowInstance workflowInstance) throws WorkflowDatabaseException;
+  void update(WorkflowInstance workflowInstance) throws WorkflowDatabaseException, WorkflowParsingException;
 
   /**
    * Gets the list of available workflow definitions. In order to be "available", a workflow definition must be

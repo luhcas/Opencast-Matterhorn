@@ -193,7 +193,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
       if (id == job.getId())
         return job;
     }
-    return null;
+    throw new NotFoundException(Long.toString(id));
   }
 
   /**

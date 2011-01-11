@@ -296,6 +296,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         throw new NotFoundException("job " + job + " is not a persistent object.", e);
       }
       update(fromDb, (JaxbJob) job);
+      em.merge(fromDb);
       tx.commit();
       int version = fromDb.getVersion();
       ((JaxbJob)job).setVersion(version);

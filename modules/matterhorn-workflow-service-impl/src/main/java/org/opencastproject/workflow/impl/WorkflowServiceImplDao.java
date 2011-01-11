@@ -20,6 +20,8 @@ import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowParsingException;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
@@ -41,8 +43,10 @@ public interface WorkflowServiceImplDao {
    *          The workflow instance to store
    * @throws WorkflowDatabaseException
    *           if there is a problem storing the workflow instance
+   * @throws WorkflowParserException
+   *           if there is a problem serializing the workflow instance
    */
-  Job update(WorkflowInstance instance) throws WorkflowDatabaseException;
+  Job update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException;
 
   /**
    * Remove the workflow instance with this id.
@@ -68,7 +72,7 @@ public interface WorkflowServiceImplDao {
    * @throws NotFoundException
    *           if there is no workflow instance with this identifier
    */
-  WorkflowInstance getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException;
+  WorkflowInstanceImpl getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets the total number of workflows that have been created to date.

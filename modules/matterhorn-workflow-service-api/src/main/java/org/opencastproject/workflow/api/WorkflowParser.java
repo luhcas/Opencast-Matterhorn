@@ -119,7 +119,7 @@ public final class WorkflowParser {
    * @throws WorkflowParsingException
    *           if creating the workflow instance fails
    */
-  public static WorkflowInstance parseWorkflowInstance(InputStream in) throws WorkflowParsingException {
+  public static WorkflowInstanceImpl parseWorkflowInstance(InputStream in) throws WorkflowParsingException {
     try {
       Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
       WorkflowInstanceImpl workflow = unmarshaller.unmarshal(
@@ -141,7 +141,7 @@ public final class WorkflowParser {
    * @throws WorkflowParsingException
    *           if creating the workflow instance fails
    */
-  public static WorkflowInstance parseWorkflowInstance(String in) throws WorkflowParsingException {
+  public static WorkflowInstanceImpl parseWorkflowInstance(String in) throws WorkflowParsingException {
     try {
       return parseWorkflowInstance(IOUtils.toInputStream(in, "UTF8"));
     } catch (IOException e) {

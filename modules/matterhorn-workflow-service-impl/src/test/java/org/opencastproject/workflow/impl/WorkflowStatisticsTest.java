@@ -22,11 +22,13 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowStatistics;
@@ -68,7 +70,7 @@ public class WorkflowStatisticsTest {
   private static final int WORKFLOW_DEFINITION_COUNT = 2;
 
   /** Number of operations per workflow */
-  private static final int OPERATION_COUNT = 5;
+  private static final int OPERATION_COUNT = 3;
 
   private WorkflowServiceImpl workflowService = null;
   private List<WorkflowDefinition> workflowDefinitions = null;
@@ -91,23 +93,18 @@ public class WorkflowStatisticsTest {
 
     workflowDefinitions = new ArrayList<WorkflowDefinition>();
     workflowHandlers = new HashSet<HandlerRegistration>();
+    String opId = "op";
+    WorkflowOperationDefinition op = new WorkflowOperationDefinitionImpl(opId, "Pausing operation", null, true);
+    WorkflowOperationHandler opHandler = new ResumableTestWorkflowOperationHandler(opId, Action.PAUSE, Action.CONTINUE);
+    HandlerRegistration handler = new HandlerRegistration(opId, opHandler);
+    workflowHandlers.add(handler);
 
     // create operation handlers for our workflows
     for (int i = 1; i <= WORKFLOW_DEFINITION_COUNT; i++) {
       WorkflowDefinition workflowDef = new WorkflowDefinitionImpl();
-      workflowDef.setId("workflow-" + i);
+      workflowDef.setId("def-" + i);
       for (int opCount = 1; opCount <= OPERATION_COUNT; opCount++) {
-
-        // Create a new operation
-        String opId = "op-" + opCount;
-        String opDescription = "workflow operation " + opCount;
-        WorkflowOperationDefinition op = new WorkflowOperationDefinitionImpl(opId, opDescription, null, true);
         workflowDef.add(op);
-
-        // Register a handler form the operation
-        HandlerRegistration handler = new HandlerRegistration(opId, new ResumableTestWorkflowOperationHandler(opId, Action.PAUSE, Action.CONTINUE));
-        if (!workflowHandlers.contains(handler))
-          workflowHandlers.add(handler);
       }
       workflowDefinitions.add(workflowDef);
     }
@@ -130,8 +127,7 @@ public class WorkflowStatisticsTest {
     EasyMock.replay(workspace);
 
     // Mock the service registry
-    ServiceRegistry serviceRegistry = new MockServiceRegistry();
-    workflowService.setServiceRegistry(serviceRegistry);
+    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
 
     // Create the workflow database (solr)
     dao = new WorkflowServiceDaoSolrImpl();
@@ -161,7 +157,6 @@ public class WorkflowStatisticsTest {
   @After
   public void teardown() throws Exception {
     System.out.println("All tests finished... tearing down...");
-    Thread.sleep(1000);
     dao.deactivate();
     workflowService.deactivate();
   }
@@ -203,18 +198,28 @@ public class WorkflowStatisticsTest {
     int stopped = 0;
     int succeeded = 0;
 
+    List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
     for (WorkflowDefinition def : workflowDefinitions) {
       for (int j = 0; j < def.getOperations().size(); j++) {
-        WorkflowInstance instance = workflowService.start(def, mediaPackage);
-        for (int k = 0; k <= j; k++) {
-          instance = workflowService.resume(instance.getId(), null);
-        }
+        instances.add(workflowService.start(def, mediaPackage));
         total++;
         paused++;
       }
     }
 
-    Thread.sleep(3000);
+    Thread.sleep(200);
+
+    // Resume all of them, so some will be finished, some won't
+    int j = 0;
+    for (WorkflowInstance instance : instances) {
+      for (int k = 0; k <= (j % OPERATION_COUNT - 1); k++) {
+        workflowService.resume(instance.getId(), null);
+        Thread.sleep(200);
+      }
+      j++;
+    }
+
+    Thread.sleep(200);
 
     // TODO: Add failed, failing, stopped etc. workflows as well
 

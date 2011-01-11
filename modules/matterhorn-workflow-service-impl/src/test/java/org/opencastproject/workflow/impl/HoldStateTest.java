@@ -20,6 +20,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -90,8 +91,7 @@ public class HoldStateTest {
       }
     };
 
-    ServiceRegistry serviceRegistry = new MockServiceRegistry();
-    service.setServiceRegistry(serviceRegistry);
+    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
 
     dao = new WorkflowServiceDaoSolrImpl();
     dao.solrRoot = storageRoot + File.separator + "solr";

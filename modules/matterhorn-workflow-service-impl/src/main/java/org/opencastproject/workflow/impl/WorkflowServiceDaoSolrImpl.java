@@ -20,6 +20,7 @@ import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
@@ -27,6 +28,7 @@ import org.opencastproject.util.SolrUtils;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowParsingException;
@@ -66,6 +68,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -566,7 +569,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowById(long)
    */
   @Override
-  public WorkflowInstance getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException {
+  public WorkflowInstanceImpl getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException {
     // Use the service registry, since it's fast and accurate to look up jobs by their primary key. Solr can be out of
     // date on quick changes (e.g. unit testing).
     try {
@@ -831,22 +834,50 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public Job update(WorkflowInstance instance) throws WorkflowDatabaseException {
+  public Job update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException {
+    WorkflowState workflowState = instance.getState();
     String xml;
     try {
       xml = WorkflowParser.toXml(instance);
     } catch (Exception e) {
-      throw new WorkflowDatabaseException(e);
+      throw new WorkflowParsingException(e);
     }
+    Job job = null;
     try {
-      Job job = serviceRegistry.getJob(instance.getId());
+      if (instance.getId() == 0) {
+        String parentId = instance.getParentId() == null ? null : Long.toString(instance.getParentId());
+        job = serviceRegistry.createJob(WorkflowService.JOB_TYPE, WorkflowService.JOB_TYPE,
+                Arrays.asList(instance.getMediaPackage().toXml(), instance.getTemplate(), parentId));
+        ((WorkflowInstanceImpl) instance).setId(job.getId());
+      } else {
+        job = serviceRegistry.getJob(instance.getId());
+      }
       job.setPayload(xml);
+      if (WorkflowState.RUNNING.equals(workflowState)) {
+        job.setStatus(Status.RUNNING);
+      } else if (WorkflowState.PAUSED.equals(workflowState)) {
+        job.setStatus(Status.PAUSED);
+      } else if (WorkflowState.FAILED.equals(workflowState) || WorkflowState.FAILING.equals(workflowState)) {
+        job.setStatus(Status.FAILED);
+      } else if (WorkflowState.SUCCEEDED.equals(workflowState)) {
+        job.setStatus(Status.FINISHED);
+      } else if (WorkflowState.INSTANTIATED.equals(workflowState)) {
+        job.setStatus(Status.QUEUED);
+      } else if (WorkflowState.STOPPED.equals(workflowState)) {
+        job.setStatus(Status.DELETED);
+      }
       serviceRegistry.updateJob(job);
-      index(instance);
-      return job;
-    } catch (Exception e) {
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException(e);
+    } catch (ServiceUnavailableException e) {
+      // this should never happen, since we're in a delegate of the workflow service itself
+      throw new WorkflowDatabaseException(e);
+    } catch (NotFoundException e) {
+      // this should never happen, since we create the job if it doesn't already exist
       throw new WorkflowDatabaseException(e);
     }
+    index(instance);
+    return job;
   }
 
 }

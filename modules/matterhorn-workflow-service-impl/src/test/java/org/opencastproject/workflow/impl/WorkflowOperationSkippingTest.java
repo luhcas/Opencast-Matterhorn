@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -93,8 +94,7 @@ public class WorkflowOperationSkippingTest {
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    ServiceRegistry serviceRegistry = new MockServiceRegistry();
-    service.setServiceRegistry(serviceRegistry);
+    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
 
     dao = new WorkflowServiceDaoSolrImpl();
     dao.setServiceRegistry(serviceRegistry);
