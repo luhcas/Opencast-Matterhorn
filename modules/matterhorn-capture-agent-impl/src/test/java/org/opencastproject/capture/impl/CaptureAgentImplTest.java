@@ -47,8 +47,6 @@ public class CaptureAgentImplTest {
   /** The configuration manager for these tests */
   private ConfigurationManager config = null;
 
-  private SchedulerImpl sched = null;
-
   /** Properties specifically designed for unit testing */
   private Properties properties = null;
 
@@ -89,18 +87,14 @@ public class CaptureAgentImplTest {
     p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
     config.updated(p);
-    sched = new SchedulerImpl();
-    sched.updated(loadProperties("config/scheduler.properties"));
-    sched.setConfigService(config);
     // creates agent, initially idle
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
-    sched.setCaptureAgent(agent);
 
     Assert.assertNull(agent.getAgentState());
     agent.activate(null);
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
-
+    agent.updated(p);
     // setup testing properties
     properties = new Properties();
     properties.setProperty(CaptureParameters.RECORDING_ID, recordingID);
@@ -118,8 +112,6 @@ public class CaptureAgentImplTest {
     config.deactivate();
     config = null;
     properties = null;
-    sched.shutdown();
-    sched = null;
     FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-agent-test"));
   }
 
@@ -210,19 +202,17 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     String id = agent.startCapture(properties);
     Assert.assertEquals(1, agent.getKnownRecordings().size());
-    Thread.sleep(2000);
+    Thread.sleep(20000);
     agent.deactivate();
     agent = null;
-
     // Bring the agent back up and check to make sure it reloads the recording
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
-    sched.setCaptureAgent(agent);
-    sched.stopScheduler();
     agent.activate(null);
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     agent.updated(loadProperties("config/scheduler.properties"));
-    agent.refresh();
+    agent.scheduler.setCaptureAgent(agent);
+    agent.scheduler.stopScheduler();
     agent.createRecordingLoadTask(1);
     System.out.println("Waiting 5 seconds to make sure the scheduler has time to load...");
     waiter.sleepWait(new CheckState() {
@@ -240,7 +230,7 @@ public class CaptureAgentImplTest {
   }
 
   @Test
-  public void testRecordingLoadMethod() throws IOException {
+  public void testRecordingLoadMethod() throws IOException, ConfigurationException {
     if (!gstreamerInstalled)
       return;
 
@@ -259,8 +249,7 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     agent.loadRecordingsFromDisk();
     Assert.assertEquals(0, agent.getKnownRecordings().size());
-
-    sched.setCaptureAgent(agent);
+    
     agent.activate(null);
 
     // More error handling tests
@@ -299,11 +288,10 @@ public class CaptureAgentImplTest {
 
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
-    sched.setCaptureAgent(agent);
     agent.activate(null);
-
+    agent.updated(loadProperties("config/scheduler.properties"));
     Assert.assertEquals(0, agent.getKnownRecordings().size());
-    sched.stopScheduler();
+    agent.scheduler.stopScheduler();
     agent.loadRecordingsFromDisk();
 
     Assert.assertEquals(10, agent.getKnownRecordings().size());

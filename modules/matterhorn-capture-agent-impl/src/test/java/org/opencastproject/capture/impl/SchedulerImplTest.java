@@ -65,7 +65,7 @@ public class SchedulerImplTest {
     setupSchedulerProperties();
     setupSchedulerImpl();
     setupWaiter();
-    Assert.assertNull(schedulerImpl.getCaptureSchedule());
+    //Assert.assertNull(schedulerImpl.getCaptureSchedule());
   }
 
   private Properties setupCaptureProperties() {
@@ -117,9 +117,11 @@ public class SchedulerImplTest {
   }
 
   private void setupSchedulerImpl() {
-    schedulerImpl = new SchedulerImpl();
-    schedulerImpl.setConfigService(configurationManager);
-    schedulerImpl.setCaptureAgent(captureAgentImpl);
+    try {
+      schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
+    } catch (ConfigurationException e) {
+      Assert.fail(e.getMessage());
+    }
   }
 
   private void setupWaiter() {
@@ -271,6 +273,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testValidRemoteUTF8Calendar() throws IOException, ConfigurationException {
+    System.out.println("Starting testValidRemoteUTF8Calendar");
     String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS
             * CaptureParameters.MILLISECONDS));
     File testfile = setupTestCalendar(new File("calendars/Opencast.ics").getPath(), times);
@@ -278,14 +281,15 @@ public class SchedulerImplTest {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL()
             .toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     schedulerImpl.updateCalendar();
+    
     String[] schedule = null;
     schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
     FileUtils.deleteQuietly(testfile);
+    System.out.println("Ending testValidRemoteUTF8Calendar");
   }
 
   @Test
@@ -295,8 +299,7 @@ public class SchedulerImplTest {
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
@@ -307,8 +310,6 @@ public class SchedulerImplTest {
   public void testBrokenCalendarURLs() throws IOException, ConfigurationException {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "foobar:?8785346");
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -323,8 +324,6 @@ public class SchedulerImplTest {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL()
             .toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     // TODO: Figure out why this fails 1/3 times on some machines without the sleep() here.
     try {
       Thread.sleep(200);
@@ -344,8 +343,6 @@ public class SchedulerImplTest {
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
     FileUtils.deleteQuietly(testfile);
@@ -363,8 +360,6 @@ public class SchedulerImplTest {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL()
             .toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     // TODO: Figure out why this fails 1/3 times on some machines without the sleep() here.
     try {
       Thread.sleep(200);
@@ -386,8 +381,6 @@ public class SchedulerImplTest {
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
     FileUtils.deleteQuietly(testfile);
@@ -404,7 +397,6 @@ public class SchedulerImplTest {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL()
             .toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
     // TODO: Figure out why this fails 1/3 times on some machines without the sleep() here.
     try {
       Thread.sleep(200);
@@ -424,7 +416,6 @@ public class SchedulerImplTest {
     File testfile = setupTestCalendar("calendars/Opencast-UTF16.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals(times[0], schedule[0]);
@@ -436,8 +427,6 @@ public class SchedulerImplTest {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, cachedBlank);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -447,8 +436,6 @@ public class SchedulerImplTest {
     String cachedBlank = this.getClass().getClassLoader().getResource("calendars/Blank.ics").getFile();
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, cachedBlank);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -457,8 +444,6 @@ public class SchedulerImplTest {
   public void testMalformedRemoteURLCalendar() throws ConfigurationException {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, "blah!");
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -467,8 +452,6 @@ public class SchedulerImplTest {
   public void testMalformedLocalURLCalendar() throws ConfigurationException {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "blah!");
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -477,8 +460,6 @@ public class SchedulerImplTest {
   public void testMalformedCalendars() throws ConfigurationException {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, "blah!");
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, "blah!");
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -489,8 +470,6 @@ public class SchedulerImplTest {
             + "nonExistantTest";
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, nonExistant);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -501,8 +480,6 @@ public class SchedulerImplTest {
             + "nonExistantTest";
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, nonExistant);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -512,8 +489,6 @@ public class SchedulerImplTest {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, garbage);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -523,8 +498,6 @@ public class SchedulerImplTest {
     String garbage = this.getClass().getClassLoader().getResource("calendars/Garbage.ics").getFile();
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, garbage);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
   }
@@ -538,8 +511,7 @@ public class SchedulerImplTest {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL()
             .toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     schedulerImpl.updateCalendar();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
@@ -554,8 +526,7 @@ public class SchedulerImplTest {
     File testfile = setupTestCalendar("calendars/Opencast-with-dups.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("one", schedule[0]);
@@ -569,8 +540,7 @@ public class SchedulerImplTest {
     File testfile = setupTestCalendar("calendars/Edge-Cases.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(5, schedule.length);
     Arrays.sort(schedule);
@@ -588,8 +558,7 @@ public class SchedulerImplTest {
             setupDurationBoundCheckTimes(new Date(System.currentTimeMillis() + 12000L)));
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(3, schedule.length);
     Arrays.sort(schedule);
@@ -615,7 +584,7 @@ public class SchedulerImplTest {
 
     // Try it
     try {
-      schedulerImpl.updated(null);
+      schedulerImpl = new SchedulerImpl(null, configurationManager, captureAgentImpl);
     } catch (ConfigurationException e) {
       expectedException = true;
     }
@@ -629,7 +598,7 @@ public class SchedulerImplTest {
 
     // Try it with a different config
     try {
-      schedulerImpl.updated(new Properties());
+      schedulerImpl = new SchedulerImpl(new Properties(), configurationManager, captureAgentImpl);
     } catch (ConfigurationException e) {
       expectedException = true;
     }
@@ -645,22 +614,18 @@ public class SchedulerImplTest {
   @Test
   public void testBadCalendarPolling() throws Exception {
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "60");
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     Thread.sleep(10);
     Assert.assertTrue(schedulerImpl.isCalendarPollingEnabled());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "0");
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     Assert.assertFalse(schedulerImpl.isCalendarPollingEnabled());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, "?asewrtk5fw5");
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "60");
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     Assert.assertFalse(schedulerImpl.isCalendarPollingEnabled());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "0");
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     Assert.assertFalse(schedulerImpl.isCalendarPollingEnabled());
   }
 
@@ -708,8 +673,6 @@ public class SchedulerImplTest {
     File testfile = setupCaptureAgentTestCalendar("calendars/ThreeCaptures.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(schedulerProperties);
-    schedulerImpl.refresh();
     captureAgentImpl.setConfigService(configurationManager);
     schedulerImpl.setConfigService(configurationManager);
   }
@@ -785,16 +748,10 @@ public class SchedulerImplTest {
   @Test
   public void testCaptureAgentStatusPollingDoesFireIfCaptureIsJustPast() throws IOException, ConfigurationException,
           InterruptedException {
-    captureAgentImpl.setConfigService(configurationManager);
-    captureAgentImpl.activate(null);
     setupThreeCaptureCalendar(-10, -1, 10);
-    waiter.sleepWait(new CheckState() {
-      @Override
-      public boolean check() {
-        return captureAgentImpl.getAgentState().equals(AgentState.CAPTURING);
-      }
-    });
-    Assert.assertEquals(AgentState.CAPTURING, captureAgentImpl.getAgentState());
+    captureAgentImpl.activate(null);
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
+    Assert.assertEquals(2, schedulerImpl.getCaptureSchedule().length);
   }
 
   @Test
@@ -808,48 +765,8 @@ public class SchedulerImplTest {
     dictionary.put(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
     configurationManager.updated(dictionary);
     schedulerImpl.setConfigService(configurationManager);
-    schedulerImpl.updated(schedulerProperties);
+    schedulerImpl = new SchedulerImpl(schedulerProperties, configurationManager, captureAgentImpl);
     captureAgentImpl.setConfigService(configurationManager);
     schedulerImpl.setConfigService(configurationManager);
-  }
-
-  @Test
-  public void schedulerRegistersItselfAsConfigurationManagerListenerIfItIsUpdatedLater() throws IOException,
-          ConfigurationException, InterruptedException {
-    String[] times = createThreeCaptures(-20, 5, 20);
-    File testfile = setupCaptureAgentTestCalendar("calendars/ThreeCaptures.ics", times);
-    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
-    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    // Create a mock ConfigurationManager to make sure that it is refreshed.
-    ConfigurationManager mockConfigurationManager = createMock(ConfigurationManager.class);
-    mockConfigurationManager.registerListener(schedulerImpl);
-    replay(mockConfigurationManager);
-    // First setting the configuration service.
-    schedulerImpl.setConfigService(mockConfigurationManager);
-    // Then updating the configuration service.
-    Dictionary<String, String> dictionary = new Hashtable<String, String>();
-    dictionary.put(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(dictionary);
-    verify(mockConfigurationManager);
-  }
-
-  @Test
-  public void schedulerRegistersItselfAsConfigurationManagerListenerIfItIsUpdatedFirst() throws IOException,
-          ConfigurationException, InterruptedException {
-    String[] times = createThreeCaptures(-20, 5, 20);
-    File testfile = setupCaptureAgentTestCalendar("calendars/ThreeCaptures.ics", times);
-    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
-    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    // Create a mock ConfigurationManager to make sure that it is refreshed.
-    ConfigurationManager mockConfigurationManager = createMock(ConfigurationManager.class);
-    mockConfigurationManager.registerListener(schedulerImpl);
-    replay(mockConfigurationManager);
-    // First updating the scheduler impl
-    Dictionary<String, String> dictionary = new Hashtable<String, String>();
-    dictionary.put(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
-    schedulerImpl.updated(dictionary);
-    // Then setting the configuration service.
-    schedulerImpl.setConfigService(mockConfigurationManager);
-    verify(mockConfigurationManager);
   }
 }

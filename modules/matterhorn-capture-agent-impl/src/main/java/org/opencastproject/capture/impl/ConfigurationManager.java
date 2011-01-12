@@ -173,7 +173,7 @@ public class ConfigurationManager implements ManagedService {
 
   /**
    * A thread to run the refresh for each ConfigurationManagerListener. This will ensure that the listeners don't get
-   * blocked waiting for another one to finish executing.
+   * blocked waiting for another one to finish executing hence causing deadlock. 
    **/
   class RefreshRunner implements Runnable {
     /** The listener to call refresh on. **/

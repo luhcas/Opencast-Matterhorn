@@ -161,7 +161,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   private String agentState = null;
 
   /** A pointer to the scheduler. */
-  private org.opencastproject.capture.api.Scheduler scheduler = null;
+  SchedulerImpl scheduler = null;
 
   /** The scheduler the agent will use to schedule any recurring events */
   private org.quartz.Scheduler agentScheduler = null;
@@ -192,13 +192,49 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * 
    * @param cfg
    *          The configuration service.
+   * @throws ConfigurationException 
    */
-  public void setConfigService(ConfigurationManager cfg) {
+  public void setConfigService(ConfigurationManager cfg) throws ConfigurationException {
     configService = cfg;
     agentName = configService.getItem(CaptureParameters.AGENT_NAME);
     configService.registerListener(this);
   }
 
+  /**
+   * When the ConfigurationManager is updated refresh is called as a part of the observer pattern of
+   * ConfigurationManagerObserver
+   **/
+  @Override
+  public void refresh() {
+    // Recreate the agent state push tasks
+    createPushTask();
+    // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
+    // seconds)
+    createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
+    logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
+    // Create SchedulerImpl
+    Hashtable<String, String> schedulerProperties = new Hashtable<String, String>();
+    schedulerProperties.put("org.quartz.scheduler.instanceName", "scheduler_sched");
+    schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
+    schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
+    schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
+    
+    schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+    schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
+    
+    schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+    try {
+      scheduler = new SchedulerImpl(schedulerProperties, configService, this);
+      if(client != null){
+        scheduler.setTrustedClient(client);
+      }
+    } catch (ConfigurationException e) {
+      e.printStackTrace();
+    }
+    
+  }
+
+  
   /**
    * Returns the configuration service form which this capture agent should draw its configuration data.
    * 
@@ -209,16 +245,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * Sets the scheduler service which this service uses to schedule stops for unscheduled captures.
-   * 
-   * @param s
-   *          The scheduler service.
-   */
-  public void setScheduler(org.opencastproject.capture.api.Scheduler scheduler) {
-    this.scheduler = scheduler;
-  }
-
-  /**
    * Sets the http client which this service uses to communicate with the core.
    * 
    * @param c
@@ -226,6 +252,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   void setTrustedClient(TrustedHttpClient c) {
     client = c;
+    if(scheduler != null){
+      scheduler.setTrustedClient(c);
+    }
   }
 
   /**
@@ -270,11 +299,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   @Override
   public String startCapture(MediaPackage mediaPackage) {
-
     logger.debug("startCapture(mediaPackage): {}", mediaPackage);
-
     return startCapture(mediaPackage, configService.getAllProperties());
-
   }
 
   /**
@@ -1230,22 +1256,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
     // Create recording load task.
     createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
-
-    logger.info("CaptureAgentImpl has successfully updated its quartz configuration.");
-  }
-
-  /**
-   * When the ConfigurationManager is updated refresh is called as a part of the observer pattern of
-   * ConfigurationManagerObserver
-   **/
-  @Override
-  public void refresh() {
-    // Recreate the agent state push tasks
-    createPushTask();
-    // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
-    // seconds)
-    createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
-    logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
+   
   }
 
   /**

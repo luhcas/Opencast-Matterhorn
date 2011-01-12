@@ -52,7 +52,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
 import org.quartz.JobDetail;
@@ -94,8 +93,7 @@ import java.util.UUID;
  * 
  * @see {@link http://www.ietf.org/rfc/rfc2445.txt}
  */
-public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService,
-        ConfigurationManagerListener {
+public class SchedulerImpl {
 
   /** Log facility */
   private static final Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
@@ -134,8 +132,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /** The trusted HttpClient used to talk to the core */
   private TrustedHttpClient trustedClient = null;
 
-  private boolean updated = false;
-
+  @SuppressWarnings("unchecked")
+  public SchedulerImpl(Dictionary dictionary, ConfigurationManager configurationManager,
+          CaptureAgentImpl captureAgentImpl) throws ConfigurationException {
+    configService = configurationManager;
+    this.captureAgent = captureAgentImpl;
+    this.updated(dictionary);
+  }
+  
   /**
    * Set the current ConfigurationManager and register this class as a listener for property updates.
    * 
@@ -144,9 +148,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    **/
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
-    if (updated) {
-      configService.registerListener(this);
-    }
   }
 
   /** Remove the reference to the ConfigurationManager service. **/
@@ -196,9 +197,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * 
    * @see org.osgi.service.cm.ManagedService#updated(Dictionary)
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  @Override
-  public void updated(Dictionary properties) throws ConfigurationException {
+  //@Override
+  @SuppressWarnings("unchecked")
+  private void updated(Dictionary properties) throws ConfigurationException {
     log.debug("Scheduler updated.");
 
     if (properties == null) {
@@ -219,20 +220,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       schedProps.put(key, properties.get(key));
     }
 
-    // If the configuration service has been set and we are just updating we should register ourselves.
-    if (configService != null) {
-      configService.registerListener(this);
-    }
-    // We have updated
-    updated = true;
-  }
-
-  /**
-   * Is part of the ConfigurationManagerObserver observer pattern. When the ConfigurationManager is updated this method
-   * is called.
-   **/
-  @Override
-  public void refresh() {
     try {
       localCalendarCacheURL = new File(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL)).toURI()
               .toURL();
@@ -405,10 +392,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    */
   public void setCaptureAgent(CaptureAgent agent) {
     captureAgent = agent;
-    // FIXME: This shouldn't be doing this...
-    if (agent != null) {
-      agent.setScheduler(this);
-    }
   }
 
   /**
@@ -1175,7 +1158,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * 
    * @see org.opencastproject.capture.api.Scheduler#isSchedulerEnabled()
    */
-  @Override
+  /*@Override
   public boolean isSchedulerEnabled() {
     try {
       if (scheduler != null && scheduler.isStarted()) {
@@ -1186,7 +1169,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
 
     return false;
-  }
+  }*/
 
   /**
    * {@inheritDoc}

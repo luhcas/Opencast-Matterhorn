@@ -54,7 +54,11 @@ public class StateServiceImplTest {
             "capture-state-test").getAbsolutePath());
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost");
-    service.setConfigService(cfg);
+    try {
+      service.setConfigService(cfg);
+    } catch (ConfigurationException e) {
+     Assert.fail(e.getMessage());
+    }
   }
 
   @After
