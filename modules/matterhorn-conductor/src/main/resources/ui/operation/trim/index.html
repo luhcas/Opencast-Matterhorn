@@ -59,7 +59,11 @@
         */
         function setOutPointDefaultValue() {
             // If Duration has been set
-            if(($('#player-container')[0].contentWindow.Opencast.Player.getDuration() != 0) && !timerSet) {
+            if($('#player-container')[0].contentWindow.Opencast != null && 
+                ($('#player-container')[0].contentWindow.Opencast.Player.getDuration() != 0) && 
+                !timerSet &&
+                ($('#player-container')[0].contentWindow.Opencast.Player.getDuration() != 'NaN:NaN:NaN')) 
+            {
                 $('#outPoint').val($('#player-container').contents().find('#oc_duration').text());
                 timerSet = true;
                 return true;
