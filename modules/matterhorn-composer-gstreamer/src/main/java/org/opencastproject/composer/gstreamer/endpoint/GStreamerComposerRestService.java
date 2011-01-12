@@ -373,7 +373,8 @@ public class GStreamerComposerRestService {
 
   protected String generateDocs(String serviceUrl) {
     // TODO fix revision
-    DocRestData data = new DocRestData("Composer", "GStreamer Composer Service", serviceUrl, new String[] { "$Rev$" });
+    DocRestData data = new DocRestData("Composer", "GStreamer Composer Service", serviceUrl,
+            new String[] { "$Rev$" });
     // profiles
     RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles.xml",
             "Retrieve the encoding profiles");
@@ -573,4 +574,3 @@ public class GStreamerComposerRestService {
             + "      <tag>lang:fr</tag>\n" + "    </tags>\n" + "  </catalog>\n" + "</captions>\n";
   }
 }
-

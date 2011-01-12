@@ -50,7 +50,10 @@ public class GStreamerFactory implements EncoderEngineFactory {
 
   /*
    * (non-Javadoc)
-   * @see org.opencastproject.composer.api.EncoderEngineFactory#newEncoderEngine(org.opencastproject.composer.api.EncodingProfile)
+   * 
+   * @see
+   * org.opencastproject.composer.api.EncoderEngineFactory#newEncoderEngine(org.opencastproject.composer.api.EncodingProfile
+   * )
    */
   @Override
   public EncoderEngine newEncoderEngine(EncodingProfile profile) {

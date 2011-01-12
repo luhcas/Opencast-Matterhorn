@@ -19,30 +19,59 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.gstreamer.AbstractGSEncoderEngine;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.gstreamer.Buffer;
 import org.gstreamer.Bus;
+import org.gstreamer.Caps;
+import org.gstreamer.ClockTime;
+import org.gstreamer.Element;
+import org.gstreamer.ElementFactory;
+import org.gstreamer.Format;
 import org.gstreamer.GstObject;
+import org.gstreamer.Pad;
+import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
+import org.gstreamer.SeekFlags;
+import org.gstreamer.SeekType;
 import org.gstreamer.State;
+import org.gstreamer.Structure;
+import org.gstreamer.elements.AppSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.RenderingHints.Key;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.IntBuffer;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.imageio.ImageIO;
+
 /**
  * Encoder engine that uses GStreamer for encoding.
  */
 public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
 
-  /** Suffix for gstreamer pipeline template */
-  private static final String GS_SUFFIX = "gstreamer.pipeline";
-
   /** Logger utility */
   private static final Logger logger = LoggerFactory.getLogger(GStreamerEncoderEngine.class);
+
+  // constants used in gstreamer
+  private static final String START_TIME = "start-time";
+  // private static final String END_TIME = "end-time";
+
+  /** Rendering hints for resizing images */
+  private static final Map<Key, Object> imageRenderingHints = new HashMap<RenderingHints.Key, Object>();
+  static {
+    imageRenderingHints.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+  }
 
   /*
    * (non-Javadoc)
@@ -55,12 +84,16 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
   protected void createAndLaunchPipeline(EncodingProfile profile, Map<String, String> properties)
           throws EncoderException {
 
-    logger.info("Creating pipeline definition from: {}", profile.getName());
+    logger.info("Creating pipeline definition from: {}", profile.getIdentifier());
     String pipelineDefinition = buildGStreamerPipelineDefinition(profile, properties);
-    logger.info("Creating pipeline from: {}", pipelineDefinition);
+    logger.debug("Creating pipeline from: {}", pipelineDefinition);
     GSPipeline pipeline = createPipeline(pipelineDefinition);
-    logger.info("Executing pipeline built from: {}", pipelineDefinition);
-    launchPipeline(pipeline);
+    logger.debug("Executing pipeline built from: {}", pipelineDefinition);
+    if (properties.containsKey(START_TIME)) {
+      launchPipeline(pipeline, Integer.parseInt(properties.get(START_TIME)));
+    } else {
+      launchPipeline(pipeline, 0);
+    }
     logger.info("Execution successful");
   }
 
@@ -86,7 +119,8 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
     }
 
     // substitute templates for actual values
-    String pipelineDefinition = substituteTemplateValues(pipelineTemplate, properties, true);
+    String tmpPipelineDefinition = substituteTemplateValues(pipelineTemplate, properties, false);
+    String pipelineDefinition = substituteTemplateValues(tmpPipelineDefinition, properties, true);
 
     return pipelineDefinition;
   }
@@ -103,7 +137,7 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
    */
   private GSPipeline createPipeline(String pipelineDefinition) throws EncoderException {
 
-    if (StringUtils.isBlank(pipelineDefinition)) {
+    if (pipelineDefinition == null || "".equals(pipelineDefinition)) {
       logger.warn("No pipeline definition specified.");
       throw new EncoderException("Pipeline definition is null");
     }
@@ -127,19 +161,42 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
   }
 
   /**
-   * Executes GSPipeline. Blocks until either exception occures in processing pipeline or EOS is reached.
+   * Executes GSPipeline. Blocks until either exception occurs in processing pipeline or EOS is reached. Optionally you
+   * can specify start position from where pipeline should start playing.
    * 
    * @param gspipeline
    *          GSPipeline used for execution
+   * @param startPosition
+   *          start position in seconds
    * @throws EncoderException
-   *           if current thread is interrupted or exception occurred in processing pipeline
+   *           if current thread is interrupted, exception occurred in processing pipeline or pipeline could not play
+   *           from specified time position
    */
-  private void launchPipeline(GSPipeline gspipeline) throws EncoderException {
+  private void launchPipeline(GSPipeline gspipeline, int startPosition) throws EncoderException {
+
+    // start position is in seconds
+    if (startPosition < 0) {
+      logger.warn("Starting position is not a positive number");
+      throw new EncoderException("Invalid start position: " + startPosition);
+    }
 
     if (Thread.interrupted()) {
       logger.warn("Failed to start processing pipeline: Thread interrupted");
       throw new EncoderException("Failed to start processing pipeline: Thread interrupted");
     }
+
+    // FIXME revise and test code
+    if (startPosition > 0) {
+      gspipeline.getPipeline().pause();
+      gspipeline.getPipeline().getState();
+      if (!gspipeline.getPipeline().seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.ACCURATE, SeekType.SET,
+              startPosition * 1000 * 1000, SeekType.NONE, -1)) {
+        gspipeline.getPipeline().stop();
+        logger.warn("Could not start pipeline from: {} s", startPosition);
+        throw new EncoderException("Failed to set " + startPosition + " as new start position");
+      }
+    }
+    //
 
     gspipeline.getPipeline().play();
     synchronized (gspipeline.getMonitorObject().getMonitorLock()) {
@@ -265,6 +322,208 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
     });
   }
 
+  @Override
+  protected void extractImage(EncodingProfile profile, Map<String, String> properties) throws EncoderException {
+
+    if (!properties.containsKey("in.video.path")) {
+      logger.warn("Video is needed for image extraction.");
+      throw new EncoderException("Missing input video.");
+    }
+    String videoPath = properties.get("in.video.path");
+
+    if (!properties.containsKey("out.file.path")) {
+      logger.warn("Output file template is needed for image extraction");
+      throw new EncoderException("Missing output file template");
+    }
+    String outputFile = properties.get("out.file.path");
+
+    String timeCodes = properties.get(GS_IMAGE_TIMES);
+    if (timeCodes == null) {
+      logger.warn("Profile '{}' does not contain time codes for image extraction", profile.getIdentifier());
+      throw new EncoderException("Time codes are missing from profile: " + profile.getIdentifier());
+    }
+    String imageSizes = profile.getExtension(GS_IMAGE_DIMENSIONS);
+    if (imageSizes == null) {
+      logger.warn("Profile '{}' does not contain image dimensions for image extraction", profile.getIdentifier());
+      throw new EncoderException("Image dimensions are missing from profile: " + profile.getIdentifier());
+    }
+    if (!timeCodes.matches("[0-9]+")) {
+      logger.warn("Invalid time format: {}", timeCodes);
+      throw new EncoderException("Invalid time: " + timeCodes);
+    }
+    if (!imageSizes.matches("[0-9]+[x|X][0-9]+")) {
+      logger.warn("Invalid image dimensions definition: {}", imageSizes);
+      throw new EncoderException("Invalid image dimensions: " + imageSizes);
+    }
+
+    // create pipeline
+    Pipeline pipeline = createFixedPipelineForImageExtraction(videoPath);
+    AppSink appsink = (AppSink) pipeline.getElementByName("appsink");
+
+    // install listeners
+    MonitorObject monitorObject = createNewMonitorObject();
+    installListeners(pipeline, monitorObject);
+
+    switch (pipeline.setState(State.PAUSED)) {
+    case FAILURE:
+      logger.warn("Could not change pipeline state to PAUSED");
+      throw new EncoderException("Could not change state");
+    case NO_PREROLL:
+      pipeline.setState(State.NULL);
+      logger.warn("Live sources are not supported");
+      throw new EncoderException("Live sources not supported");
+    default:
+      break;
+    }
+
+    // wait for state to propagate
+    if (pipeline.getState() == State.NULL) {
+      logger.warn("Exception occured while trying to play file {}", videoPath);
+      throw new EncoderException("Failed to play file " + videoPath);
+    }
+
+    // query duration -> check for right parameters
+    ClockTime duration = pipeline.queryDuration();
+    long durationInSeconds;
+    if (duration != ClockTime.NONE) {
+      durationInSeconds = duration.toSeconds();
+      logger.info("Video stream duration in seconds: {}", durationInSeconds);
+    } else {
+      logger.info("Unknown stream duration");
+      durationInSeconds = -1;
+    }
+
+    long imageTimeInSeconds = Long.parseLong(timeCodes);
+    String[] imageDimension = imageSizes.split("[x|X]");
+    int width = Integer.parseInt(imageDimension[0]);
+    int height = Integer.parseInt(imageDimension[1]);
+
+    if (durationInSeconds != -1 && imageTimeInSeconds > durationInSeconds) {
+      logger.warn("Time {}s exceeds video stream duration {}s", imageTimeInSeconds, durationInSeconds);
+      throw new EncoderException("Time exceeds video stream duration: " + imageTimeInSeconds + "s");
+    }
+
+    if (!pipeline.seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.ACCURATE, SeekType.SET,
+            imageTimeInSeconds * 1000 * 1000, SeekType.NONE, -1)) {
+      pipeline.setState(State.NULL);
+      logger.warn("Could not seek to position {}s", imageTimeInSeconds);
+      throw new EncoderException("Failed to seek to position " + imageTimeInSeconds + "s");
+    }
+
+    Buffer buffer = appsink.pullPreroll();
+
+    if (buffer != null) {
+      try {
+        logger.info("Creating image from time {}s", imageTimeInSeconds);
+        createImageOutOfBuffer(buffer, width, height, outputFile);
+      } catch (Exception e) {
+        pipeline.setState(State.NULL);
+        logger.warn("Could not create image out of buffer: {}", e.getMessage());
+        throw new EncoderException("Could not write image file {}", e);
+      } finally {
+        buffer.dispose();
+        buffer = null;
+      }
+    } else {
+      logger.warn("No buffer pulled from {}s", imageTimeInSeconds);
+      throw new EncoderException("No buffer was pulled from the pipeline");
+    }
+
+    // stop pipeline
+    logger.info("Image extraction done, finalizing pipeline...");
+    pipeline.setState(State.NULL);
+  }
+
+  /**
+   * Creates fixed pipeline for image extraction. Pipeline consists of filesrc, decodebin, ffmpegcolorspace and appsink
+   * elements. Appsink element is named 'appsink' and by that name reference to appsink element can be obtained from the
+   * pipeline.
+   * 
+   * @param videoPath
+   *          video on which image extraction will be performed
+   * @return built and linked pipeline
+   * @throws EncoderException
+   *           if linking fails
+   */
+  private Pipeline createFixedPipelineForImageExtraction(String videoPath) throws EncoderException {
+    // create pipeline
+    Element filesrc = ElementFactory.make("filesrc", null);
+    filesrc.set("location", videoPath);
+    Element decodebin = ElementFactory.make("decodebin2", null);
+    final Element ffmpegcs = ElementFactory.make("ffmpegcolorspace", null);
+    AppSink appSink = (AppSink) ElementFactory.make("appsink", "appsink");
+    Pipeline pipeline = new Pipeline("Image extraction");
+    pipeline.addMany(filesrc, decodebin, ffmpegcs, appSink);
+
+    // link pipeline
+    if (!filesrc.link(decodebin)) {
+      throw new EncoderException("Failed linking filesrc with decodebin");
+    }
+
+    decodebin.connect(new Element.PAD_ADDED() {
+      @Override
+      public void padAdded(Element element, Pad pad) {
+        pad.link(ffmpegcs.getStaticPad("sink"));
+      }
+    });
+    Pad pad = new Pad(null, PadDirection.SRC);
+    decodebin.addPad(pad);
+
+    Caps caps = new Caps("video/x-raw-rgb, bpp=32, depth=24");
+    if (!Element.linkPadsFiltered(ffmpegcs, "src", appSink, "sink", caps)) {
+      throw new EncoderException("Failed linking ffmpegcolorspace with appsink");
+    }
+
+    return pipeline;
+  }
+
+  /**
+   * Creates image out of gstreamer buffer. Buffer should have following properties: 32 bits/pixel and color depth of 24
+   * bits. Output image format is chosen based on the output file name. If width or height are equal or less than 0,
+   * original image size is retained.
+   * 
+   * @param buffer
+   *          gstreamer buffer from which image will be constructed
+   * @param width
+   *          width of the new image
+   * @param height
+   *          height of the new image
+   * @param output
+   *          output file name
+   * @throws IOException
+   *           if writing image fails
+   */
+  private void createImageOutOfBuffer(Buffer buffer, int width, int height, String output) throws IOException {
+    // get buffer information
+    Structure structure = buffer.getCaps().getStructure(0);
+    int origHeight = structure.getInteger("height");
+    int origWidth = structure.getInteger("width");
+
+    // create original image
+    IntBuffer intBuf = buffer.getByteBuffer().asIntBuffer();
+    int[] imageData = new int[intBuf.capacity()];
+    intBuf.get(imageData, 0, imageData.length);
+    BufferedImage originalImage = new BufferedImage(origWidth, origHeight, BufferedImage.TYPE_INT_RGB);
+    originalImage.setRGB(0, 0, origWidth, origHeight, imageData, 0, origWidth);
+
+    BufferedImage image;
+    if (height <= 0 || width <= 0) {
+      logger.info("Retaining image of original size {}x{}", origWidth, origHeight);
+      image = originalImage;
+    } else {
+      logger.info("Resizing image from {}x{} to {}x{}", new Object[] { origWidth, origHeight, width, height });
+      image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+      Graphics2D graphics = image.createGraphics();
+      graphics.setRenderingHints(imageRenderingHints);
+      graphics.drawImage(originalImage, 0, 0, width, height, null);
+      graphics.dispose();
+    }
+
+    // write image
+    File outputFile = new File(output);
+    ImageIO.write(image, FilenameUtils.getExtension(output), outputFile);
+  }
+
   /**
    * Creates new MonitorObject, which keeps information of pipelines errors, and if pipeline should be stopped.
    * 
@@ -334,7 +593,6 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
    * Used for monitoring pipeline state.
    */
   private interface MonitorObject {
-    
     Object getMonitorLock();
 
     boolean getEOSReached();
@@ -344,18 +602,14 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
     void addErrorMessage(String message);
 
     String getFirstErrorMessage();
-
   }
 
   /**
    * Container for Pipeline and MonitorObject
    */
   private interface GSPipeline {
-    
     Pipeline getPipeline();
 
     MonitorObject getMonitorObject();
-
   }
-
 }

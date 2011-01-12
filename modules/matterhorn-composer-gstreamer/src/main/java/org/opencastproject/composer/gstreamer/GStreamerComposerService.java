@@ -207,7 +207,7 @@ public class GStreamerComposerService implements ComposerService {
    */
   @Override
   public Job encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException {
-    return encode(sourceTrack, profileId);
+    return encode(sourceTrack, null, profileId, null);
   }
 
   /*

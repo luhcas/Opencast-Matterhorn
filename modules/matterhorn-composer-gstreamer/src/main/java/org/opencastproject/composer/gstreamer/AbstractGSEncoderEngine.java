@@ -38,6 +38,11 @@ import javax.activation.MimetypesFileTypeMap;
  */
 public abstract class AbstractGSEncoderEngine implements EncoderEngine {
 
+  /** Suffix for gstreamer pipeline template */
+  protected static final String GS_SUFFIX = "gstreamer.pipeline";
+  protected static final String GS_IMAGE_TIMES = "time";
+  protected static final String GS_IMAGE_DIMENSIONS = "gstreamer.image.sizes";
+
   /** Logging utility */
   private static Logger logger = LoggerFactory.getLogger(AbstractGSEncoderEngine.class);
 
@@ -128,7 +133,10 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
   protected File process(File audioSource, File videoSource, EncodingProfile profile, Map<String, String> properties)
           throws EncoderException {
 
-    Map<String, String> params = new HashMap<String, String>(properties);
+    Map<String, String> params = new HashMap<String, String>();
+    if (properties != null) {
+      params.putAll(properties);
+    }
 
     try {
       if (audioSource == null && videoSource == null) {
@@ -160,11 +168,18 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
         outFileName += "_reencode";
       }
 
-      // where to put output file
-      params.put("out.file.path", new File(outDir, outFileName + outSuffix).getAbsolutePath());
+      File encodedFile = new File(outDir, outFileName + outSuffix);
 
-      // create and launch gstreamer pipeline
-      createAndLaunchPipeline(profile, params);
+      // where to put output file
+      params.put("out.file.path", encodedFile.getAbsolutePath());
+
+      if (profile.getMimeType().startsWith("image")) {
+        // FIXME change how image extraction is called
+        extractImage(profile, params);
+      } else {
+        // create and launch gstreamer pipeline
+        createAndLaunchPipeline(profile, params);
+      }
 
       if (audioSource != null) {
         logger.info("Audio track {} and video track {} successfully encoded using profile '{}'",
@@ -175,7 +190,7 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
                 profile.getIdentifier() });
       }
       fireEncoded(this, profile, audioSource, videoSource);
-      return new File(outDir, outFileName + outSuffix);
+      return encodedFile;
     } catch (EncoderException e) {
       if (audioSource != null) {
         logger.warn(
@@ -210,8 +225,21 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
   protected abstract void createAndLaunchPipeline(EncodingProfile profile, Map<String, String> properties)
           throws EncoderException;
 
+  /**
+   * Extracts image from video file.
+   * 
+   * @param profile
+   *          EncodingProfile used for defining times and dimensions
+   * @param properties
+   *          additional properties for creating pipeline
+   * @throws EncoderException
+   *           if extraction fails
+   */
+  protected abstract void extractImage(EncodingProfile profile, Map<String, String> properties) throws EncoderException;
+
   /*
    * (non-Javadoc)
+   * 
    * @see org.opencastproject.composer.api.EncoderEngine#supportsMultithreading()
    */
   @Override
@@ -221,7 +249,9 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
 
   /*
    * (non-Javadoc)
-   * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String, org.opencastproject.composer.api.EncodingProfile.MediaType)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String,
+   * org.opencastproject.composer.api.EncodingProfile.MediaType)
    */
   @Override
   public boolean supportsProfile(String profile, MediaType type) {
@@ -234,11 +264,11 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
 
   /*
    * (non-Javadoc)
+   * 
    * @see org.opencastproject.composer.api.EncoderEngine#needsLocalWorkCopy()
    */
   @Override
   public boolean needsLocalWorkCopy() {
-    // TODO probably yes, at least if filesrc is used (not extensively tested yet)
     return false;
   }
 
