@@ -247,7 +247,7 @@ public class ComposerServiceImpl implements ComposerService {
           // Get the encoding profile
           final EncodingProfile profile = profileScanner.getProfile(profileId);
           if (profile == null) {
-            throw new EncoderException("Profile '" + profileId + " is unkown");
+            throw new EncoderException("Profile '" + profileId + " is unknown");
           }
 
           // Create the engine
@@ -421,7 +421,7 @@ public class ComposerServiceImpl implements ComposerService {
           // Create the engine
           final EncodingProfile profile = profileScanner.getProfile(profileId);
           if (profile == null) {
-            throw new EncoderException(null, "Profile '" + profileId + " is unkown");
+            throw new EncoderException(null, "Profile '" + profileId + " is unknown");
           }
           final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
           if (encoderEngine == null) {

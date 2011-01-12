@@ -423,6 +423,8 @@ public class ComposerRestService {
     encodeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, encodeEndpoint);
 
+    // @FormParam("sourceTrack") String sourceTrackAsXml, @FormParam("profileId") String profileId,
+    //  @FormParam("start") long start, @FormParam("duration") long duration
     // trim
     RestEndpoint trimEndpoint = new RestEndpoint("trim", RestEndpoint.Method.POST, "/trim",
             "Starts a trimming process, based on the specified track, start time and duration in ms");
@@ -432,8 +434,10 @@ public class ComposerRestService {
             .badRequest("if the start time is negative or exceeds the track duration"));
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
             .badRequest("if the duration is negative or, including the new start time, exceeds the track duration"));
-    trimEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
-            "The track containing the stream"));
+    trimEndpoint.addRequiredParam(new Param("sourceTrack", Type.TEXT, generateVideoTrack(),
+    "The track containing the stream"));
+    trimEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "trim.work",
+    "The encoding profile to use for trimming"));
     trimEndpoint.addRequiredParam(new Param("start", Type.STRING, "0", "The start time in milisecond"));
     trimEndpoint.addRequiredParam(new Param("duration", Type.STRING, "10000", "The duration in milisecond"));
     trimEndpoint.setTestForm(RestTestForm.auto());
@@ -535,7 +539,7 @@ public class ComposerRestService {
 
   protected String generateVideoTrack() {
     return "<track id=\"track-1\" type=\"presentation/source\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
-            + "  <url>serverUrl/workflow/samples/camera.mpg</url>\n"
+            + "  <url>" + serverUrl + "/workflow/samples/camera.mpg</url>\n"
             + "  <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"
             + "  <duration>14546</duration>\n" + "  <video>\n"
             + "    <device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" />\n"
