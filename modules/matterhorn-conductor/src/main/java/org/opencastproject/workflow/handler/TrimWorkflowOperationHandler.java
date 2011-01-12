@@ -139,23 +139,36 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
           throws WorkflowOperationException {
     logger.info("Trimming workflow {} using {}", workflowInstance.getId(), properties);
 
+    // Validate the trimming arguments
+    long trimStart = Long.parseLong(properties.get("trimin"));
+    long trimDuration = Long.parseLong(properties.get("newduration"));
+    long recordingDuration = workflowInstance.getMediaPackage().getDuration();
+
+    if (trimDuration <= 0)
+      throw new WorkflowOperationException("Trimming duration must be a positive integer");
+    else if (recordingDuration > 0 && trimStart > recordingDuration)
+      throw new WorkflowOperationException("Trimming start is outside of recording");
+    else if (recordingDuration > 0 && trimStart + trimDuration > recordingDuration)
+      throw new WorkflowOperationException("Trimming end is outside of recording");
+
     // Get the source flavor to match
     WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
     String configuredSourceFlavor = currentOperation.getConfiguration(SOURCE_FLAVOR_PROPERTY);
     String configuredTargetFlavorSubtype = currentOperation.getConfiguration(TARGET_FLAVOR_SUBTYPE_PROPERTY);
     MediaPackageElementFlavor matchingFlavor = MediaPackageElementFlavor.parseFlavor(configuredSourceFlavor);
+
+    
     for (Track t : workflowInstance.getMediaPackage().getTracks()) {
       MediaPackageElementFlavor trackFlavor = t.getFlavor();
       if (trackFlavor != null && matchingFlavor.matches(trackFlavor)) {
         String profileId = currentOperation.getConfiguration(ENCODING_PROFILE_PROPERTY);
-        logger.info("TRIM ---> " + properties.get("trimin") + " " + properties.get("trimout"));
-        long start = Long.parseLong(properties.get("trimin"));
-        long duration = Long.parseLong(properties.get("newduration"));
+        
+        logger.info("Trimming {} to ({}, {})", new String[] { t.toString(), properties.get("trimin"), properties.get("trimout") });
 
         Track trimmedTrack = null;
         try {
           // Trim the track
-          Job job = composerService.trim(t, profileId, start, duration);
+          Job job = composerService.trim(t, profileId, trimStart, trimDuration);
           if (!waitForStatus(job).isSuccess()) {
             throw new WorkflowOperationException("Trimming of " + t + " failed");
           }
