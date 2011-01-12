@@ -280,13 +280,13 @@ ocRecordings = new (function() {
     }
 
     // Status
+    var op = ocRecordings.findCurrentOperation(wf);
     if (wf.state == 'SUCCEEDED') {
       this.state = 'FINISHED';
     } else if (wf.state == 'FAILING' || wf.state == 'FAILED') {
       this.state = 'FAILED';
       this.error = ocUtils.ensureArray(wf.errors.error).join(', ');
     } else if (wf.state == 'PAUSED') {
-      op = ocRecordings.findCurrentOperation(wf);
       if (op) {
         if (op.id == 'schedule') {
           this.state = 'UPCOMING';
@@ -303,7 +303,6 @@ ocRecordings = new (function() {
         this.state = 'PAUSED';
       }
     } else if (wf.state == 'RUNNING') {
-      op = ocRecordings.findCurrentOperation(wf);
       if (op) {
         if (op.id == 'capture') {
           this.state = 'CAPTURING';
@@ -313,7 +312,7 @@ ocRecordings = new (function() {
         }
       } else {
         ocUtils.log('Warning could not find current operation for worklfow ' + wf.id);
-        this.state = 'PAUSED';
+        this.state = 'PROCESSING';
       }
     } else {
       this.state = wf.state;

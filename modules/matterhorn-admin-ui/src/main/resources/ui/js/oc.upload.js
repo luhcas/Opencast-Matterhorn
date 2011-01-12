@@ -96,6 +96,7 @@ ocUpload.init = function() {
       ocIngest.createMediaPackage();
     } else {
       $('#containerMissingFields').show('fast');
+      $(window).scrollTop(0);
     }
   });
 
