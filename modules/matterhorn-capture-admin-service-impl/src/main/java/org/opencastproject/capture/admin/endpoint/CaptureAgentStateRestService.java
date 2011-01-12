@@ -358,6 +358,7 @@ public class CaptureAgentStateRestService {
     endpoint = new RestEndpoint("setAgentState", RestEndpoint.Method.POST, "/agents/{name}",
             "Set the status of a given capture agent");
     endpoint.addPathParam(new Param("name", Param.Type.STRING, null, "The name of a given capture agent"));
+    endpoint.addRequiredParam(new Param("address", Param.Type.STRING, null, "The address of a given capture agent"));
     endpoint.addRequiredParam(new Param("state", Param.Type.STRING, null, "The state of the capture agent"));
     endpoint.addFormat(new Format("HTML", null, null));
     endpoint.addStatus(Status.ok("{agentName} set to {state}"));
