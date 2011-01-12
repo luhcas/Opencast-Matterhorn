@@ -73,6 +73,7 @@ $.extend(ocAdmin.Manager.prototype, {
         }
       }
     }
+    //TODO: validate additional components
     if(error){
       $('#missingFieldsContainer').show();
       $(window).scrollTop(0);

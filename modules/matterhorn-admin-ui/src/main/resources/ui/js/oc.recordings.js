@@ -808,7 +808,7 @@ ocRecordings = new (function() {
     ocRecordings.bulkEditComponents.creator = new ocAdmin.Component(['creator'], {label: 'creatorLabel'});
     ocRecordings.bulkEditComponents.contributor = new ocAdmin.Component(['contributor'], {label: 'contributorLabel'});
     ocRecordings.bulkEditComponents.seriesId = new ocAdmin.Component(['series', 'seriesSelect'],
-      { label: 'seriesLabel', errorField: 'missingSeries', nodeKey: ['seriesId', 'series']},
+      { label: 'seriesLabel', errorField: 'missingSeries', nodeKey: ['seriesId', 'series'], required: true},
       { getValue: function(){ 
           if(this.fields.series){
             this.value = this.fields.series.val();
@@ -864,7 +864,7 @@ ocRecordings = new (function() {
               dataType: 'json',
               success: function(data){
                 creationSucceeded = true;
-                seriesComponent.fields.series.val(data.series['@id']);
+                seriesComponent.fields.series.val(data.series['id']);
               }
             });
           }
