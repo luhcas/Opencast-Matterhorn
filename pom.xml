@@ -1087,6 +1087,17 @@
       <timezone>-6</timezone>
     </developer>
     <developer>
+      <id>ahochman</id>
+      <name>Adam Hochman</name>
+      <email>adam@media.berkeley.edu</email>
+      <organization>UC Berkeley</organization>
+      <organizationUrl>http://berkeley.edu</organizationUrl>
+      <roles>
+        <role>project manager/community facilitator</role>
+      </roles>
+      <timezone>-8</timezone>
+    </developer>
+    <developer>
       <id>bwulff</id>
       <name>Benjamin Wulff</name>
       <email>bwulff@uos.de</email>
