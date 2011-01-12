@@ -30,7 +30,7 @@
       #recordingsTable th {margin-left:0px; margin-right: 0px;}
       #recordingsTable th .sort-icon {float:right;}
       #recordingsTable tr {border-bottom: 1px solid silver;}
-      #recordingsTable tr:hover {cursor: pointer; background-color: silver;}
+      #recordingsTable tr:hover {background-color: silver;}
       .status-column-error-heading {}
       .status-column-error-heading .fold-icon {float:left;}
       .status-column-error-heading .error-message {float:left;font-weight:bold;color:red;padding-top:2px;}
@@ -241,7 +241,7 @@
   </thead>
   <tbody>
     {for recording in recordings}
-      <tr valign="top">
+      <tr valign="middle">
         <td>
           ${recording.title}
         </td>
@@ -254,7 +254,8 @@
         <td>
           ${recording.start}
         </td>
-        <td class="status-column-cell" title="Click inspect this workflow">
+        <td class="status-column-cell">
+          <div>
           {if recording.error}
             <span style="color:red;font-weight:bold;">FAILED</span>
           {else}
@@ -263,6 +264,13 @@
               &nbsp;${recording.operation}
             {/if}
           {/if}
+          </div>
+          <div class="workflowActionButton">
+            <a href="inspect.html?id=${recording.id}" title="View Technical Details for this Recording">
+              <span class="ui-icon ui-icon-gear inspect-workflow-button" style="float:left;"></span>
+            </a>
+            <!-- span class="ui-icon ui-icon-triangle-1-s" style="float:left;"></span -->
+          </div>
         </td>
         <td>
           ${ocRecordings.makeActions(recording.id, recording.actions)}

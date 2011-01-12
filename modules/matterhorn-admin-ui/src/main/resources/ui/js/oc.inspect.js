@@ -27,6 +27,9 @@ Opencast.WorkflowInspect = (function() {
    */
   this.rx = function(data) {
     instanceView = buildInstanceView(data.workflow);
+    var text = $('#i18n_logo_title').text() + ' - Technical Details for '+ data.workflow.mediapackage.title;
+    $('#i18n_logo_title').text(text);
+    document.title = text;
     render(instanceView, $container);
   }
 
