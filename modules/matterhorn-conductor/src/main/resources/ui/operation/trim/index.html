@@ -62,12 +62,14 @@
             if($('#player-container')[0].contentWindow.Opencast != null && 
                 ($('#player-container')[0].contentWindow.Opencast.Player.getDuration() != 0) && 
                 !timerSet &&
-                ($('#player-container')[0].contentWindow.Opencast.Player.getDuration() != 'NaN:NaN:NaN')) 
+                ($('#player-container')[0].contentWindow.Opencast.Player.getDuration() != 'NaN:NaN:NaN') && 
+                $('#player-container').contents().find('#oc_duration').text() != 'NaN:NaN:NaN') 
             {
                 $('#outPoint').val($('#player-container').contents().find('#oc_duration').text());
                 timerSet = true;
                 return true;
             }
+            
             return false;
         }
 
