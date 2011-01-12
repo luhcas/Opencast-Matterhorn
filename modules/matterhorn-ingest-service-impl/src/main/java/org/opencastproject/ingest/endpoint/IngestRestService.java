@@ -30,6 +30,7 @@ import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -347,6 +348,7 @@ public class IngestRestService {
 
   @POST
   @Path("addZippedMediaPackage")
+  @Produces(MediaType.TEXT_XML)
   public Response addZippedMediaPackage(@Context HttpServletRequest request) {
     logger.debug("addZippedMediaPackage(HttpRequest)");
     FileInputStream zipInputStream = null;
@@ -965,20 +967,10 @@ public class IngestRestService {
             "/addZippedMediaPackage",
             "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addBodyParam(true, null, "The compressed (application/zip) media package file");
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addZippedMediaPackage with workflow id
-    endpoint = new RestEndpoint(
-            "addZippedMediaPackage",
-            RestEndpoint.Method.POST,
-            "/addZippedMediaPackage/{wdID}",
-            "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addPathParam(new Param("wdID", Param.Type.STRING, null, "Workflow definition id"));
+    endpoint.addOptionalParam(new Param(WORKFLOW_INSTANCE_ID_PARAM, Type.STRING, null,
+            "The workflow instance ID to associate with this zipped mediapackage"));
+    endpoint.addRequiredParam(new Param(WORKFLOW_DEFINITION_ID_PARAM, Type.STRING, "full",
+            "The workflow definition ID to run on this mediapackage"));
     endpoint.addBodyParam(true, null, "The compressed (application/zip) media package file");
     endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
