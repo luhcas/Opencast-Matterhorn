@@ -68,11 +68,11 @@ Opencast.Description = (function ()
                                 {
                                     // get rid of every '@' in the JSON data
                                     // res = $.parseJSON(JSON.stringify(res).replace(/@/g, ''));
-                                    for (var i = 0; i < res.series.metadataList.metadata.length; i++)
+                                    for (var i = 0; i < res.series.additionalMetadata.metadata.length; i++)
                                     {
-                                        if (res.series.metadataList.metadata[i].key == 'title')
+                                        if (res.series.additionalMetadata.metadata[i].key == 'title')
                                         {
-                                            data['search-results'].result.dcSeriesTitle = res.series.metadataList.metadata[i].value;
+                                            data['search-results'].result.dcSeriesTitle = res.series.additionalMetadata.metadata[i].value;
                                         }
                                     }
                                     // Create Trimpath Template
