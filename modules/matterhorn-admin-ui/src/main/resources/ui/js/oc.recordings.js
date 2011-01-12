@@ -49,7 +49,7 @@ ocRecordings = new (function() {
     changedMediaPackage : null
   }
 
-  /** Executed when directly when script is loaded: parses url parameters and
+  /** Executed when directly script is loaded: parses url parameters and
    *  returns the configuration object.
    */
   this.Configuration = new (function() {
@@ -59,8 +59,8 @@ ocRecordings = new (function() {
     this.pageSize = 10;
     this.page = 0;
     this.refresh = 5000;
-    this.sortField = null;
-    this.sortOrder = null;
+    this.sortField = 'Date';
+    this.sortOrder = 'DESC';
     this.filterField = null;
     this.filterText = '';
     
