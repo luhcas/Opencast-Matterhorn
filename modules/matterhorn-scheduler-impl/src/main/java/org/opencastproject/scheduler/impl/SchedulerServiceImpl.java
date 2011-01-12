@@ -282,6 +282,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     mediapackage.setSeries(event.getSeriesId());
     mediapackage.setSeriesTitle(event.getSeries());
     mediapackage.setDate(event.getStartDate());
+    mediapackage.addCreator(event.getCreator());
 
     // Build a properties set for this event
     Map<String, String> properties = new HashMap<String, String>();
@@ -601,6 +602,12 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     mediapackage.setLicense(event.getLicense());
     mediapackage.setSeries(event.getSeriesId());
     mediapackage.setSeriesTitle(event.getSeries());
+    //mediapackage supports multiple creators, interface does not. replace them all with this one
+    //We really should handle this better
+    for(String creator : mediapackage.getCreators()){
+      mediapackage.removeCreator(creator);
+    }
+    mediapackage.addCreator(event.getCreator());
 
     // Update the properties
     scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_START,
