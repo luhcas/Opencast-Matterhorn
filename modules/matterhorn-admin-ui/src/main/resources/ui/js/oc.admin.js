@@ -75,6 +75,7 @@ $.extend(ocAdmin.Manager.prototype, {
     }
     if(error){
       $('#missingFieldsContainer').show();
+      $(window).scrollTop(0);
     }
     return !error;
   },
