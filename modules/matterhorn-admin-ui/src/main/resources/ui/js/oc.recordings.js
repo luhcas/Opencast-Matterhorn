@@ -3,6 +3,7 @@ ocRecordings = new (function() {
   var WORKFLOW_LIST_URL = '../workflow/rest/instances.json';          // URL of workflow instances list endpoint
   var WORKFLOW_INSTANCE_URL = '';                                     // URL of workflow instance endpoint
   var WORKFLOW_STATISTICS_URL = '../workflow/rest/statistics.json';   // URL of workflow instances statistics endpoint
+  var SERIES_URL = '/series/rest'
 
   var STATISTICS_DELAY = 3000;     // time interval for statistics update
 
@@ -625,7 +626,17 @@ ocRecordings = new (function() {
     
     $('#cancelBulkAction').click(ocRecordings.cancelBulkAction);
     
-    $('#applyBulkAction').click(ocRecordings.applyBulkEdit); 
+    $('#applyBulkAction').click(ocRecordings.applyBulkEdit);
+    
+    $('#seriesSelect').autocomplete({
+      source: SERIES_URL + '/search',
+      select: function(event, ui){
+        $('#series').val(ui.item.id);
+      },
+      search: function(){
+        $('#series').val('');
+      }
+    });
 
     // pager
     $('#pageSize').val(ocRecordings.Configuration.pageSize);
