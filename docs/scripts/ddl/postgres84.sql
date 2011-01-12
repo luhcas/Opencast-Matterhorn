@@ -27,26 +27,6 @@ CREATE TABLE dictionary (
     stopword boolean
 );
 
-CREATE TABLE host_registration (
-    host character varying(255) NOT NULL,
-    maintenance boolean NOT NULL,
-    max_jobs integer NOT NULL,
-    online boolean NOT NULL
-);
-
-CREATE TABLE job (
-    id bigint NOT NULL,
-    status integer,
-    payload text,
-    datestarted timestamp without time zone,
-    datecreated timestamp without time zone,
-    runtime bigint,
-    queuetime bigint,
-    datecompleted timestamp without time zone,
-    host character varying(255),
-    service_type character varying(255)
-);
-
 CREATE TABLE sched_event (
     event_id bigint NOT NULL,
     startdate timestamp without time zone,
@@ -89,15 +69,6 @@ CREATE TABLE series_metadata (
     series_id character varying(128) NOT NULL
 );
 
-CREATE TABLE service_registration (
-    host character varying(255) NOT NULL,
-    service_type character varying(255) NOT NULL,
-    path character varying(255) NOT NULL,
-    job_producer boolean NOT NULL,
-    online boolean NOT NULL,
-    hostregistration_host character varying(255)
-);
-
 CREATE TABLE upload (
     id character varying(255) NOT NULL,
     total bigint NOT NULL,
@@ -117,6 +88,43 @@ CREATE TABLE user_action (
     type character varying(255)
 );
 
+CREATE TABLE host_registration (
+    host character varying(255) NOT NULL,
+    maintenance boolean NOT NULL,
+    max_jobs integer NOT NULL,
+    online boolean NOT NULL
+);
+
+CREATE TABLE job (
+    id bigint NOT NULL,
+    status integer,
+    payload text,
+    datestarted timestamp without time zone,
+    runtime bigint,
+    version integer,
+    datecompleted timestamp without time zone,
+    operation character varying(255),
+    datecreated timestamp without time zone,
+    queuetime bigint,
+    creator_svc_type character varying(255),
+    creator_host character varying(255),
+    processor_svc_type character varying(255),
+    processor_host character varying(255)
+);
+
+CREATE TABLE job_arg (
+    id bigint NOT NULL,
+    argument text,
+    listindex integer
+);
+
+CREATE TABLE service_registration (
+    service_type character varying(255) NOT NULL,
+    path character varying(255) NOT NULL,
+    job_producer boolean NOT NULL,
+    online boolean NOT NULL,
+    host character varying(255) NOT NULL
+);
 
 ALTER TABLE ONLY annotation
     ADD CONSTRAINT annotation_pkey PRIMARY KEY (id);
@@ -126,12 +134,6 @@ ALTER TABLE ONLY capture_agent_state
 
 ALTER TABLE ONLY dictionary
     ADD CONSTRAINT dictionary_pkey PRIMARY KEY (text, language);
-
-ALTER TABLE ONLY host_registration
-    ADD CONSTRAINT host_registration_pkey PRIMARY KEY (host);
-
-ALTER TABLE ONLY job
-    ADD CONSTRAINT job_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY sched_event
     ADD CONSTRAINT sched_event_pkey PRIMARY KEY (event_id);
@@ -148,17 +150,11 @@ ALTER TABLE ONLY series_metadata
 ALTER TABLE ONLY series
     ADD CONSTRAINT series_pkey PRIMARY KEY (series_id);
 
-ALTER TABLE ONLY service_registration
-    ADD CONSTRAINT service_registration_pkey PRIMARY KEY (host, service_type);
-
 ALTER TABLE ONLY upload
     ADD CONSTRAINT upload_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY user_action
     ADD CONSTRAINT user_action_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY job
-    ADD CONSTRAINT fk_job_host FOREIGN KEY (host, service_type) REFERENCES service_registration(host, service_type);
 
 ALTER TABLE ONLY sched_metadata
     ADD CONSTRAINT fk_sched_metadata_event_id FOREIGN KEY (event_id) REFERENCES sched_event(event_id);
@@ -166,8 +162,23 @@ ALTER TABLE ONLY sched_metadata
 ALTER TABLE ONLY series_metadata
     ADD CONSTRAINT fk_series_metadata_series_id FOREIGN KEY (series_id) REFERENCES series(series_id);
 
+ALTER TABLE ONLY host_registration
+    ADD CONSTRAINT host_registration_pkey PRIMARY KEY (host);
+
+ALTER TABLE ONLY job
+    ADD CONSTRAINT job_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY service_registration
-    ADD CONSTRAINT fk_service_registration_hostregistration_host FOREIGN KEY (hostregistration_host) REFERENCES host_registration(host);
+    ADD CONSTRAINT service_registration_pkey PRIMARY KEY (service_type, host);
+
+ALTER TABLE ONLY job
+    ADD CONSTRAINT fk_job_creator_svc_type FOREIGN KEY (creator_svc_type, creator_host) REFERENCES service_registration(service_type, host);
+
+ALTER TABLE ONLY job
+    ADD CONSTRAINT fk_job_processor_svc_type FOREIGN KEY (processor_svc_type, processor_host) REFERENCES service_registration(service_type, host);
+
+ALTER TABLE ONLY service_registration
+    ADD CONSTRAINT fk_service_registration_host FOREIGN KEY (host) REFERENCES host_registration(host);
 
 INSERT INTO SEQUENCE VALUES('SEQ_GEN', 50);
 

@@ -190,7 +190,7 @@ public class JobJpaImpl extends JaxbJob {
    */
   @Lob
   @Column(name = "argument")
-  @OrderColumn(name = "index")
+  @OrderColumn(name = "listindex")
   @ElementCollection
   @CollectionTable(name = "JOB_ARG", joinColumns = @JoinColumn(name = "ID", referencedColumnName = "ID"))
   @XmlElement(name = "arg")
