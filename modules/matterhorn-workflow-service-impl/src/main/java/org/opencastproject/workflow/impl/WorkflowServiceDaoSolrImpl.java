@@ -844,7 +844,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     }
     Job job = null;
     try {
-      if (instance.getId() == 0) {
+      if (instance.getId() == -1) {
         String parentId = instance.getParentId() == null ? null : Long.toString(instance.getParentId());
         job = serviceRegistry.createJob(WorkflowService.JOB_TYPE, WorkflowService.JOB_TYPE,
                 Arrays.asList(instance.getMediaPackage().toXml(), instance.getTemplate(), parentId));
@@ -853,19 +853,32 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
         job = serviceRegistry.getJob(instance.getId());
       }
       job.setPayload(xml);
-      if (WorkflowState.RUNNING.equals(workflowState)) {
-        job.setStatus(Status.RUNNING);
-      } else if (WorkflowState.PAUSED.equals(workflowState)) {
-        job.setStatus(Status.PAUSED);
-      } else if (WorkflowState.FAILED.equals(workflowState) || WorkflowState.FAILING.equals(workflowState)) {
+
+      // Synchronize workflow and job state
+      switch (workflowState) {
+      case FAILED:
+      case FAILING:
         job.setStatus(Status.FAILED);
-      } else if (WorkflowState.SUCCEEDED.equals(workflowState)) {
-        job.setStatus(Status.FINISHED);
-      } else if (WorkflowState.INSTANTIATED.equals(workflowState)) {
+        break;
+      case INSTANTIATED:
         job.setStatus(Status.QUEUED);
-      } else if (WorkflowState.STOPPED.equals(workflowState)) {
+        break;
+      case PAUSED:
+        job.setStatus(Status.PAUSED);
+        break;
+      case RUNNING:
+        job.setStatus(Status.RUNNING);
+        break;
+      case STOPPED:
         job.setStatus(Status.DELETED);
+        break;
+      case SUCCEEDED:
+        job.setStatus(Status.FINISHED);
+        break;
+      default:
+        throw new IllegalStateException("Found a workflow state that is not handled");
       }
+
       serviceRegistry.updateJob(job);
     } catch (ServiceRegistryException e) {
       throw new WorkflowDatabaseException(e);

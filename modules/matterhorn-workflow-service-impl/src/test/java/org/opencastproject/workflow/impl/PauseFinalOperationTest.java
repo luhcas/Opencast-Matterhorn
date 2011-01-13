@@ -45,8 +45,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PauseFinalOperationTest {
-  /** The solr root directory */
-  protected static final String storageRoot = "." + File.separator + "target" + File.separator + "workflow-test-db";
 
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition def = null;
@@ -56,10 +54,16 @@ public class PauseFinalOperationTest {
   private Workspace workspace = null;
   private ResumableTestWorkflowOperationHandler handler = null;
 
+  private File sRoot = null;
+
+  protected static final String getStorageRoot() {
+    return "." + File.separator + "target" + File.separator + System.currentTimeMillis();
+  }
+
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
-    File sRoot = new File(storageRoot);
+    sRoot = new File(getStorageRoot());
     try {
       FileUtils.deleteDirectory(sRoot);
       FileUtils.forceMkdir(sRoot);
@@ -92,7 +96,7 @@ public class PauseFinalOperationTest {
     EasyMock.replay(workspace);
     dao = new WorkflowServiceDaoSolrImpl();
     dao.setServiceRegistry(serviceRegistry);
-    dao.solrRoot = storageRoot + File.separator + "solr";
+    dao.solrRoot = sRoot + File.separator + "solr";
     dao.activate();
     service.setDao(dao);
     service.activate(null);

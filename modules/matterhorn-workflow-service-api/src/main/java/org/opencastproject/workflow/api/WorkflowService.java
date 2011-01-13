@@ -36,6 +36,22 @@ public interface WorkflowService {
   String JOB_TYPE = "org.opencastproject.workflow";
 
   /**
+   * Adds a workflow listener to be notified when workflows are updated.
+   * 
+   * @param listener
+   *          the workflow listener to add
+   */
+  void addWorkflowListener(WorkflowListener listener);
+
+  /**
+   * Removes a workflow listener.
+   * 
+   * @param listener
+   *          the workflow listener to remove
+   */
+  void removeWorkflowLister(WorkflowListener listener);
+
+  /**
    * Registers a new workflow definition. If a workflow definition with the same identifier is already registered, it
    * will be replaced.
    * 
@@ -194,7 +210,8 @@ public interface WorkflowService {
    * @throws WorkflowParsingException
    *           if there is a problem parsing the workflow instance from persistence
    */
-  WorkflowInstance stop(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException, WorkflowParsingException;
+  WorkflowInstance stop(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException,
+          WorkflowParsingException;
 
   /**
    * Temporarily suspends a started workflow instance.

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import static org.junit.Assert.assertEquals;
 
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -26,6 +27,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowListener;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -79,12 +81,16 @@ public class WorkflowStatisticsTest {
   private Workspace workspace = null;
   private MediaPackage mediaPackage = null;
 
+  private File sRoot = null;
+
+  protected static final String getStorageRoot() {
+    return "." + File.separator + "target" + File.separator + System.currentTimeMillis();
+  }
+
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
-    String storageRoot = "." + File.separator + "target" + File.separator + "workflow-test-db" + File.separator
-            + System.currentTimeMillis();
-    File sRoot = new File(storageRoot);
+    sRoot = new File(getStorageRoot());
     try {
       FileUtils.forceMkdir(sRoot);
     } catch (IOException e) {
@@ -131,7 +137,7 @@ public class WorkflowStatisticsTest {
 
     // Create the workflow database (solr)
     dao = new WorkflowServiceDaoSolrImpl();
-    dao.solrRoot = storageRoot + File.separator + "solr." + System.currentTimeMillis();
+    dao.solrRoot = sRoot + File.separator + "solr." + System.currentTimeMillis();
     dao.setServiceRegistry(serviceRegistry);
     dao.activate();
     workflowService.setDao(dao);
@@ -179,6 +185,47 @@ public class WorkflowStatisticsTest {
     assertEquals(0, stats.getTotal());
   }
 
+  class TestWorkflowListener implements WorkflowListener {
+    int stateChanges = 0;
+    
+    @Override
+    public void stateChanged(WorkflowInstance workflow) {
+      synchronized (this) {
+        stateChanges++;
+        notifyAll();
+      }
+    }
+    
+    @Override
+    public void operationChanged(WorkflowInstance workflow) {
+    }
+  }
+  
+  class IndividualWorkflowListener implements WorkflowListener {
+    long id = -1;
+    
+    IndividualWorkflowListener(long id) {
+      this.id = id;    
+    }
+    
+    @Override
+    public void operationChanged(WorkflowInstance workflow) {
+    }
+    
+    @Override
+    public void stateChanged(WorkflowInstance workflow) {
+      if (workflow.getId() != id)
+        return;
+      synchronized (this) {
+        WorkflowState state = workflow.getState();
+        if (state.equals(WorkflowState.PAUSED) || state.equals(WorkflowState.SUCCEEDED)) {
+          notifyAll();
+        }
+      }
+    }
+  }
+  
+  
   /**
    * Tests whether the workflow service statistics are gathered correctly.
    */
@@ -198,6 +245,9 @@ public class WorkflowStatisticsTest {
     int stopped = 0;
     int succeeded = 0;
 
+    TestWorkflowListener listener = new TestWorkflowListener();
+    workflowService.addWorkflowListener(listener);
+    
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
     for (WorkflowDefinition def : workflowDefinitions) {
       for (int j = 0; j < def.getOperations().size(); j++) {
@@ -207,19 +257,28 @@ public class WorkflowStatisticsTest {
       }
     }
 
-    Thread.sleep(200);
-
+    // Wait for all the workflows to go into "paused" state
+    synchronized (listener) {
+      while (listener.stateChanges < paused * 3) {
+        listener.wait();
+      }
+    }
+    
+    workflowService.removeWorkflowLister(listener);
+    
     // Resume all of them, so some will be finished, some won't
     int j = 0;
     for (WorkflowInstance instance : instances) {
+      WorkflowListener instanceListener = new IndividualWorkflowListener(instance.getId());
+      workflowService.addWorkflowListener(instanceListener);
       for (int k = 0; k <= (j % OPERATION_COUNT - 1); k++) {
-        workflowService.resume(instance.getId(), null);
-        Thread.sleep(200);
+        synchronized(instanceListener) {
+          workflowService.resume(instance.getId(), null);
+          instanceListener.wait();
+        }
       }
       j++;
     }
-
-    Thread.sleep(200);
 
     // TODO: Add failed, failing, stopped etc. workflows as well
 

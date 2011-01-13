@@ -43,6 +43,7 @@ import org.opencastproject.workflow.api.WorkflowException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -662,10 +663,12 @@ public class IngestServiceImpl implements IngestService {
         List<WorkflowOperationInstance> preProcessingOperations = workflow.getOperations();
         while (preProcessingOperations.indexOf(currentOperation) < preProcessingOperations.size() - 1) {
           logger.debug("Advancing workflow (skipping {})", currentOperation);
-          workflow = workflowService.resume(workflow.getId());
-          currentOperation = workflow.getCurrentOperation();
+          currentOperation.setState(OperationState.SKIPPED);
+          currentOperation = workflow.next();
         }
-
+        // Ingest succeeded
+        currentOperation.setState(OperationState.SUCCEEDED);
+        
         // Replace the current mediapackage with the new one
         workflow.setMediaPackage(mp);
         workflow.extend(workflowDef);

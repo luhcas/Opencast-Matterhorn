@@ -66,12 +66,15 @@ public class WorkflowOperationSkippingTest {
   private Set<HandlerRegistration> handlerRegistrations = null;
   private Workspace workspace = null;
 
+  private File sRoot = null;
+
+  protected static final String getStorageRoot() {
+    return "." + File.separator + "target" + File.separator + System.currentTimeMillis();
+  }
+
   @Before
   public void setup() throws Exception {
-    // always start with a fresh solr root directory
-    String storageRoot = "." + File.separator + "target" + File.separator + "workflow-test-db" + File.separator
-            + System.currentTimeMillis();
-    File sRoot = new File(storageRoot);
+    sRoot = new File(getStorageRoot());
     try {
       FileUtils.forceMkdir(sRoot);
     } catch (IOException e) {
@@ -98,7 +101,7 @@ public class WorkflowOperationSkippingTest {
 
     dao = new WorkflowServiceDaoSolrImpl();
     dao.setServiceRegistry(serviceRegistry);
-    dao.solrRoot = storageRoot + File.separator + "solr." + System.currentTimeMillis();
+    dao.solrRoot = sRoot + File.separator + "solr." + System.currentTimeMillis();
     dao.activate();
     service.setDao(dao);
     service.activate(null);

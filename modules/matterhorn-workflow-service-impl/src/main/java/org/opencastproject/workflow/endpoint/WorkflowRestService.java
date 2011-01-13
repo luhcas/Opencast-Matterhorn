@@ -647,7 +647,7 @@ public class WorkflowRestService {
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
     Long parentIdAsLong = null;
-    if (parentWorkflowId != null) {
+    if (StringUtils.isNotEmpty(parentWorkflowId)) {
       try {
         parentIdAsLong = Long.parseLong(parentWorkflowId);
       } catch (NumberFormatException e) {

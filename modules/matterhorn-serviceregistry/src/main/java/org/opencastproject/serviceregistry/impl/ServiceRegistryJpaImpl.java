@@ -272,7 +272,11 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       em.refresh(job);
       return job;
     } catch (Exception e) {
-      throw new ServiceRegistryException(e);
+      if (e instanceof NotFoundException) {
+        throw (NotFoundException) e;
+      } else {
+        throw new ServiceRegistryException(e);
+      }
     } finally {
       em.close();
     }
@@ -299,7 +303,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       em.merge(fromDb);
       tx.commit();
       int version = fromDb.getVersion();
-      ((JaxbJob)job).setVersion(version);
+      ((JaxbJob) job).setVersion(version);
       return job;
     } catch (Exception e) {
       if (tx.isActive())

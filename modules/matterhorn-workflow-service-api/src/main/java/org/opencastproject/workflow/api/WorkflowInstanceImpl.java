@@ -45,34 +45,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class WorkflowInstanceImpl implements WorkflowInstance {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceImpl.class);
 
-  public WorkflowInstanceImpl() {
-  }
-
-  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, Long parentWorkflowId,
-          Map<String, String> properties) {
-    this.title = def.getTitle();
-    this.template = def.getId();
-    this.description = def.getDescription();
-    this.parentId = parentWorkflowId;
-    this.state = WorkflowState.INSTANTIATED;
-    this.mediaPackage = mediaPackage;
-    this.operations = new ArrayList<WorkflowOperationInstance>();
-    List<WorkflowOperationDefinition> operationDefinitions = def.getOperations();
-    for (int i = 0; i < operationDefinitions.size(); i++) {
-      WorkflowOperationDefinition opDef = operationDefinitions.get(i);
-      WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(opDef);
-      opInstance.setPosition(i);
-      operations.add(opInstance);
-    }
-    this.operationsInitialized = true;
-    this.configurations = new TreeSet<WorkflowConfiguration>();
-    if (properties != null) {
-      for (Entry<String, String> entry : properties.entrySet()) {
-        configurations.add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
-      }
-    }
-  }
-
   /** whether we have initialized the operation positions */
   protected boolean operationsInitialized = false;
 
@@ -110,6 +82,51 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   protected String[] errorMessages = new String[0];
 
   protected WorkflowOperationInstance currentOperation = null;
+
+  /**
+   * Default no-arg constructor needed by JAXB
+   */
+  public WorkflowInstanceImpl() {
+  }
+
+  /**
+   * Constructs a new workflow instance from the given definition, mediapackage, and optional parent workflow ID and
+   * properties.
+   * 
+   * @param def
+   *          the workflow definition
+   * @param mediaPackage
+   *          the mediapackage
+   * @param parentWorkflowId
+   *          the parent workflow ID
+   * @param properties
+   *          the properties
+   */
+  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, Long parentWorkflowId,
+          Map<String, String> properties) {
+    this.id = -1; // this should be set by the workflow service once the workflow is persisted
+    this.title = def.getTitle();
+    this.template = def.getId();
+    this.description = def.getDescription();
+    this.parentId = parentWorkflowId;
+    this.state = WorkflowState.INSTANTIATED;
+    this.mediaPackage = mediaPackage;
+    this.operations = new ArrayList<WorkflowOperationInstance>();
+    List<WorkflowOperationDefinition> operationDefinitions = def.getOperations();
+    for (int i = 0; i < operationDefinitions.size(); i++) {
+      WorkflowOperationDefinition opDef = operationDefinitions.get(i);
+      WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(opDef);
+      opInstance.setPosition(i);
+      operations.add(opInstance);
+    }
+    this.operationsInitialized = true;
+    this.configurations = new TreeSet<WorkflowConfiguration>();
+    if (properties != null) {
+      for (Entry<String, String> entry : properties.entrySet()) {
+        configurations.add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
+      }
+    }
+  }
 
   /**
    * {@inheritDoc}
@@ -415,10 +432,10 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
       int position = 0;
       OperationState previousState = null;
-      
+
       for (WorkflowOperationInstance operation : operations) {
         ((WorkflowOperationInstanceImpl) operation).setPosition(position);
-        
+
         // Set the current operation
         if (currentOperation == null) {
           // If the previous operation succeeded, but this hasn't started yet, this is the current operation
@@ -427,13 +444,14 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
             this.currentOperation = operation;
           }
           // If an operation is running or paused, this is the current operation
-          else if (OperationState.RUNNING.equals(operation.getState()) || OperationState.PAUSED.equals(operation.getState())) {
+          else if (OperationState.RUNNING.equals(operation.getState())
+                  || OperationState.PAUSED.equals(operation.getState())) {
             this.currentOperation = operation;
           }
         }
 
         previousState = operation.getState();
-        position ++;
+        position++;
       }
     }
     logger.debug("workflow instance initialized with operation={}", currentOperation);

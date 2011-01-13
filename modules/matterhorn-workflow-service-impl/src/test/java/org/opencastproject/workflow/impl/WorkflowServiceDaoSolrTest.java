@@ -67,7 +67,7 @@ public class WorkflowServiceDaoSolrTest {
 
     // Now create the dao
     dao = new WorkflowServiceDaoSolrImpl();
-    dao.solrRoot = PathSupport.concat("target", "solr");
+    dao.solrRoot = PathSupport.concat("target", Long.toString(System.currentTimeMillis()));
     dao.setServiceRegistry(serviceRegistry);
     dao.activate();
   }

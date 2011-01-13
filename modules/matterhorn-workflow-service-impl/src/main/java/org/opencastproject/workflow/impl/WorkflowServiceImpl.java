@@ -29,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowListener;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -66,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Matcher;
@@ -101,8 +103,17 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /** The metadata services */
   private SortedSet<MediaPackageMetadataService> metadataServices;
 
+  /** The data access object responsible for storing and retrieving workflow instances */
+  protected WorkflowServiceImplDao dao;
+
+  /** The list of workflow listeners */
+  private List<WorkflowListener> listeners = new CopyOnWriteArrayList<WorkflowListener>();
+
   /** The thread pool */
   protected ThreadPoolExecutor executorService;
+
+  /** The thread pool to use for firing listeners */
+  protected ThreadPoolExecutor listenerExecutorService;
 
   /**
    * {@inheritDoc}
@@ -185,9 +196,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
   }
 
-  /** The data access object responsible for storing and retrieving workflow instances */
-  protected WorkflowServiceImplDao dao;
-
   /**
    * Constructs a new workflow service impl, with a priority-sorted map of metadata services
    */
@@ -210,11 +218,23 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     this.dao = dao;
   }
 
-  public void addMetadataService(MediaPackageMetadataService service) {
+  /**
+   * Callback to set the metadata service
+   * 
+   * @param service
+   *          the metadata service
+   */
+  void addMetadataService(MediaPackageMetadataService service) {
     metadataServices.add(service);
   }
 
-  public void removeMetadataService(MediaPackageMetadataService service) {
+  /**
+   * Callback to remove a mediapackage metadata service.
+   * 
+   * @param service
+   *          the mediapackage metadata service to remove
+   */
+  void removeMetadataService(MediaPackageMetadataService service) {
     metadataServices.remove(service);
   }
 
@@ -225,6 +245,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     this.componentContext = componentContext;
     logger.debug("Creating a new thread pool with default size of {}", DEFAULT_THREADS);
     executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_THREADS);
+    listenerExecutorService = (ThreadPoolExecutor) Executors.newCachedThreadPool();
   }
 
   /**
@@ -233,6 +254,56 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   public void deactivate() {
     if (executorService != null && !executorService.isShutdown()) {
       executorService.shutdown();
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#addWorkflowListener(org.opencastproject.workflow.api.WorkflowListener)
+   */
+  @Override
+  public void addWorkflowListener(WorkflowListener listener) {
+    listeners.add(listener);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#removeWorkflowLister(org.opencastproject.workflow.api.WorkflowListener)
+   */
+  @Override
+  public void removeWorkflowLister(WorkflowListener listener) {
+    listeners.remove(listener);
+  }
+
+  /**
+   * Fires the workflow listeners on workflow updates.
+   */
+  protected void fireListeners(final WorkflowInstance oldWorkflowInstance, final WorkflowInstance newWorkflowInstance) throws WorkflowParsingException {
+    for (final WorkflowListener listener : listeners) {
+      if (oldWorkflowInstance == null || !oldWorkflowInstance.getState().equals(newWorkflowInstance.getState())) {
+        Runnable runnable = new Runnable() {
+          @Override
+          public void run() {
+            listener.stateChanged(newWorkflowInstance);
+          }
+        };
+        listenerExecutorService.execute(runnable);
+      }
+
+      if (newWorkflowInstance.getCurrentOperation() != null) {
+        if (oldWorkflowInstance == null || oldWorkflowInstance.getCurrentOperation() == null
+                || !oldWorkflowInstance.getCurrentOperation().equals(newWorkflowInstance.getCurrentOperation())) {
+          Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+              listener.operationChanged(newWorkflowInstance);
+            }
+          };
+          listenerExecutorService.execute(runnable);
+        }
+      }
     }
   }
 
@@ -415,13 +486,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // Create and configure the workflow instance
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage,
             parentWorkflowId, properties);
-    workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     workflowInstance = updateConfiguration(workflowInstance, properties);
 
     try {
       // Before we persist this, extract the metadata
       populateMediaPackageMetadata(workflowInstance.getMediaPackage());
-      dao.update(workflowInstance);
+      update(workflowInstance);
 
       // Have the job executed
       logger.info("Starting a new workflow: {}", workflowInstance);
@@ -431,7 +501,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     } catch (Throwable t) {
       try {
         workflowInstance.setState(WorkflowState.FAILED);
-        dao.update(workflowInstance);
+        update(workflowInstance);
       } catch (Exception failureToFail) {
         logger.warn("Unable to update workflow to failed state", failureToFail);
       }
@@ -536,11 +606,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   protected void run(final WorkflowInstanceImpl wfi, final Map<String, String> properties)
           throws WorkflowDatabaseException, WorkflowParsingException {
+    wfi.setState(WorkflowInstance.WorkflowState.RUNNING);
     WorkflowOperationInstance operation = wfi.getCurrentOperation();
     if (operation == null) {
       operation = wfi.next();
-      update(wfi);
     }
+    update(wfi);
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
     executorService.execute(new WorkflowOperationWorker(operationHandler, wfi, properties, this));
   }
@@ -606,7 +677,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
     // Update the workflow instance
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
-    dao.update(workflowInstance);
+    update(workflowInstance);
 
     // Continue running the workflow
     run(workflowInstance, properties);
@@ -621,7 +692,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public void update(WorkflowInstance workflowInstance) throws WorkflowDatabaseException, WorkflowParsingException {
+    WorkflowInstance databaseInstance = null;
+    try {
+      databaseInstance = dao.getWorkflowById(workflowInstance.getId());
+    } catch (NotFoundException e) {
+      // That's fine, it's a new workflow instance
+    }
     dao.update(workflowInstance);
+    WorkflowInstance clone = WorkflowParser.parseWorkflowInstance(WorkflowParser.toXml(workflowInstance));
+    fireListeners(databaseInstance, clone);
   }
 
   /**
@@ -712,7 +791,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
     currentOperation.setState(OperationState.FAILED);
     try {
-      dao.update(workflow);
+      update(workflow);
       handleOperationResult(workflow, new WorkflowOperationResultImpl(workflow.getMediaPackage(), null,
               Action.CONTINUE, 0));
     } catch (WorkflowException workflowException) {
@@ -738,7 +817,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // Get the operation and its handler
     WorkflowOperationInstanceImpl currentOperation = (WorkflowOperationInstanceImpl) workflow.getCurrentOperation();
     WorkflowOperationHandler handler = getWorkflowOperationHandler(currentOperation.getId());
-    
+
     // Create an operation result for the lazy or else update the workflow's media package
     if (result == null) {
       logger.warn("Handling a null operation result for workflow {} in operation {}", workflow.getId(),
@@ -750,13 +829,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         workflow.setMediaPackage(mp);
       }
     }
-    
+
     // The action to take
     Action action = result.getAction();
 
     // Update the workflow configuration
     workflow = updateConfiguration(workflow, result.getProperties());
-    
+
     // Adjust workflow statistics
     currentOperation.setTimeInQueue(result.getTimeInQueue());
 
@@ -782,7 +861,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         logger.warn("unable to replace workflow ID in the hold state URL", e);
       }
       workflow.setState(WorkflowState.PAUSED);
-      dao.update(workflow);
+      update(workflow);
       return;
     }
 
@@ -801,10 +880,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // If the workflow was paused or stopped while the operation was still working, accept the updated mediapackage
     // and properties, but do not continue on.
     if (WorkflowState.PAUSED.equals(dbWorkflowState) || WorkflowState.STOPPED.equals(dbWorkflowState)) {
-      dao.update(workflow);
+      update(workflow);
       return;
     }
-    
+
     // Move on to the next workflow operation
     WorkflowOperationInstance nextOperation = workflow.next(); // Be careful... this increments the current operation
 
@@ -819,10 +898,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
           }
         }
       }
-      dao.update(workflow);
+      update(workflow);
     } else {
       workflow.setState(WorkflowState.RUNNING);
-      dao.update(workflow);
+      update(workflow);
       this.run(workflow);
     }
   }
