@@ -163,27 +163,28 @@
               </form>
             </div>
           </div>
+        </div>
+        <div id="bulkActionApply">
           <div class="ui-widget ui-widget-content ui-corner-all layout-centered">
             <ul class="oc-ui-form-list">
               <li>
-                Changes will be made in <span id="numChangedFields">0</span> field(s) for all <span id="numSelectedRecordings">0</span> selected recoding(s).
+                <label>&nbsp;</label>
+                <span id="bulkActionApplyMessage"></span>
               </li>
               <li>
                 <label>&nbsp;</label>
                 <button type="button" id="applyBulkAction">
                   <span id="i18n_button_apply_bulk_action">Apply Changes</span>
                 </button>
-                <button type="button" id="cancelBulkAction">
+                <button type="button" id="cancelBulkAction" class="recordings-cancel-bulk-action">
                   <span id="i18n_button_cancel_bulk_action">Cancel Bulk Action</span>
                 </button>
               </li>
             </ul>
           </div>
         </div>
-        <div id="bulkDeletePanel">
-          <button type="button" class="recordings-cancel-bulk-action">
-            <span id="i18n_button_cancel_bulk_action">Cancel Bulk Action</span>
-          </button>
+        <div id="deleteModal" title="Delete Progress">
+          <div id="deleteProgress"> </div>
         </div>
       </div>
       <div id="tableContainer" class="ui-widget ui-helper-clearfix"></div>
@@ -228,7 +229,7 @@
     <tr>
       <th class="recordings-table-head"><span id="filterRecordingCount"></span>
       <th colspan="4">&nbsp;</th>
-      <th class="recordings-table-head"><a href="javascript:ocRecordings.displayBulkAction()">Bulk Action</a></th>
+      <th class="recordings-table-head ui-helper-hidden" id="bulkActionButton"><a href="javascript:ocRecordings.displayBulkAction()">Bulk Action</a></th>
     </tr>
     <tr>
       <th id="sortTitle" width="25%" class="ui-state-default sortable">Title<span class="sort-icon ui-icon ui-icon-triangle-2-n-s"></span></th>

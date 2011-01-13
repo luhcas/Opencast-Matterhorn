@@ -30,6 +30,7 @@ ocRecordings = new (function() {
   ]
 
   this.totalRecordings = 0;
+  this.numSelectedRecordings = 0;
 
   // components
   this.searchbox = null;
@@ -129,12 +130,9 @@ ocRecordings = new (function() {
       else if (state === 'bulkedit' || state === 'bulkdelete') {
         ocRecordings.Configuration.pageSize = 100;
         ocRecordings.Configuration.page = 0;
-        
-        if(state === 'bulkedit') {
-          params.push('state=paused');
-          params.push('state=running');
-          params.push('op=schedule');
-        }
+        params.push('state=paused');
+        params.push('state=running');
+        params.push('op=schedule');
       }
       // sorting if specified
       if (ocRecordings.Configuration.sortField != null) {
@@ -347,18 +345,47 @@ ocRecordings = new (function() {
  */
   this.render = function(data) {
     var template = 'tableTemplate';
+    var registerRecordingSelectHandler = false;
     if(ocRecordings.Configuration.state === 'bulkedit' || ocRecordings.Configuration.state === 'bulkdelete') {
       template = 'tableSelectTemplate'
       $('#controlsFoot').hide();
+      registerRecordingSelectHandler = true;
     } else {
       $('#controlsFoot').show();
     }
     refreshing = false;
     ocRecordings.data = data;
-    ocRecordings.totalRecordings = data.workflows.totalCount;
+    ocRecordings.totalRecordings = parseInt(data.workflows.totalCount);
     var result = TrimPath.processDOMTemplate(template, makeRenderData(data));
     $( '#tableContainer' ).empty().append(result);
-
+    
+    if(registerRecordingSelectHandler) {
+      $('.selectRecording').click(function() {
+        if(this.checked === true) {
+          ocRecordings.numSelectedRecordings++;
+        } else {
+          ocRecordings.numSelectedRecordings--;
+          var lastRecordingUnchecked = true;
+          $.each($('.selectRecording'), function(i,v){
+            if(v.checked) {
+              lastRecordingUnchecked = false;
+              return false;
+            }
+          });
+          if(lastRecordingUnchecked) {
+            $('#selectAllRecordings').attr('checked', false);
+          }
+        }
+        ocRecordings.updateBulkActionApplyMessage();
+      });
+    }
+    
+    if(ocRecordings.Configuration.state === 'upcoming'){
+      $('#bulkActionButton').show();
+    } else {
+      $('#bulkActionButton').hide();
+    }
+    
     // display number of matches if filtered
     if (ocRecordings.Configuration.filterText) {
       var countText;
@@ -624,9 +651,9 @@ ocRecordings = new (function() {
       ocRecordings.bulkActionHandler($(this).val());
     });
     
-    $('#cancelBulkAction').click(ocRecordings.cancelBulkAction);
+    $('.recordings-cancel-bulk-action').click(ocRecordings.cancelBulkAction);
     
-    $('#applyBulkAction').click(ocRecordings.applyBulkEdit);
+    $('#applyBulkAction').click(ocRecordings.applyBulkAction);
     
     $('#seriesSelect').autocomplete({
       source: SERIES_URL + '/search',
@@ -669,7 +696,6 @@ ocRecordings = new (function() {
     } else {
       refresh();    // load and render data for currently set configuration
     }
-
   };
   
   this.removeRecording = function(id, title) { //TODO Delete the scheduled event too. Don't just stop the workflow.
@@ -725,6 +751,7 @@ ocRecordings = new (function() {
   this.displayBulkAction = function(filter) {
     $('#bulkEditPanel').hide();
     $('#bulkDeletePanel').hide();
+    $('#bulkActionApply').hide();
     $('#bulkActionPanel').show();
     ocRecordings.Configuration.lastState = ocRecordings.Configuration.state
     ocRecordings.Configuration.lastPageSize = ocRecordings.Configuration.pageSize;
@@ -751,22 +778,43 @@ ocRecordings = new (function() {
     if (action === 'select') {
       $('#bulkEditPanel').hide();
       $('#bulkDeletePanel').hide();
+      $('#bulkActionApply').hide();
       $('#cancelBulkAction').show();
     } else {
       if(action === 'edit'){
+        $('#bulkActionApplyMessage').text(bulkEditApplyMessage());
         $('#bulkEditPanel').show();
         $('#bulkDeletePanel').hide();
+        $('#bulkActionApply').show();
         $('#cancelBulkAction').hide();
         ocRecordings.registerBulkEditComponents();
         ocRecordings.Configuration.state = 'bulkedit'
         refresh();
       } else if (action === 'delete') {
+        $('#bulkActionApplyMessage').text(bulkDeleteApplyMessage());
         $('#bulkEditPanel').hide();
         $('#bulkDeletePanel').show();
+        $('#bulkActionApply').show();
         $('#cancelBulkAction').hide();
         ocRecordings.Configuration.state = 'bulkdelete'
         refresh();
       }
+    }
+  }
+  
+  function bulkEditApplyMessage() {
+    return "Changes will be made in 0 field(s) for all " + ocRecordings.numSelectedRecordings + " selected recoding(s).";
+  }
+  
+  function bulkDeleteApplyMessage() {
+    return ocRecordings.numSelectedRecordings + " selected recording(s) will be deleted.";
+  }
+  
+  this.updateBulkActionApplyMessage = function() {
+    if(ocRecordings.Configuration.state === 'bulkedit'){
+      $('#bulkActionApplyMessage').text(bulkEditApplyMessage());
+    } else if (ocRecordings.Configuration.state === 'bulkdelete') {
+      $('#bulkActionApplyMessage').text(bulkDeleteApplyMessage());
     }
   }
 
@@ -778,28 +826,67 @@ ocRecordings = new (function() {
       $.each($('.selectRecording'), function(i,v){
         v.checked = true;
       });
+      ocRecordings.numSelectedRecordings = ocRecordings.totalRecordings;
     } else {
       $.each($('.selectRecording'), function(i,v){
         v.checked = false;
       });
+      ocRecordings.numSelectedRecordings = 0;
     }
+    ocRecordings.updateBulkActionApplyMessage();
   }
 
-  this.applyBulkEdit = function() {
-    var manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
-    var event = manager.serialize();
+  this.applyBulkAction = function() {
+    var manager;
+    var event;
+    var progress = 0;
+    var progressChunk = 0;
     var eventIdList = [];
     $.each($('.selectRecording'), function(i,v){
       if(v.checked === true) {
         eventIdList.push(v.value);
       }
     });
-    $.post('/scheduler/rest/', 
-      {event: event, idList: '[' + eventIdList.toString() + ']'},
-      ocRecordings.bulkEditComplete);
+    if(eventIdList.length > 0){
+      if(ocRecordings.Configuration.state === 'bulkedit') {
+        manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
+        event = manager.serialize();
+        $.post('/scheduler/rest/', 
+          {event: event, idList: '[' + eventIdList.toString() + ']'},
+          ocRecordings.bulkActionComplete);
+      } else if(ocRecordings.Configuration.state === 'bulkdelete') {
+        progressChunk = 100 / eventIdList.length;
+        $('#deleteProgress').progressbar({
+          value: 0,
+          complete: function(){
+            $('#deleteModal').dialog('destroy');
+            ocRecordings.bulkActionComplete();
+          }
+        });
+        $('#deleteModal').dialog({
+          height: 140,
+          modal: true
+        });
+        var toid = setInterval(function(){
+          var id = eventIdList.pop();
+          if(typeof id === 'undefined'){
+            clearInterval(toid);
+            return;
+          }
+          $.ajax({
+            url: '/scheduler/rest/'+id,
+            type: 'DELETE',
+            success: function(){
+              progress = progress + progressChunk;
+              $('#deleteProgress').progressbar('value', progress);
+            }
+          });
+        }, 250);
+      }
+    }
   }
 
-  this.bulkEditComplete = function() {
+  this.bulkActionComplete = function() {
     ocRecordings.cancelBulkAction();
   }
 
