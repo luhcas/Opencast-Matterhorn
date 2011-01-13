@@ -96,28 +96,6 @@ public class StateServiceImplTest {
 
   }
 
-  // Note: This test is meant to test that the code handles weird cases in the polling, *not* the functionality itself
-  @Test
-  public void testInvalidPolling() throws ConfigurationException {
-    Properties props = new Properties();
-    service.updated(props);
-
-    try {
-      service.updated(null);
-    } catch (ConfigurationException e) {
-      // Good, this is expected
-      return;
-    }
-    Assert.fail();
-  }
-
-  // Note: This test combines its subtests to verify that the code to handle the update functionality is working.
-  @Test
-  public void testPollingChanges() throws ConfigurationException {
-    testValidPolling();
-    testInvalidPolling();
-  }
-
   @Test
   public void testUnpreparedImpl() {
     Assert.assertNull(service.getAgentState());

@@ -15,6 +15,11 @@
  */
 package org.opencastproject.capture.impl;
 
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+
+import static org.easymock.classextension.EasyMock.createMock;
+
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureParameters;
@@ -233,7 +238,7 @@ public class CaptureAgentImplTest {
   public void testRecordingLoadMethod() throws IOException, ConfigurationException {
     if (!gstreamerInstalled)
       return;
-
+    logger.info("Starting testRecordingLoadMethod\n\n\n\n");
     agent.deactivate();
     agent = null;
 
@@ -310,4 +315,129 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(10, agent.getKnownRecordings().size());
   }
 
+  @Test
+  public void captureAgentImplWillWaitForConfigurationManagerUpdate() throws IOException, ConfigurationException,
+          InterruptedException {
+    // Create the configuration manager
+    config = new ConfigurationManager();
+    Properties p = setupConfigurationManagerProperties();
+    agent = new CaptureAgentImpl();
+    agent.setConfigService(config);
+    Assert.assertFalse("The configuration manager is just created it shouldn't be updated yet.", agent.isRefreshed());
+    Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
+    agent.updated(properties);
+    Assert.assertFalse("The config manager hasn't been updated so should not be refreshed.", agent.isRefreshed());
+    Assert.assertTrue("The agent has been updated, so updated should be true.", agent.isUpdated());
+    config.updated(p);
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return agent.isUpdated() && agent.isRefreshed();
+        } else {
+          return false;
+        }
+      }
+    });
+    Assert.assertTrue("The config manager is now updated so refreshed should be true.", agent.isRefreshed());
+    Assert.assertTrue("The agent should still be updated.", agent.isUpdated());
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+  }
+
+  @Test
+  public void configurationManagerRefreshWillWaitForCaptureAgentUpdate() throws IOException, ConfigurationException,
+          InterruptedException {
+    // Create the configuration manager
+    config = new ConfigurationManager();
+    Properties p = setupConfigurationManagerProperties();
+    agent = new CaptureAgentImpl();
+    agent.setConfigService(config);
+    Assert.assertFalse("The configuration manager is just created it shouldn't be updated yet.", agent.isRefreshed());
+    Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
+    config.updated(p);
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return agent.isRefreshed();
+        } else {
+          return false;
+        }
+      }
+    });
+    Assert.assertTrue("The config manager is now updated so refreshed should be true.", agent.isRefreshed());
+    Assert.assertFalse("The agent should still not be updated.", agent.isUpdated());
+    agent.updated(properties);
+    Assert.assertTrue("The config manager is now updated so refreshed should be true.", agent.isRefreshed());
+    Assert.assertTrue("The agent should still be updated.", agent.isUpdated());
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+  }
+  
+  @Test
+  public void configurationManagerComingUpCompletelyBeforeCaptureAgentImplOkay() throws IOException,
+          ConfigurationException, InterruptedException {
+    // Create the configuration manager
+    config = new ConfigurationManager();
+    Properties p = setupConfigurationManagerProperties();
+    config.updated(p);
+    Assert.assertTrue(config.isInitialized());
+    
+    agent = new CaptureAgentImpl();
+    agent.setConfigService(config);
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return agent.isRefreshed();
+        } else {
+          return false;
+        }
+      }
+    });
+    Assert.assertTrue("The configuration manager is fully up, so it should refresh the agent.", agent.isRefreshed());
+    Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
+    agent.updated(properties);
+    Assert.assertTrue("The config manager is still updated so refreshed should be true.", agent.isRefreshed());
+    Assert.assertTrue("The agent should be updated.", agent.isUpdated());
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+  }
+  
+  @Test
+  public void captureAgentImplComingUpFullyBeforeConfigurationManagerOkay() throws IOException,
+          ConfigurationException, InterruptedException {
+    // Create the configuration manager
+    config = new ConfigurationManager();
+    agent = new CaptureAgentImpl();
+    agent.updated(properties);
+    Assert.assertFalse("The config manager should still be waiting for an update.", agent.isRefreshed());
+    Assert.assertTrue("The agent should be updated.", agent.isUpdated());
+    Properties p = setupConfigurationManagerProperties();
+    config.updated(p);
+    Assert.assertTrue(config.isInitialized());
+    agent.setConfigService(config);
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return agent.isRefreshed();
+        } else {
+          return false;
+        }
+      }
+    });
+    Assert.assertTrue("The config manager should be updated.", agent.isRefreshed());
+    Assert.assertTrue("The agent should be updated.", agent.isUpdated());
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+  }
+  
+  private Properties setupConfigurationManagerProperties() throws IOException {
+    Properties p = loadProperties("config/capture.properties");
+    p.put("org.opencastproject.storage.dir",
+            new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
+    p.put("org.opencastproject.server.url", "http://localhost:8080");
+    p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
+    p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
+    return p;
+  }
+  
 }

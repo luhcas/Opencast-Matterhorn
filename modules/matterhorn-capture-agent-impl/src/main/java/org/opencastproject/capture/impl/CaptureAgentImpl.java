@@ -187,6 +187,15 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /** Stores the current bundle context */
   private ComponentContext context = null;
 
+  /** If the CaptureAgentImpl has its updated quartz configuration this is true.**/
+  private boolean updated = false;
+  
+  /** If the ConfigurationManager has its updated quartz configuration this is true.**/
+  private boolean refreshed = false;
+  
+  /** The last properties the CaptureAgentImpl was updated by felix with. **/
+  private Dictionary<String, String> cachedProperties = null;
+  
   /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
    * 
@@ -200,40 +209,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     configService.registerListener(this);
   }
 
-  /**
-   * When the ConfigurationManager is updated refresh is called as a part of the observer pattern of
-   * ConfigurationManagerObserver
-   **/
-  @Override
-  public void refresh() {
-    // Recreate the agent state push tasks
-    createPushTask();
-    // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
-    // seconds)
-    createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
-    logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
-    // Create SchedulerImpl
-    Hashtable<String, String> schedulerProperties = new Hashtable<String, String>();
-    schedulerProperties.put("org.quartz.scheduler.instanceName", "scheduler_sched");
-    schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
-    schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
-    schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
-    
-    schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-    schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
-    
-    schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
-    try {
-      scheduler = new SchedulerImpl(schedulerProperties, configService, this);
-      if(client != null){
-        scheduler.setTrustedClient(client);
-      }
-    } catch (ConfigurationException e) {
-      e.printStackTrace();
-    }
-    
-  }
-
+  
   
   /**
    * Returns the configuration service form which this capture agent should draw its configuration data.
@@ -1241,24 +1217,84 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
-    if (properties == null) {
-      throw new ConfigurationException("null", "Null configuration in updated!");
+    cachedProperties = properties;
+    updated = true;
+    if(updated && refreshed){
+      startConfigurationDependantTasks();
     }
-
-    // Update the agent's properties from the parameter
-    Properties props = new Properties();
-    Enumeration<String> keys = properties.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement();
-      props.put(key, properties.get(key));
-    }
-    // Create Agent state push task.
-    createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
-    // Create recording load task.
-    createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
-   
   }
 
+  public boolean isUpdated() {
+    return updated;
+  }
+
+  /**
+   * When the ConfigurationManager is updated refresh is called as a part of the observer pattern of
+   * ConfigurationManagerObserver
+   **/
+  @Override
+  public void refresh() {
+    refreshed = true;
+    if (updated && refreshed) {
+      try {
+        startConfigurationDependantTasks();
+      } catch (ConfigurationException e) {
+        logger.error(e.getMessage());
+      }
+    }
+  }
+  
+  public boolean isRefreshed() {
+    return refreshed;
+  }
+
+
+
+  public void startConfigurationDependantTasks() throws ConfigurationException{
+    synchronized(cachedProperties){
+      if (cachedProperties == null) {
+        throw new ConfigurationException("null", "Null configuration in updated!");
+      }
+  
+      // Update the agent's properties from the parameter
+      Properties props = new Properties();
+      Enumeration<String> keys = cachedProperties.keys();
+      while (keys.hasMoreElements()) {
+        String key = keys.nextElement();
+        props.put(key, cachedProperties.get(key));
+      }
+      // Create Agent state push task.
+      createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
+      // Create recording load task.
+      createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
+      // Recreate the agent state push tasks
+      createPushTask();
+      // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
+      // seconds)
+      createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
+      logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
+      // Create SchedulerImpl
+      Hashtable<String, String> schedulerProperties = new Hashtable<String, String>();
+      schedulerProperties.put("org.quartz.scheduler.instanceName", "scheduler_sched");
+      schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
+      schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
+      schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
+      
+      schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+      schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
+      
+      schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+      try {
+        scheduler = new SchedulerImpl(schedulerProperties, configService, this);
+        if(client != null){
+          scheduler.setTrustedClient(client);
+        }
+      } catch (ConfigurationException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+  
   /**
    * Callback from the OSGi container once this service is started. This is where we register our shell commands.
    * 
