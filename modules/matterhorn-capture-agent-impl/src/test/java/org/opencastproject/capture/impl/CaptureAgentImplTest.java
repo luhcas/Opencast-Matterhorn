@@ -238,7 +238,6 @@ public class CaptureAgentImplTest {
   public void testRecordingLoadMethod() throws IOException, ConfigurationException {
     if (!gstreamerInstalled)
       return;
-    logger.info("Starting testRecordingLoadMethod\n\n\n\n");
     agent.deactivate();
     agent = null;
 
@@ -334,7 +333,7 @@ public class CaptureAgentImplTest {
       @Override
       public boolean check() {
         if (agent != null) {
-          return agent.isUpdated() && agent.isRefreshed();
+          return agent.isUpdated() && agent.isRefreshed() && (agent.scheduler != null);
         } else {
           return false;
         }

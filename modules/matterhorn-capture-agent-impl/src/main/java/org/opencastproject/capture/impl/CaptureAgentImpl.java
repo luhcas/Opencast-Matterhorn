@@ -1251,47 +1251,45 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
 
   public void startConfigurationDependantTasks() throws ConfigurationException{
-    synchronized(cachedProperties){
-      if (cachedProperties == null) {
-        throw new ConfigurationException("null", "Null configuration in updated!");
+    if (cachedProperties == null) {
+      throw new ConfigurationException("null", "Null configuration in updated!");
+    }
+
+    // Update the agent's properties from the parameter
+    Properties props = new Properties();
+    Enumeration<String> keys = cachedProperties.keys();
+    while (keys.hasMoreElements()) {
+      String key = keys.nextElement();
+      props.put(key, cachedProperties.get(key));
+    }
+    // Create Agent state push task.
+    createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
+    // Create recording load task.
+    createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
+    // Recreate the agent state push tasks
+    createPushTask();
+    // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
+    // seconds)
+    createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
+    logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
+    // Create SchedulerImpl
+    Hashtable<String, String> schedulerProperties = new Hashtable<String, String>();
+    schedulerProperties.put("org.quartz.scheduler.instanceName", "scheduler_sched");
+    schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
+    schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
+    schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
+
+    schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+    schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
+
+    schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+    try {
+      scheduler = new SchedulerImpl(schedulerProperties, configService, this);
+      if (client != null) {
+        scheduler.setTrustedClient(client);
       }
-  
-      // Update the agent's properties from the parameter
-      Properties props = new Properties();
-      Enumeration<String> keys = cachedProperties.keys();
-      while (keys.hasMoreElements()) {
-        String key = keys.nextElement();
-        props.put(key, cachedProperties.get(key));
-      }
-      // Create Agent state push task.
-      createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
-      // Create recording load task.
-      createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
-      // Recreate the agent state push tasks
-      createPushTask();
-      // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
-      // seconds)
-      createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
-      logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
-      // Create SchedulerImpl
-      Hashtable<String, String> schedulerProperties = new Hashtable<String, String>();
-      schedulerProperties.put("org.quartz.scheduler.instanceName", "scheduler_sched");
-      schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
-      schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
-      schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
-      
-      schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-      schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
-      
-      schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
-      try {
-        scheduler = new SchedulerImpl(schedulerProperties, configService, this);
-        if(client != null){
-          scheduler.setTrustedClient(client);
-        }
-      } catch (ConfigurationException e) {
-        e.printStackTrace();
-      }
+    } catch (ConfigurationException e) {
+      e.printStackTrace();
     }
   }
   
