@@ -225,7 +225,7 @@ public class SeriesImpl implements Series {
     DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
 
     dc.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(getSeriesId()));
-    dc.add(DublinCoreCatalog.PROPERTY_DESCRIPTION, new DublinCoreValue(description));
+    dc.add(DublinCoreCatalog.PROPERTY_DESCRIPTION, new DublinCoreValue(getDescription()));
     for (SeriesMetadata m : getMetadata()) {
       String v = null;
       if (isDateKey(m.getKey()))
@@ -283,7 +283,10 @@ public class SeriesImpl implements Series {
    */
   @Override
   public String getDescription() {
-    return description;
+    if(description != null) {
+      return description;
+    }
+    return "";
   }
 
   /**
