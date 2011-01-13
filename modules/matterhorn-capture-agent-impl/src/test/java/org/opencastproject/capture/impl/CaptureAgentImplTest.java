@@ -329,6 +329,7 @@ public class CaptureAgentImplTest {
     Assert.assertFalse("The config manager hasn't been updated so should not be refreshed.", agent.isRefreshed());
     Assert.assertTrue("The agent has been updated, so updated should be true.", agent.isUpdated());
     config.updated(p);
+    waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override
       public boolean check() {
@@ -355,6 +356,7 @@ public class CaptureAgentImplTest {
     Assert.assertFalse("The configuration manager is just created it shouldn't be updated yet.", agent.isRefreshed());
     Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
     config.updated(p);
+    waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override
       public boolean check() {
@@ -384,6 +386,7 @@ public class CaptureAgentImplTest {
     
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
+    waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override
       public boolean check() {
@@ -415,6 +418,7 @@ public class CaptureAgentImplTest {
     config.updated(p);
     Assert.assertTrue(config.isInitialized());
     agent.setConfigService(config);
+    waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override
       public boolean check() {
