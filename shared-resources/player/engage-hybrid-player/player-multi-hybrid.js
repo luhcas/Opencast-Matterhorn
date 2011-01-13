@@ -739,6 +739,7 @@ Opencast.Player = (function () {
         $('#'+shortcutTabReturnId).focus();
       }
       shortcutDialogDisplayed = false;
+      $('#oc_shortcuts').dialog('close');
     }
 
     /**
