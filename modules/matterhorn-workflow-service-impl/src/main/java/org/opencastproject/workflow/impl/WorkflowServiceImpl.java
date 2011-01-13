@@ -264,23 +264,29 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public void addWorkflowListener(WorkflowListener listener) {
+    if (listener == null) {
+      throw new IllegalArgumentException("Listener must not be null");
+    }
     listeners.add(listener);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#removeWorkflowLister(org.opencastproject.workflow.api.WorkflowListener)
+   * @see org.opencastproject.workflow.api.WorkflowService#removeWorkflowListener(org.opencastproject.workflow.api.WorkflowListener)
    */
   @Override
-  public void removeWorkflowLister(WorkflowListener listener) {
-    listeners.remove(listener);
+  public void removeWorkflowListener(WorkflowListener listener) {
+    if (listener != null) {
+      listeners.remove(listener);
+    }
   }
 
   /**
    * Fires the workflow listeners on workflow updates.
    */
-  protected void fireListeners(final WorkflowInstance oldWorkflowInstance, final WorkflowInstance newWorkflowInstance) throws WorkflowParsingException {
+  protected void fireListeners(final WorkflowInstance oldWorkflowInstance, final WorkflowInstance newWorkflowInstance)
+          throws WorkflowParsingException {
     for (final WorkflowListener listener : listeners) {
       if (oldWorkflowInstance == null || !oldWorkflowInstance.getState().equals(newWorkflowInstance.getState())) {
         Runnable runnable = new Runnable() {
@@ -900,8 +906,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       }
       update(workflow);
     } else {
-      workflow.setState(WorkflowState.RUNNING);
-      update(workflow);
       this.run(workflow);
     }
   }

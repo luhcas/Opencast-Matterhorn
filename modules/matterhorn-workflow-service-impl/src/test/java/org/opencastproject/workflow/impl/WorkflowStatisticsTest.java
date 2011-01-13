@@ -264,7 +264,7 @@ public class WorkflowStatisticsTest {
       }
     }
     
-    workflowService.removeWorkflowLister(listener);
+    workflowService.removeWorkflowListener(listener);
     
     // Resume all of them, so some will be finished, some won't
     int j = 0;

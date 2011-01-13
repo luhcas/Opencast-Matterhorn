@@ -49,7 +49,7 @@ public interface WorkflowService {
    * @param listener
    *          the workflow listener to remove
    */
-  void removeWorkflowLister(WorkflowListener listener);
+  void removeWorkflowListener(WorkflowListener listener);
 
   /**
    * Registers a new workflow definition. If a workflow definition with the same identifier is already registered, it
