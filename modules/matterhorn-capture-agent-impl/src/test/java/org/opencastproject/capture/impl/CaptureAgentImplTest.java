@@ -76,7 +76,6 @@ public class CaptureAgentImplTest {
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
-
     // Create the configuration manager
     config = new ConfigurationManager();
 
@@ -312,6 +311,8 @@ public class CaptureAgentImplTest {
   @Test
   public void captureAgentImplWillWaitForConfigurationManagerUpdate() throws IOException, ConfigurationException,
           InterruptedException {
+    if (!gstreamerInstalled)
+      return;
     // Create the configuration manager
     config = new ConfigurationManager();
     Properties p = setupConfigurationManagerProperties();
@@ -364,6 +365,8 @@ public class CaptureAgentImplTest {
   @Test
   public void configurationManagerRefreshWillWaitForCaptureAgentUpdate() throws IOException, ConfigurationException,
           InterruptedException {
+    if (!gstreamerInstalled)
+      return;
     // Create the configuration manager
     config = new ConfigurationManager();
     Properties p = setupConfigurationManagerProperties();
@@ -416,6 +419,8 @@ public class CaptureAgentImplTest {
   @Test
   public void configurationManagerComingUpCompletelyBeforeCaptureAgentImplOkay() throws IOException,
           ConfigurationException, InterruptedException {
+    if (!gstreamerInstalled)
+      return;
     // Create the configuration manager
     config = new ConfigurationManager();
     Properties p = setupConfigurationManagerProperties();
@@ -468,6 +473,8 @@ public class CaptureAgentImplTest {
   @Test
   public void captureAgentImplComingUpFullyBeforeConfigurationManagerOkay() throws IOException,
           ConfigurationException, InterruptedException {
+    if (!gstreamerInstalled)
+      return;
     // Create the configuration manager
     config = new ConfigurationManager();
     agent = new CaptureAgentImpl();
