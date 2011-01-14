@@ -161,7 +161,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   private String agentState = null;
 
   /** A pointer to the scheduler. */
-  SchedulerImpl scheduler = null;
+  private SchedulerImpl scheduler = null;
 
   /** The scheduler the agent will use to schedule any recurring events */
   private org.quartz.Scheduler agentScheduler = null;
@@ -194,7 +194,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   private boolean refreshed = false;
   
   /** The last properties the CaptureAgentImpl was updated by felix with. **/
-  private Dictionary<String, String> cachedProperties = null;
+  private Dictionary<String, String> cachedProperties = new Hashtable<String, String>();
   
   /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
@@ -220,6 +220,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     return configService;
   }
 
+  protected SchedulerImpl getSchedulerImpl(){
+    return scheduler;
+  }
+  
   /**
    * Sets the http client which this service uses to communicate with the core.
    * 
@@ -1217,13 +1221,19 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
-    cachedProperties = properties;
-    updated = true;
-    if(updated && refreshed){
-      startConfigurationDependantTasks();
+    if(properties != null){
+      cachedProperties = properties;
+      updated = true;
+      if(updated && refreshed){
+        startConfigurationDependantTasks();
+      }
+    }
+    else{
+        throw new ConfigurationException("null", "Null configuration in updated!");
     }
   }
 
+  /** If felix has updated the CaptureAgent properties at least once this will be true. **/
   public boolean isUpdated() {
     return updated;
   }
@@ -1244,52 +1254,58 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
   }
   
+  /** If ConfigurationManager had updated and passed on those properties to the Capture Agent this returns true. **/
   public boolean isRefreshed() {
     return refreshed;
   }
 
 
-
+  /**
+   * Once the configuration is loaded through the updated method and the ConfigurationManager has loaded its properties
+   * then this method is called to start the schedules dependent on configuration properties.
+   **/
   public void startConfigurationDependantTasks() throws ConfigurationException{
-    if (cachedProperties == null) {
-      throw new ConfigurationException("null", "Null configuration in updated!");
-    }
-
-    // Update the agent's properties from the parameter
-    Properties props = new Properties();
-    Enumeration<String> keys = cachedProperties.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement();
-      props.put(key, cachedProperties.get(key));
-    }
-    // Create Agent state push task.
-    createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
-    // Create recording load task.
-    createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
-    // Recreate the agent state push tasks
-    createPushTask();
-    // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
-    // seconds)
-    createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
-    logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
-    // Create SchedulerImpl
-    Hashtable<String, String> schedulerProperties = new Hashtable<String, String>();
-    schedulerProperties.put("org.quartz.scheduler.instanceName", "scheduler_sched");
-    schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
-    schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
-    schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
-
-    schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-    schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
-
-    schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
-    try {
-      scheduler = new SchedulerImpl(schedulerProperties, configService, this);
-      if (client != null) {
-        scheduler.setTrustedClient(client);
+    synchronized (cachedProperties) {
+      if (cachedProperties == null) {
+        throw new ConfigurationException("null", "Null configuration in updated!");
       }
-    } catch (ConfigurationException e) {
-      e.printStackTrace();
+  
+      // Update the agent's properties from the parameter
+      Properties props = new Properties();
+      Enumeration<String> keys = cachedProperties.keys();
+      while (keys.hasMoreElements()) {
+        String key = keys.nextElement();
+        props.put(key, cachedProperties.get(key));
+      }
+      // Create Agent state push task.
+      createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
+      // Create recording load task.
+      createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
+      // Recreate the agent state push tasks
+      createPushTask();
+      // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
+      // seconds)
+      createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
+      logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
+      // Create SchedulerImpl
+      Hashtable<String, String> schedulerProperties = new Hashtable<String, String>();
+      schedulerProperties.put("org.quartz.scheduler.instanceName", "scheduler_sched");
+      schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
+      schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
+      schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
+  
+      schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+      schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
+  
+      schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
+      try {
+        scheduler = new SchedulerImpl(schedulerProperties, configService, this);
+        if (client != null) {
+          scheduler.setTrustedClient(client);
+        }
+      } catch (ConfigurationException e) {
+        e.printStackTrace();
+      }
     }
   }
   

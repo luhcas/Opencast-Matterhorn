@@ -15,10 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.verify;
-
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ScheduledEvent;
@@ -205,7 +201,8 @@ public class SchedulerImplTest {
     offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
     // Start time #3, event will be too short
     times[6] = formatDate(d, offset);
-    offset += (1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS - 1 /* second */* CaptureParameters.MILLISECONDS);
+    offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS - 
+                1 /* second */* CaptureParameters.MILLISECONDS;
     // End time # 5
     times[7] = formatDate(d, offset);
     return times;

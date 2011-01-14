@@ -1006,10 +1006,11 @@ public class SchedulerImpl {
     }
 
     // Create job and trigger
-    JobDetail job = new JobDetail(SerializeJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE, SerializeJob.class);
+    JobDetail job = new JobDetail(SerializeJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE, 
+            SerializeJob.class);
 
-    // Setup the trigger. The serialization job will automatically refire if it fails, so we don't need to worry about
-    // it
+    /* Setup the trigger. The serialization job will automatically refire if it fails, 
+     so we don't need to worry about it */
     SimpleTrigger trigger = new SimpleTrigger(SerializeJob.TRIGGER_PREFIX + recordingID, JobParameters.SUPPORT_TYPE,
             new Date());
     trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);

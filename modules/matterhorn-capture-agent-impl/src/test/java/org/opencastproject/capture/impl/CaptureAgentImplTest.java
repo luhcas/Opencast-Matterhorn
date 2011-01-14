@@ -15,11 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-
-import static org.easymock.classextension.EasyMock.createMock;
-
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureParameters;
@@ -216,8 +211,8 @@ public class CaptureAgentImplTest {
     agent.activate(null);
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     agent.updated(loadProperties("config/scheduler.properties"));
-    agent.scheduler.setCaptureAgent(agent);
-    agent.scheduler.stopScheduler();
+    agent.getSchedulerImpl().setCaptureAgent(agent);
+    agent.getSchedulerImpl().stopScheduler();
     agent.createRecordingLoadTask(1);
     System.out.println("Waiting 5 seconds to make sure the scheduler has time to load...");
     waiter.sleepWait(new CheckState() {
@@ -295,7 +290,7 @@ public class CaptureAgentImplTest {
     agent.activate(null);
     agent.updated(loadProperties("config/scheduler.properties"));
     Assert.assertEquals(0, agent.getKnownRecordings().size());
-    agent.scheduler.stopScheduler();
+    agent.getSchedulerImpl().stopScheduler();
     agent.loadRecordingsFromDisk();
 
     Assert.assertEquals(10, agent.getKnownRecordings().size());
@@ -322,9 +317,31 @@ public class CaptureAgentImplTest {
     Properties p = setupConfigurationManagerProperties();
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return !agent.isRefreshed() && !agent.isUpdated();
+        } else {
+          return false;
+        }
+      }
+    });    
     Assert.assertFalse("The configuration manager is just created it shouldn't be updated yet.", agent.isRefreshed());
     Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
     agent.updated(properties);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return !agent.isRefreshed() && agent.isUpdated();
+        } else {
+          return false;
+        }
+      }
+    });    
     Assert.assertFalse("The config manager hasn't been updated so should not be refreshed.", agent.isRefreshed());
     Assert.assertTrue("The agent has been updated, so updated should be true.", agent.isUpdated());
     config.updated(p);
@@ -333,7 +350,7 @@ public class CaptureAgentImplTest {
       @Override
       public boolean check() {
         if (agent != null) {
-          return agent.isUpdated() && agent.isRefreshed() && (agent.scheduler != null);
+          return agent.isUpdated() && agent.isRefreshed() && (agent.getSchedulerImpl() != null);
         } else {
           return false;
         }
@@ -341,7 +358,7 @@ public class CaptureAgentImplTest {
     });
     Assert.assertTrue("The config manager is now updated so refreshed should be true.", agent.isRefreshed());
     Assert.assertTrue("The agent should still be updated.", agent.isUpdated());
-    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.getSchedulerImpl());
   }
 
   @Test
@@ -352,6 +369,17 @@ public class CaptureAgentImplTest {
     Properties p = setupConfigurationManagerProperties();
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return !agent.isRefreshed() && !agent.isUpdated();
+        } else {
+          return false;
+        }
+      }
+    });    
     Assert.assertFalse("The configuration manager is just created it shouldn't be updated yet.", agent.isRefreshed());
     Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
     config.updated(p);
@@ -360,7 +388,7 @@ public class CaptureAgentImplTest {
       @Override
       public boolean check() {
         if (agent != null) {
-          return agent.isRefreshed();
+          return agent.isRefreshed() && !agent.isUpdated();
         } else {
           return false;
         }
@@ -369,9 +397,20 @@ public class CaptureAgentImplTest {
     Assert.assertTrue("The config manager is now updated so refreshed should be true.", agent.isRefreshed());
     Assert.assertFalse("The agent should still not be updated.", agent.isUpdated());
     agent.updated(properties);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return agent.isRefreshed() && agent.isUpdated() && agent.getSchedulerImpl() != null;
+        } else {
+          return false;
+        }
+      }
+    });
     Assert.assertTrue("The config manager is now updated so refreshed should be true.", agent.isRefreshed());
     Assert.assertTrue("The agent should still be updated.", agent.isUpdated());
-    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.getSchedulerImpl());
   }
   
   @Test
@@ -381,6 +420,17 @@ public class CaptureAgentImplTest {
     config = new ConfigurationManager();
     Properties p = setupConfigurationManagerProperties();
     config.updated(p);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (config != null) {
+          return config.isInitialized();
+        } else {
+          return false;
+        }
+      }
+    });
     Assert.assertTrue(config.isInitialized());
     
     agent = new CaptureAgentImpl();
@@ -399,9 +449,20 @@ public class CaptureAgentImplTest {
     Assert.assertTrue("The configuration manager is fully up, so it should refresh the agent.", agent.isRefreshed());
     Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
     agent.updated(properties);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return agent.isRefreshed() && agent.isUpdated() && agent.getSchedulerImpl() != null;
+        } else {
+          return false;
+        }
+      }
+    });
     Assert.assertTrue("The config manager is still updated so refreshed should be true.", agent.isRefreshed());
     Assert.assertTrue("The agent should be updated.", agent.isUpdated());
-    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.getSchedulerImpl());
   }
   
   @Test
@@ -411,10 +472,32 @@ public class CaptureAgentImplTest {
     config = new ConfigurationManager();
     agent = new CaptureAgentImpl();
     agent.updated(properties);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (agent != null) {
+          return !agent.isRefreshed() && agent.isUpdated();
+        } else {
+          return false;
+        }
+      }
+    });
     Assert.assertFalse("The config manager should still be waiting for an update.", agent.isRefreshed());
     Assert.assertTrue("The agent should be updated.", agent.isUpdated());
     Properties p = setupConfigurationManagerProperties();
     config.updated(p);
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (config != null) {
+          return config.isInitialized();
+        } else {
+          return false;
+        }
+      }
+    });
     Assert.assertTrue(config.isInitialized());
     agent.setConfigService(config);
     waiter = new WaitForState();
@@ -422,7 +505,7 @@ public class CaptureAgentImplTest {
       @Override
       public boolean check() {
         if (agent != null) {
-          return agent.isRefreshed();
+          return agent.isRefreshed() && agent.isUpdated();
         } else {
           return false;
         }
@@ -430,7 +513,7 @@ public class CaptureAgentImplTest {
     });
     Assert.assertTrue("The config manager should be updated.", agent.isRefreshed());
     Assert.assertTrue("The agent should be updated.", agent.isUpdated());
-    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.scheduler);
+    Assert.assertNotNull("If the properties are set, a SchedulerImpl should be created.", agent.getSchedulerImpl());
   }
   
   private Properties setupConfigurationManagerProperties() throws IOException {

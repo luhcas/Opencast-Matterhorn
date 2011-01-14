@@ -138,8 +138,9 @@ public class StateRestService {
           "If the service is down or not working it will return a status 503, this means the the underlying service"
                   + " is not working and is either restarting or has failed",
           "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated."
-                  + " In other words, there is a bug! You should file an error report with your server logs from the time when"
-                  + " the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+                  + " In other words, there is a bug! You should file an error report with your server logs from the "
+                  + " time when the error occurred: " + 
+                  "<a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
   private String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("stateservice", "State Service", serviceUrl, notes);

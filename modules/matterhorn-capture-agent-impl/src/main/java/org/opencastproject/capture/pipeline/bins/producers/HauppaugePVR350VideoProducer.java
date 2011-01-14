@@ -113,7 +113,8 @@ public class HauppaugePVR350VideoProducer extends FileProducer {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(filesrc, captureDevice.getLocation());
     }
     if (!new File(captureDevice.getLocation()).canRead()) {
-      throw new IllegalArgumentException("HauppaugePVR350VideoProducer cannot read from " + captureDevice.getLocation());
+      throw new IllegalArgumentException("HauppaugePVR350VideoProducer cannot read from " 
+              + captureDevice.getLocation());
     }
     filesrc.set(GStreamerProperties.LOCATION, captureDevice.getLocation());
   }
