@@ -32,6 +32,7 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import junit.framework.Assert;
@@ -120,22 +121,20 @@ public class CountWorkflowsTest {
 
   @Test
   public void testHoldAndResume() throws Exception {
+    // Wait for all workflows to be in paused state
+    WorkflowStateListener listener = new WorkflowStateListener(WorkflowState.PAUSED);
+    service.addWorkflowListener(listener);
+
     Map<String, String> initialProps = new HashMap<String, String>();
     initialProps.put("testproperty", "foo");
-    WorkflowInstance workflow1 = service.start(def, mp, initialProps);
-    WorkflowInstance workflow2 = service.start(def, mp, initialProps);
-
-    // Wait for both workflows to be in paused state
-    boolean waitForEverybody = true;
-    while (waitForEverybody) {
-      System.out.println("Waiting for both workflows to enter paused state...");
-      try {
-        waitForEverybody = !service.getWorkflowById(workflow1.getId()).getState().equals(WorkflowState.PAUSED);
-        waitForEverybody |= !service.getWorkflowById(workflow2.getId()).getState().equals(WorkflowState.PAUSED);
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
+    WorkflowInstance workflow1 = null;
+    synchronized (listener) {
+      workflow1 = service.start(def, mp, initialProps);
+      listener.wait();
+      service.start(def, mp, initialProps);
+      listener.wait();
     }
+    service.removeWorkflowListener(listener);
 
     // Test for two paused workflows in "op1"
     assertEquals(2, service.countWorkflowInstances());
@@ -146,16 +145,14 @@ public class CountWorkflowsTest {
     assertEquals(0, service.countWorkflowInstances(null, "op2"));
     assertEquals(0, service.countWorkflowInstances(WorkflowState.SUCCEEDED, "op1"));
 
-    // Continue one of the two worfkows
-    service.resume(workflow1.getId());
-    while (!service.getWorkflowById(workflow1.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-      System.out.println("Waiting for workflow 1 to finish...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-        // Nothing to be done here
-      }
+    // Continue one of the two workflows, waiting for success
+    listener = new WorkflowStateListener(WorkflowState.SUCCEEDED);
+    service.addWorkflowListener(listener);
+    synchronized (listener) {
+      service.resume(workflow1.getId());
+      listener.wait();
     }
+    service.removeWorkflowListener(listener);
 
     // Make sure one workflow is still on hold, the other is finished.
     assertEquals(2, service.countWorkflowInstances());

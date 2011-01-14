@@ -24,6 +24,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -112,29 +113,23 @@ public class HoldStateTest {
   @After
   public void teardown() throws Exception {
     System.out.println("All tests finished... tearing down...");
-    if (workflow != null) {
-      while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-        System.out.println("Waiting for workflow to complete, current state is "
-                + service.getWorkflowById(workflow.getId()).getState());
-        Thread.sleep(500);
-      }
-    }
     dao.deactivate();
     service.deactivate();
   }
 
   @Test
   public void testHoldAndResume() throws Exception {
+    // Add a listener for paused workflow instances
+    WorkflowStateListener pauseListener = new WorkflowStateListener(WorkflowState.PAUSED);
+    service.addWorkflowListener(pauseListener);
+
     Map<String, String> initialProps = new HashMap<String, String>();
     initialProps.put("testproperty", "foo");
-    workflow = service.start(def, mp, initialProps);
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
-      System.out.println("Waiting for workflow to enter paused state...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
+    synchronized (pauseListener) {
+      workflow = service.start(def, mp, initialProps);
+      pauseListener.wait();
     }
+    service.removeWorkflowListener(pauseListener);
 
     // The variable "testproperty" should have been replaced by "foo", but not "anotherproperty"
     String xml = WorkflowParser.toXml(workflow);
@@ -145,7 +140,14 @@ public class HoldStateTest {
     // workflow
     Map<String, String> resumeProps = new HashMap<String, String>();
     resumeProps.put("anotherproperty", "bar");
-    service.resume(workflow.getId(), resumeProps);
+
+    WorkflowStateListener runningListener = new WorkflowStateListener(WorkflowState.RUNNING);
+    service.addWorkflowListener(runningListener);
+    synchronized (runningListener) {
+      service.resume(workflow.getId(), resumeProps);
+      runningListener.wait();
+    }
+    service.removeWorkflowListener(runningListener);
 
     WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
     String xmlFromDb = WorkflowParser.toXml(fromDb);
@@ -156,42 +158,39 @@ public class HoldStateTest {
 
   @Test
   public void testMultipleHolds() throws Exception {
-    workflow = service.start(def, mp);
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
-      System.out.println("Waiting for workflow to enter paused state...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
+    WorkflowStateListener pauseListener = new WorkflowStateListener(WorkflowState.PAUSED);
+    service.addWorkflowListener(pauseListener);
+    synchronized (pauseListener) {
+      workflow = service.start(def, mp);
+      pauseListener.wait();
     }
 
     // Simulate a user resuming the workflow, but the handler still keeps the workflow in a hold state
     holdingOperationHandler.setResumeAction(Action.PAUSE);
-    service.resume(workflow.getId());
 
-    // The workflow is running again, but should very quickly reenter the paused state
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
-      System.out.println("Waiting for workflow to reenter paused state...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
+    // Resume the workflow again.  It should quickly reenter the paused state
+    synchronized (pauseListener) {
+      service.resume(workflow.getId());
+      pauseListener.wait();
     }
+
+    // remove the pause listener
+    service.removeWorkflowListener(pauseListener);
 
     WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
     Assert.assertEquals(WorkflowState.PAUSED, fromDb.getState());
 
     // Resume the workflow again, and this time continue with the workflow
     holdingOperationHandler.setResumeAction(Action.CONTINUE);
-    service.resume(workflow.getId());
-
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-      System.out.println("Waiting for workflow to finish...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
+    
+    WorkflowStateListener succeedListener = new WorkflowStateListener(WorkflowState.SUCCEEDED);
+    service.addWorkflowListener(succeedListener);
+    synchronized(succeedListener) {
+      service.resume(workflow.getId());
+      succeedListener.wait();
     }
+    service.removeWorkflowListener(succeedListener);
+    
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
   }
 

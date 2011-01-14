@@ -27,6 +27,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
@@ -189,14 +190,16 @@ public class WorkflowOperationSkippingTest {
 
   protected WorkflowInstance startAndWait(WorkflowDefinition definition, MediaPackage mp,
           Map<String, String> properties, WorkflowState stateToWaitFor) throws Exception {
-    WorkflowInstance instance = service.start(definition, mp, properties);
-    while (!service.getWorkflowById(instance.getId()).getState().equals(stateToWaitFor)) {
-      System.out.println("Waiting for workflow to complete...");
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
+
+    WorkflowStateListener stateListener = new WorkflowStateListener(stateToWaitFor);
+    service.addWorkflowListener(stateListener);
+    WorkflowInstance instance = null;
+    synchronized (stateListener) {
+      instance = service.start(definition, mp, properties);
+      stateListener.wait();
     }
+    service.removeWorkflowListener(stateListener);
+
     return instance;
   }
 

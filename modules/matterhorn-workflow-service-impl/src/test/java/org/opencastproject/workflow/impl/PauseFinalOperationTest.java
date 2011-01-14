@@ -23,6 +23,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
@@ -115,16 +116,15 @@ public class PauseFinalOperationTest {
 
   @Test
   public void testHoldAndResume() throws Exception {
-    // Start a new workflow
-    workflow = service.start(def, mp, null);
-
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
-      System.out.println("Waiting for workflows to enter the hold state...");
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
+    // Start a new workflow, and wait for it to pause
+    WorkflowStateListener pauseListener = new WorkflowStateListener(WorkflowState.PAUSED);
+    service.addWorkflowListener(pauseListener);
+    synchronized (pauseListener) {
+      workflow = service.start(def, mp, null);
+      pauseListener.wait();
     }
+    service.removeWorkflowListener(pauseListener);
+
     // Ensure that "start" was called on the first operation handler, but not resume
     Assert.assertTrue(handler.isStarted());
     Assert.assertTrue(!handler.isResumed());
@@ -133,15 +133,13 @@ public class PauseFinalOperationTest {
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
 
     // Resume the workflow
-    service.resume(workflow.getId());
-
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-      System.out.println("Waiting for workflows to complete...");
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
+    WorkflowStateListener succeedListener = new WorkflowStateListener(WorkflowState.SUCCEEDED);
+    service.addWorkflowListener(succeedListener);
+    synchronized (succeedListener) {
+      service.resume(workflow.getId());
+      succeedListener.wait();
     }
+    service.removeWorkflowListener(succeedListener);
 
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
   }

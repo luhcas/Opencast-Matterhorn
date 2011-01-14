@@ -25,6 +25,7 @@ import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -129,17 +130,16 @@ public class PauseWorkflowTest {
   @Test
   public void testHoldAndResume() throws Exception {
     // Start a new workflow
-    workflow = service.start(def, mp, null);
-
-    // Immediately pause the workflow
-    service.suspend(workflow.getId());
-
-    // Wait for the workflows to complete (should happen in roughly 1 second)
-    try {
-      Thread.sleep(2000);
-    } catch (InterruptedException e) {
+    WorkflowStateListener pauseListener = new WorkflowStateListener(WorkflowState.PAUSED);
+    service.addWorkflowListener(pauseListener);
+    synchronized (pauseListener) {
+      workflow = service.start(def, mp, null);
+      // Immediately pause the workflow
+      service.suspend(workflow.getId());
+      pauseListener.wait();
     }
-
+    service.removeWorkflowListener(pauseListener);
+    
     // Ensure that the first operation handler was called, but not the second
     Assert.assertTrue(firstHandler.called);
     Assert.assertTrue(!secondHandler.called);
