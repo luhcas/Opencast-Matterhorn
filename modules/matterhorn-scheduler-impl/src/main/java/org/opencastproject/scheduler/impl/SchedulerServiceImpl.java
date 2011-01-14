@@ -602,6 +602,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     mediapackage.setLicense(event.getLicense());
     mediapackage.setSeries(event.getSeriesId());
     mediapackage.setSeriesTitle(event.getSeries());
+    mediapackage.setDate(event.getStartDate());
     //mediapackage supports multiple creators, interface does not. replace them all with this one
     //We really should handle this better
     for(String creator : mediapackage.getCreators()){

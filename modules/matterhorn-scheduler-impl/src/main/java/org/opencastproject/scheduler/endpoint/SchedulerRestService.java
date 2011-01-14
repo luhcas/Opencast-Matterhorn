@@ -291,6 +291,7 @@ public class SchedulerRestService {
   public Response updateEvent(@PathParam("eventId") String eventId, @FormParam("event") EventImpl event) {
     if (!eventId.isEmpty() && event != null) {
       try {
+        event.setEventId(Long.parseLong(eventId));
         service.updateEvent(event);
         return Response.noContent().type("").build(); // remove content-type, no message-body.
       } catch (NotFoundException e) {

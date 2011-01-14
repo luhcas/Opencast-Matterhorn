@@ -197,9 +197,6 @@ public class EventImpl implements Event {
    * @return Event duration
    */
   public Long getDuration() {
-    if (duration == 0 && endDate != null && startDate != null) {
-      duration = endDate.getTime() - startDate.getTime();
-    }
     return duration;
   }
 
@@ -514,7 +511,7 @@ public class EventImpl implements Event {
     if (e.getDevice() != null) {
       this.setDevice(e.getDevice());
     }
-    if (e.getDuration() != null) {
+    if (e.getDuration() != null && e.getDuration() > 0) {
       this.setDuration(e.getDuration());
     }
     if (e.getEndDate() != null) {
@@ -537,6 +534,9 @@ public class EventImpl implements Event {
     }
     if(StringUtils.isNotEmpty(e.getSeries()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getSeries()))) {
       this.setSeries(e.getSeries());
+    }
+    if(e.getSeriesId() != null) {
+      this.setSeriesId(e.getSeriesId());
     }
     if (e.getStartDate() != null) {
       this.setStartDate(e.getStartDate());

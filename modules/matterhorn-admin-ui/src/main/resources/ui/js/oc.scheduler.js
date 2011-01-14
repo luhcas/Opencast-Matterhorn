@@ -79,6 +79,7 @@ ocScheduler.init = function(){
     document.title = i18n.window.edit + " " + i18n.window.prefix;
     $('#i18n_page_title').text(i18n.page.title.edit);
     $('#eventId').val(eventId);
+    ocScheduler.components.eventId = new ocAdmin.Component('eventId');
     $('#recordingType').hide();
     $('#agent').change(
       function() {
@@ -120,20 +121,6 @@ ocScheduler.RegisterEventHandlers = function(){
       $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
       $(this).next().toggle();
       return false;
-    });
-  
-  $('.icon-help').click(
-    function(event) {
-      popupHelp.displayHelp($(this), event);
-      return false;
-    });
-  
-  $('body').click(
-    function() {
-      if ($('#helpbox').css('display') != 'none') {
-        popupHelp.resetHelp();
-      }
-      return true;
     });
   
   $('#seriesSelect').autocomplete({
@@ -222,7 +209,7 @@ ocScheduler.ChangeRecordingType = function(recType){
     ocScheduler.inputList = '#inputList';
     $(ocScheduler.inputList).empty();
     $('#seriesRequired').remove(); //Remove series required indicator.
-    ocScheduler.components.timeStart.setValue(d.getTime().toString());
+    ocScheduler.components.startDate.setValue(d.getTime().toString());
     ocScheduler.FormManager.rootElm = SINGLE_EVENT_ROOT_ELM;
   }else{
     // Multiple recordings have some differnt fields and different behaviors
@@ -247,7 +234,7 @@ ocScheduler.SubmitForm = function(){
   eventXML = ocScheduler.FormManager.serialize();
   if(eventXML){
     if(ocUtils.getURLParam('edit')){
-      $.post({type: "POST",
+      $.ajax({type: "POST",
               url: SCHEDULER_URL + '/' + $('#eventId').val(),
               dataType: 'text',
               data: {event: eventXML},
@@ -320,13 +307,13 @@ ocScheduler.HandleAgentChange = function(elm){
     // no valid agent, change time to local form what ever it was before.
     ocScheduler.additionalMetadataComponents.agentTimeZone.setValue(''); //Being empty will end up defaulting to the server's Timezone.
     if(ocScheduler.type === SINGLE_EVENT){
-      time = ocScheduler.components.timeStart.getValue();
+      time = ocScheduler.components.startDate.getValue();
     }else if(ocScheduler.type === MULTIPLE_EVENTS){
       time = ocScheduler.components.recurrenceStart.getValue();
     }
     Agent.tzDiff = 0;
     if(ocScheduler.type === SINGLE_EVENT){
-      ocScheduler.components.timeStart.setValue(time);
+      ocScheduler.components.startDate.setValue(time);
     }else if(ocScheduler.type === MULTIPLE_EVENTS){
       ocScheduler.components.recurrenceStart.setValue(time);
     }
@@ -376,8 +363,8 @@ ocScheduler.HandleAgentTZ = function(tz){
     //update time picker to agent time
     Agent.tzDiff = tz - localTZ;
     if(ocScheduler.type == SINGLE_EVENT){
-      agentLocalTime = ocScheduler.components.timeStart.getValue() + (Agent.tzDiff * 60 * 1000);
-      ocScheduler.components.timeStart.setValue(agentLocalTime);
+      agentLocalTime = ocScheduler.components.startDate.getValue() + (Agent.tzDiff * 60 * 1000);
+      ocScheduler.components.startDate.setValue(agentLocalTime);
     }else if(ocScheduler.type == MULTIPLE_EVENTS){
       agentLocalTime = ocScheduler.components.recurrenceStart.getValue() + (Agent.tzDiff * 60 * 1000);
       ocScheduler.components.recurrenceStart.setValue(agentLocalTime);
@@ -426,7 +413,7 @@ ocScheduler.HandleAgentList = function(data) {
   if(eventId && ocUtils.getURLParam('edit')) {
     $.ajax({
       type: "GET",
-      url: SCHEDULER_URL + '/' + eventId + '.xml',
+      url: SCHEDULER_URL + '/' + eventId + '.json',
       success: ocScheduler.LoadEvent,
       cache: false
     });
@@ -434,37 +421,38 @@ ocScheduler.HandleAgentList = function(data) {
 };
 
 ocScheduler.LoadEvent = function(doc){
-  var metadata = {};
+  var event = doc.event;
   var workflowProperties = {};
-  $.each($('metadataList > metadata',doc), function(i,v){
-    if($('key', v).text().indexOf('org.opencastproject.workflow') > -1){
-      workflowProperties[$('key', v).text()] = $('value', v).text();
-    }else{
-      metadata[$('key', v).text()] = $('value', v).text();
-    }
-  });
-  $.each($('completeMetadata > metadata',doc), function(i,v){
-    if(metadata[$('key', v).text()] == undefined){
-      //feild not in list, add it.
-      if($('key', v).text().indexOf('org.opencastproject.workflow') > -1){
-        workflowProperties[$('key', v).text()] = $('value', v).text();
-      }else{
-        metadata[$('key', v).text()] = $('value', v).text();
+  var additionalMetadata;
+  if(typeof event.additionalMetadata.metadata != 'undefined') {
+   additionalMetadata = event.additionalMetadata.metadata;
+    for(var i in additionalMetadata){
+      item = additionalMetadata[i];
+      if(item.key.indexOf('org.opencastproject.workflow') > -1){
+        workflowProperties[item.key] = item.value
+      }else{ //flatten additional metadata into event
+        event[item.key] = item.value
       }
     }
-  });
-  if(metadata['resources']){
+  }
+  if(event['resources']){
     //store the selected inputs for use when getting the capabilities.
-    ocScheduler.selectedInputs = metadata['resources'];
+    ocScheduler.selectedInputs = event['resources'];
   }
-  if(metadata['seriesId']){
-    $.get(SERIES_URL + '/search?term=' + metadata['seriesId'], function(data){
-      ocScheduler.components.seriesId.setValue(data[0]);
+  if(event['seriesId']){
+    $.get(SERIES_URL + '/' + event['seriesId'] + '.json', function(data){
+      var series = {id: data.series.id};
+      if(data.series.additionalMetadata){
+        md = data.series.additionalMetadata;
+        for(var i in md){
+          if(typeof md[i].key != 'undefined' && md[i].key === 'title') {
+            series.label = md[i].value;
+          }
+        }
+      }
+      ocScheduler.components.seriesId.setValue(series);
     });
-  }
-  if(metadata['recurrenceId'] && metadata['recurrencePosition']){
-    ocScheduler.components.recurrenceId = new ocAdmin.Component(['recurrenceId']);
-    ocScheduler.components.recurrencePosition = new ocAdmin.Component(['recurrencePosition']);
+    delete event.seriesId;
   }
   if(workflowProperties['org.opencastproject.workflow.definition']){
     ocScheduler.additionalMetadataComponents.workflowDefinition.setValue(workflowProperties['org.opencastproject.workflow.definition']);
@@ -479,7 +467,7 @@ ocScheduler.LoadEvent = function(doc){
         }
       });
   }
-  ocScheduler.FormManager.populate(metadata)
+  ocScheduler.FormManager.populate(event)
   $('#agent').change(); //update the selected agent's capabilities
 }
 
@@ -504,10 +492,10 @@ ocScheduler.CheckForConflictingEvents = function(){
     return false;
   }
   if(ocScheduler.type === SINGLE_EVENT){
-    if(ocScheduler.components.timeStart.validate() && ocScheduler.components.timeDuration.validate()){
+    if(ocScheduler.components.startDate.validate() && ocScheduler.components.duration.validate()){
       event = '<event><metadataList>' + event;
-      event += '<metadata><key>timeStart</key><value>' + ocScheduler.components.timeStart.getValue() + '</value></metadata>';
-      event += '<metadata><key>timeEnd</key><value>' + ocScheduler.components.timeDuration.getValue() + '</value></metadata></metadataList></event>';
+      event += '<metadata><key>timeStart</key><value>' + ocScheduler.components.startDate.getValue() + '</value></metadata>';
+      event += '<metadata><key>timeEnd</key><value>' + ocScheduler.components.duration.getValue() + '</value></metadata></metadataList></event>';
       endpoint = '/event/conflict.xml';
       data = {event: event};
     }else{
@@ -968,7 +956,7 @@ ocScheduler.RegisterComponents = function(){
           return container;
         }
       });
-    ocScheduler.components.timeStart = new ocAdmin.Component(['startDate', 'startTimeHour', 'startTimeMin'],
+    ocScheduler.components.startDate = new ocAdmin.Component(['startDate', 'startTimeHour', 'startTimeMin'],
       { label: 'startDateLabel', errorField: 'missingStartDate', required: true, nodeKey: 'startDate' },
       { getValue: function(){
           var date = 0;
@@ -1018,19 +1006,19 @@ ocScheduler.RegisterComponents = function(){
         }
       });
 
-    ocScheduler.components.timeDuration = new ocAdmin.Component(['durationHour', 'durationMin'],
-      { label: 'durationLabel', errorField: 'missingDuration', required: true, nodeKey: 'endDate' },
+    ocScheduler.components.duration = new ocAdmin.Component(['durationHour', 'durationMin'],
+      { label: 'durationLabel', errorField: 'missingDuration', required: true },
       { getValue: function(){
           if(this.validate()){
             duration = this.fields.durationHour.val() * 3600; // seconds per hour
             duration += this.fields.durationMin.val() * 60; // seconds per min
-            this.value = ocScheduler.components.timeStart.getValue() + (duration * 1000);
+            this.value = duration * 1000;
           }
           return this.value;
         },
         setValue: function(value){
           var val, hour, min;
-          if(typeof value === 'string'){
+          if(typeof value == 'string' || typeof value == 'number'){
             value = { duration: value };
           }
           val = parseInt(value.duration);
@@ -1050,6 +1038,22 @@ ocScheduler.RegisterComponents = function(){
             return true;
           }
           return false;
+        },
+        toNode: function(parent){
+          var duration, endDate, doc;
+          if(parent){
+            doc = parent.ownerDocument;
+          }else{
+            doc = document;
+          }
+          duration = doc.createElement('duration');
+          duration.appendChild(doc.createTextNode(this.getValue()));
+          parent.appendChild(duration);
+          if(typeof ocScheduler.components.startDate != 'undefined' && ocScheduler.components.startDate.getValue() != null) {
+            endDate = doc.createElement('endDate');
+            endDate.appendChild(doc.createTextNode(ocScheduler.components.startDate.getValue() + this.getValue()));
+            parent.appendChild(endDate);
+          }
         },
         asString: function(){
           var dur = this.getValue() / 1000;

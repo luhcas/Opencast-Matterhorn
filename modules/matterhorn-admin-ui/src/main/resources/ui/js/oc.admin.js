@@ -211,7 +211,7 @@ $.extend(ocAdmin.Component.prototype, {
         switch(this.fields[el][0].type){
           case 'checkbox':
           case 'radio':
-            if(val == 'true'){
+            if(val === 'true' || val === true){
               this.fields[el][0].checked = true;
             }
             break;
@@ -240,6 +240,9 @@ $.extend(ocAdmin.Component.prototype, {
    */
   toNode: function(parent, isAdditionalMetadata){
     var doc, container, value, key, keyName;
+    if(typeof isAdditionalMetadata == 'undefined') {
+      isAdditionalMetadata = false;
+    }
     for(var el in this.fields){
       if(parent){
         doc = parent.ownerDocument;
