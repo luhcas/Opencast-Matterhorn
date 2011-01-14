@@ -114,7 +114,8 @@
 				  updateComplete="{ onResize() }"
 				  visible="{ model.coverURLOne != '' ? true : false }"
 				  includeInLayout="{ model.coverURLOne != '' ? true : false }"
-				  horizontalAlign="right"/>
+				  horizontalAlign="right"
+				  verticalAlign="bottom"/>
 
 		<mx:Image id="img_coverTwo"
 				  width="100%"
@@ -125,6 +126,7 @@
 				  updateComplete="{ onResize() }"
 				  visible="{ model.coverURLTwo != '' ? true : false }"
 				  includeInLayout="{ model.coverURLTwo != '' ? true : false }"
-				  horizontalAlign="left"/>
+				  horizontalAlign="left"
+				  verticalAlign="bottom"/>
 	</mx:HBox>
 </mx:Canvas>

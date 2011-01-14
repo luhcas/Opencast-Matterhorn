@@ -31,6 +31,7 @@ package org.opencast.engage.videodisplay.business
 	import org.opencast.engage.videodisplay.state.VideoSizeState;
 	import org.osmf.layout.ScaleMode;
 	import org.swizframework.Swiz;
+	import mx.controls.Alert;
 
 	public class FlexAjaxBridge
 	{

@@ -51,7 +51,7 @@
 			import org.opencast.engage.videodisplay.business.VideodisplayBean;
 			import org.swizframework.Swiz;
 			import flash.display.StageDisplayState;
-			import mx.controls.Alert;
+
 
 			[Autowire]
 			[Bindable]

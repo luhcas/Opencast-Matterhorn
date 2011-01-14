@@ -91,7 +91,7 @@ package org.opencast.engage.videodisplay.control
 
 		/**
 		 * loadDFXP.XML
-		 * Create new LoadDFXPXMLResponder and new HTTPService, send the serveice to the AsyncToken.
+		 * Create new LoadDFXPXMLResponder and new HTTPService, send the service to the AsyncToken.
 		 * @eventType LoadDFXPXMLEvent event
 		 * */
 		public function loadDFXPXML(event:LoadDFXPXMLEvent):void
