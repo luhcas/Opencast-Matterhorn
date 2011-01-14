@@ -98,6 +98,9 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /** The key in solr documents representing the workflow's current operation */
   protected static final String OPERATION_KEY = "operation";
 
+  /** The <code>OPERATION_KEY</code> value used when a workflow has no current operation */
+  protected static final String NO_OPERATION_KEY = "none";
+
   /** The key in solr documents representing the workflow definition id */
   protected static final String WORKFLOW_DEFINITION_KEY = "templateid";
 
@@ -320,9 +323,14 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     String xml = WorkflowParser.toXml(instance);
     doc.addField(XML_KEY, xml);
 
+    // index the current operation if there is one. If the workflow is finished, there is no current operation, so use a
+    // constant
     WorkflowOperationInstance op = instance.getCurrentOperation();
-    if (op != null)
+    if (op == null) {
+      doc.addField(OPERATION_KEY, NO_OPERATION_KEY);
+    } else {
       doc.addField(OPERATION_KEY, op.getId());
+    }
 
     MediaPackage mp = instance.getMediaPackage();
     doc.addField(MEDIAPACKAGE_KEY, mp.getIdentifier().toString());
