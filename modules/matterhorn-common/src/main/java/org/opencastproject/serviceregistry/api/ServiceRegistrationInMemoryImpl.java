@@ -15,6 +15,7 @@
  */
 package org.opencastproject.serviceregistry.api;
 
+import org.opencastproject.job.api.JobProducer;
 
 /**
  * Simple implementation of a service registration.
@@ -29,6 +30,9 @@ public class ServiceRegistrationInMemoryImpl implements ServiceRegistration {
 
   /** Path to the service */
   protected String path = null;
+
+  /** The service instance */
+  protected JobProducer service = null;
 
   /** True if this service produces jobs */
   protected boolean isJobProducer = true;
@@ -56,6 +60,18 @@ public class ServiceRegistrationInMemoryImpl implements ServiceRegistration {
     this.host = host;
     this.path = path;
     this.isJobProducer = jobProducer;
+  }
+
+  /**
+   * Creates a new service registration. The service is initially online and not in maintenance mode.
+   * 
+   * @param service
+   *          the local service instance
+   */
+  public ServiceRegistrationInMemoryImpl(JobProducer service) {
+    this.service = service;
+    this.serviceType = service.getJobType();
+    this.isJobProducer = true;
   }
 
   /**
@@ -126,6 +142,15 @@ public class ServiceRegistrationInMemoryImpl implements ServiceRegistration {
    */
   public void setMaintenance(boolean maintenance) {
     this.isInMaintenanceMode = maintenance;
+  }
+
+  /**
+   * Returns the actual service instance.
+   * 
+   * @return the service
+   */
+  public JobProducer getService() {
+    return service;
   }
 
 }

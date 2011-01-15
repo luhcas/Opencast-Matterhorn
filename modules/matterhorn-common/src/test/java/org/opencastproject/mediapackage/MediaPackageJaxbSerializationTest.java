@@ -15,18 +15,6 @@
  */
 package org.opencastproject.mediapackage;
 
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilder;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageImpl;
-import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.mediapackage.track.TrackImpl;
@@ -95,7 +83,7 @@ public class MediaPackageJaxbSerializationTest {
     mp.add(track);
 
     // Serialize the media package
-    String xml = mp.toXml();
+    String xml = MediaPackageParser.getAsXml(mp);
     Assert.assertNotNull(xml);
 
     // Deserialize the media package
@@ -123,7 +111,7 @@ public class MediaPackageJaxbSerializationTest {
 
     String elementXml = "<track id=\"track-1\" type=\"presentation/source\"><mimetype>video/mpeg</mimetype>"
             + "<url>http://localhost:8080/workflow/samples/screen.mpg</url></track>";
-    MediaPackageElement element = AbstractMediaPackageElement.getFromXml(elementXml);
+    MediaPackageElement element = MediaPackageElementParser.getFromXml(elementXml);
     Assert.assertEquals("track-1", element.getIdentifier());
     Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, element.getFlavor());
     Assert.assertEquals("http://localhost:8080/workflow/samples/screen.mpg", element.getURI().toString());
@@ -154,7 +142,7 @@ public class MediaPackageJaxbSerializationTest {
     MediaPackage original = builder.createNew();
     original.setTitle(title);
     original.setSeriesTitle("s1");
-    String xml = original.toXml();
+    String xml = MediaPackageParser.getAsXml(original);
     Assert.assertTrue(xml.indexOf(title) > 0);
     MediaPackage unmarshalled = builder.loadFromXml(xml);
     Assert.assertEquals(title, unmarshalled.getTitle());

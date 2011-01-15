@@ -20,10 +20,10 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
@@ -197,7 +197,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
         throw new WorkflowOperationException("Encoding failed");
       }
       
-      Track composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
+      Track composedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
 
       // add this receipt's queue time to the total
       long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();

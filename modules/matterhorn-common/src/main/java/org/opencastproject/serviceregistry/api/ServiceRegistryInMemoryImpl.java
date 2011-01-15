@@ -18,6 +18,7 @@ package org.opencastproject.serviceregistry.api;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobImpl;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
@@ -28,24 +29,58 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Simple and in-memory implementation of a the service registry.
- * 
+ * Simple and in-memory implementation of a the service registry intended for testing scenarios.
  */
 public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
 
   /** Logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryInMemoryImpl.class);
+  static final Logger logger = LoggerFactory.getLogger(ServiceRegistryInMemoryImpl.class);
+
+  /** Default dispatcher timeout (1 second) */
+  static final long DEFAULT_DISPATCHER_TIMEOUT = 1000;
+
+  /** Hostname for localhost */
+  private static final String LOCALHOST = "localhost";
   
   /** The hosts */
   protected Map<String, Long> hosts = new HashMap<String, Long>();
 
   /** The service registrations */
   protected Map<String, List<ServiceRegistrationInMemoryImpl>> services = new HashMap<String, List<ServiceRegistrationInMemoryImpl>>();
-  
+
   /** The jobs */
-  protected List<Job> jobs = new ArrayList<Job>();
+  protected List<Job> jobs = new CopyOnWriteArrayList<Job>();
+
+  /** The job dispatching thread */
+  protected JobDispatcher jobDispatcher = null;
+
+  public ServiceRegistryInMemoryImpl(JobProducer service) throws ServiceRegistryException {
+    if (service != null)
+      registerService(service);
+    jobDispatcher = new JobDispatcher();
+    jobDispatcher.setTimeout(DEFAULT_DISPATCHER_TIMEOUT);
+    jobDispatcher.start();
+  }
+  
+  /**
+   * Creates a new service registry in memory.
+   */
+  public ServiceRegistryInMemoryImpl() {
+    jobDispatcher = new JobDispatcher();
+    jobDispatcher.setTimeout(DEFAULT_DISPATCHER_TIMEOUT);
+    jobDispatcher.start();
+  }
+
+  /**
+   * This method shuts down the service registry.
+   */
+  public void dispose() {
+    jobDispatcher.stopRunning();
+    jobDispatcher.interrupt();
+  }
 
   /**
    * {@inheritDoc}
@@ -69,6 +104,30 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   }
 
   /**
+   * Method to register locally running services.
+   * 
+   * @param localService
+   *          the service instance
+   * @param serviceType
+   *          the service type
+   * @return the service registration
+   * @throws ServiceRegistryException
+   */
+  public ServiceRegistration registerService(JobProducer localService)
+          throws ServiceRegistryException {
+
+    List<ServiceRegistrationInMemoryImpl> servicesOnHost = services.get(LOCALHOST);
+    if (servicesOnHost == null) {
+      servicesOnHost = new ArrayList<ServiceRegistrationInMemoryImpl>();
+      services.put(LOCALHOST, servicesOnHost);
+    }
+
+    ServiceRegistrationInMemoryImpl registration = new ServiceRegistrationInMemoryImpl(localService);
+    servicesOnHost.add(registration);
+    return registration;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#registerService(java.lang.String, java.lang.String,
@@ -89,14 +148,15 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   @Override
   public ServiceRegistration registerService(String serviceType, String host, String path, boolean jobProducer)
           throws ServiceRegistryException {
-    
+
     List<ServiceRegistrationInMemoryImpl> servicesOnHost = services.get(host);
     if (servicesOnHost == null) {
       servicesOnHost = new ArrayList<ServiceRegistrationInMemoryImpl>();
       services.put(host, servicesOnHost);
     }
 
-    ServiceRegistrationInMemoryImpl registration = new ServiceRegistrationInMemoryImpl(serviceType, host, path, jobProducer);
+    ServiceRegistrationInMemoryImpl registration = new ServiceRegistrationInMemoryImpl(serviceType, host, path,
+            jobProducer);
     servicesOnHost.add(registration);
     return registration;
   }
@@ -144,31 +204,71 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   @Override
   public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
           ServiceRegistryException {
-    return createJob(type, operation, arguments, false);
+    return createJob(type, operation, arguments, null, false);
   }
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
-   *      java.util.List, boolean)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, java.lang.String)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments, boolean start)
+  public Job createJob(String type, String operation, List<String> arguments, String payload)
+          throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(type, operation, arguments, payload, false);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List, String, boolean)
+   */
+  @Override
+  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean start)
           throws ServiceUnavailableException, ServiceRegistryException {
     if (getServiceRegistrationsByType(type).size() == 0)
-     logger.warn("Service " + type + " not available");
-    
+      logger.warn("Service " + type + " not available");
+
     JobImpl job = new JobImpl(System.currentTimeMillis());
     job.setJobType(type);
-    job.setOperationType(operation);
+    job.setOperation(operation);
     job.setArguments(arguments);
+    job.setPayload(payload);
     if (start)
       job.setStatus(Status.RUNNING);
-    
+
     jobs.add(job);
+    jobDispatcher.interrupt();
 
     return job;
+  }
+
+  /**
+   * Dispatches the job to the least loaded service or throws a <code>ServiceUnavailableException</code> if there is no
+   * such service.
+   * 
+   * @param job
+   *          the job to dispatch
+   * @throws ServiceUnavailableException
+   *           if no service is available to dispatch the job
+   * @throws ServiceRegistryException
+   *           if the service registrations are unavailable or dispatching of the job fails
+   */
+  protected void dispatchJob(Job job) throws ServiceUnavailableException, ServiceRegistryException {
+    List<ServiceRegistration> registrations = getServiceRegistrationsByLoad(job.getJobType());
+    if (registrations.size() == 0)
+      throw new ServiceUnavailableException("No service is available to handle jobs of type '" + job.getJobType() + "'");
+    for (ServiceRegistration registration : registrations) {
+      if (registration.isJobProducer()) {
+        ServiceRegistrationInMemoryImpl inMemoryRegistration = (ServiceRegistrationInMemoryImpl) registration;
+        JobProducer service = inMemoryRegistration.getService();
+        service.startJob(job, job.getOperation(), job.getArguments());
+        break;
+      } else {
+        logger.warn("This implementation of the service registry doesn't support dispatching to remote services");
+        // TODO: Add remote dispatching
+      }
+    }
   }
 
   /**
@@ -307,7 +407,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
     int count = 0;
     for (Job job : jobs) {
       if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
-        count ++;
+        count++;
     }
     return count;
   }
@@ -323,7 +423,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
     int count = 0;
     for (Job job : jobs) {
       if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
-        count ++;
+        count++;
     }
     return count;
   }
@@ -336,6 +436,105 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   @Override
   public SystemLoad getLoad() throws ServiceRegistryException {
     throw new IllegalStateException("Not yet implemented");
+  }
+
+  /**
+   * This dispatcher implementation will wake from time to time and check for new jobs. If new jobs are found, it will
+   * dispatch them to the services as appropriate.
+   */
+  class JobDispatcher extends Thread {
+
+    /** Running flag */
+    private boolean keepRunning = true;
+
+    /** Dispatcher timeout */
+    private long timeout = ServiceRegistryInMemoryImpl.DEFAULT_DISPATCHER_TIMEOUT;
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Thread#run()
+     */
+    @Override
+    public void run() {
+      while (keepRunning) {
+        try {
+
+          // Go through the jobs and find those that have not yet been dispatched
+          for (Job job : jobs) {
+            if (Status.QUEUED.equals(job.getStatus())) {
+              job.setStatus(Status.RUNNING);
+              JobWorker worker = new JobWorker(job);
+              worker.start();
+            }
+          }
+
+          Thread.sleep(timeout);
+        } catch (InterruptedException e) {
+          ServiceRegistryInMemoryImpl.logger.debug("Job dispatcher thread activated");
+        }
+      }
+    }
+
+    /**
+     * Tells the dispatcher thread to stop running.
+     */
+    public void stopRunning() {
+      keepRunning = false;
+      interrupt();
+    }
+
+    /**
+     * Sets the dispatcher timeout in miliseconds.
+     * 
+     * @param timeout
+     *          the timeout
+     */
+    public void setTimeout(long timeout) {
+      this.timeout = timeout;
+      interrupt();
+    }
+
+  }
+  
+  /**
+   * Thread that will try to execute a single job.
+   */
+  class JobWorker extends Thread {
+
+    /** The job to work on */
+    private Job job = null;
+
+    /**
+     * Creates a new worker that will try to get the job <code>job</code> done.
+     * 
+     * @param job
+     *          the job to execute
+     */
+    public JobWorker(Job job) {
+      this.job = job;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Thread#run()
+     */
+    @Override
+    public void run() {
+      try {
+        dispatchJob(job);
+      } catch (ServiceUnavailableException e) {
+        job.setStatus(Status.FAILED);
+        Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+        logger.error("Unable to find a service for job " + job, cause);
+      } catch (ServiceRegistryException e) {
+        job.setStatus(Status.FAILED);
+        Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+        logger.error("Error dispatching job " + job, cause);
+      }
+    }
+
   }
 
 }

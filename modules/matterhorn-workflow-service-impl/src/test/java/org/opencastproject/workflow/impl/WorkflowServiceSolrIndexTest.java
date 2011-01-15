@@ -42,9 +42,9 @@ import java.util.List;
 /**
  * Test cases for the implementation at {@link WorkflowServiceDaoSolrImpl}.
  */
-public class WorkflowServiceDaoSolrTest {
+public class WorkflowServiceSolrIndexTest {
 
-  private WorkflowServiceDaoSolrImpl dao = null;
+  private WorkflowServiceSolrIndex dao = null;
 
   @Before
   public void setup() throws Exception {
@@ -66,7 +66,7 @@ public class WorkflowServiceDaoSolrTest {
     EasyMock.replay(serviceRegistry);
 
     // Now create the dao
-    dao = new WorkflowServiceDaoSolrImpl();
+    dao = new WorkflowServiceSolrIndex();
     dao.solrRoot = PathSupport.concat("target", Long.toString(System.currentTimeMillis()));
     dao.setServiceRegistry(serviceRegistry);
     dao.activate();

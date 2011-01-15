@@ -19,11 +19,11 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
@@ -187,7 +187,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
       totalTimeInQueue += timeInQueue;
 
-      Attachment composedImage = (Attachment) AbstractMediaPackageElement.getFromXml(job.getPayload());
+      Attachment composedImage = (Attachment) MediaPackageElementParser.getFromXml(job.getPayload());
       if (composedImage == null)
         throw new IllegalStateException("Composer service did not return an image");
 

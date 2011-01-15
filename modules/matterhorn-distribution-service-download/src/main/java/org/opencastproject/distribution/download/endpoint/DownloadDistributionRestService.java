@@ -18,8 +18,10 @@ package org.opencastproject.distribution.download.endpoint;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.job.api.JobProducerRestEndpointSupport;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -45,7 +47,7 @@ import javax.ws.rs.core.Response.Status;
  * Rest endpoint for distributing media to the local distribution channel.
  */
 @Path("/")
-public class DownloadDistributionRestService {
+public class DownloadDistributionRestService extends JobProducerRestEndpointSupport {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(DownloadDistributionRestService.class);
@@ -79,7 +81,7 @@ public class DownloadDistributionRestService {
           throws Exception {
     Job job = null;
     try {
-      MediaPackageElement element = AbstractMediaPackageElement.getFromXml(elementXml);
+      MediaPackageElement element = MediaPackageElementParser.getFromXml(elementXml);
       job = service.distribute(mediaPackageId, element);
     } catch (Exception e) {
       logger.warn("Error distributing element", e);
@@ -143,6 +145,19 @@ public class DownloadDistributionRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, retractEndpoint);
 
     return DocUtil.generate(data);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   */
+  @Override
+  public JobProducer getService() {
+    if (service instanceof JobProducer)
+      return (JobProducer)service;
+    else
+      return null;
   }
 
 }

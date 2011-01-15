@@ -38,6 +38,7 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +56,11 @@ import javax.xml.xpath.XPathConstants;
  * then ingest it. At the same time, it monitors the associated workflow and makes sure the operation and state
  * transitions happen as expected.
  */
+@Ignore
 public class PreProcessingWorkflowTest {
 
   private static final Logger logger = LoggerFactory.getLogger(PreProcessingWorkflowTest.class);
-  
+
   private TrustedHttpClient client;
 
   /** The workflow to append after preprocessing */
@@ -74,7 +76,7 @@ public class PreProcessingWorkflowTest {
   public static void setupClass() throws Exception {
     logger.info("Running " + PreProcessingWorkflowTest.class.getName());
   }
-  
+
   @Before
   public void setup() throws Exception {
     client = Main.getClient();
@@ -122,12 +124,16 @@ public class PreProcessingWorkflowTest {
     boolean agentIsCapturing = false;
     boolean inCaptureOperation = false;
     while (waiting > 0) {
+      String workflowXml = WorkflowUtils.getWorkflowById(workflowId);
       if (CaptureUtils.recordingExists(workflowId)) {
         agentIsCapturing |= CaptureUtils.isInState(workflowId, "capturing");
         inCaptureOperation |= WorkflowUtils.isWorkflowInOperation(workflowId, "capture");
         if (agentIsCapturing && inCaptureOperation)
           break;
+      } else if (WorkflowUtils.getWorkflowState(workflowXml).contains("_error")) {
+        fail("Recording failed");
       }
+
       waiting -= TIMEOUT;
       Thread.sleep(TIMEOUT);
     }
@@ -153,8 +159,9 @@ public class PreProcessingWorkflowTest {
       inIngestOperation |= WorkflowUtils.isWorkflowInOperation(workflowId, "capture");
       if (agentIsIngesting && inIngestOperation)
         break;
-      // we may have missed the ingest step, since it happens so quickly.  if the workflow has already succeeded, we're done
-      if(WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED")) {
+      // we may have missed the ingest step, since it happens so quickly. if the workflow has already succeeded, we're
+      // done
+      if (WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED")) {
         workflowSucceeded = true;
         System.out.println("Workflow " + workflowId + " succeeded before we could catch it in the ingesting state");
         break;
@@ -172,7 +179,7 @@ public class PreProcessingWorkflowTest {
     }
 
     // Wait for ingest and make sure workflow executes "cleanup", then finishes successfully
-    if(!workflowSucceeded) {
+    if (!workflowSucceeded) {
       waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
       while (waiting > 0) {
         if (WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED")) {
@@ -189,7 +196,6 @@ public class PreProcessingWorkflowTest {
     }
 
   }
-
 
   /**
    * Adds a new recording event to the scheduling service and returns the event id.

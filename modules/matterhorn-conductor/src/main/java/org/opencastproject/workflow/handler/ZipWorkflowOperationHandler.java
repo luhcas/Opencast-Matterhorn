@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
@@ -54,10 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Produces a zipped archive of a mediapackage, places it in the archive collection, and removes the rest of the
@@ -83,9 +80,6 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
   /** The temporary location to use when building an archive */
   public static final String ARCHIVE_TEMP_DIR = "archive-temp";
 
-  /** The bundle context property to consult for determining the number of concurrent threads to use in zipping */
-  public static final String ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY = "org.opencastproject.zip.threads";
-
   /** The flavor to use for a mediapackage archive */
   public static final MediaPackageElementFlavor ARCHIVE_FLAVOR = MediaPackageElementFlavor.parseFlavor("archive/zip");
 
@@ -99,9 +93,6 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
    * The workspace to use in retrieving and storing files.
    */
   protected Workspace workspace;
-
-  /** The thread pool */
-  protected ExecutorService executorService;
 
   /** The default no-arg constructor builds the configuration options set */
   public ZipWorkflowOperationHandler() {
@@ -140,15 +131,6 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
         throw new IllegalStateException(e);
       }
     }
-    int maxThreads = 1;
-    if (cc.getBundleContext().getProperty(ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY) != null) {
-      try {
-        maxThreads = Integer.parseInt(cc.getBundleContext().getProperty(ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY));
-      } catch (NumberFormatException e) {
-        logger.warn("Illegal value set for org.opencastproject.zip.threads. Using default value of 1 archive operation at a time.");
-      }
-    }
-    this.executorService = Executors.newFixedThreadPool(maxThreads);
   }
 
   /**
@@ -172,72 +154,56 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
       }
     }
 
-    // Callable allows us to throw checked exceptions, where Runnable does not
-    Callable<Void> callable = new Callable<Void>() {
-      @Override
-      public Void call() throws Exception {
-        logger.info("Archiving mediapackage {} in workflow {}", mediaPackage, workflowInstance);
+    logger.info("Archiving mediapackage {} in workflow {}", mediaPackage, workflowInstance);
 
-        String compressProperty = currentOperation.getConfiguration(COMPRESS_PROPERTY);
-        boolean compress = compressProperty == null ? false : Boolean.valueOf(compressProperty);
+    String compressProperty = currentOperation.getConfiguration(COMPRESS_PROPERTY);
+    boolean compress = compressProperty == null ? false : Boolean.valueOf(compressProperty);
 
-        // Zip the contents of the mediapackage
-        File zip = null;
-        try {
-          zip = zip(mediaPackage, flavorsToZip, compress);
-        } catch (Exception e) {
-          throw new WorkflowOperationException("Unable to create a zip archive from mediapackage " + mediaPackage, e);
-        }
-
-        // Get the collection for storing the archived mediapackage
-        String configuredCollectionId = currentOperation.getConfiguration(ZIP_COLLECTION_PROPERTY);
-        String collectionId = configuredCollectionId == null ? DEFAULT_ZIP_COLLECTION : configuredCollectionId;
-
-        // Add the zip as an attachment to the mediapackage
-        logger.info("Adding zipped mediapackage {} to the {} archive", mediaPackage, collectionId);
-
-        InputStream in = null;
-        URI uri = null;
-        try {
-          in = new FileInputStream(zip);
-          uri = workspace.putInCollection(collectionId, mediaPackage.getIdentifier().compact() + ".zip", in);
-        } catch (FileNotFoundException e) {
-          throw new WorkflowOperationException("zip file " + zip + " not found", e);
-        } catch (IOException e) {
-          throw new WorkflowOperationException(e);
-        } finally {
-          IOUtils.closeQuietly(in);
-        }
-        logger.info("Zipped mediapackage {} moved to the {} archive", mediaPackage, collectionId);
-
-        Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                .elementFromURI(uri, Type.Attachment, ARCHIVE_FLAVOR);
-        try {
-          attachment.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, zip));
-        } catch (IOException e) {
-          throw new WorkflowOperationException(e);
-        }
-
-        // The zip file is safely in the archive, so it's now safe to attempt to remove the original zip
-        try {
-          FileUtils.forceDelete(zip);
-        } catch (Exception e) {
-          throw new WorkflowOperationException(e);
-        }
-        mediaPackage.add(attachment);
-        return null;
-      }
-    };
-    Future<Void> future = executorService.submit(callable);
+    // Zip the contents of the mediapackage
+    File zip = null;
     try {
-      future.get();
+      zip = zip(mediaPackage, flavorsToZip, compress);
     } catch (Exception e) {
-      if (e instanceof WorkflowOperationException) {
-        throw (WorkflowOperationException) e;
-      } else {
-        throw new WorkflowOperationException(e);
-      }
+      throw new WorkflowOperationException("Unable to create a zip archive from mediapackage " + mediaPackage, e);
     }
+
+    // Get the collection for storing the archived mediapackage
+    String configuredCollectionId = currentOperation.getConfiguration(ZIP_COLLECTION_PROPERTY);
+    String collectionId = configuredCollectionId == null ? DEFAULT_ZIP_COLLECTION : configuredCollectionId;
+
+    // Add the zip as an attachment to the mediapackage
+    logger.info("Adding zipped mediapackage {} to the {} archive", mediaPackage, collectionId);
+
+    InputStream in = null;
+    URI uri = null;
+    try {
+      in = new FileInputStream(zip);
+      uri = workspace.putInCollection(collectionId, mediaPackage.getIdentifier().compact() + ".zip", in);
+    } catch (FileNotFoundException e) {
+      throw new WorkflowOperationException("zip file " + zip + " not found", e);
+    } catch (IOException e) {
+      throw new WorkflowOperationException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    logger.info("Zipped mediapackage {} moved to the {} archive", mediaPackage, collectionId);
+
+    Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+            .elementFromURI(uri, Type.Attachment, ARCHIVE_FLAVOR);
+    try {
+      attachment.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, zip));
+    } catch (IOException e) {
+      throw new WorkflowOperationException(e);
+    }
+
+    // The zip file is safely in the archive, so it's now safe to attempt to remove the original zip
+    try {
+      FileUtils.forceDelete(zip);
+    } catch (Exception e) {
+      throw new WorkflowOperationException(e);
+    }
+    mediaPackage.add(attachment);
+
     return createResult(mediaPackage, Action.CONTINUE);
   }
 
@@ -291,7 +257,7 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
     }
 
     // Add the manifest
-    FileUtils.writeStringToFile(new File(mediaPackageDir, "manifest.xml"), clone.toXml(), "UTF-8");
+    FileUtils.writeStringToFile(new File(mediaPackageDir, "manifest.xml"), MediaPackageParser.getAsXml(clone), "UTF-8");
 
     // Zip the directory
     File zip = new File(tempStorageDir, clone.getIdentifier().compact() + ".zip");
@@ -319,4 +285,5 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
   public SortedMap<String, String> getConfigurationOptions() {
     return configurationOptions;
   }
+
 }

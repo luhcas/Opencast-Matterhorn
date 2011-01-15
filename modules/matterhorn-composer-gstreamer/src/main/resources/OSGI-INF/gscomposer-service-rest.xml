@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" immediate="true" activate="activate" deactivate="deactivate">
+ name="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" immediate="true">
   <implementation class="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" />
   <property name="service.description" value="GStreamer Composer REST Endpoint" />
   <property name="opencast.service.type" value="org.opencastproject.composer" />

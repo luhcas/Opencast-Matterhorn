@@ -17,6 +17,7 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -345,7 +346,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
 
       // Get the results of the xpathExpression
       DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document xmldoc = db.parse(new ByteArrayInputStream(mp.toXml().getBytes())); // TODO: should use a better
+      Document xmldoc = db.parse(new ByteArrayInputStream(MediaPackageParser.getAsXml(mp).getBytes())); // TODO: should use a better
                                                                                    // serializer, to get local files
 
       XPath xpath = XPathFactory.newInstance().newXPath();

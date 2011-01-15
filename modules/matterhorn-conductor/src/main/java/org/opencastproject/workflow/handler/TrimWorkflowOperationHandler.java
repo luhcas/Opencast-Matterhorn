@@ -17,9 +17,9 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -173,7 +173,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
             throw new WorkflowOperationException("Trimming of " + t + " failed");
           }
           
-          trimmedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
+          trimmedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
           if (trimmedTrack == null) {
             throw new WorkflowOperationException("Trimming failed to produce a track");
           }

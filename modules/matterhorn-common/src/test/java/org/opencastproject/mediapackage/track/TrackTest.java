@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.elementbuilder.TrackBuilderPlugin;
@@ -155,7 +156,7 @@ public class TrackTest {
     Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, t2.getFlavor());
 
     // Get the xml from the object itself
-    String xmlFromTrack = track.getAsXml();
+    String xmlFromTrack = MediaPackageElementParser.getAsXml(track);
     Assert.assertTrue(xmlFromTrack.contains(MediaPackageElements.PRESENTATION_SOURCE.toString()));
 
     // And finally, using the element builder

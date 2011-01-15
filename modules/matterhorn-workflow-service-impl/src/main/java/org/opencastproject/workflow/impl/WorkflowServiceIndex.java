@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.job.api.Job;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -29,7 +28,7 @@ import org.opencastproject.workflow.api.WorkflowStatistics;
 /**
  * Provides persistence services to the workflow service implementation.
  */
-public interface WorkflowServiceImplDao {
+public interface WorkflowServiceIndex {
   /** Initialize the DAO, if necessary */
   void activate();
 
@@ -46,7 +45,7 @@ public interface WorkflowServiceImplDao {
    * @throws WorkflowParserException
    *           if there is a problem serializing the workflow instance
    */
-  Job update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException;
+  void update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException;
 
   /**
    * Remove the workflow instance with this id.
@@ -59,7 +58,7 @@ public interface WorkflowServiceImplDao {
    * @throws NotFoundException
    *           if there is no workflow instance with this identifier
    */
-  Job remove(long id) throws WorkflowDatabaseException, NotFoundException;
+  void remove(long id) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets a WorkflowInstace by its ID.

@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.EName;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.metadata.dublincore.DublinCore;
@@ -121,7 +122,7 @@ public class InspectWorkflowOperationHandlerTest {
 
     // set up mock receipt and inspect service providing it
     job = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(job.getPayload()).andReturn(newTrack.getAsXml()).anyTimes();
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(newTrack)).anyTimes();
     EasyMock.expect(job.getId()).andReturn(new Long(123));
     EasyMock.expect(job.getStatus()).andReturn(Status.FINISHED);
     EasyMock.expect(job.getDateCreated()).andReturn(new Date());

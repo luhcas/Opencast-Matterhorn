@@ -55,11 +55,10 @@ public class TextAnalysisRemoteImpl extends RemoteBase implements TextAnalyzerSe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.textanalyzer.api.TextAnalyzerService#extract(org.opencastproject.mediapackage.MediaPackageElement,
-   *      boolean)
+   * @see org.opencastproject.textanalyzer.api.TextAnalyzerService#extract(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Override
-  public Job extract(final Attachment image, boolean block) throws TextAnalyzerException {
+  public Job extract(final Attachment image) throws TextAnalyzerException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
     try {
@@ -78,9 +77,6 @@ public class TextAnalysisRemoteImpl extends RemoteBase implements TextAnalyzerSe
       if (response != null) {
         try {
           receipt = JobParser.parseJob(response.getEntity().getContent());
-          if (block) {
-            receipt = poll(receipt.getId());
-          }
           return receipt;
         } catch (Exception e) {
           throw new TextAnalyzerException(

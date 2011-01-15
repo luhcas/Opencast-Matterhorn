@@ -16,11 +16,8 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
@@ -68,17 +65,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 /**
  * Provides data access to the workflow service through file storage in the workspace, indexed via solr.
  */
-public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
+public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceDaoSolrImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceSolrIndex.class);
 
   /** Configuration key for a remote solr server */
   public static final String CONFIG_SOLR_URL = "org.opencastproject.workflow.solr.url";
@@ -146,8 +142,8 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /** The key in solr documents representing the full text index */
   private static final String FULLTEXT_KEY = "fulltext";
 
-  /** The service registry, managing jobs */
-  private ServiceRegistry serviceRegistry = null;
+   /** The service registry, managing jobs */
+   private ServiceRegistry serviceRegistry = null;
 
   /**
    * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
@@ -159,6 +155,12 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     this.serviceRegistry = registry;
   }
 
+  /**
+   * Callback from the OSGi environment on component registration.
+   * 
+   * @param cc
+   *          the component context
+   */
   public void activate(ComponentContext cc) {
     String solrServerUrlConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(CONFIG_SOLR_URL));
     if (solrServerUrlConfig != null) {
@@ -181,7 +183,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#activate()
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#activate()
    */
   @Override
   public void activate() {
@@ -271,7 +273,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#deactivate()
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#deactivate()
    */
   @Override
   public void deactivate() {
@@ -283,7 +285,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     InputStream in = null;
     FileOutputStream fos = null;
     try {
-      in = WorkflowServiceDaoSolrImpl.class.getResourceAsStream(classpath);
+      in = WorkflowServiceSolrIndex.class.getResourceAsStream(classpath);
       File file = new File(dir, FilenameUtils.getName(classpath));
       logger.debug("copying " + classpath + " to " + file);
       fos = new FileOutputStream(file);
@@ -385,7 +387,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#countWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.WorkflowState,
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#countWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.WorkflowState,
    *      java.lang.String)
    */
   @Override
@@ -420,7 +422,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getStatistics()
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#getStatistics()
    */
   @Override
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
@@ -495,43 +497,43 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
                 templateTotal += stateValue.getCount();
                 total += stateValue.getCount();
                 switch (state) {
-                case FAILED:
-                  operationReport.setFailed(stateValue.getCount());
-                  templateFailed += stateValue.getCount();
-                  failed += stateValue.getCount();
-                  break;
-                case FAILING:
-                  operationReport.setFailing(stateValue.getCount());
-                  templateFailing += stateValue.getCount();
-                  failing += stateValue.getCount();
-                  break;
-                case INSTANTIATED:
-                  operationReport.setInstantiated(stateValue.getCount());
-                  templateInstantiated += stateValue.getCount();
-                  instantiated += stateValue.getCount();
-                  break;
-                case PAUSED:
-                  operationReport.setPaused(stateValue.getCount());
-                  templatePaused += stateValue.getCount();
-                  paused += stateValue.getCount();
-                  break;
-                case RUNNING:
-                  operationReport.setRunning(stateValue.getCount());
-                  templateRunning += stateValue.getCount();
-                  running += stateValue.getCount();
-                  break;
-                case STOPPED:
-                  operationReport.setStopped(stateValue.getCount());
-                  templateStopped += stateValue.getCount();
-                  stopped += stateValue.getCount();
-                  break;
-                case SUCCEEDED:
-                  operationReport.setFinished(stateValue.getCount());
-                  templateSucceeded += stateValue.getCount();
-                  succeeded += stateValue.getCount();
-                  break;
-                default:
-                  throw new IllegalStateException("State '" + state + "' is not handled");
+                  case FAILED:
+                    operationReport.setFailed(stateValue.getCount());
+                    templateFailed += stateValue.getCount();
+                    failed += stateValue.getCount();
+                    break;
+                  case FAILING:
+                    operationReport.setFailing(stateValue.getCount());
+                    templateFailing += stateValue.getCount();
+                    failing += stateValue.getCount();
+                    break;
+                  case INSTANTIATED:
+                    operationReport.setInstantiated(stateValue.getCount());
+                    templateInstantiated += stateValue.getCount();
+                    instantiated += stateValue.getCount();
+                    break;
+                  case PAUSED:
+                    operationReport.setPaused(stateValue.getCount());
+                    templatePaused += stateValue.getCount();
+                    paused += stateValue.getCount();
+                    break;
+                  case RUNNING:
+                    operationReport.setRunning(stateValue.getCount());
+                    templateRunning += stateValue.getCount();
+                    running += stateValue.getCount();
+                    break;
+                  case STOPPED:
+                    operationReport.setStopped(stateValue.getCount());
+                    templateStopped += stateValue.getCount();
+                    stopped += stateValue.getCount();
+                    break;
+                  case SUCCEEDED:
+                    operationReport.setFinished(stateValue.getCount());
+                    templateSucceeded += stateValue.getCount();
+                    succeeded += stateValue.getCount();
+                    break;
+                  default:
+                    throw new IllegalStateException("State '" + state + "' is not handled");
                 }
               }
 
@@ -574,23 +576,23 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowById(long)
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#getWorkflowById(long)
    */
   @Override
   public WorkflowInstanceImpl getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException {
-    // Use the service registry, since it's fast and accurate to look up jobs by their primary key. Solr can be out of
-    // date on quick changes (e.g. unit testing).
+    SolrQuery solrQuery = new SolrQuery();
+    solrQuery.setQuery(ID_KEY + ":" + workflowId);
     try {
-      Job job = serviceRegistry.getJob(workflowId);
-      if (Status.DELETED.equals(job.getStatus())) {
-        throw new NotFoundException("Workflow " + workflowId + " was deleted");
+      QueryResponse response = solrServer.query(solrQuery);
+      SolrDocumentList items = response.getResults();
+      if (items.size() > 0) {
+        String xml = (String) items.get(0).get(XML_KEY);
+        return WorkflowParser.parseWorkflowInstance(xml);
       }
-      return WorkflowParser.parseWorkflowInstance(job.getPayload());
-    } catch (ServiceRegistryException e) {
+    } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
-    } catch (WorkflowParsingException e) {
-      throw new IllegalStateException("can not parse workflow xml", e);
     }
+    throw new NotFoundException(Long.toString(workflowId));
   }
 
   /**
@@ -686,30 +688,30 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    */
   protected String getSortField(Sort sort) {
     switch (sort) {
-    case TITLE:
-      return TITLE_KEY;
-    case CONTRIBUTOR:
-      return CONTRIBUTOR_KEY;
-    case DATE_CREATED:
-      return CREATED_KEY;
-    case CREATOR:
-      return CREATOR_KEY;
-    case LANGUAGE:
-      return LANGUAGE_KEY;
-    case LICENSE:
-      return LICENSE_KEY;
-    case MEDIA_PACKAGE_ID:
-      return MEDIAPACKAGE_KEY;
-    case SERIES_ID:
-      return SERIES_ID_KEY;
-    case SERIES_TITLE:
-      return SERIES_TITLE_KEY;
-    case SUBJECT:
-      return SUBJECT_KEY;
-    case WORKFLOW_DEFINITION_ID:
-      return WORKFLOW_DEFINITION_KEY;
-    default:
-      throw new IllegalArgumentException("No mapping found between sort field and index");
+      case TITLE:
+        return TITLE_KEY;
+      case CONTRIBUTOR:
+        return CONTRIBUTOR_KEY;
+      case DATE_CREATED:
+        return CREATED_KEY;
+      case CREATOR:
+        return CREATOR_KEY;
+      case LANGUAGE:
+        return LANGUAGE_KEY;
+      case LICENSE:
+        return LICENSE_KEY;
+      case MEDIA_PACKAGE_ID:
+        return MEDIAPACKAGE_KEY;
+      case SERIES_ID:
+        return SERIES_ID_KEY;
+      case SERIES_TITLE:
+        return SERIES_TITLE_KEY;
+      case SUBJECT:
+        return SUBJECT_KEY;
+      case WORKFLOW_DEFINITION_ID:
+        return WORKFLOW_DEFINITION_KEY;
+      default:
+        throw new IllegalArgumentException("No mapping found between sort field and index");
     }
   }
 
@@ -764,7 +766,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowQuery)
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowQuery)
    */
   @Override
   public WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException {
@@ -818,19 +820,13 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#remove(long)
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#remove(long)
    */
   @Override
-  public Job remove(long id) throws WorkflowDatabaseException, NotFoundException {
+  public void remove(long id) throws WorkflowDatabaseException, NotFoundException {
     try {
       solrServer.deleteById(Long.toString(id));
       solrServer.commit();
-
-      Job job = serviceRegistry.getJob(id);
-      job.setStatus(Status.DELETED);
-      serviceRegistry.updateJob(job);
-
-      return job;
     } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }
@@ -839,66 +835,11 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#update(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public Job update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException {
-    WorkflowState workflowState = instance.getState();
-    String xml;
-    try {
-      xml = WorkflowParser.toXml(instance);
-    } catch (Exception e) {
-      throw new WorkflowParsingException(e);
-    }
-    Job job = null;
-    try {
-      if (instance.getId() == -1) {
-        String parentId = instance.getParentId() == null ? null : Long.toString(instance.getParentId());
-        job = serviceRegistry.createJob(WorkflowService.JOB_TYPE, WorkflowService.JOB_TYPE,
-                Arrays.asList(instance.getMediaPackage().toXml(), instance.getTemplate(), parentId));
-        ((WorkflowInstanceImpl) instance).setId(job.getId());
-      } else {
-        job = serviceRegistry.getJob(instance.getId());
-      }
-      job.setPayload(xml);
-
-      // Synchronize workflow and job state
-      switch (workflowState) {
-      case FAILED:
-      case FAILING:
-        job.setStatus(Status.FAILED);
-        break;
-      case INSTANTIATED:
-        job.setStatus(Status.QUEUED);
-        break;
-      case PAUSED:
-        job.setStatus(Status.PAUSED);
-        break;
-      case RUNNING:
-        job.setStatus(Status.RUNNING);
-        break;
-      case STOPPED:
-        job.setStatus(Status.DELETED);
-        break;
-      case SUCCEEDED:
-        job.setStatus(Status.FINISHED);
-        break;
-      default:
-        throw new IllegalStateException("Found a workflow state that is not handled");
-      }
-
-      serviceRegistry.updateJob(job);
-    } catch (ServiceRegistryException e) {
-      throw new WorkflowDatabaseException(e);
-    } catch (ServiceUnavailableException e) {
-      // this should never happen, since we're in a delegate of the workflow service itself
-      throw new WorkflowDatabaseException(e);
-    } catch (NotFoundException e) {
-      // this should never happen, since we create the job if it doesn't already exist
-      throw new WorkflowDatabaseException(e);
-    }
+  public void update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException {
     index(instance);
-    return job;
   }
 
 }

@@ -19,6 +19,7 @@ import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageParser;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -106,21 +107,21 @@ public class IngestRestServiceTest {
   @Test
   public void testAddMediaPackageTrack() throws Exception {
     Response response = restService.addMediaPackageTrack("http://foo/av.mov", "presenter/source",
-            ((MediaPackage)restService.createMediaPackage().getEntity()).toXml());
+            MediaPackageParser.getAsXml(((MediaPackage)restService.createMediaPackage().getEntity())));
     Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
   }
 
   @Test
   public void testAddMediaPackageCatalog() throws Exception {
     Response response = restService.addMediaPackageCatalog("http://foo/dc.xml", "dublincore/episode",
-            ((MediaPackage)restService.createMediaPackage().getEntity()).toXml());
+            MediaPackageParser.getAsXml(((MediaPackage)restService.createMediaPackage().getEntity())));
     Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
   }
 
   @Test
   public void testAddMediaPackageAttachment() throws Exception {
     Response response = restService.addMediaPackageAttachment("http://foo/cover.png", "image/cover",
-            ((MediaPackage)restService.createMediaPackage().getEntity()).toXml());
+            MediaPackageParser.getAsXml(((MediaPackage)restService.createMediaPackage().getEntity())));
     Assert.assertEquals(Status.OK.getStatusCode(), response.getStatus());
   }
 
@@ -173,7 +174,7 @@ public class IngestRestServiceTest {
     requestBody.append("-----1234\r\n");
     requestBody.append("Content-Disposition: form-data; name=\"mediaPackage\"\r\n");
     requestBody.append("\r\n");
-    requestBody.append(mp.toXml());
+    requestBody.append(MediaPackageParser.getAsXml(mp));
     requestBody.append("\r\n");
     requestBody.append("-----1234\r\n");
     requestBody.append("Content-Disposition: form-data; name=\"file\"; filename=\"catalog.txt\"\r\n");

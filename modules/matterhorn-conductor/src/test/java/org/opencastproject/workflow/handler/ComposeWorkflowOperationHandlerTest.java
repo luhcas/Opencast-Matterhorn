@@ -22,6 +22,7 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.MimeTypes;
@@ -85,7 +86,7 @@ public class ComposeWorkflowOperationHandlerTest {
 
     // set up mock receipt
     job = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(job.getPayload()).andReturn(encodedTracks[0].getAsXml()).anyTimes();
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(encodedTracks[0])).anyTimes();
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED);
     EasyMock.expect(job.getDateCreated()).andReturn(new Date());
     EasyMock.expect(job.getDateStarted()).andReturn(new Date());

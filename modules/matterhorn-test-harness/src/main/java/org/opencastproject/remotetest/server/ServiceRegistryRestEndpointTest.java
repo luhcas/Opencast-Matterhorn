@@ -95,14 +95,17 @@ public class ServiceRegistryRestEndpointTest {
       Assert.assertEquals(BASE_URL, hostFromResponse);
     } finally {
       IOUtils.closeQuietly(in);
+      Main.returnClient(client);
     }
 
     // Get a registration that is known to not exist, and ensure we get a 404
+    client = Main.getClient();
     get = new HttpGet(serviceUrl + "/services.xml?serviceType=foo&host=" + remoteHost);
     response = client.execute(get);
     Assert.assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
 
     // Get all services on a single host
+    client = Main.getClient();
     get = new HttpGet(serviceUrl + "/services.xml?host=" + remoteHost);
     response = client.execute(get);
     Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
@@ -113,9 +116,11 @@ public class ServiceRegistryRestEndpointTest {
       Assert.assertTrue(serviceCount > 0);
     } finally {
       IOUtils.closeQuietly(in);
+      Main.returnClient(client);
     }
 
     // Get all services of a single type
+    client = Main.getClient();
     get = new HttpGet(serviceUrl + "/services.xml?serviceType=org.opencastproject.composer");
     response = client.execute(get);
     Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
@@ -126,9 +131,11 @@ public class ServiceRegistryRestEndpointTest {
       Assert.assertEquals(1, serviceCount);
     } finally {
       IOUtils.closeQuietly(in);
+      Main.returnClient(client);
     }
 
     // Get statistics
+    client = Main.getClient();
     get = new HttpGet(serviceUrl + "/statistics.xml");
     response = client.execute(get);
     Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
@@ -139,6 +146,7 @@ public class ServiceRegistryRestEndpointTest {
       Assert.assertTrue(serviceCount > 0);
     } finally {
       IOUtils.closeQuietly(in);
+      Main.returnClient(client);
     }
   }
   

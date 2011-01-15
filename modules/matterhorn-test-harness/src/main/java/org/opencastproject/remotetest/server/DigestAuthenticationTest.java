@@ -60,7 +60,7 @@ public class DigestAuthenticationTest {
       httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
       HttpResponse response = httpclient.execute(get);
       String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-      Assert.assertTrue(content.contains("Start Climbing"));
+      Assert.assertTrue(content.contains("Opencast Matterhorn"));
     } finally {
       httpclient.getConnectionManager().shutdown();
     }

@@ -16,25 +16,18 @@
 package org.opencastproject.distribution.api;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
 
 /**
  * Distributes elements from MediaPackages to distribution channels.
  */
-public interface DistributionService extends JobProducer {
+public interface DistributionService {
 
   /**
    * A prefix used by distribution service implementations to indicate the types of distribution channels they manage.
    */
   String JOB_TYPE_PREFIX = "org.opencastproject.distribution.";
-
-  /** The operation name for distributing content */
-  String DISTRIBUTE = "distribute";
-
-  /** The operation name for retracting content */
-  String RETRACT = "retract";
 
   /**
    * Distribute the elementIds from a media package.

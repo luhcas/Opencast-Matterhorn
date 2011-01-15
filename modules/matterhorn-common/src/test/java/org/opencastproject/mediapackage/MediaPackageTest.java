@@ -53,7 +53,7 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
   public void testEmptyMediaPackage() {
     try {
       MediaPackage mediaPackage = mediaPackageBuilder.createNew();
-      mediaPackage.toXml();
+      MediaPackageParser.getAsXml(mediaPackage);
     } catch (MediaPackageException e) {
       fail("Media package excpetion while reading media package from manifest: " + e.getMessage());
     } catch (ConfigurationException e) {
@@ -71,7 +71,7 @@ public class MediaPackageTest extends AbstractMediaPackageTest {
       mediaPackage.add(dcFile.toURI());
 
       // Test url
-      String xmlString = mediaPackage.toXml();
+      String xmlString = MediaPackageParser.getAsXml(mediaPackage);
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document xml = docBuilder.parse(new ByteArrayInputStream(xmlString.getBytes()));
       String expected = dcFile.toURI().toURL().toExternalForm();

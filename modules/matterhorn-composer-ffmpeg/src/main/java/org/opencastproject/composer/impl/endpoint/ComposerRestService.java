@@ -23,18 +23,18 @@ import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.job.api.JobProducerRestEndpointSupport;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.RestConstants;
-import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -63,8 +63,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
@@ -75,7 +73,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * A REST endpoint delegating functionality to the {@link ComposerService}
  */
 @Path("/")
-public class ComposerRestService {
+public class ComposerRestService extends JobProducerRestEndpointSupport {
 
   private static final Logger logger = LoggerFactory.getLogger(ComposerRestService.class);
   protected String docs;
@@ -123,7 +121,7 @@ public class ComposerRestService {
     }
 
     // Deserialize the track
-    MediaPackageElement sourceTrack = toMediaPackageElement(sourceTrackAsXml);
+    MediaPackageElement sourceTrack = MediaPackageElementParser.getFromXml(sourceTrackAsXml);
     if (!Track.TYPE.equals(sourceTrack.getElementType())) {
       return Response.status(Response.Status.BAD_REQUEST).entity("sourceTrack element must be of type track").build();
     }
@@ -160,7 +158,7 @@ public class ComposerRestService {
     }
 
     // Deserialize the track
-    MediaPackageElement sourceElement = toMediaPackageElement(sourceTrackAsXml);
+    MediaPackageElement sourceElement = MediaPackageElementParser.getFromXml(sourceTrackAsXml);
     if (!Track.TYPE.equals(sourceElement.getElementType())) {
       return Response.status(Response.Status.BAD_REQUEST).entity("sourceTrack element must be of type track").build();
     }
@@ -207,14 +205,14 @@ public class ComposerRestService {
     }
 
     // Deserialize the audio track
-    MediaPackageElement audioSourceTrack = toMediaPackageElement(audioSourceTrackXml);
+    MediaPackageElement audioSourceTrack = MediaPackageElementParser.getFromXml(audioSourceTrackXml);
     if (!Track.TYPE.equals(audioSourceTrack.getElementType())) {
       return Response.status(Response.Status.BAD_REQUEST).entity("audioSourceTrack element must be of type track")
               .build();
     }
 
     // Deserialize the video track
-    MediaPackageElement videoSourceTrack = toMediaPackageElement(videoSourceTrackXml);
+    MediaPackageElement videoSourceTrack = MediaPackageElementParser.getFromXml(videoSourceTrackXml);
     if (!Track.TYPE.equals(videoSourceTrack.getElementType())) {
       return Response.status(Response.Status.BAD_REQUEST).entity("videoSourceTrack element must be of type track")
               .build();
@@ -246,7 +244,7 @@ public class ComposerRestService {
     }
 
     // Deserialize the source track
-    MediaPackageElement sourceTrack = toMediaPackageElement(sourceTrackXml);
+    MediaPackageElement sourceTrack = MediaPackageElementParser.getFromXml(sourceTrackXml);
     if (!Track.TYPE.equals(sourceTrack.getElementType())) {
       return Response.status(Response.Status.BAD_REQUEST).entity("sourceTrack element must be of type track").build();
     }
@@ -281,7 +279,7 @@ public class ComposerRestService {
       return Response.status(Response.Status.BAD_REQUEST).entity("Source track and captions must not be null").build();
     }
 
-    MediaPackageElement mediaTrack = toMediaPackageElement(sourceTrackXml);
+    MediaPackageElement mediaTrack = MediaPackageElementParser.getFromXml(sourceTrackXml);
     if (!Track.TYPE.equals(mediaTrack.getElementType())) {
       return Response.status(Response.Status.BAD_REQUEST).entity("Source track element must be of type track").build();
     }
@@ -309,21 +307,6 @@ public class ComposerRestService {
   }
 
   @GET
-  @Path("job/{id}.xml")
-  @Produces(MediaType.TEXT_XML)
-  public Response getJob(@PathParam("id") long id) {
-    Job job = null;
-    try {
-      job = composerService.getJob(id);
-      return Response.ok().entity(new JaxbJob(job)).build();
-    } catch (NotFoundException e) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    } catch (Exception e) {
-      throw new WebApplicationException(e);
-    }
-  }
-
-  @GET
   @Path("profiles.xml")
   @Produces(MediaType.TEXT_XML)
   public EncodingProfileList listProfiles() {
@@ -342,26 +325,6 @@ public class ComposerRestService {
     if (profile == null)
       return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
     return Response.ok(profile).build();
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  @Path("count")
-  public Response count(@QueryParam("status") String status, @QueryParam("host") String host) {
-    if (status == null)
-      return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
-    long count;
-
-    try {
-      if (host == null) {
-        count = composerService.countJobs(Status.valueOf(status.toUpperCase()));
-      } else {
-        count = composerService.countJobs(Status.valueOf(status.toUpperCase()), host);
-      }
-      return Response.ok(count).build();
-    } catch (ServiceRegistryException e) {
-      throw new WebApplicationException(e);
-    }
   }
 
   @GET
@@ -486,23 +449,16 @@ public class ComposerRestService {
   }
 
   /**
-   * Converts the string representation of the track to an object.
+   * {@inheritDoc}
    * 
-   * @param trackAsXml
-   *          the serialized track representation
-   * @return the track object
-   * @throws SAXException
-   * @throws IOException
-   * @throws ParserConfigurationException
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
    */
-  protected MediaPackageElement toMediaPackageElement(String trackAsXml) throws SAXException, IOException,
-          ParserConfigurationException {
-    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml, "UTF-8"));
-    MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl();
-    MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    MediaPackageElement sourceTrack = builder.elementFromManifest(doc.getDocumentElement(), serializer);
-    return sourceTrack;
+  @Override
+  public JobProducer getService() {
+    if (composerService instanceof JobProducer)
+      return (JobProducer)composerService;
+    else
+      return null;
   }
 
   /**
@@ -575,4 +531,5 @@ public class ComposerRestService {
             + "    <checksum type=\"md5\">8f6cd99bbb6d591107f3b5c47ee51f2c</checksum>\n" + "    <tags>\n"
             + "      <tag>lang:fr</tag>\n" + "    </tags>\n" + "  </catalog>\n" + "</captions>\n";
   }
+
 }

@@ -16,7 +16,6 @@
 package org.opencastproject.caption.api;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageException;
 
@@ -24,7 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
  * Provides captioning support. This service makes use of {@link CaptionConverter} instances that need to be registered
  * in the OSGi registry.
  */
-public interface CaptionService extends JobProducer {
+public interface CaptionService {
 
   String JOB_TYPE = "org.opencastproject.caption";
 

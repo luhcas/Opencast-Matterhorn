@@ -54,7 +54,7 @@ public class JaxbJob implements Job {
     this.createdHost = job.getCreatedHost();
     this.id = job.getId();
     this.jobType = job.getJobType();
-    this.operationType = job.getOperationType();
+    this.operationType = job.getOperation();
     this.arguments = job.getArguments();
     this.status = job.getStatus();
     if (this.dateCreated != null && this.dateStarted != null) {
@@ -193,20 +193,22 @@ public class JaxbJob implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#getOperationType()
+   * @see org.opencastproject.job.api.Job#getOperation()
    */
   @XmlElement
   @Override
-  public String getOperationType() {
+  public String getOperation() {
     return operationType;
   }
 
   /**
-   * @param operationType
-   *          the operationType to set
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#setOperation(java.lang.String)
    */
-  public void setOperationType(String operationType) {
-    this.operationType = operationType;
+  @Override
+  public void setOperation(String operation) {
+    this.operationType = operation;
   }
 
   /**

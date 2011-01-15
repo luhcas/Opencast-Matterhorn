@@ -17,7 +17,6 @@ package org.opencastproject.remotetest.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
@@ -34,6 +33,7 @@ import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +52,28 @@ public final class WorkflowUtils {
    */
   private WorkflowUtils() {
     // Nothing to do here
+  }
+
+  /**
+   * Loads the workflow with id <code>workflowId</code> from the workflow service and returns the workflow instance as
+   * an xml string.
+   * 
+   * @param workflowId
+   *          the workflow identifier
+   * @return the workflow instance xml
+   * @throws IllegalStateException
+   *           if the workflow doesn't exist or the workflow endpoint did not respond properly
+   * @throws IOException
+   *           if reading the response fails
+   */
+  public static String getWorkflowById(String workflowId) throws IllegalStateException, IOException {
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + workflowId + ".xml");
+    TrustedHttpClient client = Main.getClient();
+    HttpResponse response = client.execute(getWorkflowMethod);
+    if (response.getStatusLine().getStatusCode() != 200)
+      throw new IllegalStateException(EntityUtils.toString(response.getEntity()));
+    String workflow = EntityUtils.toString(response.getEntity());
+    return workflow;
   }
 
   /**
@@ -89,7 +111,10 @@ public final class WorkflowUtils {
   public static boolean isWorkflowInState(String workflowId, String state) throws IllegalStateException, Exception {
     HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + workflowId + ".xml");
     TrustedHttpClient client = Main.getClient();
-    String workflow = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
+    HttpResponse response = client.execute(getWorkflowMethod);
+    if (response.getStatusLine().getStatusCode() != 200)
+      throw new IllegalStateException(EntityUtils.toString(response.getEntity()));
+    String workflow = EntityUtils.toString(response.getEntity());
     String currentState = (String) Utils.xpath(workflow, "/ns2:workflow/@state", XPathConstants.STRING);
     Main.returnClient(client);
     return state.equalsIgnoreCase(currentState);
@@ -146,8 +171,7 @@ public final class WorkflowUtils {
     TrustedHttpClient client = Main.getClient();
     HttpResponse response = client.execute(put);
     assertEquals(HttpStatus.SC_CREATED, response.getStatusLine().getStatusCode());
-    String id = (String) Utils.xpath(workflowDefinition, "/definition/id",
-            XPathConstants.STRING);
+    String id = (String) Utils.xpath(workflowDefinition, "/definition/id", XPathConstants.STRING);
     assertNotNull(id);
     Main.returnClient(client);
     return id;

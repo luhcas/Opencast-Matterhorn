@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.metadata.dublincore.DCMIPeriod;
 import org.opencastproject.metadata.dublincore.DublinCore;
@@ -238,7 +239,7 @@ public class SolrIndexManager {
     addStandardDublincCoreFields(solrEpisodeDocument, mediaPackage, MediaPackageElements.EPISODE);
 
     // Add media package
-    solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, mediaPackage.toXml());
+    solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, MediaPackageParser.getAsXml(mediaPackage));
 
     // Add tags
     StringBuilder sb = new StringBuilder();

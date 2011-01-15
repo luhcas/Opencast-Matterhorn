@@ -22,6 +22,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -285,7 +286,7 @@ public class IngestRestService {
           throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
         // ingestService.ingest(mp);
-        return Response.ok(mp.toXml()).build();
+        return Response.ok(MediaPackageParser.getAsXml(mp)).build();
       }
       return Response.serverError().status(Status.BAD_REQUEST).build();
     } catch (Exception e) {
@@ -594,7 +595,7 @@ public class IngestRestService {
               try {
                 is = getClass().getResourceAsStream("/templates/complete.html");
                 String html = IOUtils.toString(is, "UTF-8");
-                html = html.replaceAll("\\{mediaPackage\\}", mp.toXml());
+                html = html.replaceAll("\\{mediaPackage\\}", MediaPackageParser.getAsXml(mp));
                 return Response.ok(html).build();
               } finally {
                 IOUtils.closeQuietly(is);

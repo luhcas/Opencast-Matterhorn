@@ -25,8 +25,10 @@ import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
@@ -44,17 +46,22 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.concurrent.Callable;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * Distributes media to a iTunes U group.
  */
-public class ITunesUDistributionService implements DistributionService {
+public class ITunesUDistributionService implements DistributionService, JobProducer {
 
   /** logger instance */
   private static final Logger logger = LoggerFactory.getLogger(ITunesUDistributionService.class);
+
+  /** List of available operations on jobs */
+  private enum Operation {
+    Distribute, Retract
+  };
 
   /** Receipt type */
   public static final String JOB_TYPE = "org.opencastproject.distribution.itunes";
@@ -150,6 +157,211 @@ public class ITunesUDistributionService implements DistributionService {
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(java.lang.String,
+   *      org.opencastproject.mediapackage.MediaPackageElement)
+   */
+  @Override
+  public Job distribute(String mediaPackageId, MediaPackageElement element) throws DistributionException,
+          MediaPackageException {
+
+    if (mediaPackageId == null)
+      throw new MediaPackageException("Mediapackage ID must be specified");
+    if (element == null)
+      throw new MediaPackageException("Mediapackage element must be specified");
+
+    try {
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Distribute.toString(),
+              Arrays.asList(mediaPackageId, MediaPackageElementParser.getAsXml(element)));
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
+    } catch (ServiceRegistryException e) {
+      throw new DistributionException("Unable to create a job", e);
+    }
+  }
+
+  /**
+   * Distributes the element to the distribution channel and returns a reference to the distributed version of the
+   * element.
+   * 
+   * @param job
+   *          the associated job
+   * @param mediaPackageId
+   *          the mediapackage identifier
+   * @param element
+   *          the element to distribute
+   * @return the distributed element
+   * @throws DistributionException
+   *           if distribution fails
+   * @throws MediaPackageException
+   *           if the mediapackage is in an inconsistent state
+   */
+  private MediaPackageElement distribute(Job job, String mediaPackageId, MediaPackageElement element)
+          throws DistributionException, MediaPackageException {
+
+    if (mediaPackageId == null)
+      throw new IllegalArgumentException("Mediapackage ID must be specified");
+    if (element == null)
+      throw new IllegalArgumentException("Mediapackage element must be specified");
+    if (element.getIdentifier() == null)
+      throw new IllegalArgumentException("Mediapackage element must have an identifier");
+
+    try {
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
+
+      File sourceFile;
+      try {
+        sourceFile = workspace.get(element.getURI());
+      } catch (NotFoundException e) {
+        throw new DistributionException("Unable to find " + element.getURI() + " in the workspace", e);
+      } catch (IOException e) {
+        throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
+      }
+
+      // get task name
+      String name = getTaskID(mediaPackageId, element.getIdentifier());
+
+      // check if the file has already been delivered
+      Task savedTask;
+      try {
+        savedTask = schedule.getSavedTask(name);
+      } catch (InvalidKeyException e) {
+        throw new DistributionException(e);
+      }
+
+      if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
+        // has been successfully delivered
+        // remove the media
+        remove(name);
+      }
+
+      ITunesDeliveryAction act = new ITunesDeliveryAction();
+      act.setName(name);
+      act.setTitle(sourceFile.getName());
+      // CHNAGE ME: set metadata elements here
+      act.setCreator("Opencast Project");
+      act.setTags(new String[] { "whatever" });
+      act.setAbstract("Opencast Distribution Service - iTunes U");
+      act.setMediaPath(sourceFile.getAbsolutePath());
+
+      // get playlist ID from context strategy
+      String contextDestination = contextStrategy.getContextName(mediaPackageId);
+      if (contextDestination != null) {
+        // use the destination from context strategy
+        destination = contextDestination;
+      }
+
+      // deliver to a tab
+      act.setDestination(destination); // FIXME: replace this with a tab based on the episode's series
+
+      logger.info("Delivering from {}", sourceFile.getAbsolutePath());
+
+      // start the scheduler
+      try {
+        schedule.start(act);
+      } catch (InvalidKeyException e) {
+        throw new DistributionException(e);
+      }
+
+      while (true) {
+        Task task;
+        try {
+          task = schedule.getTask(name);
+        } catch (InvalidKeyException e) {
+          throw new DistributionException(e);
+        }
+        synchronized (task) {
+          Task.State state = task.getState();
+          if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
+            try {
+              Thread.sleep(1000L);
+            } catch (Exception e) {
+              throw new RuntimeException(e);
+            }
+            // still running
+            continue;
+          } else if (state == Task.State.COMPLETE) {
+            logger.info("Succeeded delivering from {}", sourceFile.getAbsolutePath());
+            String videoURL = act.getTrackURL();
+            URI newTrackUri;
+            try {
+              newTrackUri = new URI(videoURL);
+            } catch (URISyntaxException e) {
+              throw new DistributionException("Distributed element produces an invalid URI", e);
+            }
+            MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                    .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
+            newElement.setIdentifier(element.getIdentifier() + "-dist");
+
+            job.setPayload(MediaPackageElementParser.getAsXml(newElement));
+            job.setStatus(Status.FINISHED);
+            updateJob(job);
+
+            break;
+          } else if (state == Task.State.FAILED) {
+            throw new DistributionException("Failed delivering " + sourceFile.getAbsolutePath());
+          }
+        }
+      } // end of schedule loop
+
+      return null;
+    } catch (Exception e) {
+      logger.warn("Error distributing " + element, e);
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      if (e instanceof DistributionException) {
+        throw (DistributionException) e;
+      } else {
+        throw new DistributionException(e);
+      }
+        }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
+   */
+  @Override
+  public Job retract(String mediaPackageId) throws DistributionException {
+
+    if (mediaPackageId == null)
+      throw new IllegalArgumentException("Mediapackage ID must be specified");
+
+    try {
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Retract.toString(), Arrays.asList(mediaPackageId));
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
+    } catch (ServiceRegistryException e) {
+      throw new DistributionException("Unable to create a job", e);
+    }
+  }
+
+  /**
+   * Retracts the mediapackage from iTunesU.
+   * 
+   * @param job
+   *          the associated job
+   * @param mediapackageId
+   *          the mediapackage
+   * @throws DistributionException
+   *           if retract did not work
+   */
+  private void retract(Job job, String mediapackageId) throws DistributionException {
+    job.setStatus(Status.FAILED);
+    updateJob(job);
+    throw new DistributionException("Retract from iTunesU has not been implemented");
+  }
+
+  /**
    * Removes the media delivered by the given task.
    * 
    * @param name
@@ -198,186 +410,33 @@ public class ITunesUDistributionService implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement)
-   */
-  public Job distribute(final String mediaPackageId, final MediaPackageElement element)
-          throws DistributionException, MediaPackageException {
-    if(mediaPackageId == null) {
-      throw new DistributionException("Mediapackage ID must be specified");
-    }
-    if(element == null) {
-      throw new DistributionException("Mediapackage element must be specified");
-    }
-    if(element.getIdentifier() == null) {
-      throw new DistributionException("Mediapackage element must have an identifier");
-    }
-
-    final Job job;
-    try {
-      job = serviceRegistry.createJob(JOB_TYPE, DISTRIBUTE, Arrays.asList(mediaPackageId, element.getAsXml()));
-    } catch (ServiceUnavailableException e) {
-      throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
-    } catch (ServiceRegistryException e) {
-      throw new DistributionException("Unable to create a job", e);
-    }
-
-    Callable<Void> command = new Callable<Void>() {
-      /**
-       * {@inheritDoc}
-       * 
-       * @see java.util.concurrent.Callable#call()
-       */
-      @Override
-      public Void call() throws DistributionException {
-        try {
-          job.setStatus(Status.RUNNING);
-          updateJob(job);
-
-          File sourceFile;
-          try {
-            sourceFile = workspace.get(element.getURI());
-          } catch (NotFoundException e) {
-            throw new DistributionException("Unable to find " + element.getURI() + " in the workspace", e);
-          } catch (IOException e) {
-            throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
-          }
-
-          // get task name
-          String name = getTaskID(mediaPackageId, element.getIdentifier());
-
-          // check if the file has already been delivered
-          Task savedTask;
-          try {
-            savedTask = schedule.getSavedTask(name);
-          } catch (InvalidKeyException e) {
-            throw new DistributionException(e);
-          }
-
-          if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
-            // has been successfully delivered
-            // remove the media
-            remove(name);
-          }
-
-          ITunesDeliveryAction act = new ITunesDeliveryAction();
-          act.setName(name);
-          act.setTitle(sourceFile.getName());
-          // CHNAGE ME: set metadata elements here
-          act.setCreator("Opencast Project");
-          act.setTags(new String[] { "whatever" });
-          act.setAbstract("Opencast Distribution Service - iTunes U");
-          act.setMediaPath(sourceFile.getAbsolutePath());
-
-          // get playlist ID from context strategy
-          String contextDestination = contextStrategy.getContextName(mediaPackageId);
-          if (contextDestination != null) {
-            // use the destination from context strategy
-            destination = contextDestination;
-          }
-
-          // deliver to a tab
-          act.setDestination(destination); // FIXME: replace this with a tab based on the episode's series
-
-          logger.info("Delivering from {}", sourceFile.getAbsolutePath());
-
-          // start the scheduler
-          try {
-            schedule.start(act);
-          } catch (InvalidKeyException e) {
-            throw new DistributionException(e);
-          }
-
-          while (true) {
-            Task task;
-            try {
-              task = schedule.getTask(name);
-            } catch (InvalidKeyException e) {
-              throw new DistributionException(e);
-            }
-            synchronized (task) {
-              Task.State state = task.getState();
-              if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
-                try {
-                  Thread.sleep(1000L);
-                } catch (Exception e) {
-                  throw new RuntimeException(e);
-                }
-                // still running
-                continue;
-              } else if (state == Task.State.COMPLETE) {
-                logger.info("Succeeded delivering from {}", sourceFile.getAbsolutePath());
-                String videoURL = act.getTrackURL();
-                URI newTrackUri;
-                try {
-                  newTrackUri = new URI(videoURL);
-                } catch (URISyntaxException e) {
-                  throw new DistributionException("Distributed element produces an invalid URI", e);
-                }
-                MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                        .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
-                newElement.setIdentifier(element.getIdentifier() + "-dist");
-
-                job.setPayload(newElement.getAsXml());
-                job.setStatus(Status.FINISHED);
-                updateJob(job);
-
-                break;
-              } else if (state == Task.State.FAILED) {
-                throw new DistributionException("Failed delivering " + sourceFile.getAbsolutePath());
-              }
-            }
-          } // end of schedule loop
-
-          return null;
-        } catch(Exception e) {
-          logger.warn("Error distributing " + element, e);
-          try {
-            job.setStatus(Status.FAILED);
-            updateJob(job);
-          } catch (Exception failureToFail) {
-            logger.warn("Unable to update job to failed state", failureToFail);
-          }
-          if (e instanceof DistributionException) {
-            throw (DistributionException) e;
-          } else {
-            throw new DistributionException(e);
-          }
-        }
-      }
-    };
-
-    executor.submit(command);    
-    return job;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   *      java.util.List)
    */
   @Override
-  public Job retract(String mediaPackageId) throws DistributionException {
-    throw new UnsupportedOperationException("ITunesU retract not implemented");
-  }
-
-  /**
-   * Callback for the OSGi environment to set the workspace reference.
-   * 
-   * @param workspace
-   *          the workspace
-   */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
-  }
-
-  /**
-   * Callback for the OSGi environment to set the service registry reference.
-   * 
-   * @param remoteServiceManager
-   *          the service registry
-   */
-  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.serviceRegistry = remoteServiceManager;
+  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+    Operation op = null;
+    try {
+      op = Operation.valueOf(operation);
+      String mediapackageId = arguments.get(0);
+      switch (op) {
+        case Distribute:
+          MediaPackageElement element = MediaPackageElementParser.getFromXml(arguments.get(1));
+          distribute(job, mediapackageId, element);
+          break;
+        case Retract:
+          retract(job, mediapackageId);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      }
+    } catch (IllegalArgumentException e) {
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+    } catch (IndexOutOfBoundsException e) {
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Error handling operation '" + op + "'");
+    }
   }
 
   /**
@@ -387,6 +446,16 @@ public class ITunesUDistributionService implements DistributionService {
    */
   public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     return serviceRegistry.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#getJobType()
+   */
+  @Override
+  public String getJobType() {
+    return JOB_TYPE;
   }
 
   /**
@@ -403,8 +472,7 @@ public class ITunesUDistributionService implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
-   *      java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
    */
   public long countJobs(Status status, String host) throws ServiceRegistryException {
     if (status == null)
@@ -433,6 +501,26 @@ public class ITunesUDistributionService implements DistributionService {
     } catch (ServiceRegistryException serviceRegException) {
       throw new DistributionException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }
+  }
+
+  /**
+   * Callback for the OSGi environment to set the workspace reference.
+   * 
+   * @param workspace
+   *          the workspace
+   */
+  void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /**
+   * Callback for the OSGi environment to set the service registry reference.
+   * 
+   * @param remoteServiceManager
+   *          the service registry
+   */
+  void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
+    this.serviceRegistry = remoteServiceManager;
   }
 
 }

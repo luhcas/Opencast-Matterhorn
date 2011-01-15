@@ -17,14 +17,13 @@
 package org.opencastproject.textanalyzer.api;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackageException;
 
 /**
  * Api for text analysis implementations, aimed at extracting text from an image.
  */
-public interface TextAnalyzerService extends JobProducer {
+public interface TextAnalyzerService {
 
   /** Receipt type */
   String JOB_TYPE = "org.opencastproject.textanalyzer";
@@ -45,6 +44,6 @@ public interface TextAnalyzerService extends JobProducer {
    * @throws MediaPackageException
    *           if this attachment is not valid
    */
-  Job extract(Attachment image, boolean block) throws TextAnalyzerException, MediaPackageException;
+  Job extract(Attachment image) throws TextAnalyzerException, MediaPackageException;
 
 }

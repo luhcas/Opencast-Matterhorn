@@ -19,13 +19,12 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -51,7 +50,7 @@ public class PauseFinalOperationTest {
   private WorkflowDefinition def = null;
   private WorkflowInstance workflow = null;
   private MediaPackage mp = null;
-  private WorkflowServiceDaoSolrImpl dao = null;
+  private WorkflowServiceSolrIndex dao = null;
   private Workspace workspace = null;
   private ResumableTestWorkflowOperationHandler handler = null;
 
@@ -90,17 +89,19 @@ public class PauseFinalOperationTest {
       }
     };
 
-    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
+    serviceRegistry.registerService(service);
 
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
-    dao = new WorkflowServiceDaoSolrImpl();
+    dao = new WorkflowServiceSolrIndex();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = sRoot + File.separator + "solr";
     dao.activate();
     service.setDao(dao);
     service.activate(null);
+    service.setServiceRegistry(serviceRegistry);
 
     is = PauseFinalOperationTest.class.getResourceAsStream("/workflow-definition-pause-last.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
@@ -111,7 +112,6 @@ public class PauseFinalOperationTest {
   @After
   public void teardown() throws Exception {
     dao.deactivate();
-    service.deactivate();
   }
 
   @Test

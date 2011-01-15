@@ -18,6 +18,7 @@ package org.opencastproject.remotetest.server;
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.util.JobUtils;
 import org.opencastproject.remotetest.util.SampleUtils;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
 
@@ -87,15 +88,9 @@ public class ComposerRestEndpointTest {
     String jobId = getJobId(postResponseXml);
 
     // Poll the service for the status of the job.
-    String status = null;
-    while (status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
-      Thread.sleep(5000); // wait and try again
-      HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/job/" + jobId + ".xml");
-      status = getJobStatus(client.execute(pollRequest));
-      System.out.println("encoding job " + jobId + " is " + status);
-    }
-    if (!"FINISHED".equals(status)) {
-      Assert.fail("job status terminated with status=" + status);
+    while (!JobUtils.isJobInState(jobId, "FINISHED")) {
+      Thread.sleep(2000); // wait and try again
+      System.out.println("Waiting for encoding job " + jobId + " to finish");
     }
   }
 
@@ -134,15 +129,9 @@ public class ComposerRestEndpointTest {
     // Poll for the finished composer job
     // Poll the service for the status of the job.
     String jobId = getJobId(postResponseXml);
-    String status = null;
-    while (status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
-      Thread.sleep(5000); // wait and try again
-      HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/job/" + jobId + ".xml");
-      status = getJobStatus(client.execute(pollRequest));
-      System.out.println("encoding job " + jobId + " is " + status);
-    }
-    if (!"FINISHED".equals(status)) {
-      Assert.fail("job status terminated with status=" + status);
+    while (!JobUtils.isJobInState(jobId, "FINISHED")) {
+      Thread.sleep(2000); // wait and try again
+      System.out.println("Waiting for encoding job " + jobId + " to finish");
     }
 
     // Get the track xml from the job
@@ -183,17 +172,6 @@ public class ComposerRestEndpointTest {
     Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     return ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
             .getAttribute("id");
-  }
-
-  protected String getJobStatus(HttpResponse pollResponse) throws Exception {
-    String xml = EntityUtils.toString(pollResponse.getEntity());
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-    String status = ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
-            .getAttribute("status");
-    return status;
   }
 
 }

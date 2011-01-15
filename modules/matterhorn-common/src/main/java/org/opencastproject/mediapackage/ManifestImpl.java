@@ -28,7 +28,6 @@ import org.opencastproject.util.DateTimeSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
@@ -38,13 +37,11 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -833,113 +830,6 @@ final class ManifestImpl {
       }
     }
     return false;
-  }
-
-  /**
-   * Returns an xml presentation of the manifest.
-   * 
-   * @throws TransformerException
-   *           if serializing the document fails
-   * @throws ParserConfigurationException
-   *           if the creating a document builder fails
-   * @throws IOException
-   */
-  Document toXml() throws TransformerException, ParserConfigurationException {
-    return toXml(null);
-  }
-
-  /**
-   * Returns an xml presentation of the manifest.
-   * 
-   * @param serializer
-   *          the media package serializer
-   * @throws TransformerException
-   *           if serializing the document fails
-   * @throws ParserConfigurationException
-   *           if the creating a document builder fails
-   * @throws IOException
-   */
-  Document toXml(MediaPackageSerializer serializer) throws TransformerException, ParserConfigurationException {
-    DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-    docBuilderFactory.setNamespaceAware(true);
-    DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-    Document doc = docBuilder.newDocument();
-
-    // Root element "mediapackage"
-    Element mediaPackage = doc.createElement("mediapackage");
-    doc.appendChild(mediaPackage);
-
-    // Handle
-    if (identifier != null)
-      mediaPackage.setAttribute("id", identifier.toString());
-
-    // Start time
-    if (startTime > 0)
-      mediaPackage.setAttribute("start", DateTimeSupport.toUTC(startTime));
-
-    // Duration
-    if (duration > 0)
-      mediaPackage.setAttribute("duration", Long.toString(duration));
-
-    // Separate the media package members
-    List<Track> tracks = new ArrayList<Track>();
-    List<Attachment> attachments = new ArrayList<Attachment>();
-    List<Catalog> metadata = new ArrayList<Catalog>();
-    List<MediaPackageElement> others = new ArrayList<MediaPackageElement>();
-
-    // Sort media package elements
-    for (MediaPackageElement e : elements) {
-      if (e instanceof Track)
-        tracks.add((Track) e);
-      else if (e instanceof Attachment)
-        attachments.add((Attachment) e);
-      else if (e instanceof Catalog)
-        metadata.add((Catalog) e);
-      else
-        others.add(e);
-    }
-
-    // Tracks
-    if (tracks.size() > 0) {
-      Element tracksNode = doc.createElement("media");
-      Collections.sort(tracks);
-      for (Track t : tracks) {
-        tracksNode.appendChild(t.toManifest(doc, serializer));
-      }
-      mediaPackage.appendChild(tracksNode);
-    }
-
-    // Metadata
-    if (metadata.size() > 0) {
-      Element metadataNode = doc.createElement("metadata");
-      Collections.sort(metadata);
-      for (Catalog m : metadata) {
-        metadataNode.appendChild(m.toManifest(doc, serializer));
-      }
-      mediaPackage.appendChild(metadataNode);
-    }
-
-    // Attachments
-    if (attachments.size() > 0) {
-      Element attachmentsNode = doc.createElement("attachments");
-      Collections.sort(attachments);
-      for (Attachment a : attachments) {
-        attachmentsNode.appendChild(a.toManifest(doc, serializer));
-      }
-      mediaPackage.appendChild(attachmentsNode);
-    }
-
-    // Unclassified
-    if (others.size() > 0) {
-      Element othersNode = doc.createElement("unclassified");
-      Collections.sort(others);
-      for (MediaPackageElement e : others) {
-        othersNode.appendChild(e.toManifest(doc, serializer));
-      }
-      mediaPackage.appendChild(othersNode);
-    }
-
-    return mediaPackage.getOwnerDocument();
   }
 
   /**

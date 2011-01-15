@@ -21,10 +21,10 @@ import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.NotFoundException;
@@ -178,7 +178,7 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
     for (Map.Entry<Track, Job> entry : jobs.entrySet()) {
       Track t = entry.getKey();
       Job job = entry.getValue();
-      Track processedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
+      Track processedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
       if (targetMediaFlavor != null) {
         processedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetMediaFlavor));
       }
@@ -265,7 +265,7 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
           if (!waitForStatus(job).isSuccess()) {
             throw new WorkflowOperationException("Caption converting failed.");
           }
-          Catalog convertedCaption = (Catalog) AbstractMediaPackageElement.getFromXml(job.getPayload());
+          Catalog convertedCaption = (Catalog) MediaPackageElementParser.getFromXml(job.getPayload());
           // add to media package
           mediaPackage.addDerived(convertedCaption, caption);
           String fileName = getFileNameFromElements(caption, convertedCaption);

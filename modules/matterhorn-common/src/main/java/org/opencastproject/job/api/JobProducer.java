@@ -19,6 +19,8 @@ import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
 
+import java.util.List;
+
 /**
  * A service that creates jobs for long-running operations.
  */
@@ -38,6 +40,13 @@ public interface JobProducer {
   Job getJob(long id) throws NotFoundException, ServiceRegistryException;
 
   /**
+   * Returns the identifier for jobs that are created by this producer.
+   * 
+   * @return the job type
+   */
+  String getJobType();
+
+  /**
    * Get the number of encoding jobs in a current status on all nodes.
    * 
    * @return Number of jobs in this state
@@ -54,5 +63,17 @@ public interface JobProducer {
    *           if an error occurs while communicating with the backing data source
    */
   long countJobs(Status status, String host) throws ServiceRegistryException;
+
+  /**
+   * Asks the job producer to start the given operation on the provided list of arguments.
+   * 
+   * @param operation
+   *          the name of the operation
+   * @param arguments
+   *          the list of arguments
+   * @throws ServiceRegistryException
+   *           if the producer was unable to start work as requested
+   */
+  void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException;
 
 }

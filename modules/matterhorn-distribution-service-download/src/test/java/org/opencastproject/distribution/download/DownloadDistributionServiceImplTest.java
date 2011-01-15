@@ -38,14 +38,13 @@ import org.junit.Test;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.concurrent.Executors;
 
 public class DownloadDistributionServiceImplTest {
   
   private DownloadDistributionService service = null;
   private MediaPackage mp = null;
   private File distributionRoot = null;
-  private ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+  private ServiceRegistry serviceRegistry = null;
 
   @Before
   public void setup() throws Exception {
@@ -62,13 +61,15 @@ public class DownloadDistributionServiceImplTest {
     
     distributionRoot = new File("./target/static");
     service = new DownloadDistributionService();
+
+    serviceRegistry = new ServiceRegistryInMemoryImpl(service);
+    service.setRemoteServiceManager(serviceRegistry);
+    
     service.distributionDirectory = distributionRoot;
     service.serviceUrl = UrlSupport.DEFAULT_BASE_URL;
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
-    service.setRemoteServiceManager(serviceRegistry);
-    service.executor = Executors.newFixedThreadPool(1);
-
+    
     EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "media.mov"));
     EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "dublincore.xml"));
     EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "mpeg7.xml"));
@@ -79,6 +80,7 @@ public class DownloadDistributionServiceImplTest {
   @After
   public void teardown() throws Exception {
     FileUtils.deleteDirectory(distributionRoot);
+    ((ServiceRegistryInMemoryImpl)serviceRegistry).dispose();
   }
   
   @Test

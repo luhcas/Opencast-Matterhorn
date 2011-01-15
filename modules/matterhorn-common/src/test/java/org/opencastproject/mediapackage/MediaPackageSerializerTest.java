@@ -81,7 +81,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
       // Test relative path, using serializer
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(manifestFile.getParentFile());
-      Document xml = mediaPackage.toXml(serializer);
+      Document xml = MediaPackageParser.getAsXml(mediaPackage, serializer);
 
       // Test linux file relative to media package root
       String expected = dcFile.getAbsolutePath().substring(packageDir.getAbsolutePath().length() + 1);
@@ -111,7 +111,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
       // Test relative path, using serializer
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(new File(linuxRootURI));
-      Document xml = mediaPackage.toXml(serializer);
+      Document xml = MediaPackageParser.getAsXml(mediaPackage, serializer);
 
       // Test linux file relative to media package root
       String expected = linuxURI.toString().substring(linuxRootURI.toString().length() + 1);
@@ -141,7 +141,7 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
       // Test relative path, using serializer
       MediaPackageSerializer serializer = null;
       serializer = new DefaultMediaPackageSerializerImpl(new File(windowsRootURI));
-      Document xml = mediaPackage.toXml(serializer);
+      Document xml = MediaPackageParser.getAsXml(mediaPackage, serializer);
 
       // Test windows file relative to media package root
       String expected = windowsURI.toString().substring(windowsRootURI.toString().length() + 1);

@@ -18,6 +18,8 @@ package org.opencastproject.caption.endpoint;
 import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.job.api.JobProducerRestEndpointSupport;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -61,10 +63,9 @@ import javax.xml.transform.stream.StreamResult;
 
 /**
  * Rest endpoint for {@link CaptionService}.
- * 
  */
 @Path("/")
-public class CaptionServiceRestEndpoint {
+public class CaptionServiceRestEndpoint extends JobProducerRestEndpointSupport {
 
   protected CaptionService service;
   protected String docs;
@@ -242,4 +243,18 @@ public class CaptionServiceRestEndpoint {
             + "  <url>serverUrl/workflow/samples/captions.dfxp.xml</url>"
             + "  <checksum type=\"md5\">08b58d152be05a85f877cf160ee6608c</checksum>" + "</catalog>";
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   */
+  @Override
+  public JobProducer getService() {
+    if (service instanceof JobProducer)
+      return (JobProducer)service;
+    else
+      return null;
+  }
+
 }

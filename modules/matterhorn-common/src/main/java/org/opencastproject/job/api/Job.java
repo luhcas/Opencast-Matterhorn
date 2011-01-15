@@ -66,7 +66,15 @@ public interface Job {
    * 
    * @return The operation
    */
-  String getOperationType();
+  String getOperation();
+
+  /**
+   * Sets the operation name.
+   * 
+   * @param string
+   *          the operation
+   */
+  void setOperation(String operation);
 
   /**
    * The arguments passed to the service and operation. Each argument must be serializable to a string.

@@ -18,11 +18,11 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.UnsupportedElementException;
@@ -144,7 +144,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
       Track inspectedTrack;
       try {
-        inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectJob.getPayload());
+        inspectedTrack = (Track) MediaPackageElementParser.getFromXml(inspectJob.getPayload());
       } catch (MediaPackageException e) {
         throw new WorkflowOperationException("Unable to parse track from job " + inspectJob.getId(), e);
       }

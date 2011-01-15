@@ -325,16 +325,26 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, operation, arguments, false);
+    return createJob(type, operation, arguments, null, false);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, java.lang.String)
+   */
+  @Override
+  public Job createJob(String type, String operation, List<String> arguments, String payload)
+          throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(type, operation, arguments, payload, false);
   }
 
   /**
    * {@inheritDoc}
    *
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, boolean)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, String, boolean)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
     String servicePath = "job";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
@@ -342,6 +352,8 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       params.add(new BasicNameValuePair("jobType", type));
       params.add(new BasicNameValuePair("operation", operation));
       params.add(new BasicNameValuePair("host", this.serverUrl));
+      if (payload != null)
+        params.add(new BasicNameValuePair("payload", payload));
       params.add(new BasicNameValuePair("start", Boolean.toString(start)));
       if(arguments != null && ! arguments.isEmpty()) {
         for(String argument : arguments) {
@@ -715,7 +727,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @param client
    *          the trusted http client
    */
-  protected void setTrustedHttpClient(TrustedHttpClient client) {
+  void setTrustedHttpClient(TrustedHttpClient client) {
     this.client = client;
   }
 

@@ -21,7 +21,6 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
@@ -57,10 +56,10 @@ public class CountWorkflowsTest {
 
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition def = null;
+  private WorkflowServiceSolrIndex dao = null;
   private MediaPackage mp = null;
-  private WorkflowServiceDaoSolrImpl dao = null;
   private ResumableWorkflowOperationHandler holdingOperationHandler;
-  private ServiceRegistry serviceRegistry = null;
+  private ServiceRegistryInMemoryImpl serviceRegistry = null;
 
   private File sRoot = null;
 
@@ -99,13 +98,15 @@ public class CountWorkflowsTest {
     };
 
     serviceRegistry = new ServiceRegistryInMemoryImpl();
+    serviceRegistry.registerService(service);
 
-    dao = new WorkflowServiceDaoSolrImpl();
+    dao = new WorkflowServiceSolrIndex();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = sRoot + File.separator + "solr";
     dao.activate();
     service.setDao(dao);
     service.activate(null);
+    service.setServiceRegistry(serviceRegistry);
 
     is = CountWorkflowsTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
@@ -116,7 +117,6 @@ public class CountWorkflowsTest {
   @After
   public void teardown() throws Exception {
     dao.deactivate();
-    service.deactivate();
   }
 
   @Test
@@ -185,4 +185,5 @@ public class CountWorkflowsTest {
       return "ContinuingWorkflowOperationHandler";
     }
   }
+  
 }

@@ -21,6 +21,7 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.serviceregistry.api.RemoteBase;
 
 import org.apache.http.HttpEntity;
@@ -92,7 +93,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
     String url = "/enrich";
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
-      params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement) original).getAsXml()));
+      params.add(new BasicNameValuePair("mediaPackageElement", MediaPackageElementParser.getAsXml(((AbstractMediaPackageElement) original))));
     } catch (Exception e) {
       throw new MediaInspectionException(e);
     }

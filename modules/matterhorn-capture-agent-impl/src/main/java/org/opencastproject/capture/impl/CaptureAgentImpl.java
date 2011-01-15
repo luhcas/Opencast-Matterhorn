@@ -38,6 +38,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.track.TrackImpl;
@@ -723,7 +724,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl(recording.getBaseDir());
       File manifestFile = new File(recording.getBaseDir(), CaptureParameters.MANIFEST_NAME);
       Result outputFile = new StreamResult(manifestFile);
-      Document manifest = recording.getMediaPackage().toXml(serializer);
+      Document manifest = MediaPackageParser.getAsXml(recording.getMediaPackage(), serializer);
 
       TransformerFactory tf = TransformerFactory.newInstance();
       Transformer t = tf.newTransformer();

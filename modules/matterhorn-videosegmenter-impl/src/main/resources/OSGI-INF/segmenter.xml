@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
   name="org.opencastproject.videosegmenter.impl.VideoSegmenterServiceImpl"
-  activate="activate" immediate="true">
+  immediate="true">
   <implementation class="org.opencastproject.videosegmenter.impl.VideoSegmenterServiceImpl" />
   <property name="service.description" value="VideoSegmenter Service" />
   <service>

@@ -24,12 +24,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +40,6 @@ import java.util.TreeSet;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -53,9 +49,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 
 /**
@@ -1015,42 +1009,6 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.mediapackage.MediaPackage#toXml()
-   */
-  public String toXml() {
-    try {
-      Marshaller marshaller = context.createMarshaller();
-      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
-      StringWriter writer = new StringWriter();
-      marshaller.marshal(this, writer);
-      return writer.toString();
-    } catch (JAXBException e) {
-      throw new IllegalStateException(e.getLinkedException() != null ? e.getLinkedException() : e);
-    }
-  }
-
-  /**
-   * Serializes the media package to a dom document.
-   * 
-   * @param serializer
-   *          the media package serializer
-   * @throws ParserConfigurationException
-   * @throws TransformerException
-   * @see org.opencastproject.mediapackage.MediaPackage#toXml()
-   */
-  public Document toXml(MediaPackageSerializer serializer) throws MediaPackageException {
-    try {
-      return manifest.toXml(serializer);
-    } catch (TransformerException e) {
-      throw new MediaPackageException(e);
-    } catch (ParserConfigurationException e) {
-      throw new MediaPackageException(e);
-    }
-  }
-
-  /**
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -1076,7 +1034,7 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public Object clone() {
     try {
-      String xml = this.toXml();
+      String xml = MediaPackageParser.getAsXml(this);
       return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(xml);
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -1101,25 +1059,8 @@ public final class MediaPackageImpl implements MediaPackage {
     public MediaPackageImpl marshal(MediaPackage mp) throws Exception {
       return (MediaPackageImpl) mp;
     }
-
     public MediaPackage unmarshal(MediaPackageImpl mp) throws Exception {
       return mp;
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.mediapackage.MediaPackage#toXml(OutputStream, boolean)
-   */
-  @Override
-  public void toXml(OutputStream out, boolean format) throws MediaPackageException {
-    try {
-      Marshaller marshaller = context.createMarshaller();
-      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, format);
-      marshaller.marshal(this, out);
-    } catch (JAXBException e) {
-      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
   }
 

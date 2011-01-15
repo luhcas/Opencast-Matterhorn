@@ -18,7 +18,6 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -28,6 +27,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -293,7 +293,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
           if (!waitForStatus(imageJob).isSuccess()) {
             throw new WorkflowOperationException("Extracting scene image from " + sourceTrack + " failed");
           }
-          image = (Attachment) AbstractMediaPackageElement.getFromXml(imageJob.getPayload());
+          image = (Attachment) MediaPackageElementParser.getFromXml(imageJob.getPayload());
           long timeInComposerQueue = imageJob.getDateStarted().getTime() - imageJob.getDateCreated().getTime();
           totalTimeInQueue += timeInComposerQueue;
         } catch (EncoderException e) {
@@ -302,13 +302,17 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         }
 
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
-        Job receipt = analysisService.extract(image, true);
+        Job job = analysisService.extract(image);
+        if (!waitForStatus(job).isSuccess()) {
+          logger.warn("Text analysis failed on " + image);
+          continue;
+        }
 
         // add this receipt's queue time to the total
-        long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+        long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
         totalTimeInQueue += timeInQueue;
 
-        Catalog catalog = (Catalog) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+        Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(job.getPayload());
         workspace.delete(image.getURI());
         if (catalog == null) {
           logger.warn("Text analysis did not return a valid mpeg7 for segment {}", segment);

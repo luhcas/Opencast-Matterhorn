@@ -20,12 +20,12 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobBarrier;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -54,7 +54,6 @@ import org.opencastproject.workspace.api.Workspace;
 import org.apache.commons.io.FileUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,9 +69,7 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.media.Buffer;
 import javax.media.Controller;
@@ -95,10 +92,15 @@ import javax.media.protocol.DataSource;
  * ffmpeg -i &lt;inputfile&gt; -deinterlace -r 1 -vcodec mjpeg -qscale 1 -an &lt;outputfile&gt;
  * </pre>
  */
-public class VideoSegmenterServiceImpl implements VideoSegmenterService, ManagedService {
+public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProducer, ManagedService {
 
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "videosegments";
+
+  /** List of available operations on jobs */
+  private enum Operation {
+    Segment
+  };
 
   /** Constant used to retreive the frame positioning control */
   public static final String FRAME_POSITIONING = "javax.media.control.FramePositioningControl";
@@ -123,12 +125,6 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
 
   /** The expected mimetype of the resulting preview encoding */
   public static final MimeType MJPEG_MIMETYPE = MimeTypes.MJPEG;
-
-  /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "org.opencastproject.videosegmenter.threads";
-
-  /** The default worker thread pool size to use if no configuration is specified */
-  public static final int DEFAULT_THREADS = 1;
 
   /** The logging facility */
   protected static final Logger logger = LoggerFactory.getLogger(VideoSegmenterServiceImpl.class);
@@ -187,28 +183,6 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
     }
   }
 
-  protected void activate(ComponentContext cc) {
-    // set up threading
-    int threads = -1;
-    String configredThreads = (String) cc.getBundleContext().getProperty(CONFIG_THREADS);
-    // try to parse the value as a number. If it fails to parse, there is a config problem so we throw an exception.
-    if (configredThreads == null) {
-      threads = DEFAULT_THREADS;
-    } else {
-      threads = Integer.parseInt(configredThreads);
-    }
-    if (threads < 1) {
-      throw new IllegalStateException("The composer needs one or more threads to function.");
-    }
-    setExecutorThreads(threads);
-  }
-
-  /** Separating this from the activate method so it's easier to test */
-  void setExecutorThreads(int threads) {
-    executor = Executors.newFixedThreadPool(threads);
-    logger.info("Thread pool size = {}", threads);
-  }
-
   /**
    * Sets the composer service.
    * 
@@ -249,6 +223,21 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.videosegmenter.api.VideoSegmenterService#segment(org.opencastproject.mediapackage.Track)
+   */
+  public Job segment(Track track) throws VideoSegmenterException, MediaPackageException {
+    try {
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Segment.toString(), Arrays.asList(MediaPackageElementParser.getAsXml(track)));
+    } catch (ServiceUnavailableException e) {
+      throw new VideoSegmenterException("No service of type '" + JOB_TYPE + "' available", e);
+    } catch (ServiceRegistryException e) {
+      throw new VideoSegmenterException("Unable to create a job", e);
+    }
+  }
+
+  /**
    * Starts segmentation on the video track identified by <code>mediapackageId</code> and <code>elementId</code> and
    * returns a receipt containing the final result in the form of anMpeg7Catalog.
    * 
@@ -257,179 +246,186 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
    * @return a receipt containing the resulting mpeg-7 catalog
    * @throws VideoSegmenterException
    */
-  public Job segment(final Track track) throws VideoSegmenterException, MediaPackageException {
-    final Job job;
-    try {
-      job = serviceRegistry.createJob(JOB_TYPE, OPERATION, Arrays.asList(track.getAsXml()));
-    } catch (ServiceUnavailableException e) {
-      throw new VideoSegmenterException("No service of type '" + JOB_TYPE + "' available", e);
-    } catch (ServiceRegistryException e) {
-      throw new VideoSegmenterException("Unable to create a job", e);
-    }
+  private Catalog segment(Job job, Track track) throws VideoSegmenterException, MediaPackageException {
 
     // Make sure the element can be analyzed using this analysis implementation
     if (!track.hasVideo()) {
       logger.warn("Element {} is not a video track", track);
       job.setStatus(Status.FAILED);
       updateJob(job);
-      return job;
+      return null;
     }
 
-    Callable<Void> command = new Callable<Void>() {
-      /**
-       * {@inheritDoc}
-       * 
-       * @see java.util.concurrent.Callable#call()
-       */
-      @Override
-      public Void call() throws VideoSegmenterException {
-        try {
-          job.setStatus(Status.RUNNING);
-          updateJob(job);
+    try {
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
 
-          PlayerListener processorListener = null;
-          Track mjpegTrack = null;
-          Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
+      PlayerListener processorListener = null;
+      Track mjpegTrack = null;
+      Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
 
-          logger.info("Encoding {} to {}", track, MJPEG_MIMETYPE);
-          try {
-            mjpegTrack = prepare(track);
-          } catch (EncoderException encoderException) {
-            throw new VideoSegmenterException("Error creating a mjpeg", encoderException);
-          }
-
-          // Create a player
-          File mediaFile = null;
-          URL mediaUrl = null;
-          try {
-            mediaFile = workspace.get(mjpegTrack.getURI());
-            mediaUrl = mediaFile.toURI().toURL();
-          } catch (NotFoundException e) {
-            throw new VideoSegmenterException("Error finding the mjpeg in the workspace", e);
-          } catch (IOException e) {
-            throw new VideoSegmenterException("Error reading the mjpeg in the workspace", e);
-          }
-
-          DataSource ds;
-          try {
-            ds = Manager.createDataSource(mediaUrl);
-          } catch (NoDataSourceException e) {
-            throw new VideoSegmenterException("Error obtaining a JMF datasource", e);
-          } catch (IOException e) {
-            throw new VideoSegmenterException("Problem creating a JMF datasource", e);
-          }
-          Processor processor = null;
-          try {
-            processor = Manager.createProcessor(ds);
-            processorListener = new PlayerListener(processor);
-            processor.addControllerListener(processorListener);
-          } catch (Exception e) {
-            throw new VideoSegmenterException(e);
-          }
-
-          // Configure the processor
-          processor.configure();
-          if (!processorListener.waitForState(Processor.Configured)) {
-            throw new VideoSegmenterException("Unable to configure processor");
-          }
-
-          // Set the processor to RAW content
-          processor.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW));
-
-          // Realize the processor
-          processor.realize();
-          if (!processorListener.waitForState(Processor.Realized)) {
-            throw new VideoSegmenterException("Unable to realize the processor");
-          }
-
-          // Get the output DataSource from the processor and
-          // hook it up to the DataSourceHandler.
-          DataSource outputDataSource = processor.getDataOutput();
-          FrameGrabber dsh = new FrameGrabber();
-
-          try {
-            dsh.setSource(outputDataSource);
-          } catch (IncompatibleSourceException e) {
-            throw new VideoSegmenterException("Cannot handle the output data source from the processor: "
-                    + outputDataSource);
-          }
-
-          // Load the movie and change the processor to prefetched state
-          processor.prefetch();
-          if (!processorListener.waitForState(Controller.Prefetched)) {
-            throw new VideoSegmenterException("Unable to switch player into 'prefetch' state");
-          }
-
-          // Get the movie duration
-          Time duration = processor.getDuration();
-          if (duration == Duration.DURATION_UNKNOWN) {
-            throw new VideoSegmenterException("Java media framework is unable to detect movie duration");
-          }
-
-          long durationInSeconds = Math.min(track.getDuration() / 1000, (long) duration.getSeconds());
-          logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
-
-          MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds * 1000);
-          MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
-          Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
-
-          logger.info("Starting video segmentation of {}", mediaUrl);
-
-          processor.setRate(1.0f);
-          processor.start();
-          dsh.start();
-          List<Segment> segments;
-          try {
-            segments = segment(videoContent, dsh);
-          } catch (IOException e) {
-            throw new VideoSegmenterException("Unable to access a frame in the mjpeg", e);
-          }
-
-          logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
-
-          MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                  .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
-          URI uri;
-          try {
-            uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
-          } catch (IOException e) {
-            throw new VideoSegmenterException("Unable to put the mpeg7 catalog into the workspace", e);
-          }
-          mpeg7Catalog.setURI(uri);
-
-          try {
-            workspace.delete(mjpegTrack.getURI());
-          } catch (NotFoundException e) {
-            throw new VideoSegmenterException("Unable to find the mjpeg in the workspace", e);
-          } catch (IOException e) {
-            throw new VideoSegmenterException("Unable to delete the mjpeg from the workspace", e);
-          }
-
-          job.setPayload(mpeg7Catalog.getAsXml());
-          job.setStatus(Status.FINISHED);
-          updateJob(job);
-
-          logger.info("Finished video segmentation of {}", mediaUrl);
-          return null;
-        } catch (Exception e) {
-          logger.warn("Error segmenting " + track, e);
-          try {
-            job.setStatus(Status.FAILED);
-            updateJob(job);
-          } catch (Exception failureToFail) {
-            logger.warn("Unable to update job to failed state", failureToFail);
-          }
-          if (e instanceof VideoSegmenterException) {
-            throw (VideoSegmenterException) e;
-          } else {
-            throw new VideoSegmenterException(e);
-          }
-        }
+      logger.info("Encoding {} to {}", track, MJPEG_MIMETYPE);
+      try {
+        mjpegTrack = prepare(track);
+      } catch (EncoderException encoderException) {
+        throw new VideoSegmenterException("Error creating a mjpeg", encoderException);
       }
-    };
 
-    executor.submit(command);
-    return job;
+      // Create a player
+      File mediaFile = null;
+      URL mediaUrl = null;
+      try {
+        mediaFile = workspace.get(mjpegTrack.getURI());
+        mediaUrl = mediaFile.toURI().toURL();
+      } catch (NotFoundException e) {
+        throw new VideoSegmenterException("Error finding the mjpeg in the workspace", e);
+      } catch (IOException e) {
+        throw new VideoSegmenterException("Error reading the mjpeg in the workspace", e);
+      }
+
+      DataSource ds;
+      try {
+        ds = Manager.createDataSource(mediaUrl);
+      } catch (NoDataSourceException e) {
+        throw new VideoSegmenterException("Error obtaining a JMF datasource", e);
+      } catch (IOException e) {
+        throw new VideoSegmenterException("Problem creating a JMF datasource", e);
+      }
+      Processor processor = null;
+      try {
+        processor = Manager.createProcessor(ds);
+        processorListener = new PlayerListener(processor);
+        processor.addControllerListener(processorListener);
+      } catch (Exception e) {
+        throw new VideoSegmenterException(e);
+      }
+
+      // Configure the processor
+      processor.configure();
+      if (!processorListener.waitForState(Processor.Configured)) {
+        throw new VideoSegmenterException("Unable to configure processor");
+      }
+
+      // Set the processor to RAW content
+      processor.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW));
+
+      // Realize the processor
+      processor.realize();
+      if (!processorListener.waitForState(Processor.Realized)) {
+        throw new VideoSegmenterException("Unable to realize the processor");
+      }
+
+      // Get the output DataSource from the processor and
+      // hook it up to the DataSourceHandler.
+      DataSource outputDataSource = processor.getDataOutput();
+      FrameGrabber dsh = new FrameGrabber();
+
+      try {
+        dsh.setSource(outputDataSource);
+      } catch (IncompatibleSourceException e) {
+        throw new VideoSegmenterException("Cannot handle the output data source from the processor: "
+                + outputDataSource);
+      }
+
+      // Load the movie and change the processor to prefetched state
+      processor.prefetch();
+      if (!processorListener.waitForState(Controller.Prefetched)) {
+        throw new VideoSegmenterException("Unable to switch player into 'prefetch' state");
+      }
+
+      // Get the movie duration
+      Time duration = processor.getDuration();
+      if (duration == Duration.DURATION_UNKNOWN) {
+        throw new VideoSegmenterException("Java media framework is unable to detect movie duration");
+      }
+
+      long durationInSeconds = Math.min(track.getDuration() / 1000, (long) duration.getSeconds());
+      logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
+
+      MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds * 1000);
+      MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
+      Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
+
+      logger.info("Starting video segmentation of {}", mediaUrl);
+
+      processor.setRate(1.0f);
+      processor.start();
+      dsh.start();
+      List<Segment> segments;
+      try {
+        segments = segment(videoContent, dsh);
+      } catch (IOException e) {
+        throw new VideoSegmenterException("Unable to access a frame in the mjpeg", e);
+      }
+
+      logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
+
+      Catalog mpeg7Catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
+      URI uri;
+      try {
+        uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
+      } catch (IOException e) {
+        throw new VideoSegmenterException("Unable to put the mpeg7 catalog into the workspace", e);
+      }
+      mpeg7Catalog.setURI(uri);
+
+      try {
+        workspace.delete(mjpegTrack.getURI());
+      } catch (NotFoundException e) {
+        throw new VideoSegmenterException("Unable to find the mjpeg in the workspace", e);
+      } catch (IOException e) {
+        throw new VideoSegmenterException("Unable to delete the mjpeg from the workspace", e);
+      }
+
+      job.setPayload(MediaPackageElementParser.getAsXml(mpeg7Catalog));
+      job.setStatus(Status.FINISHED);
+      updateJob(job);
+
+      logger.info("Finished video segmentation of {}", mediaUrl);
+      return mpeg7Catalog;
+    } catch (Exception e) {
+      logger.warn("Error segmenting " + track, e);
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      if (e instanceof VideoSegmenterException) {
+        throw (VideoSegmenterException) e;
+      } else {
+        throw new VideoSegmenterException(e);
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   *      java.util.List)
+   */
+  @Override
+  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+    Operation op = null;
+    try {
+      op = Operation.valueOf(operation);
+      switch (op) {
+        case Segment:
+          Track track = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          segment(job, track);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      }
+    } catch (IllegalArgumentException e) {
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+    } catch (IndexOutOfBoundsException e) {
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Error handling operation '" + op + "'");
+    }
   }
 
   /**
@@ -439,6 +435,16 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
    */
   public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     return serviceRegistry.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#getJobType()
+   */
+  @Override
+  public String getJobType() {
+    return JOB_TYPE;
   }
 
   /**
@@ -695,7 +701,7 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
       throw new EncoderException("Unable to create motion jpeg version of " + track);
     }
 
-    Track composedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+    Track composedTrack = (Track) MediaPackageElementParser.getFromXml(receipt.getPayload());
     composedTrack.setReference(original);
     composedTrack.setMimeType(MJPEG_MIMETYPE);
     composedTrack.addTag("segmentation");

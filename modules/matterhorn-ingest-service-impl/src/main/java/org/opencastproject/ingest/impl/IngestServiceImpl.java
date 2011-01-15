@@ -26,6 +26,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -43,6 +44,7 @@ import org.opencastproject.workflow.api.WorkflowException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -206,7 +208,7 @@ public class IngestServiceImpl implements IngestService {
     String tempPath = PathSupport.concat(tempFolder, UUID.randomUUID().toString());
 
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
 
       // locally unpack the mediaPackage
       // save inputStream to file
@@ -345,7 +347,7 @@ public class IngestServiceImpl implements IngestService {
     Job job = null;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, INGEST_TRACK_FROM_URI,
-              Arrays.asList(uri.toString(), flavor == null ? null : flavor.toString(), mediaPackage.toXml()), true);
+              Arrays.asList(uri.toString(), flavor == null ? null : flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -380,7 +382,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -416,7 +418,7 @@ public class IngestServiceImpl implements IngestService {
     Job job = null;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, INGEST_CATALOG_FROM_URI,
-              Arrays.asList(uri.toString(), flavor.toString(), mediaPackage.toXml()), true);
+              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -475,7 +477,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -513,7 +515,7 @@ public class IngestServiceImpl implements IngestService {
     Job job = null;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, INGEST_ATTACHMENT_FROM_URI,
-              Arrays.asList(uri.toString(), flavor.toString(), mediaPackage.toXml()), true);
+              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
@@ -547,7 +549,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
@@ -649,7 +651,6 @@ public class IngestServiceImpl implements IngestService {
       }
     }
 
-    WorkflowStateListener listener = null;
     try {
       if (workflow == null) {
         WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(workflowDefinitionID);
@@ -657,33 +658,19 @@ public class IngestServiceImpl implements IngestService {
       } else {
         WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(workflowDefinitionID);
 
-        // if we are not in the last operation of the pre-processing workflow (due to the capture agent not reporting
+        // if we are not in the last operation of the preprocessing workflow (due to the capture agent not reporting
         // on its recording status), we need to advance the workflow.
         WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
         List<WorkflowOperationInstance> preProcessingOperations = workflow.getOperations();
-
-        // register a listener so we can ensure that each resume operation is handled
-        listener = new WorkflowStateListener(workflow.getId(), WorkflowState.PAUSED);
-        workflowService.addWorkflowListener(listener);
-
-        synchronized (listener) {
-          while (listener.getUniqueOperations().size() < preProcessingOperations.size() - 1) {
-            logger.debug("Advancing workflow (skipping {})", currentOperation);
-            workflow = workflowService.resume(workflow.getId());
-            try {
-              listener.wait();
-            } catch (InterruptedException e) {
-              throw new IngestException(e);
-            }
-            currentOperation = workflow.getCurrentOperation();
-          }
+        while (preProcessingOperations.indexOf(currentOperation) < preProcessingOperations.size() - 1) {
+          logger.debug("Advancing workflow (skipping {})", currentOperation);
+          currentOperation.setState(OperationState.SKIPPED);
+          currentOperation = workflow.next();
         }
-
-        // remove the listener as soon as possible
-        workflowService.removeWorkflowListener(listener);
-        listener = null;
-
-        // Replace the current mediapackage with the new one, and add the new operations
+        // Ingest succeeded
+        currentOperation.setState(OperationState.SUCCEEDED);
+        
+        // Replace the current mediapackage with the new one
         workflow.setMediaPackage(mp);
         workflow.extend(workflowDef);
         workflowService.update(workflow);
@@ -696,10 +683,6 @@ public class IngestServiceImpl implements IngestService {
       }
     } catch (WorkflowException e) {
       throw new IngestException(e);
-    } finally {
-      if (listener != null) {
-        workflowService.removeWorkflowListener(listener);
-      }
     }
   }
 

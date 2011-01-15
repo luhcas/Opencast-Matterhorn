@@ -19,17 +19,16 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import junit.framework.Assert;
@@ -56,7 +55,7 @@ public class HoldStateTest {
   private WorkflowDefinition def = null;
   private WorkflowInstance workflow = null;
   private MediaPackage mp = null;
-  private WorkflowServiceDaoSolrImpl dao = null;
+  private WorkflowServiceSolrIndex dao = null;
   private ResumableTestWorkflowOperationHandler holdingOperationHandler;
 
   private File sRoot = null;
@@ -95,14 +94,16 @@ public class HoldStateTest {
       }
     };
 
-    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
+    serviceRegistry.registerService(service);
 
-    dao = new WorkflowServiceDaoSolrImpl();
+    dao = new WorkflowServiceSolrIndex();
     dao.solrRoot = sRoot + File.separator + "solr";
     dao.setServiceRegistry(serviceRegistry);
     dao.activate();
     service.setDao(dao);
     service.activate(null);
+    service.setServiceRegistry(serviceRegistry);
 
     is = HoldStateTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
@@ -114,7 +115,6 @@ public class HoldStateTest {
   public void teardown() throws Exception {
     System.out.println("All tests finished... tearing down...");
     dao.deactivate();
-    service.deactivate();
   }
 
   @Test
@@ -215,4 +215,5 @@ public class HoldStateTest {
       return "ContinuingWorkflowOperationHandler";
     }
   }
+  
 }

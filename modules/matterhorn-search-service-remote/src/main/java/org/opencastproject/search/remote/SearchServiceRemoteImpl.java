@@ -16,6 +16,7 @@
 package org.opencastproject.search.remote;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
@@ -59,7 +60,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     HttpPost post = new HttpPost("/add");
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
+      params.add(new BasicNameValuePair("mediapackage", MediaPackageParser.getAsXml(mediaPackage)));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
     } catch (Exception e) {

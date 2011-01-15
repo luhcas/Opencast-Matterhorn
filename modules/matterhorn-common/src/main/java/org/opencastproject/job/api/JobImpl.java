@@ -46,7 +46,7 @@ public class JobImpl implements Job {
   protected String jobType;
 
   /** The operation type */
-  protected String operationType;
+  protected String operation;
 
   /** The arguments passed to the service operation */
   protected List<String> arguments;
@@ -163,21 +163,22 @@ public class JobImpl implements Job {
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.job.api.Job#setOperation(java.lang.String)
+   */
+  @Override
+  public void setOperation(String operation) {
+    this.operation = operation;
+  }
+  
+  /**
+   * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#getOperationType()
+   * @see org.opencastproject.job.api.Job#getOperation()
    */
   @XmlElement
   @Override
-  public String getOperationType() {
-    return operationType;
-  }
-
-  /**
-   * @param operationType
-   *          the operationType to set
-   */
-  public void setOperationType(String operationType) {
-    this.operationType = operationType;
+  public String getOperation() {
+    return operation;
   }
 
   /**

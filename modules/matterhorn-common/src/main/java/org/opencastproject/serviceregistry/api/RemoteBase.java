@@ -15,11 +15,7 @@
  */
 package org.opencastproject.serviceregistry.api;
 
-import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.security.api.TrustedHttpClient;
-import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +37,7 @@ import java.util.Map;
 /**
  * Base class serving as a convenience implementation for remote services.
  */
-public class RemoteBase implements JobProducer {
+public class RemoteBase {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(RemoteBase.class);
@@ -162,68 +158,11 @@ public class RemoteBase implements JobProducer {
   }
 
   /**
-   * Polls for a job until they return a status of {@link Status#FINISHED} or {@link Status#FAILED}
-   * 
-   * @param id
-   *          The job identifier
-   * @return The receipt
-   * @throws NotFoundException
-   *           if the job doesn't exist
-   * @throws ServiceRegistryException
-   *           if communication with the service registry fails
-   */
-  protected Job poll(long id) throws NotFoundException, ServiceRegistryException {
-    while (true) {
-      try {
-        Job r = getJob(id);
-        if (Status.FAILED.equals(r.getStatus()) || Status.FINISHED.equals(r.getStatus())) {
-          return r;
-        }
-        Thread.sleep(10000);
-      } catch (InterruptedException e) {
-        logger.warn("polling interrupted");
-      }
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return remoteServiceManager.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
-   */
-  public long countJobs(Status status) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    return remoteServiceManager.count(serviceType, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    if (host == null)
-      throw new IllegalArgumentException("host must not be null");
-    return remoteServiceManager.count(serviceType, status, host);
-  }
-
-  /**
    * A stream wrapper that closes the http response when the stream is closed. If a remote service proxy returns an
    * inputstream, this implementation should be used to ensure that the http connection is closed properly.
    */
   public class HttpClientClosingInputStream extends InputStream {
+
     /** The input stream delivering the actual data */
     protected InputStream delegateStream = null;
 

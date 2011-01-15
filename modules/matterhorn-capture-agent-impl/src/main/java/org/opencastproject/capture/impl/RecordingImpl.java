@@ -24,6 +24,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageImpl;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.util.ConfigurationException;
 
@@ -327,7 +328,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
   private void writeObject(ObjectOutputStream out) throws IOException {
     out.defaultWriteObject();
     try {
-      mPkg.toXml(out, true);
+      MediaPackageParser.getAsXml(mPkg, out, true);
     } catch (MediaPackageException e) {
       logger.error("Unable to write mediapackage to disk!  Error was: {}.", e);
     }

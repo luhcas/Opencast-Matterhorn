@@ -15,7 +15,6 @@
  */
 package org.opencastproject.job.api;
 
-import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
@@ -27,8 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is a utility implementation that will wait for one or more jobs to change their status to one of the
- * specified states. By default, these include:
+ * This class is a utility implementation that will wait for one or more jobs to change their status to either one of:
  * <ul>
  * <li>{@link Job.Status#FINISHED}</li>
  * <li>{@link Job.Status#FAILED}</li>
@@ -43,10 +41,6 @@ public class JobBarrier {
   /** Default polling interval is 5 seconds */
   protected static final long DEFAULT_POLLING_INTERVAL = 5000L;
 
-  /** Default statuses to enable passing through the barrier */
-  protected static final Job.Status[] DEFAULT_STATUS_SET = new Job.Status[] { Status.FINISHED, Status.FAILED,
-          Status.DELETED };
-
   /** The service registry used to do the polling */
   protected ServiceRegistry serviceRegistry = null;
 
@@ -55,9 +49,6 @@ public class JobBarrier {
 
   /** An exception that might have been thrown while polling */
   protected Throwable pollingException = null;
-
-  /** The statuses to wait for */
-  protected Status[] statusSet = null;
 
   /** The jobs to wait on */
   protected Job[] jobs = null;
@@ -89,22 +80,6 @@ public class JobBarrier {
    *          the time in miliseconds between two polling operations
    */
   public JobBarrier(ServiceRegistry registry, long pollingInterval, Job... jobs) {
-    this(registry, pollingInterval, jobs, DEFAULT_STATUS_SET);
-  }
-
-  /**
-   * Creates a wrapper for <code>job</code>, using <code>registry</code> to poll for the job outcome.
-   * 
-   * @param job
-   *          the job to poll
-   * @param registry
-   *          the registry
-   * @param pollingInterval
-   *          the time in miliseconds between two polling operations
-   * @param statusSet
-   *          the statuses that will allow the thread to continue
-   */
-  public JobBarrier(ServiceRegistry registry, long pollingInterval, Job[] jobs, Status... statusSet) {
     if (registry == null)
       throw new IllegalArgumentException("Service registry must not be null");
     if (jobs == null || jobs.length == 0)
@@ -114,7 +89,6 @@ public class JobBarrier {
     this.serviceRegistry = registry;
     this.pollingInterval = pollingInterval;
     this.jobs = jobs;
-    this.statusSet = statusSet;
   }
 
   /**
@@ -210,31 +184,31 @@ public class JobBarrier {
           // Don't aks what we already know
           if (status.containsKey(job))
             continue;
-
+          
           boolean jobFinished = false;
-
+          
           // Get the job status from the service registry
           try {
             Job processedJob = serviceRegistry.getJob(job.getId());
             Job.Status jobStatus = processedJob.getStatus();
             switch (jobStatus) {
-            case DELETED:
-            case FAILED:
-              failedOrDeleted = true;
-              jobFinished = true;
-              break;
-            case FINISHED:
-              jobFinished = true;
-              break;
-            case PAUSED:
-            case QUEUED:
-            case RUNNING:
-              logger.trace("Job {} is still in the works", JobBarrier.this);
-              allDone = false;
-              break;
-            default:
-              logger.error("Unhandled job status '{}' found", jobStatus);
-              break;
+              case DELETED:
+              case FAILED:
+                failedOrDeleted = true;
+                jobFinished = true;
+                break;
+              case FINISHED:
+                jobFinished = true;
+                break;
+              case PAUSED:
+              case QUEUED:
+              case RUNNING:
+                logger.trace("Job {} is still in the works", JobBarrier.this);
+                allDone = false;
+                break;
+              default:
+                logger.error("Unhandled job status '{}' found", jobStatus);
+                break;
             }
 
             // Are we done with this job?
@@ -322,26 +296,18 @@ public class JobBarrier {
     }
 
     /**
-     * Returns <code>true</code> if all jobs are in one of the <code>statusSet</code> states.
+     * Returns <code>true</code> if all jobs are in the <code>{@link Job.Status#FINISHED}</code> state.
      * 
-     * @return <code>true</code> if all jobs are in one of the <code>statusSet</code> states
+     * @return <code>true</code> if all jobs are finished
      */
     public boolean isSuccess() {
       for (Job.Status state : status.values()) {
-        boolean jobStateMatches = false;
-        for (Status statusToCheck : statusSet) {
-          if (state.equals(statusToCheck)) {
-            jobStateMatches = true;
-            break;
-          }
-        }
-        if (!jobStateMatches) {
+        if (!state.equals(Job.Status.FINISHED))
           return false;
-        }
       }
       return true;
     }
-
+    
   }
 
 }

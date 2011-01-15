@@ -19,7 +19,6 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -27,6 +26,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -271,7 +271,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
             totalTimeInQueue += timeInQueue;
 
-            Attachment composedImage = (Attachment) AbstractMediaPackageElement.getFromXml(job.getPayload());
+            Attachment composedImage = (Attachment) MediaPackageElementParser.getFromXml(job.getPayload());
             if (composedImage == null)
               throw new IllegalStateException("Unable to compose image");
 

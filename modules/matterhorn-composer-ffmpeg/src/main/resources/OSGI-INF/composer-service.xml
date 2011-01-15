@@ -2,8 +2,7 @@
 <scr:component
   xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
   name="org.opencastproject.composer.impl.ComposerServiceImpl"
-  immediate="true"
-  activate="activate">
+  immediate="true">
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
     <property name="service.description" value="Composer (Encoder) Local Service" />
     <service>

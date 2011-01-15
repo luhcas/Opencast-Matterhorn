@@ -19,6 +19,7 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
@@ -103,7 +104,7 @@ public class JobTest {
     Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
             .elementFromURI(new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     t.setIdentifier("track-1");
-    job.setPayload(t.getAsXml());
+    job.setPayload(MediaPackageElementParser.getAsXml(t));
 
     // Simulate starting the job
     job.setStatus(Status.RUNNING);
@@ -149,8 +150,8 @@ public class JobTest {
   @Test
   public void testCount() throws Exception {
     // create a receipt on each service instance
-    serviceRegistry.createJob(regType1Host1, OPERATION_NAME, null, true);
-    serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, true);
+    serviceRegistry.createJob(regType1Host1, OPERATION_NAME, null, null, true);
+    serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, null, true);
 
     Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING, LOCALHOST));
     Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING, HOST_2));
@@ -181,11 +182,11 @@ public class JobTest {
     localFinished.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(localFinished);
 
-    JobJpaImpl remoteRunning = (JobJpaImpl) serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, false);
+    JobJpaImpl remoteRunning = (JobJpaImpl) serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, null, false);
     remoteRunning.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteRunning);
 
-    JobJpaImpl remoteFinished = (JobJpaImpl) serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, false);
+    JobJpaImpl remoteFinished = (JobJpaImpl) serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, null, false);
     // Simulate starting the job
     remoteFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteFinished);

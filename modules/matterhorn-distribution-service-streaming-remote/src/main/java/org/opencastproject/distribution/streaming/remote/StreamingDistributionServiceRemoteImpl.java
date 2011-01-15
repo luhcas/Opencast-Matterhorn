@@ -20,6 +20,7 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.RemoteBase;
 
@@ -73,7 +74,7 @@ public class StreamingDistributionServiceRemoteImpl extends RemoteBase implement
   public Job distribute(String mediaPackageId, MediaPackageElement element) throws DistributionException {
     String elementXml = null;
     try {
-      elementXml = element.getAsXml();
+      elementXml = MediaPackageElementParser.getAsXml(element);
     } catch (MediaPackageException e) {
       throw new DistributionException("Unable to marshall mediapackage to xml: " + e.getMessage());
     }

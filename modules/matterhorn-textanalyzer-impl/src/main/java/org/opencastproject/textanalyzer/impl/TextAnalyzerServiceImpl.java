@@ -19,11 +19,13 @@ import org.opencastproject.dictionary.api.DictionaryService;
 import org.opencastproject.dictionary.api.DictionaryService.DICT_TOKEN;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
@@ -58,27 +60,22 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Media analysis service that takes takes an image and returns text as extracted from that image.
  */
-public class TextAnalyzerServiceImpl implements TextAnalyzerService {
+public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(TextAnalyzerServiceImpl.class);
 
+  /** List of available operations on jobs */
+  private enum Operation {
+    Extract
+  };
+
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "ocrtext";
-
-  /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "org.opencastproject.textanalyzer.threads";
-
-  /** The default worker thread pool size to use if no configuration is specified */
-  public static final int DEFAULT_THREADS = 1;
 
   /** Reference to the receipt service */
   private ServiceRegistry remoteServiceManager = null;
@@ -92,28 +89,28 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
   /** The dictionary service */
   protected DictionaryService dictionaryService;
 
-  /** The executor service used to queue and run jobs */
-  protected ExecutorService executor = null;
-
   /** Path to the ocropus binary */
   private String ocropusbinary = OcropusTextAnalyzer.OCROPUS_BINARY_DEFAULT;
 
   protected void activate(ComponentContext cc) {
-
-    // Set the number of concurrent threads
-    int threads = DEFAULT_THREADS;
-    String threadsConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(CONFIG_THREADS));
-    if (threadsConfig != null) {
-      try {
-        threads = Integer.parseInt(threadsConfig);
-      } catch (NumberFormatException e) {
-        logger.warn("Download distribution threads configuration is malformed: '{}'", threadsConfig);
-      }
-    }
-    executor = Executors.newFixedThreadPool(threads);
-
     if (cc.getBundleContext().getProperty("org.opencastproject.textanalyzer.ocrocmd") != null)
       ocropusbinary = (String) cc.getBundleContext().getProperty("org.opencastproject.textanalyzer.ocrocmd");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.textanalyzer.api.TextAnalyzerService#extract(org.opencastproject.mediapackage.Attachment)
+   */
+  @Override
+  public Job extract(Attachment image) throws TextAnalyzerException, MediaPackageException {
+    try {
+      return remoteServiceManager.createJob(JOB_TYPE, Operation.Extract.toString(), Arrays.asList(MediaPackageElementParser.getAsXml(image)));
+    } catch (ServiceUnavailableException e) {
+      throw new TextAnalyzerException("No service of type '" + JOB_TYPE + "' available", e);
+    } catch (ServiceRegistryException e) {
+      throw new TextAnalyzerException("Unable to create job", e);
+    }
   }
 
   /**
@@ -127,119 +124,108 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
    * @return a receipt containing the resulting mpeg-7 catalog
    * @throws TextAnalyzerException
    */
-  @Override
-  public Job extract(final Attachment image, boolean block) throws TextAnalyzerException, MediaPackageException {
-    final Job job;
-    try {
-      job = remoteServiceManager.createJob(JOB_TYPE, OPERATION, Arrays.asList(image.getAsXml()));
-    } catch (ServiceUnavailableException e) {
-      throw new TextAnalyzerException("No service of type '" + JOB_TYPE + "' available", e);
-    } catch (ServiceRegistryException e) {
-      throw new TextAnalyzerException("Unable to create job", e);
-    }
+  @SuppressWarnings("unchecked")
+  private Catalog extract(Job job, Attachment image) throws TextAnalyzerException, MediaPackageException {
 
     final Attachment attachment = (Attachment) image;
     final URI imageUrl = attachment.getURI();
 
-    Callable<Void> command = new Callable<Void>() {
-      /**
-       * {@inheritDoc}
-       * 
-       * @see java.util.concurrent.Callable#call()
-       */
-      @SuppressWarnings("unchecked")
-      @Override
-      public Void call() throws TextAnalyzerException {
-        try {
-          job.setStatus(Status.RUNNING);
-          updateJob(job);
+    try {
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
 
-          Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
+      Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
 
-          logger.info("Starting text extraction from {}", imageUrl);
+      logger.info("Starting text extraction from {}", imageUrl);
 
-          File imageFile;
-          try {
-            imageFile = workspace.get(imageUrl);
-          } catch (NotFoundException e) {
-            throw new TextAnalyzerException("Image " + imageUrl + " not found in workspace", e);
-          } catch (IOException e) {
-            throw new TextAnalyzerException("Unable to access " + imageUrl + " in workspace", e);
-          }
-          VideoText[] videoTexts = analyze(imageFile, image.getIdentifier());
-
-          // Create a temporal decomposition
-          MediaTime mediaTime = new MediaTimeImpl(0, 0);
-          Video avContent = mpeg7.addVideoContent(image.getIdentifier(), mediaTime, null);
-          TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent
-                  .getTemporalDecomposition();
-
-          // Add a segment
-          VideoSegment videoSegment = temporalDecomposition.createSegment("segment-0");
-          videoSegment.setMediaTime(mediaTime);
-
-          // Add the video text to the spacio temporal decomposition of the segment
-          SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.createSpatioTemporalDecomposition(
-                  true, false);
-          for (VideoText videoText : videoTexts) {
-            spatioTemporalDecomposition.addVideoText(videoText);
-          }
-
-          logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
-
-          URI uri;
-          try {
-            uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
-          } catch (IOException e) {
-            throw new TextAnalyzerException("Unable to put mpeg7 into the workspace", e);
-          }
-          Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                  .newElement(Catalog.TYPE, MediaPackageElements.TEXTS);
-          catalog.setURI(uri);
-
-          job.setPayload(catalog.getAsXml());
-          job.setStatus(Status.FINISHED);
-          updateJob(job);
-
-          logger.info("Finished text extraction of {}", imageUrl);
-          return null;
-        } catch (Exception e) {
-          logger.warn("Error extracting text from " + imageUrl, e);
-          try {
-            job.setStatus(Status.FAILED);
-            updateJob(job);
-          } catch (Exception failureToFail) {
-            logger.warn("Unable to update job to failed state", failureToFail);
-          }
-          if (e instanceof TextAnalyzerException) {
-            throw (TextAnalyzerException) e;
-          } else {
-            throw new TextAnalyzerException(e);
-          }
-        }
-      }
-    };
-
-    Future<?> future = executor.submit(command);
-    if (block) {
+      File imageFile;
       try {
-        future.get();
-      } catch (Exception e) {
-        try {
-          job.setStatus(Status.FAILED);
-          updateJob(job);
-        } catch (Exception failureToFail) {
-          logger.warn("Unable to update job to failed state", failureToFail);
-        }
-        if (e instanceof TextAnalyzerException) {
-          throw (TextAnalyzerException) e;
-        } else {
-          throw new TextAnalyzerException(e);
-        }
+        imageFile = workspace.get(imageUrl);
+      } catch (NotFoundException e) {
+        throw new TextAnalyzerException("Image " + imageUrl + " not found in workspace", e);
+      } catch (IOException e) {
+        throw new TextAnalyzerException("Unable to access " + imageUrl + " in workspace", e);
+      }
+      VideoText[] videoTexts = analyze(imageFile, image.getIdentifier());
+
+      // Create a temporal decomposition
+      MediaTime mediaTime = new MediaTimeImpl(0, 0);
+      Video avContent = mpeg7.addVideoContent(image.getIdentifier(), mediaTime, null);
+      TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent
+              .getTemporalDecomposition();
+
+      // Add a segment
+      VideoSegment videoSegment = temporalDecomposition.createSegment("segment-0");
+      videoSegment.setMediaTime(mediaTime);
+
+      // Add the video text to the spacio temporal decomposition of the segment
+      SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.createSpatioTemporalDecomposition(true,
+              false);
+      for (VideoText videoText : videoTexts) {
+        spatioTemporalDecomposition.addVideoText(videoText);
+      }
+
+      logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
+
+      URI uri;
+      try {
+        uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
+      } catch (IOException e) {
+        throw new TextAnalyzerException("Unable to put mpeg7 into the workspace", e);
+      }
+      Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .newElement(Catalog.TYPE, MediaPackageElements.TEXTS);
+      catalog.setURI(uri);
+
+      job.setPayload(MediaPackageElementParser.getAsXml(catalog));
+      job.setStatus(Status.FINISHED);
+      updateJob(job);
+
+      logger.info("Finished text extraction of {}", imageUrl);
+
+      return catalog;
+    } catch (Exception e) {
+      logger.warn("Error extracting text from " + imageUrl, e);
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      if (e instanceof TextAnalyzerException) {
+        throw (TextAnalyzerException) e;
+      } else {
+        throw new TextAnalyzerException(e);
       }
     }
+  }
 
-    return job;
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   *      java.util.List)
+   */
+  @Override
+  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+    Operation op = null;
+    try {
+      op = Operation.valueOf(operation);
+      switch (op) {
+        case Extract:
+          Attachment element = (Attachment) MediaPackageElementParser.getFromXml(arguments.get(0));
+          extract(job, element);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      }
+    } catch (IllegalArgumentException e) {
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+    } catch (IndexOutOfBoundsException e) {
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Error handling operation '" + op + "'");
+    }
   }
 
   /**
@@ -251,6 +237,15 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
     return remoteServiceManager.getJob(id);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.job.api.JobProducer#getJobType()
+   */
+  @Override
+  public String getJobType() {
+    return JOB_TYPE;
+  }
+  
   /**
    * {@inheritDoc}
    * 

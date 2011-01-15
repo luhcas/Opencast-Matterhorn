@@ -19,10 +19,10 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -227,7 +227,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
         if (!waitForStatus(job).isSuccess()) {
           throw new WorkflowOperationException("Rewriting container for video track " + videoTrack + " failed");
         }
-        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
+        composedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
         mediaPackage.add(composedTrack);
         String fileName = getFileNameFromElements(videoTrack, composedTrack);
 
@@ -248,7 +248,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
         if (!waitForStatus(job).isSuccess()) {
           throw new WorkflowOperationException("Rewriting container for audio track " + audioTrack + " failed");
         }
-        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
+        composedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
         String fileName = getFileNameFromElements(audioTrack, composedTrack);
         mediaPackage.add(composedTrack);
         composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
@@ -265,7 +265,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
         if (!waitForStatus(job).isSuccess()) {
           throw new WorkflowOperationException("Rewriting container for a/v track " + videoTrack + " failed");
         }
-        composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
+        composedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
         mediaPackage.add(composedTrack);
         String fileName = getFileNameFromElements(videoTrack, composedTrack);
         composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
@@ -282,7 +282,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
         throw new WorkflowOperationException("Muxing video track " + videoTrack + " and audio track " + audioTrack
                 + " failed");
       }
-      composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
+      composedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
       mediaPackage.add(composedTrack);
       String fileName = getFileNameFromElements(videoTrack, composedTrack);
       composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),

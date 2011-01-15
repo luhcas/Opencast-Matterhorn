@@ -17,20 +17,16 @@
 package org.opencastproject.videosegmenter.api;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 
 /**
  * Api for video segmentation implementations, aimed at detecting scenes in audiovisual tracks.
  */
-public interface VideoSegmenterService extends JobProducer {
+public interface VideoSegmenterService {
 
   /** Job type */
   String JOB_TYPE = "org.opencastproject.videosegmenter";
-
-  /** Operation */
-  String OPERATION = "segment";
 
   /**
    * Takes the given track and returns the job that can be used to get the resulting mpeg7 catalog.

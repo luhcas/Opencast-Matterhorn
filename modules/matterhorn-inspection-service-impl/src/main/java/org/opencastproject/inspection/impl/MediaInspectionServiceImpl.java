@@ -24,12 +24,14 @@ import org.opencastproject.inspection.impl.api.MediaContainerMetadata;
 import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Stream;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.UnsupportedElementException;
@@ -61,46 +63,29 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
  */
-public class MediaInspectionServiceImpl implements MediaInspectionService, ManagedService {
+public class MediaInspectionServiceImpl implements MediaInspectionService, JobProducer, ManagedService {
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
-  /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "concurrent.jobs";
-
-  /** The default worker thread pool size to use if no configuration is specified */
-  public static final int DEFAULT_THREADS = 1;
+  /** List of available operations on jobs */
+  private enum Operation {
+    Inspect, Enrich
+  };
 
   /** The inspect job operation name */
   public static final String INSPECT_URL = "inspect";
 
-  /** The enrich job operation name */
-  public static final String ENRICH_ELEMENT = "enrich";
-
   protected Workspace workspace;
   protected ServiceRegistry serviceRegistry;
-  protected ThreadPoolExecutor executor = null;
   protected Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
-
-  public void setWorkspace(Workspace workspace) {
-    logger.debug("setting " + workspace);
-    this.workspace = workspace;
-  }
-
-  public void setServiceRegistry(ServiceRegistry jobManager) {
-    this.serviceRegistry = jobManager;
-  }
+  protected MediaPackageElementBuilderFactory elementFactory = MediaPackageElementBuilderFactory.newInstance();
 
   public void activate() {
-    executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_THREADS);
     analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, MediaInfoAnalyzer.MEDIAINFO_BINARY_DEFAULT);
   }
 
@@ -119,17 +104,39 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, path);
       logger.info("Setting the path to mediainfo to " + path);
     }
+  }
 
-    // Set the number of concurrent threads
-    String threadsConfig = StringUtils.trimToNull((String) properties.get(CONFIG_THREADS));
-    if (threadsConfig != null) {
-      try {
-        int threads = Integer.parseInt(threadsConfig);
-        logger.info("Setting the maximum number of concurrent jobs to " + threads);
-        executor.setMaximumPoolSize(threads);
-      } catch (NumberFormatException e) {
-        logger.warn("Caption converter threads configuration is malformed: '{}'", threadsConfig);
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   *      java.util.List)
+   */
+  @Override
+  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+    Operation op = null;
+    try {
+      op = Operation.valueOf(operation);
+
+      switch (op) {
+        case Inspect:
+          URI uri = URI.create(arguments.get(0));
+          inspect(job, uri);
+          break;
+        case Enrich:
+          MediaPackageElement element = MediaPackageElementParser.getFromXml(arguments.get(0));
+          boolean overwrite = Boolean.parseBoolean(arguments.get(1));
+          enrich(job, element, overwrite);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
+    } catch (IllegalArgumentException e) {
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+    } catch (IndexOutOfBoundsException e) {
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Error handling operation '" + op + "'");
     }
   }
 
@@ -140,6 +147,16 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    */
   public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     return serviceRegistry.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#getJobType()
+   */
+  @Override
+  public String getJobType() {
+    return JOB_TYPE;
   }
 
   /**
@@ -171,112 +188,14 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    * 
    * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI)
    */
-  public Job inspect(final URI uri) throws MediaInspectionException {
-    logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
-
-    // Construct a receipt for this operation
-    final Job job;
+  public Job inspect(URI uri) throws MediaInspectionException {
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INSPECT_URL, Arrays.asList(uri.toString()));
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Inspect.toString(), Arrays.asList(uri.toString()));
     } catch (ServiceUnavailableException e) {
       throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaInspectionException(e);
     }
-
-    Callable<Track> command = new Callable<Track>() {
-      public Track call() throws MediaInspectionException {
-        try {
-          job.setStatus(Status.RUNNING);
-          updateJob(job);
-
-          // Get the file from the URL (runtime exception if invalid)
-          File file = null;
-          try {
-            file = workspace.get(uri);
-          } catch (NotFoundException notFound) {
-            throw new MediaInspectionException("Unable to find resource " + uri, notFound);
-          } catch (IOException ioe) {
-            throw new MediaInspectionException("Error reading " + uri + " from workspace", ioe);
-          }
-
-          // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
-          // TODO: Try to guess the extension from the container's metadata
-          if ("".equals(FilenameUtils.getExtension(file.getName()))) {
-            throw new MediaInspectionException("Can not inspect files without a filename extension");
-          }
-
-          MediaContainerMetadata metadata = getFileMetadata(file);
-          if (metadata == null) {
-            throw new MediaInspectionException("Media analyzer returned no metadata from " + file);
-          } else {
-            MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
-                    .newElementBuilder();
-            TrackImpl track;
-            MediaPackageElement element;
-            try {
-              element = elementBuilder.elementFromURI(uri, Type.Track, null);
-            } catch (UnsupportedElementException e) {
-              throw new MediaInspectionException("Unable to create track element from " + file, e);
-            }
-            track = (TrackImpl) element;
-
-            // Duration
-            if (metadata.getDuration() != null)
-              track.setDuration(metadata.getDuration());
-
-            // Checksum
-            try {
-              track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-            } catch (IOException e) {
-              throw new MediaInspectionException("Unable to read " + file, e);
-            }
-
-            // Mimetype
-            try {
-              track.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
-            } catch (Exception e) {
-              logger.info("Unable to find mimetype for {}", file.getAbsolutePath());
-            }
-
-            // Audio metadata
-            try {
-              addAudioStreamMetadata(track, metadata);
-            } catch (Exception e) {
-              throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
-            }
-
-            // Videometadata
-            try {
-              addVideoStreamMetadata(track, metadata);
-            } catch (Exception e) {
-              throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
-            }
-
-            job.setPayload(track.getAsXml());
-            job.setStatus(Status.FINISHED);
-            updateJob(job);
-            return track;
-          }
-        } catch (Exception e) {
-          logger.warn("Error inspecting " + uri, e);
-          try {
-            job.setStatus(Status.FAILED);
-            updateJob(job);
-          } catch (Exception failureToFail) {
-            logger.warn("Unable to update job to failed state", failureToFail);
-          }
-          if (e instanceof MediaInspectionException) {
-            throw (MediaInspectionException) e;
-          } else {
-            throw new MediaInspectionException(e);
-          }
-        }
-      }
-    };
-
-    executor.submit(command);
-    return job;
   }
 
   /**
@@ -286,30 +205,144 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    *      boolean)
    */
   @Override
-  public Job enrich(final MediaPackageElement element, final boolean override)
-          throws MediaInspectionException, MediaPackageException {
-    Callable<MediaPackageElement> command;
-    final Job job;
+  public Job enrich(final MediaPackageElement element, final boolean override) throws MediaInspectionException,
+          MediaPackageException {
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, ENRICH_ELEMENT, Arrays.asList(element.getAsXml(), Boolean.toString(override)));
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Enrich.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(element), Boolean.toString(override)));
     } catch (ServiceUnavailableException e) {
       throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaInspectionException(e);
     }
-    if (element instanceof Track) {
-      final Track originalTrack = (Track) element;
-      command = getEnrichTrackCommand(originalTrack, override, job);
-    } else {
-      command = getEnrichElementCommand(element, override, job);
-    }
-
-    executor.submit(command);
-    return job;
   }
 
   /**
-   * Creates a {@link Callable} that will enrich the track's metadata and can be executed in an asynchronous way.
+   * Inspects the element that is passed in as uri.
+   * 
+   * @param job
+   *          the associated job
+   * @param trackURI
+   *          the elemtn uri
+   * @return the inspected track
+   * @throws MediaInspectionException
+   *           if inspection fails
+   */
+  private Track inspect(Job job, URI trackURI) throws MediaInspectionException {
+    logger.debug("inspect(" + trackURI + ") called, using workspace " + workspace);
+
+    try {
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
+
+      // Get the file from the URL (runtime exception if invalid)
+      File file = null;
+      try {
+        file = workspace.get(trackURI);
+      } catch (NotFoundException notFound) {
+        throw new MediaInspectionException("Unable to find resource " + trackURI, notFound);
+      } catch (IOException ioe) {
+        throw new MediaInspectionException("Error reading " + trackURI + " from workspace", ioe);
+      }
+
+      // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
+      // TODO: Try to guess the extension from the container's metadata
+      if ("".equals(FilenameUtils.getExtension(file.getName()))) {
+        throw new MediaInspectionException("Can not inspect files without a filename extension");
+      }
+
+      MediaContainerMetadata metadata = getFileMetadata(file);
+      if (metadata == null) {
+        throw new MediaInspectionException("Media analyzer returned no metadata from " + file);
+      } else {
+        MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+        TrackImpl track;
+        MediaPackageElement element;
+        try {
+          element = elementBuilder.elementFromURI(trackURI, Type.Track, null);
+        } catch (UnsupportedElementException e) {
+          throw new MediaInspectionException("Unable to create track element from " + file, e);
+        }
+        track = (TrackImpl) element;
+
+        // Duration
+        if (metadata.getDuration() != null)
+          track.setDuration(metadata.getDuration());
+
+        // Checksum
+        try {
+          track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+        } catch (IOException e) {
+          throw new MediaInspectionException("Unable to read " + file, e);
+        }
+
+        // Mimetype
+        try {
+          track.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
+        } catch (Exception e) {
+          logger.info("Unable to find mimetype for {}", file.getAbsolutePath());
+        }
+
+        // Audio metadata
+        try {
+          addAudioStreamMetadata(track, metadata);
+        } catch (Exception e) {
+          throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
+        }
+
+        // Videometadata
+        try {
+          addVideoStreamMetadata(track, metadata);
+        } catch (Exception e) {
+          throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
+        }
+
+        job.setPayload(MediaPackageElementParser.getAsXml(track));
+        job.setStatus(Status.FINISHED);
+        updateJob(job);
+        return track;
+      }
+    } catch (Exception e) {
+      logger.warn("Error inspecting " + trackURI, e);
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      if (e instanceof MediaInspectionException) {
+        throw (MediaInspectionException) e;
+      } else {
+        throw new MediaInspectionException(e);
+      }
+    }
+  }
+
+  /**
+   * Enriches the given element's mediapackage.
+   * 
+   * @param job
+   *          the associated job
+   * @param element
+   *          the element to enrich
+   * @param override
+   *          <code>true</code> to override existing metadata
+   * @return the enriched element
+   * @throws MediaInspectionException
+   *           if enriching fails
+   */
+  private MediaPackageElement enrich(Job job, MediaPackageElement element, boolean override)
+          throws MediaInspectionException {
+    if (element instanceof Track) {
+      final Track originalTrack = (Track) element;
+      return enrichTrack(originalTrack, override, job);
+    } else {
+      return enrichElement(element, override, job);
+    }
+  }
+
+  /**
+   * Enriches the track's metadata and can be executed in an asynchronous way.
    * 
    * @param originalTrack
    *          the original track
@@ -317,129 +350,194 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    *          <code>true</code> to override existing metadata
    * @param job
    *          the job
-   * @return the callable
+   * @return the media package element
+   * @throws MediaInspectionException
    */
-  protected Callable<MediaPackageElement> getEnrichTrackCommand(final Track originalTrack, final boolean override,
-          final Job job) {
+  private MediaPackageElement enrichTrack(final Track originalTrack, final boolean override, final Job job)
+          throws MediaInspectionException {
 
-    return new Callable<MediaPackageElement>() {
-      public MediaPackageElement call() throws MediaInspectionException {
+    try {
+      // Set the job state to running
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
+
+      URI originalTrackUrl = originalTrack.getURI();
+      MediaPackageElementFlavor flavor = originalTrack.getFlavor();
+      logger.debug("enrich(" + originalTrackUrl + ") called");
+
+      // Get the file from the URL
+      File file = null;
+      try {
+        file = workspace.get(originalTrackUrl);
+      } catch (NotFoundException e) {
+        throw new MediaInspectionException("File " + file + " was not found and can therefore not be inspected", e);
+      } catch (IOException e) {
+        throw new MediaInspectionException("Error accessing " + file, e);
+      }
+
+      // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
+      // TODO: Try to guess the extension from the container's metadata
+      if (StringUtils.trimToNull(FilenameUtils.getExtension(file.getName())) == null) {
+        throw new MediaInspectionException("Element " + file + " has no file extension");
+      }
+
+      MediaContainerMetadata metadata = getFileMetadata(file);
+      if (metadata == null) {
+        throw new MediaInspectionException("Unable to acquire media metadata for " + originalTrackUrl);
+      } else if (metadata.getAudioStreamMetadata().size() == 0 && metadata.getVideoStreamMetadata().size() == 0) {
+        throw new MediaInspectionException("File at " + originalTrackUrl + " does not seem to be a/v media");
+      } else {
+        TrackImpl track = null;
         try {
-          // Set the job state to running
-          job.setStatus(Status.RUNNING);
-          updateJob(job);
+          track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                  .elementFromURI(originalTrackUrl, Type.Track, flavor);
+        } catch (UnsupportedElementException e) {
+          throw new MediaInspectionException("Unable to create track element from " + file, e);
+        }
 
-          URI originalTrackUrl = originalTrack.getURI();
-          MediaPackageElementFlavor flavor = originalTrack.getFlavor();
-          logger.debug("enrich(" + originalTrackUrl + ") called");
+        // init the new track with old
+        track.setChecksum(originalTrack.getChecksum());
+        track.setDuration(originalTrack.getDuration());
+        track.setElementDescription(originalTrack.getElementDescription());
+        track.setFlavor(flavor);
+        track.setIdentifier(originalTrack.getIdentifier());
+        track.setMimeType(originalTrack.getMimeType());
+        track.setReference(originalTrack.getReference());
+        track.setSize(originalTrack.getSize());
+        track.setURI(originalTrackUrl);
+        for (String tag : originalTrack.getTags()) {
+          track.addTag(tag);
+        }
 
-          // Get the file from the URL
-          File file = null;
+        // enrich the new track with basic info
+        if (track.getDuration() == -1L || override)
+          track.setDuration(metadata.getDuration());
+        if (track.getChecksum() == null || override) {
           try {
-            file = workspace.get(originalTrackUrl);
-          } catch (NotFoundException e) {
-            throw new MediaInspectionException("File " + file + " was not found and can therefore not be inspected", e);
+            track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
           } catch (IOException e) {
-            throw new MediaInspectionException("Error accessing " + file, e);
-          }
-
-          // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
-          // TODO: Try to guess the extension from the container's metadata
-          if (StringUtils.trimToNull(FilenameUtils.getExtension(file.getName())) == null) {
-            throw new MediaInspectionException("Element " + file + " has no file extension");
-          }
-
-          MediaContainerMetadata metadata = getFileMetadata(file);
-          if (metadata == null) {
-            throw new MediaInspectionException("Unable to acquire media metadata for " + originalTrackUrl);
-          } else if (metadata.getAudioStreamMetadata().size() == 0 && metadata.getVideoStreamMetadata().size() == 0) {
-            throw new MediaInspectionException("File at " + originalTrackUrl + " does not seem to be a/v media");
-          } else {
-            TrackImpl track = null;
-            try {
-              track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                      .elementFromURI(originalTrackUrl, Type.Track, flavor);
-            } catch (UnsupportedElementException e) {
-              throw new MediaInspectionException("Unable to create track element from " + file, e);
-            }
-
-            // init the new track with old
-            track.setChecksum(originalTrack.getChecksum());
-            track.setDuration(originalTrack.getDuration());
-            track.setElementDescription(originalTrack.getElementDescription());
-            track.setFlavor(flavor);
-            track.setIdentifier(originalTrack.getIdentifier());
-            track.setMimeType(originalTrack.getMimeType());
-            track.setReference(originalTrack.getReference());
-            track.setSize(originalTrack.getSize());
-            track.setURI(originalTrackUrl);
-            for (String tag : originalTrack.getTags()) {
-              track.addTag(tag);
-            }
-
-            // enrich the new track with basic info
-            if (track.getDuration() == -1L || override)
-              track.setDuration(metadata.getDuration());
-            if (track.getChecksum() == null || override) {
-              try {
-                track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-              } catch (IOException e) {
-                throw new MediaInspectionException("Unable to read " + file, e);
-              }
-            }
-
-            // Add the mime type if it's not already present
-            if (track.getMimeType() == null || override) {
-              try {
-                track.setMimeType(MimeTypes.fromURI(track.getURI()));
-              } catch (UnknownFileTypeException e) {
-                logger.info("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
-              }
-            }
-
-            // find all streams
-            Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
-            for (Stream stream : originalTrack.getStreams()) {
-              streamsId2Stream.put(stream.getIdentifier(), stream);
-            }
-
-            // audio list
-            try {
-              addAudioStreamMetadata(track, metadata);
-            } catch (Exception e) {
-              throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
-            }
-
-            // video list
-            try {
-              addVideoStreamMetadata(track, metadata);
-            } catch (Exception e) {
-              throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
-            }
-
-            job.setPayload(track.getAsXml());
-            job.setStatus(Status.FINISHED);
-            updateJob(job);
-
-            logger.info("Successfully inspected track {}", track);
-            return track;
-          }
-        } catch (Exception e) {
-          logger.warn("Error enriching track " + originalTrack, e);
-          try {
-            job.setStatus(Status.FAILED);
-            updateJob(job);
-          } catch (Exception failureToFail) {
-            logger.warn("Unable to update job to failed state", failureToFail);
-          }
-          if (e instanceof MediaInspectionException) {
-            throw (MediaInspectionException) e;
-          } else {
-            throw new MediaInspectionException(e);
+            throw new MediaInspectionException("Unable to read " + file, e);
           }
         }
+
+        // Add the mime type if it's not already present
+        if (track.getMimeType() == null || override) {
+          try {
+            track.setMimeType(MimeTypes.fromURI(track.getURI()));
+          } catch (UnknownFileTypeException e) {
+            logger.info("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
+          }
+        }
+
+        // find all streams
+        Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
+        for (Stream stream : originalTrack.getStreams()) {
+          streamsId2Stream.put(stream.getIdentifier(), stream);
+        }
+
+        // audio list
+        try {
+          addAudioStreamMetadata(track, metadata);
+        } catch (Exception e) {
+          throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
+        }
+
+        // video list
+        try {
+          addVideoStreamMetadata(track, metadata);
+        } catch (Exception e) {
+          throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
+        }
+
+        job.setPayload(MediaPackageElementParser.getAsXml(track));
+        job.setStatus(Status.FINISHED);
+        updateJob(job);
+
+        logger.info("Successfully inspected track {}", track);
+        return track;
       }
-    };
+    } catch (Exception e) {
+      logger.warn("Error enriching track " + originalTrack, e);
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      if (e instanceof MediaInspectionException) {
+        throw (MediaInspectionException) e;
+      } else {
+        throw new MediaInspectionException(e);
+      }
+    }
+  }
+
+  /**
+   * Enriches the media package element metadata such as the mimetype, the file size etc.
+   * 
+   * @param element
+   *          the media package element
+   * @param override
+   *          <code>true</code> to overwrite existing metadata
+   * @param job
+   *          the associated job
+   * @return the callable
+   * @throws MediaInspectionException
+   *           if enriching fails
+   */
+  private MediaPackageElement enrichElement(final MediaPackageElement element, final boolean override, final Job job)
+          throws MediaInspectionException {
+    try {
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
+
+      File file;
+      try {
+        file = workspace.get(element.getURI());
+      } catch (NotFoundException e) {
+        throw new MediaInspectionException("Unable to find " + element.getURI() + " in the workspace", e);
+      } catch (IOException e) {
+        throw new MediaInspectionException("Error accessing " + element.getURI() + " in the workspace", e);
+      }
+
+      // Checksum
+      if (element.getChecksum() == null || override) {
+        try {
+          element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+        } catch (IOException e) {
+          throw new MediaInspectionException("Error generating checksum for " + element.getURI(), e);
+        }
+      }
+
+      // Mimetype
+      if (element.getMimeType() == null || override) {
+        try {
+          element.setMimeType(MimeTypes.fromURI(file.toURI()));
+        } catch (UnknownFileTypeException e) {
+          logger.info("unable to determine the mime type for {}", file.getName());
+        }
+      }
+
+      job.setPayload(MediaPackageElementParser.getAsXml(element));
+      job.setStatus(Status.FINISHED);
+      updateJob(job);
+      logger.info("Successfully inspected element {}", element);
+
+      return element;
+    } catch (Exception e) {
+      logger.warn("Error enriching element " + element, e);
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      if (e instanceof MediaInspectionException) {
+        throw (MediaInspectionException) e;
+      } else {
+        throw new MediaInspectionException(e);
+      }
+    }
   }
 
   /**
@@ -505,79 +603,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   }
 
   /**
-   * This command will create a callable which tries to extract common media package element metadata such as the
-   * mimetype, the file size etc.
-   * 
-   * @param element
-   *          the media package element
-   * @param override
-   *          <code>true</code> to overwrite existing metadata
-   * @param job
-   *          the associated job
-   * @return the callable
-   */
-  protected Callable<MediaPackageElement> getEnrichElementCommand(final MediaPackageElement element,
-          final boolean override, final Job job) {
-
-    return new Callable<MediaPackageElement>() {
-      public MediaPackageElement call() throws MediaInspectionException {
-        try {
-          job.setStatus(Status.RUNNING);
-          updateJob(job);
-
-          File file;
-          try {
-            file = workspace.get(element.getURI());
-          } catch (NotFoundException e) {
-            throw new MediaInspectionException("Unable to find " + element.getURI() + " in the workspace", e);
-          } catch (IOException e) {
-            throw new MediaInspectionException("Error accessing " + element.getURI() + " in the workspace", e);
-          }
-
-          // Checksum
-          if (element.getChecksum() == null || override) {
-            try {
-              element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-            } catch (IOException e) {
-              throw new MediaInspectionException("Error generating checksum for " + element.getURI(), e);
-            }
-          }
-
-          // Mimetype
-          if (element.getMimeType() == null || override) {
-            try {
-              element.setMimeType(MimeTypes.fromURI(file.toURI()));
-            } catch (UnknownFileTypeException e) {
-              logger.info("unable to determine the mime type for {}", file.getName());
-            }
-          }
-
-          job.setPayload(element.getAsXml());
-          job.setStatus(Status.FINISHED);
-          updateJob(job);
-          logger.info("Successfully inspected element {}", element);
-
-          return element;
-        } catch (Exception e) {
-          logger.warn("Error enriching element " + element, e);
-          try {
-            job.setStatus(Status.FAILED);
-            updateJob(job);
-          } catch (Exception failureToFail) {
-            logger.warn("Unable to update job to failed state", failureToFail);
-          }
-          if (e instanceof MediaInspectionException) {
-            throw (MediaInspectionException) e;
-          } else {
-            throw new MediaInspectionException(e);
-          }
-        }
-      }
-    };
-
-  }
-
-  /**
    * Asks the media analyzer to extract the file's metadata.
    * 
    * @param file
@@ -620,6 +645,15 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     } catch (ServiceRegistryException serviceRegException) {
       throw new MediaInspectionException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }
+  }
+
+  void setWorkspace(Workspace workspace) {
+    logger.debug("setting " + workspace);
+    this.workspace = workspace;
+  }
+
+  void setServiceRegistry(ServiceRegistry jobManager) {
+    this.serviceRegistry = jobManager;
   }
 
 }

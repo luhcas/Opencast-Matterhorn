@@ -18,9 +18,16 @@ package org.opencastproject.workflow.impl;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
@@ -46,24 +53,24 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 
+import org.apache.commons.io.IOUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -80,19 +87,21 @@ import java.util.regex.Pattern;
  * WorkflowOperation.getName(), then the factory returns a WorkflowOperationRunner to handle that operation. This allows
  * for custom runners to be added or modified without affecting the workflow service itself.
  */
-public class WorkflowServiceImpl implements WorkflowService, ManagedService {
+public class WorkflowServiceImpl implements WorkflowService, JobProducer {
 
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
-  /** The number of threads to start with in the workflow instance thread pool */
-  protected static final int DEFAULT_THREADS = 1;
-
-  /** The configuration key that defines the number of threads to use in the workflow instance thread pool */
-  protected static final String WORKFLOW_THREADS_CONFIGURATION = "org.opencastproject.concurrent.jobs";
+  /** List of available operations on jobs */
+  private enum Operation {
+    Start, Resume
+  };
 
   /** The pattern used by workfow operation configuration keys **/
   public static final Pattern PROPERTY_PATTERN = Pattern.compile("\\$\\{.+?\\}");
+
+  /** Constant value indicating a <code>null</code> parent id */
+  private static final String NULL_PARENT_ID = "-";
 
   /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
   protected ComponentContext componentContext = null;
@@ -104,97 +113,16 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   private SortedSet<MediaPackageMetadataService> metadataServices;
 
   /** The data access object responsible for storing and retrieving workflow instances */
-  protected WorkflowServiceImplDao dao;
+  protected WorkflowServiceIndex index;
 
   /** The list of workflow listeners */
   private List<WorkflowListener> listeners = new CopyOnWriteArrayList<WorkflowListener>();
 
-  /** The thread pool */
-  protected ThreadPoolExecutor executorService;
-
   /** The thread pool to use for firing listeners */
   protected ThreadPoolExecutor listenerExecutorService;
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
-   */
-  @Override
-  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
-    String threadPoolConfig = (String) properties.get(WORKFLOW_THREADS_CONFIGURATION);
-    if (threadPoolConfig != null) {
-      try {
-        int threads = Integer.parseInt(threadPoolConfig);
-        if (this.executorService == null) {
-          logger.debug("Creating a new thread pool of size {}", threads);
-          this.executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
-        } else {
-          logger.debug("Resetting thread pool size to {}", threads);
-          this.executorService.setCorePoolSize(threads);
-        }
-      } catch (NumberFormatException e) {
-        logger.warn(e.getMessage());
-      }
-    }
-  }
-
-  /**
-   * A tuple of a workflow operation handler and the name of the operation it handles
-   */
-  public static class HandlerRegistration {
-
-    private WorkflowOperationHandler handler;
-    private String operationName;
-
-    public HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
-      if (operationName == null)
-        throw new IllegalArgumentException("Operation name cannot be null");
-      if (handler == null)
-        throw new IllegalArgumentException("Handler cannot be null");
-      this.operationName = operationName;
-      this.handler = handler;
-    }
-
-    public WorkflowOperationHandler getHandler() {
-      return handler;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + handler.hashCode();
-      result = prime * result + operationName.hashCode();
-      return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj)
-        return true;
-      if (obj == null)
-        return false;
-      if (getClass() != obj.getClass())
-        return false;
-      HandlerRegistration other = (HandlerRegistration) obj;
-      if (!handler.equals(other.handler))
-        return false;
-      if (!operationName.equals(other.operationName))
-        return false;
-      return true;
-    }
-  }
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
 
   /**
    * Constructs a new workflow service impl, with a priority-sorted map of metadata services
@@ -209,52 +137,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   }
 
   /**
-   * Sets the DAO implementation to use in this service.
+   * Activate this service implementation via the OSGI service component runtime.
    * 
-   * @param dao
-   *          The dao to use for persistence
-   */
-  public void setDao(WorkflowServiceImplDao dao) {
-    this.dao = dao;
-  }
-
-  /**
-   * Callback to set the metadata service
-   * 
-   * @param service
-   *          the metadata service
-   */
-  void addMetadataService(MediaPackageMetadataService service) {
-    metadataServices.add(service);
-  }
-
-  /**
-   * Callback to remove a mediapackage metadata service.
-   * 
-   * @param service
-   *          the mediapackage metadata service to remove
-   */
-  void removeMetadataService(MediaPackageMetadataService service) {
-    metadataServices.remove(service);
-  }
-
-  /**
-   * Activate this service implementation via the OSGI service component runtime
+   * @param componentContext
+   *          the component context
    */
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
-    logger.debug("Creating a new thread pool with default size of {}", DEFAULT_THREADS);
-    executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_THREADS);
     listenerExecutorService = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-  }
-
-  /**
-   * Deactivate this service.
-   */
-  public void deactivate() {
-    if (executorService != null && !executorService.isShutdown()) {
-      executorService.shutdown();
-    }
   }
 
   /**
@@ -264,9 +154,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public void addWorkflowListener(WorkflowListener listener) {
-    if (listener == null) {
-      throw new IllegalArgumentException("Listener must not be null");
-    }
     listeners.add(listener);
   }
 
@@ -277,9 +164,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public void removeWorkflowListener(WorkflowListener listener) {
-    if (listener != null) {
-      listeners.remove(listener);
-    }
+    listeners.remove(listener);
   }
 
   /**
@@ -469,50 +354,24 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowById(long)
    */
   public WorkflowInstanceImpl getWorkflowById(long id) throws WorkflowDatabaseException, NotFoundException {
-    return dao.getWorkflowById(id);
+    return index.getWorkflowById(id);
   }
 
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
-   *      org.opencastproject.mediapackage.MediaPackage, Long, java.util.Map)
+   *      org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
-  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          Long parentWorkflowId, Map<String, String> properties) throws WorkflowDatabaseException,
-          WorkflowParsingException, NotFoundException {
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage)
+          throws WorkflowDatabaseException, WorkflowParsingException {
     if (workflowDefinition == null)
       throw new IllegalArgumentException("workflow definition must not be null");
     if (mediaPackage == null)
       throw new IllegalArgumentException("mediapackage must not be null");
-    if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
-      throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
-
-    // Create and configure the workflow instance
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage,
-            parentWorkflowId, properties);
-    workflowInstance = updateConfiguration(workflowInstance, properties);
-
-    try {
-      // Before we persist this, extract the metadata
-      populateMediaPackageMetadata(workflowInstance.getMediaPackage());
-      update(workflowInstance);
-
-      // Have the job executed
-      logger.info("Starting a new workflow: {}", workflowInstance);
-      run(workflowInstance);
-
-      return workflowInstance;
-    } catch (Throwable t) {
-      try {
-        workflowInstance.setState(WorkflowState.FAILED);
-        update(workflowInstance);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update workflow to failed state", failureToFail);
-      }
-      throw new WorkflowDatabaseException(t);
-    }
+    Map<String, String> properties = new HashMap<String, String>();
+    return start(workflowDefinition, mediaPackage, properties);
   }
 
   /**
@@ -528,6 +387,70 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     } catch (NotFoundException e) {
       // should never happen
       throw new IllegalStateException("a null workflow ID caused a NotFoundException.  This is a programming error.");
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
+   *      org.opencastproject.mediapackage.MediaPackage, Long, java.util.Map)
+   */
+  @Override
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
+          Long parentWorkflowId, Map<String, String> properties) throws WorkflowDatabaseException,
+          WorkflowParsingException, NotFoundException {
+
+    if (workflowDefinition == null)
+      throw new IllegalArgumentException("workflow definition must not be null");
+    if (mediaPackage == null)
+      throw new IllegalArgumentException("mediapackage must not be null");
+    if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
+      throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
+
+    // Create and configure the workflow instance
+    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage,
+            parentWorkflowId, properties);
+    workflowInstance = updateConfiguration(workflowInstance, properties);
+
+    try {
+
+      // Before we persist this, extract the metadata
+      populateMediaPackageMetadata(workflowInstance.getMediaPackage());
+
+      // Create a new job for this workflow instance
+      String workflowDefinitionXml = WorkflowParser.toXml(workflowDefinition);
+      String workflowInstanceXml = WorkflowParser.toXml(workflowInstance);
+      String mediaPackageXml = MediaPackageParser.getAsXml(mediaPackage);
+
+      List<String> arguments = new ArrayList<String>();
+      arguments.add(workflowDefinitionXml);
+      arguments.add(mediaPackageXml);
+      if (parentWorkflowId != null || properties != null) {
+        String parentWorkflowIdString = (parentWorkflowId != null) ? parentWorkflowId.toString() : NULL_PARENT_ID;
+        arguments.add(parentWorkflowIdString);
+      }
+      if (properties != null) {
+        arguments.add(mapToString(properties));
+      }
+
+      Job job = serviceRegistry.createJob(JOB_TYPE, Operation.Start.toString(), arguments, workflowInstanceXml);
+
+      // Have the workflow take on the job's identity
+      workflowInstance.setId(job.getId());
+
+      // Add the workflow to the search index
+      update(workflowInstance);
+
+      return workflowInstance;
+    } catch (Throwable t) {
+      try {
+        workflowInstance.setState(WorkflowState.FAILED);
+        update(workflowInstance);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update workflow to failed state", failureToFail);
+      }
+      throw new WorkflowDatabaseException(t);
     }
   }
 
@@ -606,20 +529,45 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     return null;
   }
 
+  /**
+   * Executes the workflow.
+   * 
+   * @param wfi
+   *          the workflow instance
+   * @throws WorkflowDatabaseException
+   *           if the workflow instance can't be updated in the database
+   * @throws WorkflowParsingException
+   *           if the workflow instance can't be parsed
+   */
   protected void run(final WorkflowInstanceImpl wfi) throws WorkflowDatabaseException, WorkflowParsingException {
     run(wfi, null);
   }
 
+  /**
+   * Executes the workflow.
+   * 
+   * @param wfi
+   *          the workflow instance
+   * @param properties
+   *          the workflow properties
+   * @throws WorkflowDatabaseException
+   *           if the workflow instance can't be updated in the database
+   * @throws WorkflowParsingException
+   *           if the workflow instance can't be parsed
+   */
   protected void run(final WorkflowInstanceImpl wfi, final Map<String, String> properties)
           throws WorkflowDatabaseException, WorkflowParsingException {
-    wfi.setState(WorkflowInstance.WorkflowState.RUNNING);
+
+    wfi.setState(WorkflowState.RUNNING);
     WorkflowOperationInstance operation = wfi.getCurrentOperation();
     if (operation == null) {
       operation = wfi.next();
     }
     update(wfi);
+
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
-    executorService.execute(new WorkflowOperationWorker(operationHandler, wfi, properties, this));
+    WorkflowOperationWorker worker = new WorkflowOperationWorker(operationHandler, wfi, properties, this);
+    worker.run();
   }
 
   /**
@@ -679,11 +627,46 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public WorkflowInstance resume(long workflowInstanceId, Map<String, String> properties)
           throws WorkflowDatabaseException, WorkflowParsingException, NotFoundException {
-    WorkflowInstanceImpl workflowInstance = updateConfiguration(getWorkflowById(workflowInstanceId), properties);
-
-    // Update the workflow instance
-    workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
+    
+    WorkflowInstanceImpl workflowInstance = getWorkflowById(workflowInstanceId);
+    workflowInstance = updateConfiguration(workflowInstance, properties);
     update(workflowInstance);
+    
+    // Set the job to queued, so it gets picked up again
+    Job job;
+    try {
+      job = serviceRegistry.getJob(workflowInstanceId);
+      job.setStatus(Status.QUEUED);
+      job.setOperation(Operation.Resume.toString());
+      serviceRegistry.updateJob(job);
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException(e);
+    } catch (ServiceUnavailableException e) {
+      // this should never happen, since we're in a delegate of the workflow service itself
+      throw new WorkflowDatabaseException(e);
+    }
+    
+    return workflowInstance;
+  }
+
+  /**
+   * Resumes a suspended workflow instance, applying new properties to the workflow.
+   * 
+   * @param workflowInstance
+   *          the workflow to resume
+   * @param properties
+   *          the properties to apply to the resumed workflow
+   * @return the workflow instance
+   * @throws NotFoundException
+   *           if no paused workflow with this identifier exists
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instance in persistence
+   * @throws WorkflowParsingException
+   *           if there is a problem parsing the workflow instance from persistence
+   */
+  protected WorkflowInstance resume(WorkflowInstanceImpl workflowInstance, Map<String, String> properties)
+          throws WorkflowDatabaseException, WorkflowParsingException, NotFoundException {
+    workflowInstance = updateConfiguration(workflowInstance, properties);
 
     // Continue running the workflow
     run(workflowInstance, properties);
@@ -698,15 +681,69 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public void update(WorkflowInstance workflowInstance) throws WorkflowDatabaseException, WorkflowParsingException {
-    WorkflowInstance databaseInstance = null;
+    WorkflowInstance originalWorkflowInstance = null;
     try {
-      databaseInstance = dao.getWorkflowById(workflowInstance.getId());
+      originalWorkflowInstance = index.getWorkflowById(workflowInstance.getId());
     } catch (NotFoundException e) {
       // That's fine, it's a new workflow instance
     }
-    dao.update(workflowInstance);
+
+    // Synchronize the job status with the workflow
+    WorkflowState workflowState = workflowInstance.getState();
+    String xml;
+    try {
+      xml = WorkflowParser.toXml(workflowInstance);
+    } catch (Exception e) {
+      throw new WorkflowParsingException(e);
+    }
+    Job job = null;
+    try {
+      job = serviceRegistry.getJob(workflowInstance.getId());
+      job.setPayload(xml);
+
+      // Synchronize workflow and job state
+      switch (workflowState) {
+        case FAILED:
+        case FAILING:
+          job.setStatus(Status.FAILED);
+          break;
+        case INSTANTIATED:
+          job.setStatus(Status.QUEUED);
+          break;
+        case PAUSED:
+          job.setStatus(Status.PAUSED);
+          break;
+        case RUNNING:
+          job.setStatus(Status.RUNNING);
+          break;
+        case STOPPED:
+          job.setStatus(Status.DELETED);
+          break;
+        case SUCCEEDED:
+          job.setStatus(Status.FINISHED);
+          break;
+        default:
+          throw new IllegalStateException("Found a workflow state that is not handled");
+      }
+
+      // Update the service registry
+      serviceRegistry.updateJob(job);
+
+      // Update the search index
+      index.update(workflowInstance);
+
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException(e);
+    } catch (ServiceUnavailableException e) {
+      // this should never happen, since we're in a delegate of the workflow service itself
+      throw new WorkflowDatabaseException(e);
+    } catch (NotFoundException e) {
+      // this should never happen, since we create the job if it doesn't already exist
+      throw new WorkflowDatabaseException(e);
+    }
+
     WorkflowInstance clone = WorkflowParser.parseWorkflowInstance(WorkflowParser.toXml(workflowInstance));
-    fireListeners(databaseInstance, clone);
+    fireListeners(originalWorkflowInstance, clone);
   }
 
   /**
@@ -716,7 +753,18 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    *          The id of the workflow instance to remove
    */
   public void removeFromDatabase(long id) throws WorkflowDatabaseException, NotFoundException {
-    dao.remove(id);
+    Job job = null;
+    try {
+      job = serviceRegistry.getJob(id);
+      job.setStatus(Status.DELETED);
+      serviceRegistry.updateJob(job);
+      index.remove(id);
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException(e);
+    } catch (ServiceUnavailableException e) {
+      // this should never happen, since we're in a delegate of the workflow service itself
+      throw new WorkflowDatabaseException(e);
+    }
   }
 
   /**
@@ -726,7 +774,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public long countWorkflowInstances() throws WorkflowDatabaseException {
-    return dao.countWorkflowInstances(null, null);
+    return index.countWorkflowInstances(null, null);
   }
 
   /**
@@ -737,7 +785,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException {
-    return dao.countWorkflowInstances(state, operation);
+    return index.countWorkflowInstances(state, operation);
   }
 
   /**
@@ -747,7 +795,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
-    return dao.getStatistics();
+    return index.getStatistics();
   }
 
   /**
@@ -756,7 +804,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowQuery)
    */
   public WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException {
-    return dao.getWorkflowInstances(query);
+    return index.getWorkflowInstances(query);
   }
 
   /**
@@ -906,25 +954,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       }
       update(workflow);
     } else {
+      workflow.setState(WorkflowState.RUNNING);
+      update(workflow);
       this.run(workflow);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
-   *      org.opencastproject.mediapackage.MediaPackage)
-   */
-  @Override
-  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage)
-          throws WorkflowDatabaseException, WorkflowParsingException {
-    if (workflowDefinition == null)
-      throw new IllegalArgumentException("workflow definition must not be null");
-    if (mediaPackage == null)
-      throw new IllegalArgumentException("mediapackage must not be null");
-    Map<String, String> properties = new HashMap<String, String>();
-    return start(workflowDefinition, mediaPackage, properties);
   }
 
   /**
@@ -996,4 +1029,221 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       }
     }
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#getJob(long)
+   */
+  @Override
+  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
+    return serviceRegistry.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#getJobType()
+   */
+  @Override
+  public String getJobType() {
+    return JOB_TYPE;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   *      java.util.List)
+   */
+  @Override
+  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+    Operation op = null;
+    try {
+      op = Operation.valueOf(operation);
+      WorkflowInstanceImpl workflowInstance = WorkflowParser.parseWorkflowInstance(job.getPayload());
+      workflowInstance.setId(job.getId());
+      switch (op) {
+        case Start:
+          logger.info("Starting new workflow {}", workflowInstance);
+          run(workflowInstance);
+          break;
+        case Resume:
+          logger.info("Resuming workflow {}", workflowInstance);
+          Map<String, String> properties = null;
+          if (arguments.size() > 1)
+            stringToMap(arguments.get(1));
+          resume(workflowInstance, properties);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      }
+    } catch (IllegalArgumentException e) {
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
+    } catch (IndexOutOfBoundsException e) {
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations", e);
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
+   */
+  @Override
+  public long countJobs(Status status) throws ServiceRegistryException {
+    return serviceRegistry.count(JOB_TYPE, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
+   */
+  @Override
+  public long countJobs(Status status, String host) throws ServiceRegistryException {
+    return serviceRegistry.count(JOB_TYPE, status, host);
+  }
+
+  /**
+   * Converts a Map<String, String> to s key=value\n string, suitable for the properties form parameter expected by the
+   * workflow rest endpoint.
+   * 
+   * @param props
+   *          The map of strings
+   * @return the string representation
+   */
+  private String mapToString(Map<String, String> props) {
+    if (props == null)
+      return null;
+    StringBuilder sb = new StringBuilder();
+    for (Entry<String, String> entry : props.entrySet()) {
+      sb.append(entry.getKey());
+      sb.append("=");
+      sb.append(entry.getValue());
+      sb.append("\n");
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Creates a map from a serialized version that was created using {@link #mapToString(Map)}.
+   * 
+   * @param string
+   *          the serialized map
+   * @return the map or <code>null</code> if <code>string</code> was null in the first place
+   * @throws IOException
+   *           if reading the map fails
+   */
+  private Map<String, String> stringToMap(String string) throws IOException {
+    if (string == null)
+      return null;
+    Map<String, String> map = new HashMap<String, String>();
+    Properties properties = new Properties();
+    properties.load(IOUtils.toInputStream(string));
+    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+      map.put((String)entry.getKey(), (String)entry.getValue());
+    }
+    return map;
+  }
+
+  /**
+   * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
+   * 
+   * @param registry
+   *          the service registry
+   */
+  void setServiceRegistry(ServiceRegistry registry) {
+    this.serviceRegistry = registry;
+  }
+
+  /**
+   * Sets the DAO implementation to use in this service.
+   * 
+   * @param dao
+   *          The dao to use for persistence
+   */
+  void setDao(WorkflowServiceIndex dao) {
+    this.index = dao;
+  }
+
+  /**
+   * Callback to set the metadata service
+   * 
+   * @param service
+   *          the metadata service
+   */
+  void addMetadataService(MediaPackageMetadataService service) {
+    metadataServices.add(service);
+  }
+
+  /**
+   * Callback to remove a mediapackage metadata service.
+   * 
+   * @param service
+   *          the mediapackage metadata service to remove
+   */
+  void removeMetadataService(MediaPackageMetadataService service) {
+    metadataServices.remove(service);
+  }
+
+  /**
+   * A tuple of a workflow operation handler and the name of the operation it handles
+   */
+  public static class HandlerRegistration {
+
+    private WorkflowOperationHandler handler;
+    private String operationName;
+
+    public HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
+      if (operationName == null)
+        throw new IllegalArgumentException("Operation name cannot be null");
+      if (handler == null)
+        throw new IllegalArgumentException("Handler cannot be null");
+      this.operationName = operationName;
+      this.handler = handler;
+    }
+
+    public WorkflowOperationHandler getHandler() {
+      return handler;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + handler.hashCode();
+      result = prime * result + operationName.hashCode();
+      return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      HandlerRegistration other = (HandlerRegistration) obj;
+      if (!handler.equals(other.handler))
+        return false;
+      if (!operationName.equals(other.operationName))
+        return false;
+      return true;
+    }
+  }
+
 }

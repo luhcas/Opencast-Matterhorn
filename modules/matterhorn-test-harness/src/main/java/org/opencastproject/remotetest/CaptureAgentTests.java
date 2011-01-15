@@ -17,7 +17,6 @@ package org.opencastproject.remotetest;
 
 import org.opencastproject.remotetest.capture.CaptureRestEndpointTest;
 import org.opencastproject.remotetest.capture.StateRestEndpointTest;
-import org.opencastproject.remotetest.server.AdminProxyRestEndpointTest;
 import org.opencastproject.remotetest.server.CaptureAdminRestEndpointTest;
 import org.opencastproject.remotetest.server.ComposerRestEndpointTest;
 import org.opencastproject.remotetest.server.DistributionDownloadRestEndpointTest;
@@ -45,7 +44,6 @@ import org.junit.runners.Suite.SuiteClasses;
   CaptureRestEndpointTest.class,
   CaptureAdminRestEndpointTest.class,
   EngageModuleTest.class,
-  AdminProxyRestEndpointTest.class,
   StateRestEndpointTest.class,
   UploadTest.class,
   UnscheduledCaptureTest.class,

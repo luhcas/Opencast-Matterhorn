@@ -18,11 +18,11 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -137,7 +137,7 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
 
           MediaPackageElement newElement = null;
           try {
-            newElement = AbstractMediaPackageElement.getFromXml(job.getPayload());
+            newElement = MediaPackageElementParser.getFromXml(job.getPayload());
           } catch (MediaPackageException e) {
             throw new WorkflowOperationException(e);
           }

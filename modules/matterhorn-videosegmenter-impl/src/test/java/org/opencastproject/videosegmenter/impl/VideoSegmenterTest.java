@@ -22,9 +22,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
@@ -72,7 +72,7 @@ public class VideoSegmenterTest {
   protected static final long secondSegmentDuration = mediaDuration - firstSegmentDuration;
 
   /** The in-memory service registration */
-  protected ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+  protected ServiceRegistry serviceRegistry = null;
   
   /** The video segmenter */
   protected VideoSegmenterServiceImpl vsegmenter = null;
@@ -127,10 +127,12 @@ public class VideoSegmenterTest {
     EasyMock.replay(workspace);
 
     vsegmenter = new VideoSegmenterServiceImpl();
-    vsegmenter.setExecutorThreads(1);
+    serviceRegistry = new ServiceRegistryInMemoryImpl(vsegmenter);
+    vsegmenter.setRemoteServiceManager(serviceRegistry);
+    
     vsegmenter.setMpeg7CatalogService(mpeg7Service);
     vsegmenter.setWorkspace(workspace);
-    vsegmenter.setRemoteServiceManager(serviceRegistry);
+    
   }
 
   /**
@@ -139,12 +141,7 @@ public class VideoSegmenterTest {
   @After
   public void tearDown() throws Exception {
     FileUtils.deleteQuietly(tempFile);
-  }
-
-  @Test
-  public void testImageExtraction() {
-    // int undefined = -16777216;
-
+    ((ServiceRegistryInMemoryImpl)serviceRegistry).dispose();
   }
 
   @Test
@@ -153,7 +150,7 @@ public class VideoSegmenterTest {
     JobBarrier jobBarrier = new JobBarrier(serviceRegistry, 1000, receipt);
     jobBarrier.waitForJobs();
     
-    Catalog catalog = (Catalog) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
+    Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(receipt.getPayload());
 
     Mpeg7Catalog mpeg7 = new Mpeg7CatalogImpl(catalog.getURI().toURL().openStream());
 

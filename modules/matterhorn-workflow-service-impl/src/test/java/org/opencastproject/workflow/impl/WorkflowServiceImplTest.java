@@ -15,11 +15,12 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.junit.Assert.fail;
+
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -45,7 +46,6 @@ import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -65,11 +65,12 @@ public class WorkflowServiceImplTest {
   private WorkflowDefinition workingDefinition = null;
   private WorkflowDefinition failingDefinitionWithoutErrorHandler = null;
   private WorkflowDefinition failingDefinitionWithErrorHandler = null;
+  private WorkflowDefinition pausingWorkflowDefinition = null;
   private MediaPackage mediapackage1 = null;
   private MediaPackage mediapackage2 = null;
   private SucceedingWorkflowOperationHandler succeedingOperationHandler = null;
   private WorkflowOperationHandler failingOperationHandler = null;
-  private WorkflowServiceDaoSolrImpl dao = null;
+  private WorkflowServiceSolrIndex dao = null;
   private Set<HandlerRegistration> handlerRegistrations = null;
   private Workspace workspace = null;
 
@@ -96,6 +97,7 @@ public class WorkflowServiceImplTest {
     handlerRegistrations.add(new HandlerRegistration("op1", succeedingOperationHandler));
     handlerRegistrations.add(new HandlerRegistration("op2", succeedingOperationHandler));
     handlerRegistrations.add(new HandlerRegistration("op3", failingOperationHandler));
+    handlerRegistrations.add(new HandlerRegistration("opPause", new ResumableTestWorkflowOperationHandler()));
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl() {
@@ -107,13 +109,15 @@ public class WorkflowServiceImplTest {
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
+    serviceRegistry.registerService(service);
 
-    dao = new WorkflowServiceDaoSolrImpl();
+    dao = new WorkflowServiceSolrIndex();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = sRoot + File.separator + "solr." + System.currentTimeMillis();
     dao.activate();
     service.setDao(dao);
+    service.setServiceRegistry(serviceRegistry);
     service.activate(null);
 
     InputStream is = null;
@@ -130,9 +134,14 @@ public class WorkflowServiceImplTest {
       failingDefinitionWithErrorHandler = WorkflowParser.parseWorkflowDefinition(is);
       IOUtils.closeQuietly(is);
 
+      is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-4.xml");
+      pausingWorkflowDefinition = WorkflowParser.parseWorkflowDefinition(is);
+      IOUtils.closeQuietly(is);
+
       service.registerWorkflowDefinition(workingDefinition);
       service.registerWorkflowDefinition(failingDefinitionWithoutErrorHandler);
       service.registerWorkflowDefinition(failingDefinitionWithErrorHandler);
+      service.registerWorkflowDefinition(pausingWorkflowDefinition);
 
       MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
       mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
@@ -155,7 +164,6 @@ public class WorkflowServiceImplTest {
   public void teardown() throws Exception {
     System.out.println("All tests finished... tearing down...");
     dao.deactivate();
-    service.deactivate();
   }
 
   @Test
@@ -329,24 +337,27 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
-  // TODO This test requires a hold state
   @Test
-  @Ignore
   public void testGetWorkflowByCurrentOperation() throws Exception {
-    // Ensure that the database doesn't have a workflow instance in the "op2" operation
+    // Ensure that the database doesn't have a workflow instance in the "opPause" operation
     Assert.assertEquals(0, service.countWorkflowInstances());
-    Assert.assertEquals(0, service.getWorkflowInstances(new WorkflowQuery().withCurrentOperation("op2")).size());
+    Assert.assertEquals(0, service.getWorkflowInstances(new WorkflowQuery().withCurrentOperation("opPause")).size());
 
-    WorkflowInstance instance = startAndWait(workingDefinition, mediapackage1, WorkflowState.SUCCEEDED);
+    WorkflowInstance instance = startAndWait(pausingWorkflowDefinition, mediapackage1, WorkflowState.PAUSED);
 
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(new WorkflowQuery().withCurrentOperation("op2"));
+    WorkflowSet workflowsInDb = service.getWorkflowInstances(new WorkflowQuery().withCurrentOperation("opPause"));
     Assert.assertEquals(1, workflowsInDb.getItems().length);
 
     // cleanup the database
     service.removeFromDatabase(instance.getId());
 
     // And ensure that it's really gone
-    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    try {
+      service.getWorkflowById(instance.getId());
+      fail("The workflow should not be around anymore");
+    } catch (NotFoundException e) {
+      // That's expected
+    }
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
@@ -574,12 +585,15 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(OperationState.FAILED, service.getWorkflowById(instance.getId()).getOperations().get(1)
             .getState());
 
+    // Load a fresh copy
+    WorkflowInstance storedInstance = service.getWorkflowById(instance.getId());
+    
     // Make sure the error handler has been added
-    Assert.assertEquals(4, instance.getOperations().size());
-    Assert.assertEquals("op1", instance.getOperations().get(0).getId());
-    Assert.assertEquals("op3", instance.getOperations().get(1).getId());
-    Assert.assertEquals("op1", instance.getOperations().get(2).getId());
-    Assert.assertEquals("op2", instance.getOperations().get(3).getId());
+    Assert.assertEquals(4, storedInstance.getOperations().size());
+    Assert.assertEquals("op1", storedInstance.getOperations().get(0).getId());
+    Assert.assertEquals("op3", storedInstance.getOperations().get(1).getId());
+    Assert.assertEquals("op1", storedInstance.getOperations().get(2).getId());
+    Assert.assertEquals("op2", storedInstance.getOperations().get(3).getId());
 
     // cleanup the database
     service.removeFromDatabase(instance.getId());

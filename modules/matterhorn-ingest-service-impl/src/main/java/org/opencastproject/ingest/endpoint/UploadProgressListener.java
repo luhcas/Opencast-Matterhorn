@@ -30,6 +30,7 @@ public class UploadProgressListener implements ProgressListener {
   private static final int SAVE_INTERVAL = 50 * 1024;
 
   private UploadJob job;
+  @SuppressWarnings("unused")
   private EntityManagerFactory emf;
   private long lastSaved = 0L;
 

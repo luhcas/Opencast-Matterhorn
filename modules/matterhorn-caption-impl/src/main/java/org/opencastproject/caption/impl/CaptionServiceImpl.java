@@ -22,10 +22,12 @@ import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
@@ -52,9 +54,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -64,22 +64,18 @@ import javax.activation.MimetypesFileTypeMap;
  * match for specified input or output format {@link UnsupportedCaptionFormatException} is thrown.
  * 
  */
-public class CaptionServiceImpl implements CaptionService {
+public class CaptionServiceImpl implements CaptionService, JobProducer {
 
   /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(CaptionServiceImpl.class);
 
-  /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "org.opencastproject.captionconverter.threads";
-
-  /** The default worker thread pool size to use if no configuration is specified */
-  public static final int DEFAULT_THREADS = 1;
+  /** List of available operations on jobs */
+  private enum Operation {
+    Convert, ConvertWithLanguage
+  };
 
   /** The collection name */
   public static final String COLLECTION = "captions";
-
-  /** The operation type for jobs */
-  public static final String CONVERT = "convert";
 
   /** Reference to workspace */
   protected Workspace workspace;
@@ -90,38 +86,6 @@ public class CaptionServiceImpl implements CaptionService {
   /** Component context needed for retrieving Converter Engines */
   protected ComponentContext componentContext = null;
 
-  /** A thread pool for job executions */
-  protected ExecutorService executor = null;
-
-  /**
-   * Activate this service implementation via the OSGI service component runtime
-   */
-  public void activate(ComponentContext componentContext) {
-    this.componentContext = componentContext;
-
-    // Set the number of concurrent threads
-    int threads = DEFAULT_THREADS;
-    String threadsConfig = StringUtils.trimToNull(componentContext.getBundleContext().getProperty(CONFIG_THREADS));
-    if (threadsConfig != null) {
-      try {
-        threads = Integer.parseInt(threadsConfig);
-      } catch (NumberFormatException e) {
-        logger.warn("Caption converter threads configuration is malformed: '{}'", threadsConfig);
-      }
-    }
-    executor = Executors.newFixedThreadPool(threads);
-  }
-
-  /** Setter for workspace via declarative activation */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
-  }
-
-  /** Setter for remote service manager via declarative activation */
-  public void setRemoteServiceManager(ServiceRegistry manager) {
-    this.jobManager = manager;
-  }
-
   /**
    * {@inheritDoc}
    * 
@@ -129,9 +93,25 @@ public class CaptionServiceImpl implements CaptionService {
    *      java.lang.String, java.lang.String)
    */
   @Override
-  public Job convert(Catalog input, String inputFormat, String outputFormat)
-          throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
-    return convert(input, inputFormat, outputFormat, null);
+  public Job convert(Catalog input, String inputFormat, String outputFormat) throws UnsupportedCaptionFormatException,
+          CaptionConverterException, MediaPackageException {
+
+    if (input == null)
+      throw new IllegalArgumentException("Input catalog can't be null");
+    if (StringUtils.isBlank(inputFormat))
+      throw new IllegalArgumentException("Input format is null");
+    if (StringUtils.isBlank(outputFormat))
+      throw new IllegalArgumentException("Output format is null");
+
+    try {
+      return jobManager.createJob(JOB_TYPE, Operation.Convert.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(input), inputFormat, outputFormat));
+    } catch (ServiceRegistryException e) {
+      throw new CaptionConverterException("Unable to create a job", e);
+    } catch (ServiceUnavailableException e) {
+      throw new CaptionConverterException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
+    }
   }
 
   /**
@@ -141,98 +121,107 @@ public class CaptionServiceImpl implements CaptionService {
    *      java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public Job convert(final Catalog input, final String inputFormat, final String outputFormat, final String language) throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
+  public Job convert(Catalog input, String inputFormat, String outputFormat, String language)
+          throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
 
-    final Job job;
+    if (input == null)
+      throw new IllegalArgumentException("Input catalog can't be null");
+    if (StringUtils.isBlank(inputFormat))
+      throw new IllegalArgumentException("Input format is null");
+    if (StringUtils.isBlank(outputFormat))
+      throw new IllegalArgumentException("Output format is null");
+    if (StringUtils.isBlank(language))
+      throw new IllegalArgumentException("Language format is null");
+
     try {
-      job = jobManager.createJob(JOB_TYPE, CONVERT,
-              Arrays.asList(input.getAsXml(), inputFormat, outputFormat, language));
+      return jobManager.createJob(JOB_TYPE, Operation.ConvertWithLanguage.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(input), inputFormat, outputFormat, language));
     } catch (ServiceRegistryException e) {
       throw new CaptionConverterException("Unable to create a job", e);
     } catch (ServiceUnavailableException e) {
       throw new CaptionConverterException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
     }
+  }
 
-    Callable<Catalog> command = new Callable<Catalog>() {
-      public Catalog call() throws CaptionConverterException, UnsupportedCaptionFormatException {
-        try {
-          // check parameters
-          if (StringUtils.isBlank(inputFormat))
-            throw new UnsupportedCaptionFormatException("Input format is null");
-          if (StringUtils.isBlank(outputFormat))
-            throw new UnsupportedCaptionFormatException("Output format is null");
+  /**
+   * Converts the captions.
+   */
+  private Catalog convert(Job job, Catalog input, String inputFormat, String outputFormat, String language)
+          throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
+    try {
 
-          // get input file
-          File captionsFile;
-          try {
-            captionsFile = workspace.get(input.getURI());
-          } catch (NotFoundException e) {
-            throw new CaptionConverterException("Requested media package element " + input + " could not be found.");
-          } catch (IOException e) {
-            throw new CaptionConverterException("Requested media package element " + input + "could not be accessed.");
-          }
+      // check parameters
+      if (input == null)
+        throw new IllegalArgumentException("Input catalog can't be null");
+      if (StringUtils.isBlank(inputFormat))
+        throw new IllegalArgumentException("Input format is null");
+      if (StringUtils.isBlank(outputFormat))
+        throw new IllegalArgumentException("Output format is null");
 
-          logger.debug("Atempting to convert from {} to {}...", inputFormat, outputFormat);
-
-          CaptionCollection collection;
-          try {
-            collection = importCaptions(captionsFile, inputFormat, language);
-            logger.debug("Parsing to collection succeeded.");
-          } catch (UnsupportedCaptionFormatException e) {
-            throw new UnsupportedCaptionFormatException(inputFormat);
-          } catch (CaptionConverterException e) {
-            throw e;
-          }
-
-          URI exported;
-          try {
-            exported = exportCaptions(collection,
-                    job.getId() + "." + FilenameUtils.getExtension(captionsFile.getAbsolutePath()), outputFormat,
-                    language);
-            logger.debug("Exporting captions succeeding.");
-          } catch (UnsupportedCaptionFormatException e) {
-            throw new UnsupportedCaptionFormatException(outputFormat);
-          } catch (IOException e) {
-            throw new CaptionConverterException("Could not export caption collection.", e);
-          }
-
-          // create catalog and set properties
-          MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
-                  .newElementBuilder();
-          Catalog catalog = (Catalog) elementBuilder.elementFromURI(exported, Catalog.TYPE,
-                  new MediaPackageElementFlavor("captions", outputFormat));
-          String[] mimetype = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(exported.getPath())
-                  .split("/");
-          catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
-          catalog.addTag("lang:" + language);
-
-          job.setPayload(catalog.getAsXml());
-          job.setStatus(Status.FINISHED);
-          updateJob(job);
-
-          return catalog;
-        } catch (Exception e) {
-          logger.warn("Error converting captions in " + input, e);
-          try {
-            job.setStatus(Status.FAILED);
-            updateJob(job);
-          } catch (Exception failureToFail) {
-            logger.warn("Unable to update job to failed state", failureToFail);
-          }
-          if (e instanceof CaptionConverterException) {
-            throw (CaptionConverterException) e;
-          } else if (e instanceof UnsupportedCaptionFormatException) {
-            throw (UnsupportedCaptionFormatException) e;
-          } else {
-            throw new CaptionConverterException(e);
-          }
-        }
+      // get input file
+      File captionsFile;
+      try {
+        captionsFile = workspace.get(input.getURI());
+      } catch (NotFoundException e) {
+        throw new CaptionConverterException("Requested media package element " + input + " could not be found.");
+      } catch (IOException e) {
+        throw new CaptionConverterException("Requested media package element " + input + "could not be accessed.");
       }
-    };
 
-    executor.submit(command);
-    return job;
+      logger.debug("Atempting to convert from {} to {}...", inputFormat, outputFormat);
+
+      CaptionCollection collection;
+      try {
+        collection = importCaptions(captionsFile, inputFormat, language);
+        logger.debug("Parsing to collection succeeded.");
+      } catch (UnsupportedCaptionFormatException e) {
+        throw new UnsupportedCaptionFormatException(inputFormat);
+      } catch (CaptionConverterException e) {
+        throw e;
+      }
+
+      URI exported;
+      try {
+        exported = exportCaptions(collection,
+                job.getId() + "." + FilenameUtils.getExtension(captionsFile.getAbsolutePath()), outputFormat, language);
+        logger.debug("Exporting captions succeeding.");
+      } catch (UnsupportedCaptionFormatException e) {
+        throw new UnsupportedCaptionFormatException(outputFormat);
+      } catch (IOException e) {
+        throw new CaptionConverterException("Could not export caption collection.", e);
+      }
+
+      // create catalog and set properties
+      MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+      Catalog catalog = (Catalog) elementBuilder.elementFromURI(exported, Catalog.TYPE, new MediaPackageElementFlavor(
+              "captions", outputFormat));
+      String[] mimetype = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(exported.getPath()).split("/");
+      catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
+      catalog.addTag("lang:" + language);
+
+      job.setPayload(MediaPackageElementParser.getAsXml(catalog));
+      job.setStatus(Status.FINISHED);
+      updateJob(job);
+
+      return catalog;
+
+    } catch (Exception e) {
+      logger.warn("Error converting captions in " + input, e);
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      if (e instanceof CaptionConverterException) {
+        throw (CaptionConverterException) e;
+      } else if (e instanceof UnsupportedCaptionFormatException) {
+        throw (UnsupportedCaptionFormatException) e;
+      } else {
+        throw new CaptionConverterException(e);
+      }
+    }
   }
 
   /**
@@ -285,10 +274,56 @@ public class CaptionServiceImpl implements CaptionService {
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   *      java.util.List)
+   */
+  @Override
+  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+    Operation op = null;
+    try {
+      op = Operation.valueOf(operation);
+
+      Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(0));
+      String inputFormat = arguments.get(1);
+      String outputFormat = arguments.get(2);
+
+      switch (op) {
+        case Convert:
+          convert(job, catalog, inputFormat, outputFormat, null);
+          break;
+        case ConvertWithLanguage:
+          String language = arguments.get(3);
+          convert(job, catalog, inputFormat, outputFormat, language);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      }
+    } catch (IllegalArgumentException e) {
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+    } catch (IndexOutOfBoundsException e) {
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Error handling operation '" + op + "'");
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.job.api.JobProducer#getJob(long)
    */
   public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     return jobManager.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#getJobType()
+   */
+  @Override
+  public String getJobType() {
+    return JOB_TYPE;
   }
 
   /**
@@ -464,6 +499,20 @@ public class CaptionServiceImpl implements CaptionService {
     } catch (ServiceRegistryException serviceRegException) {
       throw new CaptionConverterException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }
+  }
+
+  /**
+   * Setter for workspace via declarative activation
+   */
+  void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /**
+   * Setter for remote service manager via declarative activation
+   */
+  void setRemoteServiceManager(ServiceRegistry manager) {
+    this.jobManager = manager;
   }
 
 }

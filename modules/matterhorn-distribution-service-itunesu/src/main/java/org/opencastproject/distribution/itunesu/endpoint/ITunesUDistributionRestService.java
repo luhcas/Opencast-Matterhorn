@@ -17,8 +17,8 @@ package org.opencastproject.distribution.itunesu.endpoint;
 
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -72,7 +72,7 @@ public class ITunesUDistributionRestService {
     Job receipt = null;
 
     try {
-      MediaPackageElement element = AbstractMediaPackageElement.getFromXml(elementXml);
+      MediaPackageElement element = MediaPackageElementParser.getFromXml(elementXml);
       receipt = service.distribute(mediaPackageId, element);
     } catch (Exception e) {
       logger.warn("Error distributing element", e);

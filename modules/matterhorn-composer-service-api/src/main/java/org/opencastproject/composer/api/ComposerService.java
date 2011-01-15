@@ -16,7 +16,6 @@
 package org.opencastproject.composer.api;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
@@ -24,17 +23,9 @@ import org.opencastproject.mediapackage.Track;
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
-public interface ComposerService extends JobProducer {
+public interface ComposerService {
 
   String JOB_TYPE = "org.opencastproject.composer";
-
-  String ENCODE_OPERATION = "encode";
-
-  String TRIM_OPERATION = "trim";
-
-  String IMAGE_OPERATION = "image";
-
-  String CAPTION_OPERATION = "caption";
 
   /**
    * Encode one track, using that track's audio and video streams.

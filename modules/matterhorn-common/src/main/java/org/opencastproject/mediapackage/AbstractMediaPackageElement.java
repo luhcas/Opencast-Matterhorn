@@ -15,10 +15,16 @@
  */
 package org.opencastproject.mediapackage;
 
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeType;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
-import java.io.StringWriter;
 import java.net.URI;
 import java.util.Collection;
 import java.util.SortedSet;
@@ -34,14 +40,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.commons.io.IOUtils;
-import org.opencastproject.util.Checksum;
-import org.opencastproject.util.MimeType;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 /**
  * This class provides base functionality for media package elements.
@@ -575,34 +573,4 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     }
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.mediapackage.MediaPackageElement#getAsXml()
-   */
-  public String getAsXml() throws MediaPackageException {
-    StringWriter writer = new StringWriter();
-    Marshaller m = null;
-    try {
-      m = MediaPackageImpl.context.createMarshaller();
-      m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
-      m.marshal(this, writer);
-      return writer.toString();
-    } catch (JAXBException e) {
-      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
-    }
-  }
-
-  public static AbstractMediaPackageElement getFromXml(String xml) throws MediaPackageException {
-    try {
-      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-              .parse(IOUtils.toInputStream(xml, "UTF-8"));
-      MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      return (AbstractMediaPackageElement) element;
-    } catch (Exception e) {
-      throw new MediaPackageException(e);
-    }
-
-  }
 }

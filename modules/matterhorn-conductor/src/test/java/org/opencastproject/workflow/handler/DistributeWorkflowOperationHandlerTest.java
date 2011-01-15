@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -67,10 +68,10 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getPayload()).andReturn(track2.getAsXml());
-    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml());
-    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml());
-    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(track2));
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(catalog1));
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(catalog2));
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(attachment1));
     EasyMock.replay(job);
 
     // set up mock service registry
@@ -107,9 +108,9 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml()).times(2);
-    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml()).times(2);
-    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml()).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(catalog1)).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(catalog2)).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(attachment1)).times(2);
     EasyMock.replay(job);
 
     // set up mock service registry
@@ -143,9 +144,9 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml()).times(2);
-    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml()).times(2);
-    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml()).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(catalog1)).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(catalog2)).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(MediaPackageElementParser.getAsXml(attachment1)).times(2);
     EasyMock.replay(job);
 
     // set up mock service registry

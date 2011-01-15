@@ -96,12 +96,13 @@ public class JobJpaImpl extends JaxbJob {
    * queued.
    */
   public JobJpaImpl(ServiceRegistrationJpaImpl creatorServiceRegistration, String operation, List<String> arguments,
-          boolean startImmediately) {
+          String payload, boolean startImmediately) {
     this();
     this.operationType = operation;
     if(arguments != null) {
       this.arguments = new ArrayList<String>(arguments);
     }
+    setPayload(payload);
     setDateCreated(new Date());
     setCreatedHost(creatorServiceRegistration.getHost());
     setJobType(creatorServiceRegistration.getServiceType());
@@ -174,12 +175,12 @@ public class JobJpaImpl extends JaxbJob {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JaxbJob#getOperationType()
+   * @see org.opencastproject.job.api.JaxbJob#getOperation()
    */
   @Column(name = "operation")
   @XmlAttribute
   @Override
-  public String getOperationType() {
+  public String getOperation() {
     return operationType;
   }
 

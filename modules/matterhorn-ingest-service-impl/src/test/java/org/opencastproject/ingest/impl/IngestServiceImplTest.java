@@ -157,7 +157,7 @@ public class IngestServiceImplTest {
     ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.expect(
             serviceRegistry.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (List<String>) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(job).anyTimes();
+                    (List<String>) EasyMock.anyObject(), (String)EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(job).anyTimes();
     EasyMock.replay(serviceRegistry);
 
     service = new IngestServiceImpl();

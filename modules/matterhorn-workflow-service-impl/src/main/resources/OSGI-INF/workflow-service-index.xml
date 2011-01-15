@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.workflow.impl.WorkflowServiceSolrIndex" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.workflow.impl.WorkflowServiceSolrIndex" />
+  <property name="service.description" value="Workflow Service Index" />
+  <service>
+    <provide interface="org.opencastproject.workflow.impl.WorkflowServiceIndex" />
+  </service>
+  <reference name="serviceregistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+    cardinality="1..1" policy="static" bind="setServiceRegistry" />
+</scr:component>

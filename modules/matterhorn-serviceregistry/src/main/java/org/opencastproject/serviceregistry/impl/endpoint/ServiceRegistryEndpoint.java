@@ -258,9 +258,11 @@ public class ServiceRegistryEndpoint {
     String jobType = request.getParameter("jobType");
     String operation = request.getParameter("operation");
     String host = request.getParameter("host");
+    String payload = request.getParameter("payload");
     boolean start = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("start"));
     try {
-      Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(host, jobType, operation, arguments, start);
+      Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(host, jobType, operation, arguments, payload,
+              start);
       URI uri = new URI(UrlSupport.concat(new String[] { serverUrl, servicePath, "job", job.getId() + ".xml" }));
       return Response.ok(new JaxbJob(job)).location(uri).build();
     } catch (Exception e) {
@@ -450,7 +452,14 @@ public class ServiceRegistryEndpoint {
             "Creates a new job in the queued state");
     createJobEndpoint.addRequiredParam(new Param("jobType", Type.STRING, "org.opencastproject.[type]",
             "The service that is creating and handling this job"));
+    createJobEndpoint.addRequiredParam(new Param("operation", Type.STRING, null, "Operation to execute"));
+    createJobEndpoint.addRequiredParam(new Param("host", Type.STRING, "http://localhost:8080",
+            "The host that is creating the job"));
     createJobEndpoint.addFormat(new Format("xml", null, null));
+    createJobEndpoint.addOptionalParam(new Param("payload", Type.TEXT, null, "Initial payload"));
+    createJobEndpoint.addOptionalParam(new Param("start", Type.BOOLEAN, null,
+            "Immediately start the job or simply queue it?"));
+
     createJobEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the new job."));
     createJobEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, createJobEndpoint);

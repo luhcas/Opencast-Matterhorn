@@ -22,18 +22,17 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -63,7 +62,7 @@ public class WorkflowOperationSkippingTest {
   private WorkflowDefinition workingDefinition = null;
   private MediaPackage mediapackage1 = null;
   private SucceedingWorkflowOperationHandler succeedingOperationHandler = null;
-  private WorkflowServiceDaoSolrImpl dao = null;
+  private WorkflowServiceSolrIndex dao = null;
   private Set<HandlerRegistration> handlerRegistrations = null;
   private Workspace workspace = null;
 
@@ -98,14 +97,16 @@ public class WorkflowOperationSkippingTest {
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
+    serviceRegistry.registerService(service);
 
-    dao = new WorkflowServiceDaoSolrImpl();
+    dao = new WorkflowServiceSolrIndex();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = sRoot + File.separator + "solr." + System.currentTimeMillis();
     dao.activate();
     service.setDao(dao);
     service.activate(null);
+    service.setServiceRegistry(serviceRegistry);
 
     InputStream is = null;
     try {
@@ -129,7 +130,6 @@ public class WorkflowOperationSkippingTest {
   public void teardown() throws Exception {
     System.out.println("All tests finished... tearing down...");
     dao.deactivate();
-    service.deactivate();
   }
 
   @Test

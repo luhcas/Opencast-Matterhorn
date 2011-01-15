@@ -128,6 +128,27 @@ public interface ServiceRegistry {
           ServiceRegistryException;
 
   /**
+   * Create and store a new job in {@link Status#QUEUED} state on this host. This is equivalent to calling
+   * createJob(type, false).
+   * 
+   * @param type
+   *          the type of service responsible for this job
+   * @param operation
+   *          the operation for this service to run
+   * @param arguments
+   *          the arguments to the operation
+   * @param payload
+   *          an optional initial payload
+   * @return the job
+   * @throws ServiceRegistryException
+   *           if there is a problem creating the job
+   * @throws ServiceUnavailableException
+   *           if no service registration exists for this job type on this host
+   */
+  Job createJob(String type, String operation, List<String> arguments, String payload)
+          throws ServiceUnavailableException, ServiceRegistryException;
+
+  /**
    * Create and store a new job on this host. If start is true, the job will be in the {@link Status#RUNNING} state.
    * Otherwise, it will be {@link Status#QUEUED}.
    * 
@@ -137,6 +158,8 @@ public interface ServiceRegistry {
    *          the operation for this service to run
    * @param arguments
    *          the arguments to the operation
+   * @param payload
+   *          an optional initial payload
    * @param start
    *          whether the job should be created in the running state (true) or the queued state (false)
    * @return the job
@@ -145,7 +168,7 @@ public interface ServiceRegistry {
    * @throws ServiceUnavailableException
    *           if no service registration exists for this job type on this host
    */
-  Job createJob(String type, String operation, List<String> arguments, boolean start)
+  Job createJob(String type, String operation, List<String> arguments, String payload, boolean start)
           throws ServiceUnavailableException, ServiceRegistryException;
 
   /**

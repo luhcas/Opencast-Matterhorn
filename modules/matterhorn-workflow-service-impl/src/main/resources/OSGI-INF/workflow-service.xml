@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.workflow.api.WorkflowService" immediate="true" activate="activate" deactivate="deactivate">
+ name="org.opencastproject.workflow.impl.WorkflowServiceImpl" immediate="true" activate="activate">
   <implementation class="org.opencastproject.workflow.impl.WorkflowServiceImpl" />
   <property name="service.description" value="Workflow Service" />
   <service>
-    <provide interface="org.osgi.service.cm.ManagedService" />
     <provide interface="org.opencastproject.workflow.api.WorkflowService" />
     <provide interface="org.opencastproject.workflow.impl.WorkflowServiceImpl" />
   </service>
-  <reference name="dao" interface="org.opencastproject.workflow.impl.WorkflowServiceImplDao"
+  <reference name="index" interface="org.opencastproject.workflow.impl.WorkflowServiceIndex"
     cardinality="1..1" policy="static" bind="setDao" />
   <reference name="metadata" interface="org.opencastproject.metadata.api.MediaPackageMetadataService"
     cardinality="1..n" policy="dynamic" bind="addMetadataService" unbind="removeMetadataService" />
+  <reference name="serviceregistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+    cardinality="1..1" policy="static" bind="setServiceRegistry" />
 </scr:component>

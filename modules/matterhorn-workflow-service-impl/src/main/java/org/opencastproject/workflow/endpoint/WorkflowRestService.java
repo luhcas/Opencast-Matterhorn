@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.endpoint;
 
+import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.job.api.JobProducerRestEndpointSupport;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
@@ -84,7 +86,8 @@ import javax.ws.rs.core.Response.Status;
  * A REST endpoint for the {@link WorkflowService}
  */
 @Path("/")
-public class WorkflowRestService {
+public class WorkflowRestService extends JobProducerRestEndpointSupport {
+  
   /** The default number of results returned */
   private static final int DEFAULT_LIMIT = 20;
 
@@ -841,4 +844,18 @@ public class WorkflowRestService {
   public String getDocumentation() {
     return docs;
   }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   */
+  @Override
+  public JobProducer getService() {
+    if (service instanceof JobProducer)
+      return (JobProducer)service;
+    else
+      return null;
+  }
+  
 }

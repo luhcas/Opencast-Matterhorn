@@ -19,6 +19,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -71,7 +72,7 @@ public class WorkflowInstanceTest {
             .elementFromURI(new URI("http://sample"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
     src.add(track);
     MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder()
-            .loadFromXml(src.toXml());
+            .loadFromXml(MediaPackageParser.getAsXml(src));
     workflow.setMediaPackage(deserialized);
     Assert.assertEquals(1, workflow.getMediaPackage().getTracks().length);
   }

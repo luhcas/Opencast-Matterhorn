@@ -20,7 +20,9 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.serviceregistry.api.JaxbServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -32,6 +34,11 @@ import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -40,6 +47,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -55,26 +65,51 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 /**
  * JPA implementation of the {@link ServiceRegistry}
  */
 public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
-  private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryJpaImpl.class);
+  static final Logger logger = LoggerFactory.getLogger(ServiceRegistryJpaImpl.class);
 
   /** Configuration key for the maximum load */
   protected static final String OPT_MAXLOAD = "org.opencastproject.server.maxload";
+
+  /** The http client to use when connecting to remote servers */
+  protected TrustedHttpClient client = null;
+
+  /** Default dispatcher timeout (1 second) */
+  static final long DEFAULT_DISPATCHER_TIMEOUT = 1000;
+
+  /** The job dispatching thread */
+  protected JobDispatcher jobDispatcher = null;
 
   /**
    * A static list of statuses that influence how load balancing is calculated
    */
   protected static final List<Status> JOB_STATUSES_INFLUINCING_LOAD_BALANCING;
 
+  private static final JAXBContext jaxbContext;
+
   static {
     JOB_STATUSES_INFLUINCING_LOAD_BALANCING = new ArrayList<Status>();
     JOB_STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.QUEUED);
     JOB_STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.RUNNING);
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("org.opencastproject.mediapackage");
+    sb.append(":org.opencastproject.mediapackage.attachment");
+    sb.append(":org.opencastproject.mediapackage.track");
+    sb.append(":org.opencastproject.job.api");
+    try {
+      jaxbContext = JAXBContext.newInstance(sb.toString(), JobParser.class.getClassLoader());
+    } catch (JAXBException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   /** The JPA provider */
@@ -152,6 +187,11 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         throw new IllegalStateException(e);
       }
     }
+
+    // Instantiate and start the job dispatcher
+    jobDispatcher = new JobDispatcher();
+    jobDispatcher.setTimeout(DEFAULT_DISPATCHER_TIMEOUT);
+    jobDispatcher.start();
   }
 
   public void deactivate() {
@@ -167,6 +207,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     if (emf != null) {
       emf.close();
     }
+
+    // Stop the job dispatcher
+    jobDispatcher.stopRunning();
+    jobDispatcher.interrupt();
   }
 
   /**
@@ -178,26 +222,38 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   @Override
   public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
           ServiceRegistryException {
-    return createJob(this.hostName, type, operation, arguments, false);
+    return createJob(this.hostName, type, operation, arguments, null, false);
   }
 
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
-   *      java.util.List, boolean)
+   *      java.util.List, java.lang.String)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments, boolean start)
+  public Job createJob(String type, String operation, List<String> arguments, String payload)
           throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(this.hostName, type, operation, arguments, start);
+    return createJob(this.hostName, type, operation, arguments, payload, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List, String, boolean)
+   */
+  @Override
+  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean start)
+          throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(this.hostName, type, operation, arguments, payload, start);
   }
 
   /**
    * Creates a job on a remote host.
    */
-  public Job createJob(String host, String serviceType, String operation, List<String> arguments, boolean start)
-          throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String host, String serviceType, String operation, List<String> arguments, String payload,
+          boolean start) throws ServiceUnavailableException, ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -211,7 +267,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         throw new ServiceUnavailableException(serviceRegistration.getHost()
                 + " is currently in maintenance mode.  Jobs may not be created on this host.");
       }
-      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, start);
+      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, payload, start);
 
       serviceRegistration.creatorJobs.add(job);
       if (start) {
@@ -234,12 +290,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @return the new job
    */
   JobJpaImpl createJob(ServiceRegistrationJpaImpl serviceRegistration, String operation, List<String> arguments,
-          boolean startImmediately) {
+          String payload, boolean startImmediately) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, startImmediately);
+      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, payload, startImmediately);
       serviceRegistration.creatorJobs.add(job);
       if (startImmediately) {
         serviceRegistration.processorJobs.add(job);
@@ -695,18 +751,18 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         // the status will be null if there are no jobs at all associated with this service registration
         if (status != null) {
           switch (status) {
-          case RUNNING:
-            stats.setRunningJobs(count.intValue());
-            break;
-          case QUEUED:
-            stats.setQueuedJobs(count.intValue());
-            break;
-          case FINISHED:
-            stats.setMeanRunTime(meanRunTime.longValue());
-            stats.setMeanQueueTime(meanQueueTime.longValue());
-            break;
-          default:
-            break;
+            case RUNNING:
+              stats.setRunningJobs(count.intValue());
+              break;
+            case QUEUED:
+              stats.setQueuedJobs(count.intValue());
+              break;
+            case FINISHED:
+              stats.setMeanRunTime(meanRunTime.longValue());
+              stats.setMeanQueueTime(meanQueueTime.longValue());
+              break;
+            default:
+              break;
           }
         }
       }
@@ -875,4 +931,211 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   public SystemLoad getLoad() throws ServiceRegistryException {
     throw new UnsupportedOperationException();
   }
+
+  /**
+   * Sets the trusted http client.
+   * 
+   * @param client
+   *          the trusted http client
+   */
+  void setTrustedHttpClient(TrustedHttpClient client) {
+    this.client = client;
+  }
+
+  /**
+   * Gets an xml representation of a {@link Job}
+   * 
+   * @param job
+   *          The job to marshall
+   * @return the serialized job
+   */
+  private String serializeToString(Job job) throws IOException {
+    Marshaller marshaller;
+    try {
+      marshaller = jaxbContext.createMarshaller();
+      Writer writer = new StringWriter();
+      marshaller.marshal(job, writer);
+      return writer.toString();
+    } catch (JAXBException e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * Dispatches the job to the least loaded service or throws a <code>ServiceUnavailableException</code> if there is no
+   * such service.
+   * 
+   * @param job
+   *          the job to dispatch
+   * @return <code>true</code> if the job could be dispatched, <code>false</code> otherwise.
+   * @throws ServiceUnavailableException
+   *           if no service is available to dispatch the job
+   * @throws ServiceRegistryException
+   *           if the service registrations are unavailable or dispatching of the job fails
+   */
+  protected boolean dispatchJob(Job job) throws ServiceUnavailableException, ServiceRegistryException {
+
+    // Find service instances
+    List<ServiceRegistration> registrations = getServiceRegistrationsByLoad(job.getJobType());
+    if (registrations.size() == 0)
+      throw new ServiceUnavailableException("No service is available to handle jobs of type '" + job.getJobType() + "'");
+
+    // Try the service registrations, after the first one finished, we quit
+    for (ServiceRegistration registration : registrations) {
+      String serviceUrl = UrlSupport.concat(new String[] { registration.getHost(), registration.getPath(), "dispatch" });
+      HttpPost post = new HttpPost(serviceUrl);
+      try {
+        String jobXml = serializeToString(job);
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        params.add(new BasicNameValuePair("job", jobXml));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+        post.setEntity(entity);
+      } catch (IOException e) {
+        throw new ServiceRegistryException("Can not serialize job " + job, e);
+      }
+
+      // Post the request
+      HttpResponse response = null;
+      int responseStatusCode;
+      try {
+        logger.info("Trying to dispatch job {} of type '{}' to {}", new String[] { Long.toString(job.getId()), job.getJobType(), registration.getHost() });
+        response = client.execute(post);
+        responseStatusCode = response.getStatusLine().getStatusCode();
+        if (responseStatusCode == HttpStatus.SC_OK) {
+          logger.info("Job {} of type '{}' successfully dispatched to {}", new String[] { Long.toString(job.getId()), job.getJobType(), registration.getHost() });
+          return true;
+        }
+      } catch (Exception e) {
+        throw new ServiceRegistryException("Unable to dispatch job '" + job.getId() + "' of type '" + job.getJobType() + "'", e);
+      } finally {
+        client.close(response);
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * This dispatcher implementation will wake from time to time and check for new jobs. If new jobs are found, it will
+   * dispatch them to the services as appropriate.
+   */
+  class JobDispatcher extends Thread {
+
+    /** Running flag */
+    private boolean keepRunning = true;
+
+    /** Dispatcher timeout */
+    private long timeout = DEFAULT_DISPATCHER_TIMEOUT;
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Thread#run()
+     */
+    @Override
+    public void run() {
+      while (keepRunning) {
+        try {
+
+          // Go through the jobs and find those that have not yet been dispatched
+          for (Job job : getJobs(null, Status.QUEUED)) {
+            try {
+              job.setStatus(Status.RUNNING);
+              job = updateJob(job);
+              JobWorker worker = new JobWorker(job);
+              worker.start();
+            } catch (ServiceRegistryException e) {
+              job.setStatus(Status.QUEUED);
+              logger.debug("Someone else apparently got this job first");
+            }
+          }
+
+          Thread.sleep(timeout);
+        } catch (InterruptedException e) {
+          logger.debug("Job dispatcher thread activated");
+        } catch (ServiceRegistryException e) {
+          logger.warn("Error while trying to load queued jobs", e);
+        }
+      }
+    }
+
+    /**
+     * Tells the dispatcher thread to stop running.
+     */
+    public void stopRunning() {
+      keepRunning = false;
+      interrupt();
+    }
+
+    /**
+     * Sets the dispatcher timeout in miliseconds.
+     * 
+     * @param timeout
+     *          the timeout
+     */
+    public void setTimeout(long timeout) {
+      this.timeout = timeout;
+      interrupt();
+    }
+
+  }
+
+  /**
+   * Thread that will try to execute a single job.
+   */
+  class JobWorker extends Thread {
+
+    /** The job to work on */
+    private Job job = null;
+
+    /** True if the job was successfully dispatched */
+    private boolean isDispatched = false;
+
+    /**
+     * Creates a new worker that will try to get the job <code>job</code> done.
+     * 
+     * @param job
+     *          the job to execute
+     */
+    public JobWorker(Job job) {
+      this.job = job;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public boolean isDispatched() {
+      return isDispatched;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Thread#run()
+     */
+    @Override
+    public void run() {
+      try {
+        if (!dispatchJob(job)) {
+          job = getJob(job.getId());
+          job.setStatus(Job.Status.QUEUED);
+          updateJob(job);
+          logger.info("Job {} could not be dispatched and is put back into queue", job);
+        }
+      } catch (ServiceUnavailableException e) {
+        job.setStatus(Status.FAILED);
+        Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+        logger.error("Unable to find a service for job " + job, cause);
+      } catch (ServiceRegistryException e) {
+        job.setStatus(Status.FAILED);
+        Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+        logger.error("Error dispatching job " + job, cause);
+      } catch (NotFoundException e) {
+        logger.error("Job {} was removed from the database during dispatching", job);
+      }
+    }
+
+  }
+
 }

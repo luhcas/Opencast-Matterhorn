@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
  * of installing artifacts only once they are fully copied into the watch directory.
  */
 public class InboxScanner implements ArtifactInstaller {
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(InboxScanner.class);
 
@@ -157,4 +158,5 @@ public class InboxScanner implements ArtifactInstaller {
   public boolean canHandle(File artifact) {
     return "inbox".equals(artifact.getParentFile().getName());
   }
+
 }

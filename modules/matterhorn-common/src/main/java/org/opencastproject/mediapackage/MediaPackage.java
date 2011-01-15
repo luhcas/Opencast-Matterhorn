@@ -18,9 +18,6 @@ package org.opencastproject.mediapackage;
 
 import org.opencastproject.mediapackage.identifier.Id;
 
-import org.w3c.dom.Document;
-
-import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Date;
@@ -671,37 +668,6 @@ public interface MediaPackage extends Cloneable {
    *           if an error occurs while checking the media package
    */
   void verify() throws MediaPackageException;
-
-  /**
-   * Writes an xml representation of this MediaPackage to a string.
-   * 
-   * @return the media package serialized to a string
-   * @throws MediaPackageException
-   *           if serializing or reading from a serialized media package fails
-   */
-  String toXml();
-
-  /**
-   * Writes an xml representation of this MediaPackage to a stream.
-   * 
-   * @param out
-   *          The output stream
-   * @param format
-   *          Whether to format the output for readability, or not (false gives better performance)
-   * @throws MediaPackageException
-   *           if serializing or reading from a serialized media package fails
-   */
-  void toXml(OutputStream out, boolean format) throws MediaPackageException;
-
-  /**
-   * Saves the media package, utilizing the serializer when it comes to creating paths from urls.
-   * 
-   * @param serializer
-   *          the media package serializer
-   * @throws MediaPackageException
-   *           if saving the manifest failed
-   */
-  Document toXml(MediaPackageSerializer serializer) throws MediaPackageException;
 
   /**
    * Renames the media package to the new identifier.

@@ -19,18 +19,12 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
-import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -47,12 +41,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class PauseWorkflowTest {
 
@@ -60,10 +50,10 @@ public class PauseWorkflowTest {
   private WorkflowDefinition def = null;
   private WorkflowInstance workflow = null;
   private MediaPackage mp = null;
-  private WorkflowServiceDaoSolrImpl dao = null;
+  private WorkflowServiceSolrIndex dao = null;
   private Workspace workspace = null;
-  private SampleWorkflowOperationHandler firstHandler = null;
-  private SampleWorkflowOperationHandler secondHandler = null;
+  private ResumableTestWorkflowOperationHandler firstHandler = null;
+  private ResumableTestWorkflowOperationHandler secondHandler = null;
 
   private File sRoot = null;
 
@@ -90,8 +80,8 @@ public class PauseWorkflowTest {
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
-    firstHandler = new SampleWorkflowOperationHandler(mp);
-    secondHandler = new SampleWorkflowOperationHandler(mp);
+    firstHandler = new ResumableTestWorkflowOperationHandler();
+    secondHandler = new ResumableTestWorkflowOperationHandler();
     handlerRegistrations.add(new HandlerRegistration("op1", firstHandler));
     handlerRegistrations.add(new HandlerRegistration("op2", secondHandler));
 
@@ -102,18 +92,20 @@ public class PauseWorkflowTest {
       }
     };
 
-    ServiceRegistry serviceRegistry = new ServiceRegistryInMemoryImpl();
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
+    serviceRegistry.registerService(service);
 
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    dao = new WorkflowServiceDaoSolrImpl();
+    dao = new WorkflowServiceSolrIndex();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = sRoot + File.separator + "solr";
     dao.activate();
     service.setDao(dao);
     service.activate(null);
+    service.setServiceRegistry(serviceRegistry);
 
     is = PauseWorkflowTest.class.getResourceAsStream("/workflow-definition-pause.xml");
     def = WorkflowParser.parseWorkflowDefinition(is);
@@ -124,86 +116,26 @@ public class PauseWorkflowTest {
   @After
   public void teardown() throws Exception {
     dao.deactivate();
-    service.deactivate();
   }
 
   @Test
   public void testHoldAndResume() throws Exception {
+
     // Start a new workflow
     WorkflowStateListener pauseListener = new WorkflowStateListener(WorkflowState.PAUSED);
     service.addWorkflowListener(pauseListener);
     synchronized (pauseListener) {
       workflow = service.start(def, mp, null);
-      // Immediately pause the workflow
-      service.suspend(workflow.getId());
       pauseListener.wait();
     }
     service.removeWorkflowListener(pauseListener);
     
     // Ensure that the first operation handler was called, but not the second
-    Assert.assertTrue(firstHandler.called);
-    Assert.assertTrue(!secondHandler.called);
+    Assert.assertTrue(firstHandler.isStarted());
+    Assert.assertTrue(!secondHandler.isStarted());
 
     // The workflow should be in the paused state
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
-  }
-
-  class SampleWorkflowOperationHandler extends AbstractWorkflowOperationHandler implements ResumableWorkflowOperationHandler {
-    MediaPackage mp;
-    boolean called = false;
-
-    SampleWorkflowOperationHandler(MediaPackage mp) {
-      this.mp = mp;
-    }
-
-    @Override
-    public SortedMap<String, String> getConfigurationOptions() {
-      return new TreeMap<String, String>();
-    }
-
-    @Override
-    public String getId() {
-      return this.getClass().getName();
-    }
-
-    @Override
-    public String getDescription() {
-      return "ContinuingWorkflowOperationHandler";
-    }
-
-    @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      called = true;
-      return createResult(mp, Action.PAUSE);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
-     */
-    @Override
-    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
-            throws WorkflowOperationException {
-      return createResult(Action.CONTINUE);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldStateUserInterfaceURL(org.opencastproject.workflow.api.WorkflowInstance)
-     */
-    @Override
-    public URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldActionTitle()
-     */
-    @Override
-    public String getHoldActionTitle() {
-      return "Test";
-    }
   }
 
 }

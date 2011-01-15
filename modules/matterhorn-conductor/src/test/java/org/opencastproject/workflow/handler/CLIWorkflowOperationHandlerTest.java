@@ -18,6 +18,7 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
@@ -195,7 +196,7 @@ public class CLIWorkflowOperationHandlerTest {
 
     try {
       BufferedWriter output = new BufferedWriter(new FileWriter(file));
-      output.write(mp.toXml());
+      output.write(MediaPackageParser.getAsXml(mp));
       output.close();
 
       MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
@@ -230,7 +231,7 @@ public class CLIWorkflowOperationHandlerTest {
       MediaPackage mp = builder.createNew();
 
       BufferedWriter output = new BufferedWriter(new FileWriter(file));
-      output.write(mp.toXml());
+      output.write(MediaPackageParser.getAsXml(mp));
       output.close();
 
       MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();

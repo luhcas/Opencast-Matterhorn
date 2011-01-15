@@ -67,6 +67,7 @@ public class CaptureAdminRestEndpointTest {
   public void testGetAgents() throws Exception {
     HttpGet get = new HttpGet(BASE_URL + "/capture-admin/rest/agents");
     String xmlResponse = EntityUtils.toString(httpClient.execute(get).getEntity());
+    Main.returnClient(httpClient);
     
     // parse the xml and extract the running clients names
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -78,10 +79,15 @@ public class CaptureAdminRestEndpointTest {
     
     // validate the REST endpoint for each agent state is functional
     for (int i = 0; i < agentList.getLength(); i++) {
-      String agentName = ((Element) agentList.item(i)).getElementsByTagName("name").item(0).getTextContent();
-      HttpGet agentGet = new HttpGet(get.getURI() + "/" + agentName);
-      int agentResponse = httpClient.execute(agentGet).getStatusLine().getStatusCode();
-      assertEquals(agentResponse, HttpStatus.SC_OK);
+      try {
+        httpClient = Main.getClient();
+        String agentName = ((Element) agentList.item(i)).getElementsByTagName("name").item(0).getTextContent();
+        HttpGet agentGet = new HttpGet(get.getURI() + "/" + agentName);
+        int agentResponse = httpClient.execute(agentGet).getStatusLine().getStatusCode();
+        assertEquals(agentResponse, HttpStatus.SC_OK);
+      } finally {
+        Main.returnClient(httpClient);
+      }
     }
   }
   

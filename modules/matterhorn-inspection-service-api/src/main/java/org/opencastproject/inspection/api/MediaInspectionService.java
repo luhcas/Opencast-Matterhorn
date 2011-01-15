@@ -16,7 +16,6 @@
 package org.opencastproject.inspection.api;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
 
@@ -25,7 +24,7 @@ import java.net.URI;
 /**
  * Anayzes media to determine its technical metadata.
  */
-public interface MediaInspectionService extends JobProducer {
+public interface MediaInspectionService {
 
   /**
    * The namespace distinguishing media inspection jobs from other types

@@ -16,9 +16,11 @@
 package org.opencastproject.workflow.remote;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.serviceregistry.api.RemoteBase;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.SolrUtils;
+import org.opencastproject.workflow.api.WorkflowListener;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -266,7 +268,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       if (workflowDefinition != null) {
         params.add(new BasicNameValuePair("definition", WorkflowParser.toXml(workflowDefinition)));
       }
-      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
+      params.add(new BasicNameValuePair("mediapackage", MediaPackageParser.getAsXml(mediaPackage)));
       if (parentWorkflowId != null) {
         params.add(new BasicNameValuePair("parent", parentWorkflowId.toString()));
       }
@@ -552,6 +554,24 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     if (response == null) {
       throw new WorkflowDatabaseException("Unable to delete workflow definition '" + workflowDefinitionId + "'");
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#addWorkflowListener(org.opencastproject.workflow.api.WorkflowListener)
+   */
+  @Override
+  public void addWorkflowListener(WorkflowListener listener) {
+    throw new UnsupportedOperationException("Adding workflow listeners to a remote workflow service is not supported");
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#removeWorkflowListener(org.opencastproject.workflow.api.WorkflowListener)
+   */
+  @Override
+  public void removeWorkflowListener(WorkflowListener listener) {
+    throw new UnsupportedOperationException("Removing workflow listeners from a remote workflow service is not supported");
   }
 
 }

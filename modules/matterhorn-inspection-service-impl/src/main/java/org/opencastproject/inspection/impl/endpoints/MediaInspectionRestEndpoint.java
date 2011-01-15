@@ -18,12 +18,13 @@ package org.opencastproject.inspection.impl.endpoints;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.job.api.JobProducerRestEndpointSupport;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -43,7 +44,6 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -55,7 +55,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * A service endpoint to expose the {@link MediaInspectionService} via REST.
  */
 @Path("/")
-public class MediaInspectionRestEndpoint {
+public class MediaInspectionRestEndpoint extends JobProducerRestEndpointSupport {
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionRestEndpoint.class);
 
@@ -109,22 +109,6 @@ public class MediaInspectionRestEndpoint {
       return Response.ok(new JaxbJob(job)).build();
     } catch (Exception e) {
       logger.info(e.getMessage(), e);
-      return Response.serverError().build();
-    }
-  }
-
-  @GET
-  @Path("receipt/{id}.xml")
-  @Produces(MediaType.TEXT_XML)
-  public Response getJob(@PathParam("id") long id) {
-    checkNotNull(service);
-    try {
-      Job job = service.getJob(id);
-      return Response.ok(new JaxbJob(job)).build();
-    } catch (NotFoundException e) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    } catch (Exception e) {
-      logger.info(e.getMessage());
       return Response.serverError().build();
     }
   }
@@ -185,6 +169,19 @@ public class MediaInspectionRestEndpoint {
     data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
 
     return DocUtil.generate(data);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   */
+  @Override
+  public JobProducer getService() {
+    if (service instanceof JobProducer)
+      return (JobProducer)service;
+    else
+      return null;
   }
 
   /**

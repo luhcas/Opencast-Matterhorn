@@ -157,7 +157,7 @@
             <Service-Component>
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/workflow-service.xml,
-              OSGI-INF/workflow-service-dao.xml,
+              OSGI-INF/workflow-service-index.xml,
               OSGI-INF/workflow-service-rest.xml,
               OSGI-INF/workflow-samples.xml
             </Service-Component>

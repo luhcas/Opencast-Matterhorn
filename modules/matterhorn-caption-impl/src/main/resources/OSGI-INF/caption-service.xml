@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.caption.api.CaptionService" immediate="true" activate="activate">
+ name="org.opencastproject.caption.api.CaptionService" immediate="true">
   <implementation class="org.opencastproject.caption.impl.CaptionServiceImpl" />
   <property name="service.description" value="Caption Converter Service" />
   <service>
