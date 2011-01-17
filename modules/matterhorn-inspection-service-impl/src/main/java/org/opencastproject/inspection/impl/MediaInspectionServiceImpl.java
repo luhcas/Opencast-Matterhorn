@@ -232,9 +232,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
     logger.debug("inspect(" + trackURI + ") called, using workspace " + workspace);
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       // Get the file from the URL (runtime exception if invalid)
       File file = null;
       try {
@@ -357,10 +354,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
           throws MediaInspectionException {
 
     try {
-      // Set the job state to running
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       URI originalTrackUrl = originalTrack.getURI();
       MediaPackageElementFlavor flavor = originalTrack.getFlavor();
       logger.debug("enrich(" + originalTrackUrl + ") called");
@@ -488,9 +481,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
   private MediaPackageElement enrichElement(final MediaPackageElement element, final boolean override, final Job job)
           throws MediaInspectionException {
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       File file;
       try {
         file = workspace.get(element.getURI());
@@ -647,12 +637,12 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
     }
   }
 
-  void setWorkspace(Workspace workspace) {
+  protected void setWorkspace(Workspace workspace) {
     logger.debug("setting " + workspace);
     this.workspace = workspace;
   }
 
-  void setServiceRegistry(ServiceRegistry jobManager) {
+  protected void setServiceRegistry(ServiceRegistry jobManager) {
     this.serviceRegistry = jobManager;
   }
 

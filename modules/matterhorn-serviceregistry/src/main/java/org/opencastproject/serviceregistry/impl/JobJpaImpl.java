@@ -99,7 +99,7 @@ public class JobJpaImpl extends JaxbJob {
           String payload, boolean startImmediately) {
     this();
     this.operationType = operation;
-    if(arguments != null) {
+    if (arguments != null) {
       this.arguments = new ArrayList<String>(arguments);
     }
     setPayload(payload);
@@ -141,11 +141,12 @@ public class JobJpaImpl extends JaxbJob {
    * 
    * @see org.opencastproject.job.api.JaxbJob#getVersion()
    */
-  @Column
+  @Column(name = "instance_version")
   @Version
+  @XmlAttribute
   @Override
   public int getVersion() {
-    return version;
+    return super.getVersion();
   }
 
   /**

@@ -83,8 +83,7 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.distribution.download;version=${project.version} </Export-Package>
             <Service-Component>
-              OSGI-INF/distribution-service-download.xml,
-              OSGI-INF/distribution-service-download-rest.xml
+              OSGI-INF/distribution-service-download.xml
             </Service-Component>
           </instructions>
         </configuration>

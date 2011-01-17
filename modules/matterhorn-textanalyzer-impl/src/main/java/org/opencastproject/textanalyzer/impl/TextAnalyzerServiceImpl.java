@@ -131,9 +131,6 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
     final URI imageUrl = attachment.getURI();
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
 
       logger.info("Starting text extraction from {}", imageUrl);
@@ -340,11 +337,11 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
   /**
    * Sets the receipt service
    * 
-   * @param remoteServiceManager
-   *          the receipt service
+   * @param serviceRegistry
+   *          the service registry
    */
-  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
+  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.remoteServiceManager = serviceRegistry;
   }
 
   /**

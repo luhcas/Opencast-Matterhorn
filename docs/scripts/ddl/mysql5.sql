@@ -127,7 +127,7 @@ CREATE TABLE `JOB` (
   `PAYLOAD` text collate utf8_unicode_ci,
   `DATESTARTED` datetime default NULL,
   `RUNTIME` bigint(20) default NULL,
-  `VERSION` int(11) default NULL,
+  `INSTANCE_VERSION` int(11) default NULL,
   `DATECOMPLETED` datetime default NULL,
   `operation` varchar(255) collate utf8_unicode_ci default NULL,
   `DATECREATED` datetime default NULL,

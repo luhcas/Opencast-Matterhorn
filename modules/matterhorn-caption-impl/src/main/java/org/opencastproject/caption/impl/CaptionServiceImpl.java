@@ -504,14 +504,14 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
   /**
    * Setter for workspace via declarative activation
    */
-  void setWorkspace(Workspace workspace) {
+  protected void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
 
   /**
    * Setter for remote service manager via declarative activation
    */
-  void setRemoteServiceManager(ServiceRegistry manager) {
+  protected void setServiceRegistry(ServiceRegistry manager) {
     this.jobManager = manager;
   }
 

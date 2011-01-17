@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.caption.api.CaptionService" immediate="true">
-  <implementation class="org.opencastproject.caption.impl.CaptionServiceImpl" />
-  <property name="service.description" value="Caption Converter Service" />
-  <service>
-    <provide interface="org.opencastproject.caption.api.CaptionService" />
-  </service>
-  <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
-      cardinality="1..1" policy="static" bind="setWorkspace" />
-  <reference name="remoteServiceManager" interface="org.opencastproject.serviceregistry.api.ServiceRegistry" cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
-</scr:component>
+<scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+
+  <component name="org.opencastproject.caption.api.CaptionService" immediate="true">
+    <implementation class="org.opencastproject.caption.impl.CaptionServiceImpl" />
+    <property name="service.description" value="Caption Converter Service" />
+    <service>
+      <provide interface="org.opencastproject.caption.api.CaptionService" />
+    </service>
+    <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace" cardinality="1..1"
+      policy="static" bind="setWorkspace" />
+    <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+      cardinality="1..1" policy="static" bind="setServiceRegistry" />
+  </component>
+
+  <component activate="activate" immediate="true" name="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint">
+    <implementation class="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" />
+    <property name="service.description" value="Caption REST Endpoint" />
+
+    <property name="opencast.service.type" value="org.opencastproject.caption" />
+    <property name="opencast.service.path" value="/caption/rest" />
+    <property name="opencast.service.jobproducer" value="true" />
+
+    <service>
+      <provide interface="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" />
+    </service>
+    <reference name="service-impl" interface="org.opencastproject.caption.api.CaptionService" cardinality="0..1"
+      policy="dynamic" bind="setCaptionService" unbind="unsetCaptionService" />
+    <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+      cardinality="1..1" policy="static" bind="setServiceRegistry" />
+  </component>
+
+</scr:components>

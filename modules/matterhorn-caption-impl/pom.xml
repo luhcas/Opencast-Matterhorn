@@ -88,7 +88,6 @@
 						</Private-Package>
             <Service-Component>
               OSGI-INF/caption-service.xml,
-              OSGI-INF/caption-service-rest.xml,
               OSGI-INF/converters/dfxp-caption-converter.xml,
               OSGI-INF/converters/subrip-caption-converter.xml
             </Service-Component>

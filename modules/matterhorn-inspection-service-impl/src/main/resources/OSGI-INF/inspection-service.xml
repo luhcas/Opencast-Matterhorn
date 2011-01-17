@@ -1,17 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-  name="org.opencastproject.inspection.impl.MediaInspectionServiceImpl"
-  immediate="true" activate="activate">
-  <implementation
-    class="org.opencastproject.inspection.impl.MediaInspectionServiceImpl" />
-  <property name="service.description" value="Media Inspection Service" />
-  <service>
-    <provide interface="org.osgi.service.cm.ManagedService" />
-    <provide interface="org.opencastproject.inspection.api.MediaInspectionService" />
-  </service>
-  <reference name="workspace"
-    interface="org.opencastproject.workspace.api.Workspace" cardinality="1..1"
-    policy="static" bind="setWorkspace" />
-  <reference name="serviceRegistry"
-    interface="org.opencastproject.serviceregistry.api.ServiceRegistry" cardinality="1..1" policy="static" bind="setServiceRegistry" />
-</scr:component>
+<scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+  <component
+    name="org.opencastproject.inspection.impl.MediaInspectionServiceImpl"
+    immediate="true" activate="activate">
+    <implementation class="org.opencastproject.inspection.impl.MediaInspectionServiceImpl" />
+    <property name="service.description" value="Media Inspection Service" />
+    <service>
+      <provide interface="org.osgi.service.cm.ManagedService" />
+      <provide interface="org.opencastproject.inspection.api.MediaInspectionService" />
+    </service>
+    <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace" cardinality="1..1"
+      policy="static" bind="setWorkspace" />
+    <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+      cardinality="1..1" policy="static" bind="setServiceRegistry" />
+  </component>
+
+  <component activate="activate" immediate="true"
+    name="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint">
+    <implementation class="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
+    <property name="service.description" value="Media Inspection REST Endpoint" />
+
+    <property name="opencast.service.type" value="org.opencastproject.inspection" />
+    <property name="opencast.service.path" value="/inspection/rest" />
+    <property name="opencast.service.jobproducer" value="true" />
+
+    <service>
+      <provide interface="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
+    </service>
+    <reference name="service" interface="org.opencastproject.inspection.api.MediaInspectionService"
+      cardinality="0..1" policy="dynamic" bind="setService" />
+    <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+      cardinality="1..1" policy="static" bind="setServiceRegistry" />
+  </component>
+
+
+</scr:components>

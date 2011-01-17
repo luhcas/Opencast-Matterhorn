@@ -264,8 +264,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
                 + host + "'");
       }
       if (serviceRegistration.getHostRegistration().isMaintenanceMode()) {
-        throw new ServiceUnavailableException(serviceRegistration.getHost()
-                + " is currently in maintenance mode.  Jobs may not be created on this host.");
+        logger.warn("Creating a job from {}, which is currently in maintenance mode.", serviceRegistration.getHost());
       }
       JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, payload, start);
 
@@ -321,11 +320,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityManager em = emf.createEntityManager();
     try {
       Job job = em.find(JobJpaImpl.class, id);
-      if (job == null)
+      if (job == null) {
         throw new NotFoundException("Job " + id + " not found");
+      }
       // JPA's caches can be out of date if external changes (e.g. another node in the cluster) have been made to
       // this row in the database
       em.refresh(job);
+      job.getArguments();
       return job;
     } catch (Exception e) {
       if (e instanceof NotFoundException) {
@@ -351,15 +352,14 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       tx.begin();
       JobJpaImpl fromDb;
       try {
-        fromDb = em.find(JobJpaImpl.class, job.getId());
+        fromDb = (JobJpaImpl) getJob(job.getId()); // do not use the direct em.find(), since it depends on the em cache
       } catch (NoResultException e) {
         throw new NotFoundException("job " + job + " is not a persistent object.", e);
       }
       update(fromDb, (JaxbJob) job);
       em.merge(fromDb);
       tx.commit();
-      int version = fromDb.getVersion();
-      ((JaxbJob) job).setVersion(version);
+      ((JaxbJob) job).setVersion(getJob(job.getId()).getVersion());
       return job;
     } catch (Exception e) {
       if (tx.isActive())
@@ -385,10 +385,11 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     fromDb.setPayload(job.getPayload());
     fromDb.setStatus(job.getStatus());
     fromDb.setVersion(job.getVersion());
-    if (Status.QUEUED.equals(status)) {
+    if (job.getDateCreated() == null) {
       job.setDateCreated(now);
       fromDb.setDateCreated(now);
-    } else if (Status.RUNNING.equals(status)) {
+    }
+    if (Status.RUNNING.equals(status)) {
       job.setDateStarted(now);
       job.setQueueTime(now.getTime() - job.getDateCreated().getTime());
       fromDb.setDateStarted(now);
@@ -751,18 +752,18 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         // the status will be null if there are no jobs at all associated with this service registration
         if (status != null) {
           switch (status) {
-            case RUNNING:
-              stats.setRunningJobs(count.intValue());
-              break;
-            case QUEUED:
-              stats.setQueuedJobs(count.intValue());
-              break;
-            case FINISHED:
-              stats.setMeanRunTime(meanRunTime.longValue());
-              stats.setMeanQueueTime(meanQueueTime.longValue());
-              break;
-            default:
-              break;
+          case RUNNING:
+            stats.setRunningJobs(count.intValue());
+            break;
+          case QUEUED:
+            stats.setQueuedJobs(count.intValue());
+            break;
+          case FINISHED:
+            stats.setMeanRunTime(meanRunTime.longValue());
+            stats.setMeanQueueTime(meanQueueTime.longValue());
+            break;
+          default:
+            break;
           }
         }
       }
@@ -962,27 +963,28 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   }
 
   /**
-   * Dispatches the job to the least loaded service or throws a <code>ServiceUnavailableException</code> if there is no
-   * such service.
+   * Dispatches the job to the least loaded service that will accept the job, or throws a
+   * <code>ServiceUnavailableException</code> if there is no such service.
    * 
    * @param job
    *          the job to dispatch
-   * @return <code>true</code> if the job could be dispatched, <code>false</code> otherwise.
-   * @throws ServiceUnavailableException
-   *           if no service is available to dispatch the job
+   * @return the host that accepted the dispatched job, or <code>null</code> if no services took the job.
    * @throws ServiceRegistryException
-   *           if the service registrations are unavailable or dispatching of the job fails
+   *           if the service registrations are unavailable
    */
-  protected boolean dispatchJob(Job job) throws ServiceUnavailableException, ServiceRegistryException {
+  protected String dispatchJob(Job job) throws ServiceRegistryException {
 
     // Find service instances
     List<ServiceRegistration> registrations = getServiceRegistrationsByLoad(job.getJobType());
-    if (registrations.size() == 0)
-      throw new ServiceUnavailableException("No service is available to handle jobs of type '" + job.getJobType() + "'");
+    if (registrations.size() == 0) {
+      logger.info("No service is available to handle jobs of type '" + job.getJobType() + "'");
+      return null;
+    }
 
     // Try the service registrations, after the first one finished, we quit
     for (ServiceRegistration registration : registrations) {
-      String serviceUrl = UrlSupport.concat(new String[] { registration.getHost(), registration.getPath(), "dispatch" });
+      String serviceUrl = UrlSupport
+              .concat(new String[] { registration.getHost(), registration.getPath(), "dispatch" });
       HttpPost post = new HttpPost(serviceUrl);
       try {
         String jobXml = serializeToString(job);
@@ -998,21 +1000,25 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       HttpResponse response = null;
       int responseStatusCode;
       try {
-        logger.info("Trying to dispatch job {} of type '{}' to {}", new String[] { Long.toString(job.getId()), job.getJobType(), registration.getHost() });
+        logger.debug("Trying to dispatch job {} of type '{}' to {}",
+                new String[] { Long.toString(job.getId()), job.getJobType(), registration.getHost() });
         response = client.execute(post);
         responseStatusCode = response.getStatusLine().getStatusCode();
-        if (responseStatusCode == HttpStatus.SC_OK) {
-          logger.info("Job {} of type '{}' successfully dispatched to {}", new String[] { Long.toString(job.getId()), job.getJobType(), registration.getHost() });
-          return true;
+        if (responseStatusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
+          continue;
+        } else if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
+          return registration.getHost();
         }
       } catch (Exception e) {
-        throw new ServiceRegistryException("Unable to dispatch job '" + job.getId() + "' of type '" + job.getJobType() + "'", e);
+        throw new ServiceRegistryException("Unable to dispatch job '" + job.getId() + "' of type '" + job.getJobType()
+                + "'", e);
       } finally {
         client.close(response);
       }
     }
 
-    return false;
+    // We've tried dispatching to every online service that can handle this type of job, with no luck.
+    return null;
   }
 
   /**
@@ -1036,25 +1042,28 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     public void run() {
       while (keepRunning) {
         try {
-
           // Go through the jobs and find those that have not yet been dispatched
-          for (Job job : getJobs(null, Status.QUEUED)) {
-            try {
-              job.setStatus(Status.RUNNING);
-              job = updateJob(job);
-              JobWorker worker = new JobWorker(job);
-              worker.start();
-            } catch (ServiceRegistryException e) {
-              job.setStatus(Status.QUEUED);
-              logger.debug("Someone else apparently got this job first");
+          try {
+            List<Job> jobsToDispatch = getJobs(null, Status.QUEUED);
+            for (Job job : jobsToDispatch) {
+              try {
+                String hostAcceptingJob = dispatchJob(job);
+                if (hostAcceptingJob == null) {
+                  logger.info("Job {} could not be dispatched and is put back into queue", job.getId());
+                } else {
+                  logger.info("Job {} dispatched to {}", job.getId(), hostAcceptingJob);
+                }
+              } catch (ServiceRegistryException e) {
+                Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+                logger.error("Error dispatching job " + job, cause);
+              }
             }
+          } catch (Exception e) {
+            logger.warn("Error dispatching jobs", e);
           }
-
           Thread.sleep(timeout);
         } catch (InterruptedException e) {
           logger.debug("Job dispatcher thread activated");
-        } catch (ServiceRegistryException e) {
-          logger.warn("Error while trying to load queued jobs", e);
         }
       }
     }
@@ -1079,63 +1088,4 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     }
 
   }
-
-  /**
-   * Thread that will try to execute a single job.
-   */
-  class JobWorker extends Thread {
-
-    /** The job to work on */
-    private Job job = null;
-
-    /** True if the job was successfully dispatched */
-    private boolean isDispatched = false;
-
-    /**
-     * Creates a new worker that will try to get the job <code>job</code> done.
-     * 
-     * @param job
-     *          the job to execute
-     */
-    public JobWorker(Job job) {
-      this.job = job;
-    }
-
-    /**
-     * 
-     * @return
-     */
-    public boolean isDispatched() {
-      return isDispatched;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Thread#run()
-     */
-    @Override
-    public void run() {
-      try {
-        if (!dispatchJob(job)) {
-          job = getJob(job.getId());
-          job.setStatus(Job.Status.QUEUED);
-          updateJob(job);
-          logger.info("Job {} could not be dispatched and is put back into queue", job);
-        }
-      } catch (ServiceUnavailableException e) {
-        job.setStatus(Status.FAILED);
-        Throwable cause = (e.getCause() != null) ? e.getCause() : e;
-        logger.error("Unable to find a service for job " + job, cause);
-      } catch (ServiceRegistryException e) {
-        job.setStatus(Status.FAILED);
-        Throwable cause = (e.getCause() != null) ? e.getCause() : e;
-        logger.error("Error dispatching job " + job, cause);
-      } catch (NotFoundException e) {
-        logger.error("Job {} was removed from the database during dispatching", job);
-      }
-    }
-
-  }
-
 }

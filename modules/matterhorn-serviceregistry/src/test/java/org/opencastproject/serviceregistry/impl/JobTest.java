@@ -53,6 +53,10 @@ public class JobTest {
 
   private ServiceRegistrationJpaImpl regType1Host1 = null;
   private ServiceRegistrationJpaImpl regType1Host2 = null;
+  @SuppressWarnings("unused")
+  private ServiceRegistrationJpaImpl regType2Host1 = null;
+  @SuppressWarnings("unused")
+  private ServiceRegistrationJpaImpl regType2Host2 = null;
 
   @Before
   public void setUp() throws Exception {
@@ -80,8 +84,8 @@ public class JobTest {
     // register some service instances
     regType1Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, LOCALHOST, PATH);
     regType1Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, HOST_2, PATH);
-    serviceRegistry.registerService(JOB_TYPE_2, LOCALHOST, PATH);
-    serviceRegistry.registerService(JOB_TYPE_2, HOST_2, PATH);
+    regType2Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_2, LOCALHOST, PATH);
+    regType2Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_2, HOST_2, PATH);
   }
 
   @After
@@ -326,20 +330,43 @@ public class JobTest {
     Assert.assertEquals("Arguments not persisted in order", arg1, jobFromDb.getArguments().get(0));
     Assert.assertEquals("Arguments not persisted in order", arg2, jobFromDb.getArguments().get(1));
   }
-  
+
+  @Test
+  public void testVersionIncrements() throws Exception {
+    // Disable job dispatching by setting both hosts to be in maintenance mode
+    serviceRegistry.setMaintenanceStatus(LOCALHOST, true);
+    serviceRegistry.setMaintenanceStatus(HOST_2, true);
+    
+    Job job = (JobJpaImpl)serviceRegistry.createJob(JOB_TYPE_1, "some_operation", null); 
+    Assert.assertEquals("Newly created jobs shuold have a version of 1", 1, job.getVersion());
+    
+    job = serviceRegistry.getJob(job.getId());
+    job.setPayload("update1");
+    serviceRegistry.updateJob(job);
+    Assert.assertEquals("Updated job shuold have a version of 2", 2, job.getVersion());
+    
+    job = serviceRegistry.getJob(job.getId());
+    job.setPayload("update2");
+    serviceRegistry.updateJob(job);
+    Assert.assertEquals("Updated job shuold have a version of 3", 3, job.getVersion());
+  }
+
   @Test
   public void testOptimisticLocking() throws Exception {
+    // Disable job dispatching by setting both hosts to be in maintenance mode
+    serviceRegistry.setMaintenanceStatus(LOCALHOST, true);
+    serviceRegistry.setMaintenanceStatus(HOST_2, true);
+    
     // Create a job
     String arg1 = "arg1";
     String arg2 = "<some>xml</some>";
-    String arg3 = "another arg";
     JobJpaImpl job = (JobJpaImpl)serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2)); 
 
     // Grab another reference to this job
     Job jobFromDb = serviceRegistry.getJob(job.getId());
 
     // Modify the job and save it
-    job.getArguments().add(arg3);
+    job.setPayload("something produced by this client");
     serviceRegistry.updateJob(job);
     
     // Ensure that the job version is higher than the snapshot we loaded from the database

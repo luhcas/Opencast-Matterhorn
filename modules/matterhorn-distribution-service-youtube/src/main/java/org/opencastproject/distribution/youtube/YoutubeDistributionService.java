@@ -226,9 +226,6 @@ public class YoutubeDistributionService implements DistributionService, JobProdu
       throw new IllegalArgumentException("Mediapackage element must have an identifier");
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       File sourceFile;
       try {
         sourceFile = workspace.get(element.getURI());

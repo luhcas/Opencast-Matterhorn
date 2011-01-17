@@ -24,6 +24,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -56,11 +57,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @Path("")
 public class VideoSegmenterRestEndpoint extends JobProducerRestEndpointSupport {
 
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenterRestEndpoint.class);
 
+  /** The rest docs */
   protected String docs;
 
+  /** The video segmenter */
   protected VideoSegmenterService service;
+
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
 
   /**
    * Callback from OSGi that is called when this service is activated.
@@ -73,7 +80,33 @@ public class VideoSegmenterRestEndpoint extends JobProducerRestEndpointSupport {
     docs = generateDocs(serviceUrl);
   }
 
-  void setVideoSegmenter(VideoSegmenterService videoSegmenter) {
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   */
+  @Override
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+
+  /**
+   * Sets the segmenter
+   * 
+   * @param videoSegmenter
+   *          the segmenter
+   */
+  protected void setVideoSegmenter(VideoSegmenterService videoSegmenter) {
     this.service = videoSegmenter;
   }
 
@@ -138,7 +171,7 @@ public class VideoSegmenterRestEndpoint extends JobProducerRestEndpointSupport {
   @Override
   public JobProducer getService() {
     if (service instanceof JobProducer)
-      return (JobProducer)service;
+      return (JobProducer) service;
     else
       return null;
   }

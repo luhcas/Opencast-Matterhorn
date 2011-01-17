@@ -63,7 +63,7 @@ public class DownloadDistributionServiceImplTest {
     service = new DownloadDistributionService();
 
     serviceRegistry = new ServiceRegistryInMemoryImpl(service);
-    service.setRemoteServiceManager(serviceRegistry);
+    service.setServiceRegistry(serviceRegistry);
     
     service.distributionDirectory = distributionRoot;
     service.serviceUrl = UrlSupport.DEFAULT_BASE_URL;

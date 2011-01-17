@@ -34,6 +34,7 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -75,11 +76,47 @@ import javax.xml.parsers.ParserConfigurationException;
 @Path("/")
 public class GStreamerComposerRestService extends JobProducerRestEndpointSupport {
 
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(GStreamerComposerRestService.class);
+
+  /** The rest docs */
   protected String docs;
+
+  /** The base server URL */
   protected String serverUrl;
+
+  /** The composer service */
   protected ComposerService composerService;
 
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   */
+  @Override
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+
+  /**
+   * Sets the composer service
+   * 
+   * @param composerService
+   *          the composer service
+   */
   public void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
   }
@@ -454,7 +491,7 @@ public class GStreamerComposerRestService extends JobProducerRestEndpointSupport
   @Override
   public JobProducer getService() {
     if (composerService instanceof JobProducer)
-      return (JobProducer)composerService;
+      return (JobProducer) composerService;
     else
       return null;
   }

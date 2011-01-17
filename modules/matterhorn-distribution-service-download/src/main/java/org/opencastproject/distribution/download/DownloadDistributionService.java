@@ -137,9 +137,6 @@ public class DownloadDistributionService implements DistributionService, JobProd
       throw new IllegalArgumentException("Mediapackage element must have an identifier");
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       File sourceFile;
       try {
         sourceFile = workspace.get(element.getURI());
@@ -403,18 +400,18 @@ public class DownloadDistributionService implements DistributionService, JobProd
    * @param workspace
    *          the workspace
    */
-  void setWorkspace(Workspace workspace) {
+  protected void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
 
   /**
    * Callback for the OSGi environment to set the service registry reference.
    * 
-   * @param remoteServiceManager
+   * @param serviceRegistry
    *          the service registry
    */
-  void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.serviceRegistry = remoteServiceManager;
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
   }
 
 }

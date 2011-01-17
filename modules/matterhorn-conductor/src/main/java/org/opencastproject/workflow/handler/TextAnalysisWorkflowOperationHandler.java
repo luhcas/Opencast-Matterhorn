@@ -294,7 +294,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
             throw new WorkflowOperationException("Extracting scene image from " + sourceTrack + " failed");
           }
           image = (Attachment) MediaPackageElementParser.getFromXml(imageJob.getPayload());
-          long timeInComposerQueue = imageJob.getDateStarted().getTime() - imageJob.getDateCreated().getTime();
+          long timeInComposerQueue = imageJob.getQueueTime();
           totalTimeInQueue += timeInComposerQueue;
         } catch (EncoderException e) {
           logger.error("Error creating still image from {}", sourceTrack);
@@ -309,8 +309,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         }
 
         // add this receipt's queue time to the total
-        long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
-        totalTimeInQueue += timeInQueue;
+        totalTimeInQueue += job.getQueueTime();
 
         Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(job.getPayload());
         workspace.delete(image.getURI());

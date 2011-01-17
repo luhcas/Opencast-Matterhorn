@@ -150,9 +150,6 @@ public class StreamingDistributionService implements DistributionService, JobPro
       throw new IllegalArgumentException("Mediapackage element must have an identifier");
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       // The streaming server only supports tracks
       if (!(element instanceof Track)) {
         job.setStatus(Status.FINISHED);
@@ -249,9 +246,6 @@ public class StreamingDistributionService implements DistributionService, JobPro
    */
   private void retract(Job job, String mediaPackageId) throws DistributionException {
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       if (!FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
         throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
       }
@@ -424,18 +418,18 @@ public class StreamingDistributionService implements DistributionService, JobPro
    * @param workspace
    *          the workspace
    */
-  void setWorkspace(Workspace workspace) {
+  protected void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
 
   /**
    * Callback for the OSGi environment to set the service registry reference.
    * 
-   * @param remoteServiceManager
+   * @param serviceRegistry
    *          the service registry
    */
-  void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.serviceRegistry = remoteServiceManager;
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
   }
 
 }

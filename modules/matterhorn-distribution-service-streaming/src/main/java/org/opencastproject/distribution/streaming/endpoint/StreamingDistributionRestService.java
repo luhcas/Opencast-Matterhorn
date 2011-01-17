@@ -23,6 +23,7 @@ import org.opencastproject.job.api.JobProducerRestEndpointSupport;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -51,22 +52,52 @@ public class StreamingDistributionRestService extends JobProducerRestEndpointSup
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(StreamingDistributionRestService.class);
-  
+
   /** The distribution service */
   protected DistributionService service;
-  
+
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
+
+  /**
+   * OSGi activation callback
+   * 
+   * @param cc
+   *          this component's context
+   */
   public void activate(ComponentContext cc) {
     String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     docs = generateDocs(serviceUrl);
   }
 
   /**
-   * @param service the service to set
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   */
+  @Override
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+
+  /**
+   * @param service
+   *          the service to set
    */
   public void setService(DistributionService service) {
     this.service = service;
   }
-  
+
   @POST
   @Path("/")
   @Produces(MediaType.TEXT_XML)
@@ -113,7 +144,8 @@ public class StreamingDistributionRestService extends JobProducerRestEndpointSup
                   + "occurred which is not recoverable and was not anticipated. In other words, there is a bug!" };
 
   private String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("streamingdistributionservice", "Streaming Distribution Service", serviceUrl, notes);
+    DocRestData data = new DocRestData("streamingdistributionservice", "Streaming Distribution Service", serviceUrl,
+            notes);
 
     // abstract
     data.setAbstract("This service distributes media packages to the streaming server.");
@@ -122,8 +154,7 @@ public class StreamingDistributionRestService extends JobProducerRestEndpointSup
     RestEndpoint endpoint = new RestEndpoint("distribute", RestEndpoint.Method.POST, "/",
             "Distribute a media package to the streaming server");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null,
-            "The media package identifier"));
+    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null, "The media package identifier"));
     endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, null, "A media package element"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
@@ -150,7 +181,7 @@ public class StreamingDistributionRestService extends JobProducerRestEndpointSup
   @Override
   public JobProducer getService() {
     if (service instanceof JobProducer)
-      return (JobProducer)service;
+      return (JobProducer) service;
     else
       return null;
   }

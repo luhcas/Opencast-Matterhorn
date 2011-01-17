@@ -205,5 +205,15 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
       super.maintenanceMode = hostRegistration.isMaintenanceMode();
     }
   }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return serviceType + "@" + host;
+  }
 
 }

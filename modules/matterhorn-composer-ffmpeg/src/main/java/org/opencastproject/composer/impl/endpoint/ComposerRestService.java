@@ -34,6 +34,7 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -75,11 +76,48 @@ import javax.xml.parsers.ParserConfigurationException;
 @Path("/")
 public class ComposerRestService extends JobProducerRestEndpointSupport {
 
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ComposerRestService.class);
+  
+  /** The rest documentation */
   protected String docs;
+  
+  /** The base server URL */
   protected String serverUrl;
-  protected ComposerService composerService;
+  
+  /** The composer service */
+  protected ComposerService composerService = null;
+  
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   */
+  @Override
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+
+
+  /**
+   * Sets the composer service.
+   * 
+   * @param composerService
+   *          the composer service
+   */
   public void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
   }
@@ -387,7 +425,7 @@ public class ComposerRestService extends JobProducerRestEndpointSupport {
     data.addEndpoint(RestEndpoint.Type.WRITE, encodeEndpoint);
 
     // @FormParam("sourceTrack") String sourceTrackAsXml, @FormParam("profileId") String profileId,
-    //  @FormParam("start") long start, @FormParam("duration") long duration
+    // @FormParam("start") long start, @FormParam("duration") long duration
     // trim
     RestEndpoint trimEndpoint = new RestEndpoint("trim", RestEndpoint.Method.POST, "/trim",
             "Starts a trimming process, based on the specified track, start time and duration in ms");
@@ -398,9 +436,9 @@ public class ComposerRestService extends JobProducerRestEndpointSupport {
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
             .badRequest("if the duration is negative or, including the new start time, exceeds the track duration"));
     trimEndpoint.addRequiredParam(new Param("sourceTrack", Type.TEXT, generateVideoTrack(),
-    "The track containing the stream"));
+            "The track containing the stream"));
     trimEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "trim.work",
-    "The encoding profile to use for trimming"));
+            "The encoding profile to use for trimming"));
     trimEndpoint.addRequiredParam(new Param("start", Type.STRING, "0", "The start time in milisecond"));
     trimEndpoint.addRequiredParam(new Param("duration", Type.STRING, "10000", "The duration in milisecond"));
     trimEndpoint.setTestForm(RestTestForm.auto());
@@ -456,7 +494,7 @@ public class ComposerRestService extends JobProducerRestEndpointSupport {
   @Override
   public JobProducer getService() {
     if (composerService instanceof JobProducer)
-      return (JobProducer)composerService;
+      return (JobProducer) composerService;
     else
       return null;
   }

@@ -24,6 +24,7 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.textanalyzer.api.TextAnalyzerService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -56,11 +57,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @Path("")
 public class TextAnalysisRestEndpoint extends JobProducerRestEndpointSupport {
 
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(TextAnalysisRestEndpoint.class);
 
+  /** The rest docs */
   protected String docs;
 
+  /** The text analyzer */
   protected TextAnalyzerService service;
+
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
 
   /**
    * Callback from OSGi that is called when this service is activated.
@@ -76,6 +83,32 @@ public class TextAnalysisRestEndpoint extends JobProducerRestEndpointSupport {
   public void deactivate() {
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   */
+  @Override
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+
+  /**
+   * Sets the text analyzer
+   * 
+   * @param textAnalyzer
+   *          the text analyzer
+   */
   public void setTextAnalyzer(TextAnalyzerService textAnalyzer) {
     this.service = textAnalyzer;
   }
@@ -141,9 +174,9 @@ public class TextAnalysisRestEndpoint extends JobProducerRestEndpointSupport {
   @Override
   public JobProducer getService() {
     if (service instanceof JobProducer)
-      return (JobProducer)service;
+      return (JobProducer) service;
     else
       return null;
   }
-  
+
 }

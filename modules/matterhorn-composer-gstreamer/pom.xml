@@ -149,7 +149,6 @@
               jna;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/gscomposer-service-rest.xml,
               OSGI-INF/gscomposer-service.xml,
               OSGI-INF/gsencoderengine.xml,
               OSGI-INF/gsprofile-scanner.xml

@@ -38,7 +38,6 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,6 @@ import javax.xml.xpath.XPathConstants;
  * then ingest it. At the same time, it monitors the associated workflow and makes sure the operation and state
  * transitions happen as expected.
  */
-@Ignore
 public class PreProcessingWorkflowTest {
 
   private static final Logger logger = LoggerFactory.getLogger(PreProcessingWorkflowTest.class);
@@ -111,12 +109,14 @@ public class PreProcessingWorkflowTest {
 
     // TODO: How do we submit the workflow definition?
 
-    // Schedule and event and make sure the workflow is in "schedule" operation
+    // Schedule an event and make sure that, once the workflow is dispatched, it's on hold in the "schedule" operation
     workflowId = scheduleEvent(start, end);
-    Thread.sleep(1000);
-    if (!WorkflowUtils.isWorkflowInOperation(workflowId, "schedule")
-            || !WorkflowUtils.isWorkflowInState(workflowId, "PAUSED")) {
-      fail("Workflow " + workflowId + " should be on hold in 'schedule'");
+    while(WorkflowUtils.isWorkflowInState(workflowId, "INSTANTIATED")) {
+      logger.info("Waiting for workflow {} to be dispatched", workflowId);
+      Thread.sleep(1000);
+    }
+    if (!WorkflowUtils.isWorkflowInState(workflowId, "PAUSED") ) {
+      fail("Workflow " + workflowId + " should be on hold in 'schedule', or ");
     }
 
     // Wait for the capture agent to start the recording and make sure the workflow enters the "capture" operation

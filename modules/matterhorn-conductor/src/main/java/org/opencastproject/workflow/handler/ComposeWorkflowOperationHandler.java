@@ -200,8 +200,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       Track composedTrack = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
 
       // add this receipt's queue time to the total
-      long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
-      totalTimeInQueue += timeInQueue;
+      totalTimeInQueue += job.getQueueTime();
 
       updateTrackMetadata(composedTrack, operation, profile);
 

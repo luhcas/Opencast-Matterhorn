@@ -122,7 +122,7 @@ public interface ServiceRegistry {
    * @throws ServiceRegistryException
    *           if there is a problem creating the job
    * @throws ServiceUnavailableException
-   *           if no service registration exists for this job type on this host
+   *           if no service registration exists for this job type
    */
   Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
           ServiceRegistryException;

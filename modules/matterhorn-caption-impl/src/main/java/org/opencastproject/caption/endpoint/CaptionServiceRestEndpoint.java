@@ -27,6 +27,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -67,10 +68,17 @@ import javax.xml.transform.stream.StreamResult;
 @Path("/")
 public class CaptionServiceRestEndpoint extends JobProducerRestEndpointSupport {
 
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(CaptionServiceRestEndpoint.class);
+
+  /** The caption service */
   protected CaptionService service;
+
+  /** The rest documentation */
   protected String docs;
 
-  private static final Logger logger = LoggerFactory.getLogger(CaptionServiceRestEndpoint.class);
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
 
   /**
    * Callback from OSGi that is called when this service is activated.
@@ -83,14 +91,46 @@ public class CaptionServiceRestEndpoint extends JobProducerRestEndpointSupport {
     docs = generateDocs(serviceUrl);
   }
 
-  public void setCaptionService(CaptionService service) {
+  /**
+   * Sets the caption service
+   * 
+   * @param service
+   *          the caption service to set
+   */
+  protected void setCaptionService(CaptionService service) {
     this.service = service;
   }
 
-  public void unsetCaptionService(CaptionService service) {
+  /**
+   * Removes the caption service
+   * 
+   * @param service
+   *          the caption service to remove
+   */
+  protected void unsetCaptionService(CaptionService service) {
     this.service = null;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   */
+  @Override
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+  
   /**
    * Convert captions in catalog from one format to another.
    * 
@@ -252,7 +292,7 @@ public class CaptionServiceRestEndpoint extends JobProducerRestEndpointSupport {
   @Override
   public JobProducer getService() {
     if (service instanceof JobProducer)
-      return (JobProducer)service;
+      return (JobProducer) service;
     else
       return null;
   }

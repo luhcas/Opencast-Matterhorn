@@ -184,8 +184,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
 
 
       // add this receipt's queue time to the total
-      long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
-      totalTimeInQueue += timeInQueue;
+      totalTimeInQueue += job.getQueueTime();
 
       Attachment composedImage = (Attachment) MediaPackageElementParser.getFromXml(job.getPayload());
       if (composedImage == null)

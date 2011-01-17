@@ -15,10 +15,13 @@
  */
 package org.opencastproject.workflow.endpoint;
 
+import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.job.api.JobProducerRestEndpointSupport;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.SolrUtils;
@@ -87,7 +90,7 @@ import javax.ws.rs.core.Response.Status;
  */
 @Path("/")
 public class WorkflowRestService extends JobProducerRestEndpointSupport {
-  
+
   /** The default number of results returned */
   private static final int DEFAULT_LIMIT = 20;
 
@@ -114,6 +117,29 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
 
   /** The workflow service instance */
   private WorkflowService service;
+
+  /** The service registry */
+  protected ServiceRegistry serviceRegistry = null;
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   */
+  @Override
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
 
   /**
    * Sets the workflow service
@@ -518,7 +544,7 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("instances.xml")
-  //CHECKSTYLE:OFF
+  // CHECKSTYLE:OFF
   public Response getWorkflowsAsXml(@QueryParam("state") List<String> states, @QueryParam("q") String text,
           @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
           @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
@@ -528,7 +554,7 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
           @QueryParam("workflowdefinition") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
           @QueryParam("op") List<String> currentOperations, @QueryParam("sort") String sort,
           @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
-    //CHECKSTYLE:ON
+    // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT) {
       count = DEFAULT_LIMIT;
     }
@@ -540,15 +566,15 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
     q.withStartPage(startPage);
     if (states != null && states.size() > 0) {
       try {
-      for (String state : states) {
-        if (StringUtils.isBlank(state))
-          continue;
-        if (state.startsWith(NEGATE_PREFIX)) {
-          q.withoutState(WorkflowState.valueOf(state.substring(1).toUpperCase()));
-        } else {
-          q.withState(WorkflowState.valueOf(state.toUpperCase()));
+        for (String state : states) {
+          if (StringUtils.isBlank(state))
+            continue;
+          if (state.startsWith(NEGATE_PREFIX)) {
+            q.withoutState(WorkflowState.valueOf(state.substring(1).toUpperCase()));
+          } else {
+            q.withState(WorkflowState.valueOf(state.toUpperCase()));
+          }
         }
-      }
       } catch (IllegalArgumentException e) {
         logger.debug("Unknown workflow state.", e);
       }
@@ -844,7 +870,7 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
   public String getDocumentation() {
     return docs;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -853,9 +879,33 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
   @Override
   public JobProducer getService() {
     if (service instanceof JobProducer)
-      return (JobProducer)service;
+      return (JobProducer) service;
     else
       return null;
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#dispatchJob(java.lang.String)
+   */
+  @POST
+  @Path("/dispatch")
+  public Response dispatchJob(@FormParam("job") String jobXml) throws ServiceRegistryException {
+    final JobProducer service = getService();
+    if (service == null)
+      throw new WebApplicationException(Status.PRECONDITION_FAILED);
+
+    // If we are already running the maximum number of system-wide workflows, don't accept this job
+    long runningWorkflows = service.countJobs(Job.Status.RUNNING);
+
+    if (runningWorkflows > 2) { // TODO: How should we calculate the maximum number of workflows to run?
+      logger.debug("Refused to accept dispatched job {}. This server is already running {} workflows.", jobXml,
+              runningWorkflows);
+      throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
+    } else {
+      return super.dispatchJob(jobXml);
+    }
+  }
+
 }

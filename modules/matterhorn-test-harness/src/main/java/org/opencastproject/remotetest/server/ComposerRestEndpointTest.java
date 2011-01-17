@@ -91,6 +91,9 @@ public class ComposerRestEndpointTest {
     while (!JobUtils.isJobInState(jobId, "FINISHED")) {
       Thread.sleep(2000); // wait and try again
       System.out.println("Waiting for encoding job " + jobId + " to finish");
+      if(JobUtils.isJobInState(jobId, "FAILED")) {
+        Assert.fail();
+      }
     }
   }
 
@@ -132,6 +135,10 @@ public class ComposerRestEndpointTest {
     while (!JobUtils.isJobInState(jobId, "FINISHED")) {
       Thread.sleep(2000); // wait and try again
       System.out.println("Waiting for encoding job " + jobId + " to finish");
+      if(JobUtils.isJobInState(jobId, "FAILED")) {
+        Assert.fail();
+      }
+
     }
 
     // Get the track xml from the job

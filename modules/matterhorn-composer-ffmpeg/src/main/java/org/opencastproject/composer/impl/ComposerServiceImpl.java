@@ -145,9 +145,6 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
     final String targetTrackId = idBuilder.createNew().toString();
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       // Get the tracks and make sure they exist
       final File audioFile;
       if (audioTrack == null) {
@@ -265,8 +262,11 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
   public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration)
           throws EncoderException, MediaPackageException {
     try {
-      return serviceRegistry.createJob(JOB_TYPE, Operation.Trim.toString(),
-              Arrays.asList(MediaPackageElementParser.getAsXml(sourceTrack), profileId, Long.toString(start), Long.toString(duration)));
+      return serviceRegistry.createJob(
+              JOB_TYPE,
+              Operation.Trim.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(sourceTrack), profileId, Long.toString(start),
+                      Long.toString(duration)));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -295,9 +295,6 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    */
   private Track trim(Job job, Track sourceTrack, String profileId, long start, long duration) throws EncoderException {
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       String targetTrackId = idBuilder.createNew().toString();
 
       // Get the track and make sure it exists
@@ -391,8 +388,11 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
   @Override
   public Job mux(Track videoTrack, Track audioTrack, String profileId) throws EncoderException, MediaPackageException {
     try {
-      return serviceRegistry.createJob(JOB_TYPE, Operation.Mux.toString(),
-              Arrays.asList(MediaPackageElementParser.getAsXml(videoTrack), MediaPackageElementParser.getAsXml(audioTrack), profileId));
+      return serviceRegistry.createJob(
+              JOB_TYPE,
+              Operation.Mux.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(videoTrack),
+                      MediaPackageElementParser.getAsXml(audioTrack), profileId));
     } catch (ServiceUnavailableException e) {
       throw new EncoderException("The " + JOB_TYPE
               + " service is not registered on this host, so no job can be created", e);
@@ -487,9 +487,6 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
       throw new EncoderException("SourceTrack cannot be null");
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
 
       job.setStatus(Status.RUNNING);
@@ -618,13 +615,11 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @param captions
    *          the caption catalogs
    * @return the captioned track
-   * @throws EmbedderException if embedding captions into the track fails
+   * @throws EmbedderException
+   *           if embedding captions into the track fails
    */
   private Track captions(Job job, Track mediaTrack, Catalog[] captions) throws EmbedderException {
     try {
-      job.setStatus(Status.RUNNING);
-      updateEmbedderJob(job);
-
       logger.info("Atempting to create and embed subtitles to video track");
 
       final String targetTrackId = idBuilder.createNew().toString();
@@ -776,40 +771,40 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
       Track secondTrack = null;
       String encodingProfile = null;
       switch (op) {
-        case Caption:
-          firstTrack = (Track)MediaPackageElementParser.getFromXml(arguments.get(0));
-          Catalog[] catalogs = new Catalog[arguments.size() - 1];
-          for (int i = 1; i < arguments.size(); i++) {
-            catalogs[i] = (Catalog)MediaPackageElementParser.getFromXml(arguments.get(i));
-          }
-          captions(job, firstTrack, catalogs);
-          break;
-        case Encode:
-          firstTrack = (Track)MediaPackageElementParser.getFromXml(arguments.get(0));
-          encodingProfile = arguments.get(1);
-          encode(job, firstTrack, null, encodingProfile, null);
-          break;
-        case Image:
-          firstTrack = (Track)MediaPackageElementParser.getFromXml(arguments.get(0));
-          encodingProfile = arguments.get(1);
-          long time = Long.parseLong(arguments.get(2));
-          image(job, firstTrack, encodingProfile, time);
-          break;
-        case Mux:
-          firstTrack = (Track)MediaPackageElementParser.getFromXml(arguments.get(0));
-          secondTrack = (Track)MediaPackageElementParser.getFromXml(arguments.get(1));
-          encodingProfile = arguments.get(2);
-          mux(job, firstTrack, secondTrack, encodingProfile);
-          break;
-        case Trim:
-          firstTrack = (Track)MediaPackageElementParser.getFromXml(arguments.get(0));
-          encodingProfile = arguments.get(1);
-          long start = Long.parseLong(arguments.get(2));
-          long duration = Long.parseLong(arguments.get(3));
-          trim(job, firstTrack, encodingProfile, start, duration);
-          break;
-        default:
-          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      case Caption:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        Catalog[] catalogs = new Catalog[arguments.size() - 1];
+        for (int i = 1; i < arguments.size(); i++) {
+          catalogs[i] = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(i));
+        }
+        captions(job, firstTrack, catalogs);
+        break;
+      case Encode:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        encodingProfile = arguments.get(1);
+        encode(job, firstTrack, null, encodingProfile, null);
+        break;
+      case Image:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        encodingProfile = arguments.get(1);
+        long time = Long.parseLong(arguments.get(2));
+        image(job, firstTrack, encodingProfile, time);
+        break;
+      case Mux:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
+        encodingProfile = arguments.get(2);
+        mux(job, firstTrack, secondTrack, encodingProfile);
+        break;
+      case Trim:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        encodingProfile = arguments.get(1);
+        long start = Long.parseLong(arguments.get(2));
+        long duration = Long.parseLong(arguments.get(3));
+        trim(job, firstTrack, encodingProfile, start, duration);
+        break;
+      default:
+        throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
     } catch (IllegalArgumentException e) {
       throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
@@ -908,7 +903,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @param mediaInspectionService
    *          an instance of the media inspection service
    */
-  void setMediaInspectionService(MediaInspectionService mediaInspectionService) {
+  protected void setMediaInspectionService(MediaInspectionService mediaInspectionService) {
     this.inspectionService = mediaInspectionService;
   }
 
@@ -918,7 +913,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @param encoderEngineFactory
    *          The encoder engine factory
    */
-  void setEncoderEngineFactory(EncoderEngineFactory encoderEngineFactory) {
+  protected void setEncoderEngineFactory(EncoderEngineFactory encoderEngineFactory) {
     this.encoderEngineFactory = encoderEngineFactory;
   }
 
@@ -928,7 +923,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @param embedderEngineFactory
    *          The embedder engine factory
    */
-  void setEmbedderEngineFactory(EmbedderEngineFactory embedderEngineFactory) {
+  protected void setEmbedderEngineFactory(EmbedderEngineFactory embedderEngineFactory) {
     this.embedderEngineFactory = embedderEngineFactory;
   }
 
@@ -938,20 +933,21 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @param workspace
    *          an instance of the workspace
    */
-  void setWorkspace(Workspace workspace) {
+  protected void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
 
   /**
-   * Sets the receipt service
+   * Sets the service registry
    * 
-   * @param remoteServiceManager
+   * @param serviceRegistry
+   *          the service registry
    */
-  void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.serviceRegistry = remoteServiceManager;
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
   }
 
-  void setProfileScanner(EncodingProfileScanner scanner) {
+  protected void setProfileScanner(EncodingProfileScanner scanner) {
     this.profileScanner = scanner;
   }
 

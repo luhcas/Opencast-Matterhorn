@@ -15,12 +15,15 @@
  */
 package org.opencastproject.job.api;
 
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +47,17 @@ public abstract class JobProducerRestEndpointSupport {
   protected ExecutorService executor = Executors.newCachedThreadPool();
 
   /**
+   * Sets the service registry for this job producer endpoint.
+   * 
+   * @param serviceRegistry
+   *          the service registry to use when accepting jobs to run
+   */
+  protected abstract void setServiceRegistry(ServiceRegistry serviceRegistry);
+
+  /** Gets the service registry for this job handler */
+  protected abstract ServiceRegistry getServiceRegistry();
+  
+  /**
    * @see org.opencastproject.job.api.JobProducer#getJob(long)
    */
   @GET
@@ -61,7 +75,7 @@ public abstract class JobProducerRestEndpointSupport {
       throw new WebApplicationException(e);
     }
   }
-  
+
   /**
    * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
@@ -73,37 +87,69 @@ public abstract class JobProducerRestEndpointSupport {
     if (service == null)
       throw new WebApplicationException(Status.PRECONDITION_FAILED);
 
-    Job job;
+    final Job job;
     try {
       job = JobParser.parseJob(jobXml);
-      
-      // Due to our optimistic locking strategy, we need to re-read the job from the database, in order to obtain
-      // the correct object version
-      final Job dbJob = getService().getJob(job.getId());
-
-      // Finally, have the service execute the job
-      final List<Exception> errors = new ArrayList<Exception>();
-      executor.execute(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            service.startJob(dbJob, dbJob.getOperation(), dbJob.getArguments());
-          } catch (Exception e) {
-            errors.add(e);
-          }
-        }
-      });
-    
-      // Have there been any errors?
-      if (errors.size() > 0)
-        throw new WebApplicationException(errors.get(0));
-
-      return Response.ok().build();
     } catch (IOException e) {
-      throw new WebApplicationException(e);
-    } catch (NotFoundException e) {
-      throw new WebApplicationException(e);
+      throw new WebApplicationException(Status.BAD_REQUEST);
     }
+
+    // Finally, have the service execute the job
+    executor.submit(new JobRunner(job, service, getServiceRegistry()));
+
+    return Response.noContent().build();
+  }
+
+  /**
+   * A utility class to run jobs
+   */
+  static class JobRunner implements Runnable {
+    /** The logger */
+    private static final Logger logger = LoggerFactory.getLogger(JobRunner.class);
+
+    /** The job */
+    private Job job = null;
+
+    /** The job producer */
+    private JobProducer service = null;
+
+    /** The service registry */
+    private ServiceRegistry serviceRegistry = null;
+
+    /**
+     * Constructs a new job runner
+     * 
+     * @param job
+     *          the job to run
+     * @param service
+     *          the service to execute the job
+     */
+    JobRunner(Job job, JobProducer service, ServiceRegistry serviceRegistry) {
+      this.job = job;
+      this.service = service;
+      this.serviceRegistry = serviceRegistry;
+    }
+
+    @Override
+    public void run() {
+      try {
+        logger.debug("Attempting to update job {} to status RUNNING", job);
+        job.setStatus(Job.Status.RUNNING);
+        serviceRegistry.updateJob(job);
+        logger.debug("Updated job {} to status RUNNING", job);
+        service.startJob(job, job.getOperation(), job.getArguments());
+      } catch (ServiceRegistryException e) {
+        logger.warn("Unable to start job {}", job, e);
+      } catch (NotFoundException e) {
+        logger.warn("Unable to start job {} because the job could not be found", job, e);
+      } catch (ServiceUnavailableException e) {
+        logger.warn("Unable to start job {} because the service registry is not available", job, e);
+      } catch(Exception e) {
+        logger.warn("Unable to start job {}", job);
+        e.printStackTrace();
+      }
+    }
+
   }
 
   /**

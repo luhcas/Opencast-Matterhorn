@@ -94,8 +94,7 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.inspection.impl.*;version=${project.version} </Export-Package>
             <Service-Component>
-              OSGI-INF/inspection-service.xml,
-              OSGI-INF/inspection-service-rest.xml
+              OSGI-INF/inspection-service.xml
             </Service-Component>
           </instructions>
         </configuration>

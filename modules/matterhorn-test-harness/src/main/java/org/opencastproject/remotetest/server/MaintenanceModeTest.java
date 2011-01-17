@@ -70,7 +70,7 @@ public class MaintenanceModeTest {
   @Test
   public void testMaintenanceMode() throws Exception {
     // Ensure that there is a service available
-    HttpGet availableServicesGet = new HttpGet(Main.BASE_URL + "/services/rest//available.xml?serviceType="
+    HttpGet availableServicesGet = new HttpGet(Main.BASE_URL + "/services/rest/available.xml?serviceType="
             + SERVICE_TYPE);
     HttpResponse availableServicesResponse = client.execute(availableServicesGet);
     Assert.assertEquals(HttpStatus.SC_OK, availableServicesResponse.getStatusLine().getStatusCode());
@@ -109,12 +109,12 @@ public class MaintenanceModeTest {
     availableServicesNodes = (NodeList) Utils.xpath(availableServicesXml, "//service", XPathConstants.NODESET);
     Assert.assertTrue(availableServicesNodes.getLength() == 0);
 
-    // Try to start another job on this server (this should not be possible)
-    HttpResponse jobCreationShouldFailResponse = client.execute(postJob);
-    EntityUtils.toString(jobCreationShouldFailResponse.getEntity()); // read the response so the connection can be
-                                                                     // closed
-    Assert.assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, jobCreationShouldFailResponse.getStatusLine()
-            .getStatusCode());
+    // Try to start another job on this server. This should still be possible, even in maintenance mode, because the job
+    // will be dispatched elsewhere.
+
+    HttpResponse maintenanceModeJobCreationResponse = client.execute(postJob);
+    EntityUtils.toString(maintenanceModeJobCreationResponse.getEntity());
+    Assert.assertEquals(HttpStatus.SC_OK, maintenanceModeJobCreationResponse.getStatusLine().getStatusCode());
 
     // Restore the server to normal mode
     HttpPost postNormal = new HttpPost(Main.BASE_URL + "/services/rest/maintenance");

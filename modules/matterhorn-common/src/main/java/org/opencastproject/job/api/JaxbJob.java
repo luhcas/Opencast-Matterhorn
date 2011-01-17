@@ -49,6 +49,9 @@ public class JaxbJob implements Job {
     this.dateCompleted = job.getDateCompleted();
     this.dateCreated = job.getDateCreated();
     this.dateStarted = job.getDateStarted();
+    this.queueTime = job.getQueueTime();
+    this.runTime = job.getRunTime();
+    this.version = job.getVersion();
     this.payload = job.getPayload();
     this.processingHost = job.getProcessingHost();
     this.createdHost = job.getCreatedHost();
@@ -57,12 +60,6 @@ public class JaxbJob implements Job {
     this.operationType = job.getOperation();
     this.arguments = job.getArguments();
     this.status = job.getStatus();
-    if (this.dateCreated != null && this.dateStarted != null) {
-      this.queueTime = this.dateStarted.getTime() - this.dateCreated.getTime();
-    }
-    if (this.dateStarted != null && this.dateCompleted != null) {
-      this.runTime = this.dateCompleted.getTime() - this.dateStarted.getTime();
-    }
   }
 
   /** The job ID */
@@ -413,6 +410,6 @@ public class JaxbJob implements Job {
    */
   @Override
   public String toString() {
-    return "Job {" + this.id + "}";
+    return "Job {id:" + this.id + ", version:" + version + "}";
   }
 }

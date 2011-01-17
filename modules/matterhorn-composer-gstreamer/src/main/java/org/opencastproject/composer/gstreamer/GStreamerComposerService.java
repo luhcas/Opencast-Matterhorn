@@ -235,9 +235,6 @@ public class GStreamerComposerService implements ComposerService, JobProducer {
           Dictionary<String, String> properties) throws EncoderException, MediaPackageException {
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       String targetTrackId = idBuilder.createNew().toString();
 
       // Get the tracks and make sure they exist
@@ -417,9 +414,6 @@ public class GStreamerComposerService implements ComposerService, JobProducer {
    */
   private Track trim(Job job, Track sourceTrack, String profileId, long start, long duration) throws EncoderException {
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       String targetTrackId = idBuilder.createNew().toString();
 
       // Get the track and make sure it exists
@@ -543,13 +537,7 @@ public class GStreamerComposerService implements ComposerService, JobProducer {
       throw new EncoderException("SourceTrack cannot be null");
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
-
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
 
       // Get the encoding profile
       final EncodingProfile profile = profileScanner.getProfile(profileId);
@@ -762,12 +750,12 @@ public class GStreamerComposerService implements ComposerService, JobProducer {
   }
 
   /**
-   * Sets the receipt service
+   * Sets the service registry
    * 
-   * @param remoteServiceManager
+   * @param serviceManager
    */
-  void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.serviceRegistry = remoteServiceManager;
+  void setServiceRegistry(ServiceRegistry serviceManager) {
+    this.serviceRegistry = serviceManager;
   }
 
   /**

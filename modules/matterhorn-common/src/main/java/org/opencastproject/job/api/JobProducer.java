@@ -47,7 +47,7 @@ public interface JobProducer {
   String getJobType();
 
   /**
-   * Get the number of encoding jobs in a current status on all nodes.
+   * Get the number of jobs in a current status on all nodes.
    * 
    * @return Number of jobs in this state
    * @throws ServiceRegistryException
@@ -56,7 +56,7 @@ public interface JobProducer {
   long countJobs(Status status) throws ServiceRegistryException;
 
   /**
-   * Get the number of encoding jobs in a current status on a specific node.
+   * Get the number of jobs in a current status on a specific node.
    * 
    * @return Number of running jobs
    * @throws ServiceRegistryException

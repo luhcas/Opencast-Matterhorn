@@ -128,7 +128,7 @@ public class VideoSegmenterTest {
 
     vsegmenter = new VideoSegmenterServiceImpl();
     serviceRegistry = new ServiceRegistryInMemoryImpl(vsegmenter);
-    vsegmenter.setRemoteServiceManager(serviceRegistry);
+    vsegmenter.setServiceRegistry(serviceRegistry);
     
     vsegmenter.setMpeg7CatalogService(mpeg7Service);
     vsegmenter.setWorkspace(workspace);

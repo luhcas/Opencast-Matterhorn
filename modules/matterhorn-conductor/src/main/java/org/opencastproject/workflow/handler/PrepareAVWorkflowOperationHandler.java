@@ -292,7 +292,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     long timeInQueue = 0;
     if (job != null) {
       // add this receipt's queue time to the total
-      timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
+      timeInQueue = job.getQueueTime();
     }
 
     // Update the track's flavor

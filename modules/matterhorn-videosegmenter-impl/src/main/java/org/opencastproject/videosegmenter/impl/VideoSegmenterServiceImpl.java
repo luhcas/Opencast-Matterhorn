@@ -215,11 +215,11 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
   /**
    * Sets the receipt service
    * 
-   * @param remoteServiceManager
-   *          the receipt service
+   * @param serviceRegistry
+   *          the service registry
    */
-  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.serviceRegistry = remoteServiceManager;
+  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
   }
 
   /**
@@ -229,7 +229,8 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
    */
   public Job segment(Track track) throws VideoSegmenterException, MediaPackageException {
     try {
-      return serviceRegistry.createJob(JOB_TYPE, Operation.Segment.toString(), Arrays.asList(MediaPackageElementParser.getAsXml(track)));
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Segment.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(track)));
     } catch (ServiceUnavailableException e) {
       throw new VideoSegmenterException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
@@ -257,9 +258,6 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
     }
 
     try {
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
-
       PlayerListener processorListener = null;
       Track mjpegTrack = null;
       Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
@@ -412,12 +410,12 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
     try {
       op = Operation.valueOf(operation);
       switch (op) {
-        case Segment:
-          Track track = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-          segment(job, track);
-          break;
-        default:
-          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      case Segment:
+        Track track = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        segment(job, track);
+        break;
+      default:
+        throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
     } catch (IllegalArgumentException e) {
       throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");

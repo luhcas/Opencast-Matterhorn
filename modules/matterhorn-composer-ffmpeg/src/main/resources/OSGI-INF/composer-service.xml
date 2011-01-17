@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component
-  xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-  name="org.opencastproject.composer.impl.ComposerServiceImpl"
-  immediate="true">
+<scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+  <component name="org.opencastproject.composer.impl.ComposerServiceImpl" immediate="true">
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
     <property name="service.description" value="Composer (Encoder) Local Service" />
     <service>
@@ -10,13 +8,30 @@
     </service>
     <reference name="inspection-service" interface="org.opencastproject.inspection.api.MediaInspectionService"
       cardinality="1..1" policy="static" bind="setMediaInspectionService" />
-    <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
-      cardinality="1..1" policy="static" bind="setWorkspace" />
-    <reference name="remoteServiceManager" interface="org.opencastproject.serviceregistry.api.ServiceRegistry" cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
-    <reference name="encoderEngineFactory" policy="static" bind="setEncoderEngineFactory"
-      cardinality="1..1" interface="org.opencastproject.composer.api.EncoderEngineFactory" />
-    <reference name="embedderEngineFactory" policy="static" bind="setEmbedderEngineFactory"
-      cardinality="1..1" interface="org.opencastproject.composer.api.EmbedderEngineFactory" />
-    <reference name="profileScanner" policy="static" bind="setProfileScanner"
-      cardinality="1..1" interface="org.opencastproject.composer.impl.EncodingProfileScanner" />
-</scr:component>
+    <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace" cardinality="1..1"
+      policy="static" bind="setWorkspace" />
+    <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+      cardinality="1..1" policy="static" bind="setServiceRegistry" />
+    <reference name="encoderEngineFactory" policy="static" bind="setEncoderEngineFactory" cardinality="1..1"
+      interface="org.opencastproject.composer.api.EncoderEngineFactory" />
+    <reference name="embedderEngineFactory" policy="static" bind="setEmbedderEngineFactory" cardinality="1..1"
+      interface="org.opencastproject.composer.api.EmbedderEngineFactory" />
+    <reference name="profileScanner" policy="static" bind="setProfileScanner" cardinality="1..1"
+      interface="org.opencastproject.composer.impl.EncodingProfileScanner" />
+  </component>
+
+  <component name="org.opencastproject.composer.impl.endpoint.ComposerRestService" immediate="true">
+    <implementation class="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
+    <property name="service.description" value="Composer REST Endpoint" />
+    <property name="opencast.service.type" value="org.opencastproject.composer" />
+    <property name="opencast.service.path" value="/composer/rest" />
+    <property name="opencast.service.jobproducer" value="true" />
+    <service>
+      <provide interface="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
+    </service>
+    <reference name="composerService" interface="org.opencastproject.composer.api.ComposerService"
+      cardinality="1..1" policy="static" bind="setComposerService" />
+    <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+      cardinality="1..1" policy="static" bind="setServiceRegistry" />
+  </component>
+</scr:components>

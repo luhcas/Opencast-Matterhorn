@@ -101,7 +101,7 @@ CREATE TABLE job (
     payload text,
     datestarted timestamp without time zone,
     runtime bigint,
-    version integer,
+    instance_version integer,
     datecompleted timestamp without time zone,
     operation character varying(255),
     datecreated timestamp without time zone,
