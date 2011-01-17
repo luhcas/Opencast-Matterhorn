@@ -127,6 +127,22 @@ public interface Job {
   Date getDateStarted();
 
   /**
+   * The number of milliseconds that this job has waited in a queue before execution. This value will be null if the job
+   * has not yet started execution.
+   * 
+   * @return the total run time
+   */
+  Long getQueueTime();
+
+  /**
+   * The number of milliseconds that this job took to execute. This value will be null if the job has not yet
+   * finished execution.
+   * 
+   * @return the total run time
+   */
+  Long getRunTime();
+
+  /**
    * The date this job was completed
    * 
    * @return the date completed

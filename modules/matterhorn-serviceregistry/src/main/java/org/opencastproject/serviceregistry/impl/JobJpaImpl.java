@@ -268,6 +268,8 @@ public class JobJpaImpl extends JaxbJob {
    * @return the queueTime
    */
   @Column
+  @XmlElement
+  @Override
   public Long getQueueTime() {
     return queueTime;
   }
@@ -276,6 +278,8 @@ public class JobJpaImpl extends JaxbJob {
    * @return the runTime
    */
   @Column
+  @XmlElement
+  @Override
   public Long getRunTime() {
     return runTime;
   }

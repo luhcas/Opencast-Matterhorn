@@ -122,6 +122,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     MediaPackage mediaPackage = (MediaPackage) workflowInstance.getMediaPackage().clone();
     // Inspect the tracks
     long totalTimeInQueue = 0;
+    long timeToExecute = 0;
     for (Track track : mediaPackage.getTracks()) {
 
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
@@ -138,9 +139,12 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
         throw new WorkflowOperationException("Error parsing media package", e);
       }
 
-      // add this receipt's queue time to the total
-      long timeInQueue = inspectJob.getDateStarted().getTime() - inspectJob.getDateCreated().getTime();
+      // add this receipt's queue and execution times to the total
+      long timeInQueue = inspectJob.getQueueTime() == null ? 0 : inspectJob.getQueueTime();
       totalTimeInQueue += timeInQueue;
+
+      long timeRunning = inspectJob.getRunTime() == null ? 0 : inspectJob.getRunTime();
+      timeToExecute += timeRunning;
 
       Track inspectedTrack;
       try {

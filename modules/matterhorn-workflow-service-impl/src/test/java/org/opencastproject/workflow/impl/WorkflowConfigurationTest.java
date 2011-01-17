@@ -42,7 +42,6 @@ public class WorkflowConfigurationTest {
     ops.add(op);
     instance.setOperations(ops);
     String xml = WorkflowParser.toXml(instance);
-    System.out.println(xml);
     Assert.assertTrue(xml.contains("<configurations><configuration key=\"this\">that</configuration></configurations>"));
   }
 }

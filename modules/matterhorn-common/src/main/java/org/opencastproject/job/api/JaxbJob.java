@@ -307,6 +307,8 @@ public class JaxbJob implements Job {
   /**
    * @return the queueTime
    */
+  @XmlElement
+  @Override
   public Long getQueueTime() {
     return queueTime;
   }
@@ -322,6 +324,8 @@ public class JaxbJob implements Job {
   /**
    * @return the runTime
    */
+  @XmlElement
+  @Override
   public Long getRunTime() {
     return runTime;
   }
