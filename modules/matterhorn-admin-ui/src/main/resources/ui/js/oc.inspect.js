@@ -4,16 +4,26 @@ Opencast.WorkflowInspect = (function() {
 
   this.WORKFLOW_INSTANCE_URL = '../workflow/rest/instance/';
 
-  var $container;    // id of the target container
+  var $container;       // id of the target container
   var templateId;
-  var instanceView;       // view of the workflow instance data
+  var instanceView;     // view of the workflow instance data
+  var targetView;       // indicates if technical details or info page should be rendered ('details' | 'info')
 
-  /** Called by the site to obtain and render instance data to a specified container.
-   *
-   */
-  this.renderWorkflow = function(id, container, template) {
+  this.renderInfo = function(id, container, template) {
+    targetView = 'info';
     templateId = template;
     $container = $('#' + container);
+    requestWorkflow(id);
+  }
+
+  this.renderDetails = function(id, container, template) {
+    targetView = 'details';
+    templateId = template;
+    $container = $('#' + container);
+    requestWorkflow(id);
+  }
+
+  function requestWorkflow(id) {
     $.ajax({
       url : this.WORKFLOW_INSTANCE_URL + id + ".json?jsonp=?",
       dataType: 'jsonp',
@@ -27,10 +37,11 @@ Opencast.WorkflowInspect = (function() {
    */
   this.rx = function(data) {
     instanceView = buildInstanceView(data.workflow);
-    var text = $('#i18n_logo_title').text() + ' - Technical Details for '+ data.workflow.mediapackage.title;
-    $('#i18n_logo_title').text(text);
-    document.title = text;
-    render(instanceView, $container);
+    if (targetView == 'details') {
+      renderDetailsView(instanceView, $container);
+    } else if (targetView == 'info') {
+      renderInfoView(instanceView, $container);
+    }
   }
 
   /** Build view of workflow instance data
@@ -40,6 +51,7 @@ Opencast.WorkflowInspect = (function() {
     var out = Opencast.RenderUtils.extractScalars(workflow);
     out.config = buildConfigObject(workflow.configurations.configuration);
 
+    // Operations
     var ops = Opencast.RenderUtils.ensureArray(workflow.operations.operation);
     $.each(ops, function(index, op) {
       if (op.configurations !== undefined && op.configurations.configuration !== undefined) {
@@ -52,15 +64,42 @@ Opencast.WorkflowInspect = (function() {
 
     if (workflow.mediapackage) {
       var mp = workflow.mediapackage;
+
+      // prepare info object for View Info (top most box)
+      out.info = {};
+      out.info.title = mp.title;
+      out.info.episodeDC = false;
+      out.info.seriesDC = false;
+      if (mp.creators) {
+        out.info.creators = Opencast.RenderUtils.ensureArray(mp.creators.creator).join(', ');
+      } else {
+        out.info.creators = [];
+      }
+      out.info.department = '';
+
+      // Attachments
       mp.attachments = Opencast.RenderUtils.ensureArray(mp.attachments.attachment);
+
+      // Tracks
       if (!mp.media) {
         mp.media = {};
       }
       mp.media.track = Opencast.RenderUtils.ensureArray(mp.media.track);
-      if (!mp.metadata) {
+
+      // Metadata catalogs
+      if (mp.metadata) {
+        mp.metadata.catalog = Opencast.RenderUtils.ensureArray(mp.metadata.catalog);
+        $.each(mp.metadata.catalog, function(index, catalog) {
+          if (catalog.type == 'dublincore/episode') {
+            out.info.episodeDC = catalog.url;
+          } else if (catalog.type == 'dublincore/series') {
+            out.info.seriesDC = catalog.url;
+          }
+        });
+      } else {
         mp.metadata = {};
+        mp.metadata.catalog = [];
       }
-      mp.metadata.catalog = Opencast.RenderUtils.ensureArray(mp.metadata.catalog);
 
       // 'flatten' encoder and scantype properties
       try {
@@ -78,6 +117,7 @@ Opencast.WorkflowInspect = (function() {
       }
       out.mediapackage = mp;
     } else {
+      out.info = false;
       out.mediapackage = false;
     }
 
@@ -89,7 +129,7 @@ Opencast.WorkflowInspect = (function() {
   /** Render workflow view to specified container
    *
    */
-  function render(workflow, $target) {
+  function renderDetailsView(workflow, $target) {
     var result = TrimPath.processDOMTemplate(templateId, workflow);
     $target.append(result);
     $target.tabs();
@@ -102,6 +142,60 @@ Opencast.WorkflowInspect = (function() {
       }
     });
     renderWorkflowPerformance(workflow);
+  }
+
+  /** Render workflow info page (View Info) to specified container
+   *
+   */
+  function renderInfoView(workflow, $target) {
+    var result = TrimPath.processDOMTemplate(templateId, workflow);
+    $target.append(result);
+
+    // Render Episode DC if present
+    if (workflow.workflow.info.episodeDC) {
+      $.ajax({
+        url : workflow.workflow.info.episodeDC,
+        type : 'GET',
+        dataType : 'xml',
+        error : function() {
+          $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
+        },
+        success : function(data) {
+          var $table = $('<table>');
+          $(data).find('dublincore').children().each(function() {
+            var $row = $('<tr></tr>');
+            var tagname = $(this).context.tagName.split(':')[1] + ':';
+            $('<td></td>').addClass('td-key').text(tagname).appendTo($row);
+            $('<td></td>').addClass('td-value').text($(this).text()).appendTo($row);
+            $row.appendTo($table);
+          });
+          $table.appendTo('#episodeContainer');
+        }
+      });
+    }
+
+    // Render Series DC if present
+    if (workflow.workflow.info.seriesDC) {
+      $.ajax({
+        url : workflow.workflow.info.seriesDC,
+        type : 'GET',
+        dataType : 'xml',
+        error : function() {
+          $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
+        },
+        success : function(data) {
+          var $table = $('<table>');
+          $(data).find('dublincore').children().each(function() {
+            var $row = $('<tr></tr>');
+            var tagname = $(this).context.tagName.split(':')[1] + ':';
+            $('<td></td>').addClass('td-key').text(tagname).appendTo($row);
+            $('<td></td>').addClass('td-value').text($(this).text()).appendTo($row);
+            $row.appendTo($table);
+          });
+          $table.appendTo('#seriesContainer');
+        }
+      });
+    }
   }
 
   /** render workflow performance chart

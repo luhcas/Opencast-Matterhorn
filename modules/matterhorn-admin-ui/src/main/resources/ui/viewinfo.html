@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>View Info</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="css/oc.layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/themes/oc.default.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
+    <style>
+      #stage {font-family:"Arial","Helvetica","Verdana","sans-serif"; font-size:10px; margin:20px; min-height:100%; max-width:800; padding:0 0 20px;}
+      table {font-family:"Arial","Helvetica","Verdana","sans-serif"; font-size:10px; margin:10px;}
+      .kvtable tr {margin-bottom:3px; border-bottom:1px solid silver;}
+      .td-key {font-weight:bold;text-align:right;vertical-align: top;}
+      .td-value {font-weight:normal; text-align:left; padding-left:5px;}
+    </style>
+
+    <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.6.custom.min.js"></script>
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.inspect.js"></script>
+    <script type="text/javascript">
+
+      $(document).ready(function() {
+        var id = ocUtils.getURLParam('id');
+        Opencast.WorkflowInspect.renderInfo(id, 'infoContainer', 'infoTemplate');
+      });
+
+    </script>
+  </head>
+  <body>
+    <!-- VERSION AND LOGOUT BAR -->
+    <div class="layout-page-header oc-ui-version-bar ui-helper-clearfix">
+      <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
+    </div>
+    <!-- BANNER -->
+    <div class="layout-page-header">
+      <div class="oc-ui-banner layout-inline">
+        <div class="oc-ui-cursor">
+          <img src="img/MatterhornLogo.png" onclick="document.location='../welcome.html'" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+          <h1 id="i18n_logo_title" onclick="document.location='recordings.html'" class="layout-inline layout-valign-top">Admin Tools</h1>
+        </div>
+      </div>
+      <div class="layout-page-banner layout-inline layout-float-right">
+        <a href="http://www.opencastproject.org">
+          <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project" />
+        </a>
+      </div>
+    </div>
+    <!-- PAGE TABS -->
+    <div class="layout-page-header">
+      <ul class="layout-page-tabs oc-ui-page-tabs">
+        <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor ui-corner-top" id="i18n_tab_recording" onclick="document.location='recordings.html'">Recordings</li>
+        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_series" onclick="document.location='series_list.html'">Series</li>
+        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_agent" onclick="document.location='agents_status.html'">Capture Agents</li>
+      </ul>
+    </div>
+    <div id="stage">
+      <center><h2>View Recording Info</h2></center>
+      <br>
+      <div id="infoContainer"></div>
+      <br>
+      <center><a href="javascript:window.history.back();" title="Go Back to Recordings">Back to Recordings</a></center>
+    </div>
+    <textarea id="infoTemplate" style="display:none;">
+      {if workflow.info}
+        <div class="ui-widget-content ui-corner-all">
+            <table>
+              <tr>
+                <td class="td-key">Title:</td>
+                <td class="td-value">${workflow.info.title}</td>
+              </tr>
+              <tr>
+                <td class="td-key">Presenter:</td>
+                <td class="td-value">${workflow.info.creators}</td>
+              </tr>
+              <tr>
+                <td class="td-key">Sponsoring Department:</td>
+                <td class="td-value">${workflow.info.department}</td>
+              </tr>
+            </table>
+        </div>
+      {/if}
+      {if workflow.info.episodeDC}
+        <div class="ui-widget layout-centered">
+          <div class="ui-widget-header ui-corner-top">Additional Description</div>
+          <div id="episodeContainer" class="ui-widget-content ui-corner-bottom">
+          </div>
+        </div>
+      {/if}
+      {if workflow.info.seriesDC}
+        <div class="ui-widget layout-centered">
+          <div class="ui-widget-header ui-corner-top">Series Description</div>
+          <div id="seriesContainer" class="ui-widget-content ui-corner-bottom">
+          </div>
+        </div>
+      {/if}
+      {if workflow.template == "scheduling"}
+        <div class="ui-widget layout-centered">
+          <div class="ui-widget-header ui-corner-top">Capture</div>
+          <div class="ui-widget-content ui-corner-bottom">
+            <table>
+              <tr>
+                <td class="td-key">Start Time:</td>
+                <td class="td-value">${ocUtils.makeLocaleDateString(workflow.config['schedule.start'])}</td>
+              </tr>
+              <tr>
+                <td class="td-key">End Time:</td>
+                <td class="td-value">${ocUtils.makeLocaleDateString(workflow.config['schedule.stop'])}</td>
+              </tr>
+              <tr>
+                <td class="td-key">Location:</td>
+                <td class="td-value">${workflow.config['schedule.location']}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      {/if}
+    </textarea>
+  </body>
+</html>

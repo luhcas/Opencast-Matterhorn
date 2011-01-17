@@ -969,7 +969,7 @@ ocRecordings = new (function() {
     links = [];
     for(i in actions){
       if(actions[i] === 'view') {
-        links.push('<a href="inspect.html?id=' + id + '">View Info</a>');
+        links.push('<a href="viewinfo.html?id=' + id + '">View Info</a>');
       } else if(actions[i] === 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
       } else if(actions[i] === 'delete') {
