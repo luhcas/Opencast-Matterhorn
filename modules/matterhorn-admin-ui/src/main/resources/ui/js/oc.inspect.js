@@ -50,27 +50,36 @@ Opencast.WorkflowInspect = (function() {
     });
     out.operations = ops;
 
-    var mp = workflow.mediapackage;
-    mp.attachments = Opencast.RenderUtils.ensureArray(mp.attachments.attachment);
-    mp.media.track = Opencast.RenderUtils.ensureArray(mp.media.track);
-    mp.metadata.catalog = Opencast.RenderUtils.ensureArray(mp.metadata.catalog);
+    if (workflow.mediapackage) {
+      var mp = workflow.mediapackage;
+      mp.attachments = Opencast.RenderUtils.ensureArray(mp.attachments.attachment);
+      if (!mp.media) {
+        mp.media = {};
+      }
+      mp.media.track = Opencast.RenderUtils.ensureArray(mp.media.track);
+      if (!mp.metadata) {
+        mp.metadata = {};
+      }
+      mp.metadata.catalog = Opencast.RenderUtils.ensureArray(mp.metadata.catalog);
 
-    // 'flatten' encoder and scantype properties
-    try {
-      $.each(mp.media.track, function(index, track) {
-        if (track.audio && track.audio.encoder) {
-          track.audio.encoder = track.audio.encoder.type;
-        }
-        if (track.video) {
-          if (track.video.encoder) track.video.encoder = track.video.encoder.type;
-          if (track.video.scantype) track.video.scantype = track.video.scantype.type;
-        }
-      });
-    } catch (e) {
-      ocUtils.log('Could not flatten encoder/scantype properties of tracks');
+      // 'flatten' encoder and scantype properties
+      try {
+        $.each(mp.media.track, function(index, track) {
+          if (track.audio && track.audio.encoder) {
+            track.audio.encoder = track.audio.encoder.type;
+          }
+          if (track.video) {
+            if (track.video.encoder) track.video.encoder = track.video.encoder.type;
+            if (track.video.scantype) track.video.scantype = track.video.scantype.type;
+          }
+        });
+      } catch (e) {
+        ocUtils.log('Could not flatten encoder/scantype properties of tracks');
+      }
+      out.mediapackage = mp;
+    } else {
+      out.mediapackage = false;
     }
-
-    out.mediapackage = mp;
 
     return {
       workflow : out
@@ -162,7 +171,9 @@ Opencast.RenderUtils = (function() {
    */
   this.ensureArray = function(obj) {
     try {
-      if ($.isArray(obj)) {
+      if (obj === undefined) {
+        return [];
+      } else if ($.isArray(obj)) {
         return obj;
       } else {
         return [obj];

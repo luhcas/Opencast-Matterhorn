@@ -144,7 +144,7 @@ ocRecordings = new (function() {
       }
       // filtering if specified
       if (ocRecordings.Configuration.filterText != '') {
-        params.push(ocRecordings.Configuration.filterField + '=' + ocRecordings.Configuration.filterText);
+        params.push(ocRecordings.Configuration.filterField + '=' + encodeURI(ocRecordings.Configuration.filterText));
       }
       // paging
       params.push('count=' + ocRecordings.Configuration.pageSize);
