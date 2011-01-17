@@ -1,8 +1,6 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-
-var Opencast = Opencast || {
-};
+var Opencast = Opencast || {};
 
 /**
  * @namespace the global Opencast namespace Description Plugin
@@ -35,6 +33,8 @@ Opencast.Description_Plugin = (function ()
     /**
      * @memberOf Opencast.Description_Plugin
      * @description Add As Plug-in
+     * @param elem Element to fill with the Data (e.g. a div)
+     * @param data Data to fill the Element with
      */
     function addAsPlugin(elem, data)
     {
@@ -43,6 +43,10 @@ Opencast.Description_Plugin = (function ()
         createDescription();
     }
 
+    /**
+     * @memberOf Opencast.Description_Plugin
+     * @description Processes the Data and puts it into the Element
+     */
     function createDescription()
     {
         if (element !== undefined)

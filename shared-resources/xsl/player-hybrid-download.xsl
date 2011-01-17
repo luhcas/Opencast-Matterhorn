@@ -1,3 +1,4 @@
+<!--
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://search.opencastproject.org/" version="1.0">
   <xsl:template match="/">
@@ -23,8 +24,8 @@
                         <xsl:if test="(../../mediapackage/@duration) &gt; ./@time">
                           <td class="segment-holder ui-widget ui-widget-content" style="width: 15px;">
                             <xsl:attribute name="id">segment<xsl:value-of select="position()"/></xsl:attribute>
-                            <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
-                            <xsl:attribute name="onmouseout">Opencast.Watch.hoverOutSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
+                            <xsl:attribute name="onmouseover">Opencast.segments_ui.hoverSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
+                            <xsl:attribute name="onmouseout">Opencast.segments_ui.hoverOutSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
                             <xsl:attribute name="alt">Slide <xsl:value-of select="position()"/> of <xsl:value-of select="last()"/></xsl:attribute>
                             <xsl:attribute name="onclick">Opencast.Watch.seekSegment(<xsl:value-of select="floor(./@time div 1000)"/>)</xsl:attribute>
                             <xsl:attribute name="style">width: <xsl:value-of select="./@duration div (../../mediapackage/@duration) * 100"/>%;</xsl:attribute>
@@ -306,3 +307,4 @@
     </div>
   </xsl:template>
 </xsl:stylesheet>
+-->

@@ -1,8 +1,8 @@
 {
   "annotations": {
-    "@limit": "10",
-    "@offset": "0",
-    "@total": "3",
+    "limit": "10",
+    "offset": "0",
+    "total": "3",
     "annotation": [
       {
         "annotationId": 1,

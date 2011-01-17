@@ -1,18 +1,13 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-
 var Opencast = Opencast || {};
 
 /**
  * @namespace the global Opencast namespace Description Plugin
  */
-Opencast.Series_Plugin = (function(){
-
-     /**
-     *  Variables
-     *  template: trimmpath render template
-     */
-    var element; //place to render the data in the html
+Opencast.Series_Plugin = (function()
+{
+    // The Template to process
     var template =  '{if pages.length != 1}' +
                         '<div style="float: right; padding: 5px;">' +
                             '{for p in pages}' +
@@ -36,15 +31,29 @@ Opencast.Series_Plugin = (function(){
                             '{/if}' +
                         '{/for}' +
                     '</div>';
+
+    //place to render the data in the html    
+    var element;
     var series_data;
     var processedTemplateData;
 
-    function addAsPlugin(elem, data){
+    /**
+     * @memberOf Opencast.Series_Plugin
+     * @description Add As Plug-in
+     * @param elem Element to fill with the Data (e.g. a div)
+     * @param data Data to fill the Element with
+     */
+    function addAsPlugin(elem, data)
+    {
         element = elem;
         series_data = data;
         createSeriesDropdown();
     }
 
+    /**
+     * @memberOf Opencast.Series_Plugin
+     * @description Processes the Data and puts it into the Element
+     */
     function createSeriesDropdown()
     {
         if (element !== undefined) 

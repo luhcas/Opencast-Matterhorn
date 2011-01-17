@@ -1,68 +1,37 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-var Opencast = Opencast || {
-};
-var staticBool_hide = true;
+var Opencast = Opencast || {};
+
 /**
  * @namespace the global Opencast namespace segments_text
  */
 Opencast.segments_text = (function ()
 {
+    var mediaPackageId;
+    var staticBool_hide = true;
+    var SEGMENTS_TEXT = "Segment Text",
+        SEGMENTS_TEXT_HIDE = "Hide Segment Text";
+        
     /**
-     * @memberOf Opencast.segments
-     * @description Initializes the segments_text view
+     * @memberOf Opencast.segments_text
+     * @description Initializes the Segments Text Tab
      */
     function initialize()
     {
         // Do nothing in here
     }
+    
     /**
-     *  variables
+     * @memberOf Opencast.segments_text
+     * @description Shows the Segments Text Tab
      */
-    var mediaPackageId, SEGMENTS_TEXT = "Segment Text",
-        SEGMENTS_TEXT_HIDE = "Hide Segment Text";
-    /**
-     * Returns the Input Time in Milliseconds -- TODO: put it in a utils-class
-     * @param data Data in the Format ab:cd:ef
-     * @return Time from the Data in Milliseconds
-     */
-    function getTimeInMilliseconds(data)
-    {
-        var values = data.split(':');
-        // If the Format is correct
-        if (values.length == 3)
-        {
-            // Try to convert to Numbers
-            var val0 = values[0] * 1;
-            var val1 = values[1] * 1;
-            var val2 = values[2] * 1;
-            // Check and parse the Seconds
-            if (!isNaN(val0) && !isNaN(val1) && !isNaN(val2))
-            {
-                // Convert Hours, Minutes and Seconds to Milliseconds
-                val0 *= 60 * 60 * 1000; // 1 Hour = 60 Minutes = 60 * 60 Seconds = 60 * 60 * 1000 Milliseconds
-                val1 *= 60 * 1000; // 1 Minute = 60 Seconds = 60 * 1000 Milliseconds
-                val2 *= 1000; // 1 Second = 1000 Milliseconds
-                // Add the Milliseconds and return it
-                return val0 + val1 + val2;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    function showSegmentsText(searchValue)
+    function showSegmentsText()
     {
         // Hide other Tabs
         Opencast.Description.hideDescription();
         Opencast.segments.hideSegments();
         Opencast.search.hideSearch();
+        // Change Tab Caption
         $('#oc_btn-slidetext').attr(
         {
             title: SEGMENTS_TEXT_HIDE
@@ -85,7 +54,7 @@ Opencast.segments_text = (function ()
             {
                 // get rid of every '@' in the JSON data
                 // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
-                data['search-results'].result.segments.currentTime = getTimeInMilliseconds(Opencast.Player.getCurrentTime());
+                data['search-results'].result.segments.currentTime = Opencast.Utils.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
                 // Set Duration until this Segment ends
                 var completeDuration = 0;
                 $.each(data['search-results'].result.segments.segment, function (i, value)
@@ -104,16 +73,22 @@ Opencast.segments_text = (function ()
                 $('#oc-segments_text').show();
                 $('.oc-segments-preview').css('display', 'block');
             },
+            // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
                 $('#oc-segments_text').html('No Segment Text available');
-                $('#oc-segments_text').hide();            
+                $('#oc-segments_text').hide();
             }
         });
     }
-
+    
+    /**
+     * @memberOf Opencast.segments_text
+     * @description Hides the Segments Text Tab
+     */
     function hideSegmentsText()
     {
+        // Change Tab Caption
         $('#oc_btn-slidetext').attr(
         {
             title: SEGMENTS_TEXT
@@ -122,7 +97,11 @@ Opencast.segments_text = (function ()
         $("#oc_btn-slidetext").attr('aria-pressed', 'false');
         $('#oc_slidetext').hide();
     }
-
+    
+    /**
+     * @memberOf Opencast.segments_text
+     * @description Toggles the Segments Text Tab
+     */
     function doToggleSegmentsText()
     {
         if ($('#oc_btn-slidetext').attr("title") === SEGMENTS_TEXT)
@@ -136,15 +115,17 @@ Opencast.segments_text = (function ()
             hideSegmentsText();
         }
     }
+    
     /**
      * @memberOf Opencast.segments_text
-     * @description Set the mediaPackageId
+     * @description Sets the mediaPackageId
      * @param String mediaPackageId
      */
     function setMediaPackageId(id)
     {
         mediaPackageId = id;
     }
+    
     return {
         initialize: initialize,
         showSegmentsText: showSegmentsText,

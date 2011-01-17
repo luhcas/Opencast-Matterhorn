@@ -1,24 +1,30 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-var Opencast = Opencast || {
-};
+var Opencast = Opencast || {};
+
 /**
- * @namespace the global Opencast namespace annotation_chapter delegate. This file contains the rest endpoint and passes the data to the annotation_chapter plugin
+ * @namespace the global Opencast namespace Description
  */
 Opencast.Description = (function ()
 {
     /**
      *  variables
      */
-    var mediaPackageId, duration, DESCRIPTION = "Description",
+    var mediaPackageId, duration;
+    var DESCRIPTION = "Description",
         DESCRIPTION_HIDE = "Hide Description";
-
+        
+    /**
+     * @memberOf Opencast.Description
+     * @description Displays the Description Tab
+     */
     function showDescription()
     {
         // Hide other Tabs
         Opencast.segments.hideSegments();
         Opencast.segments_text.hideSegmentsText();
         Opencast.search.hideSearch();
+        // Change Tab Caption
         $('#oc_btn-description').attr(
         {
             title: DESCRIPTION_HIDE
@@ -55,7 +61,6 @@ Opencast.Description = (function ()
                     {
                         // get rid of every '@' in the JSON data
                         // result = $.parseJSON(JSON.stringify(result).replace(/@/g, ''));
-                        data['search-results'].result.dcViews = result.stats.views;
                         // If episode is part of a series: get series data    
                         if (data['search-results'].result.dcIsPartOf != '')
                         {
@@ -81,6 +86,10 @@ Opencast.Description = (function ()
                                     $('#oc_description').show();
                                     $('#description-loading').hide();
                                     $('#oc-description').show();
+                                },
+                                // If no data comes back (JSONP-Call #3)
+                                error: function (xhr, ajaxOptions, thrownError)
+                                {
                                 }
                             });
                         }
@@ -94,18 +103,28 @@ Opencast.Description = (function ()
                             $('#oc-description').show();
                         }
                     },
+                    // If no data comes back (JSONP-Call #2)
                     error: function (xhr, ajaxOptions, thrownError)
                     {
                         $('#scrollcontainer').html('No Description available');
-                        $('#scrollcontainer').hide();            
+                        $('#scrollcontainer').hide();
                     }
                 });
+            },
+            // If no data comes back (JSONP-Call #1)
+            error: function (xhr, ajaxOptions, thrownError)
+            {
             }
         });
     }
-
+    
+    /**
+     * @memberOf Opencast.Description
+     * @description Hides the Description Tab
+     */
     function hideDescription()
     {
+        // Change Tab Caption
         $('#oc_btn-description').attr(
         {
             title: DESCRIPTION
@@ -114,7 +133,11 @@ Opencast.Description = (function ()
         $("#oc_btn-description").attr('aria-pressed', 'false');
         $('#oc_description').hide();
     }
-
+    
+    /**
+     * @memberOf Opencast.Description
+     * @description Toggles the Description Tab
+     */
     function doToggleDescription()
     {
         if ($('#oc_btn-description').attr("title") === DESCRIPTION)
@@ -129,8 +152,9 @@ Opencast.Description = (function ()
             hideDescription();
         }
     }
+    
     /**
-     * @memberOf Opencast.Analytics
+     * @memberOf Opencast.Description
      * @description Set the mediaPackageId
      * @param String mediaPackageId
      */

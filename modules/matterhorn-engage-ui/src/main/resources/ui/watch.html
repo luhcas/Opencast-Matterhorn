@@ -52,8 +52,12 @@
     <script type="text/javascript" src="js/jquery.timers-1.2.js"></script>
     <script type="text/javascript" src="js/bookmarks.js"></script>
     <script type="text/javascript" src="js/engage_plugins/json2.js"></script>
+    <script type="text/javascript" src="js/utils.js"></script>
     <script type="text/javascript" src="js/engage_plugins/description.js"></script>
     <script type="text/javascript" src="js/engage_plugins/description-plugin.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/segments_ui.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/segments_ui-plugin.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/segments_ui_slider-plugin.js"></script>
     <script type="text/javascript" src="js/engage_plugins/segments.js"></script>
     <script type="text/javascript" src="js/engage_plugins/segments-plugin.js"></script>
     <script type="text/javascript" src="js/engage_plugins/segments_text.js"></script>
@@ -189,14 +193,78 @@
       </div>
 
       <div id="oc_video-size-controls">
-        <span id="oc_video-size-dropdown">
+        <span id="oc_video-size-dropdown" style="display:block">
             <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value="">
         </span>
       </div>
     </div>
     <div id="oc_player_video-dropdown"  class="ui-corner-all"></div>
 
-    <div id="data"></div>
+    <!-- segments_ui_slider + segments_ui -->
+    <div id="data">
+        <div id="oc_seek-slider">
+            <label id="skip" for="srubber">
+                Time Slider
+            </label>
+            <table width="100%" style="float:left; margin-top:-3px;">
+                <tbody>
+                    <tr class="player-chrome">
+                        <td class="progress-segment" width="100%">
+                            <table class="segments" id="tableData1" cellspacing="0" cellpadding="0">
+                                <!-- data comes here -->
+                            </table>
+                            <div class="progress-list">
+                                <span class="load-progress" value="0">
+                                </span>
+                                <span id="play-progress" class="play-progress" value="0" style="width: 0%;">
+                                </span>
+                                <span id="scubber-channel" class="scrubber-channel">
+                                    <input id="scrubber" type="submit" type="image" src="img/space.png" class="scrubber-button" role="slider"/>
+                                    <div id="draggable" class="ui-widget-content" style="left: 0%;">
+                                    </div>
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Analytics and Annotations -->
+        <div style="height: 25px">
+            <span id="analytics" class="analytics" style="display: none;">
+                Loading..
+            </span>
+            <span id="annotation" class="annotation" style="display: none;">
+                Annotation..
+            </span>
+            <table class="segments" id="segmentstable1" style="float:left;" cellspacing="0" cellpadding="0" style="opacity:0.65; filter: alpha(opacity=65);">
+                <!-- data comes here -->
+            </table>
+        </div>
+        
+        <div id="segments_ui_slider_data1" style="display: none">
+        </div>
+        <div id="segments_ui_slider_data2" style="display: none">
+        </div>
+        <div id="segments_ui_slider_information" style="display: none">
+        </div>
+        
+        <div id="segments_ui-media1">
+        </div>
+        <div id="data1">
+        </div>
+        <div id="segments_ui-mediapackagesAttachments">
+        </div>
+        <div id="data2">
+        </div>
+        <div id="segments_ui-mediapackagesCatalog">
+        </div>
+        <div style="display: none"> <!-- id="oc-segments-text" -->
+            <table cellspacing="0" cellpadding="0" id="segmentstable2">
+            </table>
+        </div>
+    </div>
+    
     <div id="oc_video-view">
       <ul>
         <li><input id="oc_checkbox-statistics" type="checkbox" name="show Statistics" title="show Statistics"> <label for="oc_checkbox-statistics">Viewing Statistics</label></li>
@@ -208,6 +276,7 @@
 
   </div>
 
+    <!-- Tabs -->
     <div id="oc_ui_tabs">
         <div id="oc_tabs" class="oc_tabs-input">
             <ul id="oc_tabs-head">
@@ -273,8 +342,7 @@
 
         <div class="clear">
         </div>
-    
-    <!--</div>--><!-- END #oc_ui_tabs -->
+        
     
     
   <div id="segment-tooltip" class="segment-tooltip" style="display: none;"></div>

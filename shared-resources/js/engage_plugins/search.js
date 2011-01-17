@@ -1,17 +1,17 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-var Opencast = Opencast || {
-};
-// Variable for the storage of the processed jsonp-Data
-var dataStor;
-var staticImg = 'url("../img/jquery/ui-bg_flat_75_fde7ce_40x100.png") repeat-x scroll 50% 50% #FDE7CE';
-var SEARCH = 'Search this Recording';
-var staticInputElem;
+var Opencast = Opencast || {};
+
 /**
  * @namespace the global Opencast namespace search
  */
 Opencast.search = (function ()
 {
+    // Variable for the storage of the processed jsonp-Data
+    var dataStor, staticInputElem, mediaPackageId;
+    var staticImg = 'url("../img/jquery/ui-bg_flat_75_fde7ce_40x100.png") repeat-x scroll 50% 50% #FDE7CE';
+    var SEARCH = 'Search this Recording';
+    
     /**
      * @memberOf Opencast.search
      * @description Initializes the search view
@@ -20,45 +20,7 @@ Opencast.search = (function ()
     {
         // Do nothing in here
     }
-    /**
-     *  variables
-     */
-    var mediaPackageId;
-    /**
-     * Returns the Input Time in Milliseconds -- TODO: put it in a utils-class
-     * @param data Data in the Format ab:cd:ef
-     * @return Time from the Data in Milliseconds
-     */
-    function getTimeInMilliseconds(data)
-    {
-        var values = data.split(':');
-        // If the Format is correct
-        if (values.length == 3)
-        {
-            // Try to convert to Numbers
-            var val0 = values[0] * 1;
-            var val1 = values[1] * 1;
-            var val2 = values[2] * 1;
-            // Check and parse the Seconds
-            if (!isNaN(val0) && !isNaN(val1) && !isNaN(val2))
-            {
-                // Convert Hours, Minutes and Seconds to Milliseconds
-                val0 *= 60 * 60 * 1000; // 1 Hour = 60 Minutes = 60 * 60 Seconds = 60 * 60 * 1000 Milliseconds
-                val1 *= 60 * 1000; // 1 Minute = 60 Seconds = 60 * 1000 Milliseconds
-                val2 *= 1000; // 1 Second = 1000 Milliseconds
-                // Add the Milliseconds and return it
-                return val0 + val1 + val2;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            return 0;
-        }
-    }
+    
     /**
      * @memberOf Opencast.search
      * @description Set the mediaPackageId
@@ -68,7 +30,9 @@ Opencast.search = (function ()
     {
         mediaPackageId = id;
     }
+    
     /**
+     * @memberOf Opencast.search
      * @description Prepares the Data:
      * - Adds a background color correlating to the relevance
      * - Highlights the search values inside the text segments
@@ -145,9 +109,11 @@ Opencast.search = (function ()
             this.text = text;
         });
     }
+    
     /**
      * @memberOf Opencast.search
      * @description Does the search
+     * @param elem The Input ELement (currently a workaround)
      * @param searchValue The search value
      */
     function showResult(elem, searchValue)
@@ -182,9 +148,11 @@ Opencast.search = (function ()
                 // get rid of every '@' in the JSON data
                 // dataStor = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
                 dataStor = data;
-                if (dataStor['search-results'] && dataStor['search-results'].result)
+                // Check if Segments + Segments Text is available
+                var segmentsAvailable = (dataStor['search-results'].result.segments !== undefined) && (dataStor['search-results'].result.segments.segment.length > 0);
+                if (segmentsAvailable) // dataStor['search-results'] && dataStor['search-results'].result
                 {
-                    dataStor['search-results'].result.segments.currentTime = getTimeInMilliseconds(Opencast.Player.getCurrentTime());
+                    dataStor['search-results'].result.segments.currentTime = Opencast.Utils.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
                     // Set Duration until this Segment ends
                     var completeDuration = 0;
                     $.each(dataStor['search-results'].result.segments.segment, function (i, value)
@@ -200,24 +168,38 @@ Opencast.search = (function ()
                     // Create Trimpath Template nd add it to the HTML
                     Opencast.search_Plugin.addAsPlugin($('#oc-search-result'), dataStor['search-results'].result.segments, searchValue);
                     // Make visible
-                    $('#oc_search-segment').show();
-                    $('#search-loading').hide();
-                    $('#oc-search-result').show();
                     $('.oc-segments-preview').css('display', 'block');
-                } else
-                {
-                    $('#search-loading').hide();
                 }
+                else
+                {
+                    // If no Segment Data is available
+                    $('#oc-search-result').html('No Segment Data available');
+                }
+                $('#oc_search-segment').show();
+                $('#search-loading').hide();
+                $('#oc-search-result').show();
             },
+            // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                $('#oc-search-result').html('No Segment Text available');
-                $('#search-loading').hide();            
+                $('#oc-search-result').html('No Segment Data available');
+                $('#search-loading').hide();
+                $('#oc-search-result').show();
             }
         });
+        // If the Search Result Field contains nothing: Clear and display a Message
+        if($('#oc-search-result').empty)
+        {
+            $('#oc-search-result').html('No Search Result available');
+            $('#oc_search-segment').show();
+            $('#search-loading').hide();
+            $('#oc-search-result').show();
+        }
     }
+    
     /**
-     * Hides the whole Search
+     * @memberOf Opencast.search
+     * @description Hides the whole Search
      */
     function hideSearch()
     {
@@ -229,6 +211,7 @@ Opencast.search = (function ()
             $(staticInputElem).val(SEARCH);
         }
     }
+    
     /**
      * @memberOf Opencast.search
      * @description Initializes the search view
@@ -237,6 +220,7 @@ Opencast.search = (function ()
     {
         // Do nothing in here
     }
+    
     return {
         initialize: initialize,
         showResult: showResult,

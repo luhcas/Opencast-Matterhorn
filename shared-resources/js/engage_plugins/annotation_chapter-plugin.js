@@ -1,30 +1,52 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-
 var Opencast = Opencast || {};
 
 /**
  * @namespace the global Opencast namespace Annotation Plugin
  */
 Opencast.Annotation_ChapterPlugin = (function(){
-
-    /**
-     *  Variables
-     *  template: trimmpath render template
-     */
-    var element; //place to render the data in the html
-    var template = "<table id=\"annotation_holder\" cellspacing=\"0\" cellpadding=\"0\" style=\"opacity: 0.65;\" class=\"segments\"><tbody><tr>{for a in annotations.annotation}<td onclick=\"Opencast.Watch.seekSegment(${a.inpoint})\" alt=\"Slide 1 of 2\" onmouseout=\"Opencast.Watch.hoverOutDescription('segment-${a.annotationId}','${a.value}')\" onmouseover=\"Opencast.Watch.hoverDescription('segment-${a.annotationId}','${a.value}')\" id=\"segment-${a.annotationId}\" style=\"width: ${(a.length*100/duration)}%;\" class=\"segment-holder-over ui-widget ui-widget-content\"></td>{/for}</tr></tbody></table>";
+    
+    //place to render the data in the html
+    var template = '<table ' +
+                      'id="annotation_holder" ' +
+                      'cellspacing="0" ' +
+                      'cellpadding="0" ' +
+                      'style="float:left;opacity: 0.65;" ' +
+                      'class="segments">' +
+                      '<tbody>' +
+                           '<tr>' +
+                               '{for a in annotation}' +
+                                   '<td ' +
+                                     'onclick="Opencast.Watch.seekSegment(${a.inpoint})" ' +
+                                     'alt="Slide ${a.annotationId} of ${total}" ' +
+                                     'onmouseout="Opencast.segments_ui.hoverOutDescription(\'segment-${a.annotationId}\',\'${a.value}\')" ' +
+                                     'onmouseover="Opencast.segments_ui.hoverDescription(\'segment-${a.annotationId}\',\'${a.value}\')" ' +
+                                     'id="segment-${a.annotationId}" ' +
+                                     'style="width: ${parseInt(a.length) / parseInt(duration) * 100}%;" ' +
+                                     'class="segment-holder-over ui-widget ui-widget-content">' +
+                                   '</td>' +
+                                 '{/for}' +
+                            '</tr>' +
+                        '</tbody>' +
+                    '</table>';
+    
+    // The Element to put the div into
+    var element;
+    // Data to process
     var annotation_chapterData;
+    // Processed Data
     var processedTemplateData;
 
     /**
      * @memberOf Opencast.Annotation_ChapterPlugin
      * @description Add As Plug-in
+     * @param elem Element to put the Data into
+     * @param data The Data to process
      */
-    function addAsPlugin(elem, data, mediaduration){
+    function addAsPlugin(elem, data){
         element = elem;
         annotation_chapterData = data;
-        duration = mediaduration;
         drawAnnotation_Chapter();
     }
 
@@ -42,16 +64,10 @@ Opencast.Annotation_ChapterPlugin = (function(){
      * processing the template with service data
      */
     function drawAnnotation_Chapter(){
-        if (element !== undefined) {
+        if(element !== undefined)
+        {
             processedTemplateData = template.process(annotation_chapterData);
-            document.getElementById('annotation').innerHTML = processedTemplateData;
-            $('#segmentstable').css('segment-holder-empty', 'none');
-            if ($('#analytics').is(':visible')) {
-                $('#annotation_holder').css('top', '-25px');
-            }
-        }
-        else {
-            alert("target element is not defined.");
+            element.html(processedTemplateData);
         }
     }
 

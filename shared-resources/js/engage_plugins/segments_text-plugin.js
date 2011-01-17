@@ -1,11 +1,9 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-
-var Opencast = Opencast || {
-};
+var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace segments_text Plugin
+ * @namespace the global Opencast namespace segments_text_Plugin
  */
 Opencast.segments_text_Plugin = (function ()
 {
@@ -39,8 +37,10 @@ Opencast.segments_text_Plugin = (function ()
     var processedTemplateData;
 
     /**
-     * @memberOf Opencast.segments_test-Plugin
+     * @memberOf Opencast.segments_text_Plugin
      * @description Add As Plug-in
+     * @param elem Element to fill with the Data (e.g. a div)
+     * @param data Data to fill the Element with
      */
     function addAsPlugin(elem, data)
     {
@@ -49,6 +49,10 @@ Opencast.segments_text_Plugin = (function ()
         createSegments();
     }
 
+    /**
+     * @memberOf Opencast.segments_text_Plugin
+     * @description Processes the Data and puts it into the Element
+     */
     function createSegments()
     {
         if (element !== undefined)

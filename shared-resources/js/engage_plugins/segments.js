@@ -1,42 +1,76 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-var Opencast = Opencast || {
-};
+var Opencast = Opencast || {};
+
 /**
  * @namespace the global Opencast namespace segments
  */
 Opencast.segments = (function ()
 {
-    var totalPanels, segmentTimes, beforeSlide = 0,
+    var totalPanels, segmentTimes, segmentPreviews;
+    var mediaPackageId, duration;
+    var numberOfSegments = 0,
+        beforeSlide = 0,
         currentSlide = 0,
         nextSlide = 0,
         slideLength = 0;
-    var segmentPreviews;
+    var SEGMENTS = "Segments",
+        SEGMENTS_HIDE = "Hide Segments";
 
+    /**
+     * @memberOf Opencast.segments
+     * @description Returns the Segments Previews of segmentID
+     * @return the Segments Previews of segmentID
+     */
     function getSegmentPreview(segmentId)
     {
         return segmentPreviews[segmentId];
     }
-
+    
+    /**
+     * @memberOf Opencast.segments
+     * @description Returns the Seconds of the Slide before
+     * @return the Seconds of the Slide before
+     */
     function getSecondsBeforeSlide()
     {
+        updateSlides();
         return beforeSlide;
     }
-
+    
+    /**
+     * @memberOf Opencast.segments
+     * @description Returns the Seconds of the next Slide
+     * @return the Seconds of the next Slide
+     */
     function getSecondsNextSlide()
     {
+        updateSlides();
         return nextSlide;
     }
-
+    
+    /**
+     * 
+     * @memberOf Opencast.segments
+     * @description Returns the Slide Length
+     * @return the Slide Length
+     */
     function getSlideLength()
     {
         return slideLength;
     }
-
+    
+    /**
+     * 
+     * @memberOf Opencast.segments
+     * @description Sets the Slide Length
+     * @param length Slide Length
+     */
     function setSlideLength(length)
     {
         slideLength = length;
     }
+    
     /**
      * @memberOf Opencast.segments
      * @description Initializes the segments view
@@ -65,11 +99,11 @@ Opencast.segments = (function ()
             }
             else
             {
-                // If no Segemnts are available
+                // If no Segents are available
                 if ($('#segmentstable > tbody > tr > td').size() <= 1)
                 {
-                    // Disable and grey out "Slides" Tab
-                    // Disable and grey out "Slides Text" Tab
+                    // Disable and grey out "Segments" Tab
+                    // Disable and grey out "Segments Text" Tab
                     $("#oc_ui_tabs").tabs(
                     {
                         disabled: [1, 2]
@@ -87,51 +121,57 @@ Opencast.segments = (function ()
                 change(false);
             });
         }
-        var segmentTimes = new Array();
-        var seconds;
-        $('.segments-time').each(function (i)
+        // Set Segments
+        if ($('.segments-time') !== undefined)
         {
-            seconds = $(this).html();
-            segmentTimes[i] = seconds;
-        });
-        segmentPreviews = new Array();
-        var url;
-        $('.oc-segments-preview').each(function (i)
-        {
-            url = $(this).html();
-            segmentPreviews[i] = url;
-        });
-        // set the slide length
-        setSlideLength(segmentTimes.length);
-        $('#oc_video-player-controls').css('display', 'block');
+            numberOfSegments = $('.segments-time').length;
+            segmentTimes = new Array(numberOfSegments);
+            var seconds;
+            $('.segments-time').each(function (i)
+            {
+                seconds = parseInt($(this).text());
+                if (!isNaN(seconds))
+                {
+                    segmentTimes[i] = seconds;
+                }
+                else
+                {
+                    segmentTimes[i] = 0;
+                }
+            });
+            // Set Previews
+            var numberOfPreviews = 0;
+            if ($('.oc-segments-preview') != undefined)
+            {
+                numberOfPreviews = $('.oc-segments-preview').length;
+                segmentPreviews = new Array(numberOfPreviews);
+                var url;
+                $('.oc-segments-preview').each(function (i)
+                {
+                    url = $(this).html();
+                    segmentPreviews[i] = url;
+                });
+            }
+            // Set Slide Length
+            setSlideLength(numberOfSegments);
+            $('#oc_video-player-controls').css('display', 'block');
+        }
         // Hide Slide Tab, if there are no slides
-        if (segmentTimes.length === 0)
+        if (numberOfSegments == 0)
         {
-            doToggleSlides();
+            hideSegments();
             $(".oc_btn-skip-backward").hide();
             $(".oc_btn-skip-forward").hide();
+        }
+        else
+        {
+            $("#oc_ui_tabs").tabs('enable', 1);
+            $("#oc_ui_tabs").tabs('enable', 2);
         }
         // set the center of the controls
         var margin = $('#oc_video-controls').width();
         var controlswith = 0;
         var playerWidth = $('#oc_video-player-controls').width();
-/*
-        if (Opencast.segments.getSlideLength() === 0)
-        {
-            controlswith = 58;
-            margin = ((margin - controlswith) / 2) - 8;
-            $(".oc_btn-rewind").css("margin-left", margin + "px");
-        }
-        else
-        {
-            controlswith = 90;
-            margin = ((margin - controlswith) / 2) - 8;
-            $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
-        }
-
-        // set the controls visible
-        $('#oc_video-player-controls').css('visibility', 'visible');
-        */
         // player size
         if (playerWidth < 460 && playerWidth >= 380)
         {
@@ -169,7 +209,15 @@ Opencast.segments = (function ()
             margin = ((margin - controlswith) / 2) - 8;
             $("#oc_btn-play-pause").css("margin-left", margin + "px");
         }
-        $(document).everyTime(500, function (index)
+    }
+    
+    /**
+     * @memberOf Opencast.segments
+     * @description Updates the Slide Seconds of the Slides 'Before', 'Current' and 'After'
+     */
+    function updateSlides()
+    {
+        if (numberOfSegments > 0)
         {
             var currentPosition = parseInt(Opencast.Player.getCurrentPosition());
             var last = 0;
@@ -179,8 +227,14 @@ Opencast.segments = (function ()
             // last segment
             if (segmentTimes[segmentTimes.length - 1] <= currentPosition)
             {
-                if (segmentTimes[segmentTimes.length - 1] <= currentPosition && currentPosition < parseInt(segmentTimes[segmentTimes.length - 1]) + 3) lastIndex = 2;
-                else lastIndex = 1;
+                if ((segmentTimes[segmentTimes.length - 1] <= currentPosition) && (currentPosition < parseInt(segmentTimes[segmentTimes.length - 1]) + 3))
+                {
+                    lastIndex = 2;
+                }
+                else
+                {
+                    lastIndex = 1;
+                }
                 var ibefore = Math.max(segmentTimes.length - lastIndex, 0);
                 beforeSlide = segmentTimes[ibefore];
                 currentSlide = segmentTimes[segmentTimes.length - 1];
@@ -193,7 +247,10 @@ Opencast.segments = (function ()
                     cur = segmentTimes[i];
                     if (last <= currentPosition && currentPosition < cur)
                     {
-                        if (last <= currentPosition && currentPosition < parseInt(last) + 3) lastIndex = 2;
+                        if ((last <= currentPosition) && (currentPosition < parseInt(last) + 3))
+                        {
+                            lastIndex = 2;
+                        }
                         else lastIndex = 1;
                         ibefore = Math.max(parseInt(i) - lastIndex, 0);
                         beforeSlide = segmentTimes[ibefore];
@@ -204,8 +261,9 @@ Opencast.segments = (function ()
                     last = cur;
                 }
             }
-        }, 0);
+        }
     }
+    
     /**
      * @memberOf Opencast.segments
      * @description Sets scrollContainer width
@@ -219,9 +277,10 @@ Opencast.segments = (function ()
             $container.css('width', ($panels[0].offsetWidth * $panels.length)).css('left', "0px");
         }
     }
+    
     /**
      * @memberOf Opencast.segments
-     * @description Function initializes segments view
+     * @description Changes the Direction of the Slider
      * @param boolean direction true = right, false = left
      */
     function change(direction)
@@ -250,18 +309,18 @@ Opencast.segments = (function ()
             });
         }
     }
+    
     /**
-     *  variables
+     * @memberOf Opencast.segments
+     * @description Displays the Segments Tab
      */
-    var mediaPackageId, duration, SEGMENTS = "Segments",
-        SEGMENTS_HIDE = "Hide Segments";
-
     function showSegments()
     {
         // Hide other Tabs
         Opencast.Description.hideDescription();
         Opencast.segments_text.hideSegmentsText();
         Opencast.search.hideSearch();
+        // Change Tab Caption
         $('#oc_btn-slides').attr(
         {
             title: SEGMENTS_HIDE
@@ -296,16 +355,22 @@ Opencast.segments = (function ()
                 // Sets slider container width after panels are displayed
                 Opencast.segments.sizeSliderContainer();
             },
+            // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
                 $('#scrollcontainer').html('No Slides available');
-                $('#scrollcontainer').hide();            
+                $('#scrollcontainer').hide();
             }
         });
     }
-
+    
+    /**
+     * @memberOf Opencast.segments
+     * @description Hides the Segments Tab
+     */
     function hideSegments()
     {
+        // Change Tab Caption
         $('#oc_btn-slides').attr(
         {
             title: SEGMENTS
@@ -314,7 +379,11 @@ Opencast.segments = (function ()
         $("#oc_btn-slides").attr('aria-pressed', 'false');
         $('#oc_slides').hide();
     }
-
+    
+    /**
+     * @memberOf Opencast.segments
+     * @description Toggles the Segments Tab
+     */
     function doToggleSlides()
     {
         if ($('#oc_btn-slides').attr("title") === SEGMENTS)
@@ -329,6 +398,7 @@ Opencast.segments = (function ()
             hideSegments();
         }
     }
+    
     /**
      * @memberOf Opencast.segments
      * @description Set the mediaPackageId
@@ -338,6 +408,7 @@ Opencast.segments = (function ()
     {
         mediaPackageId = id;
     }
+    
     return {
         getSegmentPreview: getSegmentPreview,
         getSecondsBeforeSlide: getSecondsBeforeSlide,
