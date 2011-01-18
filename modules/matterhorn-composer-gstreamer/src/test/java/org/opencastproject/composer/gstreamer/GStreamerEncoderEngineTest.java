@@ -24,6 +24,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,14 +139,27 @@ public class GStreamerEncoderEngineTest {
   @Test
   public void testImageExtraction() throws Exception {
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("time", "2");
-    properties.put("gstreamer.image.sizes", "640x480");
+    properties.put("time", "4");
+    properties.put("gstreamer.image.extraction", "#{time}:640x480");
 
     EncoderEngine engine = factory.newEncoderEngine(null);
     EncodingProfile profile = createEncodingProfile("ImageExtractionTest", "image/jpeg", ".jpg", properties);
     File result = engine.encode(videoFile, profile, properties);
     resultingFiles = new File[] { result };
     Assert.assertTrue("Invalid file: " + result.getAbsolutePath(), result.exists() && result.length() > 0);
+  }
+  
+  @Ignore("Enable when multiple image extraction is supported by API")
+  @Test
+  public void multipleImageExtraction() throws Exception {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("gstreamer.image.extraction", "5:0x0, 1:460x280, 7:0x0");
+    properties.put("in.video.path", videoFile.getAbsolutePath());
+    properties.put("out.file.path", "/opt/matterhorn/matterhorn_trunk/modules/matterhorn-composer-gstreamer/target/test-classes/image_test_#{time}.jpg");
+    
+    EncoderEngine engine = factory.newEncoderEngine(null);
+    EncodingProfile profile = createEncodingProfile("ImageExtractionTest", "image/jpeg", ".jpg", properties);
+    engine.encode(videoFile, profile, properties);
   }
 
   @After

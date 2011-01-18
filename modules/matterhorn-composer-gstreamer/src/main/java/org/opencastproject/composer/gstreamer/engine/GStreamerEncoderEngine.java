@@ -23,7 +23,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.gstreamer.Buffer;
 import org.gstreamer.Bus;
 import org.gstreamer.Caps;
-import org.gstreamer.ClockTime;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Format;
@@ -48,6 +47,7 @@ import java.io.IOException;
 import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
@@ -60,13 +60,18 @@ import javax.imageio.ImageIO;
  */
 public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
 
+  /** Suffix for gstreamer pipeline template and image extraction */
+  protected static final String GS_SUFFIX = "gstreamer.pipeline";
+  protected static final String GS_IMAGE_TEMPLATE = "gstreamer.image.extraction";
+  
   /** Logger utility */
   private static final Logger logger = LoggerFactory.getLogger(GStreamerEncoderEngine.class);
 
   // constants used in gstreamer
   private static final String START_TIME = "start-time";
   // private static final String END_TIME = "end-time";
-
+  private static final int GS_SEEK_FLAGS = SeekFlags.FLUSH;
+  
   /** Rendering hints for resizing images */
   private static final Map<Key, Object> imageRenderingHints = new HashMap<RenderingHints.Key, Object>();
   static {
@@ -321,49 +326,33 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
       }
     });
   }
-
+  
+  /*
+   * (non-Javadoc)
+   * @see org.opencastproject.composer.gstreamer.AbstractGSEncoderEngine#extractMultipleImages(org.opencastproject.composer.api.EncodingProfile, java.util.Map)
+   */
   @Override
-  protected void extractImage(EncodingProfile profile, Map<String, String> properties) throws EncoderException {
-
-    if (!properties.containsKey("in.video.path")) {
-      logger.warn("Video is needed for image extraction.");
-      throw new EncoderException("Missing input video.");
+  protected List<String> extractMultipleImages(EncodingProfile profile, Map<String, String> properties) throws EncoderException {
+    
+    String imageExtractionTemplate = profile.getExtension(GS_IMAGE_TEMPLATE);
+    if (imageExtractionTemplate == null) {
+      logger.warn("Image extraction definition is missing from profile '{}'", profile.getIdentifier());
+      throw new EncoderException("Missing '" +  GS_IMAGE_TEMPLATE + "' extension from profile '" + profile.getIdentifier() + "'");
     }
+    String outputTemplate = properties.get("out.file.path");
     String videoPath = properties.get("in.video.path");
-
-    if (!properties.containsKey("out.file.path")) {
-      logger.warn("Output file template is needed for image extraction");
-      throw new EncoderException("Missing output file template");
-    }
-    String outputFile = properties.get("out.file.path");
-
-    String timeCodes = properties.get(GS_IMAGE_TIMES);
-    if (timeCodes == null) {
-      logger.warn("Profile '{}' does not contain time codes for image extraction", profile.getIdentifier());
-      throw new EncoderException("Time codes are missing from profile: " + profile.getIdentifier());
-    }
-    String imageSizes = profile.getExtension(GS_IMAGE_DIMENSIONS);
-    if (imageSizes == null) {
-      logger.warn("Profile '{}' does not contain image dimensions for image extraction", profile.getIdentifier());
-      throw new EncoderException("Image dimensions are missing from profile: " + profile.getIdentifier());
-    }
-    if (!timeCodes.matches("[0-9]+")) {
-      logger.warn("Invalid time format: {}", timeCodes);
-      throw new EncoderException("Invalid time: " + timeCodes);
-    }
-    if (!imageSizes.matches("[0-9]+[x|X][0-9]+")) {
-      logger.warn("Invalid image dimensions definition: {}", imageSizes);
-      throw new EncoderException("Invalid image dimensions: " + imageSizes);
-    }
-
-    // create pipeline
+    
+    // TODO generalize token substitution and write token cleanup
+    String configuration = substituteTemplateValues(imageExtractionTemplate, properties, false);
+    List<ImageExtractionProperties> extractionProperties = parseImageExtractionConfiguration(configuration, outputTemplate);
+    
     Pipeline pipeline = createFixedPipelineForImageExtraction(videoPath);
-    AppSink appsink = (AppSink) pipeline.getElementByName("appsink");
-
+    AppSink appsink = (AppSink)pipeline.getElementByName("appsink");
+    
     // install listeners
     MonitorObject monitorObject = createNewMonitorObject();
     installListeners(pipeline, monitorObject);
-
+    
     switch (pipeline.setState(State.PAUSED)) {
     case FAILURE:
       logger.warn("Could not change pipeline state to PAUSED");
@@ -375,63 +364,58 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
     default:
       break;
     }
-
-    // wait for state to propagate
-    if (pipeline.getState() == State.NULL) {
-      logger.warn("Exception occured while trying to play file {}", videoPath);
-      throw new EncoderException("Failed to play file " + videoPath);
-    }
-
-    // query duration -> check for right parameters
-    ClockTime duration = pipeline.queryDuration();
-    long durationInSeconds;
-    if (duration != ClockTime.NONE) {
-      durationInSeconds = duration.toSeconds();
-      logger.info("Video stream duration in seconds: {}", durationInSeconds);
-    } else {
-      logger.info("Unknown stream duration");
-      durationInSeconds = -1;
-    }
-
-    long imageTimeInSeconds = Long.parseLong(timeCodes);
-    String[] imageDimension = imageSizes.split("[x|X]");
-    int width = Integer.parseInt(imageDimension[0]);
-    int height = Integer.parseInt(imageDimension[1]);
-
-    if (durationInSeconds != -1 && imageTimeInSeconds > durationInSeconds) {
-      logger.warn("Time {}s exceeds video stream duration {}s", imageTimeInSeconds, durationInSeconds);
-      throw new EncoderException("Time exceeds video stream duration: " + imageTimeInSeconds + "s");
-    }
-
-    if (!pipeline.seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.ACCURATE, SeekType.SET,
-            imageTimeInSeconds * 1000 * 1000, SeekType.NONE, -1)) {
-      pipeline.setState(State.NULL);
-      logger.warn("Could not seek to position {}s", imageTimeInSeconds);
-      throw new EncoderException("Failed to seek to position " + imageTimeInSeconds + "s");
-    }
-
-    Buffer buffer = appsink.pullPreroll();
-
-    if (buffer != null) {
-      try {
-        logger.info("Creating image from time {}s", imageTimeInSeconds);
-        createImageOutOfBuffer(buffer, width, height, outputFile);
-      } catch (Exception e) {
-        pipeline.setState(State.NULL);
-        logger.warn("Could not create image out of buffer: {}", e.getMessage());
-        throw new EncoderException("Could not write image file {}", e);
-      } finally {
-        buffer.dispose();
-        buffer = null;
+    
+    // loop through all image definitions and extract them
+    // if one extraction fails, remove all and throw exception
+    for (ImageExtractionProperties imageProperties : extractionProperties) {     
+      
+      // state should be set to paused before we attempt to seek
+      if (pipeline.getState() == State.NULL) {
+        logger.warn("Exception occured while trying to play file {}", videoPath);
+        cleanup(extractionProperties);
+        throw new EncoderException("Failed to play file " + videoPath);
       }
-    } else {
-      logger.warn("No buffer pulled from {}s", imageTimeInSeconds);
-      throw new EncoderException("No buffer was pulled from the pipeline");
+      
+      // seek
+      if (!pipeline.seek(1.0, Format.TIME, GS_SEEK_FLAGS, SeekType.SET,
+              imageProperties.getTimeInSeconds() * 1000 * 1000 * 1000, SeekType.NONE, -1)) {
+        pipeline.setState(State.NULL);
+        logger.warn("Could not seek to position {}s", imageProperties.getTimeInSeconds());
+        cleanup(extractionProperties);
+        throw new EncoderException("Failed to seek to position " + imageProperties.getTimeInSeconds() + "s");
+      }
+      
+      // get buffer
+      pipeline.setState(State.PLAYING);
+      Buffer buffer = appsink.pullBuffer();
+      pipeline.setState(State.PAUSED);
+      
+      if (buffer != null) {
+        try {
+          createImageOutOfBuffer(buffer, imageProperties.getImageWidth(), imageProperties.getImageHeight(), imageProperties.getImageOutput());
+        } catch (Exception e) {
+          logger.warn("Could not create image out of buffer at time {}: {}", imageProperties.getTimeInSeconds(), e.getMessage());
+          cleanup(extractionProperties);
+          throw new EncoderException("Failed to create image", e);
+        } finally {
+          buffer.dispose();
+        }
+      } else {
+        // check if EOS was reached
+        if (monitorObject.getEOSReached()) {
+          logger.warn("Image extraction time {}s exceeds stream duration", imageProperties.getTimeInSeconds());
+          cleanup(extractionProperties);
+          throw new EncoderException("Invalid image extraction time: " + imageProperties.getTimeInSeconds() + "s");
+        } else {
+          logger.warn("Could not retrieve buffer from pipeline for time {}s", imageProperties.getTimeInSeconds());
+          cleanup(extractionProperties);
+          throw new EncoderException("Failed to retrieve buffer for time " + imageProperties.getTimeInSeconds() + "s");
+        }
+      }
     }
-
-    // stop pipeline
-    logger.info("Image extraction done, finalizing pipeline...");
+    
     pipeline.setState(State.NULL);
+    return reorder(extractionProperties);
   }
 
   /**

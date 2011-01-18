@@ -26,9 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -37,11 +41,6 @@ import javax.activation.MimetypesFileTypeMap;
  * Abstract base class for GStreamer encoder engines.
  */
 public abstract class AbstractGSEncoderEngine implements EncoderEngine {
-
-  /** Suffix for gstreamer pipeline template */
-  protected static final String GS_SUFFIX = "gstreamer.pipeline";
-  protected static final String GS_IMAGE_TIMES = "time";
-  protected static final String GS_IMAGE_DIMENSIONS = "gstreamer.image.sizes";
 
   /** Logging utility */
   private static Logger logger = LoggerFactory.getLogger(AbstractGSEncoderEngine.class);
@@ -164,19 +163,30 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
       String outFileName = FilenameUtils.getBaseName(parentFile.getName());
       String outSuffix = profile.getSuffix();
 
-      if (new File(outDir, outFileName + outSuffix).exists()) {
-        outFileName += "_reencode";
-      }
-
-      File encodedFile = new File(outDir, outFileName + outSuffix);
-
-      // where to put output file
-      params.put("out.file.path", encodedFile.getAbsolutePath());
-
+      File encodedFile;
       if (profile.getMimeType().startsWith("image")) {
         // FIXME change how image extraction is called
-        extractImage(profile, params);
+        encodedFile = new File(outDir, outFileName + outSuffix);
+        params.put("out.file.path", encodedFile.getAbsolutePath());
+        List<String> outputImages = extractMultipleImages(profile, params);
+        if (outputImages.size() == 0) {
+
+        } else if (outputImages.size() > 1) {
+          // FIXME remove once multiple image extraction is supported
+          logger.error("Multiple image extraction is not yet supported");
+          for (String filename : outputImages) {
+            new File(filename).delete();
+          }
+          throw new UnsupportedOperationException("Multiple image extraction is not yet supported");
+        } else {
+          encodedFile = new File(outputImages.get(0));
+        }
       } else {
+        if (new File(outDir, outFileName + outSuffix).exists()) {
+          outFileName += "_reencode";
+        }
+        encodedFile = new File(outDir, outFileName + outSuffix);
+        params.put("out.file.path", encodedFile.getAbsolutePath());
         // create and launch gstreamer pipeline
         createAndLaunchPipeline(profile, params);
       }
@@ -226,16 +236,20 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
           throws EncoderException;
 
   /**
-   * Extracts image from video file.
+   * Extracts multiple images from video stream. Profile is looked for the following template: &lt;time in
+   * seconds&gt;:&lt;image width&gt;x&lt;image height&gt;. Multiple image definitions can be separated with comma. If
+   * image width or image height is less or equal to zero, original image size will be retained.
    * 
    * @param profile
-   *          EncodingProfile used for defining times and dimensions
+   *          EncodeingProfile used for image extraction
    * @param properties
-   *          additional properties for creating pipeline
+   *          additional properties used in extraction
+   * @return List of extracted image's filepaths
    * @throws EncoderException
    *           if extraction fails
    */
-  protected abstract void extractImage(EncodingProfile profile, Map<String, String> properties) throws EncoderException;
+  protected abstract List<String> extractMultipleImages(EncodingProfile profile, Map<String, String> properties)
+          throws EncoderException;
 
   /*
    * (non-Javadoc)
@@ -333,6 +347,131 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
       } catch (Throwable t) {
         logger.error("Encoder listener " + l + " threw exception while handling callback");
       }
+    }
+  }
+
+  /**
+   * Parses image extraction configuration in the following format: #{image_time_1}:#{image_width}x#{image_height}.
+   * Multiple extraction configurations can be separated by comma.
+   * 
+   * @param configuration
+   *          Configuration for image extraction
+   * @param outputTemplate
+   *          output path template. Should be in the form /some_file_name_#{time}.jpg so that each image will have it's
+   *          unique path.
+   * @return parsed List for image extraction
+   */
+  protected List<ImageExtractionProperties> parseImageExtractionConfiguration(String configuration,
+          String outputTemplate) {
+
+    LinkedList<ImageExtractionProperties> propertiesList = new LinkedList<AbstractGSEncoderEngine.ImageExtractionProperties>();
+    Scanner scanner = new Scanner(configuration);
+    scanner.useDelimiter(",");
+    int counter = 0;
+
+    while (scanner.hasNext()) {
+      String nextToken = scanner.next().trim();
+      if (!nextToken.matches("[0-9]+:[0-9]+[x|X][0-9]+")) {
+        throw new IllegalArgumentException("Invalid token found: " + nextToken);
+      }
+
+      String[] properties = nextToken.split("[:|x|X]");
+      String output = outputTemplate.replaceAll("#\\{time\\}", properties[0]);
+      if (output.equals(outputTemplate)) {
+        logger.warn("Output filename does not contain #{time} template: multiple images will overwrite");
+      }
+      ImageExtractionProperties imageProperties = new ImageExtractionProperties(counter++,
+              Long.parseLong(properties[0]), Integer.parseInt(properties[1]), Integer.parseInt(properties[2]), output);
+
+      propertiesList.add(imageProperties);
+    }
+
+    Collections.sort(propertiesList, new Comparator<ImageExtractionProperties>() {
+      @Override
+      public int compare(ImageExtractionProperties o1, ImageExtractionProperties o2) {
+        return (int) (o2.timeInSeconds - o1.timeInSeconds);
+      }
+    });
+
+    return propertiesList;
+  }
+
+  /**
+   * Reorder images to the same way as they were specified in profile and returns only list of filenames.
+   * 
+   * @param extractionProperties
+   *          extraction properties for images
+   * @return List of image filenames
+   */
+  protected List<String> reorder(List<ImageExtractionProperties> extractionProperties) {
+    Collections.sort(extractionProperties, new Comparator<ImageExtractionProperties>() {
+      @Override
+      public int compare(ImageExtractionProperties o1, ImageExtractionProperties o2) {
+        return o2.order - o1.order;
+      }
+    });
+    List<String> outputImages = new LinkedList<String>();
+    for (ImageExtractionProperties properties : extractionProperties) {
+      outputImages.add(properties.imageOutput);
+    }
+    return outputImages;
+  }
+
+  /**
+   * Removes any existing file from image extraction properties.
+   * 
+   * @param extractionProperties
+   */
+  protected void cleanup(List<ImageExtractionProperties> extractionProperties) {
+    for (ImageExtractionProperties properties : extractionProperties) {
+      File file = new File(properties.imageOutput);
+      if (file.exists() && !file.delete()) {
+        logger.warn("Could not delete file: {}", properties.imageOutput);
+      }
+    }
+  }
+
+  /**
+   * Class that holds information for image extraction.
+   */
+  protected class ImageExtractionProperties {
+    /** sequence in template */
+    private int order;
+    /** extraction time */
+    private long timeInSeconds;
+    /** image width */
+    private int imageWidth;
+    /** image height */
+    private int imageHeight;
+    /** output path */
+    private String imageOutput;
+
+    public ImageExtractionProperties(int order, long timeInSeconds, int imageWidth, int imageHeight, String imageOutput) {
+      this.order = order;
+      this.timeInSeconds = timeInSeconds;
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
+      this.imageOutput = imageOutput;
+    }
+
+    public int getOrder() {
+      return order;
+    }
+
+    public long getTimeInSeconds() {
+      return timeInSeconds;
+    }
+
+    public int getImageWidth() {
+      return imageWidth;
+    }
+
+    public int getImageHeight() {
+      return imageHeight;
+    }
+
+    public String getImageOutput() {
+      return imageOutput;
     }
   }
 }
