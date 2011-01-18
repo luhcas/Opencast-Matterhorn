@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
-  <component name="org.opencastproject.composer.impl.ComposerServiceImpl" immediate="true">
+  <scr:component name="org.opencastproject.composer.impl.ComposerServiceImpl" immediate="true">
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
     <property name="service.description" value="Composer (Encoder) Local Service" />
     <service>
@@ -18,9 +18,9 @@
       interface="org.opencastproject.composer.api.EmbedderEngineFactory" />
     <reference name="profileScanner" policy="static" bind="setProfileScanner" cardinality="1..1"
       interface="org.opencastproject.composer.impl.EncodingProfileScanner" />
-  </component>
+  </scr:component>
 
-  <component name="org.opencastproject.composer.impl.endpoint.ComposerRestService" immediate="true">
+  <scr:component name="org.opencastproject.composer.impl.endpoint.ComposerRestService" immediate="true">
     <implementation class="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
     <property name="service.description" value="Composer REST Endpoint" />
     <property name="opencast.service.type" value="org.opencastproject.composer" />
@@ -33,5 +33,5 @@
       cardinality="1..1" policy="static" bind="setComposerService" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 </scr:components>

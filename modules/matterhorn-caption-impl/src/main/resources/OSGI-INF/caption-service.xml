@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
 
-  <component name="org.opencastproject.caption.api.CaptionService" immediate="true">
+  <scr:component name="org.opencastproject.caption.api.CaptionService" immediate="true">
     <implementation class="org.opencastproject.caption.impl.CaptionServiceImpl" />
     <property name="service.description" value="Caption Converter Service" />
     <service>
@@ -11,9 +11,9 @@
       policy="static" bind="setWorkspace" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 
-  <component activate="activate" immediate="true" name="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint">
+  <scr:component activate="activate" immediate="true" name="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint">
     <implementation class="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" />
     <property name="service.description" value="Caption REST Endpoint" />
 
@@ -28,6 +28,6 @@
       policy="dynamic" bind="setCaptionService" unbind="unsetCaptionService" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 
 </scr:components>

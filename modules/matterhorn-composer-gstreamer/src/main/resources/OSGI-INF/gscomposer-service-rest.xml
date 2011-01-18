@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component
+<scr:component
  name="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" immediate="true">
   <implementation class="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" />
   <property name="service.description" value="GStreamer Composer REST Endpoint" />
@@ -11,4 +11,4 @@
   </service>
   <reference name="composerService" interface="org.opencastproject.composer.api.ComposerService"
     cardinality="1..1" policy="static" bind="setComposerService" />
-</component>
+</scr:component>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
-  <component name="org.opencastproject.textanalyzer.impl.TextAnalyzerServiceImpl" immediate="true" activate="activate">
+  <scr:component name="org.opencastproject.textanalyzer.impl.TextAnalyzerServiceImpl" immediate="true" activate="activate">
     <implementation class="org.opencastproject.textanalyzer.impl.TextAnalyzerServiceImpl" />
     <property name="service.description" value="Text Analysis Service" />
     <service>
@@ -14,9 +14,9 @@
       cardinality="1..1" policy="static" bind="setMpeg7CatalogService" />
     <reference name="dictionaryService" interface="org.opencastproject.dictionary.api.DictionaryService"
       cardinality="1..1" policy="static" bind="setDictionaryService" />
-  </component>
+  </scr:component>
 
-  <component name="org.opencastproject.textanalyzer.impl.endpoint.TextAnalysisRestEndpoint" immediate="true"
+  <scr:component name="org.opencastproject.textanalyzer.impl.endpoint.TextAnalysisRestEndpoint" immediate="true"
     activate="activate" deactivate="deactivate">
     <implementation class="org.opencastproject.textanalyzer.impl.endpoint.TextAnalysisRestEndpoint" />
     <property name="service.description" value="Text Analysis REST Endpoint" />
@@ -33,7 +33,7 @@
       cardinality="1..1" policy="static" bind="setTextAnalyzer" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 
 </scr:components>
 

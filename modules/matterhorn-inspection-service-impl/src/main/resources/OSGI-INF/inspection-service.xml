@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
-  <component
+  <scr:component
     name="org.opencastproject.inspection.impl.MediaInspectionServiceImpl"
     immediate="true" activate="activate">
     <implementation class="org.opencastproject.inspection.impl.MediaInspectionServiceImpl" />
@@ -13,9 +13,9 @@
       policy="static" bind="setWorkspace" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 
-  <component activate="activate" immediate="true"
+  <scr:component activate="activate" immediate="true"
     name="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint">
     <implementation class="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
     <property name="service.description" value="Media Inspection REST Endpoint" />
@@ -31,7 +31,7 @@
       cardinality="0..1" policy="dynamic" bind="setService" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 
 
 </scr:components>

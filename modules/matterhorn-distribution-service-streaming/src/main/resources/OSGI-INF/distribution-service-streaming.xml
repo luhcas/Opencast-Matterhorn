@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
-  <component name="org.opencastproject.distribution.streaming.StreamingDistributionService" immediate="true"
+  <scr:component name="org.opencastproject.distribution.streaming.StreamingDistributionService" immediate="true"
     activate="activate">
     <implementation class="org.opencastproject.distribution.streaming.StreamingDistributionService" />
     <property name="service.description" value="Distribution Service (Local)" />
@@ -12,9 +12,9 @@
       policy="static" bind="setWorkspace" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 
-  <component name="org.opencastproject.distribution.streaming.endpoint.StreamingDistributionRestService"
+  <scr:component name="org.opencastproject.distribution.streaming.endpoint.StreamingDistributionRestService"
     immediate="true" activate="activate">
     <implementation class="org.opencastproject.distribution.streaming.endpoint.StreamingDistributionRestService" />
     <property name="service.description" value="Streaming Distribution REST Endpoint" />
@@ -31,6 +31,6 @@
       cardinality="1..1" policy="static" bind="setService" target="(distribution.channel=streaming)" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 
 </scr:components>

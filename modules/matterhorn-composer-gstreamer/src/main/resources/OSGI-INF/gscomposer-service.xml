@@ -17,7 +17,7 @@
   <reference name="profileScanner" policy="static" bind="setProfileScanner" cardinality="1..1"
     interface="org.opencastproject.composer.gstreamer.GSEncodingProfileScanner" />
 
-  <component name="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" immediate="true">
+  <scr:component name="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" immediate="true">
     <implementation class="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" />
     <property name="service.description" value="GStreamer Composer REST Endpoint" />
     <property name="opencast.service.type" value="org.opencastproject.composer" />
@@ -30,5 +30,5 @@
       cardinality="1..1" policy="static" bind="setComposerService" />
     <reference name="serviceRegistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
       cardinality="1..1" policy="static" bind="setServiceRegistry" />
-  </component>
+  </scr:component>
 </scr:component>
