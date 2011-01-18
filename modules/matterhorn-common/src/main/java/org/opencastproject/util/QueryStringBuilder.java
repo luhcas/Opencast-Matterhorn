@@ -25,6 +25,7 @@ public class QueryStringBuilder {
 
   /** The stringbuilder containing the query string itself */
   private StringBuilder sb = null;
+  private String baseServicePath = "";
 
   /**
    * Constructs a querystring builder starting with the base path
@@ -34,6 +35,7 @@ public class QueryStringBuilder {
    */
   public QueryStringBuilder(String baseServicePath) {
     sb = new StringBuilder(baseServicePath);
+    this.baseServicePath = baseServicePath;
   }
 
   /**
@@ -50,7 +52,7 @@ public class QueryStringBuilder {
     if (key == null) {
       throw new IllegalArgumentException("key can not be null");
     }
-    if (sb.length() == 0) {
+    if (sb.length() == baseServicePath.length()) {
       sb.append("?");
     } else {
       sb.append("&");
