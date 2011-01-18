@@ -72,6 +72,7 @@
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-series-service-api</module>
         <module>modules/matterhorn-series-service-impl</module>
@@ -198,10 +199,6 @@
       </activation>
       <modules>
         <module>modules/matterhorn-common</module>
-        <module>modules/matterhorn-textanalyzer-api</module>
-        <module>modules/matterhorn-textanalyzer-impl</module>
-        <module>modules/matterhorn-videosegmenter-api</module>
-        <module>modules/matterhorn-videosegmenter-impl</module>
         <module>modules/matterhorn-caption-api</module>
         <module>modules/matterhorn-caption-impl</module>
         <module>modules/matterhorn-composer-service-api</module>
@@ -217,6 +214,10 @@
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-security-impl</module>
+        <module>modules/matterhorn-textanalyzer-api</module>
+        <module>modules/matterhorn-textanalyzer-impl</module>
+        <module>modules/matterhorn-videosegmenter-api</module>
+        <module>modules/matterhorn-videosegmenter-impl</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
     </profile>
@@ -227,20 +228,20 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
+        <module>modules/matterhorn-caption-api</module>
+        <module>modules/matterhorn-caption-impl</module>
         <module>modules/matterhorn-common</module>
+        <module>modules/matterhorn-composer-service-api</module>
+        <module>modules/matterhorn-composer-service-remote</module>
+        <module>modules/matterhorn-inspection-service-api</module>
+        <module>modules/matterhorn-inspection-service-remote</module>
+        <module>modules/matterhorn-kernel</module>
+        <module>modules/matterhorn-runtime-info-ui</module>
+        <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-textanalyzer-api</module>
         <module>modules/matterhorn-textanalyzer-remote</module>
         <module>modules/matterhorn-videosegmenter-api</module>
         <module>modules/matterhorn-videosegmenter-remote</module>
-        <module>modules/matterhorn-caption-api</module>
-        <module>modules/matterhorn-caption-impl</module>
-        <module>modules/matterhorn-composer-service-api</module>
-        <module>modules/matterhorn-composer-service-remote</module>
-        <module>modules/matterhorn-db</module>
-        <module>modules/matterhorn-inspection-service-api</module>
-        <module>modules/matterhorn-inspection-service-remote</module>
-        <module>modules/matterhorn-kernel</module>
-        <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
     </profile>
@@ -277,8 +278,9 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>modules/matterhorn-serviceregistry</module>
+        <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-kernel</module>
+        <module>modules/matterhorn-serviceregistry</module>
       </modules>
     </profile>
 
@@ -288,8 +290,8 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>modules/matterhorn-serviceregistry-remote</module>
         <module>modules/matterhorn-kernel</module>
+        <module>modules/matterhorn-serviceregistry-remote</module>
       </modules>
     </profile>
 
@@ -301,11 +303,11 @@
       <modules>
         <module>modules/matterhorn-common</module>
         <module>modules/matterhorn-kernel</module>
-        <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-capture-admin-service-api</module>
         <module>modules/matterhorn-capture-agent-api</module>
         <module>modules/matterhorn-capture-agent-impl</module>
         <module>modules/matterhorn-confidence-monitoring-ui</module>
+        <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-static</module>
         <module>modules/matterhorn-webconsole</module>
