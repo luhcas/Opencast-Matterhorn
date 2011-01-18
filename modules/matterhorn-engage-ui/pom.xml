@@ -219,7 +219,8 @@
 				<inherited>false</inherited>
 				<configuration>
 					<!-- the default is src/main/js -->
-					<jsDir>${basedir}/src/main/resources/ui/js</jsDir>
+					<!-- main player javascript -->
+					<jsDir>../../shared-resources</jsDir>
 					<!-- this is actually the default -->
 					<includes>**/*.js</includes>
 					<!-- maybe you need to exclude compressed JS files -->
