@@ -585,7 +585,32 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   @Override
   public void unRegisterService(String serviceType, String baseUrl) throws ServiceRegistryException {
+    // TODO: create methods that accept an entity manager, so we can execute multiple queries using the same em and tx
     setOnlineStatus(serviceType, baseUrl, null, false, null);
+
+    // Find all jobs running on this service, and set them back to QUEUED.
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      Query query = em.createNamedQuery("Job.host.status");
+      query.setParameter("status", Status.RUNNING);
+      query.setParameter("host", baseUrl);
+      @SuppressWarnings("unchecked")
+      List<JobJpaImpl> unregisteredJobs = query.getResultList();
+      for (JobJpaImpl job : unregisteredJobs) {
+        job.setStatus(Status.QUEUED);
+        job.setProcessorServiceRegistration(null);
+        em.merge(job);
+      }
+      tx.commit();
+    } catch (Exception e) {
+      if (tx.isActive())
+        tx.rollback();
+      throw new ServiceRegistryException(e);
+    } finally {
+      em.close();
+    }
   }
 
   /**

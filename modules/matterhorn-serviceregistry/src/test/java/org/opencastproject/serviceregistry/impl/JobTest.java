@@ -190,7 +190,8 @@ public class JobTest {
     remoteRunning.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteRunning);
 
-    JobJpaImpl remoteFinished = (JobJpaImpl) serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, null, false);
+    JobJpaImpl remoteFinished = (JobJpaImpl) serviceRegistry
+            .createJob(regType1Host2, OPERATION_NAME, null, null, false);
     // Simulate starting the job
     remoteFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteFinished);
@@ -318,12 +319,12 @@ public class JobTest {
     Assert.assertEquals("xml from unmarshalled job should remain unchanged", StringUtils.trim(payload),
             StringUtils.trim(unmarshalledJob.getPayload()));
   }
-  
+
   @Test
   public void testGetArguments() throws Exception {
     String arg1 = "arg1";
     String arg2 = "<some>xml</some>";
-    Job job = serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2)); 
+    Job job = serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2));
     Job jobFromDb = serviceRegistry.getJob(job.getId());
     Assert.assertNotNull("No arguments persisted in job", jobFromDb.getArguments());
     Assert.assertEquals("Wrong number of arguments persisted", 2, jobFromDb.getArguments().size());
@@ -336,15 +337,15 @@ public class JobTest {
     // Disable job dispatching by setting both hosts to be in maintenance mode
     serviceRegistry.setMaintenanceStatus(LOCALHOST, true);
     serviceRegistry.setMaintenanceStatus(HOST_2, true);
-    
-    Job job = (JobJpaImpl)serviceRegistry.createJob(JOB_TYPE_1, "some_operation", null); 
+
+    Job job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some_operation", null);
     Assert.assertEquals("Newly created jobs shuold have a version of 1", 1, job.getVersion());
-    
+
     job = serviceRegistry.getJob(job.getId());
     job.setPayload("update1");
     serviceRegistry.updateJob(job);
     Assert.assertEquals("Updated job shuold have a version of 2", 2, job.getVersion());
-    
+
     job = serviceRegistry.getJob(job.getId());
     job.setPayload("update2");
     serviceRegistry.updateJob(job);
@@ -356,11 +357,11 @@ public class JobTest {
     // Disable job dispatching by setting both hosts to be in maintenance mode
     serviceRegistry.setMaintenanceStatus(LOCALHOST, true);
     serviceRegistry.setMaintenanceStatus(HOST_2, true);
-    
+
     // Create a job
     String arg1 = "arg1";
     String arg2 = "<some>xml</some>";
-    JobJpaImpl job = (JobJpaImpl)serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2)); 
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2));
 
     // Grab another reference to this job
     Job jobFromDb = serviceRegistry.getJob(job.getId());
@@ -368,7 +369,7 @@ public class JobTest {
     // Modify the job and save it
     job.setPayload("something produced by this client");
     serviceRegistry.updateJob(job);
-    
+
     // Ensure that the job version is higher than the snapshot we loaded from the database
     Assert.assertTrue("Version not incremented", job.getVersion() > jobFromDb.getVersion());
 
@@ -376,9 +377,30 @@ public class JobTest {
     try {
       serviceRegistry.updateJob(jobFromDb);
       Assert.fail();
-    } catch(Exception e) {
+    } catch (Exception e) {
       // do nothinng
     }
+  }
+
+  @Test
+  public void testJobsQueuedOnServiceUnregistration() throws Exception {
+    // Create a job
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some operation", null);
+
+    // Set its status to running on a localhost
+    job.setStatus(Status.RUNNING);
+    job.setProcessorServiceRegistration(regType1Host1);
+    serviceRegistry.updateJob(job);
+
+    // Ensure that we get the job back from the service in its running state
+    Assert.assertEquals("Job should be running", Status.RUNNING, serviceRegistry.getJob(job.getId()).getStatus());
+
+    // Now unregister regType1Host1, and the job should go back to queued
+    serviceRegistry.unRegisterService(regType1Host1.getServiceType(), regType1Host1.getHost());
+    
+    // Ensure that the job is queued now
+    Assert.assertEquals("Job should be queued", Status.QUEUED, serviceRegistry.getJob(job.getId()).getStatus());
+    Assert.assertNull("Job's processing service should be null", serviceRegistry.getJob(job.getId()).getProcessingHost());
   }
 
 }
