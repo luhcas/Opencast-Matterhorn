@@ -24,7 +24,7 @@ import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.job.api.JobProducerRestEndpointSupport;
+import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -74,7 +74,7 @@ import javax.xml.parsers.ParserConfigurationException;
  * A REST endpoint delegating functionality to the {@link ComposerService}
  */
 @Path("/")
-public class GStreamerComposerRestService extends JobProducerRestEndpointSupport {
+public class GStreamerComposerRestService extends AbstractJobProducerEndpoint {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(GStreamerComposerRestService.class);
@@ -92,11 +92,11 @@ public class GStreamerComposerRestService extends JobProducerRestEndpointSupport
   protected ServiceRegistry serviceRegistry = null;
 
   /**
-   * {@inheritDoc}
+   * Callback from the OSGi declarative services to set the service registry.
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   * @param serviceRegistry
+   *          the service registry
    */
-  @Override
   protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
     this.serviceRegistry = serviceRegistry;
   }
@@ -104,7 +104,7 @@ public class GStreamerComposerRestService extends JobProducerRestEndpointSupport
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
    */
   @Override
   protected ServiceRegistry getServiceRegistry() {
@@ -486,7 +486,7 @@ public class GStreamerComposerRestService extends JobProducerRestEndpointSupport
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getService()
    */
   @Override
   public JobProducer getService() {

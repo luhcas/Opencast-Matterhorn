@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * Handles execution of a workflow operation.
  */
-final class WorkflowOperationWorker implements Runnable {
+final class WorkflowOperationWorker {
 
   private static final Logger logger = LoggerFactory.getLogger(WorkflowOperationWorker.class);
 
@@ -84,25 +84,51 @@ final class WorkflowOperationWorker implements Runnable {
   }
 
   /**
-   * {@inheritDoc}
+   * Creates a worker that still needs an operation handler to be set. When the worker is finished, a callback will be
+   * made to the workflow service reporting either success or failure of the current workflow operation.
    * 
-   * @see java.lang.Runnable#run()
+   * @param workflow
+   *          the workflow instance
+   * @param properties
+   *          the properties used to execute the operation
+   * @param service
+   *          the workflow service.
    */
-  @Override
-  public void run() {
+  public WorkflowOperationWorker(WorkflowInstanceImpl workflow, Map<String, String> properties,
+          WorkflowServiceImpl service) {
+    this(null, workflow, service);
+    this.properties = properties;
+  }
+
+  /**
+   * Sets the workflow operation handler to use.
+   * 
+   * @param operationHandler
+   *          the handler
+   */
+  public void setHandler(WorkflowOperationHandler operationHandler) {
+    this.handler = operationHandler;
+  }
+
+  /**
+   * Executes the workflow operation logic.
+   */
+  public void execute() {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
+    if (handler == null)
+      throw new IllegalStateException("Handler must be set first");
     try {
       WorkflowOperationResult result = null;
       switch (operation.getState()) {
-      case INSTANTIATED:
-        result = start();
-        break;
-      case PAUSED:
-        result = resume();
-        break;
-      default:
-        throw new IllegalStateException("Workflow operation '" + operation + "' is in unexpected state '"
-                + operation.getState() + "'");
+        case INSTANTIATED:
+          result = start();
+          break;
+        case PAUSED:
+          result = resume();
+          break;
+        default:
+          throw new IllegalStateException("Workflow operation '" + operation + "' is in unexpected state '"
+                  + operation.getState() + "'");
       }
       if (result == null || Action.CONTINUE.equals(result.getAction()) || Action.SKIP.equals(result.getAction())) {
         if (handler != null) {
@@ -111,8 +137,13 @@ final class WorkflowOperationWorker implements Runnable {
       }
       service.handleOperationResult(workflow, result);
     } catch (Exception e) {
-      logger.error("Workflow operation '{}' failed with error: {}", new Object[] { handler, e.getMessage(), e });
-      e.printStackTrace();
+      logger.error("Workflow operation '{}' failed with error: {}", handler, e.getMessage());
+      Throwable t = e.getCause();
+      if (t != null) {
+        logger.error("Original cause for the failure is: {}", t.getMessage(), t);
+      } else {
+        logger.error("Cause for the failure is", e);
+      }
       try {
         service.handleOperationException(workflow, e);
       } catch (Exception e2) {
@@ -200,7 +231,7 @@ final class WorkflowOperationWorker implements Runnable {
   public WorkflowOperationResult resume() throws WorkflowOperationException, WorkflowDatabaseException,
           WorkflowParsingException, IllegalStateException {
     if (!(handler instanceof ResumableWorkflowOperationHandler)) {
-      throw new IllegalStateException("an attempt was made to resume a non-resumable operation");
+      throw new IllegalStateException("An attempt was made to resume a non-resumable operation");
     }
     ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
     WorkflowOperationInstance operation = workflow.getCurrentOperation();

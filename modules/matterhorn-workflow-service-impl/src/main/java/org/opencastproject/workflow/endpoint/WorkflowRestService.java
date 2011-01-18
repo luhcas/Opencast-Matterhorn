@@ -17,7 +17,7 @@ package org.opencastproject.workflow.endpoint;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.job.api.JobProducerRestEndpointSupport;
+import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -89,7 +89,7 @@ import javax.ws.rs.core.Response.Status;
  * A REST endpoint for the {@link WorkflowService}
  */
 @Path("/")
-public class WorkflowRestService extends JobProducerRestEndpointSupport {
+public class WorkflowRestService extends AbstractJobProducerEndpoint {
 
   /** The default number of results returned */
   private static final int DEFAULT_LIMIT = 20;
@@ -122,11 +122,11 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
   protected ServiceRegistry serviceRegistry = null;
 
   /**
-   * {@inheritDoc}
+   * Callback from the OSGi declarative services to set the service registry.
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   * @param serviceRegistry
+   *          the service registry
    */
-  @Override
   protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
     this.serviceRegistry = serviceRegistry;
   }
@@ -134,7 +134,7 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
   /**
    * {@inheritDoc}
    *
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
    */
   @Override
   protected ServiceRegistry getServiceRegistry() {
@@ -874,7 +874,7 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getService()
    */
   @Override
   public JobProducer getService() {
@@ -887,7 +887,7 @@ public class WorkflowRestService extends JobProducerRestEndpointSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#dispatchJob(java.lang.String)
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#dispatchJob(java.lang.String)
    */
   @POST
   @Path("/dispatch")

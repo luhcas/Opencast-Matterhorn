@@ -17,15 +17,15 @@ package org.opencastproject.textanalyzer.impl;
 
 import org.opencastproject.dictionary.api.DictionaryService;
 import org.opencastproject.dictionary.api.DictionaryService.DICT_TOKEN;
+import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
@@ -64,7 +64,7 @@ import java.util.List;
 /**
  * Media analysis service that takes takes an image and returns text as extracted from that image.
  */
-public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer {
+public class TextAnalyzerServiceImpl extends AbstractJobProducer implements TextAnalyzerService {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(TextAnalyzerServiceImpl.class);
@@ -78,7 +78,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
   public static final String COLLECTION_ID = "ocrtext";
 
   /** Reference to the receipt service */
-  private ServiceRegistry remoteServiceManager = null;
+  private ServiceRegistry serviceRegistry = null;
 
   /** The workspace to ue when retrieving remote media files */
   private Workspace workspace = null;
@@ -91,6 +91,13 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
 
   /** Path to the ocropus binary */
   private String ocropusbinary = OcropusTextAnalyzer.OCROPUS_BINARY_DEFAULT;
+
+  /**
+   * Creates a new instance of the text analyzer service.
+   */
+  public TextAnalyzerServiceImpl() {
+    super(JOB_TYPE);
+  }
 
   protected void activate(ComponentContext cc) {
     if (cc.getBundleContext().getProperty("org.opencastproject.textanalyzer.ocrocmd") != null)
@@ -105,7 +112,8 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
   @Override
   public Job extract(Attachment image) throws TextAnalyzerException, MediaPackageException {
     try {
-      return remoteServiceManager.createJob(JOB_TYPE, Operation.Extract.toString(), Arrays.asList(MediaPackageElementParser.getAsXml(image)));
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Extract.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(image)));
     } catch (ServiceUnavailableException e) {
       throw new TextAnalyzerException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
@@ -174,21 +182,11 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
               .newElement(Catalog.TYPE, MediaPackageElements.TEXTS);
       catalog.setURI(uri);
 
-      job.setPayload(MediaPackageElementParser.getAsXml(catalog));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
       logger.info("Finished text extraction of {}", imageUrl);
 
       return catalog;
     } catch (Exception e) {
       logger.warn("Error extracting text from " + imageUrl, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof TextAnalyzerException) {
         throw (TextAnalyzerException) e;
       } else {
@@ -200,28 +198,28 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
   @Override
-  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+  protected String process(Job job, String operation, List<String> arguments) throws Exception {
     Operation op = null;
     try {
       op = Operation.valueOf(operation);
       switch (op) {
         case Extract:
           Attachment element = (Attachment) MediaPackageElementParser.getFromXml(arguments.get(0));
-          extract(job, element);
-          break;
+          Catalog catalog = extract(job, element);
+          return MediaPackageElementParser.getAsXml(catalog);
         default:
           throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
     } catch (IllegalArgumentException e) {
-      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
     } catch (IndexOutOfBoundsException e) {
-      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations", e);
     } catch (Exception e) {
-      throw new ServiceRegistryException("Error handling operation '" + op + "'");
+      throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
   }
 
@@ -231,18 +229,19 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
    * @see org.opencastproject.job.api.JobProducer#getJob(long)
    */
   public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return remoteServiceManager.getJob(id);
+    return serviceRegistry.getJob(id);
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.job.api.JobProducer#getJobType()
    */
   @Override
   public String getJobType() {
     return JOB_TYPE;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -251,7 +250,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
   public long countJobs(Status status) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
-    return remoteServiceManager.count(JOB_TYPE, status);
+    return serviceRegistry.count(JOB_TYPE, status);
   }
 
   /**
@@ -264,7 +263,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
       throw new IllegalArgumentException("status must not be null");
     if (host == null)
       throw new IllegalArgumentException("host must not be null");
-    return remoteServiceManager.count(JOB_TYPE, status, host);
+    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -340,8 +339,18 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
    * @param serviceRegistry
    *          the service registry
    */
-  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
-    this.remoteServiceManager = serviceRegistry;
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
   }
 
   /**
@@ -350,7 +359,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
    * @param workspace
    *          an instance of the workspace
    */
-  public void setWorkspace(Workspace workspace) {
+  protected void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
 
@@ -360,7 +369,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
    * @param mpeg7CatalogService
    *          an instance of the mpeg7 catalog service
    */
-  public void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
+  protected void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
     this.mpeg7CatalogService = mpeg7CatalogService;
   }
 
@@ -370,29 +379,8 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService, JobProducer
    * @param dictionaryService
    *          an instance of the dicitonary service
    */
-  public void setDictionaryService(DictionaryService dictionaryService) {
+  protected void setDictionaryService(DictionaryService dictionaryService) {
     this.dictionaryService = dictionaryService;
-  }
-
-  /**
-   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link TextAnalyzerException}.
-   * 
-   * @param job
-   *          the job to update
-   * @throws TextAnalyzerException
-   *           the exception that is being thrown
-   */
-  private void updateJob(Job job) throws TextAnalyzerException {
-    try {
-      remoteServiceManager.updateJob(job);
-    } catch (NotFoundException notFound) {
-      throw new TextAnalyzerException("Unable to find job " + job, notFound);
-    } catch (ServiceUnavailableException e) {
-      throw new TextAnalyzerException("No service of type '" + JOB_TYPE + "' available", e);
-    } catch (ServiceRegistryException serviceRegException) {
-      throw new TextAnalyzerException("Unable to update job '" + job + "' in service registry", serviceRegException);
-    }
   }
 
 }

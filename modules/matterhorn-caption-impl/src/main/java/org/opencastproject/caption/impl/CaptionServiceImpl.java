@@ -20,9 +20,8 @@ import org.opencastproject.caption.api.CaptionConverter;
 import org.opencastproject.caption.api.CaptionConverterException;
 import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
+import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -64,7 +63,14 @@ import javax.activation.MimetypesFileTypeMap;
  * match for specified input or output format {@link UnsupportedCaptionFormatException} is thrown.
  * 
  */
-public class CaptionServiceImpl implements CaptionService, JobProducer {
+public class CaptionServiceImpl extends AbstractJobProducer implements CaptionService {
+
+  /**
+   * Creates a new caption service.
+   */
+  public CaptionServiceImpl() {
+    super(JOB_TYPE);
+  }
 
   /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(CaptionServiceImpl.class);
@@ -81,7 +87,7 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
   protected Workspace workspace;
 
   /** Reference to remote service manager */
-  protected ServiceRegistry jobManager;
+  protected ServiceRegistry serviceRegistry;
 
   /** Component context needed for retrieving Converter Engines */
   protected ComponentContext componentContext = null;
@@ -104,7 +110,7 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
       throw new IllegalArgumentException("Output format is null");
 
     try {
-      return jobManager.createJob(JOB_TYPE, Operation.Convert.toString(),
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Convert.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(input), inputFormat, outputFormat));
     } catch (ServiceRegistryException e) {
       throw new CaptionConverterException("Unable to create a job", e);
@@ -134,7 +140,7 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
       throw new IllegalArgumentException("Language format is null");
 
     try {
-      return jobManager.createJob(JOB_TYPE, Operation.ConvertWithLanguage.toString(),
+      return serviceRegistry.createJob(JOB_TYPE, Operation.ConvertWithLanguage.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(input), inputFormat, outputFormat, language));
     } catch (ServiceRegistryException e) {
       throw new CaptionConverterException("Unable to create a job", e);
@@ -145,9 +151,11 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
   }
 
   /**
-   * Converts the captions.
+   * Converts the captions and returns them in a new catalog.
+   * 
+   * @return the converted catalog
    */
-  private Catalog convert(Job job, Catalog input, String inputFormat, String outputFormat, String language)
+  protected Catalog convert(Job job, Catalog input, String inputFormat, String outputFormat, String language)
           throws UnsupportedCaptionFormatException, CaptionConverterException, MediaPackageException {
     try {
 
@@ -200,20 +208,10 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
       catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
       catalog.addTag("lang:" + language);
 
-      job.setPayload(MediaPackageElementParser.getAsXml(catalog));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
       return catalog;
 
     } catch (Exception e) {
       logger.warn("Error converting captions in " + input, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof CaptionConverterException) {
         throw (CaptionConverterException) e;
       } else if (e instanceof UnsupportedCaptionFormatException) {
@@ -269,85 +267,6 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
     String[] languageList = converter.getLanguageList(stream);
 
     return languageList == null ? new String[0] : languageList;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
-   *      java.util.List)
-   */
-  @Override
-  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
-    Operation op = null;
-    try {
-      op = Operation.valueOf(operation);
-
-      Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(0));
-      String inputFormat = arguments.get(1);
-      String outputFormat = arguments.get(2);
-
-      switch (op) {
-        case Convert:
-          convert(job, catalog, inputFormat, outputFormat, null);
-          break;
-        case ConvertWithLanguage:
-          String language = arguments.get(3);
-          convert(job, catalog, inputFormat, outputFormat, language);
-          break;
-        default:
-          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
-      }
-    } catch (IllegalArgumentException e) {
-      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
-    } catch (IndexOutOfBoundsException e) {
-      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
-    } catch (Exception e) {
-      throw new ServiceRegistryException("Error handling operation '" + op + "'");
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return jobManager.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJobType()
-   */
-  @Override
-  public String getJobType() {
-    return JOB_TYPE;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
-   */
-  public long countJobs(Status status) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    return jobManager.count(JOB_TYPE, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    if (host == null)
-      throw new IllegalArgumentException("host must not be null");
-    return jobManager.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -480,24 +399,39 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
   }
 
   /**
-   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link CaptionConverterException}.
+   * {@inheritDoc}
    * 
-   * @param job
-   *          the job to update
-   * @throws CaptionConverterException
-   *           the exception that is being thrown
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(Job, java.lang.String, java.util.List)
    */
-  private void updateJob(Job job) throws CaptionConverterException {
+  @Override
+  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+    Operation op = null;
     try {
-      jobManager.updateJob(job);
-    } catch (NotFoundException notFound) {
-      throw new CaptionConverterException("Unable to find job " + job, notFound);
-    } catch (ServiceUnavailableException e) {
-      throw new CaptionConverterException("The " + JOB_TYPE
-              + " service is not registered on this host, so the job can not be updated", e);
-    } catch (ServiceRegistryException serviceRegException) {
-      throw new CaptionConverterException("Unable to update job '" + job + "' in service registry", serviceRegException);
+      op = Operation.valueOf(operation);
+
+      Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(0));
+      String inputFormat = arguments.get(1);
+      String outputFormat = arguments.get(2);
+
+      Catalog resultingCatalog = null;
+
+      switch (op) {
+        case Convert:
+          resultingCatalog = convert(job, catalog, inputFormat, outputFormat, null);
+          return MediaPackageElementParser.getAsXml(resultingCatalog);
+        case ConvertWithLanguage:
+          String language = arguments.get(3);
+          resultingCatalog = convert(job, catalog, inputFormat, outputFormat, language);
+          return MediaPackageElementParser.getAsXml(resultingCatalog);
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      }
+    } catch (IllegalArgumentException e) {
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
+    } catch (IndexOutOfBoundsException e) {
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations", e);
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
   }
 
@@ -511,8 +445,18 @@ public class CaptionServiceImpl implements CaptionService, JobProducer {
   /**
    * Setter for remote service manager via declarative activation
    */
-  protected void setServiceRegistry(ServiceRegistry manager) {
-    this.jobManager = manager;
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
   }
 
 }

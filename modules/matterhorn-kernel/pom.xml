@@ -115,6 +115,7 @@
               javax.servlet.http,
               javax.xml.stream,
               javax.ws.rs,
+              javax.ws.rs.core,
               META-INF.cxf,
               META-INF.cxf.osgi,
               org.apache.cxf,
@@ -159,8 +160,11 @@
               org.osgi.service.http,
               org.osgi.util.tracker,
               org.slf4j,
+              org.opencastproject.job.api;version=${project.version},
+              org.opencastproject.rest;version=${project.version},
+              org.opencastproject.serviceregistry.api;version=${project.version},
               org.opencastproject.security.api;version=${project.version},
-              org.opencastproject.rest;version=${project.version}
+              org.opencastproject.util;version=${project.version},
             </Import-Package>
             <Export-Package>
               org.opencastproject.kernel.http;version=${project.version},

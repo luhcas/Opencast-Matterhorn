@@ -48,8 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,9 +63,6 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 
 /**
  * JPA implementation of the {@link ServiceRegistry}
@@ -93,23 +88,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   protected static final List<Status> JOB_STATUSES_INFLUINCING_LOAD_BALANCING;
 
-  private static final JAXBContext jaxbContext;
-
   static {
     JOB_STATUSES_INFLUINCING_LOAD_BALANCING = new ArrayList<Status>();
     JOB_STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.QUEUED);
     JOB_STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.RUNNING);
-
-    StringBuilder sb = new StringBuilder();
-    sb.append("org.opencastproject.mediapackage");
-    sb.append(":org.opencastproject.mediapackage.attachment");
-    sb.append(":org.opencastproject.mediapackage.track");
-    sb.append(":org.opencastproject.job.api");
-    try {
-      jaxbContext = JAXBContext.newInstance(sb.toString(), JobParser.class.getClassLoader());
-    } catch (JAXBException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   /** The JPA provider */
@@ -969,25 +951,6 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   }
 
   /**
-   * Gets an xml representation of a {@link Job}
-   * 
-   * @param job
-   *          The job to marshall
-   * @return the serialized job
-   */
-  private String serializeToString(Job job) throws IOException {
-    Marshaller marshaller;
-    try {
-      marshaller = jaxbContext.createMarshaller();
-      Writer writer = new StringWriter();
-      marshaller.marshal(job, writer);
-      return writer.toString();
-    } catch (JAXBException e) {
-      throw new IOException(e);
-    }
-  }
-
-  /**
    * Dispatches the job to the least loaded service that will accept the job, or throws a
    * <code>ServiceUnavailableException</code> if there is no such service.
    * 
@@ -1012,7 +975,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
               .concat(new String[] { registration.getHost(), registration.getPath(), "dispatch" });
       HttpPost post = new HttpPost(serviceUrl);
       try {
-        String jobXml = serializeToString(job);
+        String jobXml = JobParser.toXml(job);
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
         params.add(new BasicNameValuePair("job", jobXml));
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
@@ -1074,9 +1037,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
               try {
                 String hostAcceptingJob = dispatchJob(job);
                 if (hostAcceptingJob == null) {
-                  logger.info("Job {} could not be dispatched and is put back into queue", job.getId());
+                  logger.debug("Job {} could not be dispatched and is put back into queue", job.getId());
                 } else {
-                  logger.info("Job {} dispatched to {}", job.getId(), hostAcceptingJob);
+                  logger.debug("Job {} dispatched to {}", job.getId(), hostAcceptingJob);
                 }
               } catch (ServiceRegistryException e) {
                 Throwable cause = (e.getCause() != null) ? e.getCause() : e;

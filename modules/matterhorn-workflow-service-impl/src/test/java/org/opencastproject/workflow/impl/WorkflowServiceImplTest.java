@@ -346,7 +346,7 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance = startAndWait(pausingWorkflowDefinition, mediapackage1, WorkflowState.PAUSED);
 
     WorkflowSet workflowsInDb = service.getWorkflowInstances(new WorkflowQuery().withCurrentOperation("opPause"));
-    Assert.assertEquals(1, workflowsInDb.getItems().length);
+    Assert.assertEquals(1, workflowsInDb.size());
 
     // cleanup the database
     service.removeFromDatabase(instance.getId());

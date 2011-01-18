@@ -65,7 +65,7 @@ public interface JobProducer {
   long countJobs(Status status, String host) throws ServiceRegistryException;
 
   /**
-   * Asks the job producer to start the given operation on the provided list of arguments.
+   * Asks the job producer to handle the given operation using the provided list of arguments.
    * 
    * @param operation
    *          the name of the operation
@@ -74,6 +74,6 @@ public interface JobProducer {
    * @throws ServiceRegistryException
    *           if the producer was unable to start work as requested
    */
-  void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException;
+  void acceptJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException;
 
 }

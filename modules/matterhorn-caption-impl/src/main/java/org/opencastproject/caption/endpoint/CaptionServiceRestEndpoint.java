@@ -19,7 +19,7 @@ import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.job.api.JobProducerRestEndpointSupport;
+import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -66,7 +66,7 @@ import javax.xml.transform.stream.StreamResult;
  * Rest endpoint for {@link CaptionService}.
  */
 @Path("/")
-public class CaptionServiceRestEndpoint extends JobProducerRestEndpointSupport {
+public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(CaptionServiceRestEndpoint.class);
@@ -112,25 +112,25 @@ public class CaptionServiceRestEndpoint extends JobProducerRestEndpointSupport {
   }
 
   /**
-   * {@inheritDoc}
-   *
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   * Callback from the OSGi declarative services to set the service registry.
+   * 
+   * @param serviceRegistry
+   *          the service registry
    */
-  @Override
   protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
     this.serviceRegistry = serviceRegistry;
   }
-  
+
   /**
    * {@inheritDoc}
-   *
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   * 
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
    */
   @Override
   protected ServiceRegistry getServiceRegistry() {
     return serviceRegistry;
   }
-  
+
   /**
    * Convert captions in catalog from one format to another.
    * 
@@ -287,7 +287,7 @@ public class CaptionServiceRestEndpoint extends JobProducerRestEndpointSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getService()
    */
   @Override
   public JobProducer getService() {

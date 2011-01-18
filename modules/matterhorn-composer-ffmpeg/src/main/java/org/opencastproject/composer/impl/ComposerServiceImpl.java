@@ -25,12 +25,12 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobBarrier;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
@@ -68,7 +68,7 @@ import java.util.Map;
 /**
  * FFMPEG based implementation of the composer service api.
  */
-public class ComposerServiceImpl implements ComposerService, JobProducer {
+public class ComposerServiceImpl extends AbstractJobProducer implements ComposerService {
 
   /** The logging instance */
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceImpl.class);
@@ -101,6 +101,13 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
 
   /** Id builder used to create ids for encoded tracks */
   private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
+
+  /**
+   * Creates a new composer service intance.
+   */
+  public ComposerServiceImpl() {
+    super(JOB_TYPE);
+  }
 
   /**
    * {@inheritDoc}
@@ -139,7 +146,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @throws EncoderException
    *           if encoding fails
    */
-  private Track encode(Job job, Track videoTrack, Track audioTrack, String profileId,
+  protected Track encode(Job job, Track videoTrack, Track audioTrack, String profileId,
           Dictionary<String, String> properties) throws EncoderException, MediaPackageException {
 
     final String targetTrackId = idBuilder.createNew().toString();
@@ -231,19 +238,10 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
       Track inspectedTrack = (Track) MediaPackageElementParser.getFromXml(inspectionJob.getPayload());
       inspectedTrack.setIdentifier(targetTrackId);
 
-      job.setPayload(MediaPackageElementParser.getAsXml(inspectedTrack));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
-      return null;
+      return inspectedTrack;
+      
     } catch (Exception e) {
       logger.warn("Error encoding " + videoTrack + " and " + audioTrack, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof EncoderException) {
         throw (EncoderException) e;
       } else {
@@ -293,7 +291,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @throws EncoderException
    *           if trimming fails
    */
-  private Track trim(Job job, Track sourceTrack, String profileId, long start, long duration) throws EncoderException {
+  protected Track trim(Job job, Track sourceTrack, String profileId, long start, long duration) throws EncoderException {
     try {
       String targetTrackId = idBuilder.createNew().toString();
 
@@ -358,19 +356,9 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
       Track inspectedTrack = (Track) MediaPackageElementParser.getFromXml(inspectionJob.getPayload());
       inspectedTrack.setIdentifier(targetTrackId);
 
-      job.setPayload(MediaPackageElementParser.getAsXml(inspectedTrack));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
       return inspectedTrack;
     } catch (Exception e) {
       logger.warn("Error trimming " + sourceTrack, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof EncoderException) {
         throw (EncoderException) e;
       } else {
@@ -418,7 +406,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @throws MediaPackageException
    *           if serializing the mediapackage elements fails
    */
-  private Track mux(Job job, Track videoTrack, Track audioTrack, String profileId) throws EncoderException,
+  protected Track mux(Job job, Track videoTrack, Track audioTrack, String profileId) throws EncoderException,
           MediaPackageException {
     return encode(job, videoTrack, audioTrack, profileId, null);
   }
@@ -480,7 +468,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @throws EncoderException
    *           if extracting the image fails
    */
-  private Attachment image(Job job, Track sourceTrack, String profileId, long time) throws EncoderException,
+  protected Attachment image(Job job, Track sourceTrack, String profileId, long time) throws EncoderException,
           MediaPackageException {
 
     if (sourceTrack == null)
@@ -488,9 +476,6 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
 
     try {
       logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
-
-      job.setStatus(Status.RUNNING);
-      updateJob(job);
 
       // Get the encoding profile
       final EncodingProfile profile = profileScanner.getProfile(profileId);
@@ -556,19 +541,9 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
       MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
 
-      job.setPayload(MediaPackageElementParser.getAsXml(attachment));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
       return attachment;
     } catch (Exception e) {
       logger.warn("Error extracting image from " + sourceTrack, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof EncoderException) {
         throw (EncoderException) e;
       } else {
@@ -618,7 +593,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    * @throws EmbedderException
    *           if embedding captions into the track fails
    */
-  private Track captions(Job job, Track mediaTrack, Catalog[] captions) throws EmbedderException {
+  protected Track captions(Job job, Track mediaTrack, Catalog[] captions) throws EmbedderException {
     try {
       logger.info("Atempting to create and embed subtitles to video track");
 
@@ -719,19 +694,9 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
       Track inspectedTrack = (Track) MediaPackageElementParser.getFromXml(inspectionJob.getPayload());
       inspectedTrack.setIdentifier(targetTrackId);
 
-      job.setPayload(MediaPackageElementParser.getAsXml(inspectedTrack));
-      job.setStatus(Status.FINISHED);
-      updateEmbedderJob(job);
-
       return inspectedTrack;
     } catch (Exception e) {
       logger.warn("Error embedding captions into " + mediaTrack, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof EncoderException) {
         throw (EmbedderException) e;
       } else {
@@ -747,7 +712,7 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
    *          catalog tags
    * @return language or null if no corresponding tag was found
    */
-  private String getLanguageFromTags(String[] tags) {
+  protected String getLanguageFromTags(String[] tags) {
     for (String tag : tags) {
       if (tag.startsWith("lang:") && tag.length() > 5) {
         return tag.substring(5);
@@ -759,141 +724,64 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
   @Override
-  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+  protected String process(Job job, String operation, List<String> arguments) throws Exception {
     Operation op = null;
     try {
       op = Operation.valueOf(operation);
       Track firstTrack = null;
       Track secondTrack = null;
       String encodingProfile = null;
+      
+      MediaPackageElement resultingElement = null;
+      
       switch (op) {
-      case Caption:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        Catalog[] catalogs = new Catalog[arguments.size() - 1];
-        for (int i = 1; i < arguments.size(); i++) {
-          catalogs[i] = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(i));
-        }
-        captions(job, firstTrack, catalogs);
-        break;
-      case Encode:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        encodingProfile = arguments.get(1);
-        encode(job, firstTrack, null, encodingProfile, null);
-        break;
-      case Image:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        encodingProfile = arguments.get(1);
-        long time = Long.parseLong(arguments.get(2));
-        image(job, firstTrack, encodingProfile, time);
-        break;
-      case Mux:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
-        encodingProfile = arguments.get(2);
-        mux(job, firstTrack, secondTrack, encodingProfile);
-        break;
-      case Trim:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        encodingProfile = arguments.get(1);
-        long start = Long.parseLong(arguments.get(2));
-        long duration = Long.parseLong(arguments.get(3));
-        trim(job, firstTrack, encodingProfile, start, duration);
-        break;
-      default:
-        throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+        case Caption:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          Catalog[] catalogs = new Catalog[arguments.size() - 1];
+          for (int i = 1; i < arguments.size(); i++) {
+            catalogs[i] = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(i));
+          }
+          resultingElement = captions(job, firstTrack, catalogs);
+          break;
+        case Encode:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          encodingProfile = arguments.get(1);
+          resultingElement = encode(job, firstTrack, null, encodingProfile, null);
+          break;
+        case Image:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          encodingProfile = arguments.get(1);
+          long time = Long.parseLong(arguments.get(2));
+          resultingElement = image(job, firstTrack, encodingProfile, time);
+          break;
+        case Mux:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
+          encodingProfile = arguments.get(2);
+          resultingElement = mux(job, firstTrack, secondTrack, encodingProfile);
+          break;
+        case Trim:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          encodingProfile = arguments.get(1);
+          long start = Long.parseLong(arguments.get(2));
+          long duration = Long.parseLong(arguments.get(3));
+          resultingElement = trim(job, firstTrack, encodingProfile, start, duration);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
+      
+      return MediaPackageElementParser.getAsXml(resultingElement);
     } catch (IllegalArgumentException e) {
-      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
     } catch (IndexOutOfBoundsException e) {
-      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations", e);
     } catch (Exception e) {
-      throw new ServiceRegistryException("Error handling operation '" + op + "'");
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return serviceRegistry.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJobType()
-   */
-  @Override
-  public String getJobType() {
-    return JOB_TYPE;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.job.api.Job.Status)
-   */
-  @Override
-  public long countJobs(Status status) throws ServiceRegistryException {
-    return serviceRegistry.count(JOB_TYPE, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.job.api.Job.Status,
-   *      java.lang.String)
-   */
-  @Override
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    return serviceRegistry.count(JOB_TYPE, status, host);
-  }
-
-  /**
-   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link EncoderException}.
-   * 
-   * @param job
-   *          the job to update
-   * @throws EncoderException
-   *           the exception that is being thrown
-   */
-  private void updateJob(Job job) throws EncoderException {
-    try {
-      serviceRegistry.updateJob(job);
-    } catch (NotFoundException notFound) {
-      throw new EncoderException("Unable to find job " + job, notFound);
-    } catch (ServiceRegistryException serviceRegException) {
-      throw new EncoderException("Unable to update job '" + job + "' in service registry", serviceRegException);
-    } catch (ServiceUnavailableException e) {
-      throw new EncoderException("No service of type '" + JOB_TYPE + "' available", e);
-    }
-  }
-
-  /**
-   * Updates embedder jobs in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link EncoderException}.
-   * 
-   * @param job
-   *          the job to update
-   * @throws EmbedderException
-   *           the exception that is being thrown
-   */
-  private void updateEmbedderJob(Job job) throws EmbedderException {
-    try {
-      serviceRegistry.updateJob(job);
-    } catch (NotFoundException notFound) {
-      throw new EmbedderException("Unable to find job " + job, notFound);
-    } catch (ServiceRegistryException serviceRegException) {
-      throw new EmbedderException("Unable to update job '" + job + "' in service registry", serviceRegException);
-    } catch (ServiceUnavailableException e) {
-      throw new EmbedderException("No service of type '" + JOB_TYPE + "' available", e);
+      throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
   }
 
@@ -947,6 +835,22 @@ public class ComposerServiceImpl implements ComposerService, JobProducer {
     this.serviceRegistry = serviceRegistry;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+
+  /**
+   * Sets the profile scanner.
+   * 
+   * @param scanner
+   *          the profile scanner
+   */
   protected void setProfileScanner(EncodingProfileScanner scanner) {
     this.profileScanner = scanner;
   }

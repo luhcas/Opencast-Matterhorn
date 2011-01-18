@@ -33,7 +33,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 public final class JobParser {
   private static final JAXBContext jaxbContext;
-  
+
   /** Disallow constructing this utility class */
   private JobParser() {
   }
@@ -81,11 +81,24 @@ public final class JobParser {
     }
   }
 
-  public static String toXml(Job job) throws Exception {
-    Marshaller marshaller = jaxbContext.createMarshaller();
-    Writer writer = new StringWriter();
-    marshaller.marshal(job, writer);
-    return writer.toString();
+  /**
+   * Serializes the job into a string representation.
+   * 
+   * @param job
+   *          the job
+   * @return the job's serialized form
+   * @throws IOException
+   *           if parsing fails
+   */
+  public static String toXml(Job job) throws IOException {
+    try {
+      Marshaller marshaller = jaxbContext.createMarshaller();
+      Writer writer = new StringWriter();
+      marshaller.marshal(job, writer);
+      return writer.toString();
+    } catch (JAXBException e) {
+      throw new IOException(e);
+    }
   }
 
   /**

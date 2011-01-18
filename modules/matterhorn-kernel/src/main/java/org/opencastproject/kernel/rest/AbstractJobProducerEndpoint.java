@@ -13,8 +13,12 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.job.api;
+package org.opencastproject.kernel.rest;
 
+import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
@@ -41,22 +45,18 @@ import javax.ws.rs.core.Response.Status;
 /**
  * Base implementation for job producer REST endpoints.
  */
-public abstract class JobProducerRestEndpointSupport {
+public abstract class AbstractJobProducerEndpoint {
 
   /** To enable threading when dispatching jobs to the service */
   protected ExecutorService executor = Executors.newCachedThreadPool();
 
   /**
-   * Sets the service registry for this job producer endpoint.
+   * Returns a reference to the service registry.
    * 
-   * @param serviceRegistry
-   *          the service registry to use when accepting jobs to run
+   * @return the service registry
    */
-  protected abstract void setServiceRegistry(ServiceRegistry serviceRegistry);
-
-  /** Gets the service registry for this job handler */
   protected abstract ServiceRegistry getServiceRegistry();
-  
+
   /**
    * @see org.opencastproject.job.api.JobProducer#getJob(long)
    */
@@ -77,7 +77,7 @@ public abstract class JobProducerRestEndpointSupport {
   }
 
   /**
-   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   * @see org.opencastproject.job.api.JobProducer#acceptJob(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
   @POST
@@ -137,14 +137,14 @@ public abstract class JobProducerRestEndpointSupport {
         job.setStatus(Job.Status.RUNNING);
         serviceRegistry.updateJob(job);
         logger.debug("Updated job {} to status RUNNING", job);
-        service.startJob(job, job.getOperation(), job.getArguments());
+        service.acceptJob(job, job.getOperation(), job.getArguments());
       } catch (ServiceRegistryException e) {
         logger.warn("Unable to start job {}", job, e);
       } catch (NotFoundException e) {
         logger.warn("Unable to start job {} because the job could not be found", job, e);
       } catch (ServiceUnavailableException e) {
         logger.warn("Unable to start job {} because the service registry is not available", job, e);
-      } catch(Exception e) {
+      } catch (Exception e) {
         logger.warn("Unable to start job {}", job);
         e.printStackTrace();
       }

@@ -18,7 +18,7 @@ package org.opencastproject.textanalyzer.impl.endpoint;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.job.api.JobProducerRestEndpointSupport;
+import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -55,7 +55,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * The REST endpoint for {@link MediaAnalysisService}s
  */
 @Path("")
-public class TextAnalysisRestEndpoint extends JobProducerRestEndpointSupport {
+public class TextAnalysisRestEndpoint extends AbstractJobProducerEndpoint {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(TextAnalysisRestEndpoint.class);
@@ -84,11 +84,11 @@ public class TextAnalysisRestEndpoint extends JobProducerRestEndpointSupport {
   }
 
   /**
-   * {@inheritDoc}
+   * Callback from the OSGi declarative services to set the service registry.
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#setServiceRegistry(org.opencastproject.serviceregistry.api.ServiceRegistry)
+   * @param serviceRegistry
+   *          the service registry
    */
-  @Override
   protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
     this.serviceRegistry = serviceRegistry;
   }
@@ -96,7 +96,7 @@ public class TextAnalysisRestEndpoint extends JobProducerRestEndpointSupport {
   /**
    * {@inheritDoc}
    *
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getServiceRegistry()
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
    */
   @Override
   protected ServiceRegistry getServiceRegistry() {
@@ -169,7 +169,7 @@ public class TextAnalysisRestEndpoint extends JobProducerRestEndpointSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducerRestEndpointSupport#getService()
+   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getService()
    */
   @Override
   public JobProducer getService() {

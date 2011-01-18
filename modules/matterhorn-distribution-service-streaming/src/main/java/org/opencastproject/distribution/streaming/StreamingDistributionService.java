@@ -17,12 +17,11 @@ package org.opencastproject.distribution.streaming;
 
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
@@ -50,7 +49,7 @@ import java.util.List;
 /**
  * Distributes media to the local media delivery directory.
  */
-public class StreamingDistributionService implements DistributionService, JobProducer {
+public class StreamingDistributionService extends AbstractJobProducer implements DistributionService {
 
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(StreamingDistributionService.class);
@@ -77,6 +76,13 @@ public class StreamingDistributionService implements DistributionService, JobPro
 
   /** The base URL for streaming */
   protected String streamingUrl = null;
+
+  /**
+   * Creates a new instance of the streaming distribution service.
+   */
+  public StreamingDistributionService() {
+    super(JOB_TYPE);
+  }
 
   protected void activate(ComponentContext cc) {
     // Get the configured streaming and server URLs
@@ -139,7 +145,7 @@ public class StreamingDistributionService implements DistributionService, JobPro
    * 
    * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement)
    */
-  private MediaPackageElement distribute(Job job, String mediaPackageId, MediaPackageElement element)
+  protected MediaPackageElement distribute(Job job, String mediaPackageId, MediaPackageElement element)
           throws DistributionException, MediaPackageException {
 
     if (mediaPackageId == null)
@@ -152,8 +158,6 @@ public class StreamingDistributionService implements DistributionService, JobPro
     try {
       // The streaming server only supports tracks
       if (!(element instanceof Track)) {
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
         return null;
       }
 
@@ -191,22 +195,12 @@ public class StreamingDistributionService implements DistributionService, JobPro
       }
       distributedElement.setIdentifier(null);
 
-      job.setPayload(MediaPackageElementParser.getAsXml(distributedElement));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
       logger.info("Finished distribution of {}", element);
 
       return distributedElement;
 
     } catch (Exception e) {
       logger.warn("Error distributing " + element, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof DistributionException) {
         throw (DistributionException) e;
       } else {
@@ -244,25 +238,16 @@ public class StreamingDistributionService implements DistributionService, JobPro
    * @param mediapackageId
    *          the mediapackage identifier
    */
-  private void retract(Job job, String mediaPackageId) throws DistributionException {
+  protected void retract(Job job, String mediaPackageId) throws DistributionException {
     try {
       if (!FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
         throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
       }
 
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
       logger.info("Finished rectracting media package {}", mediaPackageId);
 
     } catch (Exception e) {
       logger.warn("Error retracting mediapackage " + mediaPackageId, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof DistributionException) {
         throw (DistributionException) e;
       } else {
@@ -319,96 +304,32 @@ public class StreamingDistributionService implements DistributionService, JobPro
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
   @Override
-  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+  protected String process(Job job, String operation, List<String> arguments) throws Exception {
     Operation op = null;
     try {
       op = Operation.valueOf(operation);
       String mediapackageId = arguments.get(0);
       switch (op) {
         case Distribute:
-          MediaPackageElement element = MediaPackageElementParser.getFromXml(arguments.get(1));
-          distribute(job, mediapackageId, element);
-          break;
+          MediaPackageElement sourceElement = MediaPackageElementParser.getFromXml(arguments.get(1));
+          MediaPackageElement distributedElement = distribute(job, mediapackageId, sourceElement);
+          return (distributedElement != null) ? MediaPackageElementParser.getAsXml(distributedElement) : null;
         case Retract:
           retract(job, mediapackageId);
-          break;
+          return null;
         default:
           throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
     } catch (IllegalArgumentException e) {
-      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
     } catch (IndexOutOfBoundsException e) {
-      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations", e);
     } catch (Exception e) {
-      throw new ServiceRegistryException("Error handling operation '" + op + "'");
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return serviceRegistry.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJobType()
-   */
-  @Override
-  public String getJobType() {
-    return JOB_TYPE;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
-   */
-  public long countJobs(Status status) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    return serviceRegistry.count(JOB_TYPE, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    if (host == null)
-      throw new IllegalArgumentException("host must not be null");
-    return serviceRegistry.count(JOB_TYPE, status, host);
-  }
-
-  /**
-   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link DistributionException}.
-   * 
-   * @param job
-   *          the job to update
-   * @throws DistributionException
-   *           the exception that is being thrown
-   */
-  private void updateJob(Job job) throws DistributionException {
-    try {
-      serviceRegistry.updateJob(job);
-    } catch (NotFoundException notFound) {
-      throw new DistributionException("Unable to find job " + job, notFound);
-    } catch (ServiceUnavailableException e) {
-      throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
-    } catch (ServiceRegistryException serviceRegException) {
-      throw new DistributionException("Unable to update job '" + job + "' in service registry", serviceRegException);
+      throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
   }
 
@@ -430,6 +351,16 @@ public class StreamingDistributionService implements DistributionService, JobPro
    */
   protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
     this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
   }
 
 }

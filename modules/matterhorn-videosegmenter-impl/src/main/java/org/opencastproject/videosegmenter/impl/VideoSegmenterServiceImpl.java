@@ -17,15 +17,14 @@ package org.opencastproject.videosegmenter.impl;
 
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
+import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobBarrier;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -92,7 +91,7 @@ import javax.media.protocol.DataSource;
  * ffmpeg -i &lt;inputfile&gt; -deinterlace -r 1 -vcodec mjpeg -qscale 1 -an &lt;outputfile&gt;
  * </pre>
  */
-public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProducer, ManagedService {
+public class VideoSegmenterServiceImpl extends AbstractJobProducer implements VideoSegmenterService, ManagedService {
 
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "videosegments";
@@ -151,6 +150,13 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
   protected ExecutorService executor = null;
 
   /**
+   * Creates a new instance of the video segmenter service.
+   */
+  public VideoSegmenterServiceImpl() {
+    super(JOB_TYPE);
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
@@ -184,45 +190,6 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
   }
 
   /**
-   * Sets the composer service.
-   * 
-   * @param composerService
-   */
-  public void setComposerService(ComposerService composerService) {
-    this.composer = composerService;
-  }
-
-  /**
-   * Sets the workspace
-   * 
-   * @param workspace
-   *          an instance of the workspace
-   */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
-  }
-
-  /**
-   * Sets the mpeg7CatalogService
-   * 
-   * @param mpeg7CatalogService
-   *          an instance of the mpeg7 catalog service
-   */
-  public void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
-    this.mpeg7CatalogService = mpeg7CatalogService;
-  }
-
-  /**
-   * Sets the receipt service
-   * 
-   * @param serviceRegistry
-   *          the service registry
-   */
-  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
-    this.serviceRegistry = serviceRegistry;
-  }
-
-  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.videosegmenter.api.VideoSegmenterService#segment(org.opencastproject.mediapackage.Track)
@@ -247,14 +214,12 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
    * @return a receipt containing the resulting mpeg-7 catalog
    * @throws VideoSegmenterException
    */
-  private Catalog segment(Job job, Track track) throws VideoSegmenterException, MediaPackageException {
+  protected Catalog segment(Job job, Track track) throws VideoSegmenterException, MediaPackageException {
 
     // Make sure the element can be analyzed using this analysis implementation
     if (!track.hasVideo()) {
       logger.warn("Element {} is not a video track", track);
-      job.setStatus(Status.FAILED);
-      updateJob(job);
-      return null;
+      throw new VideoSegmenterException("Element is not a video track");
     }
 
     try {
@@ -376,20 +341,10 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
         throw new VideoSegmenterException("Unable to delete the mjpeg from the workspace", e);
       }
 
-      job.setPayload(MediaPackageElementParser.getAsXml(mpeg7Catalog));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
-
       logger.info("Finished video segmentation of {}", mediaUrl);
       return mpeg7Catalog;
     } catch (Exception e) {
       logger.warn("Error segmenting " + track, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof VideoSegmenterException) {
         throw (VideoSegmenterException) e;
       } else {
@@ -401,72 +356,29 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
   @Override
-  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+  protected String process(Job job, String operation, List<String> arguments) throws Exception {
     Operation op = null;
     try {
       op = Operation.valueOf(operation);
       switch (op) {
-      case Segment:
-        Track track = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        segment(job, track);
-        break;
-      default:
-        throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+        case Segment:
+          Track track = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          Catalog catalog = segment(job, track);
+          return MediaPackageElementParser.getAsXml(catalog);
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
     } catch (IllegalArgumentException e) {
-      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
     } catch (IndexOutOfBoundsException e) {
-      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations", e);
     } catch (Exception e) {
-      throw new ServiceRegistryException("Error handling operation '" + op + "'");
+      throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return serviceRegistry.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJobType()
-   */
-  @Override
-  public String getJobType() {
-    return JOB_TYPE;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
-   */
-  public long countJobs(Status status) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    return serviceRegistry.count(JOB_TYPE, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    if (host == null)
-      throw new IllegalArgumentException("host must not be null");
-    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -708,24 +620,52 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, JobProd
   }
 
   /**
-   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link VideoSegmenterException}.
+   * Sets the composer service.
    * 
-   * @param job
-   *          the job to update
-   * @throws VideoSegmenterException
-   *           the exception that is being thrown
+   * @param composerService
    */
-  private void updateJob(Job job) throws VideoSegmenterException {
-    try {
-      serviceRegistry.updateJob(job);
-    } catch (NotFoundException notFound) {
-      throw new VideoSegmenterException("Unable to find job " + job, notFound);
-    } catch (ServiceUnavailableException e) {
-      throw new VideoSegmenterException("No service of type '" + JOB_TYPE + "' available", e);
-    } catch (ServiceRegistryException serviceRegException) {
-      throw new VideoSegmenterException("Unable to update job '" + job + "' in service registry", serviceRegException);
-    }
+  protected void setComposerService(ComposerService composerService) {
+    this.composer = composerService;
+  }
+
+  /**
+   * Sets the workspace
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  protected void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /**
+   * Sets the mpeg7CatalogService
+   * 
+   * @param mpeg7CatalogService
+   *          an instance of the mpeg7 catalog service
+   */
+  protected void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
+    this.mpeg7CatalogService = mpeg7CatalogService;
+  }
+
+  /**
+   * Sets the receipt service
+   * 
+   * @param serviceRegistry
+   *          the service registry
+   */
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
   }
 
 }

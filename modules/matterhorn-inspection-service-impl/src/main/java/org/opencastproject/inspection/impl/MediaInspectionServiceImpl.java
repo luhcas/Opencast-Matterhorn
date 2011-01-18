@@ -22,16 +22,15 @@ import org.opencastproject.inspection.impl.api.MediaAnalyzer;
 import org.opencastproject.inspection.impl.api.MediaAnalyzerException;
 import org.opencastproject.inspection.impl.api.MediaContainerMetadata;
 import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
+import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Stream;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.UnsupportedElementException;
@@ -68,7 +67,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
  */
-public class MediaInspectionServiceImpl implements MediaInspectionService, JobProducer, ManagedService {
+public class MediaInspectionServiceImpl extends AbstractJobProducer implements MediaInspectionService, ManagedService {
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
@@ -84,6 +83,13 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
   protected ServiceRegistry serviceRegistry;
   protected Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
   protected MediaPackageElementBuilderFactory elementFactory = MediaPackageElementBuilderFactory.newInstance();
+
+  /**
+   * Creates a new media inspection service instance.
+   */
+  public MediaInspectionServiceImpl() {
+    super(JOB_TYPE);
+  }
 
   public void activate() {
     analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, MediaInfoAnalyzer.MEDIAINFO_BINARY_DEFAULT);
@@ -109,78 +115,36 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#startJob(org.opencastproject.job.api.Job, java.lang.String,
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
   @Override
-  public void startJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+  protected String process(Job job, String operation, List<String> arguments) throws Exception {
     Operation op = null;
     try {
       op = Operation.valueOf(operation);
-
+      MediaPackageElement inspectedElement = null;
       switch (op) {
         case Inspect:
           URI uri = URI.create(arguments.get(0));
-          inspect(job, uri);
+          inspectedElement = inspect(job, uri);
           break;
         case Enrich:
           MediaPackageElement element = MediaPackageElementParser.getFromXml(arguments.get(0));
           boolean overwrite = Boolean.parseBoolean(arguments.get(1));
-          enrich(job, element, overwrite);
+          inspectedElement = enrich(job, element, overwrite);
           break;
         default:
           throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
+      return MediaPackageElementParser.getAsXml(inspectedElement);
     } catch (IllegalArgumentException e) {
-      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'");
+      throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
     } catch (IndexOutOfBoundsException e) {
-      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations");
+      throw new ServiceRegistryException("This argument list for operation '" + op + "' does not meet expectations", e);
     } catch (Exception e) {
-      throw new ServiceRegistryException("Error handling operation '" + op + "'");
+      throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return serviceRegistry.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJobType()
-   */
-  @Override
-  public String getJobType() {
-    return JOB_TYPE;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
-   */
-  public long countJobs(Status status) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    return serviceRegistry.count(JOB_TYPE, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    if (host == null)
-      throw new IllegalArgumentException("host must not be null");
-    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -228,7 +192,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
    * @throws MediaInspectionException
    *           if inspection fails
    */
-  private Track inspect(Job job, URI trackURI) throws MediaInspectionException {
+  protected Track inspect(Job job, URI trackURI) throws MediaInspectionException {
     logger.debug("inspect(" + trackURI + ") called, using workspace " + workspace);
 
     try {
@@ -294,19 +258,10 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
           throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
         }
 
-        job.setPayload(MediaPackageElementParser.getAsXml(track));
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
         return track;
       }
     } catch (Exception e) {
       logger.warn("Error inspecting " + trackURI, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof MediaInspectionException) {
         throw (MediaInspectionException) e;
       } else {
@@ -328,7 +283,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
    * @throws MediaInspectionException
    *           if enriching fails
    */
-  private MediaPackageElement enrich(Job job, MediaPackageElement element, boolean override)
+  protected MediaPackageElement enrich(Job job, MediaPackageElement element, boolean override)
           throws MediaInspectionException {
     if (element instanceof Track) {
       final Track originalTrack = (Track) element;
@@ -350,7 +305,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
    * @return the media package element
    * @throws MediaInspectionException
    */
-  private MediaPackageElement enrichTrack(final Track originalTrack, final boolean override, final Job job)
+  protected MediaPackageElement enrichTrack(final Track originalTrack, final boolean override, final Job job)
           throws MediaInspectionException {
 
     try {
@@ -442,21 +397,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
           throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
         }
 
-        job.setPayload(MediaPackageElementParser.getAsXml(track));
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
         logger.info("Successfully inspected track {}", track);
         return track;
       }
     } catch (Exception e) {
       logger.warn("Error enriching track " + originalTrack, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof MediaInspectionException) {
         throw (MediaInspectionException) e;
       } else {
@@ -478,7 +423,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
    * @throws MediaInspectionException
    *           if enriching fails
    */
-  private MediaPackageElement enrichElement(final MediaPackageElement element, final boolean override, final Job job)
+  protected MediaPackageElement enrichElement(final MediaPackageElement element, final boolean override, final Job job)
           throws MediaInspectionException {
     try {
       File file;
@@ -508,20 +453,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
         }
       }
 
-      job.setPayload(MediaPackageElementParser.getAsXml(element));
-      job.setStatus(Status.FINISHED);
-      updateJob(job);
       logger.info("Successfully inspected element {}", element);
 
       return element;
     } catch (Exception e) {
       logger.warn("Error enriching element " + element, e);
-      try {
-        job.setStatus(Status.FAILED);
-        updateJob(job);
-      } catch (Exception failureToFail) {
-        logger.warn("Unable to update job to failed state", failureToFail);
-      }
       if (e instanceof MediaInspectionException) {
         throw (MediaInspectionException) e;
       } else {
@@ -601,7 +537,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
    * @throws MediaInspectionException
    *           if metadata extraction fails
    */
-  private MediaContainerMetadata getFileMetadata(File file) throws MediaInspectionException {
+  protected MediaContainerMetadata getFileMetadata(File file) throws MediaInspectionException {
     if (file == null) {
       throw new IllegalArgumentException("file to analyze cannot be null");
     }
@@ -616,27 +552,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
     return metadata;
   }
 
-  /**
-   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link MediaInspectionException}.
-   * 
-   * @param job
-   *          the job to update
-   * @throws MediaInspectionException
-   *           the exception that is being thrown
-   */
-  private void updateJob(Job job) throws MediaInspectionException {
-    try {
-      serviceRegistry.updateJob(job);
-    } catch (NotFoundException notFound) {
-      throw new MediaInspectionException("Unable to find job " + job, notFound);
-    } catch (ServiceUnavailableException e) {
-      throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
-    } catch (ServiceRegistryException serviceRegException) {
-      throw new MediaInspectionException("Unable to update job '" + job + "' in service registry", serviceRegException);
-    }
-  }
-
   protected void setWorkspace(Workspace workspace) {
     logger.debug("setting " + workspace);
     this.workspace = workspace;
@@ -644,6 +559,16 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, JobPr
 
   protected void setServiceRegistry(ServiceRegistry jobManager) {
     this.serviceRegistry = jobManager;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
   }
 
 }
