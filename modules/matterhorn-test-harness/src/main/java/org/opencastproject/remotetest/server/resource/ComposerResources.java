@@ -30,10 +30,9 @@ import java.util.List;
 /**
  * Composer REST resources
  */
-
 public class ComposerResources {
-  private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/composer/rest/";
+  public static final String getServiceUrl() {
+    return Main.getBaseUrl() + "/composer/ffmpeg/rest/";
   }
 
   public static HttpResponse profiles(TrustedHttpClient client) {

@@ -18,6 +18,7 @@ package org.opencastproject.remotetest.server;
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.server.resource.ComposerResources;
 import org.opencastproject.remotetest.util.JobUtils;
 import org.opencastproject.remotetest.util.SampleUtils;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
@@ -75,7 +76,7 @@ public class ComposerRestEndpointTest {
   @Test
   public void testEncodeVideoTracks() throws Exception {
     // Start an encoding job via the rest endpoint
-    HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
+    HttpPost postEncode = new HttpPost(ComposerResources.getServiceUrl() + "encode");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("profileId", "flash.http"));
@@ -99,7 +100,7 @@ public class ComposerRestEndpointTest {
 
   @Test
   public void testImageExtraction() throws Exception {
-    HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/image");
+    HttpPost postEncode = new HttpPost(ComposerResources.getServiceUrl() + "image");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("time", "1"));
@@ -115,7 +116,7 @@ public class ComposerRestEndpointTest {
 
   @Test
   public void testTrimming() throws Exception {
-    HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/trim");
+    HttpPost postEncode = new HttpPost(ComposerResources.getServiceUrl() + "trim");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("start", "2000"));
@@ -142,7 +143,7 @@ public class ComposerRestEndpointTest {
     }
 
     // Get the track xml from the job
-    HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/job/" + jobId + ".xml");
+    HttpGet pollRequest = new HttpGet(ComposerResources.getServiceUrl() + "job/" + jobId + ".xml");
     HttpResponse pollResponse = client.execute(pollRequest);
     long duration = getDurationFromJob(pollResponse);
     Assert.assertTrue(duration < 14546);

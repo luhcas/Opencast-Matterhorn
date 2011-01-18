@@ -18,6 +18,7 @@ package org.opencastproject.remotetest.server;
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.server.resource.ComposerResources;
 import org.opencastproject.remotetest.util.SampleUtils;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
 import org.opencastproject.remotetest.util.Utils;
@@ -158,7 +159,7 @@ public class ServiceRegistryRestEndpointTest {
   public void testNodeMaintenance() throws Exception {
 
     // Start an encoding job via the rest endpoint
-    HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
+    HttpPost postEncode = new HttpPost(ComposerResources.getServiceUrl() + "encode");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("profileId", "flash.http"));
