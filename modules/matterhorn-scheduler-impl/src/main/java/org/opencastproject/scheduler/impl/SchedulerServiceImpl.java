@@ -35,6 +35,7 @@ import org.opencastproject.workflow.api.WorkflowService;
 import net.fortuna.ical4j.model.ValidationException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -46,6 +47,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -58,12 +60,14 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+/*
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.EntityType;
+*/
 import javax.persistence.spi.PersistenceProvider;
 
 /**
@@ -250,7 +254,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       em.persist(event);
       tx.commit();
     } catch (Exception ex) {
-      if (tx != null) {
+      if (tx.isActive()) {
         tx.rollback();
       }
       throw new SchedulerException("Unable to add event: {}", ex);
@@ -380,90 +384,63 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       logger.debug("returning all events");
       return getAllEvents();
     }
-
+    StringBuilder queryBase = new StringBuilder("SELECT e FROM Event e WHERE ");
+    ArrayList<String> where = new ArrayList<String>();
     EntityManager em = emf.createEntityManager();
-    CriteriaBuilder builder = emf.getCriteriaBuilder();
-    CriteriaQuery<EventImpl> query = builder.createQuery(EventImpl.class);
-
-    Root<EventImpl> rootEvent = query.from(EventImpl.class);
-    query.select(rootEvent);
-
-    EntityType<EventImpl> eventModel = rootEvent.getModel();
-    Predicate wherePred = builder.conjunction();
-
-    ParameterExpression<String> creatorParam = null;
-    if (filter.getCreatorFilter() != null && !filter.getCreatorFilter().isEmpty()) {
-      creatorParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(eventModel.getSingularAttribute("creator", String.class)), creatorParam));
+    
+    if (StringUtils.isNotEmpty(filter.getCreatorFilter())) {
+      where.add("e.creator LIKE :creatorParam");
+    }
+    
+    if (StringUtils.isNotEmpty(filter.getDeviceFilter())) {
+      where.add("e.device LIKE :deviceParam");
+    }
+    
+    if (StringUtils.isNotEmpty(filter.getTitleFilter())) {
+      where.add("e.title LIKE :titleParam");
     }
 
-    ParameterExpression<String> deviceParam = null;
-    if (filter.getDeviceFilter() != null && !filter.getDeviceFilter().isEmpty()) {
-      deviceParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(eventModel.getSingularAttribute("device", String.class)), deviceParam));
+    if (StringUtils.isNotEmpty(filter.getSeriesFilter())) {
+      where.add("e.series LIKE :seriesParam");
     }
-
-    ParameterExpression<String> titleParam = null;
-    if (filter.getTitleFilter() != null && !filter.getTitleFilter().isEmpty()) {
-      titleParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(eventModel.getSingularAttribute("title", String.class)), titleParam));
-    }
-
-    ParameterExpression<String> seriesParam = null;
-    if (filter.getSeriesFilter() != null && !filter.getSeriesFilter().isEmpty()) {
-      seriesParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred,
-              builder.like(rootEvent.get(eventModel.getSingularAttribute("series", String.class)), seriesParam));
-    }
-
-    ParameterExpression<Date> startParam = null;
-    ParameterExpression<Date> stopParam = null;
+    
     if (filter.getStart() != null && filter.getStop() != null) { // Events with dates between start and stop
-      startParam = builder.parameter(Date.class);
-      stopParam = builder.parameter(Date.class);
-      wherePred = builder.between(rootEvent.get(eventModel.getSingularAttribute("startDate", Date.class)), startParam,
-              stopParam);
+      where.add("e.startDate > :startParam AND e.endDate < :endParam");
     } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
-      startParam = builder.parameter(Date.class);
-      wherePred = builder.greaterThan(rootEvent.get(eventModel.getSingularAttribute("startDate", Date.class)),
-              startParam);
-    } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
-      stopParam = builder.parameter(Date.class);
-      wherePred = builder.lessThan(rootEvent.get(eventModel.getSingularAttribute("endDate", Date.class)), stopParam);
+      where.add("e.startDate > :startParam");
+    } else if (filter.getStart() == null && filter.getStop() != null) { // All events with dates before end
+      where.add("e.startDate < :endParam");
     }
-
-    query.where(wherePred);
-
+    
+    queryBase.append(StringUtils.join(where, " AND "));
+    
     if (filter.getOrder() != null) {
       if (filter.isOrderAscending()) {
-        query.orderBy(builder.asc(rootEvent.get(eventModel.getSingularAttribute(filter.getOrder()))));
+        queryBase.append(" ORDER BY e.title ASC");
       } else {
-        query.orderBy(builder.desc(rootEvent.get(eventModel.getSingularAttribute(filter.getOrder()))));
+        queryBase.append(" ORDER BY e.title DESC");
       }
     }
 
-    TypedQuery<EventImpl> eventQuery = em.createQuery(query);
+    TypedQuery<EventImpl> eventQuery = em.createQuery(queryBase.toString(), EventImpl.class);
 
-    if (creatorParam != null) {
-      eventQuery.setParameter(creatorParam, filter.getCreatorFilter());
+    if (StringUtils.isNotEmpty(filter.getCreatorFilter())) {
+      eventQuery.setParameter("creatorParam", "%" + filter.getCreatorFilter() + "%");
     }
-    if (deviceParam != null) {
-      eventQuery.setParameter(deviceParam, filter.getDeviceFilter());
+    if (StringUtils.isNotEmpty(filter.getDeviceFilter())) {
+      eventQuery.setParameter("deviceParam", "%" + filter.getDeviceFilter() + "%");
     }
-    if (titleParam != null) {
-      eventQuery.setParameter(titleParam, filter.getTitleFilter());
+    if (StringUtils.isNotEmpty(filter.getTitleFilter())) {
+      eventQuery.setParameter("titleParam", "%" + filter.getTitleFilter() + "%");
     }
-    if (seriesParam != null) {
-      eventQuery.setParameter(seriesParam, filter.getSeriesFilter());
+    if (StringUtils.isNotEmpty(filter.getSeriesFilter())) {
+      eventQuery.setParameter("seriesParam", "%" + filter.getSeriesFilter() + "%");
     }
-    if (startParam != null) {
-      eventQuery.setParameter(startParam, filter.getStart());
+    if (filter.getStart() != null) {
+      eventQuery.setParameter("startParam", filter.getStart());
     }
-    if (stopParam != null) {
-      eventQuery.setParameter(stopParam, filter.getStop());
+    if (filter.getStop() != null) {
+      eventQuery.setParameter("stopParam", filter.getStop());
     }
 
     List<EventImpl> results = eventQuery.getResultList();

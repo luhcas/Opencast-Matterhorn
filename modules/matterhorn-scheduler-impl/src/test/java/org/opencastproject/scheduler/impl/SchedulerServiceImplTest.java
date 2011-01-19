@@ -49,6 +49,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
@@ -70,6 +71,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 
 import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
@@ -86,6 +88,12 @@ public class SchedulerServiceImplTest {
   private static final String resourcesRoot = "src" + File.separator + "main" + File.separator + "resources";
 
   private Event event;
+  
+  private Event aEvent;
+  private Event bEvent;
+  private Event cEvent;
+  private Event dEvent;
+  
   private DataSource datasource;
 
   private String seriesID;
@@ -133,9 +141,25 @@ public class SchedulerServiceImplTest {
     WorkflowService workflowService = EasyMock.createMock(WorkflowService.class);
     EasyMock.expect(
             workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
-                    (Map<String, String>) EasyMock.anyObject())).andReturn(workflowInstance);
+                    (Map<String, String>) EasyMock.anyObject())).andAnswer(new IAnswer<WorkflowInstance>() {
+                      public WorkflowInstance answer() throws Throwable {
+                        WorkflowInstanceImpl instance = new WorkflowInstanceImpl();
+                        Random gen = new Random(System.currentTimeMillis());
+                        instance.setId(gen.nextInt());
+                        instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+                        instance.setState(WorkflowState.PAUSED);
+
+                        WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl();
+                        op.setId(SchedulerServiceImpl.SCHEDULE_OPERATION_ID);
+                        op.setState(OperationState.PAUSED);
+                        List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
+                        operations.add(op);
+                        instance.setOperations(operations);
+                        return instance;
+                      }
+                    }).anyTimes();
     EasyMock.expect(workflowService.getWorkflowById(EasyMock.anyLong())).andReturn(workflowInstance).anyTimes();
-    EasyMock.expect(workflowService.stop(EasyMock.anyLong())).andReturn(workflowInstance);
+    EasyMock.expect(workflowService.stop(EasyMock.anyLong())).andReturn(workflowInstance).anyTimes();
     workflowService.update((WorkflowInstance) EasyMock.anyObject());
     EasyMock.replay(workflowService);
     service.setWorkflowService(workflowService);
@@ -196,6 +220,41 @@ public class SchedulerServiceImplTest {
     event.setDescription("a test description");
     event.addMetadata((Metadata) new MetadataImpl(event, "location", "testlocation"));
     event.addMetadata((Metadata) new MetadataImpl(event, "channelId", "unittest"));
+    
+    
+    aEvent = new EventImpl();
+    bEvent = new EventImpl();
+    cEvent = new EventImpl();
+    dEvent = new EventImpl();
+    
+    aEvent.setTitle("Event A - Test");
+    bEvent.setTitle("Event B - Bacon");
+    cEvent.setTitle("Event C - Cheese");
+    dEvent.setTitle("Event D - Donburi");
+    
+    aEvent.setStartDate(new Date(System.currentTimeMillis() + 10000)); //start now + 10 seconds
+    aEvent.setEndDate(new Date(System.currentTimeMillis() + 3610000)); //end hour and 10 seconds from now
+    bEvent.setStartDate(new Date(System.currentTimeMillis() + (12 * 60 * 60 * 1000))); //start 12 hours from now
+    bEvent.setEndDate(new Date(System.currentTimeMillis() + (13 * 60 * 60 * 1000))); //end 13 hours from now
+    cEvent.setStartDate(new Date(System.currentTimeMillis() - (60 * 60 * 1000))); //start an hour ago
+    cEvent.setEndDate(new Date(System.currentTimeMillis() - (10 * 60 * 1000))); //end 10 minutes ago
+    dEvent.setStartDate(new Date(System.currentTimeMillis() + 10000)); //same as aEvent
+    dEvent.setEndDate(new Date(System.currentTimeMillis() + 3610000)); //same as aEvent
+    
+    aEvent.setDevice("Device A");
+    bEvent.setDevice("device a");
+    cEvent.setDevice("Device C");
+    dEvent.setDevice("Device D");
+    
+    aEvent.setCreator("Person A");
+    bEvent.setCreator("person a");
+    cEvent.setCreator("Person B");
+    dEvent.setCreator("PERSON B");
+    
+    aEvent.setSeries("Series A");
+    bEvent.setSeries("series a");
+    cEvent.setSeries("Series B");
+    dEvent.setSeries("SERIES B");
   }
 
   @After
@@ -206,7 +265,8 @@ public class SchedulerServiceImplTest {
 
   protected WorkflowInstance getSampleWorkflowInstance() throws Exception {
     WorkflowInstanceImpl instance = new WorkflowInstanceImpl();
-    instance.setId(System.currentTimeMillis());
+    Random gen = new Random(System.currentTimeMillis());
+    instance.setId(gen.nextInt());
     instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
     instance.setState(WorkflowState.PAUSED);
 
@@ -403,72 +463,25 @@ public class SchedulerServiceImplTest {
     service.removeEvent(event.getEventId());
   }
 
-  /*
-   * @Ignore
-   * 
-   * @Test public void test5000Events () { //Adding Events long time = System.currentTimeMillis(); for (int i = 0; i <
-   * 5000; i++) { time += 2000000; event.generateId(); event.updateMetadata(new Metadata("timeEnd", Long.toString(new
-   * Date(time + 1000000).getTime()))); event.updateMetadata(new Metadata("timeStart", Long.toString(new
-   * Date(time).getTime())));
-   * 
-   * service.addEvent(event); }
-   * 
-   * //get upcoming Events long start = System.currentTimeMillis(); Event [] events = service.getUpcomingEvents();
-   * Assert.assertNotNull(events); long stop = System.currentTimeMillis();
-   * logger.info("Getting {} upcoming events took {} ms.", events.length, (stop-start)); Assert.assertTrue((stop-start)
-   * < 30000);
-   * 
-   * //get All Events start = System.currentTimeMillis(); Event[] events2 = serviceJPA.getEventsJPA(null);
-   * Assert.assertNotNull(events); stop = System.currentTimeMillis(); logger.info("Getting all {} events took {} ms.",
-   * events2.length, (stop-start)); Assert.assertTrue((stop-start) < 30000);
-   * 
-   * //getIcal start = System.currentTimeMillis();
-   * Assert.assertNotNull(serviceJPA.getCalendarForCaptureAgent("testrecorder")); stop = System.currentTimeMillis();
-   * logger.info("Getting calendar took {} ms.", (stop-start)); Assert.assertTrue((stop-start) < 60000);
-   * 
-   * //getIcal again testing cache start = System.currentTimeMillis();
-   * Assert.assertNotNull(serviceJPA.getCalendarForCaptureAgent("testrecorder")); stop = System.currentTimeMillis();
-   * logger.info("Getting calendar again took {} ms.", (stop-start)); Assert.assertTrue((stop-start) < 10);
-   * 
-   * //adding additional event time += 2000000; event.createID(); event.setEnddate(new Date(time + 1000000));
-   * event.setStartdate(new Date(time)); serviceJPA.addEvent(event); // make sure that this is no longer cached start =
-   * System.currentTimeMillis(); Assert.assertNotNull(serviceJPA.getCalendarForCaptureAgent("testrecorder")); stop =
-   * System.currentTimeMillis(); logger.info("Getting calendar after update took {} ms.", (stop-start));
-   * Assert.assertTrue((stop-start) < 60000); Assert.assertTrue((stop-start) > 2); // make sure it is not cached
-   * 
-   * }
-   * 
-   * @Ignore
-   * 
-   * @Test public void test5RecurringEvents () {
-   * 
-   * String [] patterns = new String [] {"FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=8;BYMINUTE=0",
-   * "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=10;BYMINUTE=5", "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=12;BYMINUTE=20",
-   * "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=14;BYMINUTE=35",
-   * "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYHOUR=16;BYMINUTE=45"}; GregorianCalendar now = new GregorianCalendar();
-   * GregorianCalendar end = new GregorianCalendar(now.get(GregorianCalendar.YEAR)+1, now.get(GregorianCalendar.MONTH),
-   * now.get(GregorianCalendar.DAY_OF_MONTH));
-   * 
-   * for (String pattern : patterns) { RecurringEvent recurringEvent = new RecurringEvent();
-   * recurringEvent.setRecurrence(pattern); recurringEvent.getMetadata().add(new Metadata("recurrenceStart",
-   * ""+System.currentTimeMillis())); recurringEvent.getMetadata().add(new Metadata("recurrenceEnd",
-   * ""+end.getTimeInMillis())); recurringEvent.getMetadata().add(new Metadata("recurrenceDuration", "60000"));
-   * recurringEvent.getMetadata().add(new Metadata("title", "recurrence test title"));
-   * recurringEvent.getMetadata().add(new Metadata("device", "testrecorder"));
-   * 
-   * RecurringEvent storedEvent = serviceJPA.addRecurringEvent(recurringEvent); }
-   * 
-   * //get upcoming Events long start = System.currentTimeMillis(); SchedulerEvent [] events =
-   * serviceJPA.getUpcomingEvents(); Assert.assertNotNull(events); long stop = System.currentTimeMillis();
-   * logger.info("Getting {} upcoming events took {} ms.", events.length, (stop-start)); Assert.assertTrue((stop-start)
-   * < 30000);
-   * 
-   * //get All Events start = System.currentTimeMillis(); Event[] events2 = serviceJPA.getEventsJPA(null);
-   * Assert.assertNotNull(events); stop = System.currentTimeMillis(); logger.info("Getting all {} events took {} ms.",
-   * events2.length, (stop-start)); Assert.assertTrue((stop-start) < 30000);
-   * 
-   * //getIcal start = System.currentTimeMillis();
-   * Assert.assertNotNull(serviceJPA.getCalendarForCaptureAgent("testrecorder")); stop = System.currentTimeMillis();
-   * logger.info("Getting calendar took {} ms.", (stop-start)); Assert.assertTrue((stop-start) < 60000); }
-   */
+  
+  @Test
+  public void testSchedulerFilter() throws Exception {
+    
+    service.addEvent(aEvent);
+    service.addEvent(bEvent);
+    service.addEvent(cEvent);
+    service.addEvent(dEvent);
+    
+    List<Event> events = service.getEvents(new SchedulerFilter().withTitleFilter("Event"));
+    Assert.assertEquals(4, events.size());
+    
+    events = service.getEvents(new SchedulerFilter().withDeviceFilter("Device A"));
+    Assert.assertEquals(1, events.size());
+    
+    events = service.getEvents(new SchedulerFilter().withCreatorFilter("PERSON B"));
+    Assert.assertEquals(1, events.size());
+    
+    events = service.getEvents(new SchedulerFilter().withSeriesFilter("series a"));
+    Assert.assertEquals(1, events.size());
+  }
 }

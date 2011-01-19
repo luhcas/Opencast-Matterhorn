@@ -78,7 +78,6 @@ public class EventImpl implements Event {
 
   @XmlAttribute(name = "id")
   @Id
-  @GeneratedValue
   @Column(name = "EVENT_ID", length = 36)
   protected Long eventId;
 
