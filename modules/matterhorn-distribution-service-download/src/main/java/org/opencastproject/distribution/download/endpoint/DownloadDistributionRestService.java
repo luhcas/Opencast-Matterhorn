@@ -70,16 +70,6 @@ public class DownloadDistributionRestService extends AbstractJobProducerEndpoint
   }
 
   /**
-   * {@inheritDoc}
-   *
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * @param service
    *          the service to set
    */

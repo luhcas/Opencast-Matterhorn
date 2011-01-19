@@ -122,16 +122,6 @@ public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * Convert captions in catalog from one format to another.
    * 
    * @param inputType

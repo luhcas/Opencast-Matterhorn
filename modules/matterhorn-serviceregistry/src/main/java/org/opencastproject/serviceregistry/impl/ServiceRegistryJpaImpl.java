@@ -60,6 +60,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
+import javax.persistence.OptimisticLockException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
@@ -759,18 +760,18 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         // the status will be null if there are no jobs at all associated with this service registration
         if (status != null) {
           switch (status) {
-          case RUNNING:
-            stats.setRunningJobs(count.intValue());
-            break;
-          case QUEUED:
-            stats.setQueuedJobs(count.intValue());
-            break;
-          case FINISHED:
-            stats.setMeanRunTime(meanRunTime.longValue());
-            stats.setMeanQueueTime(meanQueueTime.longValue());
-            break;
-          default:
-            break;
+            case RUNNING:
+              stats.setRunningJobs(count.intValue());
+              break;
+            case QUEUED:
+              stats.setQueuedJobs(count.intValue());
+              break;
+            case FINISHED:
+              stats.setMeanRunTime(meanRunTime.longValue());
+              stats.setMeanQueueTime(meanQueueTime.longValue());
+              break;
+            default:
+              break;
           }
         }
       }
@@ -970,18 +971,28 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     }
 
     // Try the service registrations, after the first one finished, we quit
+    JobJpaImpl jpaJob = ((JobJpaImpl)job);
+    jpaJob.setStatus(Status.RUNNING);
     for (ServiceRegistration registration : registrations) {
+      jpaJob.setProcessorServiceRegistration((ServiceRegistrationJpaImpl) registration);
+      try {
+        updateJob(jpaJob);
+      } catch (OptimisticLockException e) {
+        logger.debug("Another service registry has already dispatched this job");
+        return null;
+      }
+
       String serviceUrl = UrlSupport
               .concat(new String[] { registration.getHost(), registration.getPath(), "dispatch" });
       HttpPost post = new HttpPost(serviceUrl);
       try {
-        String jobXml = JobParser.toXml(job);
+        String jobXml = JobParser.toXml(jpaJob);
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
         params.add(new BasicNameValuePair("job", jobXml));
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
         post.setEntity(entity);
       } catch (IOException e) {
-        throw new ServiceRegistryException("Can not serialize job " + job, e);
+        throw new ServiceRegistryException("Can not serialize job " + jpaJob, e);
       }
 
       // Post the request
@@ -989,7 +1000,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       int responseStatusCode;
       try {
         logger.debug("Trying to dispatch job {} of type '{}' to {}",
-                new String[] { Long.toString(job.getId()), job.getJobType(), registration.getHost() });
+                new String[] { Long.toString(jpaJob.getId()), jpaJob.getJobType(), registration.getHost() });
         response = client.execute(post);
         responseStatusCode = response.getStatusLine().getStatusCode();
         if (responseStatusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
@@ -998,14 +1009,15 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
           return registration.getHost();
         }
       } catch (Exception e) {
-        throw new ServiceRegistryException("Unable to dispatch job '" + job.getId() + "' of type '" + job.getJobType()
-                + "'", e);
+        logger.warn("Unable to dispatch job {}", jpaJob.getId(), e);
       } finally {
         client.close(response);
       }
     }
-
     // We've tried dispatching to every online service that can handle this type of job, with no luck.
+    jpaJob.setStatus(Status.QUEUED);
+    jpaJob.setProcessorServiceRegistration(null);
+    updateJob(jpaJob);
     return null;
   }
 

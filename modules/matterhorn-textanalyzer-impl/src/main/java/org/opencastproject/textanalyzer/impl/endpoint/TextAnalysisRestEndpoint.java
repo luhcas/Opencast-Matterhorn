@@ -94,16 +94,6 @@ public class TextAnalysisRestEndpoint extends AbstractJobProducerEndpoint {
   }
 
   /**
-   * {@inheritDoc}
-   *
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * Sets the text analyzer
    * 
    * @param textAnalyzer

@@ -18,10 +18,7 @@ package org.opencastproject.kernel.rest;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
-import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,13 +43,6 @@ public abstract class AbstractJobProducerEndpoint {
   protected ExecutorService executor = Executors.newCachedThreadPool();
 
   /**
-   * Returns a reference to the service registry.
-   * 
-   * @return the service registry
-   */
-  protected abstract ServiceRegistry getServiceRegistry();
-
-  /**
    * @see org.opencastproject.job.api.JobProducer#acceptJob(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
@@ -71,7 +61,7 @@ public abstract class AbstractJobProducerEndpoint {
     }
 
     // Finally, have the service execute the job
-    executor.submit(new JobRunner(job, service, getServiceRegistry()));
+    executor.submit(new JobRunner(job, service));
 
     return Response.noContent().build();
   }
@@ -80,6 +70,7 @@ public abstract class AbstractJobProducerEndpoint {
    * A utility class to run jobs
    */
   static class JobRunner implements Runnable {
+    
     /** The logger */
     private static final Logger logger = LoggerFactory.getLogger(JobRunner.class);
 
@@ -89,9 +80,6 @@ public abstract class AbstractJobProducerEndpoint {
     /** The job producer */
     private JobProducer service = null;
 
-    /** The service registry */
-    private ServiceRegistry serviceRegistry = null;
-
     /**
      * Constructs a new job runner
      * 
@@ -100,26 +88,15 @@ public abstract class AbstractJobProducerEndpoint {
      * @param service
      *          the service to execute the job
      */
-    JobRunner(Job job, JobProducer service, ServiceRegistry serviceRegistry) {
+    JobRunner(Job job, JobProducer service) {
       this.job = job;
       this.service = service;
-      this.serviceRegistry = serviceRegistry;
     }
 
     @Override
     public void run() {
       try {
-        logger.debug("Attempting to update job {} to status RUNNING", job);
-        job.setStatus(Job.Status.RUNNING);
-        serviceRegistry.updateJob(job);
-        logger.debug("Updated job {} to status RUNNING", job);
         service.acceptJob(job, job.getOperation(), job.getArguments());
-      } catch (ServiceRegistryException e) {
-        logger.warn("Unable to start job {}", job, e);
-      } catch (NotFoundException e) {
-        logger.warn("Unable to start job {} because the job could not be found", job, e);
-      } catch (ServiceUnavailableException e) {
-        logger.warn("Unable to start job {} because the service registry is not available", job, e);
       } catch (Exception e) {
         logger.warn("Unable to start job {}", job);
         e.printStackTrace();

@@ -78,16 +78,6 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * Sets the inspection service
    * 
    * @param service

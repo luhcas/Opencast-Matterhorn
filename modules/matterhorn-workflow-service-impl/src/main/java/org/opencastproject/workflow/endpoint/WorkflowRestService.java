@@ -132,16 +132,6 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   }
 
   /**
-   * {@inheritDoc}
-   *
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * Sets the workflow service
    * 
    * @param service

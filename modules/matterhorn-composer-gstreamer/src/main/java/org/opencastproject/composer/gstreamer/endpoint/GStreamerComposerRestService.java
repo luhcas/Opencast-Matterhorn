@@ -101,16 +101,6 @@ public class GStreamerComposerRestService extends AbstractJobProducerEndpoint {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * Sets the composer service
    * 
    * @param composerService

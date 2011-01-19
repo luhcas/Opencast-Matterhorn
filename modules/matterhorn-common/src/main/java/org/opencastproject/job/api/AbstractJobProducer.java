@@ -75,7 +75,6 @@ public abstract class AbstractJobProducer implements JobProducer {
   @Override
   public void acceptJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
     try {
-      job.setStatus(Status.RUNNING);
       String result = process(job, operation, arguments);
       job.setPayload(result);
       job.setStatus(Status.FINISHED);

@@ -81,16 +81,6 @@ public class StreamingDistributionRestService extends AbstractJobProducerEndpoin
   }
 
   /**
-   * {@inheritDoc}
-   *
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * @param service
    *          the service to set
    */

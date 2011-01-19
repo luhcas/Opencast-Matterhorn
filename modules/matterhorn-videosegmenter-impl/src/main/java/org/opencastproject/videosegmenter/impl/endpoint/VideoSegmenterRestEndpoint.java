@@ -91,16 +91,6 @@ public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getServiceRegistry()
-   */
-  @Override
-  protected ServiceRegistry getServiceRegistry() {
-    return serviceRegistry;
-  }
-
-  /**
    * Sets the segmenter
    * 
    * @param videoSegmenter
