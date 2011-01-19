@@ -965,7 +965,8 @@ ocRecordings = new (function() {
   
   $(document).ready(this.init);
 
-  this.makeActions = function(id, actions) {
+  this.makeActions = function(recording, actions) {
+    id = recording.id
     links = [];
     for(i in actions){
       if(actions[i] === 'view') {
@@ -973,7 +974,7 @@ ocRecordings = new (function() {
       } else if(actions[i] === 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
       } else if(actions[i] === 'delete') {
-        links.push('<a href="javascript:ocRecordings.removeRecording(\'' + id + '\',\'' + title + '\')">Delete</a>');
+        links.push('<a href="javascript:ocRecordings.removeRecording(\'' + id + '\',\'' + recording.title + '\')">Delete</a>');
       }
     }
     return links.join(' \n');

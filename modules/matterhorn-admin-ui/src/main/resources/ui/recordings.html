@@ -281,7 +281,7 @@
           </div>
         </td>
         <td>
-          ${ocRecordings.makeActions(recording.id, recording.actions)}
+          ${ocRecordings.makeActions(recording, recording.actions)}
           {if recording.holdAction}
           <br><a href="javascript:ocRecordings.displayHoldUI(${recording.id});" title="${recording.holdAction.title}">${recording.holdAction.title}</a>
           {/if}
