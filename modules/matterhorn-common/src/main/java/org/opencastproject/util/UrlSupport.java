@@ -102,7 +102,7 @@ public final class UrlSupport {
    *          the parts to concat
    * @return the concatenated url
    */
-  public static String concat(String[] parts) {
+  public static String concat(String... parts) {
     if (parts == null)
       throw new IllegalArgumentException("Argument parts is null");
     if (parts.length == 0)

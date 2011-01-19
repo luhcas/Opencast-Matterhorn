@@ -26,6 +26,8 @@ import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.IOException;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
@@ -55,15 +57,32 @@ public final class JobUtils {
    *           if the specified workflow can't be found
    */
   public static boolean isJobInState(String jobId, String state) throws IllegalStateException, Exception {
+    String jobXml = getJobAsXml(jobId);
+    String currentState = (String) Utils.xpath(jobXml, "/ns2:job/@status", XPathConstants.STRING);
+    return state.equalsIgnoreCase(currentState);
+  }
+
+  /**
+   * Gets the xml representation of a job.
+   * 
+   * @param jobId
+   *          the job identifier
+   * @return the job as xml
+   * @throws IOException
+   *           if the job could not be loaded
+   */
+  public static String getJobAsXml(String jobId) throws IOException {
     HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/services/rest/job/" + jobId + ".xml");
     TrustedHttpClient client = Main.getClient();
-    HttpResponse response = client.execute(getWorkflowMethod);
-    if (response.getStatusLine().getStatusCode() != 200)
-      throw new IllegalStateException(EntityUtils.toString(response.getEntity()));
-    String job = EntityUtils.toString(response.getEntity());
-    String currentState = (String) Utils.xpath(job, "/ns2:job/@status", XPathConstants.STRING);
-    Main.returnClient(client);
-    return state.equalsIgnoreCase(currentState);
+    try {
+      HttpResponse response = client.execute(getWorkflowMethod);
+      if (response.getStatusLine().getStatusCode() != 200)
+        throw new IllegalStateException(EntityUtils.toString(response.getEntity()));
+      String job = EntityUtils.toString(response.getEntity());
+      return job;
+    } finally {
+      Main.returnClient(client);
+    }
   }
 
   /**

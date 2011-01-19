@@ -29,7 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -143,21 +142,19 @@ public class ComposerRestEndpointTest {
     }
 
     // Get the track xml from the job
-    HttpGet pollRequest = new HttpGet(ComposerResources.getServiceUrl() + "job/" + jobId + ".xml");
-    HttpResponse pollResponse = client.execute(pollRequest);
-    long duration = getDurationFromJob(pollResponse);
+    String jobXml = JobUtils.getJobAsXml(jobId);
+    long duration = getDurationFromJob(jobXml);
     Assert.assertTrue(duration < 14546);
   }
 
   /**
    * Gets the mediapackage element from a job polling response
    * 
-   * @param pollResponse
-   *          the http response
+   * @param jobXml
+   *          the job as xml
    * @return the mediapackage elemet as an xml string
    */
-  protected long getDurationFromJob(HttpResponse pollResponse) throws Exception {
-    String jobXml = EntityUtils.toString(pollResponse.getEntity());
+  protected long getDurationFromJob(String jobXml) throws Exception {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();

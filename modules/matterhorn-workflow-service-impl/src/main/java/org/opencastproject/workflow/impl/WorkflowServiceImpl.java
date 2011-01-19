@@ -578,7 +578,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     WorkflowOperationWorker worker = new WorkflowOperationWorker(workflow, properties, this);
     WorkflowState currentState = workflow.getState();
-    
+
     while (operation != null) {
 
       // Execute the operation handler
@@ -597,8 +597,8 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
         // If we are in failing mode, we were simply working off an error handling workflow
         if (FAILING.equals(workflow.getState())) {
           workflow.setState(FAILED);
-        } 
-        
+        }
+
         // Otherwise, let's make sure we didn't miss any failed operation
         else if (!FAILED.equals(workflow.getState())) {
           workflow.setState(SUCCEEDED);
@@ -611,9 +611,9 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
             }
           }
         }
-        
+
       } else {
-        
+
         // Somebody might have set the workflow to "paused" from the outside, so take a look a the database first
         WorkflowState dbWorkflowState = null;
         try {
@@ -622,9 +622,10 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
           throw new IllegalStateException("The workflow with ID " + workflow.getId()
                   + " can not be accessed in the database");
         } catch (NotFoundException e) {
-          throw new IllegalStateException("The workflow with ID " + workflow.getId() + " can not be found in the database");
+          throw new IllegalStateException("The workflow with ID " + workflow.getId()
+                  + " can not be found in the database");
         }
-        
+
         // If somebody changed the workflow state from the outside, that state should take precedence
         if (!dbWorkflowState.equals(currentState)) {
           logger.info("Workflow state for {} was changed to '{}' from the outside", workflow, dbWorkflowState);
@@ -640,11 +641,11 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
           case STOPPED:
           case SUCCEEDED:
             operation = null; // Pretend that there is no more work so we can break out of the loop
-            break;          
+            break;
           case INSTANTIATED:
             throw new IllegalStateException("Impossible workflow state found during processing");
         }
-        
+
       }
 
       // Save the updated workflow to the database
@@ -1074,16 +1075,6 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  @Override
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return serviceRegistry.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.job.api.JobProducer#getJobType()
    */
   @Override
@@ -1136,16 +1127,6 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
   @Override
   public long countJobs(Status status) throws ServiceRegistryException {
     return serviceRegistry.count(JOB_TYPE, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  @Override
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**

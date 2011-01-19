@@ -33,7 +33,7 @@ public abstract class AbstractJobProducer implements JobProducer {
 
   /** The types of job that this producer can handle */
   protected String jobType = null;
-  
+
   /**
    * Creates a new abstract job producer for jobs of the given type.
    * 
@@ -42,16 +42,6 @@ public abstract class AbstractJobProducer implements JobProducer {
    */
   public AbstractJobProducer(String jobType) {
     this.jobType = jobType;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  @Override
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return getServiceRegistry().getJob(id);
   }
 
   /**
@@ -79,20 +69,6 @@ public abstract class AbstractJobProducer implements JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  @Override
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("Status must not be null");
-    if (host == null)
-      throw new IllegalArgumentException("Host must not be null");
-    return getServiceRegistry().count(getJobType(), status, host);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.job.api.JobProducer#acceptJob(org.opencastproject.job.api.Job, java.lang.String,
    *      java.util.List)
    */
@@ -106,7 +82,7 @@ public abstract class AbstractJobProducer implements JobProducer {
     } catch (Exception e) {
       job.setStatus(Status.FAILED);
       if (e instanceof ServiceRegistryException)
-        throw (ServiceRegistryException)e;
+        throw (ServiceRegistryException) e;
       throw new ServiceRegistryException("Error handling operation '" + operation + "': " + e.getMessage(), e);
     } finally {
       try {
@@ -129,7 +105,9 @@ public abstract class AbstractJobProducer implements JobProducer {
   /**
    * Asks the overriding class to process the arguments using the given operation. The result will be added to the
    * associated job as the payload.
-   * @param job TODO
+   * 
+   * @param job
+   *          TODO
    * @param operation
    *          the operation name
    * @param arguments

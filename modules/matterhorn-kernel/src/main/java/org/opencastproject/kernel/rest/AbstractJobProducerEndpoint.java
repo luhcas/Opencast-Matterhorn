@@ -15,7 +15,6 @@
  */
 package org.opencastproject.kernel.rest;
 
-import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.job.api.JobProducer;
@@ -32,13 +31,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -56,25 +51,6 @@ public abstract class AbstractJobProducerEndpoint {
    * @return the service registry
    */
   protected abstract ServiceRegistry getServiceRegistry();
-
-  /**
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  @GET
-  @Path("/job/{id}.xml")
-  @Produces(MediaType.TEXT_XML)
-  public JaxbJob getJob(@PathParam("id") long jobId) throws ServiceRegistryException {
-    final JobProducer service = getService();
-    if (service == null)
-      throw new WebApplicationException(Status.PRECONDITION_FAILED);
-    try {
-      return new JaxbJob(service.getJob(jobId));
-    } catch (NotFoundException e) {
-      throw new WebApplicationException(Status.NOT_FOUND);
-    } catch (Exception e) {
-      throw new WebApplicationException(e);
-    }
-  }
 
   /**
    * @see org.opencastproject.job.api.JobProducer#acceptJob(org.opencastproject.job.api.Job, java.lang.String,

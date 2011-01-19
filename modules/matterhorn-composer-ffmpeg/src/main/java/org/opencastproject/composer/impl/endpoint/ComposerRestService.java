@@ -38,7 +38,6 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
@@ -389,17 +388,6 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     profileEndpoint.addPathParam(new Param("id", Param.Type.STRING, "mov-low.http", "the profile ID"));
     profileEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, profileEndpoint);
-
-    // job
-    RestEndpoint jobEndpoint = new RestEndpoint("job", RestEndpoint.Method.GET, "/job/{id}.xml",
-            "Retrieve a job for an encoding task");
-    jobEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document containing the status of the encoding job, and the track produced by this "
-                    + "encoding job if it the task is finished"));
-    jobEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the job id"));
-    jobEndpoint.addFormat(new Format("xml", null, null));
-    jobEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, jobEndpoint);
 
     // count
     RestEndpoint countEndpoint = new RestEndpoint("count", RestEndpoint.Method.GET, "/count",
