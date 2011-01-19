@@ -369,22 +369,17 @@ ocUpload.showFailedScreen = function(message) {
 }
 
 ocUpload.createSeriesFromSearchText = function(){
-  var seriesId;
-  var seriesXml = '<series><metadataList><metadata><key>title</key><value>' + $('#series').val() + '</value></metadata></metadataList></series>';
+  var seriesXml = '<series><additionalMetadata><metadata><key>title</key><value>' + $('#series').val() + '</value></metadata></additionalMetadata></series>';
   var creationSucceeded = false;
-  if(Math.uuid){
-    seriesId = Math.uuid();
-  } else { //Client generated uuid could be done, call the series service.
-    $.ajax({async: false, type: 'GET', url: '/series/rest/new/id', success: function(data){ seriesId = data.id; }});
-  }
   $.ajax({
     async: false,
     type: 'PUT',
-    url: '/series/rest/' + seriesId,
+    url: '/series/rest',
     data: { series: seriesXml },
+    dataType : 'json',
     success: function(data){
       creationSucceeded = true;
-      $('#ispartof').val(data.id);
+      $('#ispartof').val(data.series.id);
     }
   });
   return creationSucceeded;
