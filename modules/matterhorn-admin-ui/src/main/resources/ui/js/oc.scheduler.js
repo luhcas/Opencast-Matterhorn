@@ -231,10 +231,10 @@ ocScheduler.ChangeRecordingType = function(recType){
 
 ocScheduler.SubmitForm = function(){
   var eventXML = null;
-  $('#submitButton').attr('disabled', 'disabled');
-  $('#submitModal').dialog({height: 100, modal: true});
   eventXML = ocScheduler.FormManager.serialize();
   if(eventXML){
+    $('#submitButton').attr('disabled', 'disabled');
+    $('#submitModal').dialog({height: 100, modal: true});
     if(ocUtils.getURLParam('edit')){
       $.ajax({type: 'POST',
               url: SCHEDULER_URL + '/' + $('#eventId').val(),
