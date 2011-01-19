@@ -43,7 +43,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
@@ -498,13 +497,13 @@ public class EventImpl implements Event {
     if (e.getEventId() != null) {
       this.setEventId(e.getEventId());
     }
-    if(StringUtils.isNotEmpty(e.getCreator()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getCreator()))) {
+    if (StringUtils.isNotEmpty(e.getCreator()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getCreator()))) {
       this.setCreator(e.getCreator());
     }
-    if(StringUtils.isNotEmpty(e.getContributor()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getContributor()))) {
+    if (StringUtils.isNotEmpty(e.getContributor()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getContributor()))) {
       this.setContributor(e.getContributor());
     }
-    if(StringUtils.isNotEmpty(e.getDescription()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getDescription()) )) {
+    if (StringUtils.isNotEmpty(e.getDescription()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getDescription()) )) {
       this.setDescription(e.getDescription());
     }
     if (e.getDevice() != null) {
@@ -516,38 +515,38 @@ public class EventImpl implements Event {
     if (e.getEndDate() != null) {
       this.setEndDate(e.getEndDate());
     }
-    if(StringUtils.isNotEmpty(e.getLanguage()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getLanguage()))) {
+    if (StringUtils.isNotEmpty(e.getLanguage()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getLanguage()))) {
       this.setLanguage(e.getLanguage());
     }
-    if(StringUtils.isNotEmpty(e.getLicense()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getLicense()))) {
+    if (StringUtils.isNotEmpty(e.getLicense()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getLicense()))) {
       this.setLicense(e.getLicense());
     }
-    if(StringUtils.isNotEmpty(e.getRecurrence()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getRecurrence()))) {
+    if (StringUtils.isNotEmpty(e.getRecurrence()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getRecurrence()))) {
       this.setRecurrence(e.getRecurrence());
     }
-    if(StringUtils.isNotEmpty(e.getRecurrencePattern()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getRecurrencePattern()))) {
+    if (StringUtils.isNotEmpty(e.getRecurrencePattern()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getRecurrencePattern()))) {
       this.setRecurrencePattern(e.getRecurrencePattern());
     }
-    if(StringUtils.isNotEmpty(e.getResources()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getResources()))) {
+    if (StringUtils.isNotEmpty(e.getResources()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getResources()))) {
       this.setResources(e.getResources());
     }
-    if(StringUtils.isNotEmpty(e.getSeries()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getSeries()))) {
+    if (StringUtils.isNotEmpty(e.getSeries()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getSeries()))) {
       this.setSeries(e.getSeries());
     }
-    if(e.getSeriesId() != null) {
+    if (e.getSeriesId() != null) {
       this.setSeriesId(e.getSeriesId());
     }
     if (e.getStartDate() != null) {
       this.setStartDate(e.getStartDate());
     }
-    if(StringUtils.isNotEmpty(e.getSubject()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getSubject()))) {
+    if (StringUtils.isNotEmpty(e.getSubject()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getSubject()))) {
       this.setSubject(e.getSubject());
     }
-    if(StringUtils.isNotEmpty(e.getTitle()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getTitle()))) {
+    if (StringUtils.isNotEmpty(e.getTitle()) || (updateWithEmptyValues && StringUtils.isEmpty(e.getTitle()))) {
       this.setTitle(e.getTitle());
     }
     
-    if(updateWithEmptyValues) {
+    if (updateWithEmptyValues) {
       // eliminate removed keys
       for (Metadata m : getMetadataList()) {
         if (e.findMetadata(m.getKey()) == null) {

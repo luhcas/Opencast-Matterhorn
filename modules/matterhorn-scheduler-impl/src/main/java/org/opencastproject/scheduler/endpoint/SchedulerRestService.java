@@ -321,7 +321,7 @@ public class SchedulerRestService {
     JSONParser parser = new JSONParser();
     JSONArray ids = new JSONArray();
     try {
-      if(idList != null && !idList.isEmpty()){
+      if (idList != null && !idList.isEmpty()) {
         ids = (JSONArray) parser.parse(idList);
       }
     } catch (ParseException e) {
