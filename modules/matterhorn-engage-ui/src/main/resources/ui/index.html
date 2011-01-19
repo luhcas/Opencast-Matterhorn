@@ -50,38 +50,51 @@
           var toIndex = parseInt($('#oc-episodes-limit').html()) +  (page - 1) * 10;
           var fromIndex = Math.min(parseInt($('#oc-episodes-offset').html()) + 1, toIndex);
           
-          $('.title').text("Results "+ fromIndex + "-"+ toIndex + " of "+ total + keywordString).html();
+		  if (total > 0) {
+		  	$('.title').text("Results " + fromIndex + "-" + toIndex + " of " + total + keywordString).html();
+		  	
+		  	$('.timeDate').each(function(){
+		  		var timeDate = $(this).text();
+		  		if (timeDate) {
+		  			//JavaScript parseInt(string, radix)
+							var sd = new Date();
+							sd.setFullYear(parseInt(timeDate.substring(0, 4), 10));
+							sd.setMonth(parseInt(timeDate.substring(5, 7), 10) - 1);
+							sd.setDate(parseInt(timeDate.substring(8, 10), 10));
+							sd.setHours(parseInt(timeDate.substring(11, 13), 10));
+							sd.setMinutes(parseInt(timeDate.substring(14, 16), 10));
+							sd.setSeconds(parseInt(timeDate.substring(17, 19), 10));
+							$(this).html(sd.toLocaleString());
+						}
+						else {
+							$(this).html("n.a.");
+						}
+					});
+					$(".thumb").each(function(index){
+						var src = $(this).attr("src");
+						if (src === undefined || src === "") {
+							$(this).attr("src", "img/thumbnail.png");
+						}
+					});
+					$(".search-item").each(function(index){
+						if (index % 2 == 1) {
+							$(this).css('background-color', '#F7FBFC');
+						}
+						else {
+							$(this).css('background-color', '#EFF7F9');
+						}
+					});
+				}
+				else {
+					if (Opencast.pager.getCurrentSearchQuery() != null) {
+						$('.title').text('No recordings found for : "' + searchQuery + '"');
+					}
+					else {
+						$('.title').text("No recordings published yet.");
+						
+					}
+				}
 
-          $('.timeDate').each( function() {
-            var timeDate = $(this).text();
-            if (timeDate) {
-              //JavaScript parseInt(string, radix)
-              var sd = new Date();
-              sd.setFullYear(parseInt(timeDate.substring(0,4),10));
-              sd.setMonth(parseInt(timeDate.substring(5,7),10)-1);
-              sd.setDate(parseInt(timeDate.substring(8,10),10));
-              sd.setHours(parseInt(timeDate.substring(11,13),10));
-              sd.setMinutes(parseInt(timeDate.substring(14,16),10));
-              sd.setSeconds(parseInt(timeDate.substring(17,19),10));
-              $(this).html(sd.toLocaleString());
-            } else {
-              $(this).html("n.a.");
-            }
-          });
-          $(".thumb").each( function(index) {
-            var src = $(this).attr("src");
-            if(src === undefined || src === ""){
-              $(this).attr("src", "img/thumbnail.png");
-            }
-          });
-          $(".search-item").each(function(index) {
-            if(index % 2 ==1) {
-              $(this).css('background-color','#F7FBFC');
-            } else {
-              $(this).css('background-color','#EFF7F9');
-            }
-          });
-          
         });
 
         if(searchQuery != null && searchQuery != ""){

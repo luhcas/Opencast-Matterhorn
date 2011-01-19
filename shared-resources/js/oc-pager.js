@@ -51,6 +51,11 @@ Opencast.pager = ( function() {
     li = document.createElement('li');
     li.innerHTML = text;
     $('.navigation').append(li);
+	
+	// display the pager only if necessary
+    if($('#oc-episodes-total').html() < 10){
+    $('ul.navigation').css('visibility','hidden');
+    }
 
     // Pipe before page numbers
     li = document.createElement('li');
