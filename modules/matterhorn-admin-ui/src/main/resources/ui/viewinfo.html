@@ -9,9 +9,11 @@
     <style>
       #stage {font-family:"Arial","Helvetica","Verdana","sans-serif"; font-size:10px; margin:20px; min-height:100%; max-width:800; padding:0 0 20px;}
       table {font-family:"Arial","Helvetica","Verdana","sans-serif"; font-size:10px; margin:10px;}
-      .kvtable tr {margin-bottom:3px; border-bottom:1px solid silver;}
       .td-key {font-weight:bold;text-align:right;vertical-align: top;}
       .td-value {font-weight:normal; text-align:left; padding-left:5px;}
+      .fold-icon {float:left;}
+      .unfoldable-header {cursor: pointer;}
+      .unfoldable-content {display: none;}
     </style>
 
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
@@ -70,28 +72,30 @@
                 <td class="td-key">Title:</td>
                 <td class="td-value">${workflow.info.title}</td>
               </tr>
+              {if workflow.info.seriestitle}
+              <tr>
+                <td class="td-key">Series:</td>
+                <td class="td-value">${workflow.info.seriestitle}</td>
+              </tr>
+              {/if}
               <tr>
                 <td class="td-key">Presenter:</td>
                 <td class="td-value">${workflow.info.creators}</td>
-              </tr>
-              <tr>
-                <td class="td-key">Sponsoring Department:</td>
-                <td id="departmentField" class="td-value"></td>
               </tr>
             </table>
         </div>
       {/if}
       {if workflow.info.episodeDC}
         <div class="ui-widget layout-centered">
-          <div class="ui-widget-header ui-corner-top">Additional Description</div>
-          <div id="episodeContainer" class="ui-widget-content ui-corner-bottom">
+          <div class="ui-widget-header ui-corner-top unfoldable-header"><span class="ui-icon fold-icon ui-icon-triangle-1-e"></span>Additional Description</div>
+          <div id="episodeContainer" class="ui-widget-content ui-corner-bottom unfoldable-content">
           </div>
         </div>
       {/if}
       {if workflow.info.seriesDC}
         <div class="ui-widget layout-centered">
-          <div class="ui-widget-header ui-corner-top">Series Description</div>
-          <div id="seriesContainer" class="ui-widget-content ui-corner-bottom">
+          <div class="ui-widget-header ui-corner-top unfoldable-header"><span class="ui-icon ui-icon-triangle-1-e fold-icon"></span>Series Description</div>
+          <div id="seriesContainer" class="ui-widget-content ui-corner-bottom unfoldable-content">
           </div>
         </div>
       {/if}
@@ -109,13 +113,84 @@
                 <td class="td-value">${ocUtils.makeLocaleDateString(workflow.config['schedule.stop'])}</td>
               </tr>
               <tr>
-                <td class="td-key">Location:</td>
+                <td class="td-key">Capture Agent:</td>
                 <td class="td-value">${workflow.config['schedule.location']}</td>
               </tr>
             </table>
           </div>
         </div>
       {/if}
+      {if workflow.config.distribution}
+        <div class="ui-widget layout-centered">
+          <div class="ui-widget-header ui-corner-top">Distribution</div>
+          <div class="ui-widget-content ui-corner-bottom">
+            <table>
+              <tr>
+                <td class="td-key">Distribution channel(s):</td>
+                <td class="td-value">${workflow.config.distribution}</td>
+              </tr>
+              <tr>
+                <td class="td-key">License:</td>
+                <td id="licenseField" class="td-value"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      {/if}
+    </textarea>
+
+    <textarea id="episodeTemplate" style="display:none;">
+      <table>
+        <tr>
+          <td class="td-key">Sponsoring Department:</td>
+          <td class="td-value">${dc.contributor}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Subject:</td>
+          <td class="td-value">${dc.subject}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Language:</td>
+          <td class="td-value">${dc.language}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Description:</td>
+          <td class="td-value">${dc.description}</td>
+        </tr>
+      </table>
+    </textarea>
+
+    <textarea id="seriesTemplate" style="display:none;">
+      <table>
+        <tr>
+          <td class="td-key">Series Title:</td>
+          <td class="td-value">${dc.title}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Organizer:</td>
+          <td class="td-value">${dc.creator}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Sponsoring Department:</td>
+          <td class="td-value">${dc.contributor}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Subject:</td>
+          <td class="td-value">${dc.subject}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Language:</td>
+          <td class="td-value">${dc.language}</td>
+        </tr>
+        <tr>
+          <td class="td-key">License:</td>
+          <td class="td-value">${dc.license}</td>
+        </tr>
+        <tr>
+          <td class="td-key">Description:</td>
+          <td class="td-value">${dc.description}</td>
+        </tr>
+      </table>
     </textarea>
   </body>
 </html>

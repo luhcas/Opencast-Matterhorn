@@ -66,17 +66,20 @@ Opencast.WorkflowInspect = (function() {
     if (workflow.mediapackage) {
       var mp = workflow.mediapackage;
 
-      // prepare info object for View Info (top most box)
+      // prepare info object for View Info
       out.info = {};
       out.info.title = mp.title;
+      out.info.seriestitle = false;
+      out.info.creators = '';
       out.info.episodeDC = false;
       out.info.seriesDC = false;
+
       if (mp.creators) {
         out.info.creators = Opencast.RenderUtils.ensureArray(mp.creators.creator).join(', ');
-      } else {
-        out.info.creators = [];
       }
-      out.info.department = '';
+      if (mp.seriestitle) {
+        out.info.seriestitle = mp.seriestitle;
+      }
 
       // Attachments
       mp.attachments = Opencast.RenderUtils.ensureArray(mp.attachments.attachment);
@@ -167,19 +170,12 @@ Opencast.WorkflowInspect = (function() {
           $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
         },
         success : function(data) {
-          var $table = $('<table>');
-          $(data).find('dublincore').children().each(function() {
-            var tagname = $(this).context.tagName.split(':')[1];
-            if (tagname == 'contributor') {                   // Sponsoring Department (contributor) is not part workflow info so we have to get it from here
-              $('#departmentField').text($(this).text());
-            } else if (tagname != 'title' && tagname != 'creator') {    
-              var $row = $('<tr></tr>');
-              $('<td></td>').addClass('td-key').text(tagname + ':').appendTo($row);
-              $('<td></td>').addClass('td-value').text($(this).text()).appendTo($row);
-              $row.appendTo($table);
-            }
-          });
-          $table.appendTo('#episodeContainer');
+          data = Opencast.RenderUtils.DCXMLtoObj(data);
+          var episode = TrimPath.processDOMTemplate('episodeTemplate', data);
+          $('#episodeContainer').append(episode);
+          if (data.dc.license) {
+            $('#licenseField').text(data.dc.license);
+          }
         }
       });
     }
@@ -194,15 +190,22 @@ Opencast.WorkflowInspect = (function() {
           $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
         },
         success : function(data) {
-          var $table = $('<table>');
-          $(data).find('dublincore').children().each(function() {
-            var $row = $('<tr></tr>');
-            var tagname = $(this).context.tagName.split(':')[1] + ':';
-            $('<td></td>').addClass('td-key').text(tagname).appendTo($row);
-            $('<td></td>').addClass('td-value').text($(this).text()).appendTo($row);
-            $row.appendTo($table);
-          });
-          $table.appendTo('#seriesContainer');
+          var series = TrimPath.processDOMTemplate('seriesTemplate', Opencast.RenderUtils.DCXMLtoObj(data));
+          $('#seriesContainer').append(series);
+        }
+      });
+    }
+
+    // care for unfoldable boxes
+    if (workflow.workflow.info.episodeDC || workflow.workflow.info.seriesDC) {
+      $('.unfoldable-header').click(function() {
+        var $content = $(this).next('.unfoldable-content');
+        if ($content.is(':visible')) {
+          $content.hide('fast');
+          $(this).find('.fold-icon').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+        } else {
+          $content.show('fast');
+          $(this).find('.fold-icon').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
         }
       });
     }
@@ -310,6 +313,20 @@ Opencast.RenderUtils = (function() {
       }
     }
     return out;
+  }
+
+  /** Convert a DublinCore XML document to a javascript object
+   *
+   */
+  this.DCXMLtoObj = function(data) {
+    var out = {};
+    $(data).find('dublincore').children().each(function() {
+      var tagname = $(this).context.tagName.split(':')[1];
+      out[tagname] = $(this).text();
+    });
+    return {
+      dc:out
+    };
   }
 
   return this;
