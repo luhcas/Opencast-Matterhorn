@@ -544,7 +544,7 @@ ocRecordings = new (function() {
       data.properties = "";
       $.each(postData, function(key, value) {
         if(key != 'id') {
-          data.properties += key + '=' + value + '\n';
+          data.properties += key + '=' + value + "\n";
           ocUtils.log(key + '=' + value);
         }
       });

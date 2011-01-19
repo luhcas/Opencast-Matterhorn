@@ -3,6 +3,7 @@ var Opencast = Opencast || {};
 Opencast.WorkflowInspect = (function() {
 
   this.WORKFLOW_INSTANCE_URL = '../workflow/rest/instance/';
+  this.SCHEDULER_URL = '../scheduler/rest/';
 
   var $container;       // id of the target container
   var templateId;
@@ -117,8 +118,13 @@ Opencast.WorkflowInspect = (function() {
       }
       out.mediapackage = mp;
     } else {
-      out.info = false;
+      out.info = {};
       out.mediapackage = false;
+    }
+
+    // in case of an 'upcoming event' episode dublin core catalog is obtained from scheduler service
+    if (workflow.template == 'scheduling') {
+      out.info.episodeDC = this.SCHEDULER_URL + workflow.id + '/dublincore';
     }
 
     return {
@@ -163,11 +169,15 @@ Opencast.WorkflowInspect = (function() {
         success : function(data) {
           var $table = $('<table>');
           $(data).find('dublincore').children().each(function() {
-            var $row = $('<tr></tr>');
-            var tagname = $(this).context.tagName.split(':')[1] + ':';
-            $('<td></td>').addClass('td-key').text(tagname).appendTo($row);
-            $('<td></td>').addClass('td-value').text($(this).text()).appendTo($row);
-            $row.appendTo($table);
+            var tagname = $(this).context.tagName.split(':')[1];
+            if (tagname == 'contributor') {                   // Sponsoring Department (contributor) is not part workflow info so we have to get it from here
+              $('#departmentField').text($(this).text());
+            } else if (tagname != 'title' && tagname != 'creator') {    
+              var $row = $('<tr></tr>');
+              $('<td></td>').addClass('td-key').text(tagname + ':').appendTo($row);
+              $('<td></td>').addClass('td-value').text($(this).text()).appendTo($row);
+              $row.appendTo($table);
+            }
           });
           $table.appendTo('#episodeContainer');
         }
