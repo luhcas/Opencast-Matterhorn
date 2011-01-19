@@ -32,6 +32,8 @@
       #recordingsTable th .sort-icon {float:right;}
       #recordingsTable tr {border-bottom: 1px solid silver;}
       #recordingsTable tr:hover {background-color: silver;}
+      #recordingsTable .foldable {cursor: pointer;}
+      #recordingsTable .fold-body {display: none;}
       .status-column-error-heading {}
       .status-column-error-heading .fold-icon {float:left;}
       .status-column-error-heading .error-message {float:left;font-weight:bold;color:red;padding-top:2px;}
@@ -259,7 +261,12 @@
         <td class="status-column-cell">
           <div>
           {if recording.error}
-            <span style="color:red;font-weight:bold;">FAILED</span>
+          <div class="foldable">
+            <div class="fold-header" style="color:red;font-weight:bold;">FAILED</div>
+            <div class="fold-body">
+              ${recording.error}
+            </div>
+          </div>
           {else}
             <b>${recording.state}</b>
             {if recording.operation}
@@ -267,11 +274,10 @@
             {/if}
           {/if}
           </div>
-          <div class="workflowActionButton">
+          <div class="workflowActionButton ui-helper-clearfix" style="clear:both;">
             <a href="inspect.html?id=${recording.id}" title="View Technical Details for this Recording">
               <span class="ui-icon ui-icon-gear inspect-workflow-button" style="float:left;"></span>
             </a>
-            <!-- span class="ui-icon ui-icon-triangle-1-s" style="float:left;"></span -->
           </div>
         </td>
         <td>
