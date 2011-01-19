@@ -66,7 +66,7 @@ public class JaxbJob implements Job {
   protected long id;
 
   /** The version, used for optimistic locking */
-  protected int version;
+  protected long version;
 
   /** The job type */
   protected String jobType;
@@ -123,7 +123,7 @@ public class JaxbJob implements Job {
    */
   @XmlAttribute
   @Override
-  public int getVersion() {
+  public long getVersion() {
     return version;
   }
 
@@ -131,7 +131,7 @@ public class JaxbJob implements Job {
    * @param version
    *          the version to set
    */
-  public void setVersion(int version) {
+  public void setVersion(long version) {
     this.version = version;
   }
 

@@ -147,7 +147,7 @@ public class JobJpaImpl extends JaxbJob {
   @Version
   @XmlAttribute
   @Override
-  public int getVersion() {
+  public long getVersion() {
     return super.getVersion();
   }
 

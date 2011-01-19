@@ -97,7 +97,7 @@ public class JobImpl implements Job {
    */
   @XmlAttribute
   @Override
-  public int getVersion() {
+  public long getVersion() {
     return version;
   }
 

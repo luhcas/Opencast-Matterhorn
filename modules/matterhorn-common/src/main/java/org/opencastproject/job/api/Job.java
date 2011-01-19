@@ -43,7 +43,7 @@ public interface Job {
    * 
    * @return the version number of this job
    */
-  int getVersion();
+  long getVersion();
 
   /**
    * Sets the job identifier.
