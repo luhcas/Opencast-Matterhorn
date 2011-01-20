@@ -1493,6 +1493,7 @@ Opencast.Player = (function () {
     function setVideoSizeList(displayMode)
     {
         var content = '';
+        var displayMonitorControls = true;
 
         if (displayMode === MULTIPLAYER)
         {
@@ -1525,6 +1526,8 @@ Opencast.Player = (function () {
 
             setDisplayMode(displayMode);
             setCurrentVideoSize(VIDEOSIZESINGLE);
+            
+            displayMonitorControls = false;
         }
         else if (displayMode === SINGLEPLAYERWITHSLIDES)
         {
@@ -1536,6 +1539,8 @@ Opencast.Player = (function () {
             $("#oc_btn-dropdown").attr("className", "oc_btn-singleDisplay");
             $("#oc_btn-dropdown").css("display", 'block');
             setDisplayMode(displayMode);
+            
+            displayMonitorControls = false;
         }
         else if (displayMode === AUDIOPLAYER)
         {
@@ -1543,6 +1548,13 @@ Opencast.Player = (function () {
           //$("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
             setDisplayMode(displayMode);
             setCurrentVideoSize(VIDEOSIZEAUDIO);
+            
+            displayMonitorControls = false;
+        }
+        
+        if(!displayMonitorControls)
+        {
+            $("#oc_video-size-controls").unbind('mouseover mouseout mouseenter mouseleave');
         }
     }
 
