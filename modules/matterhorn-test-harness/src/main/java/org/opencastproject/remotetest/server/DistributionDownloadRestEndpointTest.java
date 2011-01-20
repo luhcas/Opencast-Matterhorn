@@ -69,14 +69,14 @@ public class DistributionDownloadRestEndpointTest {
 
   @Test
   public void testDocs() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/distribution/download/rest/docs");
+    HttpGet get = new HttpGet(BASE_URL + "/distribution/download/docs");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
 
   @Test
   public void testWadl() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/distribution/download/rest/?_wadl");
+    HttpGet get = new HttpGet(BASE_URL + "/distribution/download/?_wadl");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -87,7 +87,7 @@ public class DistributionDownloadRestEndpointTest {
     String mpId = (String)Utils.xpath(mp, "/oc:mediapackage/@id", XPathConstants.STRING);
     String track = Utils.nodeToString((Node)Utils.xpath(mp, "//media/track[@id=\"track-1\"]", XPathConstants.NODE));
     
-    HttpPost post = new HttpPost(BASE_URL + "/distribution/download/rest");
+    HttpPost post = new HttpPost(BASE_URL + "/distribution/download");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("mediapackageId", mpId));
     formParams.add(new BasicNameValuePair("element", track));

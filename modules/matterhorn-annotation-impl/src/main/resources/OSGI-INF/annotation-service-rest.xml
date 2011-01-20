@@ -5,7 +5,7 @@
 	<implementation class="org.opencastproject.annotation.impl.AnnotationRestService" />
 	<property name="service.description" value="Annotation REST Endpoint" />
 	<property name="opencast.service.type" value="org.opencastproject.annotation" />
-	<property name="opencast.service.path" value="/annotation/rest" />
+	<property name="opencast.service.path" value="/annotation" />
 	<service>
 		<provide interface="org.opencastproject.annotation.impl.AnnotationRestService" />
 	</service>

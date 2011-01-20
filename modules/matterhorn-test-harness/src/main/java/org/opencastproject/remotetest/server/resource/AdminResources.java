@@ -55,7 +55,7 @@ public class AdminResources {
   }
   
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/admin/rest/";
+    return Main.getBaseUrl() + "/admin/";
   }
 
 }

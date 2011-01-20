@@ -58,7 +58,7 @@
       ocUploadListener.uploadFailed = function() {
         $('#loading-container').css('display','none');
         $('#upload-container').css('display','table-cell');
-        $('#filechooser-ajax').attr('src','/ingest/rest/filechooser-local.html');
+        $('#filechooser-ajax').attr('src','/ingest/filechooser-local.html');
         alert('The captions file could not be added');
       }
 
@@ -82,7 +82,7 @@
         });
         // load preview player and metadata
         $.ajax({
-          url : '/workflow/rest/instance/' + id + '.xml',
+          url : '/workflow/instance/' + id + '.xml',
           dataType : 'xml',    
           success : function(data) {
             // put mediapackge into form (for upload of captions file)
@@ -182,7 +182,7 @@
       </div>
       <div id="loading-container" class="spandiv hidden"></div>
       <div id="upload-container" style="display:table-cell;float:left;">
-        <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="/ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
+        <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="/ingest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
         </iframe>
         <button type="button" id="btn-start-upload" onclick="ocUploadListener.startUpload();">Upload</button>
       </div>

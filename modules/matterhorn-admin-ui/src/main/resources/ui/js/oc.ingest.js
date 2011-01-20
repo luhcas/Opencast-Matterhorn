@@ -26,7 +26,7 @@ ocIngest.createMediaPackage = function() {
   ocUtils.log("creating MediaPackage")
   ocUpload.setProgress('0%','creating MediaPackage',' ', ' ');
   $.ajax({
-    url        : '../ingest/rest/createMediaPackage',
+    url        : '../ingest/createMediaPackage',
     type       : 'GET',
     dataType   : 'xml',
     error      : function(XHR,status,e){
@@ -55,7 +55,7 @@ ocIngest.copyPreviousFiles = function(data) {
   if (ocIngest.previousFiles.length != 0) {
     var fileItem = ocIngest.previousFiles.pop();
     $.ajax({
-      url        : '../ingest/rest/addTrack',
+      url        : '../ingest/addTrack',
       type       : 'POST',
       dataType   : 'xml',
       data       : {
@@ -100,7 +100,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
   ocUtils.log("Adding DublinCore catalog");
   ocUpload.setProgress('100%','adding Metadata',' ', ' ');
   $.ajax({
-    url        : '../ingest/rest/addDCCatalog',
+    url        : '../ingest/addDCCatalog',
     type       : 'POST',
     dataType   : 'xml',
     data       : {
@@ -128,7 +128,7 @@ ocIngest.addSeriesCatalog = function(seriesId) {
   ocUtils.log("Getting series DublinCore");
   ocUpload.setProgress('100%','Getting series Metadata',' ', ' ');
   $.ajax({
-    url        : '../series/rest/'+seriesId+'/dublincore',
+    url        : '../series/'+seriesId+'/dublincore',
     type       : 'GET',
     error      : function(XHR,status,e){
       showFailedScreen('The metadata for the series you selected could not be retrieved.');
@@ -147,7 +147,7 @@ ocIngest.startIngest = function(mediaPackage) {
   var data = ocWorkflow.getConfiguration($('#workflowConfigContainer'));
   data['mediaPackage'] = ocUtils.xmlToString(mediaPackage);
   $.ajax({
-    url        : '../ingest/rest/ingest/' + $('#workflowSelector').val(),
+    url        : '../ingest/ingest/' + $('#workflowSelector').val(),
     type       : 'POST',
     dataType   : 'text',
     data       : data,
@@ -167,7 +167,7 @@ ocIngest.startIngest = function(mediaPackage) {
 
 ocIngest.removeWorkflowInstance = function(wfId) {
   $.ajax({
-    url : '../workflow/rest/stop/',
+    url : '../workflow/stop/',
     data: {id: wfId},
     type: 'POST',
     error: function() {

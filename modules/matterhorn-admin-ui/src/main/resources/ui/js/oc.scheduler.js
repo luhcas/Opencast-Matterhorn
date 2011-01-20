@@ -14,10 +14,10 @@
  *
  */
 // REST endpoints
-var SCHEDULER_URL     = '/scheduler/rest';
-var WORKFLOW_URL      = '/workflow/rest';
-var CAPTURE_ADMIN_URL = '/capture-admin/rest';
-var SERIES_URL        = '/series/rest';
+var SCHEDULER_URL     = '/scheduler';
+var WORKFLOW_URL      = '/workflow';
+var CAPTURE_ADMIN_URL = '/capture-admin';
+var SERIES_URL        = '/series';
 var RECORDINGS_URL    = '/admin/recordings.html';
 
 // Constants
@@ -279,7 +279,7 @@ ocScheduler.HandleAgentChange = function(elm){
   $(ocScheduler.inputList).empty();
   ocScheduler.additionalMetadataComponents.agentTimeZone.setValue('');
   if(agent){
-    $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
+    $.get('/capture-admin/agents/' + agent + '/capabilities',
       function(doc){
         var capabilities = [];
         $.each($('entry', doc), function(a, i){

@@ -5,7 +5,7 @@
   <property name="service.description" value="YouTube Distribution REST Endpoint" />
 
   <property name="opencast.service.type" value="org.opencastproject.distribution.youtube" />
-  <property name="opencast.service.path" value="/distribution/youtube/rest" />
+  <property name="opencast.service.path" value="/distribution/youtube" />
   <property name="opencast.service.jobproducer" value="true" />
 
   <service>

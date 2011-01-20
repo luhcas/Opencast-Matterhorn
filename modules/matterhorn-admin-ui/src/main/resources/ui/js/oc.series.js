@@ -20,7 +20,7 @@ ocSeries.components = {};
 ocSeries.additionalComponents = {};
 
 /*    PAGE CONFIGURATION    */
-var SERIES_SERVICE_URL = "/series/rest";
+var SERIES_SERVICE_URL = "/series";
 var SERIES_LIST_URL = "/admin/series_list.html";
 var CREATE_MODE = 1;
 var EDIT_MODE   = 2;

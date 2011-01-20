@@ -116,8 +116,8 @@ public class LtiAuthenticationTest {
     
     String sessionId = cookie.substring(0, cookie.lastIndexOf(";"));
     
-    // Send a GET request to "/info/rest/me.json" using this cookie
-    HttpGet get = new HttpGet(Main.BASE_URL + "/info/rest/me.json");
+    // Send a GET request to "/info/me.json" using this cookie
+    HttpGet get = new HttpGet(Main.BASE_URL + "/info/me.json");
     get.setHeader("Cookie", sessionId);
     HttpResponse httpResponse = httpClient.execute(get);
     String me = EntityUtils.toString(httpResponse.getEntity());
@@ -177,8 +177,8 @@ public class LtiAuthenticationTest {
     
     String sessionId = cookie.substring(0, cookie.lastIndexOf(";"));
     
-    // Send a GET request to "/info/rest/me.json" using this cookie
-    HttpGet get = new HttpGet(Main.BASE_URL + "/info/rest/me.json");
+    // Send a GET request to "/info/me.json" using this cookie
+    HttpGet get = new HttpGet(Main.BASE_URL + "/info/me.json");
     get.setHeader("Cookie", sessionId);
     HttpResponse httpResponse = httpClient.execute(get);
     String me = EntityUtils.toString(httpResponse.getEntity());

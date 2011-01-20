@@ -27,7 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 
 public class StateResources {
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/state/rest/";
+    return Main.getBaseUrl() + "/state/";
   }
   
   public static HttpResponse getState(TrustedHttpClient client) throws Exception {

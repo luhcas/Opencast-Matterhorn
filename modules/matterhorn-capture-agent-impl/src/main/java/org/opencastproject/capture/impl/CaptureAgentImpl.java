@@ -188,21 +188,21 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /** Stores the current bundle context */
   private ComponentContext context = null;
 
-  /** If the CaptureAgentImpl has its updated quartz configuration this is true.**/
+  /** If the CaptureAgentImpl has its updated quartz configuration this is true. **/
   private boolean updated = false;
-  
-  /** If the ConfigurationManager has its updated quartz configuration this is true.**/
+
+  /** If the ConfigurationManager has its updated quartz configuration this is true. **/
   private boolean refreshed = false;
-  
+
   /** The last properties the CaptureAgentImpl was updated by felix with. **/
   private Dictionary<String, String> cachedProperties = new Hashtable<String, String>();
-  
+
   /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
    * 
    * @param cfg
    *          The configuration service.
-   * @throws ConfigurationException 
+   * @throws ConfigurationException
    */
   public void setConfigService(ConfigurationManager cfg) throws ConfigurationException {
     configService = cfg;
@@ -210,8 +210,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     configService.registerListener(this);
   }
 
-  
-  
   /**
    * Returns the configuration service form which this capture agent should draw its configuration data.
    * 
@@ -221,10 +219,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     return configService;
   }
 
-  protected SchedulerImpl getSchedulerImpl(){
+  protected SchedulerImpl getSchedulerImpl() {
     return scheduler;
   }
-  
+
   /**
    * Sets the http client which this service uses to communicate with the core.
    * 
@@ -233,7 +231,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   void setTrustedClient(TrustedHttpClient c) {
     client = c;
-    if(scheduler != null){
+    if (scheduler != null) {
       scheduler.setTrustedClient(c);
     }
   }
@@ -1222,15 +1220,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
-    if(properties != null){
+    if (properties != null) {
       cachedProperties = properties;
       updated = true;
-      if(updated && refreshed){
+      if (updated && refreshed) {
         startConfigurationDependantTasks();
       }
-    }
-    else{
-        throw new ConfigurationException("null", "Null configuration in updated!");
+    } else {
+      throw new ConfigurationException("null", "Null configuration in updated!");
     }
   }
 
@@ -1254,23 +1251,22 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       }
     }
   }
-  
+
   /** If ConfigurationManager had updated and passed on those properties to the Capture Agent this returns true. **/
   public boolean isRefreshed() {
     return refreshed;
   }
 
-
   /**
    * Once the configuration is loaded through the updated method and the ConfigurationManager has loaded its properties
    * then this method is called to start the schedules dependent on configuration properties.
    **/
-  public void startConfigurationDependantTasks() throws ConfigurationException{
+  public void startConfigurationDependantTasks() throws ConfigurationException {
     synchronized (cachedProperties) {
       if (cachedProperties == null) {
         throw new ConfigurationException("null", "Null configuration in updated!");
       }
-  
+
       // Update the agent's properties from the parameter
       Properties props = new Properties();
       Enumeration<String> keys = cachedProperties.keys();
@@ -1294,10 +1290,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       schedulerProperties.put("org.quartz.scheduler.instanceId", "AUTO");
       schedulerProperties.put("org.quartz.scheduler.rmi.export", "false");
       schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
-  
+
       schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
       schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
-  
+
       schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
       try {
         scheduler = new SchedulerImpl(schedulerProperties, configService, this);
@@ -1309,7 +1305,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       }
     }
   }
-  
+
   /**
    * Callback from the OSGi container once this service is started. This is where we register our shell commands.
    * 

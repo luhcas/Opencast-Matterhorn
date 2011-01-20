@@ -18,7 +18,7 @@
     <property name="service.description" value="Caption REST Endpoint" />
 
     <property name="opencast.service.type" value="org.opencastproject.caption" />
-    <property name="opencast.service.path" value="/caption/rest" />
+    <property name="opencast.service.path" value="/caption" />
     <property name="opencast.service.jobproducer" value="true" />
 
     <service>

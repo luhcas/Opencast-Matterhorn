@@ -139,7 +139,7 @@ Opencast.search = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: "../../search/rest/episode.json",
+            url: "../../search/episode.json",
             data: "id=" + mediaPackageId + "&q=" + escape(searchValue),
             dataType: 'jsonp',
             jsonp: 'jsonp',

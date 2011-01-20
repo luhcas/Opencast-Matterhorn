@@ -74,7 +74,7 @@ public class WorkflowRestEndpointTest {
   @Test
   public void testStartAndRetrieveWorkflowInstance() throws Exception {
     // Start a workflow instance via the rest endpoint
-    HttpPost postStart = new HttpPost(BASE_URL + "/workflow/rest/start");
+    HttpPost postStart = new HttpPost(BASE_URL + "/workflow/start");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     formParams.add(new BasicNameValuePair("definition", getSampleWorkflowDefinition()));
@@ -87,12 +87,12 @@ public class WorkflowRestEndpointTest {
     String id = getWorkflowInstanceId(postResponse);
 
     // Ensure we can retrieve the workflow instance from the rest endpoint
-    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/instance/" + id + ".xml");
     String getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
     Assert.assertEquals(id, getWorkflowInstanceId(getResponse));
 
     // Make sure we can retrieve it via json, too
-    HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".json");
+    HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/instance/" + id + ".json");
     String jsonResponse = EntityUtils.toString(client.execute(getWorkflowJson).getEntity());
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
     if(json == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
@@ -103,7 +103,7 @@ public class WorkflowRestEndpointTest {
     int attempts = 0;
     while(true) {
       if(++attempts == 20) Assert.fail("workflow rest endpoint test has hung");
-      getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
+      getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/instance/" + id + ".xml");
       getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
       String state = getWorkflowInstanceStatus(getResponse);
       if("FAILED".equals(state)) Assert.fail("workflow instance " + id + " failed");

@@ -14,9 +14,9 @@ export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
 Other URLs of interest:
 
 Sample HTML form to upload binary data to the repository: http://localhost:8080/samplehtml/upload.html (warning: uploading returns HTTP 200, so "nothing happens" in the browser)
-Get binary data from the repository: http://localhost:8080/rest/repository/data/[path] (warning: this returns a file with no filename or mime type)
-(TODO) Get metadata from the repository: GET http://localhost:8080/rest/repository/metadata/[key]/[path]
-(TODO) Put metadata into the repository: POST or PUT http://localhost:8080/rest/repository/metadata/[key]/[path]
+Get binary data from the repository: http://localhost:8080/repository/data/[path] (warning: this returns a file with no filename or mime type)
+(TODO) Get metadata from the repository: GET http://localhost:8080/repository/metadata/[key]/[path]
+(TODO) Put metadata into the repository: POST or PUT http://localhost:8080/repository/metadata/[key]/[path]
 
 
 Logging:

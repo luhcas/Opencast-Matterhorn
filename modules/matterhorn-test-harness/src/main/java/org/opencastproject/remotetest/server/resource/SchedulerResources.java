@@ -36,7 +36,7 @@ import java.util.List;
 
 public class SchedulerResources {
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/scheduler/rest/";
+    return Main.getBaseUrl() + "/scheduler/";
   }
   
   public static HttpResponse addEvent(TrustedHttpClient client, String event) throws Exception {

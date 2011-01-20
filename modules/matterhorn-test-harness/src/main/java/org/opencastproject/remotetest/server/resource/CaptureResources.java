@@ -39,7 +39,7 @@ public class CaptureResources {
   public static String AGENT = "demo_capture_agent";
   
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/capture/rest/";
+    return Main.getBaseUrl() + "/capture/";
   }
 
   public static HttpResponse startCaptureGet(TrustedHttpClient client) {

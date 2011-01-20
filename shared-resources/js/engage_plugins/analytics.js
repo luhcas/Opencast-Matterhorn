@@ -34,7 +34,7 @@ Opencast.Analytics = (function ()
         {
             type: 'GET',
             contentType: 'text/xml',
-            url: "../../usertracking/rest/footprint.xml",
+            url: "../../usertracking/footprint.xml",
             data: "id=" + mediaPackageId,
             dataType: 'xml',
             success: function (xml)

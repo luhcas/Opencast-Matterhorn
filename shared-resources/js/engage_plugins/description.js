@@ -38,7 +38,7 @@ Opencast.Description = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: '../../search/rest/episode.json',
+            url: '../../search/episode.json',
             data: 'id=' + mediaPackageId,
             dataType: 'jsonp',
             jsonp: 'jsonp',
@@ -54,7 +54,7 @@ Opencast.Description = (function ()
                 // Request JSONP data (Stats)
                 $.ajax(
                 {
-                    url: '../../usertracking/rest/stats.json?id=' + mediaPackageId,
+                    url: '../../usertracking/stats.json?id=' + mediaPackageId,
                     dataType: 'jsonp',
                     jsonp: 'jsonp',
                     success: function (result)
@@ -66,7 +66,7 @@ Opencast.Description = (function ()
                         {
                             $.ajax(
                             {
-                                url: '../../series/rest/' + data['search-results'].result.dcIsPartOf + ".json",
+                                url: '../../series/' + data['search-results'].result.dcIsPartOf + ".json",
                                 dataType: 'jsonp',
                                 jsonp: 'jsonp',
                                 success: function (res)

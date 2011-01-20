@@ -29,7 +29,7 @@ import org.apache.http.client.methods.HttpGet;
 
 public class InspectionResources {
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/inspection/rest/";
+    return Main.getBaseUrl() + "/inspection/";
   }
 
   

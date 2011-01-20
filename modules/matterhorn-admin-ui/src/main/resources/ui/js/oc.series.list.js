@@ -54,7 +54,7 @@ ocSeriesList.deleteSeries = function(seriesId, title) {
   if(confirm('Are you sure you want to delete the series "' + title + '"?')){
     $.ajax({
       type: 'DELETE',
-      url: '/series/rest/' + seriesId,
+      url: '/series/' + seriesId,
       error: function(XHR,status,e){
         alert('Could not remove series "' + title + '"');
       },

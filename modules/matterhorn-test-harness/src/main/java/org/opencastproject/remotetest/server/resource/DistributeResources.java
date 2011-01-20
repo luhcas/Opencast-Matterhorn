@@ -45,7 +45,7 @@ public class DistributeResources {
    * 
    */
   public static HttpResponse distribute(TrustedHttpClient client, String channel, String mediapackage, String... elementId) throws Exception {
-    HttpPost post = new HttpPost(getServiceUrl() + channel.toLowerCase() + "/rest/");
+    HttpPost post = new HttpPost(getServiceUrl() + channel.toLowerCase() + "/");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", mediapackage));
     for (String id : elementId) {

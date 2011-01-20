@@ -75,7 +75,7 @@ public class MultiPartTest {
       mpEntity.addPart("mediaPackage", new StringBody(mp));
       mpEntity.addPart("flavor", new StringBody("presentation/source"));
       mpEntity.addPart("userfile", fileContent);
-      HttpPost httppost = new HttpPost(BASE_URL + "/ingest/rest/addAttachment");
+      HttpPost httppost = new HttpPost(BASE_URL + "/ingest/addAttachment");
       httppost.setEntity(mpEntity);
       HttpResponse response = httpClient.execute(httppost);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());

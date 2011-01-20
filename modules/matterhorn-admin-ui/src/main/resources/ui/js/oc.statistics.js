@@ -1,6 +1,6 @@
 ocStatistics = new (function() {
 
-  var SERVERS_STATS_URL = '/services/rest/statistics.json';           // URL of server and services statistics endpoint
+  var SERVERS_STATS_URL = '/services/statistics.json';           // URL of server and services statistics endpoint
 
   var STATISTICS_DELAY = 3000;     // time interval for statistics update
 

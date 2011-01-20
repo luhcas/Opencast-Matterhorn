@@ -4,7 +4,7 @@
   <property name="service.description" value="State REST Endpoint" />
 
   <property name="opencast.service.type" value="org.opencastproject.capture.state" />
-  <property name="opencast.service.path" value="/state/rest" />
+  <property name="opencast.service.path" value="/state" />
 
   <service>
     <provide interface="org.opencastproject.capture.endpoint.StateRestService" />

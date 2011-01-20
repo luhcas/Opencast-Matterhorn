@@ -2,8 +2,8 @@ var Opencast = Opencast || {};
 
 Opencast.WorkflowInspect = (function() {
 
-  this.WORKFLOW_INSTANCE_URL = '../workflow/rest/instance/';
-  this.SCHEDULER_URL = '../scheduler/rest/';
+  this.WORKFLOW_INSTANCE_URL = '../workflow/instance/';
+  this.SCHEDULER_URL = '../scheduler/';
 
   var $container;       // id of the target container
   var templateId;

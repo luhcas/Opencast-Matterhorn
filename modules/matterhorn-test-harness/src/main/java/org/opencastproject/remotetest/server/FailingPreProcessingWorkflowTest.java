@@ -126,7 +126,7 @@ public class FailingPreProcessingWorkflowTest {
    * @return the event identifier
    */
   private String scheduleEvent(Date start, Date end) throws Exception {
-    HttpPut request = new HttpPut(BASE_URL + "/scheduler/rest");
+    HttpPut request = new HttpPut(BASE_URL + "/scheduler");
 
     // Create the request body
     Calendar c = Calendar.getInstance();

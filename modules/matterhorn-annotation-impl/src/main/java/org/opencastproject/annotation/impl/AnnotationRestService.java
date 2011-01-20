@@ -67,7 +67,7 @@ public class AnnotationRestService {
 
   /** The REST endpoint's base URL */
   // this is the default value, which may be overridden in the OSGI service registration
-  protected String serviceUrl = "/annotation/rest";
+  protected String serviceUrl = "/annotation";
 
   /**
    * Method to set the service this REST endpoint uses

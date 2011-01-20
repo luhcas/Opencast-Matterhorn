@@ -26,8 +26,8 @@
 
     <!-- Enable anonymous access to the engage player and the GET endpoints it requires -->
     <sec:intercept-url pattern='/engage/ui/**' access='ROLE_ANONYMOUS, ROLE_USER' />
-    <sec:intercept-url pattern='/search/rest/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
-    <sec:intercept-url pattern='/usertracking/rest/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
+    <sec:intercept-url pattern='/search/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
+    <sec:intercept-url pattern='/usertracking/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
     <sec:intercept-url pattern='/static/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
 
     <!-- Secure the management URLs for admins only -->

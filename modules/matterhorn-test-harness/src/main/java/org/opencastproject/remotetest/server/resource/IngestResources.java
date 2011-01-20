@@ -41,7 +41,7 @@ import java.util.List;
 public class IngestResources {
 
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/ingest/rest/";
+    return Main.getBaseUrl() + "/ingest/";
   }
 
   public static HttpResponse createMediaPackage(TrustedHttpClient client) throws Exception {
@@ -99,7 +99,7 @@ public class IngestResources {
   }
 
   public static HttpResponse getWorkflowInstance(TrustedHttpClient client, String id) throws Exception {
-    return client.execute(new HttpGet(Main.getBaseUrl() + "/workflow/rest/instance/" + id + ".xml"));
+    return client.execute(new HttpGet(Main.getBaseUrl() + "/workflow/instance/" + id + ".xml"));
   }
 
 }

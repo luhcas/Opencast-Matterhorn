@@ -54,7 +54,7 @@
         } else {
           jQuery.ajax({
             type: 'GET',
-            url: '/workflow/rest/instance/' + Opencast.workflowId + '.json',
+            url: '/workflow/instance/' + Opencast.workflowId + '.json',
             dataType: 'jsonp',
             jsonp: 'jsonp',
             error: function() {

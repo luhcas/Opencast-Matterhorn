@@ -16,8 +16,8 @@
  
 var ocView = ocView || {};
 
-var SCHEDULER_SERVICE_URL = '/scheduler/rest';
-var WORKFLOW_SERVICE_URL  = '/workflow/rest';
+var SCHEDULER_SERVICE_URL = '/scheduler';
+var WORKFLOW_SERVICE_URL  = '/workflow';
 
 ocView.init = function(){
   var id = ocUtils.getURLParam('id');

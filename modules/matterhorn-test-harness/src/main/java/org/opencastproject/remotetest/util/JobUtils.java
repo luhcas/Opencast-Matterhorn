@@ -72,7 +72,7 @@ public final class JobUtils {
    *           if the job could not be loaded
    */
   public static String getJobAsXml(String jobId) throws IOException {
-    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/services/rest/job/" + jobId + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/services/job/" + jobId + ".xml");
     TrustedHttpClient client = Main.getClient();
     try {
       HttpResponse response = client.execute(getWorkflowMethod);

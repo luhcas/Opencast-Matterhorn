@@ -115,7 +115,7 @@ public class DigestAuthenticationTest {
     }
     // Build the post
     UsernamePasswordCredentials creds = new UsernamePasswordCredentials("matterhorn_system_account", "CHANGE_ME");
-    HttpPost post = new HttpPost(BASE_URL + "/capture-admin/rest/agents/testagent");
+    HttpPost post = new HttpPost(BASE_URL + "/capture-admin/agents/testagent");
     post.addHeader("X-Requested-Auth", "Digest");
     httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();

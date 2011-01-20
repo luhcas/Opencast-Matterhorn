@@ -50,7 +50,7 @@ ocUpload.init = function() {
   // Event: File location selector clicked
   $(".file-location").change(function() {
     var location = $(this).val();
-    $('#fileChooserAjax').attr('src', '../ingest/rest/filechooser-' + location + '.html');
+    $('#fileChooserAjax').attr('src', '../ingest/filechooser-' + location + '.html');
   });
 
   // Event: Add form filed button clicked
@@ -126,7 +126,7 @@ ocUpload.init = function() {
   });
   
   $('#series').autocomplete({
-    source: '/series/rest/search',
+    source: '/series/search',
     select: function(event, ui){
       $('#ispartof').val(ui.item.id);
     },
@@ -165,7 +165,7 @@ ocUpload.initRetry = function(wfId) {
   // get failed Workflow
   $.ajax({
     method: 'GET',
-    url: '../workflow/rest/instance/'+ wfId +'.xml',
+    url: '../workflow/instance/'+ wfId +'.xml',
     dataType: 'xml',
     success: function(data) {
       ocIngest.previousMediaPackage = data;
@@ -374,7 +374,7 @@ ocUpload.createSeriesFromSearchText = function(){
   $.ajax({
     async: false,
     type: 'PUT',
-    url: '/series/rest',
+    url: '/series',
     data: { series: seriesXml },
     dataType : 'json',
     success: function(data){

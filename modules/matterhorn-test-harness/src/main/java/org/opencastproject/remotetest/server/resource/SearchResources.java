@@ -34,7 +34,7 @@ import java.util.List;
 public class SearchResources {
 
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/search/rest/";
+    return Main.getBaseUrl() + "/search/";
   }
   
   public static HttpResponse add(TrustedHttpClient client, String mediapackage) throws Exception {

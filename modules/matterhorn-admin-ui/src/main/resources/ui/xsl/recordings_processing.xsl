@@ -5,7 +5,7 @@
     Created on : November 19, 2009, 9:18 PM
     Author     : wulff
     Description:
-        Transforms output of /admin/rest/recordings/processing to HTML table
+        Transforms output of /admin/recordings/processing to HTML table
 -->
 
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns1="http://adminui.opencastproject.org/" version="1.0">

@@ -113,7 +113,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
 
   /** The default service URL */
-  protected String serviceUrl = serverUrl + "/workflow/rest";
+  protected String serviceUrl = serverUrl + "/workflow";
 
   /** The workflow service instance */
   private WorkflowService service;

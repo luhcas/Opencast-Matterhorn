@@ -7,7 +7,7 @@
   <property name="service.description" value="Scheduler REST Endpoint" />
 
   <property name="opencast.service.type" value="org.opencastproject.scheduler" />
-  <property name="opencast.service.path" value="/scheduler/rest" />
+  <property name="opencast.service.path" value="/scheduler" />
 
   <service>
     <provide interface="org.opencastproject.scheduler.endpoint.SchedulerRestService" />

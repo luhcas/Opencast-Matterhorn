@@ -20,7 +20,7 @@
     <property name="service.description" value="Streaming Distribution REST Endpoint" />
 
     <property name="opencast.service.type" value="org.opencastproject.distribution.streaming" />
-    <property name="opencast.service.path" value="/distribution/streaming/rest" />
+    <property name="opencast.service.path" value="/distribution/streaming" />
     <property name="opencast.service.jobproducer" value="true" />
 
     <service>

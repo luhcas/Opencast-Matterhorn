@@ -65,7 +65,7 @@ public class CaptureAdminRestEndpointTest {
   
   @Test
   public void testGetAgents() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/capture-admin/rest/agents");
+    HttpGet get = new HttpGet(BASE_URL + "/capture-admin/agents");
     String xmlResponse = EntityUtils.toString(httpClient.execute(get).getEntity());
     Main.returnClient(httpClient);
     

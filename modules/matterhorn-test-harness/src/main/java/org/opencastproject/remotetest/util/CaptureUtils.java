@@ -52,7 +52,7 @@ public final class CaptureUtils {
    * @return <code>true</code> if the agent is online
    */
   public static boolean isOnline(String agent) {
-    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/rest/agents/" + agent);
+    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/agents/" + agent);
     return HttpStatus.SC_OK == Main.getClient().execute(request).getStatusLine().getStatusCode();
   }
 
@@ -69,7 +69,7 @@ public final class CaptureUtils {
    *           if the response can't be parsed
    */
   public static boolean isCapturing(String captureAgentId) throws IllegalStateException, Exception {
-    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/rest/agents/" + captureAgentId);
+    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/agents/" + captureAgentId);
     HttpResponse response = Main.getClient().execute(request);
     if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
       throw new IllegalStateException("Capture agent '" + captureAgentId + "' is unexpectedly offline");
@@ -78,14 +78,14 @@ public final class CaptureUtils {
   }
 
   public static boolean recordingExists(String recordingId) throws Exception {
-    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/rest/recordings/" + recordingId);
+    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/recordings/" + recordingId);
     TrustedHttpClient client = Main.getClient();
     HttpResponse response = client.execute(request);
     return HttpStatus.SC_OK == response.getStatusLine().getStatusCode();
   }
 
   public static boolean isInState(String recordingId, String state) throws Exception {
-    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/rest/recordings/" + recordingId);
+    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/recordings/" + recordingId);
     TrustedHttpClient client = Main.getClient();
     HttpResponse response = client.execute(request);
     if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
@@ -96,7 +96,7 @@ public final class CaptureUtils {
   }
 
   public static void setState(String recordingId, String state) throws Exception {
-    HttpPost request = new HttpPost(BASE_URL + "/capture-admin/rest/recordings/" + recordingId);
+    HttpPost request = new HttpPost(BASE_URL + "/capture-admin/recordings/" + recordingId);
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("state", state));
     request.setEntity(new UrlEncodedFormEntity(params));

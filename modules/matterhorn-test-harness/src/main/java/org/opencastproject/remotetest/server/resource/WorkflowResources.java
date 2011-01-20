@@ -35,7 +35,7 @@ import java.util.List;
 
 public class WorkflowResources {
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/search/rest/";
+    return Main.getBaseUrl() + "/search/";
   }
 
   /**

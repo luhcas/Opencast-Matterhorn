@@ -24,7 +24,7 @@
         });
         // load preview player and metadata
         $.ajax({
-          url : '/workflow/rest/instance/' + id + '.xml',
+          url : '/workflow/instance/' + id + '.xml',
           dataType : 'xml',    // or XML..
           success : function(data) {    
             // load metadata

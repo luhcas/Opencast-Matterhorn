@@ -21,7 +21,7 @@
     <property name="service.description" value="Media Inspection REST Endpoint" />
 
     <property name="opencast.service.type" value="org.opencastproject.inspection" />
-    <property name="opencast.service.path" value="/inspection/rest" />
+    <property name="opencast.service.path" value="/inspection" />
     <property name="opencast.service.jobproducer" value="true" />
 
     <service>

@@ -45,14 +45,14 @@ for file in datafiles:
 	popd
 
         #Wait until Felix starts up
-        running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://localhost:8080/state/rest/state
+        running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://localhost:8080/state/state
         while (len(running.grep("200 OK")) < 1 ):
                 import time
                 time.sleep(1)
-                running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://localhost:8080/state/rest/state;
+                running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://localhost:8080/state/state;
         time.sleep(3) # just in case startCapture endpoint not up yet, but soon will be
 
-	config=!curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" http://localhost:8080/capture/rest/configuration
+	config=!curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" http://localhost:8080/capture/configuration
 	configuration=dict()
 	for line in config:
 		key=line.split("=")[0]
@@ -61,7 +61,7 @@ for file in datafiles:
 
 	#Start the test with the appropriate config file
         data_file="performance_tests/" + file
-        !curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data-urlencode config@$data_file http://localhost:8080/capture/rest/startCapture
+        !curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data-urlencode config@$data_file http://localhost:8080/capture/startCapture
 
         #Start dstat in the new dir and block for capture.max.length seconds
         dstat_output="/oc_perf/" + props["capture.recording.id"].strip("\n") + "/dstat.log"

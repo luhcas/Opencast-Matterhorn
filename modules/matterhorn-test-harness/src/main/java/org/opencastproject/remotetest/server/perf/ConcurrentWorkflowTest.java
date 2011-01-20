@@ -78,7 +78,7 @@ public class ConcurrentWorkflowTest {
   @PerfTest(invocations = 100, threads = 100)
   public void testStartAndRetrieveWorkflowInstance() throws Exception {
     // Start a workflow instance via the rest endpoint
-    HttpPost postStart = new HttpPost(BASE_URL + "/workflow/rest/start");
+    HttpPost postStart = new HttpPost(BASE_URL + "/workflow/start");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     formParams.add(new BasicNameValuePair("definition", getSampleWorkflowDefinition()));
@@ -91,12 +91,12 @@ public class ConcurrentWorkflowTest {
     String id = getWorkflowInstanceId(postResponse);
 
     // Ensure we can retrieve the workflow instance from the rest endpoint
-    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/instance/" + id + ".xml");
     String getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
     Assert.assertEquals(id, getWorkflowInstanceId(getResponse));
 
     // Make sure we can retrieve it via json, too
-    HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".json");
+    HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/instance/" + id + ".json");
     String jsonResponse = EntityUtils.toString(client.execute(getWorkflowJson).getEntity());
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
     if (json == null)
@@ -108,7 +108,7 @@ public class ConcurrentWorkflowTest {
     while (true) {
       if (++attempts == 1000)
         Assert.fail("workflow rest endpoint test has hung");
-      getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
+      getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/instance/" + id + ".xml");
       getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
       String state = getWorkflowInstanceStatus(getResponse);
       if ("FAILED".equals(state))

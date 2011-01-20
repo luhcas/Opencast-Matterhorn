@@ -59,7 +59,7 @@ public class IngestZipTest {
   @Test
   public void testIngestZip() throws Exception {
     byte[] bytesToPost = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("ingest.zip"));
-    HttpPost post = new HttpPost(BASE_URL + "/ingest/rest/addZippedMediaPackage");
+    HttpPost post = new HttpPost(BASE_URL + "/ingest/addZippedMediaPackage");
     post.setEntity(new ByteArrayEntity(bytesToPost));
     HttpResponse response = client.execute(post);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());    

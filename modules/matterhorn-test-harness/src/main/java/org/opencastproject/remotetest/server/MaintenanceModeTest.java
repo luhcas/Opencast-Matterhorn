@@ -70,7 +70,7 @@ public class MaintenanceModeTest {
   @Test
   public void testMaintenanceMode() throws Exception {
     // Ensure that there is a service available
-    HttpGet availableServicesGet = new HttpGet(Main.BASE_URL + "/services/rest/available.xml?serviceType="
+    HttpGet availableServicesGet = new HttpGet(Main.BASE_URL + "/services/available.xml?serviceType="
             + SERVICE_TYPE);
     HttpResponse availableServicesResponse = client.execute(availableServicesGet);
     Assert.assertEquals(HttpStatus.SC_OK, availableServicesResponse.getStatusLine().getStatusCode());
@@ -79,7 +79,7 @@ public class MaintenanceModeTest {
     Assert.assertTrue(availableServicesNodes.getLength() == 1);
 
     // Start a job
-    HttpPost postJob = new HttpPost(Main.BASE_URL + "/services/rest/job");
+    HttpPost postJob = new HttpPost(Main.BASE_URL + "/services/job");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("jobType", SERVICE_TYPE));
     formParams.add(new BasicNameValuePair("host", Main.BASE_URL));
@@ -92,7 +92,7 @@ public class MaintenanceModeTest {
     Assert.assertEquals(HttpStatus.SC_OK, jobResponse.getStatusLine().getStatusCode());
 
     // Put the server into maintenance mode
-    HttpPost postMaintenance = new HttpPost(Main.BASE_URL + "/services/rest/maintenance");
+    HttpPost postMaintenance = new HttpPost(Main.BASE_URL + "/services/maintenance");
     List<NameValuePair> maintenanceParams = new ArrayList<NameValuePair>();
     maintenanceParams.add(new BasicNameValuePair("host", Main.BASE_URL));
     maintenanceParams.add(new BasicNameValuePair("maintenance", "true"));
@@ -117,7 +117,7 @@ public class MaintenanceModeTest {
     Assert.assertEquals(HttpStatus.SC_OK, maintenanceModeJobCreationResponse.getStatusLine().getStatusCode());
 
     // Restore the server to normal mode
-    HttpPost postNormal = new HttpPost(Main.BASE_URL + "/services/rest/maintenance");
+    HttpPost postNormal = new HttpPost(Main.BASE_URL + "/services/maintenance");
     maintenanceParams.remove(1);
     maintenanceParams.add(new BasicNameValuePair("maintenance", "false"));
     postNormal.setEntity(new UrlEncodedFormEntity(maintenanceParams, "UTF-8"));

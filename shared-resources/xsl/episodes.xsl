@@ -71,7 +71,7 @@
                 <br />
                  Alternate media files that may be playable on other players may be listed in this
                 <a>
-                  <xsl:attribute name="href">../../search/rest/episode.xml?id=<xsl:value-of
+                  <xsl:attribute name="href">../../search/episode.xml?id=<xsl:value-of
                     select="mediapackage/@id" /></xsl:attribute>
                   XML file
                 </a>.

@@ -496,7 +496,7 @@ public class IngestRestService {
       UploadJob job = createUploadJob();
       is = getClass().getResourceAsStream("/templates/uploadform.html");
       String html = IOUtils.toString(is, "UTF-8");
-      // String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
+      // String uploadURL = serverURL + "/ingest/addElementMonitored/" + job.getId();
       String uploadURL = "addElementMonitored/" + job.getId();
       html = html.replaceAll("\\{uploadURL\\}", uploadURL);
       html = html.replaceAll("\\{jobId\\}", job.getId());

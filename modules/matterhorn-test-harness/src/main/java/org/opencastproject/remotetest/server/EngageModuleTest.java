@@ -81,7 +81,7 @@ public class EngageModuleTest {
   public static String ENGAGE_BASE_URL = BASE_URL + "/engage/ui";
 
   private void clearSearchIndex() throws Exception {
-    HttpPost post = new HttpPost(BASE_URL + "/search/rest/clear");
+    HttpPost post = new HttpPost(BASE_URL + "/search/clear");
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));

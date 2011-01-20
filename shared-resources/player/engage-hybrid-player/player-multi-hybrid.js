@@ -1400,7 +1400,7 @@ Opencast.Player = (function () {
         $.ajax(
         {
             type: 'GET',
-            url: "../../usertracking/rest/?_method=PUT",
+            url: "../../usertracking/?_method=PUT",
             data: "id=" + mediaPackageId + "&in=" + inPosition + "&out=" + outPosition + "&type=FOOTPRINT",
             dataType: 'xml',
             success: function (xml) {

@@ -1,9 +1,9 @@
 ocRecordings = new (function() {
 
-  var WORKFLOW_LIST_URL = '../workflow/rest/instances.json';          // URL of workflow instances list endpoint
+  var WORKFLOW_LIST_URL = '../workflow/instances.json';          // URL of workflow instances list endpoint
   var WORKFLOW_INSTANCE_URL = '';                                     // URL of workflow instance endpoint
-  var WORKFLOW_STATISTICS_URL = '../workflow/rest/statistics.json';   // URL of workflow instances statistics endpoint
-  var SERIES_URL = '/series/rest'
+  var WORKFLOW_STATISTICS_URL = '../workflow/statistics.json';   // URL of workflow instances statistics endpoint
+  var SERIES_URL = '/series'
 
   var STATISTICS_DELAY = 3000;     // time interval for statistics update
 
@@ -558,7 +558,7 @@ ocRecordings = new (function() {
 
     $.ajax({
       type       : 'POST',
-      url        : '../workflow/rest/replaceAndresume/',
+      url        : '../workflow/replaceAndresume/',
       data       : data,
       error      : function(XHR,status,e){
         if (XHR.status == '204') {
@@ -701,7 +701,7 @@ ocRecordings = new (function() {
   this.removeRecording = function(id, title) { //TODO Delete the scheduled event too. Don't just stop the workflow.
     if(confirm('Are you sure you wish to delete ' + title + '?')){
       $.ajax({
-        url        : '../workflow/rest/stop',
+        url        : '../workflow/stop',
         data       : {
           id: id
         },
@@ -851,7 +851,7 @@ ocRecordings = new (function() {
       if(ocRecordings.Configuration.state === 'bulkedit') {
         manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
         event = manager.serialize();
-        $.post('/scheduler/rest/', 
+        $.post('/scheduler/', 
           {event: event, idList: '[' + eventIdList.toString() + ']'},
           ocRecordings.bulkActionComplete);
       } else if(ocRecordings.Configuration.state === 'bulkdelete') {
@@ -874,7 +874,7 @@ ocRecordings = new (function() {
             return;
           }
           $.ajax({
-            url: '/scheduler/rest/'+id,
+            url: '/scheduler/'+id,
             type: 'DELETE',
             success: function(){
               progress = progress + progressChunk;

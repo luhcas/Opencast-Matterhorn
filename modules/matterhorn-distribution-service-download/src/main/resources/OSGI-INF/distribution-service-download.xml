@@ -20,7 +20,7 @@
     <property name="service.description" value="Download Distribution REST Endpoint" />
 
     <property name="opencast.service.type" value="org.opencastproject.distribution.download" />
-    <property name="opencast.service.path" value="/distribution/download/rest" />
+    <property name="opencast.service.path" value="/distribution/download" />
     <property name="opencast.service.jobproducer" value="true" />
 
     <service>

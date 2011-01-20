@@ -11,7 +11,7 @@ Opencast.Annotation_Chapter = (function ()
     var annotationChapterDisplayed = false;
     var ANNOTATION_CHAPTER = "Annotation",
         ANNOTATION_CHAPTERHIDE = "Annotation off";
-    var annotationDataURL = '../../annotation/rest/annotations.json'; // Test-Data at "js/engage_plugins/demodata/annotation_demo.json"
+    var annotationDataURL = '../../annotation/annotations.json'; // Test-Data at "js/engage_plugins/demodata/annotation_demo.json"
     
     /**
      * @memberOf Opencast.Annotation_Chapter

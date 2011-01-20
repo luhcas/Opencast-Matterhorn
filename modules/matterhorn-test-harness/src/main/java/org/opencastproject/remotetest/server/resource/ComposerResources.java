@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class ComposerResources {
   public static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/composer/ffmpeg/rest/";
+    return Main.getBaseUrl() + "/composer/ffmpeg/";
   }
 
   public static HttpResponse profiles(TrustedHttpClient client) {

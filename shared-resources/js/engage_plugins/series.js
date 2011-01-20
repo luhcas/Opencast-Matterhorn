@@ -36,7 +36,7 @@ Opencast.Series = (function ()
     {
         $.ajax(
         {
-            url: '../../search/rest/series.json?id=' + series_id + '&episodes=true&limit=20&offset=' + (page - 1) * 20 + '&jsonp=?',
+            url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=' + (page - 1) * 20 + '&jsonp=?',
             dataType: 'jsonp',
             jsonp: 'jsonp',
             success: function (data)
@@ -72,7 +72,7 @@ Opencast.Series = (function ()
     {
         $.ajax(
         {
-            url: '../../search/rest/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
+            url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
             dataType: 'jsonp',
             jsonp: 'jsonp',
             success: function (data)
@@ -157,7 +157,7 @@ Opencast.Series = (function ()
         mediaPackageId = id;
         $.ajax(
         {
-            url: '../../search/rest/episode.json?id=' + mediaPackageId + '&jsonp=?',
+            url: '../../search/episode.json?id=' + mediaPackageId + '&jsonp=?',
             dataType: 'jsonp',
             jsonp: 'jsonp',
             success: function (data)
@@ -167,7 +167,7 @@ Opencast.Series = (function ()
                 {
                     $.ajax(
                     {
-                        url: '../../search/rest/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
+                        url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
                         dataType: 'jsonp',
                         jsonp: 'jsonp',
                         success: function (data)

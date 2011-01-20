@@ -51,14 +51,14 @@ public class DocUtilTest {
     String document;
     RestEndpoint endpoint;
 
-    data = new DocRestData(name, title, "/azservice/rest", new String[] { "My first note" });
+    data = new DocRestData(name, title, "/azservice", new String[] { "My first note" });
     document = DocUtil.generate(data);
     assertNotNull(document);
     assertFalse(document.startsWith("ERROR::"));
     assertTrue(document.contains(title));
 
     // now for one with some real endpoint data
-    data = new DocRestData(name, title, "/azservice/rest", new String[] { "My first note" });
+    data = new DocRestData(name, title, "/azservice", new String[] { "My first note" });
     data.addNote("my second note");
     endpoint = new RestEndpoint("name1", RestEndpoint.Method.GET, "/path1/{rp1}", null);
     endpoint.addPathParam(new Param("rp1", Param.Type.STRING, null, null, null));
@@ -95,7 +95,7 @@ public class DocUtilTest {
     assertTrue(document.contains(endpoint2.getName()));
 
     // test out the new format handling - MH-1752
-    data = new DocRestData(name, title, "/azservice/rest", null);
+    data = new DocRestData(name, title, "/azservice", null);
     RestEndpoint endpointDot = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path3/stuff.xml", null);
     endpointDot.addStatus(Status.ok(null));
     data.addEndpoint(RestEndpoint.Type.READ, endpointDot);
@@ -104,7 +104,7 @@ public class DocUtilTest {
     assertFalse(document.startsWith("ERROR::"));
     assertTrue(document.contains(title));
 
-    data = new DocRestData(name, title, "/azservice/rest", null);
+    data = new DocRestData(name, title, "/azservice", null);
     RestEndpoint endpoint3 = new RestEndpoint("name1", RestEndpoint.Method.GET, "/path3/{value}", null);
     endpoint3.setAutoPathFormat(true);
     endpoint3.addPathParam(new Param("value", Param.Type.STRING, null, null, null));
@@ -123,7 +123,7 @@ public class DocUtilTest {
 
     // test out the validation of params
     // this is missing one of the params in the path
-    data = new DocRestData(name, title, "/azservice/rest", null);
+    data = new DocRestData(name, title, "/azservice", null);
     endpoint = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path/{req1}/{req2}.{FORMAT}", null);
     endpoint.addPathParam(new Param("req1", Param.Type.STRING, null, null));
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
@@ -134,7 +134,7 @@ public class DocUtilTest {
       assertNotNull(e.getMessage());
     }
 
-    data = new DocRestData(name, title, "/azservice/rest", null);
+    data = new DocRestData(name, title, "/azservice", null);
     endpoint = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path/{req1}", null);
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
     try {
@@ -145,7 +145,7 @@ public class DocUtilTest {
     }
 
     // this has too many params compared to the path
-    data = new DocRestData(name, title, "/azservice/rest", null);
+    data = new DocRestData(name, title, "/azservice", null);
     endpoint = new RestEndpoint("nameDot", RestEndpoint.Method.GET, "/path/{req1}/{req2}.{FORMAT}", null);
     endpoint.addPathParam(new Param("req1", Param.Type.STRING, null, null));
     endpoint.addPathParam(new Param("req2", Param.Type.STRING, null, null));
@@ -159,7 +159,7 @@ public class DocUtilTest {
     }
 
     // test required params for non-get only
-    data = new DocRestData(name, title, "/azservice/rest", null);
+    data = new DocRestData(name, title, "/azservice", null);
     endpoint = new RestEndpoint("name5", RestEndpoint.Method.GET, "/path5/{value}", null);
     endpoint.setAutoPathFormat(true);
     endpoint.addPathParam(new Param("value", Param.Type.STRING, null, null, null));

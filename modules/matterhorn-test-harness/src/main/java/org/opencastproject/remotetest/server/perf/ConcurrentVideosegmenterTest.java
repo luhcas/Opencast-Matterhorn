@@ -59,7 +59,7 @@ public class ConcurrentVideosegmenterTest {
   }
 
   protected HttpPost getPost() throws Exception {
-    HttpPost postEncode = new HttpPost(BASE_URL + "/vsegmenter/rest/analyze");
+    HttpPost postEncode = new HttpPost(BASE_URL + "/vsegmenter/analyze");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("track", trackXml));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));

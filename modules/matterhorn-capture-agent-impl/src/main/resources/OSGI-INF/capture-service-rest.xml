@@ -4,7 +4,7 @@
   <property name="service.description" value="Capture REST Endpoint" />
 
   <property name="opencast.service.type" value="org.opencastproject.capture" />
-  <property name="opencast.service.path" value="/capture/rest" />
+  <property name="opencast.service.path" value="/captureagent" />
   <property name="opencast.service.remote" value="false" />
 
   <service>

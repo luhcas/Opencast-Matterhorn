@@ -183,7 +183,7 @@ function handleEvent(doc) {
     });
     var seriesId = $(eventDoc.documentElement).find("ispartof").text();
     if (seriesId) {
-      $.get('../series/rest/series/' + seriesId, function(data) {
+      $.get('../series/series/' + seriesId, function(data) {
         var seriesTitle = $(data.documentElement).find("metadata > key:contains('title')").parent().find("value").text();
         $(eventDoc.documentElement).find("ispartof").text(seriesTitle + " (" + seriesId + ")");
         $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
@@ -228,7 +228,7 @@ function handleDCMetadata(metadataDoc){
   //Hopefully we've loaded an xml document with the values we want, transform and append this.
     var seriesId = $(eventDoc.documentElement).find("ispartof").text();
     if (seriesId) {
-      $.get('../series/rest/series/' + seriesId, function(data) {
+      $.get('../series/series/' + seriesId, function(data) {
         var seriesTitle = $(data.documentElement).find("metadata > key:contains('title')").parent().find("value").text();
         $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
       });

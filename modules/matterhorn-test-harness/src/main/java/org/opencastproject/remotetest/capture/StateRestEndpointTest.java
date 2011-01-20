@@ -48,7 +48,7 @@ public class StateRestEndpointTest {
   
   @Test
   public void testGetStateGet() throws Exception {
-    HttpGet request = new HttpGet(BASE_URL + "/state/rest/state");
+    HttpGet request = new HttpGet(BASE_URL + "/state/state");
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -70,7 +70,7 @@ public class StateRestEndpointTest {
   
   @Test
   public void testGetRecordingsNoneGet() throws Exception {
-    HttpGet request = new HttpGet(BASE_URL + "/state/rest/recordings");
+    HttpGet request = new HttpGet(BASE_URL + "/state/recordings");
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -88,7 +88,7 @@ public class StateRestEndpointTest {
     
     recordingId = createRecording();
     
-    HttpGet request = new HttpGet(BASE_URL + "/state/rest/recordings");
+    HttpGet request = new HttpGet(BASE_URL + "/state/recordings");
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -107,7 +107,7 @@ public class StateRestEndpointTest {
     Thread.sleep(10000);
 
     HttpDelete deleteRecordingRequest = 
-      new HttpDelete(BASE_URL + "/capture-admin/rest/recordings/"+ recordingId);
+      new HttpDelete(BASE_URL + "/capture-admin/recordings/"+ recordingId);
     HttpResponse deleteRecordingResponse = client.execute(deleteRecordingRequest);
     
     Assert.assertEquals(200, deleteRecordingResponse.getStatusLine().getStatusCode());
@@ -132,7 +132,7 @@ public class StateRestEndpointTest {
   protected String createRecording() throws Exception {
     String recordingId;
     
-    HttpGet startCaptureRequest = new HttpGet(BASE_URL + "/capture/rest/startCapture");
+    HttpGet startCaptureRequest = new HttpGet(BASE_URL + "/capture/startCapture");
     HttpResponse startCaptureResponse = client.execute(startCaptureRequest);
     
     Assert.assertEquals(200, startCaptureResponse.getStatusLine().getStatusCode());
@@ -145,7 +145,7 @@ public class StateRestEndpointTest {
     
     startCaptureRequest.abort();
     
-    HttpGet stopCaptureRequest = new HttpGet(BASE_URL + "/capture/rest/stopCapture");
+    HttpGet stopCaptureRequest = new HttpGet(BASE_URL + "/capture/stopCapture");
     HttpResponse stopCaptureResponse = client.execute(stopCaptureRequest);
     
     Assert.assertEquals(200, stopCaptureResponse.getStatusLine().getStatusCode());

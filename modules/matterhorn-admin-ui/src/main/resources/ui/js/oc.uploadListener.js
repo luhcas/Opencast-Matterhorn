@@ -56,11 +56,11 @@ ocUploadListener.getProgress = function() {
   if (!ocUploadListener.updateRequested) {
     ocUploadListener.updateRequested = true;
     $.ajax({
-      url        : '../ingest/rest/getProgress/' + ocUploadListener.jobId,
+      url        : '../ingest/getProgress/' + ocUploadListener.jobId,
       type       : 'GET',
       dataType   : 'json',
       error      : function(XHR,status,e){
-        ocUtils.log('failed to get progress information from ' + '../ingest/rest/getProgress/' + ocUploadListener.jobId);
+        ocUtils.log('failed to get progress information from ' + '../ingest/getProgress/' + ocUploadListener.jobId);
         window.clearInterval(ocUploadListener.updateInterval); // ie in case of inbox ingest
       },
       success    : function(data, status) {

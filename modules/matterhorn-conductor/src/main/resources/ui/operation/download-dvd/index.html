@@ -9,7 +9,7 @@
         var id = parent.document.getElementById("holdWorkflowId").value;
         // get WorkflowInstance
         $.ajax({
-          url : '../../../workflow/rest/instance/' + id + '.xml',
+          url : '../../../workflow/instance/' + id + '.xml',
           dataType : 'xml',    // or XML..
           success : function(data) {    // get neccessary data to make the link to the DVD image working
             var elms = data.documentElement.getElementsByTagName('track');

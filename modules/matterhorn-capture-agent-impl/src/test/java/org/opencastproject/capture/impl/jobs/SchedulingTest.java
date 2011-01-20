@@ -77,7 +77,7 @@ public class SchedulingTest {
     props.setProperty("capture.device.AUDIO.src", this.getClass().getResource("/capture/audio.mp3").getFile());
     props.setProperty("capture.device.AUDIO.outputfile", "microphone.mp3");
     props.setProperty(CaptureParameters.INGEST_ENDPOINT_URL,
-            "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage");
+            "http://nightly.opencastproject.org/ingest/addZippedMediaPackage");
   }
 
   @After

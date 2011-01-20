@@ -210,7 +210,7 @@ public class Main {
     byte[] bytesToPost = IOUtils.toByteArray(Main.class.getResourceAsStream("/ingest.zip"));
     
     // post it to the ingest service
-    HttpPost post = new HttpPost(BASE_URL + "/ingest/rest/addZippedMediaPackage");
+    HttpPost post = new HttpPost(BASE_URL + "/ingest/addZippedMediaPackage");
     post.setEntity(new ByteArrayEntity(bytesToPost));
     TrustedHttpClient client = getClient();
     HttpResponse response = client.execute(post);

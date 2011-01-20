@@ -21,7 +21,7 @@
     <implementation class="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" />
     <property name="service.description" value="GStreamer Composer REST Endpoint" />
     <property name="opencast.service.type" value="org.opencastproject.composer" />
-    <property name="opencast.service.path" value="/composer/gstreamer/rest" />
+    <property name="opencast.service.path" value="/composer/gstreamer" />
     <property name="opencast.service.jobproducer" value="true" />
     <service>
       <provide interface="org.opencastproject.composer.gstreamer.endpoint.GStreamerComposerRestService" />

@@ -8,7 +8,7 @@
     <script type="text/javascript" src="js/state.js"></script>
 </head>
 <script type="text/javascript" language="javascript">
-var stateURL = "http://" + window.location.hostname + ":8080/state/rest/state";
+var stateURL = "http://" + window.location.hostname + ":8080/state/state";
 function refreshState(url, target) {
   req = new XMLHttpRequest();
   req.onreadystatechange = function() {getResponse(target);};
@@ -33,14 +33,14 @@ function getResponse(target) {
 
 	
 	function stopCapture() {
-		document.location = "http://" + window.location.hostname + ":8080/capture/rest/stopCapture";
+		document.location = "http://" + window.location.hostname + ":8080/capture/stopCapture";
 	}
 	
-	var start = "http://" + window.location.hostname + ":8080/capture/rest/startCapture"
-	var end = "<a href='http://" + window.location.hostname + ":8080/capture/rest/stopCapture'>Stop Capture</a>";
+	var start = "http://" + window.location.hostname + ":8080/capture/startCapture"
+	var end = "<a href='http://" + window.location.hostname + ":8080/capture/stopCapture'>Stop Capture</a>";
 	
 	var client = new XMLHttpRequest();
-	client.open("GET", "http://" + window.location.hostname + ":8080/capture/rest/configuration", false);
+	client.open("GET", "http://" + window.location.hostname + ":8080/capture/configuration", false);
 	client.send();
 	var form = "<form name='form' action=" + start + " method='POST'><textarea name=config rows='20' cols='100'>" + client.responseText + "</textarea><br>" +
 		"<input type='submit' value='Start Capture'>" +

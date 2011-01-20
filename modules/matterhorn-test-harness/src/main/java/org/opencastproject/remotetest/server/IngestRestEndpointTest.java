@@ -68,19 +68,19 @@ public class IngestRestEndpointTest {
   @Test
   public void testIngestThinClient() throws Exception {
     // create emptiy MediaPackage
-    HttpGet get = new HttpGet(BASE_URL + "/ingest/rest/createMediaPackage");
+    HttpGet get = new HttpGet(BASE_URL + "/ingest/createMediaPackage");
     HttpResponse response = client.execute(get);
     HttpEntity entity = response.getEntity();
     String mp = EntityUtils.toString(entity);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 
     // Grow media package
-    mp = postCall("/ingest/rest/addTrack", "av.mov", "track/presenter", mp);
-    mp = postCall("/ingest/rest/addCatalog", "dublincore.xml", "dublincore/episode", mp);
-    mp = postCall("/ingest/rest/addAttachment", "cover.png", "cover/source", mp);
+    mp = postCall("/ingest/addTrack", "av.mov", "track/presenter", mp);
+    mp = postCall("/ingest/addCatalog", "dublincore.xml", "dublincore/episode", mp);
+    mp = postCall("/ingest/addAttachment", "cover.png", "cover/source", mp);
 
     // Ingest the new grown media package
-    mp = postCall("/ingest/rest/ingest", null, null, mp);
+    mp = postCall("/ingest/ingest", null, null, mp);
   }
 
   protected String postCall(String method, String mediaFile, String flavor, String mediaPackage)

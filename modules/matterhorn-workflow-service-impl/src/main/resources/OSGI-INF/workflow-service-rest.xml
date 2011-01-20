@@ -5,7 +5,7 @@
   <property name="service.description" value="Workflow REST Endpoint" />
 
   <property name="opencast.service.type" value="org.opencastproject.workflow" />
-  <property name="opencast.service.path" value="/workflow/rest" />
+  <property name="opencast.service.path" value="/workflow" />
   <property name="opencast.service.jobproducer" value="true" />
 
   <service>

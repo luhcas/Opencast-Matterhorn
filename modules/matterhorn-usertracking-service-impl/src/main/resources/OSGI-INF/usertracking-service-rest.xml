@@ -5,7 +5,7 @@
 	<implementation class="org.opencastproject.usertracking.endpoint.UserTrackingRestService" />
 	<property name="service.description" value="User Tracking REST Endpoint" />
 	<property name="opencast.service.type" value="org.opencastproject.usertracking" />
-	<property name="opencast.service.path" value="/usertracking/rest" />
+	<property name="opencast.service.path" value="/usertracking" />
 	<service>
 		<provide interface="org.opencastproject.usertracking.endpoint.UserTrackingRestService" />
 	</service>

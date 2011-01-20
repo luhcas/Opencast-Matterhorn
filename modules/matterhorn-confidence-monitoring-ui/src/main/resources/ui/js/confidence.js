@@ -1,4 +1,4 @@
-var CAPTURE_AGENT_CONFIDENCE_MONITORING_URL = "/confidence/rest";
+var CAPTURE_AGENT_CONFIDENCE_MONITORING_URL = "/confidence";
 var AudioBar = {} || AudioBar;
 var Monitor = {} || Monitor;
 Monitor.intervalImgId = null;

@@ -67,7 +67,7 @@ public final class WorkflowUtils {
    *           if reading the response fails
    */
   public static String getWorkflowById(String workflowId) throws IllegalStateException, IOException {
-    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + workflowId + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/instance/" + workflowId + ".xml");
     TrustedHttpClient client = Main.getClient();
     HttpResponse response = client.execute(getWorkflowMethod);
     if (response.getStatusLine().getStatusCode() != 200)
@@ -89,7 +89,7 @@ public final class WorkflowUtils {
    */
   public static boolean isWorkflowInOperation(String workflowId, String operation) throws IllegalStateException,
           Exception {
-    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + workflowId + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/instance/" + workflowId + ".xml");
     TrustedHttpClient client = Main.getClient();
     String workflow = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
     String currentOperation = (String) Utils.xpath(workflow, "//operation[@state='PAUSED']/@id", XPathConstants.STRING);
@@ -109,7 +109,7 @@ public final class WorkflowUtils {
    *           if the specified workflow can't be found
    */
   public static boolean isWorkflowInState(String workflowId, String state) throws IllegalStateException, Exception {
-    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + workflowId + ".xml");
+    HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/instance/" + workflowId + ".xml");
     TrustedHttpClient client = Main.getClient();
     HttpResponse response = client.execute(getWorkflowMethod);
     if (response.getStatusLine().getStatusCode() != 200)
@@ -164,7 +164,7 @@ public final class WorkflowUtils {
    * @return the id of the workflow definition
    */
   public static String registerWorkflowDefinition(String workflowDefinition) throws Exception {
-    HttpPut put = new HttpPut(BASE_URL + "/workflow/rest/definition");
+    HttpPut put = new HttpPut(BASE_URL + "/workflow/definition");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("workflowDefinition", workflowDefinition));
     put.setEntity(new UrlEncodedFormEntity(params));
@@ -178,7 +178,7 @@ public final class WorkflowUtils {
   }
 
   public static void unregisterWorkflowDefinition(String workflowDefinitionId) throws Exception {
-    HttpDelete delete = new HttpDelete(BASE_URL + "/workflow/rest/definition/" + workflowDefinitionId);
+    HttpDelete delete = new HttpDelete(BASE_URL + "/workflow/definition/" + workflowDefinitionId);
     TrustedHttpClient client = Main.getClient();
     HttpResponse response = client.execute(delete);
     Main.returnClient(client);

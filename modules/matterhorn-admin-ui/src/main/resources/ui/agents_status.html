@@ -19,7 +19,7 @@
     <script type="text/javascript">
       $(document).ready( function() {
 
-        $('#stage').xslt("../../capture-admin/rest/agents", "xsl/agents_status.xsl", function() {
+        $('#stage').xslt("../../capture-admin/agents", "xsl/agents_status.xsl", function() {
           $('#agentsTable').tablesorter({cssAsc: 'sortable-asc', cssDesc: 'sortable-desc'});
           
           //header underline

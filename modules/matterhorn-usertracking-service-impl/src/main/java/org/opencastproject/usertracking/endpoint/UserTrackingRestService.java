@@ -67,7 +67,7 @@ public class UserTrackingRestService {
 
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
 
-  protected String serviceUrl = "/usertracking/rest"; // set this to the default value initially
+  protected String serviceUrl = "/usertracking"; // set this to the default value initially
 
   /**
    * Method to set the service this REST endpoint uses

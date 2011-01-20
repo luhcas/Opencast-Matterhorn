@@ -23,7 +23,7 @@
     <property name="service.description" value="Video Segmentation REST Endpoint" />
 
     <property name="opencast.service.type" value="org.opencastproject.videosegmenter" />
-    <property name="opencast.service.path" value="/analysis/videosegmenter/rest" />
+    <property name="opencast.service.path" value="/analysis/videosegmenter" />
     <property name="opencast.service.jobproducer" value="true" />
 
     <service>

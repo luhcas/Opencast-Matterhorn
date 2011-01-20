@@ -45,13 +45,13 @@ ocRecordings.init = function() {
   ocUtils.internationalize(i18n, 'i18n');
   
   // get config
-  $.getJSON('/info/rest/components.json', function(data) {
+  $.getJSON('/info/components.json', function(data) {
     ocRecordings.configuration = data;
     $('#engagelink').attr('href', data.engage + '/engage/ui');
   });
 
   // get 'me'
-  $.getJSON('/info/rest/me.json', function(data) {
+  $.getJSON('/info/me.json', function(data) {
     ocRecordings.me = data;
     $('#logout').append(' "' + data.username + '"');
   });
@@ -319,7 +319,7 @@ ocRecordings.continueWorkflow = function(postData) {
   
   $.ajax({
     type       : 'POST',
-    url        : '../workflow/rest/replaceAndresume/',
+    url        : '../workflow/replaceAndresume/',
     data       : data,
     error      : function(XHR,status,e){
       if (XHR.status == '204') {
@@ -353,7 +353,7 @@ ocRecordings.retryRecording = function(workflowId) {
 
 ocRecordings.removeRecording = function(workflowId) {
   $.ajax({
-    url        : '../workflow/rest/stop',
+    url        : '../workflow/stop',
     data       : {
       id: workflowId
     },
@@ -370,7 +370,7 @@ ocRecordings.removeRecording = function(workflowId) {
 ocRecordings.removeScheduledRecording = function(eventId, title) {
   if(confirm('Are you sure you wish to delete ' + title + '?')){
     $.ajax({
-      url        : '/scheduler/rest/' + eventId,
+      url        : '/scheduler/' + eventId,
       type       : 'DELETE',
       error      : function(XHR,status,e){
         alert('Could not remove Scheduler Event ' + workflowId);
@@ -464,7 +464,7 @@ ocRecordings.applyBulkEdit = function() {
   $.each($('.selectRecording'), function(i,v){
     eventIdList.push(v.value);
   });
-  $.post('/scheduler/rest/', 
+  $.post('/scheduler/', 
     {event: event, eventList: '[' + eventIdList.toString() + ']'},
     ocRecordings.bulkEditComplete);
 }

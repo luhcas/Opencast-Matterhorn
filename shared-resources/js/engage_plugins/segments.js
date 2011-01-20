@@ -337,7 +337,7 @@ Opencast.segments = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: '../../search/rest/episode.json',
+            url: '../../search/episode.json',
             data: 'id=' + mediaPackageId,
             dataType: 'jsonp',
             jsonp: 'jsonp',

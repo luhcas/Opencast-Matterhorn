@@ -76,39 +76,39 @@ public class CaptureRestEndpointTest {
   @Test
   public void testUnscheduledCapture() throws Exception {
     //Test using only unscheduled calls
-    sendGet(BASE_URL + "/capture/rest/startCapture", HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/startCapture", HttpStatus.SC_OK);
     Thread.sleep(1000);
-    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_OK);
-    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendGet(BASE_URL + "/capture/stopCapture", HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
   
   @Test
   public void testUnscheduledMix() throws Exception {
     //Test using both scheduled and unscheduled calls
-    sendGet(BASE_URL + "/capture/rest/startCapture", HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/startCapture", HttpStatus.SC_OK);
     Thread.sleep(1000);
-    sendPost(BASE_URL + "/capture/rest/stopCapture", stopParams, HttpStatus.SC_INTERNAL_SERVER_ERROR);
-    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_OK);
-    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendPost(BASE_URL + "/capture/stopCapture", stopParams, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendGet(BASE_URL + "/capture/stopCapture", HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
 
   @Test 
   public void testCapturePost() throws Exception {
     //Test using only scheduled calls
-    sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);
+    sendPost(BASE_URL + "/capture/startCapture", startParams, HttpStatus.SC_OK);
     Thread.sleep(1000);
-    sendPost(BASE_URL + "/capture/rest/stopCapture", stopParams, HttpStatus.SC_OK);
-    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendPost(BASE_URL + "/capture/stopCapture", stopParams, HttpStatus.SC_OK);
+    sendGet(BASE_URL + "/capture/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
 
   @Test
   public void testCaptureMix() throws Exception {
     //Test using both scheduled and unscheduled calls
-    sendPost(BASE_URL + "/capture/rest/startCapture", startParams, HttpStatus.SC_OK);
+    sendPost(BASE_URL + "/capture/startCapture", startParams, HttpStatus.SC_OK);
     Thread.sleep(1000);
-    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_OK);
-    sendPost(BASE_URL + "/capture/rest/stopCapture", stopParams, HttpStatus.SC_INTERNAL_SERVER_ERROR);
-    sendGet(BASE_URL + "/capture/rest/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendGet(BASE_URL + "/capture/stopCapture", HttpStatus.SC_OK);
+    sendPost(BASE_URL + "/capture/stopCapture", stopParams, HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    sendGet(BASE_URL + "/capture/stopCapture", HttpStatus.SC_INTERNAL_SERVER_ERROR);
   }
 
   private void sendGet(String URL, int returnCode) throws Exception {

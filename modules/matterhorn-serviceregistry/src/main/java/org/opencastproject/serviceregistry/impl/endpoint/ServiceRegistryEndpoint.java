@@ -385,7 +385,7 @@ public class ServiceRegistryEndpoint {
             "The service identifier"));
     registerEndpoint
             .addRequiredParam(new Param("host", Type.STRING, serverUrl, "The host's base URL for this service"));
-    registerEndpoint.addRequiredParam(new Param("path", Type.STRING, "/myservice/rest",
+    registerEndpoint.addRequiredParam(new Param("path", Type.STRING, "/myservice",
             "the path on the server responsible for handling this type of service"));
     registerEndpoint.addRequiredParam(new Param("jobProducer", Type.BOOLEAN, "false",
             "whether this service produces jobs, which track long running operations"));

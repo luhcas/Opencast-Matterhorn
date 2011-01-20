@@ -43,7 +43,7 @@ public class DocRestData extends DocData {
    * @param title
    *          [OPTIONAL] the title of the document
    * @param url
-   *          this is the absolute base URL for this endpoint, do not include the trailing slash (e.g. /workflow/rest)
+   *          this is the absolute base URL for this endpoint, do not include the trailing slash (e.g. /workflow)
    * @param notes
    *          [OPTIONAL] an array of notes to add into the end of the doc
    */

@@ -5,7 +5,7 @@
     Created on : November 19, 2009, 9:18 PM
     Author     : wulff
     Description:
-        Transforms the output of /capture-admin/rest/agents into an HTML table
+        Transforms the output of /capture-admin/agents into an HTML table
     TODO: add capability field (waiting for capture-admin-service)
 -->
 
