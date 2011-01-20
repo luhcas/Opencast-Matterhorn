@@ -93,7 +93,7 @@ Opencast.search = (function ()
             // Set background of the table tr
             this.backgroundColor = bgColor;
             // Set background of the scrubber elements
-            var segment = 'td#segment' + (i + 1);
+            var segment = 'td#segment' + i;
             if (bgColor !== 'none')
             {
                 // The image from jquery ui overrides the background-color, so: remove it
