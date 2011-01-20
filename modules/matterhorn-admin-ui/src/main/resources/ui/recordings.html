@@ -49,6 +49,8 @@
       .configRow div {float: right;}
       #holdActionStage {margin:20px; padding:0 0 20px;}
       #holdActionUI {border:none; width:100%;}
+      #refreshControlsContainer {margin-right: 18px;}
+      #controlsFoot .ui-widget {padding: 3px 5px 3px 5px;}
     </style>
     <script type="text/javascript">
 
@@ -195,8 +197,17 @@
 
       <!-- div id="controlsFoot" class="ui-widget-header ui-corner-bottom ui-helper-clearfix" -->
       <div id="controlsFoot" class="ui-helper-clearfix">
-        
-        <div class="layout-float-left">
+        <div id="refreshControlsContainer" class="layout-float-left ui-widget ui-state-default ui-corner-all ui-helper-clearfix">
+          <input type="checkbox" id="refreshEnabled"><label for="refreshEnabled"></label>
+            <span class="refresh-text">Update table every&nbsp;</span>
+            <select id="refreshInterval">
+              <option value="5">5</option>
+              <option value="7">7</option>
+              <option value="10">10</option>
+            </select>
+            <span class="refresh-text">&nbsp;seconds.</span>
+        </div>
+        <div class="ui-widget ui-state-default ui-corner-all ui-helper-clearfix layout-float-left">
           Show
           <select id="pageSize">
             <option>5</option>
@@ -298,7 +309,7 @@
   </tbody>
 </table>
       </textarea>
-      
+
       <textarea id="tableSelectTemplate">
 <table id="recordingsTable" class="ui-widget" cellspacing="0" width="100%">
   <thead>

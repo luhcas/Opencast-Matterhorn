@@ -41,6 +41,7 @@ ocRecordings = new (function() {
 
   var refreshing = false;      // indicates if JSONP requesting recording data is in progress
   this.refreshingStats = false; // indicates if JSONP requesting statistics data is in progress
+  this.refreshInterval = null;
   
   this.bulkEditComponents = {};
 
@@ -51,7 +52,7 @@ ocRecordings = new (function() {
     changedMediaPackage : null
   }
 
-  /** Executed when directly script is loaded: parses url parameters and
+  /** Executed directly when script is loaded: parses url parameters and
    *  returns the configuration object.
    */
   this.Configuration = new (function() {
@@ -60,7 +61,8 @@ ocRecordings = new (function() {
     this.state = 'all';
     this.pageSize = 10;
     this.page = 0;
-    this.refresh = 5000;
+    this.refresh = 5;
+    this.doRefresh = true;
     this.sortField = 'Date';
     this.sortOrder = 'DESC';
     this.filterField = null;
@@ -583,6 +585,23 @@ ocRecordings = new (function() {
     $('#stage').show();
   }
 
+  this.disableRefresh = function() {
+    if (ocRecordings.refreshInterval !== null) {
+      window.clearInterval(ocRecordings.refreshInterval);
+    }
+  }
+
+  this.updateRefreshInterval = function(enable, delay) {
+    delay = delay < 5 ? 5 : delay;
+    ocRecordings.Configuration.refresh = delay;
+    ocUtils.log('Setting Refresh to ' + enable + " - " + delay + " sec");
+    ocRecordings.Configuration.doRefresh = enable;
+    ocRecordings.disableRefresh();
+    if (enable) {
+      ocRecordings.refreshInterval = window.setInterval(refresh, delay * 1000);
+    }
+  }
+
   /** $(document).ready()
  *
  */
@@ -637,15 +656,45 @@ ocRecordings = new (function() {
       options : FILTER_FIELDS,
       selectedOption : ocRecordings.Configuration.filterField
     });
-    
+
+    // set refresh
+    ocRecordings.updateRefreshInterval(ocRecordings.Configuration.doRefresh, ocRecordings.Configuration.refresh);
+
+    // Refresh Controls
+    // set values according to config
+    if (ocRecordings.Configuration.doRefresh === 'true') {
+      $('#refreshEnabled').attr('checked', 'checked');
+      $('#refreshInterval').removeAttr('disabled');
+      $('#refreshControlsContainer span').css('color', 'white');
+    } else {
+      $('#refreshEnabled').removeAttr('checked');
+      $('#refreshInterval').attr('disabled', 'true');
+      $('#refreshControlsContainer span').css('color', 'silver');
+    }
+    $('#refreshInterval').val(ocRecordings.Configuration.refresh);
+    // attatch event handlers
+    $('#refreshEnabled').change(function() {
+      if ($(this).is(':checked')) {
+        $('#refreshInterval').removeAttr('disabled');
+        $('#refreshControlsContainer span').css('color', 'white');
+      } else {
+        $('#refreshInterval').attr('disabled', 'true');
+        $('#refreshControlsContainer span').css('color', 'silver');
+      }
+      ocRecordings.updateRefreshInterval($(this).is(':checked'), $('#refreshInterval').val());
+    });
+    $('#refreshInterval').change(function() {
+      ocRecordings.updateRefreshInterval($('#refreshEnabled').is(':checked'), $(this).val());
+    });
+
     // Bulk Actions
     $('.oc-ui-collapsible-widget .ui-widget-header').click(
-    function() {
-      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
-      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
-      $(this).next().toggle();
-      return false;
-    });
+      function() {
+        $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
+        $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+        $(this).next().toggle();
+        return false;
+      });
     
     $('#bulkActionSelect').change(function(){
       ocRecordings.bulkActionHandler($(this).val());
@@ -852,8 +901,11 @@ ocRecordings = new (function() {
         manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
         event = manager.serialize();
         $.post('/scheduler/', 
-          {event: event, idList: '[' + eventIdList.toString() + ']'},
-          ocRecordings.bulkActionComplete);
+        {
+          event: event,
+          idList: '[' + eventIdList.toString() + ']'
+        },
+        ocRecordings.bulkActionComplete);
       } else if(ocRecordings.Configuration.state === 'bulkdelete') {
         progressChunk = 100 / eventIdList.length;
         $('#deleteProgress').progressbar({
@@ -891,76 +943,97 @@ ocRecordings = new (function() {
   }
 
   this.registerBulkEditComponents = function() {
-    ocRecordings.bulkEditComponents.title = new ocAdmin.Component(['title'], {label: 'titleLabel'});
-    ocRecordings.bulkEditComponents.creator = new ocAdmin.Component(['creator'], {label: 'creatorLabel'});
-    ocRecordings.bulkEditComponents.contributor = new ocAdmin.Component(['contributor'], {label: 'contributorLabel'});
+    ocRecordings.bulkEditComponents.title = new ocAdmin.Component(['title'], {
+      label: 'titleLabel'
+    });
+    ocRecordings.bulkEditComponents.creator = new ocAdmin.Component(['creator'], {
+      label: 'creatorLabel'
+    });
+    ocRecordings.bulkEditComponents.contributor = new ocAdmin.Component(['contributor'], {
+      label: 'contributorLabel'
+    });
     ocRecordings.bulkEditComponents.seriesId = new ocAdmin.Component(['series', 'seriesSelect'],
-      { label: 'seriesLabel', errorField: 'missingSeries', nodeKey: ['seriesId', 'series'], required: true},
-      { getValue: function(){ 
-          if(this.fields.series){
-            this.value = this.fields.series.val();
-          }
-          return this.value;
-        },
-        setValue: function(value){
-          this.fields.series.val(value.id);
-          this.fields.seriesSelect.val(value.label)
-        },
-        asString: function(){
-          if(this.fields.seriesSelect){
-            return this.fields.seriesSelect.val();
-          }
-          return this.getValue() + '';
-        },
-        validate: function(){
-          if(this.fields.seriesSelect.val() !== '' && this.fields.series.val() === ''){ //have text and no idea
-            return this.createSeriesFromSearchText();
-          }
-          return true; //nothing, or we have an id.
-        },
-        toNode: function(parent){
-          if(parent){
-            doc = parent.ownerDocument;
-          }else{
-            doc = document;
-          }
-          if(this.getValue() != "" && this.asString() != ""){ //only add series if we have both id and name.
-            seriesId = doc.createElement(this.nodeKey[0]);
-            seriesId.appendChild(doc.createTextNode(this.getValue()));
-            seriesName = doc.createElement(this.nodeKey[1]);
-            seriesName.appendChild(doc.createTextNode(this.asString()));
-            if(parent && parent.nodeType){
-              parent.appendChild(seriesId);
-              parent.appendChild(seriesName);
-            }else{
-              ocUtils.log('Unable to append node to document. ', parent, seriesId, seriesName);
-            }
-          }
-        },
-        createSeriesFromSearchText: function(){
-          var series, seriesComponent, seriesId;
-          var creationSucceeded = false;
-          if(this.fields.seriesSelect !== ''){
-            series = '<series><additionalMetadata><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></additionalMetadata></series>';
-            seriesComponent = this;
-            $.ajax({
-              async: false,
-              type: 'PUT',
-              url: SERIES_URL + '/',
-              data: { series: series },
-              dataType: 'json',
-              success: function(data){
-                creationSucceeded = true;
-                seriesComponent.fields.series.val(data.series['id']);
-              }
-            });
-          }
-          return creationSucceeded;
+    {
+      label: 'seriesLabel',
+      errorField: 'missingSeries',
+      nodeKey: ['seriesId', 'series'],
+      required: true
+    },
+
+    {
+      getValue: function(){
+        if(this.fields.series){
+          this.value = this.fields.series.val();
         }
-      });
-    ocRecordings.bulkEditComponents.subject = new ocAdmin.Component(['subject'], {label: 'subjectLabel'});
-    ocRecordings.bulkEditComponents.language = new ocAdmin.Component(['language'], {label: 'languageLabel'});
-    ocRecordings.bulkEditComponents.description = new ocAdmin.Component(['description'], {label: 'descriptionLabel'});
+        return this.value;
+      },
+      setValue: function(value){
+        this.fields.series.val(value.id);
+        this.fields.seriesSelect.val(value.label)
+      },
+      asString: function(){
+        if(this.fields.seriesSelect){
+          return this.fields.seriesSelect.val();
+        }
+        return this.getValue() + '';
+      },
+      validate: function(){
+        if(this.fields.seriesSelect.val() !== '' && this.fields.series.val() === ''){ //have text and no idea
+          return this.createSeriesFromSearchText();
+        }
+        return true; //nothing, or we have an id.
+      },
+      toNode: function(parent){
+        if(parent){
+          doc = parent.ownerDocument;
+        }else{
+          doc = document;
+        }
+        if(this.getValue() != "" && this.asString() != ""){ //only add series if we have both id and name.
+          seriesId = doc.createElement(this.nodeKey[0]);
+          seriesId.appendChild(doc.createTextNode(this.getValue()));
+          seriesName = doc.createElement(this.nodeKey[1]);
+          seriesName.appendChild(doc.createTextNode(this.asString()));
+          if(parent && parent.nodeType){
+            parent.appendChild(seriesId);
+            parent.appendChild(seriesName);
+          }else{
+            ocUtils.log('Unable to append node to document. ', parent, seriesId, seriesName);
+          }
+        }
+      },
+      createSeriesFromSearchText: function(){
+        var series, seriesComponent, seriesId;
+        var creationSucceeded = false;
+        if(this.fields.seriesSelect !== ''){
+          series = '<series><additionalMetadata><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></additionalMetadata></series>';
+          seriesComponent = this;
+          $.ajax({
+            async: false,
+            type: 'PUT',
+            url: SERIES_URL + '/',
+            data: {
+              series: series
+            },
+            dataType: 'json',
+            success: function(data){
+              creationSucceeded = true;
+              seriesComponent.fields.series.val(data.series['id']);
+            }
+          });
+        }
+        return creationSucceeded;
+      }
+    });
+    ocRecordings.bulkEditComponents.subject = new ocAdmin.Component(['subject'], {
+      label: 'subjectLabel'
+    });
+    ocRecordings.bulkEditComponents.language = new ocAdmin.Component(['language'], {
+      label: 'languageLabel'
+    });
+    ocRecordings.bulkEditComponents.description = new ocAdmin.Component(['description'], {
+      label: 'descriptionLabel'
+    });
   }
   
   $(document).ready(this.init);
