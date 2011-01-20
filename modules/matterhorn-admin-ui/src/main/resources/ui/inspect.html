@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="css/oc.layout.css" />
     <link rel="stylesheet" type="text/css" href="css/themes/oc.default.css" />
     <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css">
 
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui-1.8.6.custom.min.js"></script>
@@ -210,10 +211,10 @@
           {for op in workflow.operations}
           <tr class="unfoldable-tr">
             <td class="td-value" style="font-size: 70%; vertical-align: top;
-              {if op.state=='SUCCEEDED'}color:green;{/if}
-              {if op.state=='FAILED'}color:red;{/if}
-              {if op.state=='PAUSED'}color:orange;{/if}
-              {if op.state=='INSTANTIATED'}color:blue;{/if}
+                {if op.state=='SUCCEEDED'}color:green;{/if}
+                {if op.state=='FAILED'}color:red;{/if}
+                {if op.state=='PAUSED'}color:orange;{/if}
+                {if op.state=='INSTANTIATED'}color:blue;{/if}
               ">
               ${op.state}
             </td>

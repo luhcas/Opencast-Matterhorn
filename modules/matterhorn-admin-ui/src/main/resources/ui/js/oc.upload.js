@@ -310,15 +310,15 @@ ocUpload.showHelpBox = function(help,top,left) {
 ocUpload.showProgressStage = function() {
   //$('#gray-out').fadeIn('fast');
   $('#grayOut').css('display','block');
-  $('#progressStage').fadeIn('normal');
+  $('#progressStage').show();
 }
 
 /** Restore view
  *
  */
 ocUpload.hideProgressStage = function() {
-  $('#grayOut').fadeOut('fast');
-  $('#progressStage').fadeOut('normal');
+  $('#grayOut').hide();
+  $('#progressStage').hide();
 }
 
 /** Set the progress view to a certain state
