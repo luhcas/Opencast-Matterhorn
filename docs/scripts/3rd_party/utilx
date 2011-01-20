@@ -176,7 +176,7 @@ shasumx() {
 # copypkg
 #
 copypkg() {
-  [ -z "$HOME3P" ] && HOME3P=.
+  [ -z "$HOME3P" ] && HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
   [ ! -f "${HOME3P}/tarballs/$1" ] && return 1
   cp "${HOME3P}/tarballs/$1" .
   [ $? -ne 0 ] && return 1
@@ -337,7 +337,7 @@ EOF
 #
 copypc() {
   LOC=`expr "$1" : '/*\(.*\)'`
-  [ -z "$HOME3P" ] && HOME3P=.
+  [ -z "$HOME3P" ] && HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
   DEST="${HOME3P}/$LOC"; shift
   if [ ! -d "$DEST" ]; then
     rm -f "$DEST"
