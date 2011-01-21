@@ -566,7 +566,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
 
     if (operation == null)
-      throw new IllegalStateException("Cannot start a workflow without operations");
+      throw new IllegalStateException("Cannot start a workflow without a current operation");
 
     if (operation.getPosition() != 0)
       throw new IllegalStateException("Current operation expected to be first");

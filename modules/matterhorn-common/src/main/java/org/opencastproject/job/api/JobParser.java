@@ -40,7 +40,7 @@ public final class JobParser {
 
   static {
     StringBuilder sb = new StringBuilder();
-    sb.append("org.opencastproject.job.api");
+    sb.append("org.opencastproject.job.api:org.opencastproject.serviceregistry.api");
     try {
       jaxbContext = JAXBContext.newInstance(sb.toString(), JobParser.class.getClassLoader());
     } catch (JAXBException e) {

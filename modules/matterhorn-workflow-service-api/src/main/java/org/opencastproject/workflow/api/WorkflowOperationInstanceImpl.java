@@ -115,7 +115,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   /**
    * No-arg constructor needed for JAXB serialization
    */
-  WorkflowOperationInstanceImpl() {
+  public WorkflowOperationInstanceImpl() {
   }
 
   /**

@@ -68,6 +68,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name = "mediapackage")
   private MediaPackage mediaPackage;
 
+  @XmlElement(name = "operation")
+  @XmlElementWrapper(name = "operations")
   protected List<WorkflowOperationInstance> operations;
 
   @XmlElement(name = "configuration")
@@ -80,7 +82,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   @XmlTransient
   protected WorkflowOperationInstance currentOperation = null;
-  
+
   @XmlTransient
   protected boolean initialized = false;
 
@@ -215,6 +217,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see org.opencastproject.workflow.api.WorkflowInstance#getCurrentOperation()
    */
   public WorkflowOperationInstance getCurrentOperation() {
+    if (!initialized)
+      init();
     return currentOperation;
   }
 
@@ -226,6 +230,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   public List<WorkflowOperationInstance> getOperations() {
     if (operations == null)
       operations = new ArrayList<WorkflowOperationInstance>();
+    if (!initialized)
+      init();
     return new ArrayList<WorkflowOperationInstance>(operations);
   }
 
@@ -234,13 +240,14 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * 
    * @param workflowOperationInstanceList
    */
-  @XmlElement(name = "operation")
-  @XmlElementWrapper(name = "operations")
+  @Override
   public final void setOperations(List<WorkflowOperationInstance> workflowOperationInstanceList) {
-
     this.operations = workflowOperationInstanceList;
-    currentOperation = null;
+    init();
+  }
 
+  protected void init() {
+    currentOperation = null;
     if (operations == null || operations.isEmpty())
       return;
 
@@ -287,7 +294,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       }
 
     }
-
+    initialized = true;
   }
 
   /**
@@ -387,6 +394,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   public WorkflowOperationInstance next() {
     if (operations == null || operations.size() == 0)
       throw new IllegalStateException("Operations list must contain operations");
+    if (!initialized)
+      init();
     if (currentOperation == null)
       throw new IllegalStateException("Can't call next on a finished workflow");
 
@@ -408,6 +417,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see org.opencastproject.workflow.api.WorkflowInstance#hasNext()
    */
   public boolean hasNext() {
+    if (!initialized)
+      init();
     if (WorkflowState.FAILED.equals(state) || WorkflowState.FAILING.equals(state)
             || WorkflowState.STOPPED.equals(state) || WorkflowState.SUCCEEDED.equals(state))
       return false;
@@ -460,6 +471,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     }
 
     public WorkflowInstance unmarshal(WorkflowInstanceImpl instance) throws Exception {
+      instance.init();
       return instance;
     }
   }

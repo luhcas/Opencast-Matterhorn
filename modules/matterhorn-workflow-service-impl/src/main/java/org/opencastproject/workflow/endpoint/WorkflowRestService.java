@@ -45,6 +45,7 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowParsingException;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowQuery.Sort;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -662,9 +663,15 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("start")
   @Produces(MediaType.TEXT_XML)
-  public WorkflowInstanceImpl start(@FormParam("definition") WorkflowDefinitionImpl workflowDefinition,
+  public WorkflowInstanceImpl start(@FormParam("definition") String workflowDefinitionXml,
           @FormParam("mediapackage") MediaPackageImpl mp, @FormParam("parent") String parentWorkflowId,
           @FormParam("properties") LocalHashMap localMap) {
+    WorkflowDefinition workflowDefinition;
+    try {
+      workflowDefinition = WorkflowParser.parseWorkflowDefinition(workflowDefinitionXml);
+    } catch (WorkflowParsingException e) {
+      throw new WebApplicationException(e);
+    }
     Map<String, String> properties = localMap.getMap();
     Long parentIdAsLong = null;
     if (StringUtils.isNotEmpty(parentWorkflowId)) {

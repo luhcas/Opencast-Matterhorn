@@ -17,6 +17,8 @@ package org.opencastproject.serviceregistry.api;
 
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -28,6 +30,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType(name = "load", namespace = "http://serviceregistry.opencastproject.org")
 @XmlRootElement(name = "load", namespace = "http://serviceregistry.opencastproject.org")
+@XmlAccessorType(XmlAccessType.NONE)
 public class SystemLoad {
 
   /** No-arg constructor needed by JAXB */
@@ -59,8 +62,9 @@ public class SystemLoad {
   }
 
   /** A record of a node in the cluster and its load factor */
-  @XmlType(name = "node", namespace = "http://serviceregistry.opencastproject.org")
-  @XmlRootElement(name = "node", namespace = "http://serviceregistry.opencastproject.org")
+  @XmlType(name = "nodetype", namespace = "http://serviceregistry.opencastproject.org")
+  @XmlRootElement(name = "nodetype", namespace = "http://serviceregistry.opencastproject.org")
+  @XmlAccessorType(XmlAccessType.NONE)
   public static class NodeLoad {
 
     /** No-arg constructor needed by JAXB */
