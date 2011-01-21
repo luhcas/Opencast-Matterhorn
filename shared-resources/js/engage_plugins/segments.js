@@ -19,6 +19,54 @@ Opencast.segments = (function ()
 
     /**
      * @memberOf Opencast.segments
+     * @description Returns the Seconds of a given Segment with the ID segmentID
+     * @return the Seconds of a given Segment with the ID segmentID
+     */
+    function getSegmentSeconds(segmentId)
+    {
+        if((segmentId >= 0) && (segmentId < segmentTimes.length))
+        {
+            return segmentTimes[segmentId];
+        }
+        return 0;
+    }
+
+    /**
+     * @memberOf Opencast.segments
+     * @description Returns the current Segment ID
+     * @return the current Segment ID
+     */
+    function getCurrentSlideId()
+    {
+        var currentPosition = parseInt(Opencast.Player.getCurrentPosition());
+        for(var i = 0; i < segmentTimes.length; ++i)
+        {
+            if(i < (segmentTimes.length - 1))
+            {
+                if((currentPosition >= segmentTimes[i]) && (currentPosition < segmentTimes[i + 1]))
+                {
+                    return i;
+                }
+            } else
+            {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * @memberOf Opencast.segments
+     * @description Returns the total Number of Segments
+     * @return the total Number of Segments
+     */
+    function getNumberOfSegments()
+    {
+        return numberOfSegments;
+    }
+
+    /**
+     * @memberOf Opencast.segments
      * @description Returns the Segments Previews of segmentID
      * @return the Segments Previews of segmentID
      */
@@ -410,6 +458,9 @@ Opencast.segments = (function ()
     }
     
     return {
+        getSegmentSeconds: getSegmentSeconds,
+        getCurrentSlideId: getCurrentSlideId,
+        getNumberOfSegments: getNumberOfSegments,
         getSegmentPreview: getSegmentPreview,
         getSecondsBeforeSlide: getSecondsBeforeSlide,
         getSecondsNextSlide: getSecondsNextSlide,

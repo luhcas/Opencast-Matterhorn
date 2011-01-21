@@ -53,6 +53,12 @@ Opencast.Initialize = (function ()
         embedUrl = "",
         advancedUrl = "",
         size = "";
+
+    var segmentForwardDelay = 200,
+        segmentBackwardDelay = 200;
+    var segmentTimeoutForward, segmentTimeoutBackward;
+    var segmentForwardClickedCounter = 0,
+        segmentBackwardClickedCounter = 0; // Number of clicks
         
     /**
      @memberOf Opencast.Initialize
@@ -360,13 +366,58 @@ Opencast.Initialize = (function ()
         // Handler for .click()
         $('#oc_btn-skip-backward').click(function ()
         {
-            var sec = Opencast.segments.getSecondsBeforeSlide();
-            Opencast.Watch.seekSegment(sec);
+            // Delete forward Timeout and Clicks
+            if(segmentTimeoutForward !== undefined)
+            {
+                clearTimeout(segmentTimeoutForward);
+            }
+            segmentForwardClickedCounter = 0;
+
+            // Handle backward Timeout and Clicks
+            if(segmentTimeoutBackward !== undefined)
+            {
+                clearTimeout(segmentTimeoutBackward);
+            }
+            ++segmentBackwardClickedCounter;
+            segmentTimeoutBackward = setTimeout(function()
+                {
+                    var currentSlideId = Opencast.segments.getCurrentSlideId();
+                    var sec = Opencast.segments.getSegmentSeconds(currentSlideId - segmentBackwardClickedCounter);
+                    if(sec < 0)
+                    {
+                        sec = 0;
+                    }
+                    segmentBackwardClickedCounter = 0;
+                    Opencast.Watch.seekSegment(sec);
+                }, segmentForwardDelay);
         });
         $('#oc_btn-skip-forward').click(function ()
         {
-            var sec = Opencast.segments.getSecondsNextSlide();
-            Opencast.Watch.seekSegment(sec);
+            // Delete backward Timeout and Clicks
+            if(segmentTimeoutBackward !== undefined)
+            {
+                clearTimeout(segmentTimeoutBackward);
+            }
+            segmentBackwardClickedCounter = 0;
+
+            // Handle forward Timeout and Clicks
+            if(segmentTimeoutForward !== undefined)
+            {
+                clearTimeout(segmentTimeoutForward);
+            }
+            ++segmentForwardClickedCounter;
+            segmentTimeoutForward = setTimeout(function()
+                {
+                    var currentSlideId = Opencast.segments.getCurrentSlideId();
+                    var sec = Opencast.segments.getSegmentSeconds(currentSlideId + segmentForwardClickedCounter);
+                    var secOfLastSeg = Opencast.segments.getSegmentSeconds(Opencast.segments.getNumberOfSegments() - 1);
+                    if((sec == 0) || (sec > secOfLastSeg))
+                    {
+                        sec = secOfLastSeg;
+                    }
+                    segmentForwardClickedCounter = 0;
+                    Opencast.Watch.seekSegment(sec);
+                }, segmentForwardDelay);
         });
         $('#oc_btn-play-pause').click(function ()
         {

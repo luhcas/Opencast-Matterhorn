@@ -24,7 +24,7 @@ Opencast.Watch = (function ()
     var interval;
     var intervalOn = false;
     
-    var isNull = false;
+    var mediaPackageIdAvailable = false;
     
     /**
      * @memberOf Opencast.Watch
@@ -37,7 +37,7 @@ Opencast.Watch = (function ()
         
         if(mediaPackageId === null)
         {
-            isNull = true;
+            mediaPackageIdAvailable = true;
         }
         
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
@@ -45,7 +45,7 @@ Opencast.Watch = (function ()
         Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
         Opencast.Player.setUserId(userId);
         
-        if(!isNull)
+        if(!mediaPackageIdAvailable)
         {
             // Set MediaPackage ID's in the Plugins
             Opencast.Player.setMediaPackageId(mediaPackageId);
@@ -144,7 +144,7 @@ Opencast.Watch = (function ()
         mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
         mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
         
-        if(!isNull)
+        if(!mediaPackageIdAvailable)
         {
             // init the segements
             Opencast.segments.initialize();
@@ -205,7 +205,7 @@ Opencast.Watch = (function ()
         // Opencast.search.initialize();
         // Parse URL Parameters
         time = Opencast.Utils.parseSeconds(Opencast.Utils.getURLParameter('t'));
-        if (!intervalOn && !isNull)
+        if (!intervalOn && !mediaPackageIdAvailable)
         {
             interval = setInterval(forwardSeconds, 250);
             intervalOn = true;
