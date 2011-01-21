@@ -1065,8 +1065,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
                 logger.error("Error dispatching job " + job, cause);
               }
             }
-          } catch (Exception e) {
-            logger.warn("Error dispatching jobs", e);
+          } catch (Throwable t) {
+            logger.warn("Error dispatching jobs", t);
           }
           Thread.sleep(timeout);
         } catch (InterruptedException e) {
