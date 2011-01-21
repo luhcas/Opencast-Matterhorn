@@ -1229,8 +1229,8 @@ Opencast.Player = (function () {
      */
     function showEditTime()
     {
-        $("#oc_current-time").toggleClass("oc_current-time-hide").toggleClass('oc_current-time');
-        $("#oc_edit-time").toggleClass("oc_edit-time-hide").toggleClass("oc_edit-time");
+        $("#oc_current-time").addClass("oc_current-time-hide").removeClass('oc_current-time');
+        $("#oc_edit-time").removeClass("oc_edit-time-hide").addClass("oc_edit-time");
 
         backupPlayPauseState = getCurrentPlayPauseState();
 
@@ -1238,7 +1238,6 @@ Opencast.Player = (function () {
         {
             Videodisplay.pause();
         }
-
         $("#oc_edit-time").focus();
     }
 
@@ -1248,8 +1247,8 @@ Opencast.Player = (function () {
      */
     function hideEditTime()
     {
-        $("#oc_current-time").toggleClass("oc_current-time-hide").toggleClass('oc_current-time');
-        $("#oc_edit-time").toggleClass("oc_edit-time-hide").toggleClass("oc_edit-time");
+        $("#oc_current-time").removeClass("oc_current-time-hide").addClass('oc_current-time');
+        $("#oc_edit-time").addClass("oc_edit-time-hide").removeClass("oc_edit-time");
         if($("#oc_edit-time").hasClass("oc_edit-time-error")) {
           $("#oc_edit-time").val($("#oc_current-time").val());
           $("#oc_edit-time").removeClass("oc_edit-time-error");
