@@ -458,9 +458,6 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
 
       // Add the workflow to the search index and have the job enqueued for dispatch.
       update(workflowInstance);
-      //
-      // job.setStatus(Status.QUEUED);
-      // serviceRegistry.updateJob(job);
 
       return workflowInstance;
     } catch (Throwable t) {

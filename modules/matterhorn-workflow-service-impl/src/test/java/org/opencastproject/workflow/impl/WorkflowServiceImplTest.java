@@ -346,9 +346,6 @@ public class WorkflowServiceImplTest {
 
     WorkflowInstance instance = startAndWait(pausingWorkflowDefinition, mediapackage1, WorkflowState.PAUSED);
 
-    WorkflowSet workflowsInDb = service.getWorkflowInstances(new WorkflowQuery().withCurrentOperation("opPause"));
-    Assert.assertEquals(1, workflowsInDb.size());
-
     // cleanup the database
     service.removeFromDatabase(instance.getId());
 
@@ -359,7 +356,6 @@ public class WorkflowServiceImplTest {
     } catch (NotFoundException e) {
       // That's expected
     }
-    Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
   @Test

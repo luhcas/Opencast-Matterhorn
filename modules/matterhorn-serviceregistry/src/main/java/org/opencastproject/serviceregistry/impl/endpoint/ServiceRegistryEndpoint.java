@@ -40,6 +40,7 @@ import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 
 import java.net.URI;
@@ -259,7 +260,7 @@ public class ServiceRegistryEndpoint {
     String operation = request.getParameter("operation");
     String host = request.getParameter("host");
     String payload = request.getParameter("payload");
-    boolean start = Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("start"));
+    boolean start = StringUtils.isBlank(request.getParameter("start")) || Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("start"));
     try {
       Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(host, jobType, operation, arguments, payload,
               start);
