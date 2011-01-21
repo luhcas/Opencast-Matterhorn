@@ -18,6 +18,7 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -87,9 +88,9 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
-  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     logger.debug("Running distribution workflow operation");
 
     MediaPackage mediaPackage = workflowInstance.getMediaPackage();

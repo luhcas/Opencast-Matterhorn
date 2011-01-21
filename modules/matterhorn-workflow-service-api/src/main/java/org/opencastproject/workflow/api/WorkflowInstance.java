@@ -37,6 +37,14 @@ public interface WorkflowInstance extends Configurable {
   long getId();
 
   /**
+   * Sets the workflow identifier.
+   * 
+   * @param id
+   *          the identifier
+   */
+  void setId(long id);
+
+  /**
    * The short title of the workflow definition used to create this workflow instance
    */
   String getTitle();

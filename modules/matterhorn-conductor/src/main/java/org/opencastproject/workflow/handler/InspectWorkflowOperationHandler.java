@@ -18,6 +18,7 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElements;
@@ -115,10 +116,10 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage) workflowInstance.getMediaPackage().clone();
     // Inspect the tracks
     long totalTimeInQueue = 0;

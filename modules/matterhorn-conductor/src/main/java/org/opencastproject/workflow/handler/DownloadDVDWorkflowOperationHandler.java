@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -68,10 +69,10 @@ public class DownloadDVDWorkflowOperationHandler extends ResumableWorkflowOperat
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     logger.info("Holding for download of DVD image...");
     return createResult(Action.PAUSE);
   }
@@ -80,10 +81,10 @@ public class DownloadDVDWorkflowOperationHandler extends ResumableWorkflowOperat
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-   *      java.util.Map)
+   *      JobContext, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context, Map<String, String> properties)
           throws WorkflowOperationException {
     // remove the DVD encoded track from the mediaPackage
     try {

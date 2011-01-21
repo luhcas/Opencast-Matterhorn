@@ -33,7 +33,7 @@ import java.util.List;
 public class SecurityServiceSpringImpl implements SecurityService {
 
   @Override
-  public String getUserName() {
+  public String getUserId() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null) {
       return null;

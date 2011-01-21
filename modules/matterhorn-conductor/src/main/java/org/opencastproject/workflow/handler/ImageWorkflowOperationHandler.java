@@ -19,6 +19,7 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
@@ -109,9 +110,9 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
-  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     logger.debug("Running image workflow operation on {}", workflowInstance);
 
     MediaPackage src = (MediaPackage) workflowInstance.getMediaPackage().clone();

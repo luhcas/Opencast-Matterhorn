@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
@@ -77,10 +78,10 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
     if (!hasCaptions(workflowInstance.getMediaPackage(), flavor))
       return createResult(Action.PAUSE);
@@ -92,12 +93,12 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-   *      java.util.Map)
+   *      JobContext, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context, Map<String, String> properties)
           throws WorkflowOperationException {
-    return super.resume(workflowInstance, properties);
+    return super.resume(workflowInstance, context, properties);
     // FIXME: enable this logic once the caption upload UI has been implemented
     // MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
     // boolean hasCaptions = hasCaptions(workflowInstance.getMediaPackage(), flavor);

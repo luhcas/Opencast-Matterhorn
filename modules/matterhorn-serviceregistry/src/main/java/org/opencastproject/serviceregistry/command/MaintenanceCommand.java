@@ -18,7 +18,6 @@ package org.opencastproject.serviceregistry.command;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 
 /**
  * An interactive shell command for putting Maintainable services in and out of maintenance mode
@@ -39,8 +38,6 @@ public class MaintenanceCommand {
       } else {
         return baseUrl + " has returned to service\n";
       }
-    } catch (ServiceUnavailableException e) {
-      return baseUrl + " is not registered, so its maintenance mode can not be set\n";
     } catch (ServiceRegistryException e) {
       return "Error setting maintenance mode: " + e.getMessage() + "\n";
     }

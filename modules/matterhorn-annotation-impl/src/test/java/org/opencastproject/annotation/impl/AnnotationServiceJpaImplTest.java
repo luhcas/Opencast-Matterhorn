@@ -55,7 +55,7 @@ public class AnnotationServiceJpaImplTest {
     
     // Set up a mock security service that always returns "me" as the current user
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUserName()).andReturn("me").anyTimes();
+    EasyMock.expect(securityService.getUserId()).andReturn("me").anyTimes();
     EasyMock.replay(securityService);
 
     // Set up the annotation service
@@ -93,7 +93,7 @@ public class AnnotationServiceJpaImplTest {
     Assert.assertEquals(a.getMediapackageId(), a1FromDb.getMediapackageId());
     Assert.assertEquals(a.getSessionId(), a1FromDb.getSessionId());
     Assert.assertEquals(a.getUserId(), a1FromDb.getUserId());
-    Assert.assertEquals(a.getUserId(), annotationService.securityService.getUserName());
+    Assert.assertEquals(a.getUserId(), annotationService.securityService.getUserId());
   }
 
   @Test

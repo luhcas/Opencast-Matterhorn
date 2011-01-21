@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
@@ -82,9 +83,9 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
-  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     logger.debug("Running video segmentation on workflow {}", workflowInstance.getId());
 
     WorkflowOperationInstance operation = workflowInstance.getCurrentOperation();

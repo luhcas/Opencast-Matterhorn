@@ -36,6 +36,7 @@ public class JaxbJob implements Job {
 
   /** Default constructor needed by jaxb */
   public JaxbJob() {
+    this.context = new JaxbJobContext();
   }
 
   /**
@@ -60,6 +61,9 @@ public class JaxbJob implements Job {
     this.operationType = job.getOperation();
     this.arguments = job.getArguments();
     this.status = job.getStatus();
+    this.context = new JaxbJobContext(job.getContext());
+    this.parentJobId = job.getParentJobId();
+    this.rootJobId = job.getRootJobId();
   }
 
   /** The job ID */
@@ -94,6 +98,15 @@ public class JaxbJob implements Job {
 
   /** The date this job was completed */
   protected Date dateCompleted;
+
+  /** The parent job identifier */
+  protected Long parentJobId;
+
+  /** The root job identifier */
+  protected Long rootJobId;
+
+  /** The job context */
+  protected JaxbJobContext context;
 
   /** The queue time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
   protected Long queueTime = 0L;
@@ -383,6 +396,65 @@ public class JaxbJob implements Job {
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.job.api.Job#getContext()
+   */
+  @XmlElement
+  @Override
+  public JaxbJobContext getContext() {
+    return context;
+  }
+
+  /**
+   * Sets the job context.
+   * 
+   * @param context
+   *          the context to set
+   */
+  public void setContext(JaxbJobContext context) {
+    this.context = context;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getParentJobId()
+   */
+  @XmlElement
+  @Override
+  public Long getParentJobId() {
+    return parentJobId;
+  }
+
+  /**
+   * @param parentJobId
+   *          the parentJobId to set
+   */
+  public void setParentJobId(Long parentJobId) {
+    this.parentJobId = parentJobId;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getRootJobId()
+   */
+  @XmlElement
+  @Override
+  public Long getRootJobId() {
+    return rootJobId;
+  }
+
+  /**
+   * @param rootJobId
+   *          the rootJobId to set
+   */
+  public void setRootJobId(Long rootJobId) {
+    this.rootJobId = rootJobId;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -412,4 +484,5 @@ public class JaxbJob implements Job {
   public String toString() {
     return "Job {id:" + this.id + ", version:" + version + "}";
   }
+
 }

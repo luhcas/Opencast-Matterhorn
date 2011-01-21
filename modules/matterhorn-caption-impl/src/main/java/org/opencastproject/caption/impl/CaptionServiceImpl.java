@@ -30,7 +30,6 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -114,9 +113,6 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
               Arrays.asList(MediaPackageElementParser.getAsXml(input), inputFormat, outputFormat));
     } catch (ServiceRegistryException e) {
       throw new CaptionConverterException("Unable to create a job", e);
-    } catch (ServiceUnavailableException e) {
-      throw new CaptionConverterException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     }
   }
 
@@ -144,9 +140,6 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
               Arrays.asList(MediaPackageElementParser.getAsXml(input), inputFormat, outputFormat, language));
     } catch (ServiceRegistryException e) {
       throw new CaptionConverterException("Unable to create a job", e);
-    } catch (ServiceUnavailableException e) {
-      throw new CaptionConverterException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     }
   }
 

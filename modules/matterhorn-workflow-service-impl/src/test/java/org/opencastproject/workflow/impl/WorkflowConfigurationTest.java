@@ -21,6 +21,7 @@ import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowParser;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,9 +32,10 @@ import java.util.List;
 import java.util.Set;
 
 public class WorkflowConfigurationTest {
+  
   @Test
   public void testConfigurationSerialization() throws Exception {
-    WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl();
+    WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl("op", OperationState.RUNNING);
     Set<WorkflowConfiguration> config = new HashSet<WorkflowConfiguration>();
     config.add(new WorkflowConfigurationImpl("this", "that"));
     op.setConfiguration(config);
@@ -44,4 +46,5 @@ public class WorkflowConfigurationTest {
     String xml = WorkflowParser.toXml(instance);
     Assert.assertTrue(xml.contains("<configurations><configuration key=\"this\">that</configuration></configurations>"));
   }
+
 }

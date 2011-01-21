@@ -28,7 +28,6 @@ import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.serviceregistry.api.SystemLoad;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
@@ -198,14 +197,22 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String)
+   */
+  @Override
+  public Job createJob(String type, String operation) throws ServiceRegistryException {
+    return createJob(this.hostName, type, operation, null, null, true);
+  }
+  
+  /**
+   * {@inheritDoc}
    * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
    *      java.util.List)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
-          ServiceRegistryException {
-    return createJob(this.hostName, type, operation, arguments, null, false);
+  public Job createJob(String type, String operation, List<String> arguments) throws ServiceRegistryException {
+    return createJob(this.hostName, type, operation, arguments, null, true);
   }
 
   /**
@@ -216,8 +223,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   @Override
   public Job createJob(String type, String operation, List<String> arguments, String payload)
-          throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(this.hostName, type, operation, arguments, payload, false);
+          throws ServiceRegistryException {
+    return createJob(this.hostName, type, operation, arguments, payload, true);
   }
 
   /**
@@ -227,33 +234,33 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    *      java.util.List, String, boolean)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean start)
-          throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(this.hostName, type, operation, arguments, payload, start);
+  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean enqueueImmediately)
+          throws ServiceRegistryException {
+    return createJob(this.hostName, type, operation, arguments, payload, enqueueImmediately);
   }
 
   /**
    * Creates a job on a remote host.
    */
   public Job createJob(String host, String serviceType, String operation, List<String> arguments, String payload,
-          boolean start) throws ServiceUnavailableException, ServiceRegistryException {
+          boolean enqueueImmediately) throws ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationJpaImpl serviceRegistration = getServiceRegistration(em, serviceType, host);
-      if (serviceRegistration == null) {
-        throw new ServiceUnavailableException("No service registration exists for type '" + serviceType + "' on host '"
+      ServiceRegistrationJpaImpl creator = getServiceRegistration(em, serviceType, host);
+      if (creator == null) {
+        throw new ServiceRegistryException("No service registration exists for type '" + serviceType + "' on host '"
                 + host + "'");
       }
-      if (serviceRegistration.getHostRegistration().isMaintenanceMode()) {
-        logger.warn("Creating a job from {}, which is currently in maintenance mode.", serviceRegistration.getHost());
+      if (creator.getHostRegistration().isMaintenanceMode()) {
+        logger.warn("Creating a job from {}, which is currently in maintenance mode.", creator.getHost());
       }
-      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, payload, start);
+      JobJpaImpl job = new JobJpaImpl(creator, operation, arguments, payload, enqueueImmediately);
 
-      serviceRegistration.creatorJobs.add(job);
-      if (start) {
-        serviceRegistration.processorJobs.add(job);
+      creator.creatorJobs.add(job);
+      if (enqueueImmediately) {
+        creator.processorJobs.add(job);
       }
       em.persist(job);
       tx.commit();

@@ -20,9 +20,13 @@ import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A simple workflow listener implementation suitable for monitoring a workflow's state changes.
@@ -36,17 +40,16 @@ public class WorkflowStateListener implements WorkflowListener {
   protected final Set<Long> workflowInstanceIds;
 
   /** The states that this listener respond to with a notify() */
-  protected final Set<WorkflowState> notifyStates;
+  protected final Map<WorkflowState, AtomicInteger> notifyStates;
 
-  /** The number of state change events that have triggered a notify() */
-  protected int counter;
+  protected AtomicInteger total = new AtomicInteger(0);
 
   /**
    * Constructs a workflow listener that notifies for any state change to any workflow instance.
    */
   public WorkflowStateListener() {
     workflowInstanceIds = Collections.unmodifiableSet(new HashSet<Long>());
-    notifyStates = Collections.unmodifiableSet(new HashSet<WorkflowState>());
+    notifyStates = Collections.unmodifiableMap(new HashMap<WorkflowState, AtomicInteger>());
   }
 
   /**
@@ -61,7 +64,7 @@ public class WorkflowStateListener implements WorkflowListener {
       ids.add(workflowInstanceId);
     }
     workflowInstanceIds = Collections.unmodifiableSet(ids);
-    notifyStates = Collections.unmodifiableSet(new HashSet<WorkflowState>());
+    notifyStates = Collections.unmodifiableMap(new HashMap<WorkflowState, AtomicInteger>());
   }
 
   /**
@@ -70,86 +73,36 @@ public class WorkflowStateListener implements WorkflowListener {
    * 
    * @param workflowInstanceId
    *          the workflow identifier
-   * @param notifyState
-   *          the workflow state change that should trigger this listener. If null, any state change will trigger the
+   * @param statess
+   *          the workflow state changes that should trigger this listener. If null, any state change will trigger the
    *          listener.
    */
-  public WorkflowStateListener(Long workflowInstanceId, WorkflowState notifyState) {
-    Set<Long> ids = new HashSet<Long>();
-    if (workflowInstanceId != null) {
-      ids.add(workflowInstanceId);
-    }
-    workflowInstanceIds = Collections.unmodifiableSet(ids);
-
-    if (notifyState == null) {
-      notifyStates = Collections.unmodifiableSet(new HashSet<WorkflowState>());
-    } else {
-      Set<WorkflowState> set = new HashSet<WorkflowState>();
-      set.add(notifyState);
-      notifyStates = Collections.unmodifiableSet(set);
-    }
+  public WorkflowStateListener(Long workflowInstanceId, WorkflowState... states) {
+    this(new HashSet<Long>(Arrays.asList(new Long[] { workflowInstanceId })), states);
   }
 
   /**
    * Constructs a workflow listener for all workflow instances. The listener may be configured to be notified on a set
    * of specific state changes.
    * 
-   * @param notifyStates
+   * @param states
    *          the workflow state changes that should trigger this listener. If null, any state change will trigger the
    *          listener.
    */
-  public WorkflowStateListener(Set<WorkflowState> notifyStates) {
-    workflowInstanceIds = Collections.unmodifiableSet(new HashSet<Long>());
-
-    if (notifyStates == null) {
-      this.notifyStates = Collections.unmodifiableSet(new HashSet<WorkflowState>());
-    } else {
-      this.notifyStates = Collections.unmodifiableSet(notifyStates);
-    }
+  public WorkflowStateListener(WorkflowState... states) {
+    this(new HashSet<Long>(), states);
   }
 
   /**
    * Constructs a workflow listener for all workflow instances. The listener may be configured to be notified on a of
    * specific state changes.
    * 
-   * @param notifyState
+   * @param staet
    *          the workflow state change that should trigger this listener. If null, any state change will trigger the
    *          listener.
    */
-  public WorkflowStateListener(WorkflowState notifyState) {
-    workflowInstanceIds = Collections.unmodifiableSet(new HashSet<Long>());
-
-    if (notifyState == null) {
-      this.notifyStates = Collections.unmodifiableSet(new HashSet<WorkflowState>());
-    } else {
-      Set<WorkflowState> states = new HashSet<WorkflowInstance.WorkflowState>();
-      states.add(notifyState);
-      this.notifyStates = Collections.unmodifiableSet(states);
-    }
-  }
-
-  /**
-   * Constructs a workflow listener for a single workflow instance. The listener may be configured to be notified on a
-   * set of specific state changes.
-   * 
-   * @param workflowInstanceId
-   *          the workflow identifier
-   * @param notifyStates
-   *          the workflow state changes that should trigger this listener. If null, any state change will trigger the
-   *          listener.
-   */
-  public WorkflowStateListener(Long workflowInstanceId, Set<WorkflowState> notifyStates) {
-    Set<Long> ids = new HashSet<Long>();
-    if (workflowInstanceId != null) {
-      ids.add(workflowInstanceId);
-    }
-    workflowInstanceIds = Collections.unmodifiableSet(ids);
-
-    if (notifyStates == null) {
-      this.notifyStates = Collections.unmodifiableSet(new HashSet<WorkflowState>());
-    } else {
-      this.notifyStates = Collections.unmodifiableSet(notifyStates);
-    }
+  public WorkflowStateListener(WorkflowState state) {
+    this(new HashSet<Long>(), new WorkflowState[] { state });
   }
 
   /**
@@ -158,19 +111,21 @@ public class WorkflowStateListener implements WorkflowListener {
    * 
    * @param workflowInstanceIds
    *          the workflow identifiers
-   * @param notifyStates
+   * @param states
    *          the workflow state changes that should trigger this listener. If null, any state change will trigger the
    *          listener.
    */
-  public WorkflowStateListener(Set<Long> workflowInstanceIds, Set<WorkflowState> notifyStates) {
-    if (workflowInstanceIds == null) {
-      workflowInstanceIds = new HashSet<Long>();
-    }
+  public WorkflowStateListener(Set<Long> workflowInstanceIds, WorkflowState... states) {
     this.workflowInstanceIds = Collections.unmodifiableSet(workflowInstanceIds);
-    if (notifyStates == null) {
-      this.notifyStates = Collections.unmodifiableSet(new HashSet<WorkflowState>());
+
+    if (states == null) {
+      notifyStates = Collections.unmodifiableMap(new HashMap<WorkflowState, AtomicInteger>());
     } else {
-      this.notifyStates = Collections.unmodifiableSet(notifyStates);
+      Map<WorkflowState, AtomicInteger> map = new HashMap<WorkflowState, AtomicInteger>();
+      for (WorkflowState state : states) {
+        map.put(state, new AtomicInteger(0));
+      }
+      notifyStates = Collections.unmodifiableMap(map);
     }
   }
 
@@ -191,17 +146,22 @@ public class WorkflowStateListener implements WorkflowListener {
    */
   @Override
   public void stateChanged(WorkflowInstance workflow) {
-    if (!workflowInstanceIds.isEmpty() && !workflowInstanceIds.contains(workflow.getId()))
-      return;
-    if (notifyStates != null) {
-      WorkflowState currentState = workflow.getState();
-      if (!notifyStates.contains(currentState)) {
-        return;
-      }
-    }
     synchronized (this) {
+      
+      if (!workflowInstanceIds.isEmpty() && !workflowInstanceIds.contains(workflow.getId()))
+        return;
+
+      WorkflowState currentState = workflow.getState();
+      if (!notifyStates.isEmpty() && !notifyStates.containsKey(currentState))
+        return;
+
+      if (notifyStates.containsKey(currentState)) {
+        notifyStates.get(currentState).addAndGet(1);
+      }
+
+      total.addAndGet(1);
+
       logger.debug("Workflow {} state updated to {}", workflow.getId(), workflow.getState());
-      counter++;
       notifyAll();
     }
   }
@@ -212,6 +172,18 @@ public class WorkflowStateListener implements WorkflowListener {
    * @return the counter
    */
   public int countStateChanges() {
-    return counter;
+    return total.get();
   }
+
+  /**
+   * Returns the number of state changes that this listener has observed without ignoring.
+   * 
+   * @return the counter
+   */
+  public int countStateChanges(WorkflowState state) {
+    if (!notifyStates.containsKey(state))
+      throw new IllegalArgumentException("State '" + state + "' is not being monitored");
+    return notifyStates.get(state).get();
+  }
+
 }

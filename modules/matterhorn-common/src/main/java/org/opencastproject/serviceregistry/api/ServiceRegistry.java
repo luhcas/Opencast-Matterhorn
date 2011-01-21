@@ -100,17 +100,28 @@ public interface ServiceRegistry {
    *          The base URL where the service that can handle this service type can be found
    * @param maintenance
    *          the new maintenance status for this service
-   * @throws ServiceUnavailableException
-   *           if this is called for a jobType and baseUrl that is not registered
    * @throws ServiceRegistryException
    *           if communication with the service registry fails
    */
-  void setMaintenanceStatus(String host, boolean maintenance) throws ServiceUnavailableException,
-          ServiceRegistryException;
+  void setMaintenanceStatus(String host, boolean maintenance) throws ServiceRegistryException;
 
   /**
-   * Create and store a new job in {@link Status#QUEUED} state on this host. This is equivalent to calling
-   * createJob(type, false).
+   * Create and store a new job that will be dispatched as soon as possible. This is equivalent to calling
+   * {@link #createJob(String, String, List, String, boolean)} with an empty argument list.
+   * 
+   * @param type
+   *          the type of service responsible for this job
+   * @param operation
+   *          the operation for this service to run
+   * @return the job
+   * @throws ServiceRegistryException
+   *           if there is a problem creating the job
+   */
+  Job createJob(String type, String operation) throws ServiceRegistryException;
+
+  /**
+   * Create and store a new job that will be dispatched as soon as possible. This is equivalent to calling
+   * {@link #createJob(String, String, List, String, boolean)}.
    * 
    * @param type
    *          the type of service responsible for this job
@@ -121,36 +132,12 @@ public interface ServiceRegistry {
    * @return the job
    * @throws ServiceRegistryException
    *           if there is a problem creating the job
-   * @throws ServiceUnavailableException
-   *           if no service registration exists for this job type
    */
-  Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
-          ServiceRegistryException;
+  Job createJob(String type, String operation, List<String> arguments) throws ServiceRegistryException;
 
   /**
-   * Create and store a new job in {@link Status#QUEUED} state on this host. This is equivalent to calling
-   * createJob(type, false).
-   * 
-   * @param type
-   *          the type of service responsible for this job
-   * @param operation
-   *          the operation for this service to run
-   * @param arguments
-   *          the arguments to the operation
-   * @param payload
-   *          an optional initial payload
-   * @return the job
-   * @throws ServiceRegistryException
-   *           if there is a problem creating the job
-   * @throws ServiceUnavailableException
-   *           if no service registration exists for this job type on this host
-   */
-  Job createJob(String type, String operation, List<String> arguments, String payload)
-          throws ServiceUnavailableException, ServiceRegistryException;
-
-  /**
-   * Create and store a new job on this host. If start is true, the job will be in the {@link Status#RUNNING} state.
-   * Otherwise, it will be {@link Status#QUEUED}.
+   * Create and store a new job that will be dispatched as soon as possible. This is equivalent to calling
+   * {@link #createJob(String, String, List, String, boolean)}. The job will carry the given payload from the beginning.
    * 
    * @param type
    *          the type of service responsible for this job
@@ -160,30 +147,46 @@ public interface ServiceRegistry {
    *          the arguments to the operation
    * @param payload
    *          an optional initial payload
-   * @param start
-   *          whether the job should be created in the running state (true) or the queued state (false)
    * @return the job
    * @throws ServiceRegistryException
    *           if there is a problem creating the job
-   * @throws ServiceUnavailableException
-   *           if no service registration exists for this job type on this host
    */
-  Job createJob(String type, String operation, List<String> arguments, String payload, boolean start)
-          throws ServiceUnavailableException, ServiceRegistryException;
+  Job createJob(String type, String operation, List<String> arguments, String payload) throws ServiceRegistryException;
+
+  /**
+   * Create and store a new job. If <code>enqueueImmediately</code> is true, the job will be in the
+   * {@link Status#QUEUED} state and will be dispatched as soon as possible. Otherwise, it will be
+   * {@link Status#INSTANTIATED}.
+   * 
+   * @param type
+   *          the type of service responsible for this job
+   * @param operation
+   *          the operation for this service to run
+   * @param arguments
+   *          the arguments to the operation
+   * @param payload
+   *          an optional initial payload
+   * @param enqueueImmediately
+   *          whether the job should be enqueued for dispatch immediately. Otherwise, the job's initial state will be
+   *          {@link Status#INSTANTIATED}.
+   * @return the job
+   * @throws ServiceRegistryException
+   *           if there is a problem creating the job
+   */
+  Job createJob(String type, String operation, List<String> arguments, String payload, boolean enqueueImmediately)
+          throws ServiceRegistryException;
 
   /**
    * Update the job in the database
    * 
    * @param job
    * @return the updated job
-   * @throws ServiceRegistryException
-   *           if there is a problem updating the job
    * @throws NotFoundException
    *           if the job does not exist
-   * @throws ServiceUnavailableException
-   *           if no service registration exists for this job
+   * @throws ServiceRegistryException
+   *           if there is a problem updating the job
    */
-  Job updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException;
+  Job updateJob(Job job) throws NotFoundException, ServiceRegistryException;
 
   /**
    * Gets a receipt by its ID, or null if not found
@@ -308,4 +311,5 @@ public interface ServiceRegistry {
    *           if there is a problem accessing the service registry
    */
   SystemLoad getLoad() throws ServiceRegistryException;
+
 }

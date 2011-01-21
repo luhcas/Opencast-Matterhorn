@@ -38,7 +38,6 @@ import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
@@ -198,8 +197,6 @@ public class VideoSegmenterServiceImpl extends AbstractJobProducer implements Vi
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Segment.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(track)));
-    } catch (ServiceUnavailableException e) {
-      throw new VideoSegmenterException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new VideoSegmenterException("Unable to create a job", e);
     }

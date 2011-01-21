@@ -21,6 +21,7 @@ import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
@@ -105,10 +106,10 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
 
     try {
       return embed(workflowInstance.getMediaPackage(), workflowInstance.getCurrentOperation());

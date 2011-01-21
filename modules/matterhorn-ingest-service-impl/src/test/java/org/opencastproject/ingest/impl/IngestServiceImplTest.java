@@ -15,12 +15,10 @@
  */
 package org.opencastproject.ingest.impl;
 
-import org.opencastproject.job.api.JaxbJob;
-import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.security.api.TrustedHttpClient;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -41,7 +39,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 public class IngestServiceImplTest {
@@ -153,13 +150,7 @@ public class IngestServiceImplTest {
     EasyMock.expect(httpClient.execute((HttpGet) EasyMock.anyObject())).andReturn(httpResponse).anyTimes();
     EasyMock.replay(httpClient);
 
-    Job job = new JaxbJob();
-    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(
-            serviceRegistry.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (List<String>) EasyMock.anyObject(), (String)EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(job).anyTimes();
-    EasyMock.replay(serviceRegistry);
-
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
     service = new IngestServiceImpl();
     service.setHttpClient(httpClient);
     service.setTempFolder("target/temp/");
@@ -167,6 +158,7 @@ public class IngestServiceImplTest {
     service.setWorkflowService(workflowService);
     service.setServiceRegistry(serviceRegistry);
     service.defaultWorkflowDefinionId = "sample";
+    serviceRegistry.registerService(service);
   }
 
   @Test

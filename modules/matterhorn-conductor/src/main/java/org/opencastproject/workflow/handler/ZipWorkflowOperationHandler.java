@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -136,10 +137,10 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     final MediaPackage mediaPackage = workflowInstance.getMediaPackage();
     final WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
     String flavors = currentOperation.getConfiguration(INCLUDE_FLAVORS_PROPERTY);

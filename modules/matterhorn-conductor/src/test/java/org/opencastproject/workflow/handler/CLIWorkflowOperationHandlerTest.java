@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -97,14 +98,13 @@ public class CLIWorkflowOperationHandlerTest {
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
     workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
-    WorkflowOperationInstanceImpl operation = new WorkflowOperationInstanceImpl();
+    WorkflowOperationInstanceImpl operation = new WorkflowOperationInstanceImpl("op", OperationState.RUNNING);
     List<WorkflowOperationInstance> operationsList = new ArrayList<WorkflowOperationInstance>();
     operationsList.add(operation);
     workflowInstance.setOperations(operationsList);
 
     operation.setConfiguration("exec", exec);
     operation.setConfiguration("params", params);
-    workflowInstance.next(); // Simulate starting the workflow
     return new InstanceAndHandler(workflowInstance, cliHandler);
   }
 
@@ -199,7 +199,7 @@ public class CLIWorkflowOperationHandlerTest {
       output.write(MediaPackageParser.getAsXml(mp));
       output.close();
 
-      MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
+      MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
       if (returned_mp == null) {
         Assert.fail("A media package was not returned from external process");
       }
@@ -234,7 +234,7 @@ public class CLIWorkflowOperationHandlerTest {
       output.write(MediaPackageParser.getAsXml(mp));
       output.close();
 
-      MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
+      MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
       if (returned_mp == null) {
         Assert.fail("A media package was not returned from external process");
       }
@@ -258,7 +258,7 @@ public class CLIWorkflowOperationHandlerTest {
       InstanceAndHandler tuple = createCLIWorkflow("touch", "");
 
       // start the flow
-      tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
+      tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
       Assert.fail("Exception should have been thrown but wasn't.");
     } catch (Exception e) {
       Assert.assertTrue(e.getMessage().startsWith("Non-zero"));
@@ -274,7 +274,7 @@ public class CLIWorkflowOperationHandlerTest {
       InstanceAndHandler tuple = createCLIWorkflow("touch", file.getAbsolutePath());
 
       // start the flow
-      tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
+      tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
       Assert.assertTrue(file.exists());
     } finally {
       try {
@@ -296,7 +296,7 @@ public class CLIWorkflowOperationHandlerTest {
       InstanceAndHandler tuple = createCLIWorkflow("touch", f1 + " " + f2 + " " + f3);
 
       // start the flow
-      tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
+      tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
       Assert.assertTrue(f1.exists());
       Assert.assertTrue(f2.exists());
       Assert.assertTrue(f3.exists());

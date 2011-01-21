@@ -17,6 +17,7 @@ package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.fail;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -620,7 +621,7 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(0, service.countWorkflowInstances());
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
 
-    WorkflowStateListener stateListener = new WorkflowStateListener(WorkflowState.SUCCEEDED);
+    WorkflowStateListener stateListener = new WorkflowStateListener(WorkflowState.SUCCEEDED, WorkflowState.FAILED);
     service.addWorkflowListener(stateListener);
     
     for (int i = 0; i < count; i++) {
@@ -635,6 +636,7 @@ public class WorkflowServiceImplTest {
     }
 
     Assert.assertEquals(count, service.countWorkflowInstances());
+    Assert.assertEquals(count, stateListener.countStateChanges(WorkflowState.SUCCEEDED));
   }
 
   class SucceedingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
@@ -654,7 +656,7 @@ public class WorkflowServiceImplTest {
     }
 
     @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
       return createResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
     }
   }
@@ -676,7 +678,7 @@ public class WorkflowServiceImplTest {
     }
 
     @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
       throw new WorkflowOperationException("this operation handler always fails.  that's the point.");
     }
   }

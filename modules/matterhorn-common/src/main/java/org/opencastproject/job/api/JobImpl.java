@@ -34,11 +34,21 @@ public class JobImpl implements Job {
     this.dateCreated = new Date();
     this.id = id;
     this.status = Job.Status.QUEUED;
+    this.context = new JaxbJobContext();
   }
 
   /** The job ID */
   protected long id;
 
+  /** The root job identifier*/
+  protected Long rootJobId;
+
+  /** The parent job identifier*/
+  protected Long parentJobId;
+
+  /** The job context */
+  protected JaxbJobContext context;
+  
   /** The version, used for optimistic locking */
   protected int version;
 
@@ -380,6 +390,33 @@ public class JobImpl implements Job {
   @Override
   public String toString() {
     return "Job {" + this.id + "}";
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.job.api.Job#getContext()
+   */
+  @Override
+  public JobContext getContext() {
+    return context;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.job.api.Job#getParentJobId()
+   */
+  @Override
+  public Long getParentJobId() {
+    return parentJobId;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.job.api.Job#getRootJobId()
+   */
+  @Override
+  public Long getRootJobId() {
+    return rootJobId;
   }
 
 }

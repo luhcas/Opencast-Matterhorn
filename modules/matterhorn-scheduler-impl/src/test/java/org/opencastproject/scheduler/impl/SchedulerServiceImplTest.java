@@ -149,9 +149,7 @@ public class SchedulerServiceImplTest {
                         instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
                         instance.setState(WorkflowState.PAUSED);
 
-                        WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl();
-                        op.setId(SchedulerServiceImpl.SCHEDULE_OPERATION_ID);
-                        op.setState(OperationState.PAUSED);
+                        WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl(SchedulerServiceImpl.SCHEDULE_OPERATION_ID, OperationState.PAUSED);
                         List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
                         operations.add(op);
                         instance.setOperations(operations);
@@ -270,9 +268,7 @@ public class SchedulerServiceImplTest {
     instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
     instance.setState(WorkflowState.PAUSED);
 
-    WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl();
-    op.setId(SchedulerServiceImpl.SCHEDULE_OPERATION_ID);
-    op.setState(OperationState.PAUSED);
+    WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl(SchedulerServiceImpl.SCHEDULE_OPERATION_ID, OperationState.PAUSED);
     List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
     operations.add(op);
     instance.setOperations(operations);

@@ -125,7 +125,6 @@ public final class WorkflowParser {
       WorkflowInstanceImpl workflow = unmarshaller.unmarshal(
               DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), WorkflowInstanceImpl.class)
               .getValue();
-      workflow.init();
       return workflow;
     } catch (Exception e) {
       throw new WorkflowParsingException(e);

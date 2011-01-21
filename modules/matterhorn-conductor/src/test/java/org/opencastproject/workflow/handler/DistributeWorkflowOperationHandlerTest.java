@@ -25,6 +25,7 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
@@ -92,7 +93,7 @@ public class DistributeWorkflowOperationHandlerTest {
     String sourceTags = "engage,atom,rss";
     String targetTags = "engage,publish";
     WorkflowInstance workflowInstance = getWorkflowInstance(sourceTags, targetTags);
-    operationHandler.start(workflowInstance);
+    operationHandler.start(workflowInstance, null);
     EasyMock.verify(service);
   }
 
@@ -130,7 +131,7 @@ public class DistributeWorkflowOperationHandlerTest {
     String sourceTags = "rss";
     String targetTags = "engage,publish";
     WorkflowInstance workflowInstance = getWorkflowInstance(sourceTags, targetTags);
-    operationHandler.start(workflowInstance);
+    operationHandler.start(workflowInstance, null);
     EasyMock.verify(service);
 
   }
@@ -165,7 +166,7 @@ public class DistributeWorkflowOperationHandlerTest {
     String sourceTags = "nosuchtag";
     String targetTags = "engage,publish";
     WorkflowInstance workflowInstance = getWorkflowInstance(sourceTags, targetTags);
-    operationHandler.start(workflowInstance);
+    operationHandler.start(workflowInstance, null);
     EasyMock.verify(service);
   }
 
@@ -175,15 +176,14 @@ public class DistributeWorkflowOperationHandlerTest {
     workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
-    WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();
+    WorkflowOperationInstanceImpl operation = new WorkflowOperationInstanceImpl("op", OperationState.RUNNING);
 
-    operationInstance.setConfiguration("source-tags", sourceTags);
-    operationInstance.setConfiguration("target-tags", targetTags);
+    operation.setConfiguration("source-tags", sourceTags);
+    operation.setConfiguration("target-tags", targetTags);
 
     List<WorkflowOperationInstance> operationsList = new ArrayList<WorkflowOperationInstance>();
-    operationsList.add(operationInstance);
+    operationsList.add(operation);
     workflowInstance.setOperations(operationsList);
-    workflowInstance.next();
 
     return workflowInstance;
   }

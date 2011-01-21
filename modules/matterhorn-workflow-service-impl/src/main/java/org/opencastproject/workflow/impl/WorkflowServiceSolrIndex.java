@@ -25,10 +25,8 @@ import org.opencastproject.util.SolrUtils;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowParser;
-import org.opencastproject.workflow.api.WorkflowParsingException;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowQuery.QueryTerm;
 import org.opencastproject.workflow.api.WorkflowQuery.Sort;
@@ -142,8 +140,8 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   /** The key in solr documents representing the full text index */
   private static final String FULLTEXT_KEY = "fulltext";
 
-   /** The service registry, managing jobs */
-   private ServiceRegistry serviceRegistry = null;
+  /** The service registry, managing jobs */
+  private ServiceRegistry serviceRegistry = null;
 
   /**
    * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
@@ -298,11 +296,13 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     }
   }
 
-  public synchronized void index(WorkflowInstance instance) throws WorkflowDatabaseException {
+  public void index(WorkflowInstance instance) throws WorkflowDatabaseException {
     try {
       SolrInputDocument doc = createDocument(instance);
-      solrServer.add(doc);
-      solrServer.commit();
+      synchronized (solrServer) {
+        solrServer.add(doc);
+        solrServer.commit();
+      }
     } catch (Exception e) {
       throw new WorkflowDatabaseException("unable to index workflow", e);
     }
@@ -574,28 +574,6 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#getWorkflowById(long)
-   */
-  @Override
-  public WorkflowInstanceImpl getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException {
-    SolrQuery solrQuery = new SolrQuery();
-    solrQuery.setQuery(ID_KEY + ":" + workflowId);
-    try {
-      QueryResponse response = solrServer.query(solrQuery);
-      SolrDocumentList items = response.getResults();
-      if (items.size() > 0) {
-        String xml = (String) items.get(0).get(XML_KEY);
-        return WorkflowParser.parseWorkflowInstance(xml);
-      }
-    } catch (Exception e) {
-      throw new WorkflowDatabaseException(e);
-    }
-    throw new NotFoundException(Long.toString(workflowId));
-  }
-
-  /**
    * Appends query parameters to a solr query
    * 
    * @param sb
@@ -825,8 +803,10 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   @Override
   public void remove(long id) throws WorkflowDatabaseException, NotFoundException {
     try {
-      solrServer.deleteById(Long.toString(id));
-      solrServer.commit();
+      synchronized (solrServer) {
+        solrServer.deleteById(Long.toString(id));
+        solrServer.commit();
+      }
     } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }
@@ -838,7 +818,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
    * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public void update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException {
+  public void update(WorkflowInstance instance) throws WorkflowDatabaseException {
     index(instance);
   }
 

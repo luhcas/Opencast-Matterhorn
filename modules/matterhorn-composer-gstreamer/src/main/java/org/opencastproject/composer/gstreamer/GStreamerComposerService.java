@@ -37,7 +37,6 @@ import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -177,9 +176,6 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Encode.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(sourceTrack), profileId));
-    } catch (ServiceUnavailableException e) {
-      throw new EncoderException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -309,9 +305,6 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
               Operation.Mux.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(videoTrack),
                       MediaPackageElementParser.getAsXml(audioTrack), profileId));
-    } catch (ServiceUnavailableException e) {
-      throw new EncoderException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -354,9 +347,6 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
               Operation.Trim.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(sourceTrack), profileId, Long.toString(start),
                       Long.toString(duration)));
-    } catch (ServiceUnavailableException e) {
-      throw new EncoderException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -465,9 +455,6 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Image.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(sourceTrack), profileId, Long.toString(time)));
-    } catch (ServiceUnavailableException e) {
-      throw new EncoderException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -588,9 +575,6 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Caption.toString(), args);
-    } catch (ServiceUnavailableException e) {
-      throw new EmbedderException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EmbedderException("Unable to create a job", e);
     }

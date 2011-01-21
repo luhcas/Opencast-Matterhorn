@@ -112,7 +112,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
 
   public Annotation addAnnotation(Annotation a) {
     // set the User ID on the annotation
-    a.setUserId(securityService.getUserName());
+    a.setUserId(securityService.getUserId());
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -329,7 +329,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
   }
 
   private String getCurrentUserName() {
-    String userName = securityService.getUserName();
+    String userName = securityService.getUserId();
     return userName == null ? ".anon" : userName;
   }
 }

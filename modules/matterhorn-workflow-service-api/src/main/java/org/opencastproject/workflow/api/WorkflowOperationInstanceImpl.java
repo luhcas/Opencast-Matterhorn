@@ -115,7 +115,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   /**
    * No-arg constructor needed for JAXB serialization
    */
-  public WorkflowOperationInstanceImpl() {
+  WorkflowOperationInstanceImpl() {
   }
 
   /**
@@ -123,8 +123,11 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    * 
    * @param def
    *          the workflow definition
+   * @param position
+   *          the operation's position within the workflow
    */
-  public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def) {
+  public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def, int position) {
+    this.position = position;
     setId(def.getId());
     setState(OperationState.INSTANTIATED);
     setDescription(def.getDescription());
@@ -139,6 +142,19 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
         configurations.add(new WorkflowConfigurationImpl(key, def.getConfiguration(key)));
       }
     }
+  }
+
+  /**
+   * Constructs a new operaiton instance with the given id and initial state.
+   * 
+   * @param id
+   *          the operation id
+   * @param state
+   *          the state
+   */
+  public WorkflowOperationInstanceImpl(String id, OperationState state) {
+    setId(id);
+    setState(state);
   }
 
   public String getId() {
@@ -408,12 +424,12 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   /**
-   * Sets the position of this operation in the workflow instance.
+   * Sets the workflow operation's position within the workflow.
    * 
    * @param position
    *          the position
    */
-  void setPosition(int position) {
+  public void setPosition(int position) {
     this.position = position;
   }
 

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.job.api.JobContext;
+
 import java.util.SortedMap;
 
 /**
@@ -50,13 +52,16 @@ public interface WorkflowOperationHandler {
    * 
    * @param workflowInstance
    *          the workflow instance
+   * @param context
+   *          the job context
    * @return the {@link WorkflowOperationResult} containing a potentially modified MediaPackage and whether to put the
    *         workflow instance into a wait state.
    * 
    * @throws WorkflowOperationException
    *           If the workflow operation fails to execute properly, and the default error handling should be invoked.
    */
-  WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+  WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
+          throws WorkflowOperationException;
 
   /**
    * Skips the workflow operation on this {@link WorkflowInstance}. If the execution fails for some reason, this must
@@ -65,21 +70,26 @@ public interface WorkflowOperationHandler {
    * 
    * @param workflowInstance
    *          the workflow instance
+   * @param context
+   *          the job context
    * @return the {@link WorkflowOperationResult} containing a potentially modified MediaPackage and whether to put the
    *         workflow instance into a wait state.
    * 
    * @throws WorkflowOperationException
    *           If the workflow operation fails to execute properly, and the default error handling should be invoked.
    */
-  WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+  WorkflowOperationResult skip(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException;
 
   /**
    * Clean up after a workflow operation finishes
    * 
    * @param workflowInstance
    *          The workflow instance
+   * @param context
+   *          the job context
    * @throws WorkflowOperationException
    *           If the workflow operation fails to clean up properly.
    */
-  void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+  void destroy(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException;
+
 }

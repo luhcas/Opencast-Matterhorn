@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workflow.endpoint;
+package org.opencastproject.util;
 
 import org.apache.commons.io.IOUtils;
 

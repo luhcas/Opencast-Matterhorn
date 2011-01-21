@@ -17,7 +17,9 @@ package org.opencastproject.ingest.impl;
 
 import org.opencastproject.ingest.api.IngestException;
 import org.opencastproject.ingest.api.IngestService;
+import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -34,7 +36,6 @@ import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.ZipUtil;
@@ -75,7 +76,7 @@ import java.util.UUID;
 /**
  * Creates and augments Matterhorn MediaPackages. Stores media into the Working File Repository.
  */
-public class IngestServiceImpl implements IngestService {
+public class IngestServiceImpl extends AbstractJobProducer implements IngestService {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
@@ -120,6 +121,13 @@ public class IngestServiceImpl implements IngestService {
 
   /** The default workflow identifier, if one is configured */
   protected String defaultWorkflowDefinionId;
+
+  /**
+   * Creates a new ingest service instance.
+   */
+  public IngestServiceImpl() {
+    super(JOB_TYPE);
+  }
 
   /**
    * OSGI callback for activating this component
@@ -208,7 +216,12 @@ public class IngestServiceImpl implements IngestService {
     String tempPath = PathSupport.concat(tempFolder, UUID.randomUUID().toString());
 
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
+
+      // We don't need anybody to do the dispatching for us. Therefore we need to make sure that the job is never in
+      // QUEUED state but set it to INSTANTIATED in the beginning and then manually switch it to RUNNING.
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, false);
+      job.setStatus(Status.RUNNING);
+      serviceRegistry.updateJob(job);
 
       // locally unpack the mediaPackage
       // save inputStream to file
@@ -293,8 +306,6 @@ public class IngestServiceImpl implements IngestService {
       job.setStatus(Job.Status.FINISHED);
       return workflowInstance;
 
-    } catch (ServiceUnavailableException e) {
-      throw new IngestException(e);
     } catch (ServiceRegistryException e) {
       throw new IngestException(e);
     } catch (IOException e) {
@@ -346,8 +357,11 @@ public class IngestServiceImpl implements IngestService {
           throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_TRACK_FROM_URI,
-              Arrays.asList(uri.toString(), flavor == null ? null : flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, true);
+      job = serviceRegistry.createJob(
+              JOB_TYPE,
+              INGEST_TRACK_FROM_URI,
+              Arrays.asList(uri.toString(), flavor == null ? null : flavor.toString(),
+                      MediaPackageParser.getAsXml(mediaPackage)));
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -358,8 +372,6 @@ public class IngestServiceImpl implements IngestService {
       if (job != null)
         job.setStatus(Job.Status.FAILED);
       throw e;
-    } catch (ServiceUnavailableException e) {
-      throw new IngestException(e);
     } catch (ServiceRegistryException e) {
       throw new IngestException(e);
     } finally {
@@ -382,7 +394,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -393,8 +405,6 @@ public class IngestServiceImpl implements IngestService {
       if (job != null)
         job.setStatus(Job.Status.FAILED);
       throw e;
-    } catch (ServiceUnavailableException e) {
-      throw new IngestException(e);
     } catch (ServiceRegistryException e) {
       throw new IngestException(e);
     } finally {
@@ -418,7 +428,7 @@ public class IngestServiceImpl implements IngestService {
     Job job = null;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, INGEST_CATALOG_FROM_URI,
-              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, true);
+              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)));
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -432,8 +442,6 @@ public class IngestServiceImpl implements IngestService {
       if (job != null)
         job.setStatus(Job.Status.FAILED);
       throw e;
-    } catch (ServiceUnavailableException e) {
-      throw new IngestException(e);
     } catch (ServiceRegistryException e) {
       throw new IngestException(e);
     } finally {
@@ -477,7 +485,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -491,8 +499,6 @@ public class IngestServiceImpl implements IngestService {
       if (job != null)
         job.setStatus(Job.Status.FAILED);
       throw e;
-    } catch (ServiceUnavailableException e) {
-      throw new IngestException(e);
     } catch (ServiceRegistryException e) {
       throw new IngestException(e);
     } finally {
@@ -515,7 +521,7 @@ public class IngestServiceImpl implements IngestService {
     Job job = null;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, INGEST_ATTACHMENT_FROM_URI,
-              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, true);
+              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)));
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
@@ -526,8 +532,6 @@ public class IngestServiceImpl implements IngestService {
       if (job != null)
         job.setStatus(Job.Status.FAILED);
       throw e;
-    } catch (ServiceUnavailableException e) {
-      throw new IngestException(e);
     } catch (ServiceRegistryException e) {
       throw new IngestException(e);
     } finally {
@@ -549,7 +553,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, true);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
@@ -560,8 +564,6 @@ public class IngestServiceImpl implements IngestService {
       if (job != null)
         job.setStatus(Job.Status.FAILED);
       throw e;
-    } catch (ServiceUnavailableException e) {
-      throw new IngestException(e);
     } catch (ServiceRegistryException e) {
       throw new IngestException(e);
     } finally {
@@ -669,7 +671,7 @@ public class IngestServiceImpl implements IngestService {
         }
         // Ingest succeeded
         currentOperation.setState(OperationState.SUCCEEDED);
-        
+
         // Replace the current mediapackage with the new one
         workflow.setMediaPackage(mp);
         workflow.extend(workflowDef);
@@ -808,6 +810,27 @@ public class IngestServiceImpl implements IngestService {
 
   public void setDublinCoreService(DublinCoreCatalogService dublinCoreService) {
     this.dublinCoreService = dublinCoreService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getServiceRegistry()
+   */
+  @Override
+  protected ServiceRegistry getServiceRegistry() {
+    return serviceRegistry;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
+   *      java.util.List)
+   */
+  @Override
+  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+    throw new IllegalStateException("Ingest jobs are not expected to be dispatched");
   }
 
 }

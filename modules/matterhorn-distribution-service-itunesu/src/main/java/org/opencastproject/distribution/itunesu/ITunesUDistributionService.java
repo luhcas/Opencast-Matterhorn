@@ -31,7 +31,6 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -180,9 +179,6 @@ public class ITunesUDistributionService extends AbstractJobProducer implements D
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Distribute.toString(),
               Arrays.asList(mediaPackageId, MediaPackageElementParser.getAsXml(element)));
-    } catch (ServiceUnavailableException e) {
-      throw new DistributionException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new DistributionException("Unable to create a job", e);
     }
@@ -329,9 +325,6 @@ public class ITunesUDistributionService extends AbstractJobProducer implements D
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Retract.toString(), Arrays.asList(mediaPackageId));
-    } catch (ServiceUnavailableException e) {
-      throw new DistributionException("The " + JOB_TYPE
-              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new DistributionException("Unable to create a job", e);
     }

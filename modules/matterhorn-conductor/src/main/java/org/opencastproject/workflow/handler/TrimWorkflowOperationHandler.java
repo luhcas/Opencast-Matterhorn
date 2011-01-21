@@ -17,6 +17,7 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
@@ -93,10 +94,10 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     logger.info("Holding for review / trim...");
 
     return createResult(Action.PAUSE);
@@ -105,10 +106,10 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult skip(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     // If we do not hold for trim, we still need to put tracks in the mediapackage with the right flavor
     MediaPackage mediaPackage = workflowInstance.getMediaPackage();
     WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
@@ -132,10 +133,10 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-   *      java.util.Map)
+   *      JobContext, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context, Map<String, String> properties)
           throws WorkflowOperationException {
     logger.info("Trimming workflow {} using {}", workflowInstance.getId(), properties);
 
@@ -197,7 +198,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
         }
       }
     }
-    return super.resume(workflowInstance, properties);
+    return super.resume(workflowInstance, context, properties);
   }
 
   /**

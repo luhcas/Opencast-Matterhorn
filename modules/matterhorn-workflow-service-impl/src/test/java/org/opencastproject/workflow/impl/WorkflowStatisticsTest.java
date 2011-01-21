@@ -31,6 +31,7 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workflow.api.WorkflowStateListener;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport;
 import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport.OperationReport;
@@ -175,22 +176,6 @@ public class WorkflowStatisticsTest {
     assertEquals(0, stats.getTotal());
   }
 
-  class TestWorkflowListener implements WorkflowListener {
-    int stateChanges = 0;
-    
-    @Override
-    public void stateChanged(WorkflowInstance workflow) {
-      synchronized (TestWorkflowListener.this) {
-        stateChanges++;
-        notifyAll();
-      }
-    }
-    
-    @Override
-    public void operationChanged(WorkflowInstance workflow) {
-    }
-  }
-  
   class IndividualWorkflowListener implements WorkflowListener {
     long id = -1;
     
@@ -235,7 +220,7 @@ public class WorkflowStatisticsTest {
     int stopped = 0;
     int succeeded = 0;
 
-    TestWorkflowListener listener = new TestWorkflowListener();
+    WorkflowStateListener listener = new WorkflowStateListener(WorkflowState.PAUSED);
     service.addWorkflowListener(listener);
     
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
@@ -249,7 +234,7 @@ public class WorkflowStatisticsTest {
 
     // Wait for all the workflows to go into "paused" state
     synchronized (listener) {
-      while (listener.stateChanges < paused * 3) {
+      while (listener.countStateChanges() < WORKFLOW_DEFINITION_COUNT * OPERATION_COUNT) {
         listener.wait();
       }
     }

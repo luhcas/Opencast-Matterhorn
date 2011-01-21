@@ -15,14 +15,12 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationException;
-import org.opencastproject.workflow.api.WorkflowOperationInstance;
-import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -32,8 +30,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,10 +74,10 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     String workflowDefinitionId = workflowInstance.getConfiguration(OPT_WORKFLOW);
     if (append(workflowInstance, workflowDefinitionId))
       return createResult(Action.CONTINUE);
@@ -94,10 +90,10 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.handler.ResumableWorkflowOperationHandlerBase#resume(org.opencastproject.workflow.api.WorkflowInstance,
-   *      java.util.Map)
+   *      JobContext, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) {
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context, Map<String, String> properties) {
     String workflowDefinitionId = workflowInstance.getConfiguration(OPT_WORKFLOW);
     if (append(workflowInstance, workflowDefinitionId))
       return createResult(Action.CONTINUE);
@@ -124,15 +120,7 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
     try {
       WorkflowDefinition definition = workflowService.getWorkflowDefinitionById(workflowDefinitionId);
       if (definition != null) {
-        List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
-        for (WorkflowOperationDefinition operationDefinition : definition.getOperations()) {
-          WorkflowOperationInstance operation = new WorkflowOperationInstanceImpl(operationDefinition);
-          logger.debug("Adding workflow operation '{}' to '{}'", operationDefinition.getId(), workflowInstance.getId());
-          operations.add(operation);
-        }
-        List<WorkflowOperationInstance> currentOperations = workflowInstance.getOperations();
-        currentOperations.addAll(operations);
-        workflowInstance.setOperations(currentOperations);
+        workflowInstance.extend(definition);
         return true;
       }
     } catch (WorkflowDatabaseException e) {

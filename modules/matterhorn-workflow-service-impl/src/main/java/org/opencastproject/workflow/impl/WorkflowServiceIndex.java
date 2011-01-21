@@ -19,8 +19,6 @@ import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowParsingException;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
@@ -29,6 +27,7 @@ import org.opencastproject.workflow.api.WorkflowStatistics;
  * Provides persistence services to the workflow service implementation.
  */
 public interface WorkflowServiceIndex {
+  
   /** Initialize the DAO, if necessary */
   void activate();
 
@@ -42,10 +41,8 @@ public interface WorkflowServiceIndex {
    *          The workflow instance to store
    * @throws WorkflowDatabaseException
    *           if there is a problem storing the workflow instance
-   * @throws WorkflowParserException
-   *           if there is a problem serializing the workflow instance
    */
-  void update(WorkflowInstance instance) throws WorkflowDatabaseException, WorkflowParsingException;
+  void update(WorkflowInstance instance) throws WorkflowDatabaseException;
 
   /**
    * Remove the workflow instance with this id.
@@ -59,19 +56,6 @@ public interface WorkflowServiceIndex {
    *           if there is no workflow instance with this identifier
    */
   void remove(long id) throws WorkflowDatabaseException, NotFoundException;
-
-  /**
-   * Gets a WorkflowInstace by its ID.
-   * 
-   * @param workflowId
-   *          the workflow instance identifier
-   * @return the workflow instance
-   * @throws WorkflowDatabaseException
-   *           if there is a problem retrieving the workflow instance from persistence
-   * @throws NotFoundException
-   *           if there is no workflow instance with this identifier
-   */
-  WorkflowInstanceImpl getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets the total number of workflows that have been created to date.

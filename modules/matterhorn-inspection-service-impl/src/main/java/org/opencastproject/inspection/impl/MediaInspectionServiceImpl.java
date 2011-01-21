@@ -39,7 +39,6 @@ import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
@@ -155,8 +154,6 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
   public Job inspect(URI uri) throws MediaInspectionException {
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Inspect.toString(), Arrays.asList(uri.toString()));
-    } catch (ServiceUnavailableException e) {
-      throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaInspectionException(e);
     }
@@ -174,8 +171,6 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Enrich.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(element), Boolean.toString(override)));
-    } catch (ServiceUnavailableException e) {
-      throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaInspectionException(e);
     }

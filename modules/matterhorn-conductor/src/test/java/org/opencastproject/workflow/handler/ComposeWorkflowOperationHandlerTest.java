@@ -32,6 +32,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.easymock.EasyMock;
@@ -189,18 +190,19 @@ public class ComposeWorkflowOperationHandlerTest {
     workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
-    WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();
+    WorkflowOperationInstanceImpl operation = new WorkflowOperationInstanceImpl("op", OperationState.RUNNING);
+    operation.setId("compose");
+    operation.setState(OperationState.RUNNING);
     for (String key : configurations.keySet()) {
-      operationInstance.setConfiguration(key, configurations.get(key));
+      operation.setConfiguration(key, configurations.get(key));
     }
 
     List<WorkflowOperationInstance> operationsList = new ArrayList<WorkflowOperationInstance>();
-    operationsList.add(operationInstance);
+    operationsList.add(operation);
     workflowInstance.setOperations(operationsList);
-    workflowInstance.next(); // Simulate starting the workflow
 
     // Run the media package through the operation handler, ensuring that metadata gets added
-    return operationHandler.start(workflowInstance);
+    return operationHandler.start(workflowInstance, null);
   }
 
 }

@@ -152,7 +152,7 @@ public class RuntimeInfo {
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings("unchecked")
   public String getMyInfo() {
-    String username = securityService.getUserName();
+    String username = securityService.getUserId();
     JSONArray roles = new JSONArray();
     for (String role : securityService.getRoles()) {
       roles.add(role);

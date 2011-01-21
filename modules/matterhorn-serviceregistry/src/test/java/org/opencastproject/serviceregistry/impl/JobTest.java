@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JobTest {
+  
   private static final String JOB_TYPE_1 = "testing1";
   private static final String JOB_TYPE_2 = "testing2";
   private static final String OPERATION_NAME = "op";
@@ -154,12 +155,15 @@ public class JobTest {
   @Test
   public void testCount() throws Exception {
     // create a receipt on each service instance
-    serviceRegistry.createJob(regType1Host1, OPERATION_NAME, null, null, true);
-    serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, null, true);
+    serviceRegistry.createJob(regType1Host1, OPERATION_NAME, null, null, false);
+    serviceRegistry.createJob(regType1Host2, OPERATION_NAME, null, null, false);
 
-    Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING, LOCALHOST));
-    Assert.assertEquals(1, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING, HOST_2));
-    Assert.assertEquals(2, serviceRegistry.count(JOB_TYPE_1, Status.RUNNING));
+    // Since these jobs have not been dispatched to a host, there shouldn't be any jobs on those hosts
+    Assert.assertEquals(0, serviceRegistry.count(JOB_TYPE_1, Status.INSTANTIATED, LOCALHOST));
+    Assert.assertEquals(0, serviceRegistry.count(JOB_TYPE_1, Status.INSTANTIATED, HOST_2));
+
+    // Counting any job without regard to host should return both jobs
+    Assert.assertEquals(2, serviceRegistry.count(JOB_TYPE_1, Status.INSTANTIATED));
   }
 
   @Test

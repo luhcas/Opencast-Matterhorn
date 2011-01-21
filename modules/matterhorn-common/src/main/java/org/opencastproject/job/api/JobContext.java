@@ -13,28 +13,41 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.security.api;
+package org.opencastproject.job.api;
+
+import java.util.Map;
 
 /**
- * Provides access to the current user's username and roles, if any.
+ * Runtime contextual information to be passed around with jobs.
  */
-public interface SecurityService {
+public interface JobContext {
 
-  /** The anonymous role array */
-  String[] ANONYMOUS = new String[] { "ROLE_ANONYMOUS" };
+  // /**
+  // * Returns the identifier of the parent job or <code>null</code> if there is no parent job.
+  // *
+  // * @return the parent job identifier
+  // */
+  // Long getParentJobId();
+  //
+  // /**
+  // * Returns the user that is associated with the job.
+  // *
+  // * @return the user id
+  // */
+  // String getUserId();
 
   /**
-   * Gets the current user, or <code>null</code> if the user has not been authenticated.
+   * Gets the job context identifier.
    * 
-   * @return the user id
+   * @return the job context identifier
    */
-  String getUserId();
+  Long getId();
 
   /**
-   * Gets the current user's roles. For anonymous users, this will return {@link Anonymous}.
+   * Returns any additional contextual data.
    * 
-   * @return the user's roles
+   * @return the contextual data
    */
-  String[] getRoles();
+  Map<String, String> getProperties();
 
 }

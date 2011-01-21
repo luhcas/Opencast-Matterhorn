@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -68,7 +69,7 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   }
 
   /**
-   * Sets the action that is returned on {@link #start(WorkflowInstance)}.
+   * Sets the action that is returned on {@link #start(WorkflowInstance, JobContext)}.
    * 
    * @param startAction
    *          the start action
@@ -78,7 +79,7 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   }
 
   /**
-   * Sets the action that is returned on {@link #resume(WorkflowInstance, Map)}.
+   * Sets the action that is returned on {@link #resume(WorkflowInstance, JobContext, Map)}.
    * 
    * @param resumeAction
    *          the resume action
@@ -108,10 +109,10 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     started = true;
     return createResult(startAction);
   }
@@ -120,10 +121,10 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-   *      java.util.Map)
+   *      JobContext, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context, Map<String, String> properties)
           throws WorkflowOperationException {
     resumed = true;
     return createResult(resumeAction);

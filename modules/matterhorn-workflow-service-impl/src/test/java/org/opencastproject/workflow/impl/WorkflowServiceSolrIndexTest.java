@@ -31,7 +31,6 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.apache.commons.io.FileUtils;
 import org.easymock.classextension.EasyMock;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -123,12 +122,6 @@ public class WorkflowServiceSolrIndexTest {
     String solrQuery = dao.buildSolrQueryString(q);
     String expected = "seriesid:series1 AND (-state:RUNNING AND *:*)";
     assertEquals(expected, solrQuery);
-  }
-
-  @Test
-  public void testPopulateSolr() throws Exception {
-    // this method uses the service registry
-    Assert.assertNotNull(dao.getWorkflowById(123));
   }
 
 }

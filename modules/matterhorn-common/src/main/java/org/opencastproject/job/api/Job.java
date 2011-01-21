@@ -26,7 +26,7 @@ public interface Job {
 
   /** The status of the job that this receipt represents */
   static enum Status {
-    QUEUED, PAUSED, RUNNING, FINISHED, FAILED, DELETED
+    QUEUED, PAUSED, RUNNING, FINISHED, FAILED, DELETED, INSTANTIATED
   }
 
   /**
@@ -135,8 +135,8 @@ public interface Job {
   Long getQueueTime();
 
   /**
-   * The number of milliseconds that this job took to execute. This value will be null if the job has not yet
-   * finished execution.
+   * The number of milliseconds that this job took to execute. This value will be null if the job has not yet finished
+   * execution.
    * 
    * @return the total run time
    */
@@ -165,4 +165,24 @@ public interface Job {
    */
   void setPayload(String payload);
 
+  /**
+   * Gets the context for this job.
+   * 
+   * @return the context
+   */
+  JobContext getContext();
+
+  /**
+   * Gets the parent job identifier, or null if there is no parent.
+   * 
+   * @return the parent identifier
+   */
+  Long getParentJobId();
+
+  /**
+   * Gets the root job identifier, or null if this is the root job.
+   * 
+   * @return the root job identifier
+   */
+  Long getRootJobId();
 }

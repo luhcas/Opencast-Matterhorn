@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.kernel.http.StaticResource;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -138,10 +139,10 @@ public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOpera
    * 
    * This default implementation will put the workflow into the hold state.
    * 
-   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     return createResult(Action.PAUSE);
   }
 
@@ -149,10 +150,10 @@ public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOpera
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
-   *      java.util.Map)
+   *      JobContext, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context, Map<String, String> properties)
           throws WorkflowOperationException {
     return createResult(Action.CONTINUE);
   }

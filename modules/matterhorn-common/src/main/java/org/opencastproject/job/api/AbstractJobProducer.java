@@ -18,7 +18,6 @@ package org.opencastproject.job.api;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 
 import java.util.List;
@@ -43,7 +42,7 @@ public abstract class AbstractJobProducer implements JobProducer {
   public AbstractJobProducer(String jobType) {
     this.jobType = jobType;
   }
-
+  
   /**
    * {@inheritDoc}
    * 
@@ -87,8 +86,6 @@ public abstract class AbstractJobProducer implements JobProducer {
       try {
         getServiceRegistry().updateJob(job);
       } catch (NotFoundException e) {
-        throw new ServiceRegistryException(e);
-      } catch (ServiceUnavailableException e) {
         throw new ServiceRegistryException(e);
       }
     }

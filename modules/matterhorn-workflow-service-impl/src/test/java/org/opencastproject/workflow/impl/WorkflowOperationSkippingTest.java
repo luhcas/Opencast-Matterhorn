@@ -18,6 +18,7 @@ package org.opencastproject.workflow.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -226,7 +227,7 @@ public class WorkflowOperationSkippingTest {
     }
 
     @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
       return createResult(mp, Action.CONTINUE);
     }
   }

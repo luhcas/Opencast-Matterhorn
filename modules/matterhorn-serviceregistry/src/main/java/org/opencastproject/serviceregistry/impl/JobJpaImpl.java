@@ -16,6 +16,7 @@
 package org.opencastproject.serviceregistry.impl;
 
 import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.job.api.JaxbJobContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -30,16 +32,19 @@ import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OrderColumn;
 import javax.persistence.PostLoad;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -88,6 +93,24 @@ public class JobJpaImpl extends JaxbJob {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(JobJpaImpl.class);
 
+  /** The service that produced this job */
+  protected ServiceRegistrationJpaImpl creatorServiceRegistration;
+
+  /** The service that is processing, or processed, this job */
+  protected ServiceRegistrationJpaImpl processorServiceRegistration;
+
+  @ManyToMany(mappedBy = "root_id", fetch = FetchType.EAGER)
+  protected List<JobPropertyJpaImpl> properties;
+
+  /** The job context, to be created after loading by JPA */
+  protected JaxbJobContext context = null;
+
+  @JoinColumn(name = "root_id", referencedColumnName = "id", updatable = false)
+  protected JobJpaImpl rootJob = null;
+
+  @JoinColumn(name = "parent_id", referencedColumnName = "id", updatable = false)
+  protected JobJpaImpl parentJob = null;
+
   /** Default constructor needed by jaxb and jpa */
   public JobJpaImpl() {
     super();
@@ -98,9 +121,10 @@ public class JobJpaImpl extends JaxbJob {
    * queued.
    */
   public JobJpaImpl(ServiceRegistrationJpaImpl creatorServiceRegistration, String operation, List<String> arguments,
-          String payload, boolean startImmediately) {
+          String payload, boolean queueImmediately) {
     this();
     this.operationType = operation;
+    this.context = new JaxbJobContext();
     if (arguments != null) {
       this.arguments = new ArrayList<String>(arguments);
     }
@@ -109,21 +133,14 @@ public class JobJpaImpl extends JaxbJob {
     setCreatedHost(creatorServiceRegistration.getHost());
     setJobType(creatorServiceRegistration.getServiceType());
     this.creatorServiceRegistration = creatorServiceRegistration;
-    if (startImmediately) {
-      this.processorServiceRegistration = creatorServiceRegistration;
+    if (queueImmediately) {
       setDateStarted(getDateCreated());
-      setStatus(Status.RUNNING);
-    } else {
       setStatus(Status.QUEUED);
+    } else {
+      setStatus(Status.INSTANTIATED);
     }
 
   }
-
-  /** The service that produced this job */
-  protected ServiceRegistrationJpaImpl creatorServiceRegistration;
-
-  /** The service that is processing, or processed, this job */
-  protected ServiceRegistrationJpaImpl processorServiceRegistration;
 
   /**
    * {@inheritDoc}
@@ -346,6 +363,17 @@ public class JobJpaImpl extends JaxbJob {
     this.processorServiceRegistration = processorServiceRegistration;
   }
 
+  @PreUpdate
+  public void preUpdate() {
+    if (properties != null)
+      properties.clear();
+    else 
+      properties = new ArrayList<JobPropertyJpaImpl>();
+    for (Map.Entry<String, String> entry : context.getProperties().entrySet()) {
+      properties.add(new JobPropertyJpaImpl(rootJob, entry.getKey(), entry.getValue()));
+    }
+  }
+
   @PostLoad
   public void postLoad() {
     if (payload != null) {
@@ -363,5 +391,70 @@ public class JobJpaImpl extends JaxbJob {
       super.processingHost = creatorServiceRegistration.getHost();
       super.jobType = creatorServiceRegistration.getServiceType();
     }
+    context = new JaxbJobContext();
+    if (rootJob != null) {
+      context.setId(rootJob.getId());
+    }
+    if (properties != null) {
+      for (JobPropertyJpaImpl property : properties) {
+        context.getProperties().put(property.getKey(), property.getValue());
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JaxbJob#getContext()
+   */
+  @Transient
+  @Override
+  public JaxbJobContext getContext() {
+    return context;
+  }
+
+  /**
+   * @return the properties
+   */
+  public List<JobPropertyJpaImpl> getProperties() {
+    return properties;
+  }
+
+  /**
+   * @param properties
+   *          the properties to set
+   */
+  public void setProperties(List<JobPropertyJpaImpl> properties) {
+    this.properties = properties;
+  }
+
+  /**
+   * @return the parentJob
+   */
+  public JobJpaImpl getParentJob() {
+    return parentJob;
+  }
+
+  /**
+   * @param parentJob
+   *          the parentJob to set
+   */
+  public void setParentJob(JobJpaImpl parentJob) {
+    this.parentJob = parentJob;
+  }
+
+  /**
+   * @return the rootJob
+   */
+  public JobJpaImpl getRootJob() {
+    return rootJob;
+  }
+
+  /**
+   * @param rootJob
+   *          the rootJob to set
+   */
+  public void setRootJob(JobJpaImpl rootJob) {
+    this.rootJob = rootJob;
   }
 }

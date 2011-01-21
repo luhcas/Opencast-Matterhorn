@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -196,7 +197,7 @@ public class HoldStateTest {
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
       return createResult(Action.CONTINUE);
     }
 

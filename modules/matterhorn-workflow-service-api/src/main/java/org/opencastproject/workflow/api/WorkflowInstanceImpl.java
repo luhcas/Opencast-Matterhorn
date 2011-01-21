@@ -15,11 +15,13 @@
  */
 package org.opencastproject.workflow.api;
 
+import static org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState.FAILED;
+import static org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState.INSTANTIATED;
+import static org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState.SKIPPED;
+import static org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState.SUCCEEDED;
+
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +38,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
@@ -43,10 +46,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlRootElement(name = "workflow", namespace = "http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.NONE)
 public class WorkflowInstanceImpl implements WorkflowInstance {
-  private static final Logger logger = LoggerFactory.getLogger(WorkflowInstanceImpl.class);
-
-  /** whether we have initialized the operation positions */
-  protected boolean operationsInitialized = false;
 
   @XmlAttribute()
   private long id;
@@ -69,8 +68,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name = "mediapackage")
   private MediaPackage mediaPackage;
 
-  @XmlElement(name = "operation")
-  @XmlElementWrapper(name = "operations")
   protected List<WorkflowOperationInstance> operations;
 
   @XmlElement(name = "configuration")
@@ -81,7 +78,11 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElementWrapper(name = "errors")
   protected String[] errorMessages = new String[0];
 
+  @XmlTransient
   protected WorkflowOperationInstance currentOperation = null;
+  
+  @XmlTransient
+  protected boolean initialized = false;
 
   /**
    * Default no-arg constructor needed by JAXB
@@ -112,20 +113,13 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.state = WorkflowState.INSTANTIATED;
     this.mediaPackage = mediaPackage;
     this.operations = new ArrayList<WorkflowOperationInstance>();
-    List<WorkflowOperationDefinition> operationDefinitions = def.getOperations();
-    for (int i = 0; i < operationDefinitions.size(); i++) {
-      WorkflowOperationDefinition opDef = operationDefinitions.get(i);
-      WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(opDef);
-      opInstance.setPosition(i);
-      operations.add(opInstance);
-    }
-    this.operationsInitialized = true;
     this.configurations = new TreeSet<WorkflowConfiguration>();
     if (properties != null) {
       for (Entry<String, String> entry : properties.entrySet()) {
         configurations.add(new WorkflowConfigurationImpl(entry.getKey(), entry.getValue()));
       }
     }
+    extend(def);
   }
 
   /**
@@ -240,9 +234,60 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * 
    * @param workflowOperationInstanceList
    */
-  public void setOperations(List<WorkflowOperationInstance> workflowOperationInstanceList) {
+  @XmlElement(name = "operation")
+  @XmlElementWrapper(name = "operations")
+  public final void setOperations(List<WorkflowOperationInstance> workflowOperationInstanceList) {
+
     this.operations = workflowOperationInstanceList;
-    init();
+    currentOperation = null;
+
+    if (operations == null || operations.isEmpty())
+      return;
+
+    // Jaxb will lose the workflow operation's position, so we fix it here
+    for (int i = 0; i < operations.size(); i++) {
+      ((WorkflowOperationInstanceImpl) operations.get(i)).setPosition(i);
+    }
+
+    // Handle newly instantiated workflows
+    if (INSTANTIATED.equals(operations.get(0).getState())) {
+      currentOperation = operations.get(0);
+      initialized = true;
+    } else {
+      OperationState previousState = null;
+
+      int position = 0;
+      while (currentOperation == null && position < operations.size()) {
+
+        WorkflowOperationInstance operation = operations.get(position);
+
+        switch (operation.getState()) {
+          case FAILED:
+            break;
+          case INSTANTIATED:
+            if (SUCCEEDED.equals(previousState) || SKIPPED.equals(previousState) || FAILED.equals(previousState))
+              currentOperation = operation;
+            break;
+          case PAUSED:
+            currentOperation = operation;
+            break;
+          case RUNNING:
+            currentOperation = operation;
+            break;
+          case SKIPPED:
+            break;
+          case SUCCEEDED:
+            break;
+          default:
+            throw new IllegalStateException("Found operation in unknown state '" + operation.getState() + "'");
+        }
+
+        previousState = operation.getState();
+        position++;
+      }
+
+    }
+
   }
 
   /**
@@ -341,11 +386,10 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @Override
   public WorkflowOperationInstance next() {
     if (operations == null || operations.size() == 0)
-      throw new IllegalStateException("operations list must contain operations");
-    if (currentOperation == null) {
-      currentOperation = operations.get(0);
-      return currentOperation;
-    }
+      throw new IllegalStateException("Operations list must contain operations");
+    if (currentOperation == null)
+      throw new IllegalStateException("Can't call next on a finished workflow");
+
     for (Iterator<WorkflowOperationInstance> opIter = operations.iterator(); opIter.hasNext();) {
       WorkflowOperationInstance op = opIter.next();
       if (op.equals(currentOperation) && opIter.hasNext()) {
@@ -353,6 +397,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
         return currentOperation;
       }
     }
+
     currentOperation = null;
     return null;
   }
@@ -389,7 +434,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   @Override
   public int hashCode() {
-    return (int) (id >> 32);
+    return Long.valueOf(id).hashCode();
   }
 
   /**
@@ -399,16 +444,11 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (!(obj instanceof WorkflowInstanceImpl))
-      return false;
-    WorkflowInstanceImpl other = (WorkflowInstanceImpl) obj;
-    if (id != other.id)
-      return false;
-    return true;
+    if (obj instanceof WorkflowInstance) {
+      WorkflowInstance other = (WorkflowInstance) obj;
+      return id == other.getId();
+    }
+    return false;
   }
 
   /**
@@ -422,39 +462,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     public WorkflowInstance unmarshal(WorkflowInstanceImpl instance) throws Exception {
       return instance;
     }
-  }
-
-  /**
-   * Initializes the workflow instance
-   */
-  public void init() {
-    if (operations != null) {
-
-      int position = 0;
-      OperationState previousState = null;
-
-      for (WorkflowOperationInstance operation : operations) {
-        ((WorkflowOperationInstanceImpl) operation).setPosition(position);
-
-        // Set the current operation
-        if (currentOperation == null) {
-          // If the previous operation succeeded, but this hasn't started yet, this is the current operation
-          if (OperationState.SUCCEEDED.equals(previousState)
-                  && OperationState.INSTANTIATED.equals(operation.getState())) {
-            this.currentOperation = operation;
-          }
-          // If an operation is running or paused, this is the current operation
-          else if (OperationState.RUNNING.equals(operation.getState())
-                  || OperationState.PAUSED.equals(operation.getState())) {
-            this.currentOperation = operation;
-          }
-        }
-
-        previousState = operation.getState();
-        position++;
-      }
-    }
-    logger.debug("workflow instance initialized with operation={}", currentOperation);
   }
 
   /**
@@ -506,9 +513,13 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   @Override
   public void extend(WorkflowDefinition workflowDefinition) {
+    if (workflowDefinition.getOperations().size() == 0)
+      return;
+    List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>(this.operations);
     for (WorkflowOperationDefinition operationDefintion : workflowDefinition.getOperations()) {
-      this.operations.add(new WorkflowOperationInstanceImpl(operationDefintion));
+      operations.add(new WorkflowOperationInstanceImpl(operationDefintion, -1));
     }
+    setOperations(operations);
   }
 
 }

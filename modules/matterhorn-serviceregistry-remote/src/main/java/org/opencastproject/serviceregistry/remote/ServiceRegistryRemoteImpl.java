@@ -29,7 +29,6 @@ import org.opencastproject.serviceregistry.api.ServiceRegistrationParser;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.serviceregistry.api.SystemLoad;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.QueryStringBuilder;
@@ -320,12 +319,21 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String)
+   */
+  @Override
+  public Job createJob(String type, String operation) throws ServiceRegistryException {
+    return createJob(type, operation, null, null, true);
+  }
+  
+  /**
+   * {@inheritDoc}
    *
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, operation, arguments, null, false);
+  public Job createJob(String type, String operation, List<String> arguments) throws ServiceRegistryException {
+    return createJob(type, operation, arguments, null, true);
   }
   
   /**
@@ -334,8 +342,8 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public Job createJob(String type, String operation, List<String> arguments, String payload)
-          throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, operation, arguments, payload, false);
+          throws ServiceRegistryException {
+    return createJob(type, operation, arguments, payload, true);
   }
 
   /**
@@ -344,7 +352,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, String, boolean)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean enqueueImmediately) throws ServiceRegistryException {
     String servicePath = "job";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
@@ -354,7 +362,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       params.add(new BasicNameValuePair("host", this.serverUrl));
       if (payload != null)
         params.add(new BasicNameValuePair("payload", payload));
-      params.add(new BasicNameValuePair("start", Boolean.toString(start)));
+      params.add(new BasicNameValuePair("start", Boolean.toString(enqueueImmediately)));
       if(arguments != null && ! arguments.isEmpty()) {
         for(String argument : arguments) {
           params.add(new BasicNameValuePair("arg", argument));

@@ -17,6 +17,7 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -65,28 +66,28 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public abstract WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+  public abstract WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException;
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult skip(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     return createResult(Action.SKIP);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#destroy(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#destroy(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public void destroy(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
   }
 
   /**

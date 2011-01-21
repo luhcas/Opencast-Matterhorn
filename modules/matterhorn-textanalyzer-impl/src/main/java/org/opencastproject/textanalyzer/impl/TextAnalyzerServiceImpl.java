@@ -40,7 +40,6 @@ import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.textanalyzer.api.TextAnalyzerException;
 import org.opencastproject.textanalyzer.api.TextAnalyzerService;
 import org.opencastproject.textanalyzer.impl.ocropus.OcropusLine;
@@ -114,8 +113,6 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Extract.toString(),
               Arrays.asList(MediaPackageElementParser.getAsXml(image)));
-    } catch (ServiceUnavailableException e) {
-      throw new TextAnalyzerException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new TextAnalyzerException("Unable to create job", e);
     }

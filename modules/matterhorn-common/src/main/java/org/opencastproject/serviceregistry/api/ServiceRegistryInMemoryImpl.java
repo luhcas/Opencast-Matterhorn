@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Simple and in-memory implementation of a the service registry intended for testing scenarios.
@@ -44,7 +44,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
 
   /** Hostname for localhost */
   private static final String LOCALHOST = "localhost";
-  
+
   /** The hosts */
   protected Map<String, Long> hosts = new HashMap<String, Long>();
 
@@ -52,10 +52,13 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   protected Map<String, List<ServiceRegistrationInMemoryImpl>> services = new HashMap<String, List<ServiceRegistrationInMemoryImpl>>();
 
   /** The jobs */
-  protected List<Job> jobs = new CopyOnWriteArrayList<Job>();
+  protected List<Job> jobs = new ArrayList<Job>();
 
   /** The job dispatching thread */
   protected JobDispatcher jobDispatcher = null;
+
+  /** The job identifier */
+  protected static AtomicLong idCounter = new AtomicLong();
 
   public ServiceRegistryInMemoryImpl(JobProducer service) throws ServiceRegistryException {
     if (service != null)
@@ -64,7 +67,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
     jobDispatcher.setTimeout(DEFAULT_DISPATCHER_TIMEOUT);
     jobDispatcher.start();
   }
-  
+
   /**
    * Creates a new service registry in memory.
    */
@@ -113,8 +116,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
    * @return the service registration
    * @throws ServiceRegistryException
    */
-  public ServiceRegistration registerService(JobProducer localService)
-          throws ServiceRegistryException {
+  public ServiceRegistration registerService(JobProducer localService) throws ServiceRegistryException {
 
     List<ServiceRegistrationInMemoryImpl> servicesOnHost = services.get(LOCALHOST);
     if (servicesOnHost == null) {
@@ -185,8 +187,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String, boolean)
    */
   @Override
-  public void setMaintenanceStatus(String host, boolean maintenance) throws ServiceUnavailableException,
-          ServiceRegistryException {
+  public void setMaintenanceStatus(String host, boolean maintenance) throws ServiceRegistryException {
     List<ServiceRegistrationInMemoryImpl> servicesOnHost = services.get(host);
     if (servicesOnHost != null) {
       for (ServiceRegistrationInMemoryImpl r : servicesOnHost) {
@@ -198,25 +199,36 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
-   *      java.util.List)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments) throws ServiceUnavailableException,
-          ServiceRegistryException {
-    return createJob(type, operation, arguments, null, false);
+  public Job createJob(String type, String operation) throws ServiceRegistryException {
+    return createJob(type, operation, null, null, true);
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, java.lang.String)
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List)
+   */
+  @Override
+  public Job createJob(String type, String operation, List<String> arguments) throws ServiceRegistryException {
+    return createJob(type, operation, arguments, null, true);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List, java.lang.String)
    */
   @Override
   public Job createJob(String type, String operation, List<String> arguments, String payload)
-          throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, operation, arguments, payload, false);
+          throws ServiceRegistryException {
+    return createJob(type, operation, arguments, payload, true);
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -224,20 +236,28 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
    *      java.util.List, String, boolean)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean start)
-          throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean enqueuImmediately)
+          throws ServiceRegistryException {
     if (getServiceRegistrationsByType(type).size() == 0)
       logger.warn("Service " + type + " not available");
 
-    JobImpl job = new JobImpl(System.currentTimeMillis());
-    job.setJobType(type);
-    job.setOperation(operation);
-    job.setArguments(arguments);
-    job.setPayload(payload);
-    if (start)
-      job.setStatus(Status.RUNNING);
+    JobImpl job = null;
+    synchronized (this) {
+      job = new JobImpl(idCounter.addAndGet(1));
+      job.setJobType(type);
+      job.setOperation(operation);
+      job.setArguments(arguments);
+      job.setPayload(payload);
+      if (enqueuImmediately)
+        job.setStatus(Status.QUEUED);
+      else
+        job.setStatus(Status.INSTANTIATED);
+    }
 
-    jobs.add(job);
+    synchronized (jobs) {
+      jobs.add(job);
+    }
+
     jobDispatcher.interrupt();
 
     return job;
@@ -277,7 +297,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#updateJob(org.opencastproject.job.api.Job)
    */
   @Override
-  public Job updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException {
+  public Job updateJob(Job job) throws NotFoundException, ServiceRegistryException {
     // Nothing to do, everything is in memory only anyway
     return job;
   }
@@ -289,9 +309,11 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
    */
   @Override
   public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    for (Job job : jobs) {
-      if (id == job.getId())
-        return job;
+    synchronized (jobs) {
+      for (Job job : jobs) {
+        if (id == job.getId())
+          return job;
+      }
     }
     throw new NotFoundException(Long.toString(id));
   }
@@ -305,9 +327,11 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   @Override
   public List<Job> getJobs(String serviceType, Status status) throws ServiceRegistryException {
     List<Job> result = new ArrayList<Job>();
-    for (Job job : jobs) {
-      if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
-        result.add(job);
+    synchronized (jobs) {
+      for (Job job : jobs) {
+        if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
+          result.add(job);
+      }
     }
     return result;
   }
@@ -405,9 +429,11 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   @Override
   public long count(String serviceType, Status status) throws ServiceRegistryException {
     int count = 0;
-    for (Job job : jobs) {
-      if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
-        count++;
+    synchronized (jobs) {
+      for (Job job : jobs) {
+        if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
+          count++;
+      }
     }
     return count;
   }
@@ -421,9 +447,11 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   @Override
   public long count(String serviceType, Status status, String host) throws ServiceRegistryException {
     int count = 0;
-    for (Job job : jobs) {
-      if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
-        count++;
+    synchronized (jobs) {
+      for (Job job : jobs) {
+        if (serviceType.equals(job.getJobType()) && status.equals(job.getStatus()))
+          count++;
+      }
     }
     return count;
   }
@@ -461,11 +489,13 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
         try {
 
           // Go through the jobs and find those that have not yet been dispatched
-          for (Job job : jobs) {
-            if (Status.QUEUED.equals(job.getStatus())) {
-              job.setStatus(Status.RUNNING);
-              JobWorker worker = new JobWorker(job);
-              worker.start();
+          synchronized (jobs) {
+            for (Job job : jobs) {
+              if (Status.QUEUED.equals(job.getStatus())) {
+                job.setStatus(Status.RUNNING);
+                JobWorker worker = new JobWorker(job);
+                worker.start();
+              }
             }
           }
 
@@ -496,7 +526,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
     }
 
   }
-  
+
   /**
    * Thread that will try to execute a single job.
    */

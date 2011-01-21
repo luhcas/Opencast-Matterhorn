@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageParser;
@@ -75,10 +76,10 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
 
     WorkflowOperationInstance operation = workflowInstance.getCurrentOperation();
 
@@ -204,10 +205,10 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
    */
   @Override
-  public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult skip(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     return new WorkflowOperationResultImpl(workflowInstance.getMediaPackage(), null, Action.SKIP, 0);
   }
 
@@ -398,7 +399,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
   }
 
   @Override
-  public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public void destroy(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
     // Do nothing (nothing to clean up, the command line program should do this itself)
   }
 
