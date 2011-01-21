@@ -857,24 +857,6 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
   }
 
   /**
-   * Removes a workflow instance.
-   * 
-   * @param id
-   *          The id of the workflow instance to remove
-   */
-  public void removeFromDatabase(long id) throws WorkflowDatabaseException, NotFoundException {
-    Job job = null;
-    try {
-      job = serviceRegistry.getJob(id);
-      job.setStatus(Status.DELETED);
-      serviceRegistry.updateJob(job);
-      index.remove(id);
-    } catch (ServiceRegistryException e) {
-      throw new WorkflowDatabaseException(e);
-    }
-  }
-
-  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#countWorkflowInstances()
