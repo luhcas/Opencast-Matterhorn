@@ -129,11 +129,11 @@ public class VideoFilesinkConsumerTest {
   public void settingCodecButNotContainerResultsInCorrectCodecAndDefaultMuxer() {
     if (!gstreamerInstalled)
       return;
-    Properties captureDeviceProperties = createProperties("mpeg2enc", "4096", null);
+    Properties captureDeviceProperties = createProperties("x264enc", "4096", null);
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     VideoFilesinkConsumer videoFileSinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
-    checkEncoderProperties(videoFileSinkBin, "mpeg2enc", "4096");
+    checkEncoderProperties(videoFileSinkBin, "x264enc", "4096");
     checkMuxerProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_MUXER);
   }
 
