@@ -33,14 +33,14 @@ function getResponse(target) {
 
 	
 	function stopCapture() {
-		document.location = "http://" + window.location.hostname + ":8080/capture/stopCapture";
+		document.location = "http://" + window.location.hostname + ":8080/captureagent/stopCapture";
 	}
 	
-	var start = "http://" + window.location.hostname + ":8080/capture/startCapture"
-	var end = "<a href='http://" + window.location.hostname + ":8080/capture/stopCapture'>Stop Capture</a>";
+	var start = "http://" + window.location.hostname + ":8080/captureagent/startCapture"
+	var end = "<a href='http://" + window.location.hostname + ":8080/captureagent/stopCapture'>Stop Capture</a>";
 	
 	var client = new XMLHttpRequest();
-	client.open("GET", "http://" + window.location.hostname + ":8080/capture/configuration", false);
+	client.open("GET", "http://" + window.location.hostname + ":8080/captureagent/configuration", false);
 	client.send();
 	var form = "<form name='form' action=" + start + " method='POST'><textarea name=config rows='20' cols='100'>" + client.responseText + "</textarea><br>" +
 		"<input type='submit' value='Start Capture'>" +
