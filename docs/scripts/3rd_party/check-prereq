@@ -166,6 +166,18 @@ install_prog() {
               ;;
           esac
           ;;
+        zlib-devel )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="zlib-devel-1.2.3-3.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="zlib-devel-1.2.3-3.x86_64.rpm"
+              ;;
+          esac
+          ;;
         * )
           echo "Don't know how to install $1 on `os`"
           return 1
@@ -195,6 +207,7 @@ install_prog() {
         ImageMagick ) prog=imagemagick ;;
         gsl-devel ) prog=libgsl0-dev ;;
         perl-dbi ) prog=libdbi-perl ;;
+        zlib-devel ) prog=zlib1g-dev ;;
         * ) prog="$1" ;;
       esac
       sudox apt-get -y install $prog
@@ -339,8 +352,14 @@ check_prereq() {
       #
       # this was reported as missing
       chkprog dbiprof || install_prog perl-dbi || return 1
+      #
+      if [ ! -f /usr/include/zlib.h ]; then
+        install_prog zlib-devel || return 1
+      fi
       ;;
     Ubuntu )
+      apt-get update || return 1
+      #
       chkprog wget  || install_prog wget  || return 1
       chkprog alien || install_prog alien || return 1
       chkprog g++   || install_prog g++   || return 1
@@ -361,6 +380,10 @@ check_prereq() {
       #
       # this was reported as missing
       chkprog dbiprof || install_prog perl-dbi || return 1
+      #
+      if [ ! -f /usr/include/zlib.h ]; then
+        install_prog zlib-devel || return 1
+      fi
       ;;
     Debian )
       ;;
