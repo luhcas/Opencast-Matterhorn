@@ -97,7 +97,7 @@ fix_libs()).
 If you have different versions of required packages, you could/will
 have problems compiling all 3rd party tools.
 
-Note: URLs and names of needed packages are hardcoded in the script
+Note: URLs and names of needed packages are hard-coded in the script
 (see shell functions install_prog() and install_mingw32())!
 
 1) download sources
@@ -292,8 +292,8 @@ of ffmpeg preset files in ffmpeg.
 Windows installation of gstreamer
 =================================
 
-Gstreamer on Windows can be installed manually, following the steps
-outlined here:
+Gstreamer on Windows can be installed from the precompiled packages
+from OSSBuild, following the steps outlined here:
 
 - download precompiled version of gstreamer from one of the following
   locations:
@@ -303,18 +303,17 @@ GPL version:
 LGPL version:
   http://ossbuild.googlecode.com/files/GStreamer-WinBuilds-LGPL-x86.msi
 
-- extract files from msi:
+  You can also check the OSSBuild site for any newer beta versions.
 
-  mkdir gpl
-  for /f "tokens=*" %%P in ('cd') do set PWD=%%P
-  msiexec /a GStreamer-WinBuilds-GPL-x86.msi /qb TARGETDIR="%PWD%\gpl"
+- start installation by clicking on downloaded msi
+  * click Next until you get to the "Custom Setup" screen, where you
+    have to select a new install location with the button "Browse".
+    Write "C:\usr\local" as a folder name (or any other disk:\usr\local)
+    and click OK.
+  * select wanted plugins, click Next and then Install
 
-- copy files from extraction sub-directories to destination:
-
-  xcopy gpl\PFiles\bin   \usr\local\bin   /s /i
-  xcopy gpl\PFiles\lib   \usr\local\lib   /s /i
-  xcopy gpl\PFiles\etc   \usr\local\etc   /s /i
-  xcopy gpl\PFiles\share \usr\local\share /s /i
+- If the correct folder was selected, gstreamer should be installed along
+  with the other 3rd party tools.
 
 
 Picture of 3rd party tools dependencies
