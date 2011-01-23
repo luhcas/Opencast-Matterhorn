@@ -15,13 +15,11 @@
  */
 package org.opencastproject.workflow.endpoint;
 
-import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.LocalHashMap;
 import org.opencastproject.util.NotFoundException;
@@ -880,30 +878,6 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
       return (JobProducer) service;
     else
       return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#dispatchJob(java.lang.String)
-   */
-  @POST
-  @Path("/dispatch")
-  public Response dispatchJob(@FormParam("job") String jobXml) throws ServiceRegistryException {
-    final JobProducer service = getService();
-    if (service == null)
-      throw new WebApplicationException(Status.PRECONDITION_FAILED);
-
-    // If we are already running the maximum number of system-wide workflows, don't accept this job
-    long runningWorkflows = service.countJobs(Job.Status.RUNNING);
-
-    if (runningWorkflows > 2) { // TODO: How should we calculate the maximum number of workflows to run?
-      logger.debug("Refused to accept dispatched job {}. This server is already running {} workflows.", jobXml,
-              runningWorkflows);
-      throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
-    } else {
-      return super.dispatchJob(jobXml);
-    }
   }
 
 }

@@ -37,10 +37,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
 
   /** Logging facility */
-  static final Logger logger = LoggerFactory.getLogger(ServiceRegistryInMemoryImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryInMemoryImpl.class);
 
   /** Default dispatcher timeout (1 second) */
-  static final long DEFAULT_DISPATCHER_TIMEOUT = 1000;
+  public static final long DEFAULT_DISPATCHER_TIMEOUT = 1000;
 
   /** Hostname for localhost */
   private static final String LOCALHOST = "localhost";
@@ -58,7 +58,7 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   protected JobDispatcher jobDispatcher = null;
 
   /** The job identifier */
-  protected static AtomicLong idCounter = new AtomicLong();
+  protected AtomicLong idCounter = new AtomicLong();
 
   public ServiceRegistryInMemoryImpl(JobProducer service) throws ServiceRegistryException {
     if (service != null)

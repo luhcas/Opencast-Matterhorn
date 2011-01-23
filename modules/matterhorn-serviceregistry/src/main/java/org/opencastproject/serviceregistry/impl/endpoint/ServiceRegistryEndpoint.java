@@ -265,7 +265,7 @@ public class ServiceRegistryEndpoint {
       Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(host, jobType, operation, arguments, payload,
               start);
       URI uri = new URI(UrlSupport.concat(new String[] { serverUrl, servicePath, "job", job.getId() + ".xml" }));
-      return Response.ok(new JaxbJob(job)).location(uri).build();
+      return Response.created(uri).entity(new JaxbJob(job)).build();
     } catch (Exception e) {
       throw new WebApplicationException(e);
     }
@@ -461,7 +461,7 @@ public class ServiceRegistryEndpoint {
     createJobEndpoint.addOptionalParam(new Param("start", Type.BOOLEAN, null,
             "Immediately start the job or simply queue it?"));
 
-    createJobEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the new job."));
+    createJobEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Returns the new job."));
     createJobEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, createJobEndpoint);
 

@@ -25,7 +25,7 @@ import java.util.List;
 public interface Job {
 
   /** The status of the job that this receipt represents */
-  static enum Status {
+  public static enum Status {
     QUEUED, PAUSED, RUNNING, FINISHED, FAILED, DELETED, INSTANTIATED
   }
 

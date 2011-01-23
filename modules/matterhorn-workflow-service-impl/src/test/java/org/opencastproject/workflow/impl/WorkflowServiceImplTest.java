@@ -255,12 +255,12 @@ public class WorkflowServiceImplTest {
     service.addWorkflowListener(succeedListener);
     synchronized (succeedListener) {
       if (service.getWorkflowById(originalInstance.getId()).getState().equals(WorkflowState.RUNNING)) {
-        succeedListener.wait();
+        succeedListener.wait(10000);
       }
     }
     synchronized (succeedListener) {
       if (service.getWorkflowById(childInstance.getId()).getState().equals(WorkflowState.RUNNING)) {
-        succeedListener.wait();
+        succeedListener.wait(10000);
       }
     }
     service.removeWorkflowListener(succeedListener);
@@ -379,7 +379,7 @@ public class WorkflowServiceImplTest {
       } else {
         instance = service.start(definition, mp, parentId, null);
       }
-      stateListener.wait();
+      stateListener.wait(10000);
     }
     service.removeWorkflowListener(stateListener);
 
@@ -491,7 +491,7 @@ public class WorkflowServiceImplTest {
 
     while (stateListener.countStateChanges() < count) {
       synchronized (stateListener) {
-        stateListener.wait();
+        stateListener.wait(10000);
       }
     }
 

@@ -24,8 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -38,6 +43,8 @@ import javax.ws.rs.core.Response.Status;
  * Base implementation for job producer REST endpoints.
  */
 public abstract class AbstractJobProducerEndpoint {
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(AbstractJobProducerEndpoint.class);
 
   /** To enable threading when dispatching jobs to the service */
   protected ExecutorService executor = Executors.newCachedThreadPool();
@@ -60,19 +67,25 @@ public abstract class AbstractJobProducerEndpoint {
       throw new WebApplicationException(Status.BAD_REQUEST);
     }
 
-    // Finally, have the service execute the job
-    executor.submit(new JobRunner(job, service));
-
+    // Try to execute the job. If, after one second, there is an execution exception, we know that the service refused
+    // to take the job.
+    Future<?> future = executor.submit(new JobRunner(job, service));
+    try {
+      future.get(1, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      logger.info("Attempt to execute job {} interrupted", job);
+    } catch (ExecutionException e) {
+      throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
+    } catch (TimeoutException e) {
+      logger.debug("Timed out waiting for a response.  This is expected.", job);
+    }
     return Response.noContent().build();
   }
 
   /**
    * A utility class to run jobs
    */
-  static class JobRunner implements Runnable {
-    
-    /** The logger */
-    private static final Logger logger = LoggerFactory.getLogger(JobRunner.class);
+  static class JobRunner implements Callable<Void> {
 
     /** The job */
     private Job job = null;
@@ -93,16 +106,16 @@ public abstract class AbstractJobProducerEndpoint {
       this.service = service;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.util.concurrent.Callable#call()
+     */
     @Override
-    public void run() {
-      try {
-        service.acceptJob(job, job.getOperation(), job.getArguments());
-      } catch (Exception e) {
-        logger.warn("Unable to start job {}", job);
-        e.printStackTrace();
-      }
+    public Void call() throws Exception {
+      service.acceptJob(job, job.getOperation(), job.getArguments());
+      return null;
     }
-
   }
 
   /**

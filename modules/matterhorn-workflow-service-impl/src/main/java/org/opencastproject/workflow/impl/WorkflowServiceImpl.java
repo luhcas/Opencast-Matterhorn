@@ -58,26 +58,26 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -94,7 +94,7 @@ import java.util.regex.Pattern;
  * WorkflowOperation.getName(), then the factory returns a WorkflowOperationRunner to handle that operation. This allows
  * for custom runners to be added or modified without affecting the workflow service itself.
  */
-public class WorkflowServiceImpl implements WorkflowService, JobProducer {
+public class WorkflowServiceImpl implements WorkflowService, JobProducer, ManagedService {
 
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
@@ -107,11 +107,18 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
   /** The pattern used by workfow operation configuration keys **/
   public static final Pattern PROPERTY_PATTERN = Pattern.compile("\\$\\{.+?\\}");
 
+  /** The configuration key for setting {@link #maxConcurrentWorkflows} */
+  public static final String MAX_CONCURRENT_CONFIG_KEY = "max.concurrent";
+
   /** Constant value indicating a <code>null</code> parent id */
   private static final String NULL_PARENT_ID = "-";
 
   /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
   protected ComponentContext componentContext = null;
+
+  // TODO: How should we calculate the maximum number of workflows to run?
+  /** The maximum number of cluster-wide workflows that will cause this service to stop accepting new jobs */
+  protected int maxConcurrentWorkflows = 0;
 
   /** The collection of workflow definitions */
   protected Map<String, WorkflowDefinition> workflowDefinitions = new HashMap<String, WorkflowDefinition>();
@@ -188,6 +195,8 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
           }
         };
         listenerExecutorService.execute(runnable);
+      } else {
+        logger.debug("Not notifying {} because the workflow state has not changed", listener);
       }
 
       if (newWorkflowInstance.getCurrentOperation() != null) {
@@ -201,6 +210,8 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
           };
           listenerExecutorService.execute(runnable);
         }
+      } else {
+        logger.debug("Not notifying {} because the workflow operation has not changed", listener);
       }
     }
   }
@@ -596,12 +607,11 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
     if (operation == null)
       throw new IllegalStateException("No operation to run, workflow is " + workflow.getState());
 
-    WorkflowOperationWorker worker = new WorkflowOperationWorker(workflow, this);
     WorkflowState currentState = workflow.getState();
 
     // Execute the operation handler
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
-    worker.setHandler(operationHandler);
+    WorkflowOperationWorker worker = new WorkflowOperationWorker(operationHandler, workflow, this);
     worker.execute();
 
     // Move on to the next workflow operation
@@ -632,6 +642,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
       }
 
       // Save the updated workflow to the database
+      logger.info("{} has {}", workflow, workflow.getState());
       update(workflow);
 
     } else {
@@ -675,6 +686,8 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
           break;
         case INSTANTIATED:
           throw new IllegalStateException("Impossible workflow state found during processing");
+        default:
+          throw new IllegalStateException("Unkown workflow state found during processing");
       }
 
     }
@@ -728,7 +741,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
    */
   @Override
   public WorkflowInstance resume(long id) throws WorkflowDatabaseException, WorkflowParsingException, NotFoundException {
-    return resume(id, new HashMap<String, String>());
+    return resume(id, null);
   }
 
   /**
@@ -749,34 +762,13 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
       job = serviceRegistry.getJob(workflowInstanceId);
       job.setStatus(Status.QUEUED);
       job.setOperation(Operation.RESUME.toString());
+      // It's unclear why this is necessary, but it seems to be (jmh)
+      job.setPayload(WorkflowParser.toXml(workflowInstance));
       serviceRegistry.updateJob(job);
     } catch (ServiceRegistryException e) {
       throw new WorkflowDatabaseException(e);
     }
 
-    return workflowInstance;
-  }
-
-  /**
-   * Resumes a suspended workflow instance, applying new properties to the workflow.
-   * 
-   * @param workflowInstance
-   *          the workflow to resume
-   * @param properties
-   *          the properties to apply to the resumed workflow
-   * @return the workflow instance
-   * @throws NotFoundException
-   *           if no paused workflow with this identifier exists
-   * @throws WorkflowDatabaseException
-   *           if there is a problem accessing the workflow instance in persistence
-   * @throws WorkflowParsingException
-   *           if there is a problem parsing the workflow instance from persistence
-   */
-  protected WorkflowInstance resume(WorkflowInstance workflowInstance, Map<String, String> properties)
-          throws WorkflowDatabaseException, WorkflowParsingException, NotFoundException {
-    workflowInstance = updateConfiguration(workflowInstance, properties);
-    workflowInstance.setState(RUNNING);
-    runWorkflowOperation(workflowInstance);
     return workflowInstance;
   }
 
@@ -906,7 +898,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
    *          the exception
    * @throws WorkflowParsingException
    */
-  void handleOperationException(WorkflowInstance workflow, Exception e) throws WorkflowDatabaseException,
+  protected void handleOperationException(WorkflowInstance workflow, Exception e) throws WorkflowDatabaseException,
           WorkflowParsingException {
     // Add the exception's localized message to the workflow instance
     workflow.addErrorMessage(e.getLocalizedMessage());
@@ -955,7 +947,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
    * @throws WorkflowDatabaseException
    *           if updating the workflow fails
    */
-  void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result)
+  protected void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result)
           throws WorkflowDatabaseException, WorkflowParsingException {
 
     // Get the operation and its handler
@@ -1110,6 +1102,22 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
    */
   @Override
   public void acceptJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
+
+    // If we are already running the maximum number of workflows, don't accept another START_WORKFLOW job
+    if (Operation.START_WORKFLOW.toString().equals(operation) && maxConcurrentWorkflows > 0) {
+      long runningWorkflows;
+      try {
+        runningWorkflows = this.countWorkflowInstances(RUNNING, null);
+      } catch(WorkflowDatabaseException e) {
+        throw new ServiceRegistryException("Unable to determine the number of running workflows", e);
+      }
+      
+      if (runningWorkflows >= maxConcurrentWorkflows) {
+        throw new ServiceRegistryException("Refused to accept dispatched job '" + job
+                + "'. This server is already running '" + runningWorkflows + "' workflows.");
+      }
+    }
+
     Operation op = null;
     WorkflowInstance workflowInstance = null;
     try {
@@ -1123,16 +1131,13 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
             break;
           case RESUME:
             workflowInstance = WorkflowParser.parseWorkflowInstance(job.getPayload());
-            workflowInstance = getWorkflowById(workflowInstance.getId());
-            Map<String, String> properties = null;
-            if (arguments.size() > 1)
-              stringToMap(arguments.get(1));
-            logger.info("Resuming workflow {}", workflowInstance);
-            resume(workflowInstance, properties);
+            logger.info("Resuming {} at {}", workflowInstance, workflowInstance.getCurrentOperation());
+            workflowInstance.setState(RUNNING);
+            runWorkflowOperation(workflowInstance);
             break;
           case START_OPERATION:
             workflowInstance = getWorkflowById(Long.parseLong(arguments.get(0)));
-            logger.info("Starting workflow operation {}", workflowInstance.getCurrentOperation());
+            logger.info("Running {} {}", workflowInstance, workflowInstance.getCurrentOperation());
             runWorkflowOperation(workflowInstance);
             break;
           default:
@@ -1193,27 +1198,6 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
   }
 
   /**
-   * Creates a map from a serialized version that was created using {@link #mapToString(Map)}.
-   * 
-   * @param string
-   *          the serialized map
-   * @return the map or <code>null</code> if <code>string</code> was null in the first place
-   * @throws IOException
-   *           if reading the map fails
-   */
-  private Map<String, String> stringToMap(String string) throws IOException {
-    if (string == null)
-      return null;
-    Map<String, String> map = new HashMap<String, String>();
-    Properties properties = new Properties();
-    properties.load(IOUtils.toInputStream(string));
-    for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-      map.put((String) entry.getKey(), (String) entry.getValue());
-    }
-    return map;
-  }
-
-  /**
    * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
    * 
    * @param registry
@@ -1251,6 +1235,25 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer {
    */
   void removeMetadataService(MediaPackageMetadataService service) {
     metadataServices.remove(service);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  @Override
+  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+    String maxConfiguration = StringUtils.trimToNull((String) properties.get(MAX_CONCURRENT_CONFIG_KEY));
+    if (maxConfiguration != null) {
+      try {
+        maxConcurrentWorkflows = Integer.parseInt(maxConfiguration);
+        logger.info("Set maximum concurrent workflows to {}", maxConcurrentWorkflows);
+      } catch (NumberFormatException e) {
+        logger.warn("Can not set max concurrent workflows to {}. {} must be an integer", maxConfiguration,
+                MAX_CONCURRENT_CONFIG_KEY);
+      }
+    }
   }
 
   /**

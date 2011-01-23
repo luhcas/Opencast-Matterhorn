@@ -254,14 +254,16 @@ public interface WorkflowService {
    *          the properties to apply to the resumed workflow
    * @return the workflow instance
    * @throws NotFoundException
-   *           if no paused workflow with this identifier exists
+   *           if no workflow with this identifier exists
    * @throws WorkflowDatabaseException
    *           if there is a problem accessing the workflow instance in persistence
    * @throws WorkflowParsingException
    *           if there is a problem parsing the workflow instance from persistence
+   * @throws IllegalStateException
+   *           if the workflow with this identifier is not in the paused state
    */
   WorkflowInstance resume(long workflowInstanceId, Map<String, String> properties) throws NotFoundException,
-          WorkflowDatabaseException, WorkflowParsingException;
+          WorkflowDatabaseException, WorkflowParsingException, IllegalStateException;
 
   /**
    * Updates the given workflow instance with regard to the media package, the properties and the operations involved.

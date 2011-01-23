@@ -136,7 +136,9 @@ public class WorkflowStateListener implements WorkflowListener {
    */
   @Override
   public void operationChanged(WorkflowInstance workflow) {
-    logger.debug("No-op");
+    synchronized (this) {
+      logger.debug("No-op");
+    }
   }
 
   /**
@@ -147,7 +149,7 @@ public class WorkflowStateListener implements WorkflowListener {
   @Override
   public void stateChanged(WorkflowInstance workflow) {
     synchronized (this) {
-      
+
       if (!workflowInstanceIds.isEmpty() && !workflowInstanceIds.contains(workflow.getId()))
         return;
 
@@ -156,10 +158,10 @@ public class WorkflowStateListener implements WorkflowListener {
         return;
 
       if (notifyStates.containsKey(currentState)) {
-        notifyStates.get(currentState).addAndGet(1);
+        notifyStates.get(currentState).incrementAndGet();
       }
 
-      total.addAndGet(1);
+      total.incrementAndGet();
 
       logger.debug("Workflow {} state updated to {}", workflow.getId(), workflow.getState());
       notifyAll();
@@ -172,7 +174,9 @@ public class WorkflowStateListener implements WorkflowListener {
    * @return the counter
    */
   public int countStateChanges() {
-    return total.get();
+    synchronized (this) {
+      return total.get();
+    }
   }
 
   /**
@@ -181,9 +185,11 @@ public class WorkflowStateListener implements WorkflowListener {
    * @return the counter
    */
   public int countStateChanges(WorkflowState state) {
-    if (!notifyStates.containsKey(state))
-      throw new IllegalArgumentException("State '" + state + "' is not being monitored");
-    return notifyStates.get(state).get();
+    synchronized (this) {
+      if (!notifyStates.containsKey(state))
+        throw new IllegalArgumentException("State '" + state + "' is not being monitored");
+      return notifyStates.get(state).get();
+    }
   }
 
 }

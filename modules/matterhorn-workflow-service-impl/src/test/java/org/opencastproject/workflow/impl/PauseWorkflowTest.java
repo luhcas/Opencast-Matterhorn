@@ -126,7 +126,7 @@ public class PauseWorkflowTest {
     service.addWorkflowListener(pauseListener);
     synchronized (pauseListener) {
       workflow = service.start(def, mp, null);
-      pauseListener.wait();
+      pauseListener.wait(10000);
     }
     service.removeWorkflowListener(pauseListener);
     

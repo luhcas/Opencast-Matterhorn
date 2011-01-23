@@ -114,14 +114,14 @@ public class PauseFinalOperationTest {
     dao.deactivate();
   }
 
-  @Test
-  public void testHoldAndResume() throws Exception {
+  @Test()
+  public void testHoldAndResumeFinalOperation() throws Exception {
     // Start a new workflow, and wait for it to pause
     WorkflowStateListener pauseListener = new WorkflowStateListener(WorkflowState.PAUSED);
     service.addWorkflowListener(pauseListener);
     synchronized (pauseListener) {
       workflow = service.start(def, mp, null);
-      pauseListener.wait();
+      pauseListener.wait(10000);
     }
     service.removeWorkflowListener(pauseListener);
 
@@ -137,7 +137,7 @@ public class PauseFinalOperationTest {
     service.addWorkflowListener(succeedListener);
     synchronized (succeedListener) {
       service.resume(workflow.getId());
-      succeedListener.wait();
+      succeedListener.wait(10000);
     }
     service.removeWorkflowListener(succeedListener);
 

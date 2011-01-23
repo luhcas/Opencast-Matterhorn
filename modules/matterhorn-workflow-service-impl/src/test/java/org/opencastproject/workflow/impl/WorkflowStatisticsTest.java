@@ -127,7 +127,6 @@ public class WorkflowStatisticsTest {
 
     // Mock the service registry
     ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
-    serviceRegistry.registerService(service);
 
     // Create the workflow database (solr)
     dao = new WorkflowServiceSolrIndex();
@@ -150,6 +149,9 @@ public class WorkflowStatisticsTest {
     } catch (Exception e) {
       Assert.fail(e.getMessage());
     }
+    
+    // Register the workflow service with the service registry
+    serviceRegistry.registerService(service);
   }
 
   @After
@@ -222,7 +224,7 @@ public class WorkflowStatisticsTest {
 
     WorkflowStateListener listener = new WorkflowStateListener(WorkflowState.PAUSED);
     service.addWorkflowListener(listener);
-    
+
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
     for (WorkflowDefinition def : workflowDefinitions) {
       for (int j = 0; j < def.getOperations().size(); j++) {
@@ -235,7 +237,7 @@ public class WorkflowStatisticsTest {
     // Wait for all the workflows to go into "paused" state
     synchronized (listener) {
       while (listener.countStateChanges() < WORKFLOW_DEFINITION_COUNT * OPERATION_COUNT) {
-        listener.wait();
+        listener.wait(10000);
       }
     }
     
@@ -249,7 +251,7 @@ public class WorkflowStatisticsTest {
       for (int k = 0; k <= (j % OPERATION_COUNT - 1); k++) {
         synchronized(instanceListener) {
           service.resume(instance.getId(), null);
-          instanceListener.wait();
+          instanceListener.wait(10000);
         }
       }
       j++;

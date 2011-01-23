@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JobTest {
-  
+
   private static final String JOB_TYPE_1 = "testing1";
   private static final String JOB_TYPE_2 = "testing2";
   private static final String OPERATION_NAME = "op";
@@ -101,21 +101,21 @@ public class JobTest {
 
   @Test
   public void testGetJob() throws Exception {
-    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
+    // Start a job, but don't allow it to be dispatched
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null, null, false);
 
     Job jobFromDb = serviceRegistry.getJob(job.getId());
-    Assert.assertEquals(Status.QUEUED, jobFromDb.getStatus());
-
-    Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-            .elementFromURI(new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
-    t.setIdentifier("track-1");
-    job.setPayload(MediaPackageElementParser.getAsXml(t));
+    Assert.assertEquals(Status.INSTANTIATED, jobFromDb.getStatus());
 
     // Simulate starting the job
     job.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(job);
 
     // Finish the job
+    Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+            .elementFromURI(new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
+    t.setIdentifier("track-1");
+    job.setPayload(MediaPackageElementParser.getAsXml(t));
     job.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(job);
 
@@ -174,15 +174,15 @@ public class JobTest {
 
   @Test
   public void testGetHostsCount() throws Exception {
-    JobJpaImpl localRunning1 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
+    JobJpaImpl localRunning1 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null, null, false);
     localRunning1.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localRunning1);
 
-    JobJpaImpl localRunning2 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
+    JobJpaImpl localRunning2 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null, null, false);
     localRunning2.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localRunning2);
 
-    JobJpaImpl localFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null);
+    JobJpaImpl localFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null, null, false);
     // Simulate starting the job
     localFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localFinished);
@@ -203,11 +203,11 @@ public class JobTest {
     remoteFinished.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(remoteFinished);
 
-    JobJpaImpl otherTypeRunning = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2, OPERATION_NAME, null);
+    JobJpaImpl otherTypeRunning = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2, OPERATION_NAME, null, null, false);
     otherTypeRunning.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(otherTypeRunning);
 
-    JobJpaImpl otherTypeFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2, OPERATION_NAME, null);
+    JobJpaImpl otherTypeFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2, OPERATION_NAME, null, null, false);
     // Simulate starting the job
     otherTypeFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(otherTypeFinished);
@@ -338,11 +338,7 @@ public class JobTest {
 
   @Test
   public void testVersionIncrements() throws Exception {
-    // Disable job dispatching by setting both hosts to be in maintenance mode
-    serviceRegistry.setMaintenanceStatus(LOCALHOST, true);
-    serviceRegistry.setMaintenanceStatus(HOST_2, true);
-
-    Job job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some_operation", null);
+    Job job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some_operation", null, null, false);
     Assert.assertEquals("Newly created jobs shuold have a version of 1", 1, job.getVersion());
 
     job = serviceRegistry.getJob(job.getId());
@@ -365,7 +361,7 @@ public class JobTest {
     // Create a job
     String arg1 = "arg1";
     String arg2 = "<some>xml</some>";
-    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2));
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some_operation", Arrays.asList(arg1, arg2), null, false);
 
     // Grab another reference to this job
     Job jobFromDb = serviceRegistry.getJob(job.getId());
@@ -389,7 +385,7 @@ public class JobTest {
   @Test
   public void testJobsQueuedOnServiceUnregistration() throws Exception {
     // Create a job
-    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some operation", null);
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some operation", null, null, false);
 
     // Set its status to running on a localhost
     job.setStatus(Status.RUNNING);
@@ -401,10 +397,11 @@ public class JobTest {
 
     // Now unregister regType1Host1, and the job should go back to queued
     serviceRegistry.unRegisterService(regType1Host1.getServiceType(), regType1Host1.getHost());
-    
+
     // Ensure that the job is queued now
     Assert.assertEquals("Job should be queued", Status.QUEUED, serviceRegistry.getJob(job.getId()).getStatus());
-    Assert.assertNull("Job's processing service should be null", serviceRegistry.getJob(job.getId()).getProcessingHost());
+    Assert.assertNull("Job's processing service should be null", serviceRegistry.getJob(job.getId())
+            .getProcessingHost());
   }
 
 }

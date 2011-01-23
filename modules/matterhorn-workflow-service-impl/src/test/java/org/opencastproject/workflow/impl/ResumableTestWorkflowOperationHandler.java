@@ -107,12 +107,22 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   }
 
   /**
+   * Resets the state of this handler.
+   */
+  public void clear() {
+    resumed = false;
+    started = false;
+  }
+
+  /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance,
+   *      JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
+          throws WorkflowOperationException {
     started = true;
     return createResult(startAction);
   }
@@ -124,8 +134,8 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
    *      JobContext, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context, Map<String, String> properties)
-          throws WorkflowOperationException {
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context,
+          Map<String, String> properties) throws WorkflowOperationException {
     resumed = true;
     return createResult(resumeAction);
   }

@@ -99,7 +99,6 @@ public class CountWorkflowsTest {
     };
 
     serviceRegistry = new ServiceRegistryInMemoryImpl();
-    serviceRegistry.registerService(service);
 
     dao = new WorkflowServiceSolrIndex();
     dao.setServiceRegistry(serviceRegistry);
@@ -113,6 +112,9 @@ public class CountWorkflowsTest {
     def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
+
+    serviceRegistry.registerService(service);
+
   }
 
   @After
@@ -131,9 +133,9 @@ public class CountWorkflowsTest {
     WorkflowInstance workflow1 = null;
     synchronized (listener) {
       workflow1 = service.start(def, mp, initialProps);
-      listener.wait();
+      listener.wait(10000);
       service.start(def, mp, initialProps);
-      listener.wait();
+      listener.wait(10000);
     }
     service.removeWorkflowListener(listener);
 
@@ -151,7 +153,7 @@ public class CountWorkflowsTest {
     service.addWorkflowListener(listener);
     synchronized (listener) {
       service.resume(workflow1.getId());
-      listener.wait();
+      listener.wait(10000);
     }
     service.removeWorkflowListener(listener);
 

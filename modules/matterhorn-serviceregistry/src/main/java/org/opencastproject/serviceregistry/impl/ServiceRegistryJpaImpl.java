@@ -54,6 +54,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -77,11 +80,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /** The http client to use when connecting to remote servers */
   protected TrustedHttpClient client = null;
 
-  /** Default dispatcher timeout (1 second) */
-  static final long DEFAULT_DISPATCHER_TIMEOUT = 1000;
-
-  /** The job dispatching thread */
-  protected JobDispatcher jobDispatcher = null;
+  /** Default delay between job dispatching attempts, in milliseconds */
+  static final long DEFAULT_DISPATCH_PERIOD = 5000;
 
   /**
    * A static list of statuses that influence how load balancing is calculated
@@ -123,10 +123,14 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
 
+  /** Tracks services published locally and adds them to the service registry */
   protected RestServiceTracker tracker = null;
 
-  /** The maximum number of parallel jobs */
+  /** The maximum number of parallel jobs possible on this host. */
   protected int maxJobs = 1;
+
+  /** The thread pool to use for dispatching queued jobs. */
+  protected ScheduledExecutorService dispatcher = Executors.newScheduledThreadPool(1);
 
   public void activate(ComponentContext cc) {
     logger.debug("activate");
@@ -170,10 +174,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       }
     }
 
-    // Instantiate and start the job dispatcher
-    jobDispatcher = new JobDispatcher();
-    jobDispatcher.setTimeout(DEFAULT_DISPATCHER_TIMEOUT);
-    jobDispatcher.start();
+    // Schedule the job dispatching.
+    dispatcher.scheduleWithFixedDelay(new JobDispatcher(), DEFAULT_DISPATCH_PERIOD, DEFAULT_DISPATCH_PERIOD,
+            TimeUnit.MILLISECONDS);
   }
 
   public void deactivate() {
@@ -191,19 +194,19 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     }
 
     // Stop the job dispatcher
-    jobDispatcher.stopRunning();
-    jobDispatcher.interrupt();
+    dispatcher.shutdown();
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String)
    */
   @Override
   public Job createJob(String type, String operation) throws ServiceRegistryException {
     return createJob(this.hostName, type, operation, null, null, true);
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -393,8 +396,11 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         fromDb.setRunTime(now.getTime() - job.getDateStarted().getTime());
       }
     } else if (Status.FINISHED.equals(status)) {
-      if (job.getDateStarted() == null)
-        throw new IllegalStateException("Job " + job + " was never started");
+      if (job.getDateStarted() == null) {
+        // Some services (e.g. ingest) don't use job dispatching, since they start immediately and handle their own
+        // lifecycle. In these cases, if the start date isn't set, use the date created as the start date
+        job.setDateStarted(job.getDateCreated());
+      }
       job.setDateCompleted(now);
       job.setRunTime(now.getTime() - job.getDateStarted().getTime());
       fromDb.setDateCompleted(now);
@@ -978,7 +984,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     }
 
     // Try the service registrations, after the first one finished, we quit
-    JobJpaImpl jpaJob = ((JobJpaImpl)job);
+    JobJpaImpl jpaJob = ((JobJpaImpl) job);
     jpaJob.setStatus(Status.RUNNING);
     for (ServiceRegistration registration : registrations) {
       jpaJob.setProcessorServiceRegistration((ServiceRegistrationJpaImpl) registration);
@@ -999,6 +1005,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
         post.setEntity(entity);
       } catch (IOException e) {
+      	logger.warn("Job parsing error on job {}", job, e);
+        jpaJob.setStatus(Status.FAILED);
+        jpaJob.setProcessorServiceRegistration(null);
+        updateJob(jpaJob);
         throw new ServiceRegistryException("Can not serialize job " + jpaJob, e);
       }
 
@@ -1006,8 +1016,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       HttpResponse response = null;
       int responseStatusCode;
       try {
-        logger.debug("Trying to dispatch job {} of type '{}' to {}",
-                new String[] { Long.toString(jpaJob.getId()), jpaJob.getJobType(), registration.getHost() });
+        logger.debug("Trying to dispatch job {} of type '{}' to {}", new String[] { Long.toString(jpaJob.getId()),
+                jpaJob.getJobType(), registration.getHost() });
         response = client.execute(post);
         responseStatusCode = response.getStatusLine().getStatusCode();
         if (responseStatusCode == HttpStatus.SC_SERVICE_UNAVAILABLE) {
@@ -1029,16 +1039,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   }
 
   /**
-   * This dispatcher implementation will wake from time to time and check for new jobs. If new jobs are found, it will
-   * dispatch them to the services as appropriate.
+   * This dispatcher implementation will check for jobs in the QUEUED {@link #org.opencastproject.job.api.Job.Status}. If new jobs are found, the
+   * dispatcher will attempt to dispatch each job to the least loaded service.
    */
-  class JobDispatcher extends Thread {
-
-    /** Running flag */
-    private boolean keepRunning = true;
-
-    /** Dispatcher timeout */
-    private long timeout = DEFAULT_DISPATCHER_TIMEOUT;
+  class JobDispatcher implements Runnable {
 
     /**
      * {@inheritDoc}
@@ -1047,52 +1051,25 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
      */
     @Override
     public void run() {
-      while (keepRunning) {
-        try {
-          // Go through the jobs and find those that have not yet been dispatched
+      try {
+        List<Job> jobsToDispatch = getJobs(null, Status.QUEUED);
+        for (Job job : jobsToDispatch) {
           try {
-            List<Job> jobsToDispatch = getJobs(null, Status.QUEUED);
-            for (Job job : jobsToDispatch) {
-              try {
-                String hostAcceptingJob = dispatchJob(job);
-                if (hostAcceptingJob == null) {
-                  logger.debug("Job {} could not be dispatched and is put back into queue", job.getId());
-                } else {
-                  logger.debug("Job {} dispatched to {}", job.getId(), hostAcceptingJob);
-                }
-              } catch (ServiceRegistryException e) {
-                Throwable cause = (e.getCause() != null) ? e.getCause() : e;
-                logger.error("Error dispatching job " + job, cause);
-              }
+            String hostAcceptingJob = dispatchJob(job);
+            if (hostAcceptingJob == null) {
+              ServiceRegistryJpaImpl.logger.debug("Job {} could not be dispatched and is put back into queue", job.getId());
+            } else {
+              ServiceRegistryJpaImpl.logger.debug("Job {} dispatched to {}", job.getId(), hostAcceptingJob);
             }
-          } catch (Throwable t) {
-            logger.warn("Error dispatching jobs", t);
+          } catch (ServiceRegistryException e) {
+            Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+            ServiceRegistryJpaImpl.logger.error("Error dispatching job " + job, cause);
           }
-          Thread.sleep(timeout);
-        } catch (InterruptedException e) {
-          logger.debug("Job dispatcher thread activated");
         }
+      } catch (Throwable t) {
+        ServiceRegistryJpaImpl.logger.warn("Error dispatching jobs", t);
       }
     }
-
-    /**
-     * Tells the dispatcher thread to stop running.
-     */
-    public void stopRunning() {
-      keepRunning = false;
-      interrupt();
-    }
-
-    /**
-     * Sets the dispatcher timeout in miliseconds.
-     * 
-     * @param timeout
-     *          the timeout
-     */
-    public void setTimeout(long timeout) {
-      this.timeout = timeout;
-      interrupt();
-    }
-
   }
+
 }

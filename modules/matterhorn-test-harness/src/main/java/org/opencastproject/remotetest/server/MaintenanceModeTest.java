@@ -89,7 +89,7 @@ public class MaintenanceModeTest {
     // Ensure that the job was created successfully
     HttpResponse jobResponse = client.execute(postJob);
     EntityUtils.toString(jobResponse.getEntity()); // read the response so the connection can be closed
-    Assert.assertEquals(HttpStatus.SC_OK, jobResponse.getStatusLine().getStatusCode());
+    Assert.assertEquals(HttpStatus.SC_CREATED, jobResponse.getStatusLine().getStatusCode());
 
     // Put the server into maintenance mode
     HttpPost postMaintenance = new HttpPost(Main.BASE_URL + "/services/maintenance");
@@ -114,7 +114,7 @@ public class MaintenanceModeTest {
 
     HttpResponse maintenanceModeJobCreationResponse = client.execute(postJob);
     EntityUtils.toString(maintenanceModeJobCreationResponse.getEntity());
-    Assert.assertEquals(HttpStatus.SC_OK, maintenanceModeJobCreationResponse.getStatusLine().getStatusCode());
+    Assert.assertEquals(HttpStatus.SC_CREATED, maintenanceModeJobCreationResponse.getStatusLine().getStatusCode());
 
     // Restore the server to normal mode
     HttpPost postNormal = new HttpPost(Main.BASE_URL + "/services/maintenance");

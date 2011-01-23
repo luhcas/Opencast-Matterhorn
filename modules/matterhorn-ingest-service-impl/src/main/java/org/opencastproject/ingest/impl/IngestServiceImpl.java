@@ -361,7 +361,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
               JOB_TYPE,
               INGEST_TRACK_FROM_URI,
               Arrays.asList(uri.toString(), flavor == null ? null : flavor.toString(),
-                      MediaPackageParser.getAsXml(mediaPackage)));
+                      MediaPackageParser.getAsXml(mediaPackage)), null, false);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -394,7 +394,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, false);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
@@ -428,7 +428,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
     Job job = null;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, INGEST_CATALOG_FROM_URI,
-              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)));
+              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, false);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -485,7 +485,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, false);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -521,7 +521,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
     Job job = null;
     try {
       job = serviceRegistry.createJob(JOB_TYPE, INGEST_ATTACHMENT_FROM_URI,
-              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)));
+              Arrays.asList(uri.toString(), flavor.toString(), MediaPackageParser.getAsXml(mediaPackage)), null, false);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
@@ -553,7 +553,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM);
+      job = serviceRegistry.createJob(JOB_TYPE, INGEST_STREAM, null, null, false);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
