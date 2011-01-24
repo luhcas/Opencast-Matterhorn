@@ -53,7 +53,7 @@
         var uploadFrame = document.getElementById("filechooser-ajax");
         var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
         parent.ocRecordings.Hold.changedMediaPackage = mp;
-        //alert(mp);
+        parent.ocRecordings.continueWorkflow();
       }
       ocUploadListener.uploadFailed = function() {
         $('#loading-container').css('display','none');
@@ -69,6 +69,14 @@
           return doc.xml;
         } else {
           return '';
+        }
+      }
+
+      function continueWorkflow() {
+        if (ocUploadListener.filename !== null) {
+          ocUploadListener.startUpload();
+        } else {
+          parent.ocRecordings.continueWorkflow();
         }
       }
 
@@ -184,11 +192,11 @@
       <div id="upload-container" style="display:table-cell;float:left;">
         <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="/ingest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
         </iframe>
-        <button type="button" id="btn-start-upload" onclick="ocUploadListener.startUpload();">Upload</button>
+        <!-- button type="button" id="btn-start-upload" onclick="ocUploadListener.startUpload();">Upload</button -->
       </div>
     </div>
     <div id="actions" style="padding-top:26px;padding-left:40px;">
-        <button type="button" id="continueBtn" onclick="parent.ocRecordings.continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
+        <button type="button" id="continueBtn" onclick="continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
         <button type="button" style="margin-right:16px;" title="Cancel" onclick="parent.ocRecordings.hideHoldActionUI();">Cancel</button>
     </div>
     <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
