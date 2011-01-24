@@ -283,16 +283,16 @@ ocRecordings = new (function() {
     // Status
     var op = ocRecordings.findLastOperation(wf, wf.state);
     if (wf.state == 'SUCCEEDED') {
-      this.state = 'FINISHED';
+      this.state = 'Finished';
     } else if (wf.state == 'FAILING' || wf.state == 'FAILED') {
-      this.state = 'FAILED';
+      this.state = 'Failed';
       this.error = ocUtils.ensureArray(wf.errors.error).join(', ');
     } else if (wf.state == 'PAUSED') {
       if (op) {
         if (op.id == 'schedule') {
-          this.state = 'UPCOMING';
+          this.state = 'Upcoming';
         } else if (op.holdurl) {
-          this.state = 'ON HOLD';
+          this.state = 'On Hold';
           this.operation = op.description;
           this.holdAction = {
             url : op.holdurl,
@@ -301,14 +301,14 @@ ocRecordings = new (function() {
         }
       } else {
         ocUtils.log('Warning could not find current operation for worklfow ' + wf.id);
-        this.state = 'PAUSED';
+        this.state = 'Paused';
       }
     } else if (wf.state == 'RUNNING') {
       if (op) {
         if (op.id == 'capture') {
-          this.state = 'CAPTURING';
+          this.state = 'Capturing';
         } else {
-          this.state = 'PROCESSING';
+          this.state = 'Processing';
           this.operation = op.description;
         }
       } else {
@@ -318,14 +318,14 @@ ocRecordings = new (function() {
         } else {
           ocUtils.log('Warning could not find current operation (neither RUNNING nor INSTANTIATED) for worklfow ' + wf.id);
         }
-        this.state = 'QUEUED';
+        this.state = 'Queued';
       }
     } else {
       this.state = wf.state;
     }
 
     // Actions
-    if(this.state == 'UPCOMING') {
+    if(this.state == 'Upcoming') {
       this.actions = ['view', 'edit', 'delete'];
     }else{
       this.actions = ['view', 'delete'];

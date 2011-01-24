@@ -271,7 +271,12 @@
           ${recording.start}
         </td>
         <td class="status-column-cell">
-          <div>
+          <div class="workflowActionButton ui-helper-clearfix" style="float:left;">
+            <a href="inspect.html?id=${recording.id}" title="View Technical Details for this Recording">
+              <span class="ui-icon ui-icon-gear inspect-workflow-button" style="float:left;"></span>
+            </a>
+          </div>
+          <div style="padding-top:3px;">
           {if recording.error}
           <div class="foldable">
             <div class="fold-header" style="color:red;font-weight:bold;">FAILED</div>
@@ -280,16 +285,11 @@
             </div>
           </div>
           {else}
-            <b>${recording.state}</b>
+            ${recording.state}
             {if recording.operation}
-              &nbsp;${recording.operation}
+              :&nbsp;${recording.operation}
             {/if}
           {/if}
-          </div>
-          <div class="workflowActionButton ui-helper-clearfix" style="clear:both;">
-            <a href="inspect.html?id=${recording.id}" title="View Technical Details for this Recording">
-              <span class="ui-icon ui-icon-gear inspect-workflow-button" style="float:left;"></span>
-            </a>
           </div>
         </td>
         <td>
