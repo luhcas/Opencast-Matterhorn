@@ -81,17 +81,17 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   protected TrustedHttpClient client = null;
 
   /** Default delay between job dispatching attempts, in milliseconds */
-  static final long DEFAULT_DISPATCH_PERIOD = 5000;
+  static final long DEFAULT_DISPATCH_PERIOD = 1000;
 
   /**
    * A static list of statuses that influence how load balancing is calculated
    */
-  protected static final List<Status> JOB_STATUSES_INFLUINCING_LOAD_BALANCING;
+  protected static final List<Status> JOB_STATUSES_INFLUENCING_LOAD_BALANCING;
 
   static {
-    JOB_STATUSES_INFLUINCING_LOAD_BALANCING = new ArrayList<Status>();
-    JOB_STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.QUEUED);
-    JOB_STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.RUNNING);
+    JOB_STATUSES_INFLUENCING_LOAD_BALANCING = new ArrayList<Status>();
+    JOB_STATUSES_INFLUENCING_LOAD_BALANCING.add(Status.QUEUED);
+    JOB_STATUSES_INFLUENCING_LOAD_BALANCING.add(Status.RUNNING);
   }
 
   /** The JPA provider */
