@@ -77,16 +77,16 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ComposerRestService.class);
-  
+
   /** The rest documentation */
   protected String docs;
-  
+
   /** The base server URL */
   protected String serverUrl;
-  
+
   /** The composer service */
   protected ComposerService composerService = null;
-  
+
   /** The service registry */
   protected ServiceRegistry serviceRegistry = null;
 
@@ -99,7 +99,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
     this.serviceRegistry = serviceRegistry;
   }
-  
+
   /**
    * Sets the composer service.
    * 
@@ -252,10 +252,12 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   /**
    * Encodes a track in a media package.
    * 
-   * @param sourceTrack
+   * @param sourceTrackXml
    *          The source track
    * @param profileId
    *          The profile to use in encoding this track
+   * @param times
+   *          one or more times in seconds separated by comma
    * @return A {@link Response} with the resulting track in the response body
    * @throws Exception
    */
@@ -263,10 +265,18 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @Path("image")
   @Produces(MediaType.TEXT_XML)
   public Response image(@FormParam("sourceTrack") String sourceTrackXml, @FormParam("profileId") String profileId,
-          @FormParam("time") long time) throws Exception {
+          @FormParam("time") String times) throws Exception {
     // Ensure that the POST parameters are present
     if (sourceTrackXml == null || profileId == null) {
       return Response.status(Response.Status.BAD_REQUEST).entity("sourceTrack and profileId must not be null").build();
+    }
+
+    // parse time codes
+    long[] timeArray;
+    try {
+      timeArray = parseTimeArray(times);
+    } catch (Exception e) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("could not parse times: invalid format").build();
     }
 
     // Deserialize the source track
@@ -276,10 +286,10 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     }
 
     try {
-      Job job = composerService.image((Track) sourceTrack, profileId, time);
+      Job job = composerService.image((Track) sourceTrack, profileId, timeArray);
       return Response.ok().entity(new JaxbJob(job)).build();
     } catch (EncoderException e) {
-      logger.warn("Unable to extract image: " + e.getMessage());
+      logger.warn("Unable to extract image(s): " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -439,8 +449,9 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             "Starts an image extraction process, based on the specified encoding profile ID and the source track");
     imageEndpoint.addStatus(org.opencastproject.util.doc.Status
             .ok("Results in an xml document containing the image attachment"));
-    imageEndpoint.addRequiredParam(new Param("time", Type.STRING, "1",
-            "The number of seconds into the video to extract the image"));
+    imageEndpoint
+            .addRequiredParam(new Param("time", Type.STRING, "1",
+                    "The number of seconds (many numbers can be specified, separated by comma) into the video to extract the image"));
     imageEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
             "The track containing the video stream"));
     imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "player-preview.http",
@@ -506,6 +517,28 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     }
 
     return mpElements.toArray(new MediaPackageElement[mpElements.size()]);
+  }
+
+  /**
+   * Parses string containing times in seconds separated by comma.
+   * 
+   * @param times
+   *          string to be parsed
+   * @return array of times in seconds
+   */
+  protected long[] parseTimeArray(String times) {
+    String[] timeStringArray = times.split(",");
+    List<Long> parsedTimeArray = new LinkedList<Long>();
+    for (String timeString : timeStringArray) {
+      if (!(timeString = timeString.trim()).equals("")) {
+        parsedTimeArray.add(Long.parseLong(timeString));
+      }
+    }
+    long[] timeArray = new long[parsedTimeArray.size()];
+    for (int i = 0; i < parsedTimeArray.size(); i++) {
+      timeArray[i] = parsedTimeArray.get(i);
+    }
+    return timeArray;
   }
 
   protected String generateVideoTrack() {

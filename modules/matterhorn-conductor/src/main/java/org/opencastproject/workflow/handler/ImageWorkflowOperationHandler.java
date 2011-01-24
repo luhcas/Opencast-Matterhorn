@@ -135,10 +135,11 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
    * @throws ExecutionException
    * @throws IOException
    * @throws NotFoundException
-   * @throws WorkflowOperationException 
+   * @throws WorkflowOperationException
    */
   private WorkflowOperationResult image(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
-          throws EncoderException, ExecutionException, NotFoundException, MediaPackageException, IOException, WorkflowOperationException {
+          throws EncoderException, ExecutionException, NotFoundException, MediaPackageException, IOException,
+          WorkflowOperationException {
 
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -183,11 +184,11 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
         throw new WorkflowOperationException("Encoding failed");
       }
 
-
       // add this receipt's queue time to the total
       totalTimeInQueue += job.getQueueTime();
 
-      Attachment composedImage = (Attachment) MediaPackageElementParser.getFromXml(job.getPayload());
+      // assume only one image was extracted
+      Attachment composedImage = (Attachment) MediaPackageElementParser.getArrayFromXml(job.getPayload()).get(0);
       if (composedImage == null)
         throw new IllegalStateException("Composer service did not return an image");
 

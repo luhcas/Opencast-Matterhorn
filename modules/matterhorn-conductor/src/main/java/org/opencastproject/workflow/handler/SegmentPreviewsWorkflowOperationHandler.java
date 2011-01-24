@@ -25,9 +25,9 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -59,6 +59,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -174,7 +175,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    * @throws InterruptedException
    * @throws IOException
    * @throws NotFoundException
-   * @throws WorkflowOperationException 
+   * @throws WorkflowOperationException
    */
   private WorkflowOperationResult createPreviews(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
           throws EncoderException, InterruptedException, ExecutionException, NotFoundException, MediaPackageException,
@@ -256,22 +257,32 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
           Iterator<? extends Segment> segmentIterator = decomposition.segments();
 
+          List<MediaTimePoint> timePointList = new LinkedList<MediaTimePoint>();
           while (segmentIterator.hasNext()) {
             Segment segment = segmentIterator.next();
             MediaTimePoint tp = segment.getMediaTime().getMediaTimePoint();
+            timePointList.add(tp);
+          }
 
-            // Choose a time
-            long time = tp.getTimeInMilliseconds() / 1000;
+          // convert to time array
+          long[] timeArray = new long[timePointList.size()];
+          for (int i = 0; i < timePointList.size(); i++)
+            timeArray[i] = timePointList.get(i).getTimeInMilliseconds() / 1000;
 
-            Job job = composerService.image(t, profile.getIdentifier(), time);
-            if (!waitForStatus(job).isSuccess()) {
-              throw new WorkflowOperationException("Extracting preview image from " + t + " failed");
-            }
+          Job job = composerService.image(t, profile.getIdentifier(), timeArray);
+          if (!waitForStatus(job).isSuccess()) {
+            throw new WorkflowOperationException("Extracting preview image from " + t + " failed");
+          }
 
-            // add this receipt's queue time to the total
-            totalTimeInQueue += job.getQueueTime();
+          // add this receipt's queue time to the total
+          totalTimeInQueue += job.getQueueTime();
 
-            Attachment composedImage = (Attachment) MediaPackageElementParser.getFromXml(job.getPayload());
+          List<? extends MediaPackageElement> composedImages = MediaPackageElementParser.getArrayFromXml(job
+                  .getPayload());
+          Iterator<MediaTimePoint> it = timePointList.iterator();
+
+          for (MediaPackageElement element : composedImages) {
+            Attachment composedImage = (Attachment) element;
             if (composedImage == null)
               throw new IllegalStateException("Unable to compose image");
 
@@ -293,7 +304,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
             // Refer to the original track including a timestamp
             MediaPackageReferenceImpl ref = new MediaPackageReferenceImpl(referenceMaster);
-            ref.setProperty("time", tp.toString());
+            ref.setProperty("time", it.next().toString());
             composedImage.setReference(ref);
 
             // store new image in the mediaPackage

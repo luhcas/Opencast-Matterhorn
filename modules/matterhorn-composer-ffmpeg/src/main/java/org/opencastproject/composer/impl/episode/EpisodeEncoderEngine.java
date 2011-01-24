@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -261,6 +262,18 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
   }
 
   /**
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#extract(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile, java.util.Map, long[])
+   */
+  @Override
+  public List<File> extract(File mediaSource, EncodingProfile format, Map<String, String> properties, long... time)
+          throws EncoderException {
+    throw new UnsupportedOperationException("Operation is not supported by episode encoder engine");
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.composer.api.EncoderEngine#trim(java.io.File,
@@ -333,4 +346,10 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
     return "Telestream Episode Engine";
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#extract(java.io.File,
+   * org.opencastproject.composer.api.EncodingProfile, java.util.Map, long[])
+   */
 }

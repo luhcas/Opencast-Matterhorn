@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -120,6 +121,38 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   }
 
   /**
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#extract(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile, java.util.Map, long[])
+   */
+  @Override
+  public List<File> extract(File mediaSource, EncodingProfile format, Map<String, String> properties, long... times)
+          throws EncoderException {
+
+    List<File> extractedImages = new LinkedList<File>();
+    for (long time : times) {
+      Map<String, String> params = new HashMap<String, String>();
+      if (properties != null) {
+        params.putAll(properties);
+      }
+      params.put("time", Long.toString(time));
+      try {
+        extractedImages.add(process(null, mediaSource, format, params));
+      } catch (Exception e) {
+        cleanup(extractedImages);
+        if (e instanceof EncoderException) {
+          throw (EncoderException) e;
+        } else {
+          throw new EncoderException("Image extraction failed", e);
+        }
+      }
+    }
+
+    return extractedImages;
+  }
+
+  /**
    * Executes the command line encoder with the given set of files and properties and using the provided encoding
    * profile.
    * 
@@ -176,6 +209,10 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       String outFileName = FilenameUtils.getBaseName(parentFile.getName());
       String outSuffix = processParameters(profile.getSuffix());
 
+      if (params.containsKey("time")) {
+        outFileName += "_" + properties.get("time");
+      }
+      
       if (new File(outDir, outFileName + outSuffix).exists()) {
         outFileName += "_reencode";
       }
@@ -244,6 +281,25 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
     } finally {
       IoSupport.closeQuietly(in);
       IoSupport.closeQuietly(encoderProcess);
+    }
+  }
+
+  /**
+   * Deletes all valid files found in a list
+   * 
+   * @param outputFiles
+   *          list containing files
+   */
+  protected void cleanup(List<File> outputFiles) {
+    for (File file : outputFiles) {
+      if (file != null && file.isFile()) {
+        String path = file.getAbsolutePath();
+        if (file.delete()) {
+          logger.info("Deleted file {}", path);
+        } else {
+          logger.warn("Could not delete file {}", path);
+        }
+      }
     }
   }
 

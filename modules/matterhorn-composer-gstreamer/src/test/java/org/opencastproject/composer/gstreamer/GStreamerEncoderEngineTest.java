@@ -24,13 +24,13 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -77,7 +77,7 @@ public class GStreamerEncoderEngineTest {
     properties.put("out.bitrate", "320");
 
     EncoderEngine engine = factory.newEncoderEngine(null);
-    EncodingProfile profile = createEncodingProfile("SingleThreadTest", "audio/mp3", ".mp3", properties);
+    EncodingProfile profile = createEncodingProfile("SingleThreadTest", ".mp3", properties);
     File encodedFile = engine.encode(audioFile1, profile, properties);
     resultingFiles = new File[] { encodedFile };
 
@@ -101,7 +101,7 @@ public class GStreamerEncoderEngineTest {
       @Override
       public void run() {
         EncoderEngine engine = factory.newEncoderEngine(null);
-        EncodingProfile profile = createEncodingProfile("Thread1Test", "audio/mp3", ".mp3", properties);
+        EncodingProfile profile = createEncodingProfile("Thread1Test", ".mp3", properties);
         try {
           resultingFiles[0] = engine.encode(audioFile1, profile, properties);
         } catch (EncoderException e) {
@@ -113,7 +113,7 @@ public class GStreamerEncoderEngineTest {
       @Override
       public void run() {
         EncoderEngine engine = factory.newEncoderEngine(null);
-        EncodingProfile profile = createEncodingProfile("Thread2Test", "audio/mp3", ".mp3", properties);
+        EncodingProfile profile = createEncodingProfile("Thread2Test", ".mp3", properties);
         try {
           resultingFiles[1] = engine.encode(audioFile2, profile, properties);
         } catch (EncoderException e) {
@@ -139,27 +139,29 @@ public class GStreamerEncoderEngineTest {
   @Test
   public void testImageExtraction() throws Exception {
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("time", "4");
-    properties.put("gstreamer.image.extraction", "#{time}:640x480");
+    properties.put("gstreamer.image.dimensions", "640x480");
 
     EncoderEngine engine = factory.newEncoderEngine(null);
-    EncodingProfile profile = createEncodingProfile("ImageExtractionTest", "image/jpeg", ".jpg", properties);
-    File result = engine.encode(videoFile, profile, properties);
-    resultingFiles = new File[] { result };
-    Assert.assertTrue("Invalid file: " + result.getAbsolutePath(), result.exists() && result.length() > 0);
+    EncodingProfile profile = createEncodingProfile("ImageExtractionTest", ".jpg", properties);
+    List<File> result = engine.extract(videoFile, profile, properties, 4);
+    resultingFiles = result.toArray(new File[result.size()]);
+    for (File image : result) {
+      Assert.assertTrue("Invalid file: " + image.getAbsolutePath(), image.exists() && image.length() > 0);
+    }
   }
   
-  @Ignore("Enable when multiple image extraction is supported by API")
   @Test
   public void multipleImageExtraction() throws Exception {
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put("gstreamer.image.extraction", "5:0x0, 1:460x280, 7:0x0");
-    properties.put("in.video.path", videoFile.getAbsolutePath());
-    properties.put("out.file.path", "/opt/matterhorn/matterhorn_trunk/modules/matterhorn-composer-gstreamer/target/test-classes/image_test_#{time}.jpg");
+    properties.put("gstreamer.image.dimensions", "0x0");
     
     EncoderEngine engine = factory.newEncoderEngine(null);
-    EncodingProfile profile = createEncodingProfile("ImageExtractionTest", "image/jpeg", ".jpg", properties);
-    engine.encode(videoFile, profile, properties);
+    EncodingProfile profile = createEncodingProfile("ImageExtractionTest", "_#{time}.jpg", properties);
+    List<File> result = engine.extract(videoFile, profile, properties, 3, 1, 7);
+    resultingFiles = result.toArray(new File[result.size()]);
+    for (File image : result) {
+      Assert.assertTrue("Invalid file: " + image.getAbsolutePath(), image.exists() && image.length() > 0);
+    }
   }
 
   @After
@@ -186,7 +188,7 @@ public class GStreamerEncoderEngineTest {
    * @param properties
    * @return
    */
-  private EncodingProfile createEncodingProfile(final String name, final String mimetype, final String suffix,
+  private EncodingProfile createEncodingProfile(final String name, final String suffix,
           final Map<String, String> properties) {
     EncodingProfile profile = new EncodingProfile() {
       @Override
@@ -221,7 +223,7 @@ public class GStreamerEncoderEngineTest {
 
       @Override
       public String getMimeType() {
-        return mimetype;
+        return null;
       }
 
       @Override

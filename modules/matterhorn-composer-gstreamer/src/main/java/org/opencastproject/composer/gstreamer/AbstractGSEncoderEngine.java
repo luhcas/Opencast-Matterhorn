@@ -163,33 +163,14 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
       String outFileName = FilenameUtils.getBaseName(parentFile.getName());
       String outSuffix = profile.getSuffix();
 
-      File encodedFile;
-      if (profile.getMimeType().startsWith("image")) {
-        // FIXME change how image extraction is called
-        encodedFile = new File(outDir, outFileName + outSuffix);
-        params.put("out.file.path", encodedFile.getAbsolutePath());
-        List<String> outputImages = extractMultipleImages(profile, params);
-        if (outputImages.size() == 0) {
-
-        } else if (outputImages.size() > 1) {
-          // FIXME remove once multiple image extraction is supported
-          logger.error("Multiple image extraction is not yet supported");
-          for (String filename : outputImages) {
-            new File(filename).delete();
-          }
-          throw new UnsupportedOperationException("Multiple image extraction is not yet supported");
-        } else {
-          encodedFile = new File(outputImages.get(0));
-        }
-      } else {
-        if (new File(outDir, outFileName + outSuffix).exists()) {
-          outFileName += "_reencode";
-        }
-        encodedFile = new File(outDir, outFileName + outSuffix);
-        params.put("out.file.path", encodedFile.getAbsolutePath());
-        // create and launch gstreamer pipeline
-        createAndLaunchPipeline(profile, params);
+      if (new File(outDir, outFileName + outSuffix).exists()) {
+        outFileName += "_reencode";
       }
+      File encodedFile = new File(outDir, outFileName + outSuffix);
+      params.put("out.file.path", encodedFile.getAbsolutePath());
+
+      // create and launch gstreamer pipeline
+      createAndLaunchPipeline(profile, params);
 
       if (audioSource != null) {
         logger.info("Audio track {} and video track {} successfully encoded using profile '{}'",
@@ -235,6 +216,82 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
   protected abstract void createAndLaunchPipeline(EncodingProfile profile, Map<String, String> properties)
           throws EncoderException;
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#extract(java.io.File,
+   * org.opencastproject.composer.api.EncodingProfile, java.util.Map, long[])
+   */
+  @Override
+  public List<File> extract(File mediaSource, EncodingProfile profile, Map<String, String> properties, long... times)
+          throws EncoderException {
+
+    Map<String, String> params = new HashMap<String, String>();
+    if (properties != null) {
+      params.putAll(properties);
+    }
+
+    try {
+      if (mediaSource == null) {
+        throw new IllegalArgumentException("Media source must be specified.");
+      }
+      if (times.length == 0) {
+        throw new IllegalArgumentException("At least one time has to be specified");
+      }
+
+      // build string definition
+      String imageDimensions = profile.getExtension("gstreamer.image.dimensions");
+      if (imageDimensions == null) {
+        throw new EncoderException("Missing dimension definition in encoding profile");
+      }
+      StringBuilder definition = new StringBuilder();
+      definition.append(Long.toString(times[0]) + ":" + imageDimensions);
+      for (int i = 1; i < times.length; i++) {
+        definition.append("," + Long.toString(times[i]) + ":" + imageDimensions);
+      }
+      params.put("gstreamer.image.extraction", definition.toString());
+
+      // Set encoding parameters
+      String mediaInput = FilenameUtils.normalize(mediaSource.getAbsolutePath());
+      params.put("in.video.path", mediaInput);
+      params.put("in.video.mimetype", MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(mediaInput));
+
+      String outDir = mediaSource.getAbsoluteFile().getParent();
+      String outFileName = FilenameUtils.getBaseName(mediaSource.getName());
+      String outSuffix = profile.getSuffix();
+
+      // add time template
+      if (!outSuffix.contains("#{time}")) {
+        outFileName += "_#{time}";
+      }
+      
+      File encodedFileTemplate = new File(outDir, outFileName + outSuffix);
+      params.put("out.file.path", encodedFileTemplate.getAbsolutePath());
+
+      // extract images
+      List<File> outputImages = extractMultipleImages(profile, params);
+      if (outputImages.size() == 0) {
+        logger.warn("No images were extracted from video track {} using encoding profile '{}'", mediaSource.getName(),
+                profile.getIdentifier());
+      }
+
+      logger.info("Images successfully extracted from video track {} using profile '{}'",
+              new String[] { mediaSource.getName(), profile.getIdentifier() });
+      fireEncoded(this, profile, mediaSource);
+      return outputImages;
+    } catch (EncoderException e) {
+      logger.warn("Error while extracting images from video track {} using '{}': {}", new String[] {
+              (mediaSource == null ? "N/A" : mediaSource.getName()), profile.getIdentifier(), e.getMessage() });
+      fireEncodingFailed(this, profile, e, mediaSource);
+      throw e;
+    } catch (Exception e) {
+      logger.warn("Error while extracting images from video track {} using '{}': {}", new String[] {
+              (mediaSource == null ? "N/A" : mediaSource.getName()), profile.getIdentifier(), e.getMessage() });
+      fireEncodingFailed(this, profile, e, mediaSource);
+      throw new EncoderException(this, e.getMessage(), e);
+    }
+  }
+
   /**
    * Extracts multiple images from video stream. Profile is looked for the following template: &lt;time in
    * seconds&gt;:&lt;image width&gt;x&lt;image height&gt;. Multiple image definitions can be separated with comma. If
@@ -244,11 +301,11 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
    *          EncodeingProfile used for image extraction
    * @param properties
    *          additional properties used in extraction
-   * @return List of extracted image's filepaths
+   * @return List of extracted image's files
    * @throws EncoderException
    *           if extraction fails
    */
-  protected abstract List<String> extractMultipleImages(EncodingProfile profile, Map<String, String> properties)
+  protected abstract List<File> extractMultipleImages(EncodingProfile profile, Map<String, String> properties)
           throws EncoderException;
 
   /*
@@ -380,6 +437,13 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
       if (output.equals(outputTemplate)) {
         logger.warn("Output filename does not contain #{time} template: multiple images will overwrite");
       }
+      
+      if (new File(output).exists()) {
+        String outputFile = FilenameUtils.removeExtension(output);
+        String extension= FilenameUtils.getExtension(output);
+        output = outputFile + "_reencode." + extension;
+      }
+      
       ImageExtractionProperties imageProperties = new ImageExtractionProperties(counter++,
               Long.parseLong(properties[0]), Integer.parseInt(properties[1]), Integer.parseInt(properties[2]), output);
 
@@ -403,16 +467,16 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
    *          extraction properties for images
    * @return List of image filenames
    */
-  protected List<String> reorder(List<ImageExtractionProperties> extractionProperties) {
+  protected List<File> reorder(List<ImageExtractionProperties> extractionProperties) {
     Collections.sort(extractionProperties, new Comparator<ImageExtractionProperties>() {
       @Override
       public int compare(ImageExtractionProperties o1, ImageExtractionProperties o2) {
         return o2.order - o1.order;
       }
     });
-    List<String> outputImages = new LinkedList<String>();
+    List<File> outputImages = new LinkedList<File>();
     for (ImageExtractionProperties properties : extractionProperties) {
-      outputImages.add(properties.imageOutput);
+      outputImages.add(new File(properties.imageOutput));
     }
     return outputImages;
   }

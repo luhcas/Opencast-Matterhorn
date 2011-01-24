@@ -19,6 +19,7 @@ package org.opencastproject.composer.api;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -93,6 +94,22 @@ public interface EncoderEngine {
    *           if an error occurs during encoding
    */
   File trim(File mediaSource, EncodingProfile format, long start, long duration, Map<String, String> properties)
+          throws EncoderException;
+
+  /**
+   * Extracts one or more image from video stream.
+   * 
+   * @param mediaSource
+   *          video stream used for extraction
+   * @param format
+   *          EncodingProfile defining extraction
+   * @param times
+   *          times in seconds from which to extract images
+   * @return list of extracted files
+   * @throws EncoderException
+   *           if extraction fails
+   */
+  List<File> extract(File mediaSource, EncodingProfile format, Map<String, String> properties, long... times)
           throws EncoderException;
 
   /**

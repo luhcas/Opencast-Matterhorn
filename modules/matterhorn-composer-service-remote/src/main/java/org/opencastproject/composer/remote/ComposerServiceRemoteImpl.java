@@ -108,8 +108,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    *      java.lang.String, long, long, boolean)
    */
   @Override
-  public Job trim(Track sourceTrack, String profileId, long start, long duration)
-          throws EncoderException {
+  public Job trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException {
     String url = "/trim";
     HttpPost post = new HttpPost(url);
     try {
@@ -146,8 +145,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
    *      org.opencastproject.mediapackage.Track, java.lang.String)
    */
-  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId)
-          throws EncoderException {
+  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
     String url = "/mux";
     HttpPost post = new HttpPost(url);
     try {
@@ -211,7 +209,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
    *      java.lang.String, long)
    */
-  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException {
+  public Job image(Track sourceTrack, String profileId, long... times) throws EncoderException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity = null;
     String url = "/image";
@@ -219,7 +217,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     try {
       params.add(new BasicNameValuePair("sourceTrack", getXML(sourceTrack)));
       params.add(new BasicNameValuePair("profileId", profileId));
-      params.add(new BasicNameValuePair("time", Long.toString(time)));
+      params.add(new BasicNameValuePair("time", buildTimeArray(times)));
       entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
     } catch (Exception e) {
@@ -359,4 +357,22 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     return writer.toString();
   }
 
+  /**
+   * Builds string containing times in seconds separated by comma.
+   * 
+   * @param times
+   *          time array to be converted to string
+   * @return string represented specified time array
+   */
+  protected String buildTimeArray(long[] times) {
+    if (times.length == 0) {
+      return "";
+    }
+    StringBuilder builder = new StringBuilder();
+    builder.append(Long.toString(times[0]));
+    for (int i = 1; i < times.length; i++) {
+      builder.append("," + Long.toString(times[i]));
+    }
+    return builder.toString();
+  }
 }

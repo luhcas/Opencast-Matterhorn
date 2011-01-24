@@ -61,6 +61,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -235,7 +236,7 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
       inspectedTrack.setIdentifier(targetTrackId);
 
       return inspectedTrack;
-      
+
     } catch (Exception e) {
       logger.warn("Error encoding " + videoTrack + " and " + audioTrack, e);
       if (e instanceof EncoderException) {
@@ -427,14 +428,23 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
    * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
    *      java.lang.String, long)
    */
-  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException, MediaPackageException {
+  public Job image(Track sourceTrack, String profileId, long... times) throws EncoderException, MediaPackageException {
 
     if (sourceTrack == null)
       throw new IllegalArgumentException("SourceTrack cannot be null");
 
+    if (times.length == 0)
+      throw new IllegalArgumentException("At least one time argument has to be specified");
+
+    String[] parameters = new String[times.length + 2];
+    parameters[0] = MediaPackageElementParser.getAsXml(sourceTrack);
+    parameters[1] = profileId;
+    for (int i = 0; i < times.length; i++) {
+      parameters[i + 2] = Long.toString(times[i]);
+    }
+
     try {
-      return serviceRegistry.createJob(JOB_TYPE, Operation.Image.toString(),
-              Arrays.asList(MediaPackageElementParser.getAsXml(sourceTrack), profileId, Long.toString(time)));
+      return serviceRegistry.createJob(JOB_TYPE, Operation.Image.toString(), Arrays.asList(parameters));
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -449,14 +459,14 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
    *          the source track
    * @param profileId
    *          the identifer of the encoding profile to use
-   * @param time
-   *          the time in miliseconds
+   * @param times
+   *          (one or more) times in miliseconds
    * @return the image as an attachment element
    * @throws EncoderException
    *           if extracting the image fails
    */
-  protected Attachment image(Job job, Track sourceTrack, String profileId, long time) throws EncoderException,
-          MediaPackageException {
+  protected List<Attachment> image(Job job, Track sourceTrack, String profileId, long... times)
+          throws EncoderException, MediaPackageException {
 
     if (sourceTrack == null)
       throw new EncoderException("SourceTrack cannot be null");
@@ -482,13 +492,15 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
       }
 
       // The time should not be outside of the track's duration
-      if (time < 0 || time > sourceTrack.getDuration()) {
-        throw new EncoderException("Can not extract an image at time " + Long.valueOf(time)
-                + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
+      for (long time : times) {
+        if (time < 0 || time > sourceTrack.getDuration()) {
+          throw new EncoderException("Can not extract an image at time " + Long.valueOf(time)
+                  + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
+        }
       }
 
       // Finally get the file that needs to be encoded
-      final File videoFile;
+      File videoFile;
       try {
         videoFile = workspace.get(sourceTrack.getURI());
       } catch (NotFoundException e) {
@@ -497,38 +509,51 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
         throw new EncoderException("Error accessing video track " + sourceTrack, e);
       }
 
-      Map<String, String> properties = new HashMap<String, String>();
-      String timeAsString = Long.toString(time);
-      properties.put("time", timeAsString);
-
       // Do the work
-      File encodingOutput = encoderEngine.encode(videoFile, profile, properties);
+      List<File> encodingOutput = encoderEngine.extract(videoFile, profile, null, times);
 
-      if (encodingOutput == null || !encodingOutput.isFile()) {
-        throw new EncoderException("Image extraction failed: encoding output doesn't exist at " + encodingOutput);
+      // check for validity of output
+      if (encodingOutput == null || encodingOutput.isEmpty()) {
+        throw new EncoderException("Image extraction failed: no images were produced");
+      }
+      for (File output : encodingOutput) {
+        if (output == null || !output.isFile()) {
+          cleanup(encodingOutput);
+          throw new EncoderException("Image extraction failed: encoding output doesn't exist at " + output);
+        }
       }
 
       // Put the file in the workspace
-      URI returnURL = null;
-      InputStream in = null;
-      try {
-        in = new FileInputStream(encodingOutput);
-        returnURL = workspace.putInCollection(COLLECTION,
-                job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
-        logger.debug("Copied the encoded file to the workspace at {}", returnURL);
-      } catch (Exception e) {
-        throw new EncoderException("unable to put the encoded file into the workspace", e);
-      } finally {
-        IOUtils.closeQuietly(in);
+      List<URI> workspaceURIs = new LinkedList<URI>();
+      for (int i = 0; i < encodingOutput.size(); i++) {
+        File output = encodingOutput.get(i);
+        InputStream in = null;
+        try {
+          in = new FileInputStream(output);
+          URI returnURL = workspace.putInCollection(COLLECTION,
+                  job.getId() + "_" + i + "." + FilenameUtils.getExtension(output.getAbsolutePath()), in);
+          logger.debug("Copied image file to the workspace at {}", returnURL);
+          workspaceURIs.add(returnURL);
+        } catch (Exception e) {
+          cleanup(encodingOutput);
+          cleanupWorkspace(workspaceURIs);
+          throw new EncoderException("Unable to put image file into the workspace", e);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
       }
-      if (encodingOutput != null && !encodingOutput.delete()) {
-        logger.warn("Unable to delete encoded file '{}'", encodingOutput);
-      }
+
+      // cleanup
+      cleanup(encodingOutput);
 
       MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-      Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
+      List<Attachment> imageAttachments = new LinkedList<Attachment>();
+      for (URI url : workspaceURIs) {
+        Attachment attachment = (Attachment) builder.elementFromURI(url, Attachment.TYPE, null);
+        imageAttachments.add(attachment);
+      }
 
-      return attachment;
+      return imageAttachments;
     } catch (Exception e) {
       logger.warn("Error extracting image from " + sourceTrack, e);
       if (e instanceof EncoderException) {
@@ -706,6 +731,35 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
   }
 
   /**
+   * Deletes any valid file in the list.
+   * 
+   * @param encodingOutput
+   *          list of files to be deleted
+   */
+  protected void cleanup(List<File> encodingOutput) {
+    for (File file : encodingOutput) {
+      if (file != null && file.isFile()) {
+        String path = file.getAbsolutePath();
+        if (file.delete()) {
+          logger.info("Deleted local copy of image file at {}", path);
+        } else {
+          logger.warn("Could not delete local copy of image file at {}", path);
+        }
+      }
+    }
+  }
+
+  protected void cleanupWorkspace(List<URI> workspaceURIs) {
+    for (URI url : workspaceURIs) {
+      try {
+        workspace.delete(url);
+      } catch (Exception e) {
+        logger.warn("Could not delete {} from workspace: {}", url, e.getMessage());
+      }
+    }
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
@@ -719,47 +773,55 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
       Track firstTrack = null;
       Track secondTrack = null;
       String encodingProfile = null;
-      
-      MediaPackageElement resultingElement = null;
-      
+
+      String serialized;
+
       switch (op) {
-        case Caption:
-          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-          Catalog[] catalogs = new Catalog[arguments.size() - 1];
-          for (int i = 1; i < arguments.size(); i++) {
-            catalogs[i] = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(i));
-          }
-          resultingElement = captions(job, firstTrack, catalogs);
-          break;
-        case Encode:
-          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-          encodingProfile = arguments.get(1);
-          resultingElement = encode(job, firstTrack, null, encodingProfile, null);
-          break;
-        case Image:
-          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-          encodingProfile = arguments.get(1);
-          long time = Long.parseLong(arguments.get(2));
-          resultingElement = image(job, firstTrack, encodingProfile, time);
-          break;
-        case Mux:
-          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-          secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
-          encodingProfile = arguments.get(2);
-          resultingElement = mux(job, firstTrack, secondTrack, encodingProfile);
-          break;
-        case Trim:
-          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-          encodingProfile = arguments.get(1);
-          long start = Long.parseLong(arguments.get(2));
-          long duration = Long.parseLong(arguments.get(3));
-          resultingElement = trim(job, firstTrack, encodingProfile, start, duration);
-          break;
-        default:
-          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+      case Caption:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        Catalog[] catalogs = new Catalog[arguments.size() - 1];
+        for (int i = 1; i < arguments.size(); i++) {
+          catalogs[i] = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(i));
+        }
+        MediaPackageElement resultingElement = captions(job, firstTrack, catalogs);
+        serialized = MediaPackageElementParser.getAsXml(resultingElement);
+        break;
+      case Encode:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        encodingProfile = arguments.get(1);
+        resultingElement = encode(job, firstTrack, null, encodingProfile, null);
+        serialized = MediaPackageElementParser.getAsXml(resultingElement);
+        break;
+      case Image:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        encodingProfile = arguments.get(1);
+        long[] times = new long[arguments.size() - 2];
+        for (int i = 2; i < arguments.size(); i++) {
+          times[i - 2] = Long.parseLong(arguments.get(i));
+        }
+        List<Attachment> resultingElements = image(job, firstTrack, encodingProfile, times);
+        serialized = MediaPackageElementParser.getArrayAsXml(resultingElements);
+        break;
+      case Mux:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
+        encodingProfile = arguments.get(2);
+        resultingElement = mux(job, firstTrack, secondTrack, encodingProfile);
+        serialized = MediaPackageElementParser.getAsXml(resultingElement);
+        break;
+      case Trim:
+        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+        encodingProfile = arguments.get(1);
+        long start = Long.parseLong(arguments.get(2));
+        long duration = Long.parseLong(arguments.get(3));
+        resultingElement = trim(job, firstTrack, encodingProfile, start, duration);
+        serialized = MediaPackageElementParser.getAsXml(resultingElement);
+        break;
+      default:
+        throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
-      
-      return MediaPackageElementParser.getAsXml(resultingElement);
+
+      return serialized;
     } catch (IllegalArgumentException e) {
       throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);
     } catch (IndexOutOfBoundsException e) {

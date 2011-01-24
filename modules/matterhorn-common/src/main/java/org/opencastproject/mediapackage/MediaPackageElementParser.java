@@ -19,6 +19,8 @@ import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 
 import java.io.StringWriter;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -33,7 +35,7 @@ public final class MediaPackageElementParser {
    * Private constructor to prohibit instances of this static utility class.
    */
   private MediaPackageElementParser() {
-    // Nothing to do 
+    // Nothing to do
   }
 
   /**
@@ -81,4 +83,58 @@ public final class MediaPackageElementParser {
     }
   }
 
+  /**
+   * Serializes media package element list to a string.
+   * 
+   * @param elements
+   *          element list to be serialized
+   * @return serialized media package element list
+   * @throws MediaPackageException
+   *           if serialization fails
+   */
+  public static String getArrayAsXml(List<? extends MediaPackageElement> elements) throws MediaPackageException {
+    // TODO write real serialization function
+    try {
+      StringBuilder builder = new StringBuilder();
+      builder.append(getAsXml(elements.get(0)));
+      for (int i = 1; i < elements.size(); i++) {
+        builder.append("###");
+        builder.append(getAsXml(elements.get(i)));
+      }
+      return builder.toString();
+    } catch (Exception e) {
+      if (e instanceof MediaPackageException) {
+        throw (MediaPackageException) e;
+      } else {
+        throw new MediaPackageException(e);
+      }
+    }
+  }
+
+  /**
+   * Parses the serialized media package element list.
+   * 
+   * @param xml
+   *          String to be parsed
+   * @return parsed media package element list
+   * @throws MediaPackageException
+   *           if de-serialization fails
+   */
+  public static List<? extends MediaPackageElement> getArrayFromXml(String xml) throws MediaPackageException {
+    // TODO write real deserialization function
+    try {
+      List<MediaPackageElement> elements = new LinkedList<MediaPackageElement>();
+      String[] xmlArray = xml.split("###");
+      for (String xmlElement : xmlArray) {
+        elements.add(getFromXml(xmlElement.trim()));
+      }
+      return elements;
+    } catch (Exception e) {
+      if (e instanceof MediaPackageException) {
+        throw (MediaPackageException) e;
+      } else {
+        throw new MediaPackageException(e);
+      }
+    }
+  }
 }

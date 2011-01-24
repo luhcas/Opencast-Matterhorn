@@ -76,6 +76,7 @@ import java.net.URI;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -266,15 +267,21 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       Iterator<? extends Segment> segmentIterator = decomposition.segments();
 
       // For every segment, try to find the still image and run text analysis on it
+      List<VideoSegment> videoSegments = new LinkedList<VideoSegment>();
       while (segmentIterator.hasNext()) {
         Segment segment = segmentIterator.next();
-        if (!(segment instanceof VideoSegment))
-          continue;
+        if ((segment instanceof VideoSegment))
+          videoSegments.add((VideoSegment) segment);
+      }
+      
+      // argument array for image extraction
+      long[] times = new long[videoSegments.size()];
 
-        VideoSegment videoSegment = (VideoSegment) segment;
+      for (int i = 0; i < videoSegments.size(); i++) {
+        VideoSegment videoSegment = videoSegments.get(i);
         MediaTimePoint segmentTimePoint = videoSegment.getMediaTime().getMediaTimePoint();
         MediaDuration segmentDuration = videoSegment.getMediaTime().getMediaDuration();
-
+        
         // Choose a time
         MediaPackageReference reference = null;
         if (catalogRef == null)
@@ -283,25 +290,34 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
           reference = new MediaPackageReferenceImpl(catalogRef.getType(), catalogRef.getIdentifier());
         reference.setProperty("time", segmentTimePoint.toString());
 
-        // Have the ocr image created. To circumvent problems with slowly building slides, we take the image that is
+        // Have the time for ocr image created. To circumvent problems with slowly building slides, we take the image that is
         // almost at the end of the segment, it should contain the most content and is stable as well.
-        Attachment image = null;
-        try {
-          long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
-          long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
-          Job imageJob = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds + durationSeconds
-                  - stabilityThreshold + 1);
-          if (!waitForStatus(imageJob).isSuccess()) {
-            throw new WorkflowOperationException("Extracting scene image from " + sourceTrack + " failed");
-          }
-          image = (Attachment) MediaPackageElementParser.getFromXml(imageJob.getPayload());
-          long timeInComposerQueue = imageJob.getQueueTime();
-          totalTimeInQueue += timeInComposerQueue;
-        } catch (EncoderException e) {
-          logger.error("Error creating still image from {}", sourceTrack);
-          throw e;
+        long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
+        long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
+        times[i] = startTimeSeconds + durationSeconds - stabilityThreshold + 1;
+      }
+        
+      // Have the ocr image(s) created. 
+      List<? extends MediaPackageElement> images = new LinkedList<Attachment>();
+      try {
+        Job imageJob = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, times);
+        if (!waitForStatus(imageJob).isSuccess()) {
+          throw new WorkflowOperationException("Extracting scene image from " + sourceTrack + " failed");
         }
+        images = MediaPackageElementParser.getArrayFromXml(imageJob.getPayload());
+        long timeInComposerQueue = imageJob.getQueueTime();
+        totalTimeInQueue += timeInComposerQueue;
+      } catch (EncoderException e) {
+        logger.error("Error creating still image(s) from {}", sourceTrack);
+        throw e;
+      }
 
+      Iterator<VideoSegment> it = videoSegments.iterator();
+      for (MediaPackageElement element : images) {
+        Attachment image = (Attachment) element;
+        VideoSegment videoSegment = it.next();
+        MediaDuration segmentDuration = videoSegment.getMediaTime().getMediaDuration();
+        
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
         Job job = analysisService.extract(image);
         if (!waitForStatus(job).isSuccess()) {
@@ -315,7 +331,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(job.getPayload());
         workspace.delete(image.getURI());
         if (catalog == null) {
-          logger.warn("Text analysis did not return a valid mpeg7 for segment {}", segment);
+          logger.warn("Text analysis did not return a valid mpeg7 for segment {}", videoSegment);
           continue;
         }
         Mpeg7Catalog videoTextCatalog = loadMpeg7Catalog(catalog);

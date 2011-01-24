@@ -63,7 +63,7 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
   /** Suffix for gstreamer pipeline template and image extraction */
   protected static final String GS_SUFFIX = "gstreamer.pipeline";
   protected static final String GS_IMAGE_TEMPLATE = "gstreamer.image.extraction";
-  
+
   /** Logger utility */
   private static final Logger logger = LoggerFactory.getLogger(GStreamerEncoderEngine.class);
 
@@ -71,7 +71,7 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
   private static final String START_TIME = "start-time";
   // private static final String END_TIME = "end-time";
   private static final int GS_SEEK_FLAGS = SeekFlags.FLUSH;
-  
+
   /** Rendering hints for resizing images */
   private static final Map<Key, Object> imageRenderingHints = new HashMap<RenderingHints.Key, Object>();
   static {
@@ -326,33 +326,34 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
       }
     });
   }
-  
+
   /*
    * (non-Javadoc)
-   * @see org.opencastproject.composer.gstreamer.AbstractGSEncoderEngine#extractMultipleImages(org.opencastproject.composer.api.EncodingProfile, java.util.Map)
+   * 
+   * @see
+   * org.opencastproject.composer.gstreamer.AbstractGSEncoderEngine#extractMultipleImages(org.opencastproject.composer
+   * .api.EncodingProfile, java.util.Map)
    */
   @Override
-  protected List<String> extractMultipleImages(EncodingProfile profile, Map<String, String> properties) throws EncoderException {
-    
-    String imageExtractionTemplate = profile.getExtension(GS_IMAGE_TEMPLATE);
-    if (imageExtractionTemplate == null) {
-      logger.warn("Image extraction definition is missing from profile '{}'", profile.getIdentifier());
-      throw new EncoderException("Missing '" +  GS_IMAGE_TEMPLATE + "' extension from profile '" + profile.getIdentifier() + "'");
-    }
+  protected List<File> extractMultipleImages(EncodingProfile profile, Map<String, String> properties)
+          throws EncoderException {
+
+    String imageExtractionTemplate = properties.get(GS_IMAGE_TEMPLATE);
     String outputTemplate = properties.get("out.file.path");
     String videoPath = properties.get("in.video.path");
-    
+
     // TODO generalize token substitution and write token cleanup
     String configuration = substituteTemplateValues(imageExtractionTemplate, properties, false);
-    List<ImageExtractionProperties> extractionProperties = parseImageExtractionConfiguration(configuration, outputTemplate);
-    
+    List<ImageExtractionProperties> extractionProperties = parseImageExtractionConfiguration(configuration,
+            outputTemplate);
+
     Pipeline pipeline = createFixedPipelineForImageExtraction(videoPath);
-    AppSink appsink = (AppSink)pipeline.getElementByName("appsink");
-    
+    AppSink appsink = (AppSink) pipeline.getElementByName("appsink");
+
     // install listeners
     MonitorObject monitorObject = createNewMonitorObject();
     installListeners(pipeline, monitorObject);
-    
+
     switch (pipeline.setState(State.PAUSED)) {
     case FAILURE:
       logger.warn("Could not change pipeline state to PAUSED");
@@ -364,18 +365,18 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
     default:
       break;
     }
-    
+
     // loop through all image definitions and extract them
     // if one extraction fails, remove all and throw exception
-    for (ImageExtractionProperties imageProperties : extractionProperties) {     
-      
+    for (ImageExtractionProperties imageProperties : extractionProperties) {
+
       // state should be set to paused before we attempt to seek
       if (pipeline.getState() == State.NULL) {
         logger.warn("Exception occured while trying to play file {}", videoPath);
         cleanup(extractionProperties);
         throw new EncoderException("Failed to play file " + videoPath);
       }
-      
+
       // seek
       if (!pipeline.seek(1.0, Format.TIME, GS_SEEK_FLAGS, SeekType.SET,
               imageProperties.getTimeInSeconds() * 1000 * 1000 * 1000, SeekType.NONE, -1)) {
@@ -384,17 +385,19 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
         cleanup(extractionProperties);
         throw new EncoderException("Failed to seek to position " + imageProperties.getTimeInSeconds() + "s");
       }
-      
+
       // get buffer
       pipeline.setState(State.PLAYING);
       Buffer buffer = appsink.pullBuffer();
       pipeline.setState(State.PAUSED);
-      
+
       if (buffer != null) {
         try {
-          createImageOutOfBuffer(buffer, imageProperties.getImageWidth(), imageProperties.getImageHeight(), imageProperties.getImageOutput());
+          createImageOutOfBuffer(buffer, imageProperties.getImageWidth(), imageProperties.getImageHeight(),
+                  imageProperties.getImageOutput());
         } catch (Exception e) {
-          logger.warn("Could not create image out of buffer at time {}: {}", imageProperties.getTimeInSeconds(), e.getMessage());
+          logger.warn("Could not create image out of buffer at time {}: {}", imageProperties.getTimeInSeconds(),
+                  e.getMessage());
           cleanup(extractionProperties);
           throw new EncoderException("Failed to create image", e);
         } finally {
@@ -413,7 +416,7 @@ public class GStreamerEncoderEngine extends AbstractGSEncoderEngine {
         }
       }
     }
-    
+
     pipeline.setState(State.NULL);
     return reorder(extractionProperties);
   }

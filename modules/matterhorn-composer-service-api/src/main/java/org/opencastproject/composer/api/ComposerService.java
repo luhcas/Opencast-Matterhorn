@@ -95,7 +95,8 @@ public interface ComposerService {
    * @throws MediaPackageException
    *           if the mediapackage is invalid
    */
-  Job image(Track sourceTrack, String profileId, long time) throws EncoderException, MediaPackageException;
+  // TODO revise
+  Job image(Track sourceTrack, String profileId, long... time) throws EncoderException, MediaPackageException;
 
   /**
    * Insert captions in media package element identified by <code>mediaTrack</code> from catalog which contains
