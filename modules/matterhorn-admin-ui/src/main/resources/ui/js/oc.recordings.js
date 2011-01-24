@@ -18,14 +18,14 @@ ocRecordings = new (function() {
   {
     q : 'Any fields',
     title : 'Title',
-    creator : 'Presenter',
-    seriestitle : 'Course/Series'
+    seriestitle : 'Series',
+    creator : 'Presenter'
   },
   {
-    contributor : 'Contributor',
+    subject : 'Subject',
     language : 'Language',
-    license : 'License',
-    subject : 'Subject'
+    contributor : 'Contributor',
+    license : 'License'
   }
   ]
 
