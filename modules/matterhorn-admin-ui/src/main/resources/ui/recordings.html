@@ -30,6 +30,7 @@
       #pagerBottom {float:right;}
       #tableContainer {padding: 0px 5px 0px 5px;}
       #recordingsTable th {margin-left:0px; margin-right: 0px;}
+      #recordingsTable .sortable {cursor:pointer;}
       #recordingsTable th .sort-icon {float:right;}
       #recordingsTable tr {border-bottom: 1px solid silver;}
       #recordingsTable tr:hover {background-color: silver;}
@@ -348,9 +349,9 @@
           {if recording.error}
             <span style="color:red;font-weight:bold;">FAILED</span>
           {else}
-            <b>${recording.state}</b>
+            ${recording.state}
             {if recording.operation}
-              &nbsp;${recording.operation}
+              :&nbsp;${recording.operation}
             {/if}
           {/if}
         </td>
