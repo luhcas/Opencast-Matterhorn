@@ -731,7 +731,7 @@ Opencast.Initialize = (function ()
         
         $.ajax(
         {
-            url: '../../search/rest/episode.json',
+            url: '../../search/episode.json',
             data: 'id=' + mediaPackageId,
             dataType: 'jsonp',
             jsonp: 'jsonp',
