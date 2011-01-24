@@ -1145,7 +1145,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
                 job.setStatus(Status.FAILED);
                 break;
               case PAUSED:
-                job.setStatus(Status.PAUSED);
+                job.setStatus(Status.RUNNING);
                 break;
               case SKIPPED:
               case SUCCEEDED:
