@@ -23,9 +23,7 @@ var Opencast = Opencast || {};
 // Create the methods in a closure to avoid creating global variables
 if (!this.JSON)
 {
-    this.JSON =
-    {
-    };
+    this.JSON = {};
 }
 
 (function ()

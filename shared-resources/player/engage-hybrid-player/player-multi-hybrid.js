@@ -1480,8 +1480,7 @@ Opencast.Player = (function () {
      */
     function setVolumeSlider(newVolume)
     {
-
-      Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
+      Opencast.ariaSpinbutton.jumpToRange(newVolume);
     }
 
     /**

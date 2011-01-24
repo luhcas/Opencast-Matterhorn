@@ -367,8 +367,7 @@ Opencast.Initialize = (function ()
         {
             dropdown_timer();
         });
-        // init the aria slider for the volume
-        Opencast.ariaSlider.init();
+        Opencast.ariaSpinbutton.initialize('oc_volume-container', 'oc_volume-back', 'oc_volume-front', 8, 0, 100);
         // aria roles
         $("#editorContainer").attr("className", "oc_editTime");
         $("#editField").attr("className", "oc_editTime");
@@ -725,7 +724,34 @@ Opencast.Initialize = (function ()
         });
         
         $('#oc_video-player-controls').hide();
+        
         onPlayerReadyListener();
+        
+        var mediaPackageId = Opencast.engage.getMediaPackageId();
+        
+        $.ajax(
+        {
+            url: '../../search/rest/episode.json',
+            data: 'id=' + mediaPackageId,
+            dataType: 'jsonp',
+            jsonp: 'jsonp',
+            success: function (data)
+            {
+               var result_data = data['search-results'].result;
+               var input_string = '';
+               
+               if(result_data.dcSeriesTitle) {
+                 input_string += '<div id="oc_title-1" style="border-right: 2px solid black;">'+result_data.dcSeriesTitle+'</div><h2 id="oc_title-2">'+result_data.dcTitle+'</h2>';
+               } else {
+                 input_string += '<h2 id="oc_title-1">'+result_data.dcTitle+'</h2>';
+               }
+               if(result_data.dcCreator) {
+                 input_string += '<div id="oc_title-creator">'+result_data.dcCreator+'</h2>';
+               }
+               
+               $('#oc_title').html(input_string);
+            }
+        });
     });
 /*
      *
@@ -763,12 +789,6 @@ Opencast.Initialize = (function ()
             }
         }
         Opencast.Player.setBrowserWidth(myWidth);
-        creator = $('#oc-creator').html();
-        if (creator !== "")
-        {
-            creatorPostfix = " by " + $('#oc-creator').html();
-        }
-        $('#oc_title').html($('#oc-title').html() + creatorPostfix);
         Opencast.Player.refreshScrubberPosition();
     }
     /**

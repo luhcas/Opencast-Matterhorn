@@ -114,7 +114,6 @@ Opencast.segments_ui_slider_Plugin = (function ()
 
     // The Elements to put the div into
     var elementSegmentsTable, elementData1, elementData2;
-    
     // Data to process == search-result.results.result
     var segments_ui_data,
         segments_ui_dataSegments,
@@ -173,6 +172,7 @@ Opencast.segments_ui_slider_Plugin = (function ()
             elementSegmentsTable.html(processedTemplateData);
         }
     }
+    
     return {
         addAsPlugin: addAsPlugin
     };

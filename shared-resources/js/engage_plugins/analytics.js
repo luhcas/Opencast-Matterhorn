@@ -30,6 +30,7 @@ Opencast.Analytics = (function ()
      */
     function showAnalytics()
     {
+        // Request JSONP data
         $.ajax(
         {
             type: 'GET',

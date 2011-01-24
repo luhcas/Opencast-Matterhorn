@@ -7,9 +7,6 @@ var Opencast = Opencast || {};
  */
 Opencast.Description = (function ()
 {
-    /**
-     *  variables
-     */
     var mediaPackageId, duration;
     var DESCRIPTION = "Description",
         DESCRIPTION_HIDE = "Hide Description";
@@ -44,8 +41,6 @@ Opencast.Description = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
-                // get rid of every '@' in the JSON data
-                // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
                 var timeDate = data['search-results'].result.dcCreated;
                 var sd = new Date();
                 sd.setMinutes(parseInt(timeDate.substring(14, 16), 10));
@@ -59,11 +54,10 @@ Opencast.Description = (function ()
                     jsonp: 'jsonp',
                     success: function (result)
                     {
-                        // get rid of every '@' in the JSON data
-                        // result = $.parseJSON(JSON.stringify(result).replace(/@/g, ''));
                         // If episode is part of a series: get series data    
                         if (data['search-results'].result.dcIsPartOf != '')
                         {
+                            // Request JSONP data (Series)
                             $.ajax(
                             {
                                 url: '../../series/' + data['search-results'].result.dcIsPartOf + ".json",
@@ -71,8 +65,6 @@ Opencast.Description = (function ()
                                 jsonp: 'jsonp',
                                 success: function (res)
                                 {
-                                    // get rid of every '@' in the JSON data
-                                    // res = $.parseJSON(JSON.stringify(res).replace(/@/g, ''));
                                     for (var i = 0; i < res.series.additionalMetadata.metadata.length; i++)
                                     {
                                         if (res.series.additionalMetadata.metadata[i].key == 'title')
@@ -162,6 +154,7 @@ Opencast.Description = (function ()
     {
         mediaPackageId = id;
     }
+    
     return {
         showDescription: showDescription,
         hideDescription: hideDescription,

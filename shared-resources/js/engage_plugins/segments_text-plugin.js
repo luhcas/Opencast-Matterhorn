@@ -7,8 +7,6 @@ var Opencast = Opencast || {};
  */
 Opencast.segments_text_Plugin = (function ()
 {
-    // The Element to put the div into
-    var element;
     // The Template to process
     var template =  '<table cellspacing="5" cellpadding="0" width="100%">' +
                         '{for s in segment}' +
@@ -31,6 +29,8 @@ Opencast.segments_text_Plugin = (function ()
                         '{/for}' +
                     '</table>';
 
+    // The Element to put the div into
+    var element;
     // Data to process
     var segments_data;
     // Precessed Data

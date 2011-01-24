@@ -164,9 +164,21 @@ Opencast.Utils = (function ()
         return 0;
     }
     
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description create date in format MM/DD/YYYY
+     * @param timeDate Time and Date
+     */
+    function getLocaleDate(timeDate)
+    {
+        return timeDate.substring(0, 10);
+    }
+    
     return {
         getTimeInMilliseconds: getTimeInMilliseconds,
         getURLParameter: getURLParameter,
-        parseSeconds: parseSeconds
+        parseSeconds: parseSeconds,
+        getLocaleDate: getLocaleDate
     };
 }());

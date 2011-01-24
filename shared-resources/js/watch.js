@@ -23,11 +23,10 @@ Opencast.Watch = (function ()
     var time = 0;
     var interval;
     var intervalOn = false;
-            
+    
     /**
      * @memberOf Opencast.Watch
-     * @description Sets up the html page after the player has been initialized.
-     *              The XSL files are loaded.
+     * @description Sets up the Plugins
      */
     function onPlayerReady()
     {
@@ -36,7 +35,6 @@ Opencast.Watch = (function ()
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
         Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
         Opencast.Player.setUserId(userId);
-        
         // Set MediaPackage ID's in the Plugins
         Opencast.Player.setMediaPackageId(mediaPackageId);
         Opencast.Annotation_Chapter.setMediaPackageId(mediaPackageId);
@@ -47,13 +45,13 @@ Opencast.Watch = (function ()
         Opencast.segments.setMediaPackageId(mediaPackageId);
         Opencast.segments_text.setMediaPackageId(mediaPackageId);
         Opencast.search.setMediaPackageId(mediaPackageId);
-        
         // Initialize Segments UI
         Opencast.segments_ui.initialize();
     }
-
+    
     /**
-     * Continues initialization
+     * @memberOf Opencast.Watch
+     * @description Sets up the html page after the player and the Plugins have been initialized.
      */
     function continueProcessing()
     {
@@ -144,9 +142,7 @@ Opencast.Watch = (function ()
         // init the segements_text
         Opencast.segments_text.initialize();
         slideLength = Opencast.segments.getSlideLength();
-        
         Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE, slideLength);
-        
         if (mediaUrlOne !== '' && mediaUrlTwo !== '')
         {
             Opencast.Player.setVideoSizeList(MULTIPLAYER);
@@ -197,19 +193,17 @@ Opencast.Watch = (function ()
         getClientShortcuts();
         // init
         Opencast.Initialize.init();
-        // **************************************
         // Segments Text View
         $('.segments-time').each(function ()
         {
             var seconds = $(this).html();
             $(this).html(Opencast.engage.formatSeconds(seconds));
         });
-        // set the controls visible
+        // Set the Controls visible
         $('#oc_video-player-controls').show();
-        
-        // Parse URL Parameters
+        // Parse URL Parameters (time 't') and jump to the given Seconds
         time = Opencast.Utils.parseSeconds(Opencast.Utils.getURLParameter('t'));
-        if(!intervalOn)
+        if (!intervalOn)
         {
             interval = setInterval(forwardSeconds, 250);
             intervalOn = true;
@@ -217,15 +211,17 @@ Opencast.Watch = (function ()
     }
     
     /**
-     * Tries to forward to given Seconds
+     * @memberOf Opencast.Watch
+     * @description Tries to forward to given Seconds if Player ready and Second set
      */
     function forwardSeconds()
     {
-        if(($('#oc_duration').text() != "NaN:NaN:NaN") && ($('#oc_duration').text() != ""))
+        if (($('#oc_duration').text() != "NaN:NaN:NaN") && ($('#oc_duration').text() != ""))
         {
+            // Start playing the Video
             // Videodisplay.play();
             Videodisplay.seek(parseInt(time));
-            if(intervalOn)
+            if (intervalOn)
             {
                 clearInterval(interval);
                 intervalOn = false;

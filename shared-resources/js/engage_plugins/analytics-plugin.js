@@ -7,10 +7,9 @@ var Opencast = Opencast || {};
  */
 Opencast.AnalyticsPlugin = (function ()
 {
-    /**
-     *  Variables
-     */
+    // The Element to put the div into
     var element;
+    // Data to process
     var footprintData;
     
     /**

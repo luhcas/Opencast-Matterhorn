@@ -31,9 +31,12 @@ Opencast.Series = (function ()
 
     /**
      * @memberOf Opencast.Series
+     * @description Show the Series Page
+     * @param page Page
      */
     function showSeriesPage(page)
     {
+        // Request JSONP data
         $.ajax(
         {
             url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=' + (page - 1) * 20 + '&jsonp=?',
@@ -107,6 +110,9 @@ Opencast.Series = (function ()
     
     /**
      * @memberOf Opencast.Series
+     * @description Prepares the Data for the Plugin
+     * @param data Data
+     * @return Processed Data
      */
     function createDataForPlugin(data)
     {
@@ -125,7 +131,7 @@ Opencast.Series = (function ()
         //cut title and add '...'
         for (var i = 0; i < data['search-results'].result.length; i++)
         {
-            data['search-results'].result[i].dcCreated = getLocaleDate(data['search-results'].result[i].dcCreated);
+            data['search-results'].result[i].dcCreated = Opencast.Utils.getLocaleDate(data['search-results'].result[i].dcCreated);
             data['search-results'].result[i].dcNumber = i + 1;
             data['search-results'].result[i].dcTitleShort = data['search-results'].result[i].dcTitle.substr(0, 35) + "...";
         }
@@ -136,15 +142,6 @@ Opencast.Series = (function ()
             data['search-results'].pages.push(i);
         }
         return data;
-    }
-    
-    /**
-     * @memberOf Opencast.Series
-     * @description create date in format MM/DD/YYYY
-     */
-    function getLocaleDate(timeDate)
-    {
-        return timeDate.substring(0, 10);
     }
     
     /**

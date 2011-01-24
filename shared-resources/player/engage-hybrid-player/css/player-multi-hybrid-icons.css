@@ -331,6 +331,10 @@ background-position: -300px -215px;
   display:                  inline;
 }
 
+#oc_volume-container { padding: 0px; margin: 0px; overflow: hidden; background: transparent; border: none; float: left; }
+#oc_volume-back { position: relative; left: 0px; background:  url("../img/oc_icons_2.png") no-repeat -1px -120px transparent; width: 56px; height: 30px;}
+#oc_volume-front { padding: 0px; margin: 0px; background:  url("../img/oc_icons_2.png") no-repeat -1px -150px transparent; width: 56px; height: 30px; position: absolute; top: 0px; left: 0px;}
+
 #oc_btn-volume, #oc_btn-volume:focus, #oc_btn-volume::-moz-focus-inner { outline: none; border: 0px; }
 #oc_time-chooser { width: 30px; height: 10px; background: url("../img/oc_icons_2.png") no-repeat -180px -132px transparent;}
 #oc_time-chooser:hover, #oc_time-chooser:focus  { background-position: -180px -162px;}

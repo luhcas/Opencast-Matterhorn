@@ -32,10 +32,12 @@ Opencast.Series_Plugin = (function()
                         '{/for}' +
                     '</div>';
 
-    //place to render the data in the html    
+    // The Element to put the div into   
     var element;
+    // Data to process
     var series_data;
-    var processedTemplateData;
+    // Precessed Data
+    var processedTemplate;
 
     /**
      * @memberOf Opencast.Series_Plugin
@@ -58,8 +60,8 @@ Opencast.Series_Plugin = (function()
     {
         if (element !== undefined) 
         {
-            processedTemplateData = template.process(series_data);
-            element.html(processedTemplateData);
+            processedTemplate = template.process(series_data);
+            element.html(processedTemplate);
         }
     }
 

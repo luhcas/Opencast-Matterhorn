@@ -108,8 +108,12 @@ color: #000;
   background:               #FFF;
 }
 
-#oc_title { float: left; font-weight: normal; margin: 0px; padding: 5px 15px 5px; max-width: 70%; }
-#oc_player-head { padding: 5px; }
+#oc_title { float: left; font-weight: normal; margin: 0px; padding: 5px 0 5px; max-width: 70%; }
+#oc_title-1 { display: inline; font-size: 1.4em; font-weight: bold; padding:  0px 5px 0px 0px; margin: 0px;}
+#oc_title-2 { display: inline; font-size: 1em; font-weight: normal; padding: 0px 0px 0px 5px; margin:0px;}
+#oc_title-creator { color: #8A8A8A; }
+
+#oc_player-head { padding: 5px 2px; }
 #oc_player-head-right { float: right; }
 
 #oc_video-view ul { list-style:none outside none;}

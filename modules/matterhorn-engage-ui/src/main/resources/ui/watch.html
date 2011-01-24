@@ -44,7 +44,7 @@
     <script type="text/javascript" src="jquery/jquery-ui-1.8.1.custom.min.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSpinbutton.js"></script>
     <script type="text/javascript" src="jquery/plugins/jwysiwyg/jquery.wysiwyg.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.client.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.sparkline.min.js"></script>
@@ -87,12 +87,15 @@
             return urlParams;
           }
 
+
+
         if(parseQueryString(window.location.search.substring(1)).embed) {
           $('#oc_title-bar').hide();
           $('#oc_btn-embed').hide();
           $('#oc_slidetext').addClass('scroll');
         }
       });
+
     </script>
   </head>
 
@@ -110,7 +113,7 @@
   </div>
 
   <div id="oc_title-bar">
-    <div id="oc_title-bar-container" class="">
+    <div id="oc_title-bar-container">
 
       <div id="oc_title-bar-logo">
         <img src="img/Matterhorn_80x56.gif" alt="Back to Media Module" title="Back to Media Module" />
@@ -131,12 +134,13 @@
     <div class="clear"></div>
   </div><!-- END #oc_title-bar -->
     <div id="oc_player-head">
-      <h2 id="oc_title"></h2>
+      <div id="oc_title"></div>
       <div id="oc_player-head-see-more" class="ui-helper-hidden">
         <a href="javascript:" id="oc_see-more-button" title="click to see more of this series" role="button" aria-pressed="false">
             <div>See More</div>
         </a>
       </div>
+
       <div id="oc_player-head-right">
         <a href="javascript:" id="oc_shortcut-button" title="click to show shortcuts" role="button" aria-pressed="false"  tabindex="70"><div>Shortcuts</div></a>
         <a href="javascript:" id="oc_share-button" title="click to show share options" role="button" aria-pressed="false"  tabindex="80"><div>Share</div></a>
@@ -177,19 +181,13 @@
       </div>
 
       <div id="oc_sound">
+
         <span id="oc_volume-dropdown">
             <input id="oc_btn-volume" class="oc_btn-volume-high handcursor" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value="">
         </span>
-        <span id="oc_volume-menue">
-            <div id="oc_volume-dropdown-div">
-                <div id="oc_volume-slider">
-                    <div id="slider_volume_Rail" class="oc_slider-volume-Rail handcursor" title="Volume" alt="Volume">
-                        <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden "></label>
-                        <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb handcursor" type="submit" value="">
-                    </div>
-                </div>
-            </div>
-        </span>
+        <button id="oc_volume-container">
+          <div id="oc_volume-back"><div id="oc_volume-front"> </div></div>
+       </button>
       </div>
 
       <div id="oc_video-size-controls">
@@ -241,14 +239,14 @@
                 <!-- data comes here -->
             </table>
         </div>
-        
+
         <div id="segments_ui_slider_data1" style="display: none">
         </div>
         <div id="segments_ui_slider_data2" style="display: none">
         </div>
         <div id="segments_ui_slider_information" style="display: none">
         </div>
-        
+
         <div id="segments_ui-media1">
         </div>
         <div id="data1">
@@ -264,7 +262,7 @@
             </table>
         </div>
     </div>
-    
+
     <div id="oc_video-view">
       <ul>
         <li><input id="oc_checkbox-statistics" type="checkbox" name="show Statistics" title="show Statistics"> <label for="oc_checkbox-statistics">Viewing Statistics</label></li>
@@ -302,7 +300,7 @@
             <div id="oc-description">
             </div>
         </div>
-  
+
         <div id="oc_slides" class="oc_DisplayBlock" style="display: none">
             <div id="segments-holder" class="oc-segments-holder">
                 <div id="oc_segment-table" class="oc-segments">
@@ -322,7 +320,7 @@
                 </div>
             </div>
         </div>
-    
+
         <div id="oc_slidetext" class="fl-fix" style="display: none">
             <div id="segments_text-loading" class="loadingImage">
                 <img src="img/loading.gif" />
@@ -342,9 +340,6 @@
 
         <div class="clear">
         </div>
-        
-    
-    
   <div id="segment-tooltip" class="segment-tooltip" style="display: none;"></div>
   <!-- Shortcut dialog -->
   <div id="oc_shortcuts" title="Shortcuts">

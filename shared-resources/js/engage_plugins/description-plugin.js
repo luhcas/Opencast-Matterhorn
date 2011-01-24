@@ -7,8 +7,6 @@ var Opencast = Opencast || {};
  */
 Opencast.Description_Plugin = (function ()
 {
-    // The Element to put the div into
-    var element;
     // The Template to process
     var template =  '<div style="float: left;">' +
                         'Date: <span style="color:grey;">${result.dcCreated}</span><br />' +
@@ -25,6 +23,8 @@ Opencast.Description_Plugin = (function ()
                     '<div style="clear: both">' + 
                     '</div>';
 
+    // The Element to put the div into
+    var element;
     // Data to process
     var description_data;
     // Precessed Data
