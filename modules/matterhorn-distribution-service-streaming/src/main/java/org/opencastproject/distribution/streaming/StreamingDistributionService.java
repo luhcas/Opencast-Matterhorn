@@ -88,21 +88,22 @@ public class StreamingDistributionService extends AbstractJobProducer implements
     if (cc != null) {
       streamingUrl = StringUtils.trimToNull(cc.getBundleContext().getProperty("org.opencastproject.streaming.url"));
       if (streamingUrl == null)
-        throw new IllegalStateException("Stream url must be set (org.opencastproject.streaming.url)");
-      logger.info("streaming url is {}", streamingUrl);
+        logger.warn("Stream url was not set (org.opencastproject.streaming.url)");
+      else
+        logger.info("streaming url is {}", streamingUrl);
 
       String distributionDirectoryPath = StringUtils.trimToNull(cc.getBundleContext().getProperty(
               "org.opencastproject.streaming.directory"));
       if (distributionDirectoryPath == null)
-        throw new IllegalStateException(
-                "Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
-
-      distributionDirectory = new File(distributionDirectoryPath);
-      if (!distributionDirectory.isDirectory()) {
-        try {
-          FileUtils.forceMkdir(distributionDirectory);
-        } catch (IOException e) {
-          throw new IllegalStateException("Distribution directory does not exist and can't be created", e);
+       logger.warn("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
+      else {
+        distributionDirectory = new File(distributionDirectoryPath);
+        if (!distributionDirectory.isDirectory()) {
+          try {
+            FileUtils.forceMkdir(distributionDirectory);
+          } catch (IOException e) {
+            throw new IllegalStateException("Distribution directory does not exist and can't be created", e);
+          }
         }
       }
 
@@ -124,6 +125,11 @@ public class StreamingDistributionService extends AbstractJobProducer implements
       throw new MediaPackageException("Mediapackage ID must be specified");
     if (element == null)
       throw new MediaPackageException("Mediapackage element must be specified");
+
+    if (StringUtils.isBlank(streamingUrl))
+      throw new IllegalStateException("Stream url must be set (org.opencastproject.streaming.url)");
+    if (distributionDirectory == null)
+      throw new IllegalStateException("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Distribute.toString(),
@@ -212,9 +218,11 @@ public class StreamingDistributionService extends AbstractJobProducer implements
    */
   @Override
   public Job retract(String mediaPackageId) throws DistributionException {
-
     if (mediaPackageId == null)
       throw new IllegalArgumentException("Mediapackage ID must be specified");
+
+    if (distributionDirectory == null)
+      throw new IllegalStateException("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Retract.toString(), Arrays.asList(mediaPackageId));
