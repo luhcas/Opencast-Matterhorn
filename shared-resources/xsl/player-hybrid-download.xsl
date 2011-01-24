@@ -250,7 +250,7 @@
           <xsl:value-of select="ns2:search-results/result/dcContributor"/>
         </xsl:when>
         <xsl:otherwise>
-          No Sponsoring Department
+          No Department
         </xsl:otherwise>
       </xsl:choose>
     </div>

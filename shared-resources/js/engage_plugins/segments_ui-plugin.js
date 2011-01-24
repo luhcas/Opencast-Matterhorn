@@ -234,7 +234,7 @@ Opencast.segments_ui_Plugin = (function ()
                                  '{if (dcContributor != undefined) && (dcContributor != "")}' +
                                      '${dcContributor}' +
                                  '{else}' +
-                                     'No Sponsoring Department' +
+                                     'No Department information' +
                                  '{/if}' +
                              '</div>' +
                              '<div id="dc-description" style="display: none">' +
