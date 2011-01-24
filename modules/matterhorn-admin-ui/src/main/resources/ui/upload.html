@@ -218,12 +218,15 @@
                   </div>
                 </li>
                 <li class="ui-helper-clearfix" id="regularFileChooserFlavor">
-                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload_flavor">Media File Content</span>:</label>
-                  <select name="flavor" id="flavor" class="requiredField" style="float:left;margin-right:3px;">
-                    <option value="">Choose one:</option>
-                    <option value="presenter/source">Presenter</option>
-                    <option value="presentation/source">Presentation</option>
-                  </select>
+                  <label class="fl-label"><span id="i18n_upload_flavor">Media Characteristics</span>:</label>
+                  <input type="hidden" name="flavor" id="flavor" value="presenter/source">
+                  <input type="checkbox" id="containsSlides">
+                  <label for="containsSlides">Contains discrete images/slides/scenes</label>
+                </li>
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label">&nbsp;</label>
+                  <span style="font-size:80%;color:gray;">Analysis and processing will occur to enable slide thumbnail navigation and possibly in-video text search)</span>
+                </li>
               </ul>
             </div>
           </div>

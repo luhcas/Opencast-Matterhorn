@@ -68,6 +68,14 @@ ocUpload.init = function() {
     $(this).parent().children('.additionalFieldsContainer').append(remove);
   });
 
+  $('#containsSlides').change(function() {
+    if ($(this).is(':checked')) {
+      $('#flavor').val('presentation/source');
+    } else {
+      $('#flavor').val('presenter/source');
+    }
+  });
+
   // Event: Submit button, submit form if no missing inputs
   $('#BtnSubmit').click( function() {
     if (ocUpload.checkRequiredFields(true))  {
