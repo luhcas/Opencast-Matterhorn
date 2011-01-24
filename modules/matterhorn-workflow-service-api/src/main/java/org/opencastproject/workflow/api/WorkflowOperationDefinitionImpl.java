@@ -219,4 +219,14 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
     return set;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "operation definition:'" + id + "'";
+  }
+
 }

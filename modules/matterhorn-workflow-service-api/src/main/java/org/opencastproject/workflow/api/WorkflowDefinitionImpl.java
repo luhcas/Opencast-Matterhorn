@@ -241,4 +241,14 @@ public class WorkflowDefinitionImpl implements WorkflowDefinition {
   public void setTitle(String title) {
     this.title = title;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#toString()
+   */
+  public String toString() {
+    return "Workflow definition {" + id + "}";
+  }
+
 }
