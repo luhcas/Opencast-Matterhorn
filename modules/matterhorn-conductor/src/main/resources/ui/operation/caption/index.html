@@ -15,7 +15,8 @@
         background-repeat: no-repeat;
       }
       #i18n_captions_upload_label{float:left;}
-      #actions{clear:both}
+      #notification {clear:both;padding-top:13px;padding-left:40px;font-size:80%;color:white;}
+      #actions{clear:both;padding-top:13px;padding-left:40px;}
       .spandiv {display:table-cell;float:left;}
     </style>
     <script type="text/javascript" src="/admin/jquery/jquery-1.4.2.min.js"></script>
@@ -23,7 +24,11 @@
 
       var PLAYER_URL = '/engage/ui/embed.html';
       var currentFile = null;
-      
+
+      var notification_nofile = 'There is currently no captions file selected for this recording. If you continue processing now, there will be no captions for this recording.';
+      var notification_fileselected = 'You have the selected a captions file. If you continue processing now, the captions file will be added to the recording.';
+      var btnContinue_fileSelected = 'Upload selected captions file and move on to next steps in processing this recording.';
+
       // Captions upload
       var ocUploadListener = {};
       ocUploadListener.filename = null;
@@ -45,6 +50,8 @@
       }
       ocUploadListener.fileSelectedAjax = function(filename, jobId) {
         ocUploadListener.filename = filename;
+        $('#notification').text(notification_fileselected);
+        $('#continueBtn').attr('title', btnContinue_fileSelected);
       }
       ocUploadListener.uploadComplete = function () {
         $('#file-upload-container').css('display','none');
@@ -82,12 +89,22 @@
 
       $(document).ready(function() {
         var id = parent.document.getElementById("holdWorkflowId").value;
+        $('#notification').text(notification_nofile);
+        parent.ocRecordings.adjustHoldActionPanelHeight();
+        $('#continueBtn').mouseenter(function() {
+          $('#notification').css('color', 'gray');
+        });
+        $('#continueBtn').mouseleave(function() {
+          $('#notification').css('color', 'white');
+        });
+        /*
         // Event edit link clicked
         $('#edit-link').click( function() {
           //parent.ocRecordings.retryRecording(id);
           parent.location.href = "/admin/upload.html?retry=" + id;
           return false;
         });
+        */
         // load preview player and metadata
         $.ajax({
           url : '/workflow/instance/' + id + '.xml',
@@ -96,6 +113,7 @@
             // put mediapackge into form (for upload of captions file)
             var mp = xmlToString(data).match(/<mediapackage(.*)mediapackage>/)[0];
             ocUploadListener.mediaPackage = mp;
+            /* --> not needed for current mock-up
             // load metadata
             var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
             $.ajax({
@@ -115,10 +133,11 @@
                     }
                   }
                 });
-                parent.ocRecordings.adjustHoldActionPanelHeight();
+                
               }
             });
             // look for already uploaded captions file
+            // deactivating with new interaction scheme (continue and upload now together)
             $(data.documentElement).find("mediapackage > metadata > catalog").each(function(index, elm) {
               if ($(elm).attr('type') == 'captions/timedtext') {
                 var captionsFile = $(elm).find('url').text().split(/\//);
@@ -130,6 +149,7 @@
               }
             });
             // call preview player
+            // deactivating since not needed for current mock-up
             var previewFiles = new Array();
             $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
               if ($(elm).attr('type').split(/\//)[1] == 'preview') {
@@ -166,7 +186,7 @@
                 }
                 $('#files').append(link);
               }
-            });
+            });*/
           }
         });
       });
@@ -177,10 +197,10 @@
     <h1>Upload Captions file</h1>
     <div class="spandiv">
     </div>
-    <div id="file-display-container" class="spandiv hidden" style="padding-top:26px;padding-left:40px;">
+    <!-- div id="file-display-container" class="spandiv hidden" style="padding-top:26px;padding-left:40px;">
       <span id="i18n_captions_upload_label">Captions file:&nbsp;</span>
       <span id="filename-container" class="spandiv"></span>
-    </div>
+    </div -->
     <div id="file-upload-container" class="spandiv" style="padding-top:26px;padding-left:40px;">
       <div id="i18n_captions_upload_label" class="spandiv">Captions file to upload:&nbsp;
         <br>
@@ -195,8 +215,10 @@
         <!-- button type="button" id="btn-start-upload" onclick="ocUploadListener.startUpload();">Upload</button -->
       </div>
     </div>
-    <div id="actions" style="padding-top:26px;padding-left:40px;">
-        <button type="button" id="continueBtn" onclick="continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
+    <div id="notification">
+    </div>
+    <div id="actions">
+        <button type="button" id="continueBtn" onclick="continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording without captions.">Continue processing</button>
         <button type="button" style="margin-right:16px;" title="Cancel" onclick="parent.ocRecordings.hideHoldActionUI();">Cancel</button>
     </div>
     <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
