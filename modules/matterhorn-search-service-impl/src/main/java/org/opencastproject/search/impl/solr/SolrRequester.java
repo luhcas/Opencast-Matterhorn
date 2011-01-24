@@ -471,6 +471,12 @@ public class SolrRequester {
         sb.append(flavorBuilder);
       }
     }
+    
+    if (q.getDeletedDate() != null) {
+      if (sb.length() > 0)
+        sb.append(" AND ");
+      sb.append(SolrFields.OC_DELETED + ":" + SolrUtils.serializeDateRange(q.getDeletedDate(), new Date()));
+    }
 
     if (sb.length() == 0)
       sb.append("*:*");
@@ -478,11 +484,15 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(sb.toString());
 
     if (q.isIncludeSeries() && !q.isIncludeEpisodes()) {
-      query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
+      query.addFilterQuery(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
     }
 
     if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
-      query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
+      query.addFilterQuery(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
+    }
+    
+    if (q.getDeletedDate() == null) {
+      query.addFilterQuery("-" + SolrFields.OC_DELETED + ":[* TO *]");
     }
 
     if (q.getLimit() > 0)

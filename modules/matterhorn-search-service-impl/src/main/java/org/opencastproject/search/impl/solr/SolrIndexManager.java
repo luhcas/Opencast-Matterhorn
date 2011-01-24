@@ -53,6 +53,7 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -159,10 +160,35 @@ public class SolrIndexManager {
    * @throws SolrServerException
    *           if an errors occurs while talking to solr
    */
-  public void delete(String id) throws SolrServerException {
+  public boolean delete(String id) throws SolrServerException {
     try {
-      solrServer.deleteById(id);
+      // Load the existing episode
+      QueryResponse solrResponse = null;
+      try {
+        SolrQuery query = new SolrQuery(SolrFields.ID + ":" + id + " AND -" + SolrFields.OC_DELETED + ":[* TO *]");
+        solrResponse = solrServer.query(query);
+      } catch (Exception e1) {
+        throw new SolrServerException(e1);
+      }
+
+      // Did we find the episode?
+      if (solrResponse.getResults().size() == 0) {
+        logger.warn("Trying to delete non-existing (or already deleted) episode {} from the search index", id);
+        return false;
+      }
+      
+      // Use all existing fields
+      SolrDocument doc = solrResponse.getResults().get(0);
+      SolrUpdateableInputDocument inputDocument = new SolrUpdateableInputDocument();
+      for (String field : doc.getFieldNames()) {
+        inputDocument.setField(field, doc.get(field));
+      }
+
+      // Set the oc_deleted field to the current date, then update
+      inputDocument.setField(SolrFields.OC_DELETED, SolrUtils.serializeDate(new Date()));
+      solrServer.add(inputDocument);
       solrServer.commit();
+      return true;
     } catch (IOException e) {
       throw new SolrServerException(e);
     }

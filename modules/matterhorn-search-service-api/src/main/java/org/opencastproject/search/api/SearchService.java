@@ -20,8 +20,6 @@ import org.opencastproject.mediapackage.MediaPackage;
 
 /**
  * Provides search capabilities, possibly to the engage tools, possibly to other services.
- * 
- * TODO: Improve documentation
  */
 public interface SearchService {
   /**
@@ -44,10 +42,11 @@ public interface SearchService {
    * 
    * @param mediaPackageId
    *          id of the media package to remove
+   * @return <code>true</code> if the episode was found and deleted
    * @throws SearchException
    *           if an error occurs while removing the media package
    */
-  void delete(String mediaPackageId) throws SearchException;
+  boolean delete(String mediaPackageId) throws SearchException;
 
   /**
    * Clears the search index.

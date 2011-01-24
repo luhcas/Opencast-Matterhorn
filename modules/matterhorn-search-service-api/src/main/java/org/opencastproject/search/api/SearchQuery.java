@@ -17,6 +17,8 @@ package org.opencastproject.search.api;
 
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 
+import java.util.Date;
+
 /**
  * Represents a query to find search results
  */
@@ -43,4 +45,6 @@ public interface SearchQuery {
   String[] getElementTags();
   SearchQuery withElementFlavors(MediaPackageElementFlavor[] flavors);
   MediaPackageElementFlavor[] getElementFlavors();
+  SearchQuery withDeletedSince(Date date);
+  Date getDeletedDate();
 }

@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.Date;
 
 /**
  * Tests the functionality of the search service.
@@ -206,6 +207,9 @@ public class SearchServiceImplTest {
 
     // Add the media package to the search index
     service.add(mediaPackage);
+    
+    // Delete it, and try to look it up
+    Date deletedDate = new Date();
     service.delete(mediaPackage.getIdentifier().toString());
 
     SearchQueryImpl q = new SearchQueryImpl();
@@ -215,6 +219,10 @@ public class SearchServiceImplTest {
     assertEquals(0, service.getByQuery(q).size());
     q.withId(null); // Clear the ID requirement
     assertEquals(0, service.getByQuery(q).size());
+    
+    q = new SearchQueryImpl();
+    q.withDeletedSince(deletedDate);
+    assertEquals(1, service.getByQuery(q).size());
   }
 
   /**

@@ -18,10 +18,15 @@ package org.opencastproject.search.impl;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchQuery;
 
+import java.util.Date;
+
 /**
+ * Default implementation of the search query.
+ * 
  * @see SearchQuery
  */
 public class SearchQueryImpl implements SearchQuery {
+
   protected boolean includeEpisode = true;
   protected boolean includeSeries = false;
   protected boolean sortByCreationDate = false;
@@ -33,6 +38,7 @@ public class SearchQueryImpl implements SearchQuery {
   protected int offset = -1;
   protected String[] tags = null;
   protected MediaPackageElementFlavor[] flavors = null;
+  protected Date deletedDate = null;
 
   /**
    * {@inheritDoc}
@@ -264,4 +270,24 @@ public class SearchQueryImpl implements SearchQuery {
     this.tags = tags;
     return this;
   }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.SearchQuery#withDeletedSince(java.util.Date)
+   */
+  @Override
+  public SearchQuery withDeletedSince(Date date) {
+    this.deletedDate = date;
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.SearchQuery#getDeletedDate()
+   */
+  @Override
+  public Date getDeletedDate() {
+    return deletedDate;
+  }
+  
 }

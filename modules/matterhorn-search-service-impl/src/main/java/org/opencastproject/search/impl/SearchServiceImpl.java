@@ -267,10 +267,10 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#delete(java.lang.String)
    */
-  public void delete(String mediaPackageId) throws SearchException {
+  public boolean delete(String mediaPackageId) throws SearchException {
     try {
       logger.info("Removing mediapackage {} from search index", mediaPackageId);
-      solrIndexManager.delete(mediaPackageId);
+      return solrIndexManager.delete(mediaPackageId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

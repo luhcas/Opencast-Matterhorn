@@ -17,8 +17,6 @@
 package org.opencastproject.search.api;
 
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -43,9 +41,6 @@ import javax.xml.transform.stream.StreamSource;
 @XmlType(name = "search-results", namespace = "http://search.opencastproject.org/", propOrder = { "query", "resultSet" })
 @XmlRootElement(name = "search-results", namespace = "http://search.opencastproject.org/")
 public class SearchResultImpl implements SearchResult {
-
-  /** Logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(SearchResultImpl.class);
 
   /** Context for serializing and deserializing */
   private static final JAXBContext context;
