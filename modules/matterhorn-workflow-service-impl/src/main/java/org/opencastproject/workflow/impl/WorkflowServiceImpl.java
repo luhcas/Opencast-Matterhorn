@@ -1108,10 +1108,10 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
       long runningWorkflows;
       try {
         runningWorkflows = this.countWorkflowInstances(RUNNING, null);
-      } catch(WorkflowDatabaseException e) {
+      } catch (WorkflowDatabaseException e) {
         throw new ServiceRegistryException("Unable to determine the number of running workflows", e);
       }
-      
+
       if (runningWorkflows >= maxConcurrentWorkflows) {
         throw new ServiceRegistryException("Refused to accept dispatched job '" + job
                 + "'. This server is already running '" + runningWorkflows + "' workflows.");
@@ -1137,8 +1137,24 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
             break;
           case START_OPERATION:
             workflowInstance = getWorkflowById(Long.parseLong(arguments.get(0)));
-            logger.info("Running {} {}", workflowInstance, workflowInstance.getCurrentOperation());
+            WorkflowOperationInstance wfo = workflowInstance.getCurrentOperation();
+            logger.info("Running {} {}", workflowInstance, wfo);
             runWorkflowOperation(workflowInstance);
+            switch (wfo.getState()) {
+              case FAILED:
+                job.setStatus(Status.FAILED);
+                break;
+              case PAUSED:
+                job.setStatus(Status.PAUSED);
+                break;
+              case SKIPPED:
+              case SUCCEEDED:
+                job.setStatus(Status.FINISHED);
+                break;
+              default:
+                throw new IllegalStateException("Unexpected state '" + wfo.getState() + "' found");
+            }
+            serviceRegistry.updateJob(job);
             break;
           default:
             throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
