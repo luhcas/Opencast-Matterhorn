@@ -32,6 +32,11 @@
       .titlebar {background-color:silver !important; padding-left:8px;}
       .addIcon {display:block;float:left;margin-left:5px;width:16px;height:16px;background-image:url(img/icons/add.png);background-position:center center;background-repeat:no-repeat;cursor:pointer;}
       .deleteIcon {display:block;float:left;margin-left:5px;width:16px;height:16px;background-image:url(img/icons/delete.png);background-position:center center;background-repeat:no-repeat;cursor:pointer;}
+      #progressStage {border:1px solid black; z-index:100; position: fixed; top:200px; left:250px; width:400px; height:200px; background:white; padding: 20px;}
+      #progressBar {border:1px solid silver;}
+      #progressBarLabel {width:100%; background:none; z-index: 101; text-align: center;float:left;}
+      #labelFilesize {float:right;}
+      #labelBytesTrasfered {float: left;}
     </style>
 
     <!-- scripts -->
@@ -267,16 +272,16 @@
   <div id="gray-out">
     &nbsp;
   </div>
-  <div id="progressStage" style="display:none;">
+  <div id="progressStage" class="ui-corner-all ui-helper-clearfix">
     <div id="labelFilename">
       &nbsp;
     </div>
-    <div id="progressBar">
-      <div id="progressBarIndicator" style="width:0%;">&nbsp;</div>
+    <div id="progressBar" class="ui-corner-all">
+      <div id="progressBarIndicator" class="ui-state-default" style="width:0%;">&nbsp;</div>
       <div id="progressBarLabel"><span id="i18n_progress">Initializing upload...</span></div>
     </div>
-    <div id="labelFilesize">&nbsp;</div>
-    <div id="labelBytesTrasfered">&nbsp;</div>
+    <div id="labelFilesize">&nbsp;20.5 MB</div>
+    <div id="labelBytesTrasfered">&nbsp;13.5 MB</div>
   </div>
 
   <!-- template for the popup help box -->

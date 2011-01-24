@@ -1,7 +1,7 @@
 ocRecordings = new (function() {
 
   var WORKFLOW_LIST_URL = '../workflow/instances.json';          // URL of workflow instances list endpoint
-  var WORKFLOW_INSTANCE_URL = '';                                     // URL of workflow instance endpoint
+  var WORKFLOW_INSTANCE_URL = '';                                // URL of workflow instance endpoint
   var WORKFLOW_STATISTICS_URL = '../workflow/statistics.json';   // URL of workflow instances statistics endpoint
   var SERIES_URL = '/series'
 
@@ -281,7 +281,7 @@ ocRecordings = new (function() {
     }
 
     // Status
-    var op = ocRecordings.findCurrentOperation(wf);
+    var op = ocRecordings.findLastOperation(wf, wf.state);
     if (wf.state == 'SUCCEEDED') {
       this.state = 'FINISHED';
     } else if (wf.state == 'FAILING' || wf.state == 'FAILED') {
@@ -312,8 +312,13 @@ ocRecordings = new (function() {
           this.operation = op.description;
         }
       } else {
-        ocUtils.log('Warning could not find current operation for worklfow ' + wf.id);
-        this.state = 'PROCESSING';
+        op = ocRecordings.findFirstOperation(wf, "INSTANTIATED");    // MH-6426: it can happen that for running workflow there is no operation in state RUNNING
+        if (op) {                                               //          in this case we search for the next INSTANTIATED operation and display is as QUEUED
+          this.operation = op.description;
+        } else {
+          ocUtils.log('Warning could not find current operation (neither RUNNING nor INSTANTIATED) for worklfow ' + wf.id);
+        }
+        this.state = 'QUEUED';
       }
     } else {
       this.state = wf.state;
@@ -501,10 +506,21 @@ ocRecordings = new (function() {
     return out;
   }
 
-  this.findCurrentOperation = function(workflow) {
+  this.findFirstOperation = function(workflow, state) {
+    var out = false;
+    for (var i in ocUtils.ensureArray(workflow.operations.operation)) {
+      if (workflow.operations.operation[i].state == state) {
+        out = workflow.operations.operation[i];
+        break;
+      }
+    }
+    return out;
+  }
+
+  this.findLastOperation = function(workflow, state) {
     var out = false;
     $.each(ocUtils.ensureArray(workflow.operations.operation), function(index, operation) {
-      if (operation.state == workflow.state) {
+      if (operation.state == state) {
         out = operation;
       }
     });
@@ -514,7 +530,7 @@ ocRecordings = new (function() {
   this.displayHoldUI = function(wfId) {
     var workflow = ocRecordings.getWorkflow(wfId);
     if (workflow) {
-      var operation = ocRecordings.findCurrentOperation(workflow);
+      var operation = ocRecordings.findFirstOperation(workflow, 'PAUSED');
       if (operation !== false && operation.holdurl !== undefined) {
         this.Hold.workflow = workflow;
         this.Hold.operation = operation;
