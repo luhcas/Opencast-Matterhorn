@@ -479,20 +479,24 @@ ocRecordings = new (function() {
     });
   }
 
-  /** Make the page reload with the currently set configuration
- */
-  this.reload = function() {
-    var url = document.location.href.split('?', 2)[0];
+  this.buildURLparams = function() {
     var pa = [];
     for (p in this.Configuration) {
       if (this.Configuration[p] != null) {
         pa.push(p + '=' + escape(this.Configuration[p]));
       }
     }
-    url += '?' + pa.join('&');
-    document.location.href = url;
+    return pa.join('&');
   }
 
+  /** Make the page reload with the currently set configuration
+  */
+  this.reload = function() {
+    var url = document.location.href.split('?', 2)[0];
+    url += '?' + ocRecordings.buildURLparams();
+    document.location.href = url;
+  }
+  
   /** Returns the workflow with the specified id from the currently loaded
  *  workflow data or false if workflow with given Id was not found.
  */
@@ -630,7 +634,7 @@ ocRecordings = new (function() {
       }
     })
     .click( function() {
-      window.location.href = '../../admin/upload.html';
+      window.location.href = '../../admin/upload.html' + '?' + ocRecordings.buildURLparams();
     });
     $('#scheduleButton').button({
       icons:{

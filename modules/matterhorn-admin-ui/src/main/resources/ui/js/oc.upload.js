@@ -15,6 +15,7 @@
  */
 var ocUpload = ocUpload || {};
 
+ocUpload.lastParams = '';
 ocUpload.metadata = {};
 ocUpload.retryId = "";
 
@@ -22,6 +23,8 @@ ocUpload.retryId = "";
  *
  */
 ocUpload.init = function() {
+
+  ocUpload.lastParams = document.location.href.split('?', 2)[1];
 
   // are we in debug mode?
   if (ocUtils.getURLParam("debug")) {
@@ -391,4 +394,12 @@ ocUpload.createSeriesFromSearchText = function(){
     }
   });
   return creationSucceeded;
+}
+
+ocUpload.backToRecordings = function() {
+  var url = 'recordings.html';
+  if (ocUpload.lastParams !== '') {
+    url += '?' + ocUpload.lastParams;
+  }
+  window.location.href = url;
 }
