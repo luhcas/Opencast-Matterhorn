@@ -107,7 +107,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
    * @see org.opencastproject.search.api.SearchService#delete(java.lang.String)
    */
   @Override
-  public void delete(String mediaPackageId) throws SearchException {
+  public boolean delete(String mediaPackageId) throws SearchException {
     HttpDelete del = new HttpDelete(mediaPackageId);
     HttpResponse response = null;
     try {
@@ -118,6 +118,10 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
       int status = response.getStatusLine().getStatusCode();
       if (status == HttpStatus.SC_NO_CONTENT) {
         logger.info("Successfully deleted {} from the remote search index", mediaPackageId);
+        return true;
+      } else if (status == HttpStatus.SC_NOT_FOUND) {
+        logger.info("Mediapackage {} not found in remote search index", mediaPackageId);
+        return false;
       } else {
         throw new SearchException("Unable to remove " + mediaPackageId + " from a remote search index, http status="
                 + status);
