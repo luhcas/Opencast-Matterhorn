@@ -10,7 +10,8 @@ Opencast.segments_text_Plugin = (function ()
     // The Template to process
     var template =  '<table cellspacing="5" cellpadding="0" width="100%">' +
                         '{for s in segment}' +
-                            '{if s.durationIncludingSegment >= currentTime}' +
+                            // Accessibility Feature - Comment in if you want to display only the Segments after the current Slider-Position
+                            // '{if s.durationIncludingSegment >= currentTime}' +
                                 '<tr>' +
                                     '<td width="15%" class="oc-segments-preview" style="cursor:pointer;cursor:hand;">' +
                                         '<a onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})"><img width="111" alt="Slide ${parseInt(s.index) + 1} of ${segment.length}" src="${s.previews.preview.$}"></a>' +
@@ -23,7 +24,7 @@ Opencast.segments_text_Plugin = (function ()
                                         '&nbsp;<a onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">${s.text}</a>' +
                                     '</td>' +
                                 '</tr>' +
-                            '{/if}' +
+                            // '{/if}' +
                         '{forelse}' +
                             'No Segment Text available' +
                         '{/for}' +
