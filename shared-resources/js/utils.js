@@ -175,10 +175,30 @@ Opencast.Utils = (function ()
         return timeDate.substring(0, 10);
     }
     
+    /**
+     * @memberOf Opencast.Utils
+     * @description Returns a random Number in between [min, max]
+     * @param min Min Value
+     * @param max Max Value
+     * @return a random Number in between [min, max]
+     */
+    function getRandom(min, max) {
+	    if(min > max)
+	    {
+		    return max;
+	    }
+	    if(min == max)
+	    {
+		    return min;
+	    }
+	    return(min + parseInt(Math.random() * (max - min + 1)));
+	}
+    
     return {
         getTimeInMilliseconds: getTimeInMilliseconds,
         getURLParameter: getURLParameter,
         parseSeconds: parseSeconds,
-        getLocaleDate: getLocaleDate
+        getLocaleDate: getLocaleDate,
+        getRandom: getRandom
     };
 }());

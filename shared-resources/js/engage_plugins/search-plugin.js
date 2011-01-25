@@ -8,19 +8,21 @@ var Opencast = Opencast || {};
 Opencast.search_Plugin = (function ()
 {
     // The Template to process
-    var template =  '<table cellspacing="5" cellpadding="0" width="100%">' +
+    var template =  '<table cellspacing="5" cellpadding="0" style="table-layout:fixed; empty-cells:hide">' +
                     '{for s in segment}' +
                         '{if s.display}' +
-                            '<tr style="background-color:${s.backgroundColor};">' +
-                                '<td width="15%" class="oc-segments-preview" style="cursor:pointer;cursor:hand;">' +
+                            '<tr style="background-color:${s.backgroundColor};cursor:pointer;cursor:hand;">' +
+                                '<td style="width:115px" class="oc-segments-preview">' +
                                     '<a onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})"><img width="111" alt="Slide ${parseInt(s.index) + 1} of ${segment.length}" src="${s.previews.preview.$}"></a>' +
                                 '</td>' +
-                                '<td width="85%" align="left" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})" style="cursor:pointer;cursor:hand;">' +
-                                    '&nbsp;<a class="segments-time"' +
+                                '<td style="width:90px; text-align:center;" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
+                                    '<a class="segments-time"' +
                                         'onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
                                         '${Opencast.engage.formatSeconds(Math.floor(parseInt(s.time) / 1000))}' +
                                     '</a>' +
-                                    '&nbsp;<a onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">${s.text}</a>' +
+                                '</td>' +
+                                '<td style="text-align:left;" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
+                                    '<a onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">${s.text}</a>' +
                                 '</td>' +
                             '</tr>' +
                         '{/if}' +
@@ -28,6 +30,28 @@ Opencast.search_Plugin = (function ()
                         'No Segment Text available' +
                     '{/for}' +
                     '</table>';
+    
+    function getHeader(searchValue)
+    {
+        var ret = '<div id="searchValueDisplay" style="float:left">' +
+                      'Results for &quot;' + unescape(searchValue) + '&quot;' +
+                  '</div>';
+        ret +=  '<div id="relevance-overview">' +
+                    '<div style="text-align: center; margin-left: 1px; margin-right: 1px; border: 0px solid black;width: 60px; height: 15px; background-color: ' + Opencast.search.getThirdColor() + '; float: right">' +
+                        '&gt; 70&#37;' +
+                    '</div>' +
+                    '<div style="text-align: center; margin-left: 1px; margin-right: 1px; border: 0px solid black;width: 60px; height: 15px; background-color: ' + Opencast.search.getSecondColor() + '; float: right">' +
+                        '&lt; 70&#37;' +
+                    '</div>' +
+                    '<div style="text-align: center; margin-left: 1px; margin-right: 1px; border: 0px solid black;width: 60px; height: 15px; background-color: ' + Opencast.search.getFirstColor() + '; float: right">' +
+                        '&lt; 30&#37;' +
+                    '</div>' +
+                    '<div style="float:right">' +
+                        'Search Relevance:&nbsp;' +
+                    '</div>' +
+                '</div>';
+        return ret;
+    }
 
     // The Element to put the div into
     var element;
@@ -63,7 +87,7 @@ Opencast.search_Plugin = (function ()
         {
             if (search_value !== '')
             {
-                var newTemplate = 'Results for &quot;' + unescape(search_value) + '&quot;<br/>' + template;
+                var newTemplate = getHeader(search_value) + '<br />' + template;
                 processedTemplate = newTemplate.process(search_data);
             }
             else

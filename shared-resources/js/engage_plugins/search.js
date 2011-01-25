@@ -11,6 +11,39 @@ Opencast.search = (function ()
     var dataStor, staticInputElem, mediaPackageId;
     var staticImg = 'url("../img/jquery/ui-bg_flat_75_fde7ce_40x100.png") repeat-x scroll 50% 50% #FDE7CE';
     var SEARCH = 'Search this Recording';
+    var colorFirst = '#C0C0C0';
+    var colorSecond = '#ADD8E6';
+    var colorThird = '#90EE90';
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Returns the first Color - Colors for Segments < 30% Relevance
+     * @return the first Color - Colors for Segments < 30% Relevance
+     */
+    function getFirstColor()
+    {
+        return colorFirst;
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Returns the second Color - Colors for Segments < 70% Relevance
+     * @return the second Color - Colors for Segments < 70% Relevance
+     */
+    function getSecondColor()
+    {
+        return colorSecond;
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Returns the third Color - Colors for Segments >= 70% Relevance
+     * @return the third Color - Colors for Segments >= 70% Relevance
+     */
+    function getThirdColor()
+    {
+        return colorThird;
+    }
     
     /**
      * @memberOf Opencast.search
@@ -74,15 +107,15 @@ Opencast.search = (function ()
                 // Set the background color correlated to the relevance
                 if (relevance < Math.round(maxRelevance * 30 / 100))
                 {
-                    bgColor = "#C0C0C0";
+                    bgColor = colorFirst;
                 }
                 else if (relevance < Math.round(maxRelevance * 70 / 100))
                 {
-                    bgColor = "#ADD8E6";
+                    bgColor = colorSecond;
                 }
                 else
                 {
-                    bgColor = "#90EE90";
+                    bgColor = colorThird;
                 }
             }
             // if the relevance is too small but a search value exists
@@ -222,6 +255,9 @@ Opencast.search = (function ()
     }
     
     return {
+        getFirstColor: getFirstColor,
+        getSecondColor: getSecondColor,
+        getThirdColor: getThirdColor,
         initialize: initialize,
         showResult: showResult,
         hideSearch: hideSearch,
