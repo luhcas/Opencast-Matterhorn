@@ -27,10 +27,10 @@
     '.ui-searchbox select .withsep {border-top:1px solid black;}',    // TODO make separator style configurable
 
     _markup :
-    '<span class="searchbox-search-icon ui-icon"></span>' +
-    '<span class="searchbox-text-container ui-corner-all ui-helper-clearfix">' +
-    '  <input type="text" class="searchbox-text-input ui-corner-all">' +
-    '  <span class="searchbox-clear-icon ui-icon"></span>' +
+    '<span class="searchbox-search-icon ui-icon" style="float:left;cursor:pointer;margin-right:3px;"></span>' +
+    '<span class="searchbox-text-container ui-corner-all ui-helper-clearfix" style="float:left;">' +
+    '  <input type="text" class="searchbox-text-input ui-corner-all" style="float:left;border:none;">' +
+    '  <span class="searchbox-clear-icon ui-icon" style="float:right;"></span>' +
     '</span>',
 
     clear : function() {
@@ -53,9 +53,6 @@
      */
     _create : function() {
       var self = this;
-
-      // inject CSS if this hasn't been done yet
-      this._ensureCSS();
 
       // prepare container
       var width = this.element.width();
@@ -80,7 +77,7 @@
 
       // options dropdown
       if (this.options.options != null) {
-        var dropdown = $('<select></select>');
+        var dropdown = $('<select></select>').css('float', 'right');
         var selected = this.options.selectedOption;
 
         // care for options that are grouped
@@ -88,9 +85,9 @@
           $.each(this.options.options, function(index, options) {
             var optgroup = $('<optgroup></optgroup>');
             if (index == 0) {
-              optgroup.addClass('nosep');
+              optgroup.css('border', 'none');
             } else {
-              optgroup.addClass('withsep');
+              optgroup.css('border-top', '1px solid black');
             }
             self._appendOptions(optgroup, options, selected);
             dropdown.append(optgroup);
@@ -98,7 +95,7 @@
         } else {
           self._appendOptions(dropdown, this.options.options);
         }
-
+        this.element.css('padding', '5px');
         this.element.append(dropdown);
       }
 
@@ -126,7 +123,6 @@
       this.element.find('.searchbox-search-icon').css('margin-top', (this.element.innerHeight() - 10 - 16) / 2);
       this.element.find('.searchbox-clear-icon').css('margin-top', (inputContainerHeight - 16) / 2);
 
-
       // text input
       this.options._input = this.element.find('.searchbox-text-input')
       .css({
@@ -144,18 +140,9 @@
       });
     },
 
-    _ensureCSS : function() {
-      if ($('head').data('ui-searchbox-css') !== this._version) {
-        $('<style type="text/css"></style>')
-        .attr('title', 'CSS for ' + this._version)
-        .text(this._css)
-        .appendTo('head');
-      }
-    },
-
     _appendOptions: function(elm, options, selected_val) {
       $.each(options, function(key, val) {
-        var option = $('<option></option>').text(val).val(key);
+        var option = $('<option></option>').css('padding-left', '0px').text(val).val(key);
         if (selected_val !== undefined && selected_val == key) {
           option.attr('selected', 'selected');
         }

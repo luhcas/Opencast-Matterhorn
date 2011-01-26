@@ -659,7 +659,7 @@ ocRecordings = new (function() {
     // search box
     this.searchbox = $( '#searchBox' ).searchbox({
       search : function(text, field) {
-        if (text.trim() != '') {
+        if ($.trim(text) != '') {
           ocRecordings.Configuration.filterField = field;
           ocRecordings.Configuration.filterText = text;
           ocRecordings.Configuration.page = 0;
