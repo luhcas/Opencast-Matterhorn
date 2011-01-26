@@ -49,7 +49,7 @@ Opencast.Description_Plugin = (function ()
      */
     function createDescription()
     {
-        if (element !== undefined)
+        if ((element !== undefined) && (description_data !== undefined))
         {
             processedTemplateData = template.process(description_data);
             element.html(processedTemplateData);

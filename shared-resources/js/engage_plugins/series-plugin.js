@@ -58,7 +58,7 @@ Opencast.Series_Plugin = (function()
      */
     function createSeriesDropdown()
     {
-        if (element !== undefined) 
+        if ((element !== undefined) && (series_data.pages !==  undefined) && (series_data.pages.length > 0))
         {
             processedTemplate = template.process(series_data);
             element.html(processedTemplate);

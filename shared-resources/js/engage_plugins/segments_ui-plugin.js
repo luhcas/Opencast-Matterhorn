@@ -26,6 +26,7 @@ Opencast.segments_ui_Plugin = (function ()
                                  '<td style="width: 100%;" id="segment-holder-empty" class="segment-holder" />' +
                              '{/for}' +
                              '</tr>';
+
     
     var templateMedia1 =     '{for t in track}' +
                                  '{if t.type == "presenter/delivery"}' +
@@ -42,24 +43,25 @@ Opencast.segments_ui_Plugin = (function ()
                                              '</div>' +
                                          '{/if}' +
                                      '{/if}' +
-                                 '{/if}' +
+                                  '{/if}' +
      
-                                  '{if (t.type == "presenter/delivery")' +
-                                   '&& (t.precedingSiblingType == "presentation/delivery")' +
-                                   '&& (t.precedingSiblingMimetypeIsVideo == "true")' +
-                                   '&& (t.followingSiblingType == "presentation/delivery")' +
-                                   '&& (t.followingSiblingMimetypeIsVideo == "true")}' +
-                                      '{if t.mimetype == "audio/x-adpcm"}' +
-                                          '{if t.url.substring(0, 4) == "http"}' +
-                                              '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
-                                                  '${t.url}' +
-                                              '</div>' +
-                                              '<div id="oc-resolution-presenter-delivery-x-flv-http" style="display: none">' +
-                                                  '${t.video.resolution}' +
-                                              '</div>' +
-                                              '<div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">' +
-                                                  '${t.mimetype}' +
-                                              '</div>' +
+                                  '{if (t.type == "presenter/delivery")}' +
+                                      '{if (' +
+                                              '!((t.precedingSiblingType == "presentation/delivery") && t.precedingSiblingMimetypeIsVideo) &&' +
+                                              '!((t.followingSiblingType == "presentation/delivery") && t.followingSiblingMimetypeIsVideo)' +
+                                            ')}' +
+                                          '{if t.mimetype == "audio/x-adpcm"}' +
+                                              '{if t.url.substring(0, 4) == "http"}' +
+                                                  '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
+                                                      '${t.url}' +
+                                                  '</div>' +
+                                                  // '<div id="oc-resolution-presenter-delivery-x-flv-http" style="display: none">' +
+                                                  //     '${t.video.resolution}' +
+                                                  // '</div>' +
+                                                  '<div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">' +
+                                                      '${t.mimetype}' +
+                                                  '</div>' +
+                                              '{/if}' +
                                           '{/if}' +
                                       '{/if}' +
                                   '{/if}' +
@@ -78,7 +80,7 @@ Opencast.segments_ui_Plugin = (function ()
                                              '</div>' +
                                          '{/if}' +
                                      '{/if}' +
-                                 '{/if}' +
+                                  '{/if}' +
          
                                   '{if t.type == "presenter/delivery"}' +
                                       '{if t.mimetype == "video/x-flv"}' +
@@ -94,7 +96,7 @@ Opencast.segments_ui_Plugin = (function ()
                                               '</div>' +
                                           '{/if}' +
                                       '{/if}' +
-                                  '{/if}' + 
+                                  '{/if}' +
          
                                   '{if t.type == "presentation/delivery"}' +
                                       '{if t.mimetype == "video/x-flv"}' +
@@ -110,7 +112,7 @@ Opencast.segments_ui_Plugin = (function ()
                                               '</div>' +
                                           '{/if}' +
                                       '{/if}' +
-                                  '{/if}' + 
+                                  '{/if}' +
           
                                   '{if t.type == "presenter/source"}' +
                                       '{if t.mimetype == "video/x-flv"}' +
@@ -126,7 +128,7 @@ Opencast.segments_ui_Plugin = (function ()
                                               '</div>' +
                                           '{/if}' +
                                       '{/if}' +
-                                 '{/if}' + 
+                                  '{/if}' +
           
                                   '{if t.type == "presentation/source"}' +
                                       '{if t.mimetype == "video/x-flv"}' +
@@ -142,7 +144,7 @@ Opencast.segments_ui_Plugin = (function ()
                                               '</div>' +
                                           '{/if}' +
                                       '{/if}' +
-                                 '{/if}' + 
+                                  '{/if}' +
          
                                  '{if t.type == "presenter/source"}' +
                                      '{if t.mimetype == "video/x-flv"}' +
@@ -158,7 +160,7 @@ Opencast.segments_ui_Plugin = (function ()
                                              '</div>' +
                                          '{/if}' +
                                      '{/if}' +
-                                '{/if}' + 
+                                  '{/if}' +
          
                                  '{if t.type == "presentation/source"}' +
                                      '{if t.mimetype == "video/x-flv"}' +
@@ -353,13 +355,13 @@ Opencast.segments_ui_Plugin = (function ()
      */
     function createSegments(withSegments) {
         // Process Element Segments 1
-        if (withSegments && (elementSegments1 !== undefined)) {
+        if (withSegments && (elementSegments1 !== undefined) && (segments_ui_dataSegments.segment !== undefined) && (segments_ui_dataSegments.segment.length > 0)) {
             processedTemplateData = templateSegments1.process(segments_ui_dataSegments);
             elementSegments1.html(processedTemplateData);
         }
 
         // Process Element Media 1
-        if (elementMedia1 !== undefined) {
+        if ((elementMedia1 !== undefined) && (segments_ui_dataMPMedia.track !== undefined) && (segments_ui_dataMPMedia.track.length > 0)) {
             processedTemplateData = templateMedia1.process(segments_ui_dataMPMedia);
             elementMedia1.html(processedTemplateData);
         }
@@ -371,25 +373,25 @@ Opencast.segments_ui_Plugin = (function ()
         }
 
         // Process Element MediaPackage 1
-        if (elementMediaPackage1 !== undefined) {
+        if ((elementMediaPackage1 !== undefined) && (segments_ui_dataMPAttach.attachment !== undefined) && (segments_ui_dataMPAttach.attachment.length > 0)) {
             processedTemplateData = templateMPAttach1.process(segments_ui_dataMPAttach);
             elementMediaPackage1.html(processedTemplateData);
         }
 
         // Process Element Data 2
-        if (elementData2 !== undefined) {
+        if ((elementData2 !== undefined) && (templateData2 !== undefined)) {
             processedTemplateData = templateData2.process(segments_ui_data);
             elementData2.html(processedTemplateData);
         }
 
         // Process Element MediaPackage 2
-        if (elementMediaPackage2 !== undefined) {
+        if ((elementMediaPackage2 !== undefined) && (segments_ui_dataMPCatalog.catalog !== undefined) && (segments_ui_dataMPCatalog.catalog.length > 0)) {
             processedTemplateData = templateMPCatalog1.process(segments_ui_dataMPCatalog);
             elementMediaPackage2.html(processedTemplateData);
         }
 
         // Process Element Segments 2
-        if (withSegments && (elementSegments2 !== undefined)) {
+        if (withSegments && (elementSegments2 !== undefined) && (segments_ui_dataSegments.segment !== undefined) && (segments_ui_dataSegments.segment.length > 0)) {
             processedTemplateData = templateSegments2.process(segments_ui_dataSegments);
             elementSegments2.html(processedTemplateData);
         }

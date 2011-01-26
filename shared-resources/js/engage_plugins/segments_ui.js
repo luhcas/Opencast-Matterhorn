@@ -131,36 +131,30 @@ Opencast.segments_ui = (function ()
                         // Set a Duration until the End of this Segment
                         data['search-results'].result.segments.segment[i].durationIncludingSegment = completeDuration;
                     });
-                    
-                    // Define a String startsWith-Function
-                    if(!String.prototype.startsWith)
-                    {
-                        String.prototype.startsWith = function(str){
-                            return (this.substring(0, str.length).indexOf(str) != -1);
-                        }
-                    }
-                    
+                }
+                if((data['search-results'].result.mediapackage.media !== undefined) && (data['search-results'].result.mediapackage.media.track.length > 0))
+                {
                     $.each(data['search-results'].result.mediapackage.media.track, function (i, value)
                     {
                         // Set preceding Sibling's Type and Mimetype
                         if(i > 0)
                         {
-                            data['search-results'].result.mediapackage.media.track[i].precedingSiblingType = data['search-results'].result.mediapackage.media.track[i - 1].track;
-                            data['search-results'].result.mediapackage.media.track[i].precedingSiblingMimetypeIsVideo = (data['search-results'].result.mediapackage.media.track[i - 1].mimetype.startsWith("video"));
+                            this.precedingSiblingType = data['search-results'].result.mediapackage.media.track[i - 1].type;
+                            this.precedingSiblingMimetypeIsVideo = Opencast.Utils.startsWith(data['search-results'].result.mediapackage.media.track[i - 1].mimetype, "video");
                         } else
                         {
-                            data['search-results'].result.mediapackage.media.track[i].precedingSiblingType = "";
-                            data['search-results'].result.mediapackage.media.track[i].precedingSiblingMimetypeIsVideo = "";
+                            this.precedingSiblingType = 'none';
+                            this.precedingSiblingMimetypeIsVideo = false;
                         }
                         // Set following Sibling's Type and Mimetype
                         if(i < (data['search-results'].result.mediapackage.media.track.length - 1))
                         {
-                            data['search-results'].result.mediapackage.media.track[i].followingSiblingType = data['search-results'].result.mediapackage.media.track[i + 1].track;
-                            data['search-results'].result.mediapackage.media.track[i].followingSiblingMimetypeIsVideo = (data['search-results'].result.mediapackage.media.track[i + 1].mimetype.startsWith("video"));
+                            this.followingSiblingType = data['search-results'].result.mediapackage.media.track[i + 1].type;
+                            this.followingSiblingMimetypeIsVideo = Opencast.Utils.startsWith(data['search-results'].result.mediapackage.media.track[i + 1].mimetype, "video");
                         } else
                         {
-                            data['search-results'].result.mediapackage.media.track[i].followingSiblingType = "";
-                            data['search-results'].result.mediapackage.media.track[i].followingSiblingMimetypeIsVideo = "";
+                            this.followingSiblingType = 'none';
+                            this.followingSiblingMimetypeIsVideo = false;
                         }
                     });
                 }

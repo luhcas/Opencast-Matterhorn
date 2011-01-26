@@ -56,7 +56,7 @@ Opencast.segments_text_Plugin = (function ()
      */
     function createSegments()
     {
-        if (element !== undefined)
+        if ((element !== undefined) && (segments_data.segment !==  undefined) && (segments_data.segment.length > 0))
         {
             processedTemplateData = template.process(segments_data);
             element.html(processedTemplateData);

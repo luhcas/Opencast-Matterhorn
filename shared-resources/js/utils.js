@@ -193,12 +193,29 @@ Opencast.Utils = (function ()
 	    }
 	    return(min + parseInt(Math.random() * (max - min + 1)));
 	}
+	
+    /**
+     * @memberOf Opencast.Utils
+     * @description Returns if 'haystack' starts with 'start'
+     * @param haystack String to search in
+     * @param start String to search for
+     * @return true if 'haystack' starts with 'start', false else
+     */
+	function startsWith(haystack, start)
+	{
+	    if((typeof(haystack) == 'string') && (typeof(start) == 'string'))
+	    {
+	        return (haystack.substring(0, start.length).indexOf(start) != -1);
+	    }
+	    return false;
+	}
     
     return {
         getTimeInMilliseconds: getTimeInMilliseconds,
         getURLParameter: getURLParameter,
         parseSeconds: parseSeconds,
         getLocaleDate: getLocaleDate,
+        startsWith: startsWith,
         getRandom: getRandom
     };
 }());

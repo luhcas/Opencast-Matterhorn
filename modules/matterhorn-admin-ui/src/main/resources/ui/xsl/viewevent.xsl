@@ -42,8 +42,8 @@
         <div class="fl-widget-content folder-content">
           <ul class="fl-controls-right form-list">
             <li class="additionalMeta">
-              <label class="fl-label">Sponsoring Department:</label>
-              <!-- Sponsoring Department -->
+              <label class="fl-label">Department:</label>
+              <!-- Department -->
               <xsl:value-of select="contributor" />
             </li>
             <li class="additionalMeta">

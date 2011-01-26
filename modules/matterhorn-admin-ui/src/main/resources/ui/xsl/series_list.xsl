@@ -9,7 +9,7 @@
                 <tr>
                     <th width="25%" class="sortable">Title</th>
                     <th width="25%" class="sortable">Organizer</th>
-                    <th width="25%" class="sortable">Sponsoring Department</th>
+                    <th width="25%" class="sortable">Department</th>
                     <!--<th width="25%">Action</th>-->
                 </tr>
             </thead>

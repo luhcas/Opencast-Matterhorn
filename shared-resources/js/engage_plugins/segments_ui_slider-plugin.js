@@ -38,19 +38,20 @@ Opencast.segments_ui_slider_Plugin = (function ()
                                      '{/if}' +
                                  '{/if}' +
                              '{/if}' +
-                              '{if (t.type == "presenter/delivery")' +
-                               '&& (t.precedingSiblingType == "presentation/delivery")' +
-                               '&& (t.precedingSiblingMimetypeIsVideo == "true")' +
-                               '&& (t.followingSiblingType == "presentation/delivery")' +
-                               '&& (t.followingSiblingMimetypeIsVideo == "true")}' +
-                                  '{if t.mimetype == "audio/x-adpcm"}' +
-                                      '{if t.url.substring(0, 4) == "http"}' +
-                                          '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
-                                              '${t.url}' +
-                                          '</div>' +
-                                          '<div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">' +
-                                              '${t.mimetype}' +
-                                          '</div>' +
+                              '{if (t.type == "presenter/delivery")}' +
+                                  '{if (' +
+                                          '!((t.precedingSiblingType == "presentation/delivery") && t.precedingSiblingMimetypeIsVideo) &&' +
+                                          '!((t.followingSiblingType == "presentation/delivery") && t.followingSiblingMimetypeIsVideo)' +
+                                        ')}' +
+                                      '{if t.mimetype == "audio/x-adpcm"}' +
+                                          '{if t.url.substring(0, 4) == "http"}' +
+                                              '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
+                                                  '${t.url}' +
+                                              '</div>' +
+                                              '<div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">' +
+                                                  '${t.mimetype}' +
+                                              '</div>' +
+                                          '{/if}' +
                                       '{/if}' +
                                   '{/if}' +
                               '{/if}' +
@@ -154,19 +155,19 @@ Opencast.segments_ui_slider_Plugin = (function ()
     function createSegments(withSegments)
     {
         // Process Element Segments Table 1
-        if (withSegments && (elementSegmentsTable !== undefined))
+        if (withSegments && (elementSegmentsTable !== undefined) && (segments_ui_dataSegments.segment !== undefined) && (segments_ui_dataSegments.segment.length > 0))
         {
             processedTemplateData = templateSegmentsTable.process(segments_ui_dataSegments);
             elementSegmentsTable.html(processedTemplateData);
         }
         // Process Element Data 1
-        if (elementData1 !== undefined)
+        if ((elementData1 !== undefined) && (segments_ui_dataData1.track !== undefined) && (segments_ui_dataData1.track.length > 0))
         {
             processedTemplateData = templateData1.process(segments_ui_dataData1);
             elementSegmentsTable.html(processedTemplateData);
         }
         // Process Element Data 2
-        if (elementData2 !== undefined)
+        if ((elementData2 !== undefined) && (segments_ui_dataData2.attachment !== undefined) && (segments_ui_dataData2.attachment.length > 0))
         {
             processedTemplateData = templateData2.process(segments_ui_dataData2);
             elementSegmentsTable.html(processedTemplateData);

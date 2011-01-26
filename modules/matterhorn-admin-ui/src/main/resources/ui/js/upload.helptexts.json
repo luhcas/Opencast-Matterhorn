@@ -7,7 +7,7 @@ var helpTexts = {
 ["Presenter", "Enter the name of the presenter."],
  
 "contributor" :
-["Sponsoring Department", "Enter the name of the department associated with the recording."],
+["Department", "Enter the name of the department associated with the recording."],
  
 "ispartof" :
 ["Series", "If the recording is part of series, enter the name of the series. This is a single piece of metadata and has no other implications in the system."],

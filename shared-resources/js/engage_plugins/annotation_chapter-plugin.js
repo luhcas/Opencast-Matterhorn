@@ -64,7 +64,7 @@ Opencast.Annotation_ChapterPlugin = (function(){
      * processing the template with service data
      */
     function drawAnnotation_Chapter(){
-        if(element !== undefined)
+        if((element !== undefined) && (annotation_chapterData.annotation !== undefined) && (annotation_chapterData.annotation.length > 0))
         {
             processedTemplateData = template.process(annotation_chapterData);
             element.html(processedTemplateData);

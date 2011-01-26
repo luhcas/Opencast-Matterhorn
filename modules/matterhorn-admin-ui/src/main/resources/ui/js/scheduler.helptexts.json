@@ -68,7 +68,7 @@ popupHelp.helpTexts = {
     ],
     
     "contributor" : [
-        "Sponsoring Department",
+        "Department",
         "Enter the name of the department associated with the recording."
     ]
 };
