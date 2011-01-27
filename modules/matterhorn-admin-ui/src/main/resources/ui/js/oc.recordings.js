@@ -110,6 +110,7 @@ ocRecordings = new (function() {
       else if (state == 'capturing') {
         params.push('state=paused');
         params.push('op=capture');
+        params.push('op=ingest');
       }
       else if (state == 'processing') {
         params.push('state=running');
@@ -125,9 +126,11 @@ ocRecordings = new (function() {
         params.push('state=paused');
         params.push('op=-schedule');
         params.push('op=-capture');
+        params.push('op=-ingest');
       }
       else if (state == 'failed') {
         params.push('state=failed');
+        params.push('state=failing');
       }
       else if (state === 'bulkedit' || state === 'bulkdelete') {
         ocRecordings.Configuration.pageSize = 100;
@@ -329,7 +332,7 @@ ocRecordings = new (function() {
           this.operation = op.description;
       } else {
         op = ocRecordings.findFirstOperation(wf, "INSTANTIATED");    // MH-6426: it can happen that for running workflow there is no operation in state RUNNING
-        if (op) {                                               //          in this case we search for the next INSTANTIATED operation and display is as QUEUED
+        if (op) {                                                    //     in this case we search for the next INSTANTIATED operation and display is as QUEUED
           this.operation = op.description;
         } else {
           ocUtils.log('Warning could not find current operation (neither RUNNING nor INSTANTIATED) for worklfow ' + wf.id);
