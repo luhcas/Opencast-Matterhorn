@@ -108,7 +108,7 @@ ocRecordings = new (function() {
         params.push('op=schedule');
       }
       else if (state == 'capturing') {
-        params.push('state=running');
+        params.push('state=paused');
         params.push('op=capture');
       }
       else if (state == 'processing') {
@@ -228,9 +228,15 @@ ocRecordings = new (function() {
    */
   function addStatistics(definition, stats) {
     if (definition.id == 'scheduling') {
-      stats.upcoming = parseInt(definition.running) + parseInt(definition.paused) + parseInt(definition.instantiated);
-    } else if (definition.id == 'capture') {
-      stats.capturing = parseInt(definition.running);
+      stats.failed += parseInt(definition.failed) + parseInt(definition.failing);
+      definition.operations.operation = ocUtils.ensureArray(definition.operations.operation);
+      $.each(definition.operations.operation, function(index, op) {
+        if (op.id == 'schedule') {
+          stats.upcoming = parseInt(op.instantiated) + parseInt(op.running) + parseInt(op.paused);
+        } else if (op.id == 'capture' || op.id == 'ingest') {
+          stats.capturing += parseInt(op.running) + parseInt(op.paused);
+        }
+      });
     } else {
       stats.processing += parseInt(definition.running);
       stats.finished += parseInt(definition.finished);
@@ -259,6 +265,7 @@ ocRecordings = new (function() {
     this.end='';
     this.actions=[];
     this.holdAction=false;
+    this.error = false;
 
     if (wf.mediapackage && wf.mediapackage.title) {
       this.title = wf.mediapackage.title;
@@ -286,11 +293,24 @@ ocRecordings = new (function() {
       this.state = 'Finished';
     } else if (wf.state == 'FAILING' || wf.state == 'FAILED') {
       this.state = 'Failed';
-      this.error = ocUtils.ensureArray(wf.errors.error).join(', ');
+      if (wf.errors === '') {
+        if (op) {
+          this.error = 'Failed in operation ' + op.description;
+        } else {
+          this.error = 'No error message available';
+        }
+      } else {
+        this.error = ocUtils.ensureArray(wf.errors.error).join(', ');
+      }
     } else if (wf.state == 'PAUSED') {
       if (op) {
         if (op.id == 'schedule') {
           this.state = 'Upcoming';
+        } else if (op.id == 'capture')  {
+          this.state = 'Capturing';
+        } else if (op.id == 'ingest') {
+          this.state = 'Captured';
+          this.operation = 'Sending recording to processing';
         } else if (op.holdurl) {
           this.state = 'On Hold';
           this.operation = op.description;
@@ -305,12 +325,8 @@ ocRecordings = new (function() {
       }
     } else if (wf.state == 'RUNNING') {
       if (op) {
-        if (op.id == 'capture') {
-          this.state = 'Capturing';
-        } else {
           this.state = 'Processing';
           this.operation = op.description;
-        }
       } else {
         op = ocRecordings.findFirstOperation(wf, "INSTANTIATED");    // MH-6426: it can happen that for running workflow there is no operation in state RUNNING
         if (op) {                                               //          in this case we search for the next INSTANTIATED operation and display is as QUEUED
