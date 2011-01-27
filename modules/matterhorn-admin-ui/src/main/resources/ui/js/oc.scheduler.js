@@ -781,7 +781,7 @@ ocScheduler.RegisterComponents = function(){
           }
         },
         validate: function(){
-          if(this.fields.recurEnd.datepicker && this.fields.recurStart.datepicker && ocScheduler.components.recurrenceDuration.validate() &&
+          if(this.fields.recurEnd.datepicker && this.fields.recurStart.datepicker &&    // ocScheduler.components.recurrenceDuration.validate() &&
              this.fields.recurStartTimeHour && this.fields.recurStartTimeMin &&
              this.fields.recurEnd.datepicker('getDate') > this.fields.recurStart.datepicker('getDate')){
             return true;
