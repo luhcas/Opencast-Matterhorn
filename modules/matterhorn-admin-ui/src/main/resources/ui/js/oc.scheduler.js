@@ -923,7 +923,7 @@ ocScheduler.RegisterComponents = function(){
                this.fields.repeatFri[0].checked ||
                this.fields.repeatSat[0].checked ){
               if(ocScheduler.components.recurrenceStart.validate() &&
-                 ocScheduler.components.recurrenceDuration.validate() &&
+                 // ocScheduler.components.recurrenceDuration.validate() &&
                  ocScheduler.components.recurrenceEnd.validate()){
                 return true;
               }
