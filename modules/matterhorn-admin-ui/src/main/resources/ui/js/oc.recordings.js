@@ -760,6 +760,7 @@ ocRecordings = new (function() {
     
     $('#pageSize').change(function(){
       ocRecordings.Configuration.pageSize = $(this).val();
+      ocRecordings.Configuration.page = 0;
       ocRecordings.reload();
     });
     
