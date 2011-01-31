@@ -344,9 +344,11 @@ ocRecordings = new (function() {
     }
 
     // Actions
-    if(this.state == 'Upcoming') {
+    if (this.state == 'Upcoming') {
       this.actions = ['view', 'edit', 'delete'];
-    }else{
+    } else if (this.state == 'Processing' || this.state == 'Queued') {
+      this.actions = ['view'];
+    } else {
       this.actions = ['view', 'delete'];
     }
 
