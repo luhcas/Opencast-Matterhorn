@@ -979,16 +979,17 @@ public class IngestRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
     // createUploadJobHtml
-    endpoint = new RestEndpoint(
+    /* having '.html' in the URL yields Exception in Rest Docs Utility */
+    /*endpoint = new RestEndpoint(
             "createUploadJobHtml",
             RestEndpoint.Method.GET,
-            "/filechooser",
+            "/filechooser-local.html",
             "Creates an upload job and returns an html form ready to submit the selected file to /addTrackMonitored with the newly created upload job Id.");
     endpoint.addFormat(new Format("HTML", "HTML form for submitting the file with the newly created upload job", null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);*/
 
     // addTrackMonitored
     endpoint = new RestEndpoint(
