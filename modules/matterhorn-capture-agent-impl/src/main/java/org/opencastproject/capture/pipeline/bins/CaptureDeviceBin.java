@@ -28,11 +28,14 @@ import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
 import org.gstreamer.Bin;
 import org.gstreamer.Element;
 import org.gstreamer.Pad;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.Properties;
 
 public class CaptureDeviceBin {
+  private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBin.class);
   // The bin that contains the Producer and Consumers.
   private Bin bin = new Bin();
   // The tee that connects the Producer to the Consumers.
@@ -295,6 +298,10 @@ public class CaptureDeviceBin {
     Pad newTeePad = tee.getRequestPad(GStreamerProperties.SRCTEMPLATE);
     Element queue = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
             GStreamerElements.QUEUE, null);
+    if (logger.isTraceEnabled()) {
+      BufferThread t = new BufferThread(queue);
+      t.run();
+    }
     bin.add(queue);
     if (!Element.linkPads(tee, newTeePad.getName(), queue, GStreamerProperties.SINK)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, tee, queue);
