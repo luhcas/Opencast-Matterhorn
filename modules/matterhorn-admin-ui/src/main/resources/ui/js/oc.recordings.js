@@ -344,13 +344,25 @@ ocRecordings = new (function() {
     }
 
     // Actions
+    this.actions = ['view'];
+    if (this.state == 'Upcoming') {
+      this.actions.push('edit');
+      this.actions.push('delete');
+    } else if (this.state == 'Finished') {
+      this.actions.push('play');
+      this.actions.push('delete');
+    } else if (this.state == 'Failed') {
+      this.actions.push('delete');
+    }
+
+    /*
     if (this.state == 'Upcoming') {
       this.actions = ['view', 'edit', 'delete'];
     } else if (this.state == 'Processing' || this.state == 'Queued') {
       this.actions = ['view'];
     } else {
       this.actions = ['view', 'delete'];
-    }
+    }*/
 
     return this;
   }
@@ -1081,13 +1093,19 @@ ocRecordings = new (function() {
   $(document).ready(this.init);
 
   this.makeActions = function(recording, actions) {
-    id = recording.id
-    links = [];
+    var id = recording.id
+    var links = [];
     for(i in actions){
       if(actions[i] === 'view') {
         links.push('<a href="viewinfo.html?id=' + id + '">View Info</a>');
       } else if(actions[i] === 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
+      } else if(actions[i] === 'play') {
+        var workflow = ocRecordings.getWorkflow(id);
+        if (workflow) {
+          var mpId = workflow.mediapackage.id;
+          links.push('<a href="../engage/ui/watch.html?id=' + mpId + '">Play</a>');
+        }
       } else if(actions[i] === 'delete') {
         links.push('<a href="javascript:ocRecordings.removeRecording(\'' + id + '\',\'' + recording.title + '\')">Delete</a>');
       }
