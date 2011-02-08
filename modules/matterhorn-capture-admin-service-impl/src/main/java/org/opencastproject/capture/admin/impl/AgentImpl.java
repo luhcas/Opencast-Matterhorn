@@ -17,14 +17,23 @@ package org.opencastproject.capture.admin.impl;
 
 import org.opencastproject.capture.admin.api.Agent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Properties;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * An in-memory construct to represent the state of a capture agent, and when it was last heard from.
@@ -33,6 +42,8 @@ import javax.persistence.Table;
 @Table(name = "CAPTURE_AGENT_STATE")
 @NamedQueries({ @NamedQuery(name = "AgentImpl.getAll", query = "SELECT a FROM AgentImpl a") })
 public class AgentImpl implements Agent {
+
+  private static final Logger log = LoggerFactory.getLogger(AgentImpl.class);
 
   /**
    * The name of the agent.
@@ -65,7 +76,12 @@ public class AgentImpl implements Agent {
    * associated to determine their nature (e.g. PRESENTER --> dev/video0)
    */
   @Column(name = "CAPABILITIES", nullable = true, length = 65535)
-  protected Properties capabilities;
+  @Lob
+  protected String capabilities;
+
+  //Private var to store the caps as a properties object.
+  @Transient
+  private Properties caps;
 
   /**
    * Required 0-arg constructor for JAXB, creates a blank agent.
@@ -159,7 +175,7 @@ public class AgentImpl implements Agent {
    * @see org.opencastproject.capture.admin.api.Agent#getCapabilities()
    */
   public Properties getCapabilities() {
-    return capabilities;
+    return caps;
   }
 
   /**
@@ -168,6 +184,31 @@ public class AgentImpl implements Agent {
    * @see org.opencastproject.capture.admin.api.Agent#setCapabilities(java.util.Properties)
    */
   public void setCapabilities(Properties capabilities) {
-    this.capabilities = capabilities;
+    if (capabilities == null) {
+      return;
+    }
+
+    this.caps = capabilities;
+    try {
+      StringWriter sw = new StringWriter();
+      capabilities.store(sw, "");
+      this.capabilities = sw.toString();
+    } catch (IOException e) {
+      log.warn("Unable to store agent " + "'s capabilities to the database, IO exception occurred.", e);
+    }
+  }
+
+  /**
+   * Post load method to load the capabilities from a string to the properties object
+   */
+  @SuppressWarnings("unused")
+  @PostLoad
+  private void loadCaps() {
+    this.caps = new Properties();
+    try {
+      caps.load(new StringReader(this.capabilities));
+    } catch (IOException e) {
+      log.warn("Unable to load agent " + name + "'s capabilities, IO exception occurred.", e);
+    }
   }
 }
