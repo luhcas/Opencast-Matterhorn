@@ -64,7 +64,7 @@ public class AgentImpl implements Agent {
    * The capabilities the agent has Capabilities are the devices this agent can record from, with a friendly name
    * associated to determine their nature (e.g. PRESENTER --> dev/video0)
    */
-  @Column(name = "CAPABILITIES", nullable = true)
+  @Column(name = "CAPABILITIES", nullable = true, length = 65535)
   protected Properties capabilities;
 
   /**
@@ -86,7 +86,7 @@ public class AgentImpl implements Agent {
     this.setState(agentState);
     this.setUrl(agentUrl);
     // Agents with no capabilities are allowed. These can/will be updated after the agent is built if necessary.
-    this.capabilities = capabilities;
+    setCapabilities(capabilities);
   }
 
   /**
