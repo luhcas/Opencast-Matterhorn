@@ -77,11 +77,11 @@ public class AgentImpl implements Agent {
    */
   @Column(name = "CAPABILITIES", nullable = true, length = 65535)
   @Lob
-  protected String capabilities;
+  protected String capabilitiesString;
 
   //Private var to store the caps as a properties object.
   @Transient
-  private Properties caps;
+  private Properties capabilitiesProperties;
 
   /**
    * Required 0-arg constructor for JAXB, creates a blank agent.
@@ -175,7 +175,7 @@ public class AgentImpl implements Agent {
    * @see org.opencastproject.capture.admin.api.Agent#getCapabilities()
    */
   public Properties getCapabilities() {
-    return caps;
+    return capabilitiesProperties;
   }
 
   /**
@@ -188,11 +188,11 @@ public class AgentImpl implements Agent {
       return;
     }
 
-    this.caps = capabilities;
+    capabilitiesProperties = capabilities;
     try {
       StringWriter sw = new StringWriter();
       capabilities.store(sw, "");
-      this.capabilities = sw.toString();
+      this.capabilitiesString = sw.toString();
     } catch (IOException e) {
       log.warn("Unable to store agent " + "'s capabilities to the database, IO exception occurred.", e);
     }
@@ -204,9 +204,9 @@ public class AgentImpl implements Agent {
   @SuppressWarnings("unused")
   @PostLoad
   private void loadCaps() {
-    this.caps = new Properties();
+    capabilitiesProperties = new Properties();
     try {
-      caps.load(new StringReader(this.capabilities));
+      capabilitiesProperties.load(new StringReader(this.capabilitiesString));
     } catch (IOException e) {
       log.warn("Unable to load agent " + name + "'s capabilities, IO exception occurred.", e);
     }
