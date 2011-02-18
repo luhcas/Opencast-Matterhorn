@@ -19,18 +19,22 @@ public @interface RestQuery {
   String description();
   
   /**
-   * @return a list of return formats, such as XML, JSON etc.
-   */
-  RestFormats[] returnFormats();
-  
-  /**
    * @return a description of what is returned.
    */
   String returnDescription();
 
   /**
-   * @return a list of methods that can be used to make this query, such as POST, GET etc.
-   *         These methods are defined in the RestMethods enum class.
+   * @return a list of possible responses from this query.
    */
-  RestMethods[] methods();
+  RestResponse[] reponses();
+
+  /**
+   * @return a list of path parameters from this query.
+   */
+  RestParameter[] pathParameters();
+  
+  /**
+   * @return a list of query parameters from this query.
+   */
+  RestParameter[] queryParameters();
 }
