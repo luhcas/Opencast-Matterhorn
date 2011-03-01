@@ -34,6 +34,10 @@ public class PollCalendarJob implements Job {
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     SchedulerImpl sched = (SchedulerImpl) ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
-    sched.updateCalendar();
+    if (!sched.isLocked()) {
+      sched.setLocked(true);
+      sched.updateCalendar();
+      sched.setLocked(false);
+    }
   }
 }

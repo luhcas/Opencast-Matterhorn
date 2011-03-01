@@ -132,6 +132,13 @@ public class SchedulerImpl {
   /** The trusted HttpClient used to talk to the core */
   private TrustedHttpClient trustedClient = null;
 
+  /** 
+   * A variable that is set when the calendar polling process is running, and unset when it is not.
+   * The purpose of this flag is to keep the calendar polling thread from crushing the server if the
+   * endpoint which returns the calendar takes a long time to return (say, with a huge number of events).
+   */
+  private boolean locked = false;
+
   @SuppressWarnings("unchecked")
   public SchedulerImpl(Dictionary dictionary, ConfigurationManager configurationManager,
           CaptureAgentImpl captureAgentImpl) throws ConfigurationException {
@@ -382,6 +389,22 @@ public class SchedulerImpl {
     } catch (SchedulerException e) {
       log.warn("Scheduler exception when attempting to start polling tasks: {}", e);
     }
+  }
+
+  /**
+   * Returns the value of the lock.
+   * @return  True if the lock is closed, false otherwise.
+   */
+  public boolean isLocked() {
+    return locked;
+  }
+
+  /**
+   * Changes the lock value on the scheduler.
+   * @param newValue True to lock the calendar updating thread (disables calendar updates).  False to unlock/enable.
+   */
+  public void setLocked(boolean newValue) {
+    locked = newValue;
   }
 
   /**
