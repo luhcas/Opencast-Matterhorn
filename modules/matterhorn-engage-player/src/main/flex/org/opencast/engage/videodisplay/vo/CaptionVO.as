@@ -15,37 +15,38 @@
  */
 package org.opencast.engage.videodisplay.vo
 {
+	/**
+	 * 	CaptionVO
+	 *
+	 */
+	[Bindable]
+	public class CaptionVO
+	{
+		/**
+		 * Constructor
+		 */
+		public function CaptionVO()
+		{
+			super();
+		}
 
-    /**
-     * 	CaptionVO
-     *
-     */
-    [Bindable]
-    public class CaptionVO
-    {
-        /**
-         * Constructor
-         */
-        public function CaptionVO()
-        {
-            super();
-        }
+		public var begin:Number;
 
-        public var begin : Number;
+		public var end:Number;
 
-        public var end : Number;
+		public var text:String;
 
-        public var text : String;
-
-        /**
-         * toString
-         * return the caption with begin, end and the text
-         * @return String result
-         *  */
-        public function toString() : String
-        {
-            var result : String = "\n" + begin + " " + end + " " + text + "\n";
-            return result;
-        }
-    }
+		/**
+		 * toString
+		 * return the caption with begin, end and the text
+		 * @return String result
+		 *  */
+		public function toString():String
+		{
+			var result:String="\n" + begin + " " + end + " " + text + "\n";
+			return result;
+		}
+	}
 }
+
+

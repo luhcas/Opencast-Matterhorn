@@ -17,26 +17,29 @@ Opencast.AnalyticsPlugin = (function ()
      * @description Add As Plug-in
      * @param elem Element to put the Data in
      * @param data The Data to Process
+     * @return true if successfully processed, false else
      */
     function addAsPlugin(elem, data)
     {
         element = elem;
         footprintData = data;
-        drawFootprints();
+        return drawFootprints();
     }
     
     /**
      * @memberOf Opencast.Analytics
      * @description Resize Plug-in
+     * @return true if successfully processed, false else
      */
     function resizePlugin()
     {
-        drawFootprints();
+        return drawFootprints();
     }
     
     /**
      * @memberOf Opencast.Analytics
      * @description Draw footprintData into the element
+     * @return true if successfully processed, false else
      */
     function drawFootprints()
     {
@@ -48,6 +51,10 @@ Opencast.AnalyticsPlugin = (function ()
                 width: '100%',
                 height: '25px'
             });
+            return true;
+        } else
+        {
+            return false;
         }
     }
     

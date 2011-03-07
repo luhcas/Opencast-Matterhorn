@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
@@ -101,6 +101,11 @@
       <version>1.0-rc2-patched</version>
     </dependency>
     <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>javax.persistence</artifactId>
     </dependency>
@@ -135,16 +140,16 @@
       <scope>test</scope>
     </dependency>  
     <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-bundle-jaxrs</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-series-service-impl</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency> 
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -167,7 +172,7 @@
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
-              net.fortuna.ical4j.*,
+              net.fortuna.ical4j.*;-split-package:=merge-last,
               org.json.*
             </Private-Package>
             <Embed-Dependency>

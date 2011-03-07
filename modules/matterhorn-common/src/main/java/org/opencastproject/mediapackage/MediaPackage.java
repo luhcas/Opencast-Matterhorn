@@ -137,6 +137,18 @@ public interface MediaPackage extends Cloneable {
   long getDuration();
 
   /**
+   * Sets the duration of the media package in milliseconds. This method will throw an {@link IllegalStateException} if
+   * tracks have been added to the mediapackage already. Also note that as soon as the first track is added, the
+   * duration will be udpated according to the track's length.
+   * 
+   * @param duration
+   *          the duration in milliseconds
+   * @throws IllegalStateException
+   *           if the mediapackage already contains a track
+   */
+  void setDuration(long duration) throws IllegalStateException;
+
+  /**
    * Returns <code>true</code> if the given element is part of the media package.
    * 
    * @param element

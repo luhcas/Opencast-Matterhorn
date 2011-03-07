@@ -83,8 +83,11 @@ public class AlsaProducer extends AudioProducer {
   @Override
   protected synchronized void setElementProperties() throws UnableToSetElementPropertyBecauseElementWasNullException {
     if (alsasrc != null) {
-      alsasrc.set(GStreamerProperties.DEVICE, captureDevice.getLocation());
-    } else {
+      if (captureDevice.getLocation() != null) {
+        alsasrc.set(GStreamerProperties.DEVICE, captureDevice.getLocation());
+      }
+    } 
+    else {
       throw new UnableToSetElementPropertyBecauseElementWasNullException(alsasrc, GStreamerProperties.DEVICE);
     }
   }

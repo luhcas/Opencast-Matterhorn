@@ -1,9 +1,9 @@
-URL1: http://tesseract-ocr.googlecode.com/files/tesseract-2.04.tar.gz
-PKG1: tesseract-2.04.tar.gz
-SHA1: 850c42c92a4471c5f41d4384c57045e812fde26a
-URL2: http://tesseract-ocr.googlecode.com/files/tesseract-2.00.eng.tar.gz
-PKG2: tesseract-2.00.eng.tar.gz
-SHA2: 40292c8d206090c4ab342f6b7814ea41c075abce
-DIR: tesseract-2.04
+URL1: http://tesseract-ocr.googlecode.com/files/tesseract-3.00.tar.gz
+PKG1: tesseract-3.00.tar.gz
+SHA1: 1d797cae3d0047d7be6c9b17d1973a9afcf6bd81
+URL2: http://tesseract-ocr.googlecode.com/files/eng.traineddata.gz
+PKG2: eng.traineddata.gz
+SHA2: bf72c6c4542d67ce1d6def9d4e8432c7e98a654b
+DIR: tesseract-3.00
 PCP1: pc-tesseract.zip
 PCP2: tessdata.zip

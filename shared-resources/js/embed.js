@@ -2,7 +2,7 @@
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 /**
- @namespace the global Opencast namespace watch
+ * @namespace the global Opencast namespace watch
  */
 Opencast.Watch = (function ()
 {
@@ -10,7 +10,6 @@ Opencast.Watch = (function ()
         SINGLEPLAYER = "Singleplayer",
         SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
         AUDIOPLAYER = "Audioplayer",
-        ADVANCEDPLAYER = "advancedPlayer",
         PLAYERSTYLE = "embedPlayer",
         mediaResolutionOne = "",
         mediaResolutionTwo = "",
@@ -19,11 +18,11 @@ Opencast.Watch = (function ()
         mimetypeOne = "",
         mimetypeTwo = "",
         coverUrlOne = "",
-        coverUrlTwo = "";
-    var time = 0;
-    var interval;
-    var intervalOn = false;
-    var mediaPackageIdAvailable = true;
+        coverUrlTwo = "",
+        slideLength = 0,
+        timeoutTime = 400,
+        duration = 0,
+        mediaPackageIdAvailable = true;
     
     /**
      * @memberOf Opencast.Watch
@@ -31,14 +30,14 @@ Opencast.Watch = (function ()
      */
     function onPlayerReady()
     {
-        var mediaPackageId = Opencast.engage.getMediaPackageId();
-        var userId = Opencast.engage.getUserId();
+        var mediaPackageId = Opencast.Utils.getURLParameter('id');
+        var userId = Opencast.Utils.getURLParameter('user');
         if (mediaPackageId === null)
         {
             mediaPackageIdAvailable = false;
         }
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
-        restEndpoint = Opencast.engage.getVideoUrl() !== null ? "preview.xml" : restEndpoint;
+        restEndpoint = Opencast.Utils.getURLParameter('videoUrl') !== null ? "preview.xml" : restEndpoint;
         Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
         Opencast.Player.setUserId(userId);
         if (mediaPackageIdAvailable)
@@ -62,18 +61,45 @@ Opencast.Watch = (function ()
     /**
      * @memberOf Opencast.Watch
      * @description Sets up the html page after the player and the Plugins have been initialized.
+     * @param error flag if error occured (=> display nothing, hide initialize); optional: set only if an error occured
      */
-    function continueProcessing()
+    function continueProcessing(error)
     {
+        var err = error||false;
+        if(error)
+        {
+            $('body').css('background-color', '#FFFFFF');
+            $('body').html('<span id="initializing-matter">matter</span><span id="initializing-horn">horn</span><span id="initializing">&nbsp;The media is not available.</span>');
+            $('#initializing').css('color', '#000000');
+            return;
+        }
+        
         $('#oc-segments').html("");
         $(".segments").css("margin-top", "-3px");
         mimetypeOne = "video/x-flv";
         mimetypeTwo = "video/x-flv";
         // set the media URLs
-        mediaUrlOne = Opencast.engage.getVideoUrl();
-        mediaUrlTwo = Opencast.engage.getVideoUrl2();
+        mediaUrlOne = Opencast.Utils.getURLParameter('videoUrl');
+        mediaUrlTwo = Opencast.Utils.getURLParameter('videoUrl2');
         coverUrlOne = $('#oc-cover-presenter').html();
         coverUrlTwo = $('#oc-cover-presentation').html();
+        
+        // If URL Parameter display exists and is set to revert
+        var display = Opencast.Utils.getURLParameter('display');
+        if((display != null) && (display.toLowerCase() == 'invert'))
+        {
+            // Switch the displays and its covers
+            var tmpMediaURLOne = mediaUrlOne;
+            var tmpCoverURLOne = coverUrlOne;
+            var tmpMimetypeOne = mimetypeOne;
+            mediaUrlOne = mediaUrlTwo;
+            coverUrlOne = coverUrlTwo;
+            mimetypeOne = mimetypeTwo;
+            mediaUrlTwo = tmpMediaURLOne;
+            coverUrlTwo = tmpCoverURLOne;
+            mimetypeTwo = tmpMimetypeOne;
+        }
+        
         if (coverUrlOne === null)
         {
             coverUrlOne = coverUrlTwo;
@@ -162,7 +188,6 @@ Opencast.Watch = (function ()
         {
             var pos = mediaUrlOne.lastIndexOf(".");
             var fileType = mediaUrlOne.substring(pos + 1);
-            //
             if (fileType === 'mp3')
             {
                 Opencast.Player.setVideoSizeList(AUDIOPLAYER);
@@ -199,32 +224,100 @@ Opencast.Watch = (function ()
             Opencast.Player.stopFastForward();
         });
         getClientShortcuts();
-        // Opencast.search.initialize();
-        // Parse URL Parameters (time 't') and jump to the given Seconds
-        time = Opencast.Utils.parseSeconds(Opencast.Utils.getURLParameter('t'));
-        if (!intervalOn)
+        
+        // Hide loading indicators
+        $('#oc_flash-player-loading').hide();
+        // Show video controls and data
+        $('#data').show();
+        
+        // Set Duration
+        var durDiv = $('#dc-extent').html();
+        if((durDiv !== undefined) && (durDiv !== null) && (durDiv != ''))
         {
-            interval = setInterval(forwardSeconds, 250);
-            intervalOn = true;
+            duration = parseInt(parseInt(durDiv) / 1000);
+            if((!isNaN(duration)) && (duration > 0))
+            {
+                Opencast.Player.setDuration(duration);
+            }
+        }
+        Opencast.Player.setTotalTime(Opencast.Utils.formatSeconds(Opencast.Player.getDuration()));
+        // Set seconds or autoplay
+        durationSet();
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Checks and executes the URL Parameters 't' and 'play'
+     *              Callback if duration time has been set
+     */
+    function durationSet()
+    {
+        var playParam = Opencast.Utils.getURLParameter('play');
+        var timeParam = Opencast.Utils.getURLParameter('t');
+        var durTextSet = ($('#oc_duration').text() != 'Initializing');
+        
+        var autoplay = (playParam !== null) && (playParam.toLowerCase() == 'true');
+        var time = (timeParam === null) ? 0 : Opencast.Utils.parseSeconds(timeParam);
+        time = (time < 0) ? 0 : time;
+        
+        var rdy = false;
+        // duration set
+        if(durTextSet)
+        {
+            // autoplay and jump to time OR autoplay and not jump to time
+            if((autoplay && (time != 0 )) || (autoplay && (time == 0 )))
+            {
+                // attention: first call 'play', after that 'jumpToTime', otherwise nothing happens!
+                if(Opencast.Player.doPlay() && jumpToTime(time))
+                {
+                    rdy = true;
+                }
+            }
+            // not autoplay and jump to time
+            else if(!autoplay && (time != 0 ))
+            {
+                if(jumpToTime(time))
+                {
+                    rdy = true;
+                }
+            }
+            // not autoplay and not jump to time
+            else
+            {
+                rdy = true;
+            }
+        } else
+        {
+            rdy = false;
+        }
+        
+        if(!rdy)
+        {
+            // If duration time not set, yet: set a timeout and call again
+            setTimeout(function()
+            {
+                Opencast.Watch.durationSet();
+            }, timeoutTime);
         }
     }
     
     /**
      * @memberOf Opencast.Watch
-     * @description Tries to forward to given Seconds if Player ready and Second set
+     * @description tries to jump to a given time
+     * @return true if successfully jumped, false else
      */
-    function forwardSeconds()
+    function jumpToTime(time)
     {
-        if (($('#oc_duration').text() != "NaN:NaN:NaN") && ($('#oc_duration').text() != ""))
+        var success = false;
+        try
         {
-            // Videodisplay.play();
-            Videodisplay.seek(parseInt(time));
-            if (intervalOn)
-            {
-                clearInterval(interval);
-                intervalOn = false;
-            }
+            Videodisplay.seek(time);
+            success = true;
+        } catch(err)
+        {
+            success = false;
         }
+        return success;
     }
     
     /**
@@ -312,6 +405,7 @@ Opencast.Watch = (function ()
         continueProcessing: continueProcessing,
         onPlayerReady: onPlayerReady,
         hoverSegment: hoverSegment,
+        durationSet: durationSet,
         hoverOutSegment: hoverOutSegment,
         seekSegment: seekSegment,
         getClientShortcuts: getClientShortcuts

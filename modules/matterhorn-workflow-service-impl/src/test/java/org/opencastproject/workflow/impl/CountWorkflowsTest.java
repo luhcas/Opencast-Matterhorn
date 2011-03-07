@@ -22,6 +22,7 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
@@ -39,6 +40,7 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +99,10 @@ public class CountWorkflowsTest {
         return handlerRegistrations;
       }
     };
+    MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
+    EasyMock.replay(mds);
+    service.addMetadataService(mds);
+
 
     serviceRegistry = new ServiceRegistryInMemoryImpl();
 
@@ -133,9 +139,9 @@ public class CountWorkflowsTest {
     WorkflowInstance workflow1 = null;
     synchronized (listener) {
       workflow1 = service.start(def, mp, initialProps);
-      listener.wait(10000);
+      listener.wait();
       service.start(def, mp, initialProps);
-      listener.wait(10000);
+      listener.wait();
     }
     service.removeWorkflowListener(listener);
 
@@ -153,7 +159,7 @@ public class CountWorkflowsTest {
     service.addWorkflowListener(listener);
     synchronized (listener) {
       service.resume(workflow1.getId());
-      listener.wait(10000);
+      listener.wait();
     }
     service.removeWorkflowListener(listener);
 

@@ -20,6 +20,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageParser;
+import org.opencastproject.util.NotFoundException;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -161,8 +162,12 @@ public class IngestRestServiceTest {
     Assert.assertTrue(progressResponse.getEntity().toString().startsWith("{\"total\":"));
     
     // Check on a job that doesn't exist
-    Response invalidResponse = restService.getProgress("This ID does not exist");
-    Assert.assertEquals(Status.NOT_FOUND.getStatusCode(), invalidResponse.getStatus());
+    try {
+      restService.getProgress("This ID does not exist");
+      Assert.fail("The rest service should throw");
+    } catch(NotFoundException e) {
+      // expected
+    }
   }
   
   private HttpServletRequest newMockRequest() throws Exception {

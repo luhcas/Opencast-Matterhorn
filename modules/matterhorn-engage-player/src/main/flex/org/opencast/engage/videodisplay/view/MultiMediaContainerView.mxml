@@ -27,16 +27,16 @@
 
 	<mx:Script>
 		<![CDATA[
-			import org.osmf.layout.HorizontalAlign;
-			import mx.core.Application;
 			import mx.controls.Alert;
+			import mx.core.Application;
 			import mx.core.Container;
-			import org.osmf.layout.ScaleMode;
-			import org.osmf.containers.MediaContainer;
-			import org.osmf.media.MediaPlayer;
-			import org.swizframework.Swiz;
 			import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
 			import org.opencast.engage.videodisplay.model.VideodisplayModel;
+			import org.osmf.containers.MediaContainer;
+			import org.osmf.layout.HorizontalAlign;
+			import org.osmf.layout.ScaleMode;
+			import org.osmf.media.MediaPlayer;
+			import org.swizframework.Swiz;
 
 			[Autowire]
 			[Bindable]
@@ -64,7 +64,7 @@
 
 			/**
 			 * resizeVideodisplay
-			 * When the learner resize the Videodisplay in the Browser call the ResizeVideodisplayEvent.
+			 * When the user resize the Videodisplay in the Browser call the ResizeVideodisplayEvent.
 			 */
 			public function resizeVideodisplay():void
 			{
@@ -142,11 +142,14 @@
 			 right="{ model.previewPlayer == true ? 0 : model.multiMediaContainerRight}"
 			 bottom="{model.previewPlayer == true ? 0 : model.multiMediaContainerBottom}"
 			 top="0">
+		<!-- Debug view can be used to get feedback from the videoservers, html -->
+		<!--<view:DebugView/> -->
 
 		<osmf:MediaContainerUIComponent id="mediaContainerLeftUIComponent"
 										addedToStage="initPlayerLeft()"/>
 
 		<osmf:MediaContainerUIComponent id="mediaContainerRightUIComponent"
 										addedToStage="initPlayerRight()"/>
+
 	</mx:HBox>
 </mx:Canvas>

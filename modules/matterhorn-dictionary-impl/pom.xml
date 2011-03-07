@@ -5,11 +5,11 @@
 	<artifactId>matterhorn-dictionary-impl</artifactId>
 	<packaging>bundle</packaging>
 	<name>matterhorn-dictionary-impl</name>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.2-SNAPSHOT</version>
 	<parent>
 		<groupId>org.opencastproject</groupId>
 		<artifactId>base</artifactId>
-		<version>1.1-SNAPSHOT</version>
+		<version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
 	</parent>
   <properties>
@@ -152,9 +152,6 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-						<Export-Package>
-							org.opencastproject.dictionary;version=${project.version}
-            </Export-Package>
 						<Service-Component>
 							OSGI-INF/dictionary-service.xml,
               OSGI-INF/dictionary-scanner.xml

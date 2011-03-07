@@ -25,6 +25,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.util.NotFoundException;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -124,8 +125,12 @@ public class ComposerRestServiceTest {
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(profile, response.getEntity());
 
-    Response notFoundResponse = restService.getProfile("some other ID");
-    Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), notFoundResponse.getStatus());
+    try {
+      restService.getProfile("some other ID");
+      Assert.fail("This ID should cause the rest endpoint to throw");
+    } catch(NotFoundException e) {
+      // expected
+    }
 
     EncodingProfileList list = restService.listProfiles();
     Assert.assertEquals(profileList, list);

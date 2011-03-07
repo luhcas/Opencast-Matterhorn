@@ -15,12 +15,12 @@
  */
 package org.opencastproject.capture.pipeline.bins.consumers;
 
-import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
+import org.opencastproject.capture.pipeline.PipelineTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
 import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.gstreamer.Element;
 import org.gstreamer.Gst;
@@ -40,7 +40,7 @@ import java.util.Properties;
 public class VideoFilesinkConsumerTest {
 
   /** Capture Device Properties created for unit testing **/
-  CaptureDevice captureDevice = null;
+  private CaptureDevice captureDevice = null;
 
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
@@ -59,7 +59,7 @@ public class VideoFilesinkConsumerTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
 
@@ -87,8 +87,8 @@ public class VideoFilesinkConsumerTest {
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String codec, String bitrate, String container) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec,
-            bitrate, null, container, null, null, null, null);
+    Properties captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec,
+            bitrate, null, container, null);
     return captureDeviceProperties;
   }
 
@@ -107,7 +107,7 @@ public class VideoFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     VideoFilesinkConsumer videoFileSinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_ENCODER, "2000000");
@@ -119,7 +119,7 @@ public class VideoFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties(null, "32000000", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     VideoFilesinkConsumer videoFileSinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_ENCODER, "32000000");
@@ -130,7 +130,7 @@ public class VideoFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties("x264enc", "4096", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     VideoFilesinkConsumer videoFileSinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(videoFileSinkBin, "x264enc", "4096");
@@ -142,7 +142,7 @@ public class VideoFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties(null, null, "mpegtsmux");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     VideoFilesinkConsumer videoFileSinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(videoFileSinkBin, VideoFilesinkConsumer.DEFAULT_ENCODER, "2000000");
@@ -156,7 +156,7 @@ public class VideoFilesinkConsumerTest {
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
     String location = "/tmp/testpipe/test.mp2";
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             location, captureDeviceProperties);
     VideoFilesinkConsumer sinkBin = createVideoFileSinkBinDontWantException(captureDeviceProperties);
     Assert.assertEquals(location, sinkBin.filesink.get("location"));
@@ -168,7 +168,7 @@ public class VideoFilesinkConsumerTest {
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
     String location = "";
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             location, captureDeviceProperties);
     @SuppressWarnings("unused")
     VideoFilesinkConsumer sinkBin = createVideoSinkBinWantException(captureDeviceProperties);
@@ -180,7 +180,7 @@ public class VideoFilesinkConsumerTest {
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
     String location = null;
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             location, captureDeviceProperties);
     @SuppressWarnings("unused")
     VideoFilesinkConsumer sinkBin = createVideoSinkBinWantException(captureDeviceProperties);

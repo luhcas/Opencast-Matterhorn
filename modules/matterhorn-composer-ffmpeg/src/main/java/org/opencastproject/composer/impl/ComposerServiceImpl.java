@@ -207,17 +207,15 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
         returnURL = workspace.putInCollection(COLLECTION,
                 job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
         logger.info("Copied the encoded file to the workspace at {}", returnURL);
-        encodingOutput.delete();
-        logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
+        if(encodingOutput.delete()) {
+          logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
+        } else {
+          logger.warn("Unable to delete the encoding output at {}", encodingOutput);
+        }
       } catch (Exception e) {
         throw new EncoderException("Unable to put the encoded file into the workspace", e);
       } finally {
         IOUtils.closeQuietly(in);
-      }
-
-      // clean up the encoding output, since the file is now safely stored in the file repo
-      if (encodingOutput != null && !encodingOutput.delete()) {
-        logger.warn("Unable to delete the encoding output at {}", encodingOutput);
       }
 
       // Have the encoded track inspected and return the result
@@ -762,12 +760,13 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
-   *      java.util.List)
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job)
    */
   @Override
-  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+  protected String process(Job job) throws Exception {
     Operation op = null;
+    String operation = job.getOperation();
+    List<String> arguments = job.getArguments(); 
     try {
       op = Operation.valueOf(operation);
       Track firstTrack = null;

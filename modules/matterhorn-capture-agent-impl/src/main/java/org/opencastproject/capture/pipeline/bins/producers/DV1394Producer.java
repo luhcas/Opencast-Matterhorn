@@ -116,7 +116,7 @@ public class DV1394Producer extends VideoProducer {
   /** Add all of the GStreamer Elements required for this Producer to the Bin **/
   @Override
   protected void addElementsToBin() {
-    bin.addMany(dv1394src, demux, decoder, videorate, fpsfilter, ffmpegcolorspace);
+    bin.addMany(dv1394src, demux, decoder, videorate, fpsfilter, ffmpegcolorspace, queue);
     // TODO - Figure out if this connect or the one above is required!
     demux.connect(new Element.PAD_ADDED() {
       public void padAdded(Element element, Pad pad) {
@@ -138,18 +138,18 @@ public class DV1394Producer extends VideoProducer {
       throw new UnableToLinkGStreamerElementsException(captureDevice, dv1394src, queue);
     } else if (!queue.link(demux)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, queue, demux);
-    } else if (!decoder.link(videorate)) {
-      throw new UnableToLinkGStreamerElementsException(captureDevice, decoder, videorate);
+    } else if (!decoder.link(ffmpegcolorspace)) {
+      throw new UnableToLinkGStreamerElementsException(captureDevice, decoder, ffmpegcolorspace);
+    } else if (!ffmpegcolorspace.link(videorate)) {
+      throw new UnableToLinkGStreamerElementsException(captureDevice, ffmpegcolorspace, videorate);
     } else if (!videorate.link(fpsfilter)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, videorate, fpsfilter);
-    } else if (!fpsfilter.link(ffmpegcolorspace)) {
-      throw new UnableToLinkGStreamerElementsException(captureDevice, fpsfilter, ffmpegcolorspace);
     }
   }
 
   /** Returns the decoder's source pad so that this Producer can have ghost pads that link it to Consumers. **/
   @Override
   public Pad getSrcPad() {
-    return decoder.getStaticPad(GStreamerProperties.SRC);
+    return fpsfilter.getStaticPad(GStreamerProperties.SRC);
   }
 }

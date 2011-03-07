@@ -5,11 +5,11 @@
   <artifactId>matterhorn-admin-ui</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-admin-ui</name>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
@@ -79,8 +79,8 @@
                 <resource>
                   <directory>../../shared-resources/player/</directory>
                   <includes>
-                    <include>engage-hybrid-player/</include>
-                    <include>style/</include>
+                    <include>engage-hybrid-player/**</include>
+                    <include>style/**</include>
                     <include>embed.html</include>
                     <include>preview.xml</include>
                     <include>Videodisplay.swf/</include>
@@ -103,7 +103,7 @@
                 <resource>
                   <directory>../../shared-resources/jquery/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -122,7 +122,7 @@
                 <resource>
                   <directory>../../shared-resources/trimpath/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -141,7 +141,7 @@
                 <resource>
                   <directory>../../shared-resources/infusion-1.1.2/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -160,7 +160,7 @@
                 <resource>
                   <directory>../../shared-resources/infusion-1.2.1/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -179,7 +179,7 @@
                 <resource>
                   <directory>../../shared-resources/img/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -198,7 +198,7 @@
                 <resource>
                   <directory>../../shared-resources/css/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -217,7 +217,7 @@
                 <resource>
                   <directory>../../shared-resources/js/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -253,7 +253,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.kernel.http;version=${project.version}, *;resolution:=optional</Import-Package>
+            <Import-Package>org.opencastproject.kernel.http;version=${project.version}</Import-Package>
             <Private-Package>ui.*, uitests.*</Private-Package>
             <Service-Component>
               OSGI-INF/opencast-admin-ui.xml

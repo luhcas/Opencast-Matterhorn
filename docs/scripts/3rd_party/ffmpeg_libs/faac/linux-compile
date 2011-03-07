@@ -10,6 +10,7 @@ source "${HOME3P}/utilx"
 TMPFILE=`mktemp /tmp/${0##*/}.XXXXX`
 trap 'rm -f $TMPFILE' 0
 pkg=`getcfg PKG:`
+chkpkg "$pkg" || exit 1
 dir=`getcfg DIR:`
 [ -z "$dir" -o "$dir" = "/" ] && exit 1
 #

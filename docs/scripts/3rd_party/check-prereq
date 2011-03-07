@@ -1,6 +1,6 @@
 #!/bin/bash
 set -x
-source  "${HOME3P}/utilx"
+source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #
 install_rpms() {
@@ -26,6 +26,8 @@ install_rpms() {
     Debian )
       ;;
     openSUSE )
+      ;;
+    Amazon )
       ;;
     MacOS )
       ;;
@@ -68,6 +70,30 @@ install_prog() {
             fi
           fi
           ;;
+        zip )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="zip-2.31-2.el5.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="zip-2.31-2.el5.x86_64.rpm"
+              ;;
+          esac
+          ;;
+        unzip )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="unzip-5.52-3.el5.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="unzip-5.52-3.el5.x86_64.rpm"
+              ;;
+          esac
+          ;;
         xz )
           case `arch` in
             i386 )
@@ -94,6 +120,18 @@ install_prog() {
               ;;
           esac
           ;;
+        perl-dbi )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="perl-DBI-1.52-2.el5.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="perl-DBI-1.52-2.el5.x86_64.rpm"
+              ;;
+          esac
+          ;;
         git ) 
           case `arch` in
             i386 )
@@ -110,11 +148,11 @@ install_prog() {
           case `arch` in
             i386 )
               URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
-              rpms=jam-2.5-4.el5.i386.rpm
+              rpms="jam-2.5-4.el5.i386.rpm"
               ;;
             x86_64 )
               URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
-              rpms=jam-2.5-4.el5.x86_64.rpm
+              rpms="jam-2.5-4.el5.x86_64.rpm"
               ;;
           esac
           ;;
@@ -122,11 +160,11 @@ install_prog() {
           case `arch` in
             i386 )
               URL=http://packages.sw.be/yasm
-              rpms=yasm-1.0.1-1.el5.rf.i386.rpm
+              rpms="yasm-1.0.1-1.el5.rf.i386.rpm"
               ;;
             x86_64 )
               URL=http://packages.sw.be/yasm
-              rpms=yasm-1.0.1-1.el5.rf.x86_64.rpm
+              rpms="yasm-1.0.1-1.el5.rf.x86_64.rpm"
               ;;
           esac
           ;;
@@ -142,6 +180,18 @@ install_prog() {
               ;;
           esac
           ;;
+        automake )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="automake-1.9.6-2.3.el5.noarch.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="automake-1.9.6-2.3.el5.noarch.rpm"
+              ;;
+          esac
+          ;;
         gsl-devel )
           case `arch` in
             i386 )
@@ -154,15 +204,27 @@ install_prog() {
               ;;
           esac
           ;;
-        perl-dbi )
+        desktop-file-utils )
           case `arch` in
             i386 )
               URL=http://mirror.centos.org/centos/5/os/i386/CentOS
-              rpms="perl-DBI-1.52-2.el5.i386.rpm"
+              rpms="desktop-file-utils-0.10-7.i386.rpm"
               ;;
             x86_64 )
               URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
-              rpms="perl-DBI-1.52-2.el5.x86_64.rpm"
+              rpms="desktop-file-utils-0.10-7.x86_64.rpm"
+              ;;
+          esac
+          ;;
+        gmp )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="gmp-4.1.4-10.el5.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="gmp-4.1.4-10.el5.x86_64.rpm"
               ;;
           esac
           ;;
@@ -179,7 +241,7 @@ install_prog() {
           esac
           ;;
         * )
-          echo "Don't know how to install $1 on `os`"
+          echo "Don't know how to install $1 on `os`" 1>&2
           return 1
           ;;
       esac
@@ -203,10 +265,11 @@ install_prog() {
         xz ) prog=xz-utils ;;
       # yacc ) prog="flex bison" ;;
         yacc ) prog=byacc ;;
+        perl-dbi ) prog=libdbi-perl ;;
         git ) prog=git-core ;;
         ImageMagick ) prog=imagemagick ;;
         gsl-devel ) prog=libgsl0-dev ;;
-        perl-dbi ) prog=libdbi-perl ;;
+        gmp ) prog=libgmp3c2 ;;
         zlib-devel ) prog=zlib1g-dev ;;
         * ) prog="$1" ;;
       esac
@@ -216,6 +279,8 @@ install_prog() {
     Debian )
       ;;
     openSUSE )
+      ;;
+    Amazon )
       ;;
     MacOS )
       case "$1" in
@@ -260,6 +325,16 @@ install_macports() {
   [ $? -ne 0 ] && return 1
 # sudox port -v selfupdate
 # [ $? -ne 0 -a $? -ne 25 ] && return 1
+  return 0
+}
+#
+macports_version() {
+  port version | awk '{ n = split($2, a, "."); v = 0;
+    if (n == 1) { v = a[1] * 100; }
+    else if (n == 2) { v = a[1] * 100 + a[2] * 10; }
+    else if (n == 3) { v = a[1] * 100 + a[2] * 10 + a[3]; }
+    print v }'
+  [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && return 1
   return 0
 }
 #
@@ -319,7 +394,7 @@ preinstall_scons() {
   [ $? -ne 0 ] && return 1
   #
   case `os` in
-    CentOS | RHEL | Ubuntu | Debian | openSUSE )
+    CentOS | RHEL | Ubuntu | Debian | openSUSE | Amazon )
       download .
       [ $? -ne 0 ] && return 1
       ./linux-compile
@@ -334,52 +409,70 @@ preinstall_scons() {
 check_prereq() {
   case `os` in
     CentOS | RHEL )
-      chkprog wget  || install_prog wget  || return 1
-      chkprog xz    || install_prog xz    || return 1
-      chkprog yacc  || install_prog yacc  || return 1
-      chkprog git   || install_prog git   || return 1
+      chkprog wget    || install_prog wget     || return 1
+      chkprog zip     || install_prog zip      || return 1
+      chkprog unzip   || install_prog unzip    || return 1
+      chkprog xz      || install_prog xz       || return 1
+      chkprog yacc    || install_prog yacc     || return 1
+      # this was reported as missing on some systems and is needed by git
+      chkprog dbiprof || install_prog perl-dbi || return 1
+      chkprog git     || install_prog git      || return 1
       # These are needed for Windows compile
-      chkprog jam   || install_prog jam   || return 1
-      chkprog yasm  || install_prog yasm  || return 1
-      chkprog scons || preinstall_scons   || return 1
+      chkprog jam     || install_prog jam      || return 1
+      chkprog yasm    || install_prog yasm     || return 1
+      chkprog scons   || preinstall_scons      || return 1
       #fix_scons || return 1
       #
       # convert (part of ImageMagick) is needed by ocropus_libs/iulib
       #chkprog convert || install_prog ImageMagick  || return 1
       #
+      # automake is missing on some systems and is needed by gsl-devel
+      chkprog automake   || install_prog automake  || return 1
       # gsl-devel is needed by ocropus
       chkprog gsl-config || install_prog gsl-devel || return 1
       #
-      # this was reported as missing
-      chkprog dbiprof || install_prog perl-dbi || return 1
+      # desktop-file-utils is needed by some versions of rpmlint
+      chkprog desktop-file-install || install_prog desktop-file-utils || return 1
+      #
+      # libgmp is missing on some systems and is needed by mingw32-gcc
+      chklib gmp || install_prog gmp || return 1
       #
       if [ ! -f /usr/include/zlib.h ]; then
         install_prog zlib-devel || return 1
       fi
       ;;
     Ubuntu )
-      apt-get update || return 1
+      sudox apt-get update || return 1
       #
-      chkprog wget  || install_prog wget  || return 1
-      chkprog alien || install_prog alien || return 1
-      chkprog g++   || install_prog g++   || return 1
-      chkprog yacc  || install_prog yacc  || return 1
-      chkprog patch || install_prog patch || return 1
-      chkprog git   || install_prog git   || return 1
+      chkprog wget    || install_prog wget     || return 1
+      chkprog zip     || install_prog zip      || return 1
+      chkprog unzip   || install_prog unzip    || return 1
+      chkprog alien   || install_prog alien    || return 1
+      chkprog g++     || install_prog g++      || return 1
+      chkprog yacc    || install_prog yacc     || return 1
+      chkprog patch   || install_prog patch    || return 1
+      # this was reported as missing on some systems and is needed by git
+      chkprog dbiprof || install_prog perl-dbi || return 1
+      chkprog git     || install_prog git      || return 1
       # These are needed for Windows compile
-      chkprog jam   || install_prog jam   || return 1
-      chkprog yasm  || install_prog yasm  || return 1
-      chkprog scons || preinstall_scons   || return 1
+      chkprog jam     || install_prog jam      || return 1
+      chkprog yasm    || install_prog yasm     || return 1
+      chkprog scons   || preinstall_scons      || return 1
       #fix_scons || return 1
       #
       # convert (part of ImageMagick) is needed by ocropus_libs/iulib
       #chkprog convert || install_prog ImageMagick  || return 1
       #
+      # automake is missing on some systems and is needed by gsl-devel
+      chkprog automake   || install_prog automake  || return 1
       # gsl-devel is needed by ocropus
       chkprog gsl-config || install_prog gsl-devel || return 1
       #
-      # this was reported as missing
-      chkprog dbiprof || install_prog perl-dbi || return 1
+      # desktop-file-utils is needed by some versions of rpmlint
+      chkprog desktop-file-install || install_prog desktop-file-utils || return 1
+      #
+      # libgmp is missing on some systems and is needed by mingw32-gcc
+      chklib gmp || install_prog gmp || return 1
       #
       if [ ! -f /usr/include/zlib.h ]; then
         install_prog zlib-devel || return 1
@@ -389,8 +482,14 @@ check_prereq() {
       ;;
     openSUSE )
       ;;
+    Amazon )
+      ;;
     MacOS )
       chkprog port  || install_macports   || return 1
+      if [ `macports_version` -lt 192 ]; then
+        echo "Mac ports version is too old - should be at least 1.9.2 or greater" 1>&2
+        return 1
+      fi
       #
       LOGFILE=`mktemp /tmp/${0##*/}-patch.log.XXXXX`
       sudox patch -N /opt/local/etc/macports/sources.conf "${HOME3P}/sources.conf.patch" 2>&1 | tee $LOGFILE
@@ -458,11 +557,11 @@ install_mingw32() {
       case `arch` in
         i386 )
           URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
-          rpms=mingw32-gcc-c++-4.3.2-12.el5.i386.rpm
+          rpms="mingw32-gcc-c++-4.3.2-12.el5.i386.rpm"
           ;;
         x86_64 )
           URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
-          rpms=mingw32-gcc-c++-4.3.2-12.el5.x86_64.rpm
+          rpms="mingw32-gcc-c++-4.3.2-12.el5.x86_64.rpm"
           ;;
       esac
       for rpm in $rpms; do
@@ -505,6 +604,8 @@ install_mingw32() {
       ;;
     openSUSE )
       ;;
+    Amazon )
+      ;;
     MacOS )
       ;;
   esac
@@ -520,7 +621,7 @@ fix_libs() {
   [ $? -ne 0 ] && return 1
   #
   case `os` in
-    CentOS | RHEL | Ubuntu | Debian | openSUSE )
+    CentOS | RHEL | Ubuntu | Debian | openSUSE | Amazon )
       #
       # Install patchelf 0.5
       #
@@ -564,7 +665,7 @@ fix_libs() {
 EOF
         [ $? -ne 0 ] && return 1
         if [ -s /etc/ld.so.conf.d/local.conf ]; then
-          echo "File /etc/ld.so.conf.d/local.conf already exists"
+          echo "File /etc/ld.so.conf.d/local.conf already exists" 1>&2
           rm -f local.conf
           return 1
         fi
@@ -632,7 +733,7 @@ EOF
 EOF
         [ $? -ne 0 ] && return 1
         if [ -s /etc/ld.so.conf.d/local.conf ]; then
-          echo "File /etc/ld.so.conf.d/local.conf already exists"
+          echo "File /etc/ld.so.conf.d/local.conf already exists" 1>&2
           rm -f local.conf
           return 1
         fi
@@ -648,6 +749,8 @@ EOF
       ;;
     openSUSE )
       ;;
+    Amazon )
+      ;;
     MacOS )
       ;;
   esac
@@ -655,11 +758,11 @@ EOF
 }
 #
 case `os` in
-  CentOS | RHEL | Ubuntu | Debian | openSUSE | MacOS )
+  CentOS | RHEL | Ubuntu | Debian | openSUSE | Amazon | MacOS )
     ;;
   * )
-    echo "Unsupported operating system: `os`"
-    return 1
+    echo "Unsupported operating system: `os`" 1>&2
+    exit 1
     ;;
 esac
 #
@@ -667,8 +770,8 @@ case `arch` in
   i386 | x86_64 )
     ;;
   * )
-    echo "Unsupported architecture: `arch`"
-    return 1
+    echo "Unsupported architecture: `arch`" 1>&2
+    exit 1
     ;;
 esac
 #

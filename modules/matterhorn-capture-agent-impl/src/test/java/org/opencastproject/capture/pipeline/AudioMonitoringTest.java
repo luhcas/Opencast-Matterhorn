@@ -43,7 +43,7 @@ public class AudioMonitoringTest {
   private static boolean gstreamerInstalled = true;
 
   @BeforeClass
-  public static void setup() {
+  public void setUp() {
     try {
       Gst.init();
     } catch (Throwable t) {

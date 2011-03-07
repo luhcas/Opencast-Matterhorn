@@ -5,11 +5,11 @@
   <artifactId>matterhorn-confidence-monitoring-ui</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-confidence-monitoring-ui</name>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
@@ -72,8 +72,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.kernel.http;version=${project.version}, *</Import-Package>
-            <Private-Package>ui.*, uitests.*</Private-Package>
+            <Import-Package>org.opencastproject.kernel.http;version=${project.version}</Import-Package>
             <Service-Component>
               OSGI-INF/confidence-monitoring-ui.xml
             </Service-Component>

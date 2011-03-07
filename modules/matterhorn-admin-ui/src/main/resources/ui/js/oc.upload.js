@@ -83,7 +83,7 @@ ocUpload.init = function() {
   $('#BtnSubmit').click( function() {
     if (ocUpload.checkRequiredFields(true))  {
       ocUtils.log("Collecting metadata");
-      $('.formField').each( function() {
+      $('.oc-ui-form-field').each( function() {
         if (($(this).attr('id') != 'flavor') && ($(this).attr('id') != 'distribution')) {
           //log("adding metadata " + $(this).attr('id') + ' ' + $(this).val());
           if ($(this).hasClass('multiValueField')) {
@@ -112,9 +112,9 @@ ocUpload.init = function() {
   });
 
   // Event: collapsable title clicked, de-/collapse collapsables
-  $('.collapse-control').click(function() {
-    $(this).toggleClass('collapse-control-closed');
-    $(this).toggleClass('collapse-control-open');
+  $('.collapse-control2').click(function() {
+    $('#ui-icon').toggleClass('ui-icon-triangle-1-e');
+    $('#ui-icon').toggleClass('ui-icon-triangle-1-s');
     $(this).next('.collapsable').toggle('fast');
   });
 
@@ -262,12 +262,11 @@ ocUpload.collectWorkflowConfig = function() {
  */
 ocUpload.checkRequiredFields = function(submit) {
   var missing = false;
-  var wrongtype = false; //ID TODO
   $('.requiredField:visible, .requiredField[type|=hidden]').each( function() {
     if (!$(this).val()) {
       $('#notification' + $(this).attr('id')).show();
       if ((submit) || ($('#containerMissingFields').is(':visible'))) {
-        $(this).prev('.fl-label').css('color','red');
+        $(this).prev('.scheduler-label').css('color','red');
       }
       if ((submit) && $('#track').val() == '') {
         $('#i18n_upload_file').css('color','red');
@@ -275,31 +274,13 @@ ocUpload.checkRequiredFields = function(submit) {
       missing = true;
     } else {
       $('#notification' + $(this).attr('id')).hide();
-      $(this).prev('.fl-label').css('color','black');
+      $(this).prev('.scheduler-label').css('color','black');
+      if ($('#track').val() != '') {
+        $('#i18n_upload_file').css('color','black');
+      }
     }
   });
 
-  // check for right file extension
-  /*
-  if ($('#track').val() != '') {
-    var ext = $('#track').val();
-    ext = ext.substr(ext.length-3).toLowerCase();
-    var right = (ext == 'avi') || (ext == 'mpg') ||
-    (ext == 'mp4') || (ext == 'mkv') ||
-    (ext == 'flv') || (ext == 'mov') ||
-    (ext == 'wmv') || (ext == 'mp3');
-    if (!right) {
-      $('#notification-track').show();
-      wrongtype = true;
-    } else {
-      $('#notification-track').hide();
-      wrongtype = false;
-    }
-  }
-  if (!missing && !wrongtype) {
-    $('#container-missingFields').hide('fast');
-  }
-  return !missing && right;*/
   if (!missing) {
     $('#containerMissingFields').hide('fast');
   }
@@ -321,7 +302,22 @@ ocUpload.showHelpBox = function(help,top,left) {
 ocUpload.showProgressStage = function() {
   //$('#gray-out').fadeIn('fast');
   $('#grayOut').css('display','block');
-  $('#progressStage').show();
+  $('#progressStage').dialog(
+  {
+    modal: true,
+    width: 450,
+    height: 'auto',
+    position: ['center', 'center'],
+    title: 'Uploading Recording',
+    create: function (event, ui)
+    {
+      $('.ui-dialog-titlebar-close').hide();
+    },
+    resizable: false,
+    draggable: false,
+    disabled: true
+  });
+
 }
 
 /** Restore view
@@ -329,7 +325,7 @@ ocUpload.showProgressStage = function() {
  */
 ocUpload.hideProgressStage = function() {
   $('#grayOut').hide();
-  $('#progressStage').hide();
+  $('#progressStage').dialog('close');
 }
 
 /** Set the progress view to a certain state

@@ -15,12 +15,12 @@
  */
 package org.opencastproject.capture.pipeline.bins.consumers;
 
-import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
+import org.opencastproject.capture.pipeline.PipelineTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
 import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.gstreamer.Element;
 import org.gstreamer.Gst;
@@ -41,7 +41,7 @@ import java.util.Properties;
 public class AudioFilesinkConsumerTest {
 
   /** Capture Device Properties created for unit testing **/
-  CaptureDevice captureDevice = null;
+  private CaptureDevice captureDevice = null;
 
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
@@ -69,7 +69,7 @@ public class AudioFilesinkConsumerTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
     try {
@@ -97,8 +97,8 @@ public class AudioFilesinkConsumerTest {
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String codec, String bitrate, String container) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec,
-            bitrate, null, container, null, null, null, null);
+    Properties captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec,
+            bitrate, null, container, null);
     return captureDeviceProperties;
   }
 
@@ -117,8 +117,8 @@ public class AudioFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
-            "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC,
+            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
     AudioFilesinkConsumer audioFileSinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(audioFileSinkBin, AudioFilesinkConsumer.DEFAULT_ENCODER, bitrateDefault);
     checkMuxerProperties(audioFileSinkBin, AudioFilesinkConsumer.DEFAULT_MUXER);
@@ -129,7 +129,7 @@ public class AudioFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties(null, "320", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     AudioFilesinkConsumer audioFileSinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(audioFileSinkBin, AudioFilesinkConsumer.DEFAULT_ENCODER, "320");
@@ -140,7 +140,7 @@ public class AudioFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties("vorbisenc", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     AudioFilesinkConsumer audioFileSinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(audioFileSinkBin, "vorbisenc", "-1");
@@ -152,7 +152,7 @@ public class AudioFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties("faac", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     AudioFilesinkConsumer audioFileSinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(audioFileSinkBin, "faac", "128000");
@@ -164,7 +164,7 @@ public class AudioFilesinkConsumerTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createProperties(null, null, "mpegtsmux");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     AudioFilesinkConsumer audioFileSinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
     checkEncoderProperties(audioFileSinkBin, AudioFilesinkConsumer.DEFAULT_ENCODER, bitrateDefault);
@@ -178,7 +178,7 @@ public class AudioFilesinkConsumerTest {
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
     String location = "/tmp/testpipe/test.mp2";
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             location, captureDeviceProperties);
     AudioFilesinkConsumer sinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
     Assert.assertEquals(location, sinkBin.filesink.get("location"));
@@ -190,7 +190,7 @@ public class AudioFilesinkConsumerTest {
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
     String location = "";
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             location, captureDeviceProperties);
     @SuppressWarnings("unused")
     AudioFilesinkConsumer sinkBin = createSinkBinWantException(captureDeviceProperties);
@@ -202,7 +202,7 @@ public class AudioFilesinkConsumerTest {
       return;
     Properties captureDeviceProperties = createProperties(null, null, null);
     String location = null;
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             location, captureDeviceProperties);
     @SuppressWarnings("unused")
     AudioFilesinkConsumer sinkBin = createSinkBinWantException(captureDeviceProperties);

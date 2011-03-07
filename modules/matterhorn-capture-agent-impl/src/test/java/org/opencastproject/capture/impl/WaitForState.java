@@ -22,7 +22,7 @@ class WaitForState {
   private int sleepTime = 100;
   private int maxSleepTime = 20000;
   private int sleepAccumulator = 0;
-  boolean done = false;
+  private boolean done = false;
 
   /**
    * Sleeps for a while, checks to see if a condition is made. Once it is the sleep wait ends.

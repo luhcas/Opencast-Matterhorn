@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -94,6 +95,10 @@ public class WorkflowOperationSkippingTest {
         return handlerRegistrations;
       }
     };
+    MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
+    EasyMock.replay(mds);
+    service.addMetadataService(mds);
+
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
@@ -129,7 +134,6 @@ public class WorkflowOperationSkippingTest {
 
   @After
   public void teardown() throws Exception {
-    System.out.println("All tests finished... tearing down...");
     dao.deactivate();
   }
 
@@ -197,7 +201,7 @@ public class WorkflowOperationSkippingTest {
     WorkflowInstance instance = null;
     synchronized (stateListener) {
       instance = service.start(definition, mp, properties);
-      stateListener.wait(10000);
+      stateListener.wait();
     }
     service.removeWorkflowListener(stateListener);
 

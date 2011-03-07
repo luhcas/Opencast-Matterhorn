@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding = "utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <!--
 	 /**
@@ -17,70 +17,66 @@
 	 *
 	 */
 -->
-<mx:VBox 
-		 xmlns:mx = "http://www.adobe.com/2006/mxml"
-		 creationComplete = "{ onCreationComplete() }"
-		 verticalScrollPolicy = "off"
-		 horizontalScrollPolicy = "off">
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml"
+		 creationComplete="{ onCreationComplete() }"
+		 verticalScrollPolicy="off"
+		 horizontalScrollPolicy="off">
 
 	<mx:Script>
 		<![CDATA[
-			import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
-			import org.opencast.engage.videodisplay.state.PlayerState;
-			import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
-			import org.swizframework.Swiz;
-			import org.opencast.engage.videodisplay.model.VideodisplayModel;
-			import mx.controls.Alert;
 			import mx.events.ValidationResultEvent;
+			import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
+			import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
+			import org.opencast.engage.videodisplay.model.VideodisplayModel;
+			import org.opencast.engage.videodisplay.state.PlayerState;
+			import org.swizframework.Swiz;
 
 			[Autowire]
 			[Bindable]
-			public var model : VideodisplayModel;
-
-			/**
-			 * onCreationComplete
-			 * Add a shadow text filter around the captions.
-			 */
-			private function onCreationComplete() : void
-			{
-				var myfilters : Array = [];
-				var dropShadow : DropShadowFilter = new DropShadowFilter();
-				dropShadow.distance = 0;
-				dropShadow.angle = 25;
-				dropShadow.alpha = 1.0;
-				dropShadow.blurX = 3;
-				dropShadow.blurY = 3;
-				dropShadow.strength = 2;
-				dropShadow.quality = 3;
-				myfilters.push( dropShadow );
-				txt_captions.filters = myfilters;
-			}
+			public var model:VideodisplayModel;
 
 			/**
 			 * copyToClipboard
 			 * Copy the text in to the system clipboard.
 			 */
-			private function copyToClipboard() : void
+			private function copyToClipboard():void
 			{
-				System.setClipboard( txt_captions.text );
+				System.setClipboard(txt_captions.text);
+			}
+
+			/**
+			 * onCreationComplete
+			 * Add a shadow text filter around the captions.
+			 */
+			private function onCreationComplete():void
+			{
+				var myfilters:Array=[];
+				var dropShadow:DropShadowFilter=new DropShadowFilter();
+				dropShadow.distance=0;
+				dropShadow.angle=25;
+				dropShadow.alpha=1.0;
+				dropShadow.blurX=3;
+				dropShadow.blurY=3;
+				dropShadow.strength=2;
+				dropShadow.quality=3;
+				myfilters.push(dropShadow);
+				txt_captions.filters=myfilters;
 			}
 		]]>
 	</mx:Script>
 
-	<mx:VBox 
-			 backgroundColor = "#999999"
-			 backgroundAlpha = "0.8"
-			 width = "{ txt_captions.width }"
-			 visible = "{ model.ccBoolean == true ? model.currentSubtitle == '' ? false : true : false }"
-			 includeInLayout = "{ model.ccBoolean == true ? model.currentSubtitle == '' ? false : true : false }">
+	<mx:VBox backgroundColor="#999999"
+			 backgroundAlpha="0.8"
+			 width="{ txt_captions.width }"
+			 visible="{ model.ccBoolean == true ? model.currentSubtitle == '' ? false : true : false }"
+			 includeInLayout="{ model.ccBoolean == true ? model.currentSubtitle == '' ? false : true : false }">
 
-		<mx:Text 
-				 id = "txt_captions"
-				 fontSize = "{ model.fontSizeCaptions }"
-				 htmlText = "{ model.currentSubtitle }"
-				 styleName = "captions"
-				 focusOut = "{ txt_captions.setFocus() }"
-				 click = "{ copyToClipboard() }"
-				 toolTip = "Click to copy the text."/>
+		<mx:Text id="txt_captions"
+				 fontSize="{ model.fontSizeCaptions }"
+				 htmlText="{ model.currentSubtitle }"
+				 styleName="captions"
+				 focusOut="{ txt_captions.setFocus() }"
+				 click="{ copyToClipboard() }"
+				 toolTip="Click to copy the text."/>
 	</mx:VBox>
 </mx:VBox>

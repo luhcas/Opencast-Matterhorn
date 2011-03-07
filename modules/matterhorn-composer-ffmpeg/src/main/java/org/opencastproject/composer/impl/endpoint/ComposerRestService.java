@@ -36,6 +36,7 @@ import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Param;
@@ -356,10 +357,10 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @GET
   @Path("profile/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response getProfile(@PathParam("id") String profileId) {
+  public Response getProfile(@PathParam("id") String profileId) throws NotFoundException {
     EncodingProfileImpl profile = (EncodingProfileImpl) composerService.getProfile(profileId);
     if (profile == null)
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+      throw new NotFoundException();
     return Response.ok(profile).build();
   }
 
@@ -388,24 +389,12 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     profileEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, profileEndpoint);
 
-    // count
-    RestEndpoint countEndpoint = new RestEndpoint("count", RestEndpoint.Method.GET, "/count",
-            "Count the number of jobs");
-    countEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Result body contains the number of jobs matching the query parameters"));
-    countEndpoint.addOptionalParam(new Param("status", Param.Type.STRING, "FINISHED",
-            "the job status (QUEUED, RUNNING, FINISHED, FAILED)"));
-    countEndpoint.addOptionalParam(new Param("host", Param.Type.STRING, serverUrl,
-            "the host responsible for this encoding job"));
-    countEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, countEndpoint);
-
     // encode
     RestEndpoint encodeEndpoint = new RestEndpoint("encode", RestEndpoint.Method.POST, "/encode",
             "Starts an encoding process, based on the specified encoding profile ID and the track");
     encodeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .ok("Results in an xml document containing the job for the encoding task"));
-    encodeEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
+    encodeEndpoint.addRequiredParam(new Param("sourceTrack", Type.TEXT, generateVideoTrack(),
             "The track containing the stream"));
     encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
     encodeEndpoint.setTestForm(RestTestForm.auto());
@@ -436,9 +425,9 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             "Starts an encoding process, which will mux the two tracks using the given encoding profile");
     muxEndpoint.addStatus(org.opencastproject.util.doc.Status
             .ok("Results in an xml document containing the job for the encoding task"));
-    muxEndpoint.addRequiredParam(new Param("sourceAudioTrack", Type.STRING, generateAudioTrack(),
+    muxEndpoint.addRequiredParam(new Param("sourceAudioTrack", Type.TEXT, generateAudioTrack(),
             "The track containing the audio stream"));
-    muxEndpoint.addRequiredParam(new Param("sourceVideoTrack", Type.STRING, generateVideoTrack(),
+    muxEndpoint.addRequiredParam(new Param("sourceVideoTrack", Type.TEXT, generateVideoTrack(),
             "The track containing the video stream"));
     muxEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
     muxEndpoint.setTestForm(RestTestForm.auto());
@@ -452,7 +441,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     imageEndpoint
             .addRequiredParam(new Param("time", Type.STRING, "1",
                     "The number of seconds (many numbers can be specified, separated by comma) into the video to extract the image"));
-    imageEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
+    imageEndpoint.addRequiredParam(new Param("sourceTrack", Type.TEXT, generateVideoTrack(),
             "The track containing the video stream"));
     imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "player-preview.http",
             "The encoding profile to use"));
@@ -464,9 +453,9 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             "Starts caption embedding process, based on the specified source track and captions");
     captionsEndpoint.addStatus(org.opencastproject.util.doc.Status
             .ok("Result in an xml document containing resulting media file."));
-    captionsEndpoint.addRequiredParam(new Param("mediaTrack", Type.STRING, generateMediaTrack(),
+    captionsEndpoint.addRequiredParam(new Param("mediaTrack", Type.TEXT, generateMediaTrack(),
             "QuickTime file containg video stream"));
-    captionsEndpoint.addRequiredParam(new Param("captions", Type.STRING, generateCaptionsCatalogs(),
+    captionsEndpoint.addRequiredParam(new Param("captions", Type.TEXT, generateCaptionsCatalogs(),
             "Catalog(s) containing captions in SRT format"));
     captionsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, captionsEndpoint);

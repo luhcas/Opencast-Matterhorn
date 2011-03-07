@@ -30,8 +30,11 @@ import org.opencastproject.workspace.api.Workspace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
@@ -80,10 +83,12 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance, JobContext)
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance,
+   *      JobContext)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
+          throws WorkflowOperationException {
     MediaPackage mediaPackage = workflowInstance.getMediaPackage();
     WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
 
@@ -100,6 +105,11 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
     }
 
     String baseUrl = workspace.getBaseUri().toString();
+
+    // Some URIs are shared by multiple elements. If one of these elements should be deleted but another should not, we
+    // must keep the file.
+    Set<URI> urisToDelete = new HashSet<URI>();
+    Set<URI> urisToKeep = new HashSet<URI>();
     for (MediaPackageElement element : mediaPackage.getElements()) {
       if (!element.getURI().toString().startsWith(baseUrl)) {
         continue;
@@ -113,12 +123,22 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
         }
       }
       if (remove) {
-        try {
-          workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
-          mediaPackage.remove(element);
-        } catch (Exception e) {
-          logger.warn("Unable to delete the file for {}", element);
-        }
+        urisToDelete.add(element.getURI());
+        mediaPackage.remove(element);
+      } else {
+        urisToKeep.add(element.getURI());
+      }
+    }
+
+    // Remove all of the files to keep from the one to delete
+    urisToDelete.removeAll(urisToKeep);
+    
+    // Now remove the files to delete
+    for (URI uri : urisToDelete) {
+      try {
+        workspace.delete(uri);
+      } catch (Exception e) {
+        logger.warn("Unable to delete {}", uri);
       }
     }
     return createResult(mediaPackage, Action.CONTINUE);

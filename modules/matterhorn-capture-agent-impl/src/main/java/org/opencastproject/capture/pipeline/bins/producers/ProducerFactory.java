@@ -23,12 +23,35 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinEx
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
+import java.util.HashSet;
 import java.util.Properties;
 
 public final class ProducerFactory {
   /** The actual singleton factory **/
   private static ProducerFactory factory;
 
+  /**
+   * The gstreamer sources that are currently supported and tested with this code
+   */
+  public enum ProducerType {
+    ALSASRC, /* Linux sound capture */
+    AUDIOTESTSRC, /* Built in gstreamer audio test src */
+    BLUECHERRY_PROVIDEO, /* Bluecherry ProVideo-143 */
+    CUSTOM_VIDEO_SRC, /* Allows the user to specify their producer with gstreamer command line syntax */
+    CUSTOM_AUDIO_SRC, /* Allows the user to specify their producer with gstreamer command line syntax */
+    DV_1394, /* A DV camera that runs over firewire */
+    EPIPHAN_VGA2USB, /* Epiphan VGA2USB frame grabber */
+    FILE, /* A media file on the filesystem or a file device that requires no decoding */
+    FILE_DEVICE, /* Generic file device source (such as a Hauppauge card that produces an MPEG file) */
+    HAUPPAUGE_WINTV, /* Hauppauge devices */
+    PULSESRC, /* Linux sound capture */
+    V4LSRC, /* Generic v4l source */
+    V4L2SRC, /* Generic v4l2 source */
+    VIDEOTESTSRC /* Built in gstreamer video test src */    
+  }
+  
+  private HashSet<ProducerType> producersWithoutSourceRequirement = new HashSet<ProducerType>();
+  
   /** Singleton factory pattern ensuring only one instance of the factory is created even with multiple threads. **/
   public static synchronized ProducerFactory getInstance() {
     if (factory == null) {
@@ -39,7 +62,13 @@ public final class ProducerFactory {
 
   /** Constructor made private so that the number of Factories can be kept to one. **/
   private ProducerFactory() {
-
+    // Producers that don't require a source. 
+    producersWithoutSourceRequirement.add(ProducerType.ALSASRC);
+    producersWithoutSourceRequirement.add(ProducerType.AUDIOTESTSRC);
+    producersWithoutSourceRequirement.add(ProducerType.CUSTOM_AUDIO_SRC);
+    producersWithoutSourceRequirement.add(ProducerType.CUSTOM_VIDEO_SRC);
+    producersWithoutSourceRequirement.add(ProducerType.PULSESRC);
+    producersWithoutSourceRequirement.add(ProducerType.VIDEOTESTSRC);
   }
 
   /**
@@ -99,5 +128,19 @@ public final class ProducerFactory {
     else {
       throw new NoProducerFoundException("No valid Producer found for device " + captureDevice.getName());
     }
+  }
+  
+  /**
+   * Returns true if the ProducerType does require a source to create, returns false if ProducerType is null, doesn't
+   * exist or doesn't require the source location.
+   * 
+   * @param type The type of Producer that needs to be checked whether it requires a source. 
+   * @return Returns true if it requires a source, false otherwise. 
+   */
+  public boolean requiresSrc(ProducerType type) {
+    if (type == null) {
+      return false;
+    }
+    return !producersWithoutSourceRequirement.contains(type);
   }
 }

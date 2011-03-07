@@ -15,7 +15,6 @@
  */
 package org.opencast.engage.videodisplay.control.util
 {
-
 	/**
 	 *   TimeCode
 	 */

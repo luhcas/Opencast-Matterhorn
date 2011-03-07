@@ -47,11 +47,6 @@ public class ConfigurationManagerTest {
   /** the singleton object to test with */
   private ConfigurationManager configManager;
 
-  @AfterClass
-  public static void after() {
-    FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "configman-test"));
-  }
-
   @Before
   public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     configManager = new ConfigurationManager();
@@ -74,7 +69,7 @@ public class ConfigurationManagerTest {
     p.load(is);
     IOUtils.closeQuietly(is);
     p.put("org.opencastproject.storage.dir",
-            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+            new File("./target", "configman-test").getAbsolutePath());
 
     configManager.updated(p);
     configManager.updated(null);
@@ -143,7 +138,7 @@ public class ConfigurationManagerTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"),
+    configManager.setItem("org.opencastproject.storage.dir", new File("./target",
             "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);
@@ -166,7 +161,7 @@ public class ConfigurationManagerTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"),
+    configManager.setItem("org.opencastproject.storage.dir", new File("./target",
             "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.setItem("M2_REPO", getClass().getClassLoader().getResource("m2_repo").toURI().getPath());
@@ -206,7 +201,7 @@ public class ConfigurationManagerTest {
     sourceProps.remove("capture.device.MOCK_PRESENTER.outputfile");
     configManager.setItem("capture.device.MOCK_PRESENTER.src", null);
     configManager.setItem("capture.device.MOCK_PRESENTER.outputfile", null);
-    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"),
+    configManager.setItem("org.opencastproject.storage.dir", new File("./target",
             "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);

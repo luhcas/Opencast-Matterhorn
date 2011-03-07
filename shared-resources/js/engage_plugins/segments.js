@@ -145,19 +145,6 @@ Opencast.segments = (function ()
                     disabled: [4]
                 });
             }
-            else
-            {
-                // If no Segents are available
-                if ($('#segmentstable > tbody > tr > td').size() <= 1)
-                {
-                    // Disable and grey out "Segments" Tab
-                    // Disable and grey out "Segments Text" Tab
-                    $("#oc_ui_tabs").tabs(
-                    {
-                        disabled: [1, 2]
-                    });
-                }
-            }
             var scroll = $('#slider .scroll').css('overflow', 'hidden');
             //when the left/right arrows are clicked
             $(".right").click(function ()
@@ -210,41 +197,42 @@ Opencast.segments = (function ()
             hideSegments();
             $(".oc_btn-skip-backward").hide();
             $(".oc_btn-skip-forward").hide();
+            // Disable and grey out "Segments" and "Segments Text" Tab
+            $("#oc_ui_tabs").tabs(
+            {
+                disabled: [1, 2]
+            });
+            // Hide Search, too
+            $('#oc_lecturer-search-field').attr('disabled', true);
         }
         else
         {
+            // Display and grey out "Segments" and "Segments Text" Tab
             $("#oc_ui_tabs").tabs('enable', 1);
             $("#oc_ui_tabs").tabs('enable', 2);
+            // Display Search, too
+            $('#oc_lecturer-search-field').attr('disabled', false);
         }
         // set the center of the controls
         var margin = $('#oc_video-controls').width();
         var controlswith = 0;
         var playerWidth = $('#oc_video-player-controls').width();
-        // player size
-        if (playerWidth < 460 && playerWidth >= 380)
+        if($.browser.mozilla)
         {
-            $(".oc_btn-skip-backward").css('display', 'none');
-            $(".oc_btn-skip-forward").css('display', 'none');
-            $('#oc_video-controls').css('width', '20%');
-            $('#oc_video-cc').css('width', '12%');
-            $('#oc_video-time').css('width', '40%');
-            $('.oc_slider-volume-Rail').css('width', '45px');
-            controlswith = 58;
-            margin = $('#oc_video-controls').width();
-            margin = ((margin - controlswith) / 2) - 8;
-            $(".oc_btn-rewind").css("margin-left", margin + "px");
+            $('.oc_btn-cc-off').css('backgroundPosition', '-0px -179px');
+            $('.oc_btn-cc-over').css('backgroundPosition', '-0px -179px');
+            $('.oc_btn-cc-on').css('backgroundPosition', '-0px -179px');
         }
-        else if (playerWidth < 380 && playerWidth >= 300)
+        // player size
+        if (playerWidth < 470)
         {
             $(".oc_btn-skip-backward").css('display', 'none');
             $(".oc_btn-skip-forward").css('display', 'none');
             $(".oc_btn-rewind").css('display', 'none');
             $(".oc_btn-fast-forward").css('display', 'none');
-            $("#oc_video-cc").css('display', 'none');
-            $("#oc_video-cc").css('width', '0%');
             $('#simpleEdit').css('font-size', '0.8em');
             $('#simpleEdit').css('margin-left', '1px');
-            $('#oc_current-time').css('width', '45px');
+            $('#oc_current-time').css('width', '50px');
             $('#oc_edit-time').css('width', '45px');
             $('#oc_duration').css('width', '45px');
             $('#oc_edit-time-error').css('width', '45px');
@@ -376,40 +364,82 @@ Opencast.segments = (function ()
         $('#oc_btn-slides').html(SEGMENTS_HIDE);
         $("#oc_btn-slides").attr('aria-pressed', 'true');
         // Will be overwritten if the Template is ready
-        $('#scrollcontainer').html('<img src="img/loading.gif" />');
+        $('#scrollcontainer').html('<img src="img/squares.gif" />');
         // Show a loading Image
         $('#oc_slides').show();
         $('#oc_slides').css('display', 'block');
         $('#segments-loading').show();
         $('#slider').hide();
-        // Request JSONP data
-        $.ajax(
+        
+        // If cashed data are available
+        if(Opencast.segments_Plugin.createSegmentsFromCashe())
         {
-            url: '../../search/episode.json',
-            data: 'id=' + mediaPackageId,
-            dataType: 'jsonp',
-            jsonp: 'jsonp',
-            success: function (data)
+            // Request JSONP data -- senseless but otherwise weirdly no correct css parsing?!
+            $.ajax(
             {
-                // get rid of every '@' in the JSON data
-                // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
-                // Create Trimpath Template
-                Opencast.segments_Plugin.addAsPlugin($('#scrollcontainer'), data['search-results'].result.segments);
-                // Show a loading Image
-                $('#oc_slides').show();
-                $('#oc_slides').css('display', 'block');
-                $('#segments-loading').hide();
-                $('#slider').show();
-                // Sets slider container width after panels are displayed
-                Opencast.segments.sizeSliderContainer();
-            },
-            // If no data comes back
-            error: function (xhr, ajaxOptions, thrownError)
+                url: '../../search/episode.json',
+                data: 'id=' + mediaPackageId,
+                dataType: 'jsonp',
+                jsonp: 'jsonp',
+                success: function (data)
+                {
+                    // Hide the loading Image
+                    $('#segments-loading').hide();
+                    $('#oc_slides').show();
+                    $('#oc_slides').css('display', 'block');
+                    $('#slider').show();
+                    // Sets slider container width after panels are displayed
+                    sizeSliderContainer();
+                },
+                // If no data comes back
+                error: function (xhr, ajaxOptions, thrownError)
+                {
+                    $('#scrollcontainer').html('No Slides available');
+                    $('#scrollcontainer').hide();
+                }
+            });
+        } else
+        {
+            // Request JSONP data
+            $.ajax(
             {
-                $('#scrollcontainer').html('No Slides available');
-                $('#scrollcontainer').hide();
-            }
-        });
+                url: '../../search/episode.json',
+                data: 'id=' + mediaPackageId,
+                dataType: 'jsonp',
+                jsonp: 'jsonp',
+                success: function (data)
+                {
+                    // get rid of every '@' in the JSON data
+                    // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
+                    
+                    if((data === undefined) ||
+                       (data['search-results'] === undefined) ||
+                       (data['search-results'].result === undefined) ||
+                       (data['search-results'].result.segments === undefined))
+                    {
+                        $('#scrollcontainer').html('No Slides available');
+                        $('#scrollcontainer').hide();
+                    } else
+                    {
+                        // Create Trimpath Template
+                        Opencast.segments_Plugin.addAsPlugin($('#scrollcontainer'), data['search-results'].result.segments);
+                        // Hide the loading Image
+                        $('#segments-loading').hide();
+                        $('#oc_slides').show();
+                        $('#oc_slides').css('display', 'block');
+                        $('#slider').show();
+                        // Sets slider container width after panels are displayed
+                        sizeSliderContainer();
+                    }
+                },
+                // If no data comes back
+                error: function (xhr, ajaxOptions, thrownError)
+                {
+                    $('#scrollcontainer').html('No Slides available');
+                    $('#scrollcontainer').hide();
+                }
+            });
+        }
     }
     
     /**

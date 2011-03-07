@@ -83,7 +83,8 @@ public class MaintenanceModeTest {
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("jobType", SERVICE_TYPE));
     formParams.add(new BasicNameValuePair("host", Main.BASE_URL));
-    formParams.add(new BasicNameValuePair("start", "true"));
+    formParams.add(new BasicNameValuePair("operation", "test"));
+    formParams.add(new BasicNameValuePair("start", "false"));
     postJob.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
     // Ensure that the job was created successfully

@@ -213,7 +213,6 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
    */
   @Override
   protected void createElements() throws UnableToCreateElementException {
-    GStreamerElements elements;
     src = (AppSrc) GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
             GStreamerElements.APPSRC, captureDevice.getFriendlyName() + "_appsrc");
     identity = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
@@ -391,7 +390,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     try {
       V4LInfo v4linfo = JV4LInfo.getV4LInfo(device);
       String deviceName = v4linfo.getVideoCapability().getName();
-      if ("Epiphan VGA2USB".equals(deviceName)) {
+      if ("Epiphan VGA2USB".equals(deviceName) || "Epiphan VGA2PCI".equals(deviceName)) {
         return true;
       }
     } catch (JV4LInfoException e) {
@@ -425,7 +424,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
             if (!newBin.start(DEVICEBIN_START_TIME)) {
               newBin.stop();
               logger.debug("Can not start Epiphan VGA2USB pipeline!");
-            } else {
+            } else { 
               deviceBin = newBin;
               logger.debug("Epiphan VGA2USB pipeline restored!");
             }

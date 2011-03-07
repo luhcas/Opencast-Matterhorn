@@ -17,6 +17,7 @@ package org.opencastproject.series.impl;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
@@ -62,7 +63,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   protected PersistenceProvider persistenceProvider;
   protected Map<String, Object> persistenceProperties;
   protected EntityManagerFactory emf = null;
-
+  
   public SeriesServiceImpl() {
     logger.info("Series Service instantiated");
   }
@@ -124,7 +125,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#addOrUpdate(org.opencastproject.metadata.dublincore.DublinCoreCatalog)
    */
   @Override
-  public Series addOrUpdate(DublinCoreCatalog dcCatalog) {
+  public Series addOrUpdate(DublinCoreCatalog dcCatalog) throws SeriesException{
     String id = dcCatalog.get(DublinCoreCatalog.PROPERTY_IDENTIFIER).get(0).getValue();
     SeriesImpl existingSeries;
     try {
@@ -137,6 +138,8 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
         // this should not happen, since we explicitly check for the series above
         logger.warn("Unable to find series {}: {}", existingSeries, e);
         throw new IllegalStateException(e);
+      } catch (Exception ex) {
+        throw new SeriesException(ex);
       }
     } catch (NotFoundException e1) {
       Series series = SeriesImpl.buildSeries(dcCatalog);
@@ -174,7 +177,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#removeSeries(java.lang.String)
    */
   @Override
-  public void removeSeries(String seriesId) throws NotFoundException {
+  public void removeSeries(String seriesId) throws NotFoundException, SeriesException {
     logger.debug("Removing series with the ID {}", seriesId);
     Series s;
     EntityManager em = emf.createEntityManager();
@@ -197,13 +200,14 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.series.api.Series)
    */
   @Override
-  public void updateSeries(Series s) throws NotFoundException {
+  public void updateSeries(Series s) throws NotFoundException, SeriesException {
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
       SeriesImpl storedSeries = em.find(SeriesImpl.class, s.getSeriesId());
-      if (storedSeries == null)
+      if (storedSeries == null) {
         throw new NotFoundException("Series " + s + " does not exist");
+      }
       storedSeries.setDescription(s.getDescription());
       storedSeries.setMetadata(s.getMetadata());
       em.merge(storedSeries);
@@ -248,15 +252,15 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;
   }
-
+  
   @SuppressWarnings("unchecked")
   @Override
   public List<Series> searchSeries(String pattern) throws NotFoundException {
     EntityManager em = emf.createEntityManager();
     List<SeriesMetadataImpl> found = null;
     try {
-      Query query = em.createQuery("SELECT o FROM SeriesMetadataImpl o WHERE o.value LIKE :keyword");
-      query.setParameter("keyword", "%" + pattern + "%");
+      Query query = em.createQuery("SELECT o FROM SeriesMetadataImpl o WHERE LOWER(o.value) LIKE :keyword");
+      query.setParameter("keyword", "%" + pattern.toLowerCase() + "%");
       found = (List<SeriesMetadataImpl>) query.getResultList();
       logger.debug("Found {} values containing {}.", found.size(), pattern);
     } catch (Exception e) {

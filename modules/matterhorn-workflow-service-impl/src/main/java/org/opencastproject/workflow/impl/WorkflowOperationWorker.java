@@ -15,6 +15,10 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.workflow.impl.WorkflowServiceImpl.NO;
+import static org.opencastproject.workflow.impl.WorkflowServiceImpl.PROPERTY_PATTERN;
+import static org.opencastproject.workflow.impl.WorkflowServiceImpl.YES;
+
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -94,8 +98,7 @@ final class WorkflowOperationWorker {
    * @param service
    *          the workflow service.
    */
-  public WorkflowOperationWorker(WorkflowInstance workflow, Map<String, String> properties,
-          WorkflowServiceImpl service) {
+  public WorkflowOperationWorker(WorkflowInstance workflow, Map<String, String> properties, WorkflowServiceImpl service) {
     this(null, workflow, service);
     this.properties = properties;
   }
@@ -126,7 +129,7 @@ final class WorkflowOperationWorker {
   /**
    * Executes the workflow operation logic.
    */
-  public void execute() {
+  public WorkflowInstance execute() {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     try {
       WorkflowOperationResult result = null;
@@ -146,23 +149,23 @@ final class WorkflowOperationWorker {
           handler.destroy(workflow, null);
         }
       }
-      service.handleOperationResult(workflow, result);
+      workflow = service.handleOperationResult(workflow, result);
     } catch (Exception e) {
-      logger.error("Workflow operation '{}' failed with error: {}", handler, e.getMessage());
       Throwable t = e.getCause();
       if (t != null) {
-        logger.error("Original cause for the failure is: {}", t.getMessage(), t);
+        logger.error("Workflow operation '" + handler + "' failed", t);
       } else {
-        logger.error("Cause for the failure is", e);
+        logger.error("Workflow operation '" + handler + "' failed", e);
       }
       try {
-        service.handleOperationException(workflow, e);
+        workflow = service.handleOperationException(workflow, new WorkflowOperationException(e, operation));
       } catch (Exception e2) {
         logger.error("Error handling workflow operation '{}' failure: {}",
                 new Object[] { handler, e2.getMessage(), e2 });
         e.printStackTrace();
       }
     }
+    return workflow;
   }
 
   /**
@@ -184,29 +187,31 @@ final class WorkflowOperationWorker {
     String executeCondition = operation.getExecutionCondition(); // if
     String skipCondition = operation.getSkipCondition(); // unless
 
-    if (StringUtils.isNotBlank(executeCondition)
-            && WorkflowServiceImpl.PROPERTY_PATTERN.matcher(executeCondition).matches()) {
-      operation.setState(OperationState.SKIPPED);
+    boolean skip = false;
+    if (StringUtils.isNotBlank(executeCondition) && (PROPERTY_PATTERN.matcher(executeCondition).matches()
+            || NO.contains(executeCondition.toLowerCase()))) {
+      skip = true;
     } else if (StringUtils.isNotBlank(skipCondition)
-            && !WorkflowServiceImpl.PROPERTY_PATTERN.matcher(skipCondition).matches()) {
-      operation.setState(OperationState.SKIPPED);
-    } else {
-      operation.setState(OperationState.RUNNING);
+            && (!PROPERTY_PATTERN.matcher(skipCondition).matches() || YES.contains(skipCondition.toLowerCase()))) {
+      skip = true;
     }
+
+    operation.setState(OperationState.RUNNING);
     service.update(workflow);
 
     try {
       WorkflowOperationResult result = null;
-      if (OperationState.SKIPPED.equals(operation.getState())) {
+      if (skip) {
         // Allow for null handlers when we are skipping an operation
         if (handler != null) {
           result = handler.skip(workflow, null);
+          result.setAction(Action.SKIP);
         }
       } else {
         if (handler == null) {
           // If there is no handler for the operation, yet we are supposed to run it, we must fail
-          logger.warn("No handler available to execute operation '{}'", operation.getId());
-          throw new IllegalStateException("Unable to find a workflow handler for '" + operation.getId() + "'");
+          logger.warn("No handler available to execute operation '{}'", operation.getTemplate());
+          throw new IllegalStateException("Unable to find a workflow handler for '" + operation.getTemplate() + "'");
         }
         result = handler.start(workflow, null);
       }
@@ -240,12 +245,12 @@ final class WorkflowOperationWorker {
     // Make sure we have a (suitable) handler
     if (handler == null) {
       // If there is no handler for the operation, yet we are supposed to run it, we must fail
-      logger.warn("No handler available to resume operation '{}'", operation.getId());
-      throw new IllegalStateException("Unable to find a workflow handler for '" + operation.getId() + "'");
+      logger.warn("No handler available to resume operation '{}'", operation.getTemplate());
+      throw new IllegalStateException("Unable to find a workflow handler for '" + operation.getTemplate() + "'");
     } else if (!(handler instanceof ResumableWorkflowOperationHandler)) {
       throw new IllegalStateException("An attempt was made to resume a non-resumable operation");
     }
-    
+
     ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
     operation.setState(OperationState.RUNNING);
     service.update(workflow);

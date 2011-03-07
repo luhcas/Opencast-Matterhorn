@@ -38,7 +38,7 @@
         this.options.clear();
       }
     },
-    
+
     search : function(t) {
       if (this.options.search !== undefined && $.isFunction(this.options.search)) {
         if (this.options.options !== undefined) {
@@ -59,7 +59,7 @@
       if (width < 140) {
         width = 140;
       }
-      this.element.addClass('ui-searchbox ui-widget ui-state-default ui-corner-all ui-helper-clearfix');
+      this.element.addClass('ui-searchbox ui-widget ui-state-hover ui-corner-all ui-helper-clearfix');
       if (this.options.border) {
         this.element.css('border', this.options.border);
       }
@@ -135,7 +135,7 @@
           var input = self.element.find('input');
           if (event.keyCode == $.ui.keyCode.ENTER) {
             self.search(input.val());
-          } 
+          }
         }
       });
     },

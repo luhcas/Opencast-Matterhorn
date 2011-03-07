@@ -28,6 +28,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -353,10 +354,10 @@ public class IngestRestService {
   public Response addZippedMediaPackage(@Context HttpServletRequest request) {
     logger.debug("addZippedMediaPackage(HttpRequest)");
     FileInputStream zipInputStream = null;
+    String zipFileName = UUID.randomUUID().toString() + ".zip";
     try {
       String workflowDefinitionId = null;
       Long workflowInstanceIdAsLong = null;
-      String zipFileName = null;
       URI zipFileUri = null;
       Map<String, String> workflowConfig = new HashMap<String, String>();
       if (ServletFileUpload.isMultipartContent(request)) {
@@ -378,11 +379,6 @@ public class IngestRestService {
             }
           } else {
             logger.debug("Processing file item");
-            if (zipFileName != null) {
-              logger.warn("Ingest request contained more than one file attachment");
-              return Response.serverError().status(Status.BAD_REQUEST).build();
-            }
-            zipFileName = UUID.randomUUID().toString() + ".zip";
             InputStream in = item.openStream();
             try {
               zipFileUri = workspace.putInCollection(COLLECTION_ID, zipFileName, in);
@@ -392,7 +388,6 @@ public class IngestRestService {
           }
         }
       } else {
-        zipFileName = UUID.randomUUID().toString() + ".zip";
         InputStream in = request.getInputStream();
         try {
           zipFileUri = workspace.putInCollection(COLLECTION_ID, zipFileName, in);
@@ -411,6 +406,14 @@ public class IngestRestService {
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     } finally {
       IOUtils.closeQuietly(zipInputStream);
+      try {
+        workspace.deleteFromCollection(COLLECTION_ID, zipFileName);
+      } catch (NotFoundException nfe) {
+        // That's fine, we failed somewhere on the way
+        logger.debug("Error removing missing temporary ingest file " + COLLECTION_ID + "/" + zipFileName, nfe);
+      } catch (IOException ioe) {
+        logger.warn("Error removing temporary ingest file " + COLLECTION_ID + "/" + zipFileName, ioe);
+      }
     }
   }
 
@@ -687,23 +690,14 @@ public class IngestRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getProgress/{jobId}")
-  public Response getProgress(@PathParam("jobId") String jobId) {
-    EntityManager em = emf.createEntityManager();
-    try {
+  public Response getProgress(@PathParam("jobId") String jobId) throws NotFoundException {
+    // try to get UploadJob, responde 404 if not successful
       UploadJob job = null;
-      try { // try to get UploadJob, responde 404 if not successful
-        // Query q = em.createNamedQuery("UploadJob.getByID");
-        // q.setParameter("id", jobId);
-        // job = (UploadJob) q.getSingleResult();
         if (jobs.containsKey(jobId)) {
           job = jobs.get(jobId);
         } else {
-          throw new NoResultException("Job not found");
+      throw new NotFoundException("Job not found");
         }
-      } catch (NoResultException e) {
-        logger.warn("UploadJob not found for Id: " + jobId);
-        return Response.status(Status.NOT_FOUND).build();
-      }
       /*
        * String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:" +
        * Long.toString(job.getBytesReceived()) + "}"; return Response.ok(json).build();
@@ -712,13 +706,7 @@ public class IngestRestService {
       out.put("total", Long.toString(job.getBytesTotal()));
       out.put("received", Long.toString(job.getBytesReceived()));
       return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
-    } catch (Exception ex) {
-      logger.error(ex.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    } finally {
-      em.close();
     }
-  }
 
   @GET
   @Produces(MediaType.TEXT_HTML)
@@ -992,39 +980,37 @@ public class IngestRestService {
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);*/
 
     // addTrackMonitored
-    endpoint = new RestEndpoint(
-            "addTrackMonitored",
-            RestEndpoint.Method.POST,
-            "/addTrackMonitored/{jobId}",
-            "Adds a track to the specified MediaPackage while counting the bytes received during the upload of the file. POSTs to this method must be of type multipart/form-data.");
-    endpoint.addFormat(new Format(
-            "HTML",
-            "HTML that triggers a javascript function in the parent site (upload form lives in an iframe) to indicate the POST to this method was successfully finished.",
-            null));
-    endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-            "Id of the MediaPackage to which the file should be added"));
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
-            "The flavor of the file in the MediaPackage (eg. presenter/source, presentation/source etc)"));
-    endpoint.addBodyParam(false, "presenter/source", "flavor : ");
-    endpoint.addBodyParam(true, null, "file : binary content of the uploaded file");
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+    /*
+     * doc deactivated, MH-6634 endpoint = new RestEndpoint( "addTrackMonitored", RestEndpoint.Method.POST,
+     * "/addTrackMonitored/{jobId}",
+     * "Adds a track to the specified MediaPackage while counting the bytes received during the upload of the file. POSTs to this method must be of type multipart/form-data."
+     * ); endpoint.addFormat(new Format( "HTML",
+     * "HTML that triggers a javascript function in the parent site (upload form lives in an iframe) to indicate the POST to this method was successfully finished."
+     * , null)); endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id"));
+     * endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+     * "Id of the MediaPackage to which the file should be added")); endpoint.addRequiredParam(new Param("flavor",
+     * Param.Type.STRING, null,
+     * "The flavor of the file in the MediaPackage (eg. presenter/source, presentation/source etc)"));
+     * endpoint.addBodyParam(false, "presenter/source", "flavor : "); endpoint.addBodyParam(true, null,
+     * "file : binary content of the uploaded file"); endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+     * endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+     * endpoint.addStatus(org.opencastproject.util.doc.Status.error(null)); endpoint.setTestForm(RestTestForm.auto());
+     * data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+     */
 
     // getUploadProgress
-    endpoint = new RestEndpoint("getUploadProgress", RestEndpoint.Method.GET, "/getUploadProgress/{jobId}",
-            "Returns a JSON object reporting the status of the upload with the provided upload job id.");
-    endpoint.addFormat(new Format("JSON",
-            "JSON object reporting the status of the upload with the provided upload job id.", null));
-    endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id."));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    /*
+     * doc deactivated, MH-6634 endpoint = new RestEndpoint("getUploadProgress", RestEndpoint.Method.GET,
+     * "/getUploadProgress/{jobId}",
+     * "Returns a JSON object reporting the status of the upload with the provided upload job id.");
+     * endpoint.addFormat(new Format("JSON",
+     * "JSON object reporting the status of the upload with the provided upload job id.", null));
+     * endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id."));
+     * endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+     * endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
+     * endpoint.addStatus(org.opencastproject.util.doc.Status.error(null)); endpoint.setTestForm(RestTestForm.auto());
+     * data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+     */
 
     // TODO: v v v --- check the documentation and implementation of the existing methods --- v v v
 

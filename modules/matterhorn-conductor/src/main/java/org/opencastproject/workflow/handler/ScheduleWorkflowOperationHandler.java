@@ -78,4 +78,8 @@ public class ScheduleWorkflowOperationHandler extends ResumableWorkflowOperation
     return result;
   }
 
+  @Override
+  public boolean isAlwaysPause() {
+    return true;
+  }
 }

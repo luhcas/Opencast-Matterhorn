@@ -291,8 +291,8 @@ public class ITunesUDistributionService extends AbstractJobProducer implements D
             } catch (URISyntaxException e) {
               throw new DistributionException("Distributed element produces an invalid URI", e);
             }
-            MediaPackageElement distributedElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                    .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
+            MediaPackageElement distributedElement = MediaPackageElementBuilderFactory.newInstance()
+                    .newElementBuilder().elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
             distributedElement.setIdentifier(element.getIdentifier() + "-dist");
 
             return distributedElement;
@@ -393,14 +393,14 @@ public class ITunesUDistributionService extends AbstractJobProducer implements D
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
-   *      java.util.List)
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job)
    */
   @Override
-  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+  protected String process(Job job) throws Exception {
     Operation op = null;
     try {
-      op = Operation.valueOf(operation);
+      op = Operation.valueOf(job.getOperation());
+      List<String> arguments = job.getArguments();
       String mediapackageId = arguments.get(0);
       switch (op) {
         case Distribute:
@@ -411,7 +411,7 @@ public class ITunesUDistributionService extends AbstractJobProducer implements D
           retract(job, mediapackageId);
           return null;
         default:
-          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+          throw new IllegalStateException("Don't know how to handle operation '" + job.getOperation() + "'");
       }
     } catch (IllegalArgumentException e) {
       throw new ServiceRegistryException("This service can't handle operations of type '" + op + "'", e);

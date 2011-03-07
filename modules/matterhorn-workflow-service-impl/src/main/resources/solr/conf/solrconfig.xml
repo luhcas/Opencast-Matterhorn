@@ -232,12 +232,12 @@
          maxTime - oldest uncommited update (in ms) is this long ago
          Instead of enabling autoCommit, consider using "commitWithin"
          when adding documents. http://wiki.apache.org/solr/UpdateXmlMessages
-    <autoCommit> 
-      <maxDocs>10000</maxDocs>
-      <maxTime>1000</maxTime> 
-    </autoCommit>
     -->
 
+    <autoCommit>
+      <maxDocs>1000</maxDocs> <!-- maximum uncommited docs before autocommit triggered -->
+      <maxTime>10000</maxTime> <!-- maximum time (in MS) after adding a doc before an autocommit is triggered -->
+    </autoCommit>
 
     <!-- The RunExecutableListener executes an external command from a
       hook such as postCommit or postOptimize.
@@ -481,6 +481,8 @@
     </httpCaching>
   </requestDispatcher>
 
+  <!-- Modified version of the regular SolrQueryParser that allows for full wildcard queries -->
+  <queryParser name="wildcardqueryparser" class="org.opencastproject.solr.WildcardQueryParserPlugin" />
 
   <!-- requestHandler plugins... incoming queries will be dispatched to the
      correct handler based on the path or the qt (query type) param.
@@ -494,6 +496,7 @@
     <!-- default values for query parameters -->
      <lst name="defaults">
        <str name="echoParams">explicit</str>
+       <str name="defType">wildcardqueryparser</str>
        <!--
        <int name="rows">10</int>
        <str name="fl">*</str>

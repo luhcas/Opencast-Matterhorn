@@ -16,13 +16,14 @@
 package org.opencastproject.capture.pipeline.bins.producers;
 
 import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
+import org.opencastproject.capture.pipeline.PipelineTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 import org.opencastproject.util.ConfigurationException;
 
 import org.apache.commons.io.FileUtils;
@@ -71,7 +72,7 @@ public abstract class EpiphanVGA2USBV4LTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
 
@@ -89,14 +90,15 @@ public abstract class EpiphanVGA2USBV4LTest {
       return;
     }
 
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"), "testpipe");
+    File tmpDir = new File("./target", "testpipe");
     if (!tmpDir.exists())
       tmpDir.mkdir();
 
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
-            null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation, ProducerType.EPIPHAN_VGA2USB,
-            "Epiphan VGA 2 USB", new File(tmpDir, "test.mpg").getAbsolutePath(), captureDeviceProperties);
+    captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null,
+            null, null);
+    captureDevice = PipelineTestHelpers.createCaptureDevice(epiphanLocation,
+            ProducerType.EPIPHAN_VGA2USB, "Epiphan VGA 2 USB", 
+            new File(tmpDir, "test.mpg").getAbsolutePath(), captureDeviceProperties);
 
     // setup testing properties
     properties = new Properties();
@@ -113,7 +115,7 @@ public abstract class EpiphanVGA2USBV4LTest {
 
     properties = null;
     captureDevice = null;
-    FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "testpipe"));
+    FileUtils.deleteQuietly(new File("./target", "testpipe"));
   }
 
   /**

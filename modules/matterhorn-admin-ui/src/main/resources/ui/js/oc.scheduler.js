@@ -76,6 +76,7 @@ ocScheduler.init = function(){
   //Editing setup
   var eventId = ocUtils.getURLParam('eventId');
   if(eventId && ocUtils.getURLParam('edit')){
+    ocScheduler.mode = EDIT_MODE;
     document.title = i18n.window.edit + " " + i18n.window.prefix;
     $('#i18n_page_title').text(i18n.page.title.edit);
     $('#eventId').val(eventId);
@@ -115,7 +116,7 @@ ocScheduler.RegisterEventHandlers = function(){
     ocScheduler.ChangeRecordingType(MULTIPLE_EVENTS);
   });
   
-  $('.oc-ui-collapsible-widget .ui-widget-header').click(
+  $('.oc-ui-collapsible-widget .form-box-head').click(
     function() {
       $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
       $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
@@ -135,6 +136,9 @@ ocScheduler.RegisterEventHandlers = function(){
   
   $('#seriesSelect').blur(function(){if($('#seriesSelect').val() === ''){ $('#series').val(''); }});
   
+  $('#submitButton').button();
+  $('#cancelButton').button();
+  
   $('#submitButton').click(ocScheduler.SubmitForm);
   $('#cancelButton').click(ocScheduler.CancelForm);
 
@@ -143,13 +147,15 @@ ocScheduler.RegisterEventHandlers = function(){
   $('#startDate').datepicker({
     showOn: 'both',
     buttonImage: 'img/icons/calendar.gif',
-    buttonImageOnly: true
+    buttonImageOnly: true,
+    dateFormat: 'yy-mm-dd'
   });
   $('#startDate').datepicker('setDate', initializerDate);
   $('#endDate').datepicker({
     showOn: 'both',
     buttonImage: 'img/icons/calendar.gif',
-    buttonImageOnly: true
+    buttonImageOnly: true,
+    dateFormat: 'yy-mm-dd'
   });
   
   $('#agent').change(ocScheduler.HandleAgentChange);
@@ -158,13 +164,15 @@ ocScheduler.RegisterEventHandlers = function(){
   $('#recurStart').datepicker({
     showOn: 'both',
     buttonImage: 'img/icons/calendar.gif',
-    buttonImageOnly: true
+    buttonImageOnly: true,
+    dateFormat: 'yy-mm-dd'
   });
   
   $('#recurEnd').datepicker({
     showOn: 'both',
     buttonImage: 'img/icons/calendar.gif',
-    buttonImageOnly: true
+    buttonImageOnly: true,
+    dateFormat: 'yy-mm-dd'
   });
 
   $('#recurAgent').change(ocScheduler.HandleAgentChange);
@@ -232,9 +240,27 @@ ocScheduler.ChangeRecordingType = function(recType){
 ocScheduler.SubmitForm = function(){
   var eventXML = null;
   eventXML = ocScheduler.FormManager.serialize();
+  if(ocScheduler.conflictingEvents) {
+    $('#missingFieldsContainer').show();
+    $('#errorConflict').show();
+    $('#errorConflict li').show();
+    return;
+  }
   if(eventXML){
     $('#submitButton').attr('disabled', 'disabled');
-    $('#submitModal').dialog({height: 100, modal: true});
+    $('#submitModal').dialog(
+    {
+      modal: true,
+      resizable: false,
+      draggable: false,
+      close: function(){ 
+        document.location = RECORDINGS_URL;
+      },
+      create: function (event, ui)
+      {
+        $('.ui-dialog-titlebar-close').hide();
+      }
+    });
     if(ocUtils.getURLParam('edit')){
       $.ajax({type: 'POST',
               url: SCHEDULER_URL + '/' + $('#eventId').val(),
@@ -277,7 +303,7 @@ ocScheduler.HandleAgentChange = function(elm){
   var time;
   var agent = elm.target.value;
   $(ocScheduler.inputList).empty();
-  ocScheduler.additionalMetadataComponents.agentTimeZone.setValue('');
+  ocScheduler.additionalMetadataComponents.agentTimeZone = new ocAdmin.Component(['agentTimeZone']);
   if(agent){
     $.get('/capture-admin/agents/' + agent + '/capabilities',
       function(doc){
@@ -303,11 +329,12 @@ ocScheduler.HandleAgentChange = function(elm){
         }else{
           Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
           $('#inputList').replaceWith('Agent defaults will be used.');
+          delete ocScheduler.additionalMetadataComponents.agentTimeZone;
         }
       });
   }else{
     // no valid agent, change time to local form what ever it was before.
-    ocScheduler.additionalMetadataComponents.agentTimeZone.setValue(''); //Being empty will end up defaulting to the server's Timezone.
+    delete ocScheduler.additionalMetadataComponents.agentTimeZone; //Being empty will end up defaulting to the server's Timezone.
     if(ocScheduler.type === SINGLE_EVENT){
       time = ocScheduler.components.startDate.getValue();
     }else if(ocScheduler.type === MULTIPLE_EVENTS){
@@ -325,8 +352,11 @@ ocScheduler.HandleAgentChange = function(elm){
 ocScheduler.DisplayCapabilities = function(capabilities){
   $(ocScheduler.inputList).append('<ul class="oc-ui-checkbox-list">');
   $.each(capabilities, function(i, v){
-    $(ocScheduler.inputList).append('<li><input type="checkbox" id="' + v + '" value="' + v + '" checked="checked">&nbsp;<label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label></li>');
+    $(ocScheduler.inputList).append('<li><input type="checkbox" id="' + v + '" value="' + v + '">&nbsp;<label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label></li>');
   });
+  if(ocScheduler.mode === CREATE_MODE) {
+    $(':input', ocScheduler.inputList).attr('checked', 'checked');
+  }
   $(ocScheduler.inputList).append('</ul>');
   ocScheduler.components.resources.setFields(capabilities);
   if(ocScheduler.selectedInputs && ocUtils.getURLParam('edit')){
@@ -345,11 +375,9 @@ ocScheduler.DisplayCapabilities = function(capabilities){
         	  $('#inputhelpTitle').text('Please Note');
         	  $('#inputhelpText').text('You have to select at least one input in order to schedule a recording.');
         	  $('#inputhelpBox').show();
-        	  $('#submitButton').attr('disabled', 'true');
           }
           else {
         	  $('#inputhelpBox').hide();
-        	  $('#submitButton').removeAttr('disabled');
           }
         });
       });
@@ -429,7 +457,7 @@ ocScheduler.LoadEvent = function(doc){
   if(typeof event.additionalMetadata.metadata != 'undefined') {
    additionalMetadata = event.additionalMetadata.metadata;
     for(var i in additionalMetadata){
-      item = additionalMetadata[i];
+      var item = additionalMetadata[i];
       if(item.key.indexOf('org.opencastproject.workflow') > -1){
         workflowProperties[item.key] = item.value
       }else{ //flatten additional metadata into event
@@ -445,7 +473,11 @@ ocScheduler.LoadEvent = function(doc){
     $.get(SERIES_URL + '/' + event['seriesId'] + '.json', function(data){
       var series = {id: data.series.id};
       if(data.series.additionalMetadata){
-        md = data.series.additionalMetadata;
+        if(!$.isArray(data.series.additionalMetadata.metadata)){
+          md = [data.series.additionalMetadata.metadata];
+        } else {
+          md = data.series.additionalMetadata.metadata;
+        }
         for(var i in md){
           if(typeof md[i].key != 'undefined' && md[i].key === 'title') {
             series.label = md[i].value;
@@ -481,61 +513,67 @@ ocScheduler.EventSubmitComplete = function(xhr, status){
 }
 
 ocScheduler.CheckForConflictingEvents = function(){
-  var event, endpoint, data;
+  var start, end;
+  var data = {
+    device: '',
+    start: 0,
+    end: 0,
+    duration: 0,
+    rrule: ''
+  };
   ocScheduler.conflictingEvents = false;
-  if($('#noticeConflict').siblings(':visible').length === 0){
-    $('#noticeContainer').hide();
-  }
-  $('#noticeConflict').hide();
+  $('#missingFieldsContainer').hide();
+  $('#missingFieldsContainer li').hide();
+  $('#errorConflict').hide();
   $('#conflictingEvents').empty();
   if(ocScheduler.components.device.validate()){
-    event = '<metadata><key>device</key><value>' + ocScheduler.components.device.getValue() + '</value></metadata>';
+    data.device = ocScheduler.components.device.getValue()
   }else{
     return false;
   }
   if(ocScheduler.type === SINGLE_EVENT){
     if(ocScheduler.components.startDate.validate() && ocScheduler.components.duration.validate()){
-      event = '<event><metadataList>' + event;
-      event += '<metadata><key>timeStart</key><value>' + ocScheduler.components.startDate.getValue() + '</value></metadata>';
-      event += '<metadata><key>timeEnd</key><value>' + ocScheduler.components.duration.getValue() + '</value></metadata></metadataList></event>';
-      endpoint = '/event/conflict.xml';
-      data = {event: event};
+      data.start = ocScheduler.components.startDate.getValue();
+      data.duration = ocScheduler.components.duration.getValue();
+      data.end = data.start + data.duration;
     }else{
       return false;
     }
   }else if(ocScheduler.type === MULTIPLE_EVENTS){
     if(ocScheduler.components.recurrenceStart.validate() && ocScheduler.components.recurrenceEnd.validate() &&
        ocScheduler.components.recurrence.validate() && ocScheduler.components.recurrenceDuration.validate()){
-      event = '<recurringEvent><recurrence>' + ocScheduler.components.recurrence.getValue() + '</recurrence><metadataList>' + event;
-      event += '<metadata><key>recurrenceStart</key><value>' + ocScheduler.components.recurrenceStart.getValue() + '</value></metadata>';
-      event += '<metadata><key>recurrenceEnd</key><value>' + ocScheduler.components.recurrenceEnd.getValue() + '</value></metadata>';
-      event += '<metadata><key>recurrenceDuration</key><value>' + (ocScheduler.components.recurrenceDuration.getValue()) + '</value></metadata>';
-      event += '</metadataList></recurringEvent>';
-      endpoint = '/recurring/conflict.xml';
-      data = {recurringEvent: event};
+      data.start = ocScheduler.components.recurrenceStart.getValue();
+      data.end = ocScheduler.components.recurrenceEnd.getValue();
+      data.duration = ocScheduler.components.recurrenceDuration.getValue();
+      data.rrule = ocScheduler.components.recurrence.getValue();
     }else{
       return false;
     }
   }
-  $.post(SCHEDULER_URL + endpoint, data, function(doc){
-    if($('event', doc).length > 0){
-      $.each($('event', doc), function(i,event){
-        var id, title;
-        id = $('eventId', event).text();
-        $.each($('completeMetadata > metadata', event), function(j,metadata){
-          if($('key', metadata).text() === 'title'){
-            title = $('value', metadata).text();
-            return true;
-          }
-        });
-        if(id !== $('#eventId').val()){
-          $('#conflictingEvents').append('<li><a href="scheduler.html?eventId=' + id + '&edit" target="_new">' + title + '</a></li>');
-          ocScheduler.conflictingEvents = true;
+  $.post(SCHEDULER_URL + "/conflict.json", data, function(data){
+    var events = [];
+    if(data != '') {
+      if(!$.isArray(data.events.event)){
+        if(ocScheduler.mode === CREATE_MODE || (ocScheduler.mode === EDIT_MODE && $('#eventId').val() !== data.events.event.id)) {
+          events.push(data.events.event);
         }
-      });
+        if(events.length == 0) {
+          return;
+        }
+      } else {
+        events = data.events.event;
+      }
+      for(i in events) {
+        curId = $('#eventId').val();
+        eid = events[i].id;
+        if(ocScheduler.mode === CREATE_MODE || (ocScheduler.mode === EDIT_MODE && curId !== eid)) {
+          ocScheduler.conflictingEvents = true;
+          $('#conflictingEvents').append('<li><a href="scheduler.html?eventId=' + events[i].id + '&edit=true" target="_new">' + events[i].title + '</a></li>');
+        }
+      }
       if(ocScheduler.conflictingEvents){
-        $('#noticeContainer').show();
-        $('#noticeConflict').show();
+        $('#missingFieldsContainer').show();
+        $('#errorConflict').show();
       }
     }
   });
@@ -653,7 +691,6 @@ ocScheduler.RegisterComponents = function(){
       }
     });
   ocScheduler.additionalMetadataComponents.workflowDefinition = new ocAdmin.Component(['workflowSelector'], {nodeKey: 'org.opencastproject.workflow.definition'});
-  ocScheduler.additionalMetadataComponents.agentTimeZone = new ocAdmin.Component(['agentTimeZone']);
   
   if(ocScheduler.type === MULTIPLE_EVENTS){
     //Series validation override for recurring events.
@@ -959,7 +996,7 @@ ocScheduler.RegisterComponents = function(){
         }
       });
     ocScheduler.components.startDate = new ocAdmin.Component(['startDate', 'startTimeHour', 'startTimeMin'],
-      { label: 'startDateLabel', errorField: 'missingStartDate', required: true, nodeKey: 'startDate' },
+      { label: 'startDateLabel', errorField: 'missingStartdate', required: true, nodeKey: 'startDate' },
       { getValue: function(){
           var date = 0;
           date = this.fields.startDate.datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.

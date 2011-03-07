@@ -29,7 +29,6 @@ IS_CA=false
 
 LOGDIR=$FELIX/logs
 
-NAME=matterhorn
 PATH=$PATH:$FELIX
 
 ##
@@ -51,6 +50,18 @@ PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencas
 UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.util.logging.properties"
 GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
 JAVA_OPTS="-Xms256m -Xmx256m -XX:MaxPermSize=128m"
+
+# If this computer is OS X and $DYLD_FALLBACK_LIBRARY_PATH environment variable
+# is not defined, then set it to /opt/local/lib. This is required for the demo
+# capture agent.  
+unameResult=`uname`
+if [ $unameResult = 'Darwin' ];
+then 
+ 	if [ "$DYLD_FALLBACK_LIBRARY_PATH" = "" ];
+	then
+		export DYLD_FALLBACK_LIBRARY_PATH="/opt/local/lib";
+	fi
+fi
 
 FELIX_CACHE="$FELIX/felix-cache"
 
@@ -90,7 +101,7 @@ case "$1" in
 
 # starting felix
 
-    su -c "cd $FELIX && java -Dgosh.args='--noshutdown -c noop=true' $DEBUG_OPTS $GRAPHICS_OPTS $MAVEN_ARG $JAVA_OPTS $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE &" $MATTERHORN_USER > /dev/null 2> /dev/null
+    su -c "java -Dgosh.args='--noshutdown -c noop=true' $DEBUG_OPTS $GRAPHICS_OPTS $MAVEN_ARG $JAVA_OPTS $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE 2>&1 > /dev/null &" $MATTERHORN_USER
     echo "done." 
     ;;    
   stop)
@@ -136,7 +147,7 @@ case "$1" in
     fi   
     ;;
   *)
-    echo "Usage: /etc/init.d/$NAME {start|stop|restart|status}"
+    echo "Usage: $0 {start|stop|restart|status}"
     exit 1
     ;;
 esac

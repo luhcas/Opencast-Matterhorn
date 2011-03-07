@@ -182,7 +182,7 @@ public class RuntimeInfo {
       endpoint.put("description", description);
       endpoint.put("version", version);
       endpoint.put("docs", serverUrl + servletContextPath + "/docs"); // This is a Matterhorn convention
-      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml"); // This triggers a CXF-specific handler
+      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&_type=xml"); // This triggers a CXF-specific handler
       json.add(endpoint);
     }
     return json;

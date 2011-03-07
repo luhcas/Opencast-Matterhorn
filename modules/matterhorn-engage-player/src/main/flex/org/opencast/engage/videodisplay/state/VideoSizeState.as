@@ -15,26 +15,27 @@
  */
 package org.opencast.engage.videodisplay.state
 {
+	/**
+	 *   VideoSizeState
+	 */
+	public class VideoSizeState
+	{
 
-    /**
-     *   VideoSizeState
-     */
-    public class VideoSizeState
-    {
-        public static const ONLYLEFT : String = 'onlyleft';
+		public static const AUDIO:String='audio';
 
-        public static const BIGLEFT : String = 'bigleft';
+		public static const BIGLEFT:String='bigleft';
 
-        public static const CENTER : String = 'center';
+		public static const BIGRIGHT:String='bigright';
 
-        public static const BIGRIGHT : String = 'bigright';
+		public static const CENTER:String='center';
 
-        public static const ONLYRIGHT : String = 'onlyright';
+		public static const CUSTOM:String='custom';
+		public static const ONLYLEFT:String='onlyleft';
 
-        public static const CUSTOM : String = 'custom';
+		public static const ONLYRIGHT:String='onlyright';
 
-        public static const AUDIO : String = 'audio';
-
-        public static const SINGLE : String = 'single';
-    }
+		public static const SINGLE:String='single';
+	}
 }
+
+

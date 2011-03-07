@@ -1,9 +1,12 @@
 ocRecordings = new (function() {
 
+  var WORKFLOW_URL = '../workflow';
   var WORKFLOW_LIST_URL = '../workflow/instances.json';          // URL of workflow instances list endpoint
   var WORKFLOW_INSTANCE_URL = '';                                // URL of workflow instance endpoint
   var WORKFLOW_STATISTICS_URL = '../workflow/statistics.json';   // URL of workflow instances statistics endpoint
-  var SERIES_URL = '/series'
+  var SERIES_URL = '/series';
+  var SEARCH_URL = '../search';
+  var ENGAGE_URL = '';
 
   var STATISTICS_DELAY = 3000;     // time interval for statistics update
 
@@ -18,19 +21,21 @@ ocRecordings = new (function() {
   {
     q : 'Any fields',
     title : 'Title',
-    seriestitle : 'Series',
-    creator : 'Presenter'
+    creator : 'Presenter',
+    seriestitle : 'Course/Series'
   },
   {
+    contributor : 'Contributor',
     subject : 'Subject',
     language : 'Language',
-    contributor : 'Contributor',
     license : 'License'
   }
   ]
 
   this.totalRecordings = 0;
+  this.currentShownRecordings = 0;
   this.numSelectedRecordings = 0;
+  this.changedBulkEditFields = {};
 
   // components
   this.searchbox = null;
@@ -42,6 +47,7 @@ ocRecordings = new (function() {
   var refreshing = false;      // indicates if JSONP requesting recording data is in progress
   this.refreshingStats = false; // indicates if JSONP requesting statistics data is in progress
   this.refreshInterval = null;
+  this.statsInterval = null;
   
   this.bulkEditComponents = {};
 
@@ -62,9 +68,9 @@ ocRecordings = new (function() {
     this.pageSize = 10;
     this.page = 0;
     this.refresh = 5;
-    this.doRefresh = true;
+    this.doRefresh = 'true';
     this.sortField = 'Date';
-    this.sortOrder = 'DESC';
+    this.sortOrder = 'ASC';
     this.filterField = null;
     this.filterText = '';
     
@@ -84,7 +90,8 @@ ocRecordings = new (function() {
           }
         }
       }
-    } catch (e) {
+    }
+    catch (e) {
       alert('Unable to parse url parameters:\n' + e.toString());
     }
 
@@ -97,8 +104,6 @@ ocRecordings = new (function() {
     if (!refreshing) {
       refreshing = true;
       var params = [];
-      //params.push('count=' + ocRecordings.Configuration.pageSize);
-      //params.push('startPage=' + ocRecordings.Configuration.page);
       // 'state' to display
       var state = ocRecordings.Configuration.state;
       params.push('state=-stopped');
@@ -254,6 +259,20 @@ ocRecordings = new (function() {
     });
   }
 
+  this.startStatisticsUpdate = function() {
+    refreshStatistics();
+    if(ocRecordings.statsInterval == null) {
+      ocRecordings.statsInterval = window.setInterval(refreshStatistics, STATISTICS_DELAY);
+    }
+  }
+
+  this.stopStatisticsUpdate = function() {
+    if(ocRecordings.statsInterval != null) {
+      window.clearInterval(ocRecordings.statsInterval);
+      ocRecordings.statsInterval = null;
+    }
+  }
+
   /** Construct an object representing a row in the recording table from a
    *  workflow instance object delivered by the workflow endpoint.
    */
@@ -269,6 +288,19 @@ ocRecordings = new (function() {
     this.actions=[];
     this.holdAction=false;
     this.error = false;
+    this.captureAgent = '';
+
+    var self = this;    // ie for $.each
+
+    // ensure workflow.configuration.configurations is an array / search for capture agent name
+    if (wf.configurations && wf.configurations.configuration) {
+      wf.configurations.configuration = ocUtils.ensureArray(wf.configurations.configuration);
+      $.each(wf.configurations.configuration, function(index, elm) {
+        if (elm.key == 'schedule.location') {
+          self.captureAgent = elm['$'];
+        }
+      });
+    }
 
     if (wf.mediapackage && wf.mediapackage.title) {
       this.title = wf.mediapackage.title;
@@ -287,7 +319,7 @@ ocRecordings = new (function() {
 
     // Start Time
     if (wf.mediapackage.start) {
-      this.start = ocUtils.fromUTCDateString(wf.mediapackage.start);
+      this.start = ocUtils.fromUTCDateStringToFormattedTime(wf.mediapackage.start, wf.mediapackage.duration);
     }
 
     // Status
@@ -332,10 +364,10 @@ ocRecordings = new (function() {
           this.operation = op.description;
       } else {
         op = ocRecordings.findFirstOperation(wf, "INSTANTIATED");    // MH-6426: it can happen that for running workflow there is no operation in state RUNNING
-        if (op) {                                                    //     in this case we search for the next INSTANTIATED operation and display is as QUEUED
+        if (op) {                                                    //     in this case we search for the next INSTANTIATED operation and display it as QUEUED
           this.operation = op.description;
         } else {
-          ocUtils.log('Warning could not find current operation (neither RUNNING nor INSTANTIATED) for worklfow ' + wf.id);
+          ocUtils.log('Warning could not find current operation for worklfow ' + wf.id);
         }
         this.state = 'Queued';
       }
@@ -343,6 +375,21 @@ ocRecordings = new (function() {
       this.state = wf.state;
     }
 
+    // MH-6671 mark upcoming events with start date in the past
+    if (this.state == 'Upcoming') {
+      $.each(wf.configurations.configuration, function(index, elm) {
+        if (elm.key == 'schedule.start') {
+          var start = elm['$'];
+          var now = new Date().getTime();
+          if (parseInt(start) < parseInt(now)) {
+            self.error = 'Capture or Ingest Failure';
+            self.state = 'Failed';
+          }
+        }
+      });
+      
+    }
+    
     // Actions
     this.actions = ['view'];
     if (this.state == 'Upcoming') {
@@ -350,19 +397,13 @@ ocRecordings = new (function() {
       this.actions.push('delete');
     } else if (this.state == 'Finished') {
       this.actions.push('play');
-      this.actions.push('delete');
+    //this.actions.push('publish');
+    //this.actions.push('unpublish');
     } else if (this.state == 'Failed') {
-      this.actions.push('delete');
+      this.actions.push('stop');
+    } else if (this.state == 'On Hold') {
+      this.actions.push('ignore');
     }
-
-    /*
-    if (this.state == 'Upcoming') {
-      this.actions = ['view', 'edit', 'delete'];
-    } else if (this.state == 'Processing' || this.state == 'Queued') {
-      this.actions = ['view'];
-    } else {
-      this.actions = ['view', 'delete'];
-    }*/
 
     return this;
   }
@@ -396,6 +437,11 @@ ocRecordings = new (function() {
     refreshing = false;
     ocRecordings.data = data;
     ocRecordings.totalRecordings = parseInt(data.workflows.totalCount);
+    if(ocRecordings.totalRecordings >= data.workflows.count) {
+      ocRecordings.currentShownRecordings = parseInt(data.workflows.count);
+    } else {
+      ocRecordings.currentShownRecordings = ocRecordings.totalRecordings;
+    }
     var result = TrimPath.processDOMTemplate(template, makeRenderData(data));
     $( '#tableContainer' ).empty().append(result);
     
@@ -428,48 +474,37 @@ ocRecordings = new (function() {
     
     // display number of matches if filtered
     if (ocRecordings.Configuration.filterText) {
-      var countText;
       if (data.workflows.totalCount == '0') {
-        countText = 'No Recordings matching Filter';
         $('#filterRecordingCount').css('color', 'red');
       } else {
-        countText = data.workflows.totalCount;
-        countText += parseInt(data.workflows.totalCount) > 1 ? ' Recordings' : ' Recording';
-        countText += ' matching Filter';
         $('#filterRecordingCount').css('color', 'black');
       }
-      $('#filterRecordingCount').text(countText).show();
+      $('#filterRecordingCount').text(data.workflows.totalCount + ' found').show();
     } else {
       $('#filterRecordingCount').hide();
     }
 
     var page = parseInt(ocRecordings.Configuration.page) + 1;
-    var pageCount = Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize);
+    var pageCount = Math.ceil(data.workflows.totalCount / ocRecordings.Configuration.pageSize);
     pageCount = pageCount == 0 ? 1 : pageCount;
     $('#pageList').text( page + " of " + pageCount);
     if (page == 1) {
-      $('.prevPage').each(function() {
-        var text = $(this).text();
-        var $elm = $('<span></span>').text(text).css('color', 'gray');
-        $(this).replaceWith($elm);
-      });
+      $('#prevButtons').hide();
+      $('#prevText').show();
+    } else {
+      $('#prevButtons').show();
+      $('#prevText').hide();
     }
     if (page == pageCount) {
-      $('.nextPage').each(function() {
-        var text = $(this).text();
-        var $elm = $('<span></span>').text(text).css('color', 'gray');
-        $(this).replaceWith($elm);
-      })
+      $('#nextButtons').hide();
+      $('#nextText').show();
+    } else {
+      $('#nextButtons').show();
+      $('#nextText').hide();
     }
 
     // When table is ready, attach event handlers
     $('.sortable')
-    .mouseenter( function() {
-      $(this).addClass('ui-state-hover');
-    })
-    .mouseleave( function() {
-      $(this).removeClass('ui-state-hover');
-    })
     .click( function() {
       var sortDesc = $(this).find('.sort-icon').hasClass('ui-icon-circle-triangle-s');
       var sortField = ($(this).attr('id')).substr(4);
@@ -584,8 +619,8 @@ ocRecordings = new (function() {
   }
 
   this.adjustHoldActionPanelHeight = function() {
-    var height = $('#holdActionUI').contents().find('html').height();
-    $('#holdActionUI').height(height+10);
+    var height = $('#holdActionUI').contents().find('html').height() + 10;
+    $('#holdActionUI').height(height);
   }
 
   this.continueWorkflow = function(postData) {
@@ -680,8 +715,8 @@ ocRecordings = new (function() {
 
     // ocRecordings state selectors
     $( '#state-' +  ocRecordings.Configuration.state).attr('checked', true);
-    $( '.state-filter-container' ).buttonset();
-    $( '.state-filter-container input' ).click( function() {
+    $( '#runningStatesContainer, #notRunningStatesContainer' ).buttonset();
+    $( '#runningStatesContainer input, #notRunningStatesContainer input' ).click( function() {
       ocRecordings.Configuration.filterText = '';
       ocRecordings.Configuration.filterField = '';
       ocRecordings.Configuration.state = $(this).val();
@@ -690,6 +725,7 @@ ocRecordings = new (function() {
     })
 
     // search box
+    $( '#searchBox' ).css('width', $('#addButtonsContainer').outerWidth(false) - 10);   // make searchbox beeing aligned with upload/schedule buttons (MH-6519)
     this.searchbox = $( '#searchBox' ).searchbox({
       search : function(text, field) {
         if ($.trim(text) != '') {
@@ -697,13 +733,13 @@ ocRecordings = new (function() {
           ocRecordings.Configuration.filterText = text;
           ocRecordings.Configuration.page = 0;
         }
-        ocRecordings.reload();
+        refresh();
       },
       clear : function() {
         ocRecordings.Configuration.filterField = '';
         ocRecordings.Configuration.filterText = '';
         ocRecordings.Configuration.page = 0;
-        ocRecordings.reload();
+        refresh();
       },
       searchText : ocRecordings.Configuration.filterText,
       options : FILTER_FIELDS,
@@ -715,10 +751,10 @@ ocRecordings = new (function() {
 
     // Refresh Controls
     // set values according to config
-    if (ocRecordings.Configuration.doRefresh === 'true') {
+    if (ocRecordings.Configuration.doRefresh == 'true') {
       $('#refreshEnabled').attr('checked', 'checked');
       $('#refreshInterval').removeAttr('disabled');
-      $('#refreshControlsContainer span').css('color', 'white');
+      $('#refreshControlsContainer span').removeAttr('style');
     } else {
       $('#refreshEnabled').removeAttr('checked');
       $('#refreshInterval').attr('disabled', 'true');
@@ -729,7 +765,7 @@ ocRecordings = new (function() {
     $('#refreshEnabled').change(function() {
       if ($(this).is(':checked')) {
         $('#refreshInterval').removeAttr('disabled');
-        $('#refreshControlsContainer span').css('color', 'white');
+        $('#refreshControlsContainer span').removeAttr('style');
       } else {
         $('#refreshInterval').attr('disabled', 'true');
         $('#refreshControlsContainer span').css('color', 'silver');
@@ -790,8 +826,8 @@ ocRecordings = new (function() {
     });
 
     // set up statistics update
-    refreshStatistics();
-    window.setInterval(refreshStatistics, STATISTICS_DELAY);
+    ocRecordings.startStatisticsUpdate();
+
     if (ocRecordings.Configuration.state === 'bulkedit') {
       ocRecordings.bulkActionHandler('edit');
     } else if (ocRecordings.Configuration.state === 'bulkdelete') {
@@ -801,23 +837,80 @@ ocRecordings = new (function() {
     }
   };
   
-  this.removeRecording = function(id, title) { //TODO Delete the scheduled event too. Don't just stop the workflow.
+  this.removeRecording = function(id, title) {
     if(confirm('Are you sure you wish to delete ' + title + '?')){
       $.ajax({
-        url        : '../workflow/stop',
-        data       : {
-          id: id
+        url: '/scheduler/'+id,
+        type: 'DELETE',
+        error: function(XHR,status,e){
+          alert('Could not remove Recording ' + title);
         },
-        type       : 'POST',
-        error      : function(XHR,status,e){
-          alert('Could not remove Workflow ' + title);
-        },
-        success    : function(data) {
+        success: function(){
           ocRecordings.reload();
         }
       });
     }
   }
+
+  this.stopWorkflow = function(id) {
+    var wf = ocRecordings.getWorkflow(id);
+    if (wf) {
+      if(confirm('Are you sure you wish to delete ' + wf.title + '?')){
+        $.ajax({
+          url: WORKFLOW_URL + '/stop',
+          type: 'POST',
+        data       : {
+          id: id
+        },
+        error      : function(XHR,status,e){
+            alert('Could not stop Processing.');
+        },
+          success: function(){
+          ocRecordings.reload();
+        }
+      });
+    }
+  }
+  }
+
+  this.publishRecording = function(wfId) {
+    var workflow = ocRecordings.getWorkflow(id);
+    if (workflow) {
+      var mpId = workflow.mediapackage.id;
+      var mpTitle = workflow.mediapackge.title;
+      var mpXML = ""; // TODO get MediaPackage XML
+      $.ajax({
+        url : SEARCH_URL + "/add",
+        type : 'POST',
+        data : {
+          mediapackage : mpXML
+        },
+        error : function(xhr) {
+        // TODO: react on 204 -> success , 404 -> failure
+        }
+      });
+    }
+  }
+
+  this.unpublishRecording = function(wfId) {
+    var workflow = ocRecordings.getWorkflow(wfId);
+    if (workflow) {
+      var mpId = workflow.mediapackage.id;
+      var mpTitle = workflow.mediapackage.title;
+      $.ajax({
+        url : SEARCH_URL + '/' + mpId,
+        type : 'DELETE',
+        error : function(xhr) {
+          if (xhr.status == '204') {
+            alert("The following Recording was removed from Matterhorn Media Module:\n" + mpTitle);
+          } else {
+            alert("The recording was not removed from Metterhorn Media Module,\nmaybe it has already been remnoved.");
+          }
+        }
+      });
+    }
+  }
+
   //TEMPORARY (quick'n'dirty) PAGING
   this.nextPage = function() {
     numPages = Math.floor(this.totalRecordings / ocRecordings.Configuration.pageSize);
@@ -859,6 +952,18 @@ ocRecordings = new (function() {
     ocRecordings.Configuration.lastState = ocRecordings.Configuration.state
     ocRecordings.Configuration.lastPageSize = ocRecordings.Configuration.pageSize;
     ocRecordings.Configuration.lastPage = ocRecordings.Configuration.page;
+    ocRecordings.disableRefresh();
+    ocRecordings.stopStatisticsUpdate();
+    $('#bulkActionPanel :input[type=textarea], #bulkActionPanel :text').keyup(ocRecordings.bulkEditFieldHandler);
+  }
+
+  this.bulkEditFieldHandler = function(e) {
+    if(e.target.value !== '') {
+      ocRecordings.changedBulkEditFields[e.target.id] = e.target;
+    } else {
+      delete ocRecordings.changedBulkEditFields[e.target.id];
+    }
+    $('#bulkActionApplyMessage').text(bulkEditApplyMessage());
   }
 
   this.cancelBulkAction = function() {
@@ -867,6 +972,8 @@ ocRecordings = new (function() {
     ocRecordings.Configuration.pageSize = ocRecordings.Configuration.lastPageSize;
     ocRecordings.Configuration.page = ocRecordings.Configuration.lastPage;
     refresh();
+    ocRecordings.updateRefreshInterval(true, ocRecordings.Configuration.refresh);
+    ocRecordings.startStatisticsUpdate();
   }
 
   this.resetBulkActionPanel = function() {
@@ -874,6 +981,9 @@ ocRecordings = new (function() {
     $('#bulkActionSelect').change();
     $('#bulkActionPanel').hide();
     ocRecordings.bulkEditComponents = [];
+    $('#bulkActionPanel :input[type=textarea], #bulkActionPanel :text').val('');
+    ocRecordings.changedBulkEditFields = {};
+    ocRecordings.numSelectedRecordings = 0;
   }
 
   this.bulkActionHandler = function(action) {
@@ -884,6 +994,7 @@ ocRecordings = new (function() {
       $('#bulkActionApply').hide();
       $('#cancelBulkAction').show();
     } else {
+      ocRecordings.numSelectedRecordings = 0;
       if(action === 'edit'){
         $('#bulkActionApplyMessage').text(bulkEditApplyMessage());
         $('#bulkEditPanel').show();
@@ -892,7 +1003,6 @@ ocRecordings = new (function() {
         $('#cancelBulkAction').hide();
         ocRecordings.registerBulkEditComponents();
         ocRecordings.Configuration.state = 'bulkedit'
-        refresh();
       } else if (action === 'delete') {
         $('#bulkActionApplyMessage').text(bulkDeleteApplyMessage());
         $('#bulkEditPanel').hide();
@@ -900,13 +1010,14 @@ ocRecordings = new (function() {
         $('#bulkActionApply').show();
         $('#cancelBulkAction').hide();
         ocRecordings.Configuration.state = 'bulkdelete'
+      }
         refresh();
       }
     }
-  }
   
   function bulkEditApplyMessage() {
-    return "Changes will be made in 0 field(s) for all " + ocRecordings.numSelectedRecordings + " selected recoding(s).";
+    return "Changes will be made in " + ocUtils.sizeOf(ocRecordings.changedBulkEditFields) +
+    " field(s) for all " + ocRecordings.numSelectedRecordings + " selected recoding(s).";
   }
   
   function bulkDeleteApplyMessage() {
@@ -945,6 +1056,7 @@ ocRecordings = new (function() {
     var progress = 0;
     var progressChunk = 0;
     var eventIdList = [];
+    var failed = 0;
     $.each($('.selectRecording'), function(i,v){
       if(v.checked === true) {
         eventIdList.push(v.value);
@@ -954,6 +1066,7 @@ ocRecordings = new (function() {
       if(ocRecordings.Configuration.state === 'bulkedit') {
         manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
         event = manager.serialize();
+        $('#progressIndicator').show();
         $.post('/scheduler/', 
         {
           event: event,
@@ -961,7 +1074,7 @@ ocRecordings = new (function() {
         },
         ocRecordings.bulkActionComplete);
       } else if(ocRecordings.Configuration.state === 'bulkdelete') {
-        progressChunk = 100 / eventIdList.length;
+        progressChunk = (100 / eventIdList.length)
         $('#deleteProgress').progressbar({
           value: 0,
           complete: function(){
@@ -970,21 +1083,36 @@ ocRecordings = new (function() {
           }
         });
         $('#deleteModal').dialog({
-          height: 140,
-          modal: true
+          modal: true,
+          resizable: false,
+          draggable: false,
+          create: function (event, ui)
+          {
+            $('.ui-dialog-titlebar-close').hide();
+          }
         });
         var toid = setInterval(function(){
           var id = eventIdList.pop();
           if(typeof id === 'undefined'){
             clearInterval(toid);
+            ocUtils.log(progress);
+            $('#deleteProgress').progressbar('value', ++progress);
+            if(failed > 0) {
+              $('#deleteError').show();
+            }
             return;
           }
           $.ajax({
             url: '/scheduler/'+id,
             type: 'DELETE',
-            success: function(){
+            complete: function(xhr, status) {
+              if(xhr.status == 500) {
+                failed++;
+                $('#deleteErrorMessage').text('Failed to delete ' + failed + ' recordings.');
+              } else {
               progress = progress + progressChunk;
               $('#deleteProgress').progressbar('value', progress);
+            }
             }
           });
         }, 250);
@@ -993,6 +1121,9 @@ ocRecordings = new (function() {
   }
 
   this.bulkActionComplete = function() {
+    if(ocRecordings.Configuration.state === 'bulkedit') {
+      $('#progressIndicator').hide();
+    }
     ocRecordings.cancelBulkAction();
   }
 
@@ -1090,15 +1221,21 @@ ocRecordings = new (function() {
     });
   }
   
+  this.closeDeleteDialog = function() {
+    $('#deleteModal').dialog('close');
+    refresh();
+  }
+  
   $(document).ready(this.init);
 
   this.makeActions = function(recording, actions) {
-    var id = recording.id
+    var id = recording.id;
     var links = [];
-    for(i in actions){
-      if(actions[i] === 'view') {
+    $.each(actions, function(index, action) {
+      if (action == 'view') {
         links.push('<a href="viewinfo.html?id=' + id + '">View Info</a>');
-      } else if(actions[i] === 'edit') {
+
+      } else if (action == 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
       } else if(actions[i] === 'play') {
         var workflow = ocRecordings.getWorkflow(id);
@@ -1106,10 +1243,39 @@ ocRecordings = new (function() {
           var mpId = workflow.mediapackage.id;
           links.push('<a href="../engage/ui/watch.html?id=' + mpId + '">Play</a>');
         }
-      } else if(actions[i] === 'delete') {
+
+      } else if (action == 'play') {
+        var workflow = ocRecordings.getWorkflow(id);
+        if (workflow) {
+          var mpId = workflow.mediapackage.id;
+          if(ENGAGE_URL == '')
+          {
+            var data = $.ajax(
+            {
+              url: '/info/components.json',
+              dataType: 'json',
+              async: false
+            }).responseText;
+            data = $.parseJSON(data);
+            ENGAGE_URL = data.engage;
+          }
+          links.push('<a href="' + ENGAGE_URL + '/engage/ui/watch.html?id=' + mpId + '">Play</a>');
+        }
+
+      } else if (action == 'delete') {
         links.push('<a href="javascript:ocRecordings.removeRecording(\'' + id + '\',\'' + recording.title + '\')">Delete</a>');
+        
+      } else if (action == 'unpublish') {
+        links.push('<a href="javascript:ocRecordings.unpublishRecording(\'' + id + '\')">Unpublish</a>');
+      
+      } else if (action == 'ignore') {
+        links.push('<a title="Remove this Recording from UI only" href="javascript:ocRecordings.stopWorkflow(\'' + id + '\')">Ignore</a>');
+
+      } else if (action == 'stop') {
+        links.push('<a href="javascript:ocRecordings.stopWorkflow(\'' + id + '\')">Delete</a>');
+
       }
-    }
+    });
     return links.join(' \n');
   }
 

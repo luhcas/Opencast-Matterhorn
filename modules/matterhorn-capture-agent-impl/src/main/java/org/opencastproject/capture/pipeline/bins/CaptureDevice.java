@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import java.util.Properties;
 
@@ -51,7 +51,8 @@ public class CaptureDevice {
    * @param outputPath
    *          The output path
    */
-  public CaptureDevice(String location, ProducerType sourceDeviceName, String friendlyName, String outputPath) {
+  public CaptureDevice(String location, ProducerType sourceDeviceName, String friendlyName,
+          String outputPath) {
     this.location = location;
     this.sourceDeviceName = sourceDeviceName;
     this.outputPath = outputPath;

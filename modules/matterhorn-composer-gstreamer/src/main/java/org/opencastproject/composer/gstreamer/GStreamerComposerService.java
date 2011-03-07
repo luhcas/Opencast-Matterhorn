@@ -103,14 +103,14 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
-   *      java.util.List)
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job)
    */
   @Override
-  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+  protected String process(Job job) throws Exception {
     Operation op = null;
     try {
-      op = Operation.valueOf(operation);
+      op = Operation.valueOf(job.getOperation());
+      List<String> arguments = job.getArguments();
       Track firstTrack = null;
       Track secondTrack = null;
       String encodingProfile = null;
@@ -118,48 +118,48 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
       String serialized;
 
       switch (op) {
-      case Caption:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        Catalog[] catalogs = new Catalog[arguments.size() - 1];
-        for (int i = 1; i < arguments.size(); i++) {
-          catalogs[i] = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(i));
-        }
-        MediaPackageElement resultingElement = captions(job, firstTrack, catalogs);
-        serialized = MediaPackageElementParser.getAsXml(resultingElement);
-        break;
-      case Encode:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        encodingProfile = arguments.get(1);
-        resultingElement = encode(job, firstTrack, null, encodingProfile, null);
-        serialized = MediaPackageElementParser.getAsXml(resultingElement);
-        break;
-      case Image:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        encodingProfile = arguments.get(1);
-        long[] times = new long[arguments.size() - 2];
-        for (int i = 2; i < arguments.size(); i++) {
-          times[i - 2] = Long.parseLong(arguments.get(i));
-        }
-        List<Attachment> resultingElements = image(job, firstTrack, encodingProfile, times);
-        serialized = MediaPackageElementParser.getArrayAsXml(resultingElements);
-        break;
-      case Mux:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
-        encodingProfile = arguments.get(2);
-        resultingElement = mux(job, firstTrack, secondTrack, encodingProfile);
-        serialized = MediaPackageElementParser.getAsXml(resultingElement);
-        break;
-      case Trim:
-        firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
-        encodingProfile = arguments.get(1);
-        long start = Long.parseLong(arguments.get(2));
-        long duration = Long.parseLong(arguments.get(3));
-        resultingElement = trim(job, firstTrack, encodingProfile, start, duration);
-        serialized = MediaPackageElementParser.getAsXml(resultingElement);
-        break;
-      default:
-        throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
+        case Caption:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          Catalog[] catalogs = new Catalog[arguments.size() - 1];
+          for (int i = 1; i < arguments.size(); i++) {
+            catalogs[i] = (Catalog) MediaPackageElementParser.getFromXml(arguments.get(i));
+          }
+          MediaPackageElement resultingElement = captions(job, firstTrack, catalogs);
+          serialized = MediaPackageElementParser.getAsXml(resultingElement);
+          break;
+        case Encode:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          encodingProfile = arguments.get(1);
+          resultingElement = encode(job, firstTrack, null, encodingProfile, null);
+          serialized = MediaPackageElementParser.getAsXml(resultingElement);
+          break;
+        case Image:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          encodingProfile = arguments.get(1);
+          long[] times = new long[arguments.size() - 2];
+          for (int i = 2; i < arguments.size(); i++) {
+            times[i - 2] = Long.parseLong(arguments.get(i));
+          }
+          List<Attachment> resultingElements = image(job, firstTrack, encodingProfile, times);
+          serialized = MediaPackageElementParser.getArrayAsXml(resultingElements);
+          break;
+        case Mux:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
+          encodingProfile = arguments.get(2);
+          resultingElement = mux(job, firstTrack, secondTrack, encodingProfile);
+          serialized = MediaPackageElementParser.getAsXml(resultingElement);
+          break;
+        case Trim:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          encodingProfile = arguments.get(1);
+          long start = Long.parseLong(arguments.get(2));
+          long duration = Long.parseLong(arguments.get(3));
+          resultingElement = trim(job, firstTrack, encodingProfile, start, duration);
+          serialized = MediaPackageElementParser.getAsXml(resultingElement);
+          break;
+        default:
+          throw new IllegalStateException("Don't know how to handle operation '" + job.getOperation() + "'");
       }
 
       return serialized;

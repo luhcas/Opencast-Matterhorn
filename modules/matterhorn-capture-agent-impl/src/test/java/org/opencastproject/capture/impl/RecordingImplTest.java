@@ -35,13 +35,13 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class RecordingImplTest {
-  RecordingImpl rec = null;
-  ConfigurationManager configManager = null;
+  private RecordingImpl rec = null;
+  private ConfigurationManager configManager = null;
 
-  File testDir = null;
+  private File testDir = null;
 
   @Before
-  public void setup() throws org.osgi.service.cm.ConfigurationException, IOException {
+  public void setUp() throws org.osgi.service.cm.ConfigurationException, IOException {
     // Setup the configuration manager
     configManager = new ConfigurationManager();
     Properties sourceProps = new Properties();
@@ -52,14 +52,14 @@ public class RecordingImplTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    testDir = new File(System.getProperty("java.io.tmpdir"), "recording-test");
+    testDir = new File("./target", "recording-test");
     configManager.setItem("org.opencastproject.storage.dir", testDir.getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     rec = null;
     FileUtils.deleteQuietly(testDir);
   }

@@ -146,7 +146,7 @@ public class IngestServiceImplTest {
     EasyMock.expect(httpResponse.getEntity()).andReturn(entity).anyTimes();
     EasyMock.replay(httpResponse);
 
-    TrustedHttpClient httpClient = EasyMock.createMock(TrustedHttpClient.class);
+    TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);
     EasyMock.expect(httpClient.execute((HttpGet) EasyMock.anyObject())).andReturn(httpResponse).anyTimes();
     EasyMock.replay(httpClient);
 

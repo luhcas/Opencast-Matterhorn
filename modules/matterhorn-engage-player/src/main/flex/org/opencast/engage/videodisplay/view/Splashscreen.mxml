@@ -26,19 +26,19 @@
 
 	<mx:Script>
 		<![CDATA[
+			import mx.core.Application;
 			import mx.skins.halo.ApplicationBackground;
-			import org.opencast.engage.videodisplay.state.VideoSizeState;
-			import org.opencast.engage.videodisplay.state.DefaultPlayerState;
-			import org.osmf.media.MediaPlayer;
-			import org.opencast.engage.videodisplay.state.VideoState;
-			import org.osmf.layout.VerticalAlign;
 			import bridge.ExternalFunction;
 			import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
-			import org.opencast.engage.videodisplay.state.PlayerState;
 			import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
-			import org.swizframework.Swiz;
 			import org.opencast.engage.videodisplay.model.VideodisplayModel;
-			import mx.core.Application;
+			import org.opencast.engage.videodisplay.state.DefaultPlayerState;
+			import org.opencast.engage.videodisplay.state.PlayerState;
+			import org.opencast.engage.videodisplay.state.VideoSizeState;
+			import org.opencast.engage.videodisplay.state.VideoState;
+			import org.osmf.layout.VerticalAlign;
+			import org.osmf.media.MediaPlayer;
+			import org.swizframework.Swiz;
 
 			[Autowire]
 			[Bindable]
@@ -47,43 +47,9 @@
 			private var startMultiPlayer:Boolean=false;
 
 			/**
-			 * showButton
-			 * Show the Button in the middle of the video
-			 */
-			private function showButton():void
-			{
-				if (this.currentState == PlayerState.PLAYING)
-				{
-					pauseButton_up.visible=true;
-				}
-				else
-				{
-					playButton_up.visible=true;
-				}
-			}
-
-			/**
-			 * hideButton
-			 * Hide the Button in the middle of the video
-			 */
-			private function hideButton():void
-			{
-				if (this.currentState == PlayerState.PLAYING)
-				{
-					pauseButton_up.visible=false;
-				}
-				else
-				{
-					if (model.videoState != VideoState.COVER)
-					{
-						playButton_up.visible=false;
-					}
-				}
-			}
-
-			/**
 			 * fullscreen
-			 * Toggle between normal screen to the fullscreen mode. Set the new heigt and width for the videos.
+			 * Toggle between normal and fullscreen mode.
+			 * Set also the new height and width for the videos.
 			 */
 			private function fullscreen():void
 			{
@@ -159,8 +125,27 @@
 			}
 
 			/**
+			 * hideButton
+			 * Hide the splash button in the centre of the stage
+			 */
+			private function hideButton():void
+			{
+				if (this.currentState == PlayerState.PLAYING)
+				{
+					pauseButton_up.visible=false;
+				}
+				else
+				{
+					if (model.videoState != VideoState.COVER)
+					{
+						playButton_up.visible=false;
+					}
+				}
+			}
+
+			/**
 			 * play
-			 * Play the media file
+			 * Play the media file by calling the html
 			 */
 			private function play():void
 			{
@@ -175,6 +160,22 @@
 				else if (model.startPlayOne == true)
 				{
 					ExternalInterface.call(ExternalFunction.PLAYPAUSE, '');
+				}
+			}
+
+			/**
+			 * showButton
+			 * Show the splash button in the centre of the stage
+			 */
+			private function showButton():void
+			{
+				if (this.currentState == PlayerState.PLAYING)
+				{
+					pauseButton_up.visible=true;
+				}
+				else
+				{
+					playButton_up.visible=true;
 				}
 			}
 		]]>
@@ -235,7 +236,7 @@
 			   horizontalScrollPolicy="off"/>
 
 	<mx:Button id="playButton_up"
-			   click="{ play() }"
+			   click="{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
 			   width="{this.width/10}"
 			   height="{playButton_up.width}"
 			   styleName="PlayBig"

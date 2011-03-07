@@ -45,7 +45,7 @@
         <!-- field: License -->
         <li class="ui-helper-clearfix">
           <label class="scheduler-label"><span id="i18n_license_label">License</span>:</label>
-          <input type="text" class="formField" id="license" name="license">
+          <input type="text" class="formField" id="license" name="license" maxlength="255" />
         </li>
       </ul>
     </fieldset>
@@ -59,15 +59,11 @@
          */
         components['org.opencastproject.workflow.config.trimHold'] = new ocAdmin.Component(
           ['trimHold'],
-          {nodeKey: 'org.opencastproject.workflow.config.trimHold'},
-          {getValue: function(){ return this.fields.trimHold.is(":checked"); }
-          });
+          {nodeKey: 'org.opencastproject.workflow.config.trimHold'});
           
         components['org.opencastproject.workflow.config.captionHold'] = new ocAdmin.Component(
           ['captionHold'],
-          {nodeKey: 'org.opencastproject.workflow.config.captionHold'},
-          {getValue: function(){ return this.fields.captionHold.is(":checked");}
-          });
+          {nodeKey: 'org.opencastproject.workflow.config.captionHold'});
           
           //etc...
       }

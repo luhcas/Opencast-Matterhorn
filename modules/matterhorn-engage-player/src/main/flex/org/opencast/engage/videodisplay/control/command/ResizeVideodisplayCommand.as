@@ -15,70 +15,68 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
-    import mx.controls.Alert;
-    import mx.core.Application;
+	import mx.core.Application;
+	import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
+	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+	import org.swizframework.Swiz;
+	/**
+	 *   ResizeVideodisplayCommand
+	 */
+	public class ResizeVideodisplayCommand
+	{
 
-    import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
-    import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.swizframework.Swiz;
+		/**
+		 * Constructor
+		 */
+		public function ResizeVideodisplayCommand()
+		{
+			Swiz.autowire(this);
+		}
 
-    /**
-     *   ResizeVideodisplayCommand
-     */
-    public class ResizeVideodisplayCommand
-    {
+		[Autowire]
+		public var model:VideodisplayModel;
 
-        [Autowire]
-        public var model : VideodisplayModel;
+		/**
+		 * execute
+		 * When the user resize the Videodisplay in the browser.
+		 * @eventType ResizeVideodisplayEvent event
+		 */
+		public function execute(event:ResizeVideodisplayEvent):void
+		{
+			if (model.mediaContainer != null)
+			{
+				model.mediaContainer.height=Application.application.height;
+				model.mediaContainer.width=Application.application.width;
+			}
 
-        /**
-         * Constructor
-         */
-        public function ResizeVideodisplayCommand()
-        {
-            Swiz.autowire( this );
-        }
+			var divisor:int=50;
+			var fontSize:int=Application.application.width / divisor;
 
-        /**
-         * execute
-         * When the learner resize the Videodisplay in the browser.
-         * @eventType ResizeVideodisplayEvent event
-         */
-        public function execute( event : ResizeVideodisplayEvent ) : void
-        {
-            if( model.mediaContainer != null )
-            {
-                model.mediaContainer.height = Application.application.height;
-                model.mediaContainer.width = Application.application.width;
-            }
-
-            var divisor : int = 50;
-            var fontSize : int = Application.application.width / divisor;
-
-            if( fontSize > 16 )
-            {
-                model.fontSizeCaptions = 16;
-                model.endIndexSubtitle = 100;
-            }
-            else if( fontSize < 13 && fontSize >= 9 )
-            {
-                model.endIndexSubtitle = 80;
-                model.fontSizeCaptions = fontSize;
-            }
-            else if( fontSize < 9 && fontSize > 7 )
-            {
-                model.endIndexSubtitle = 70;
-                model.fontSizeCaptions = 9;
-            }
-            else if( fontSize < 8 )
-            {
-                model.endIndexSubtitle = 50;
-                model.fontSizeCaptions = 9;
-            }
-            else
-            {
-                model.fontSizeCaptions = fontSize;
-            }
-        }
-    }
+			if (fontSize > 16)
+			{
+				model.fontSizeCaptions=16;
+				model.endIndexSubtitle=100;
+			}
+			else if (fontSize < 13 && fontSize >= 9)
+			{
+				model.endIndexSubtitle=80;
+				model.fontSizeCaptions=fontSize;
+			}
+			else if (fontSize < 9 && fontSize > 7)
+			{
+				model.endIndexSubtitle=70;
+				model.fontSizeCaptions=9;
+			}
+			else if (fontSize < 8)
+			{
+				model.endIndexSubtitle=50;
+				model.fontSizeCaptions=9;
+			}
+			else
+			{
+				model.fontSizeCaptions=fontSize;
+			}
+		}
+	}
 }
+

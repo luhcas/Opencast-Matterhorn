@@ -157,7 +157,7 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
       content = new MultimediaContentImpl<Audio>(MultimediaContent.Type.AudioType);
       multimediaContent.put(MultimediaContent.Type.AudioType, content);
     }
-    MultimediaContentTypeImpl audio = new MultimediaContentTypeImpl(MultimediaContentType.Type.Audio, id);
+    MultimediaContentTypeImpl<AudioSegment> audio = new MultimediaContentTypeImpl<AudioSegment>(MultimediaContentType.Type.Audio, id);
     audio.setMediaTime(time);
     audio.setMediaLocator(locator);
     content.add(audio);
@@ -204,7 +204,7 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
       content = new MultimediaContentImpl<Video>(MultimediaContent.Type.VideoType);
       multimediaContent.put(MultimediaContent.Type.VideoType, content);
     }
-    MultimediaContentTypeImpl video = new MultimediaContentTypeImpl(MultimediaContentType.Type.Video, id);
+    MultimediaContentTypeImpl<VideoSegment> video = new MultimediaContentTypeImpl<VideoSegment>(MultimediaContentType.Type.Video, id);
     content.add(video);
     video.setMediaTime(time);
     video.setMediaLocator(locator);
@@ -251,7 +251,7 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
       content = new MultimediaContentImpl<AudioVisual>(MultimediaContent.Type.AudioVisualType);
       multimediaContent.put(MultimediaContent.Type.AudioVisualType, content);
     }
-    MultimediaContentTypeImpl audioVisual = new MultimediaContentTypeImpl(MultimediaContentType.Type.AudioVisual, id);
+    MultimediaContentTypeImpl<AudioVisualSegment> audioVisual = new MultimediaContentTypeImpl<AudioVisualSegment>(MultimediaContentType.Type.AudioVisual, id);
     audioVisual.setMediaTime(time);
     audioVisual.setMediaLocator(locator);
     content.add(audioVisual);

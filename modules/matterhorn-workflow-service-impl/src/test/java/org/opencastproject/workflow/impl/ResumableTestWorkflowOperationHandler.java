@@ -41,6 +41,9 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
 
   /** True if the resume() method has been called */
   private boolean resumed = false;
+  
+  /** The properties used to resume the workflow, or null */
+  private Map<String, String> properties;
 
   /**
    * Creates a new workflow operation handler that will pause on <code>start()</code> and continue on
@@ -112,6 +115,7 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   public void clear() {
     resumed = false;
     started = false;
+    this.properties = null;
   }
 
   /**
@@ -123,7 +127,7 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
           throws WorkflowOperationException {
-    started = true;
+    this.started = true;
     return createResult(startAction);
   }
 
@@ -136,7 +140,8 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   @Override
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance, JobContext context,
           Map<String, String> properties) throws WorkflowOperationException {
-    resumed = true;
+    this.resumed = true;
+    this.properties = properties;
     return createResult(resumeAction);
   }
 
@@ -158,6 +163,18 @@ public class ResumableTestWorkflowOperationHandler extends AbstractWorkflowOpera
   @Override
   public String getHoldActionTitle() {
     return "Test action";
+  }
+  
+  /**
+   * @return the properties
+   */
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+
+  @Override
+  public boolean isAlwaysPause() {
+    return false;
   }
 
 }

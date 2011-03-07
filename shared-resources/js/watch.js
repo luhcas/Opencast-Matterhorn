@@ -11,18 +11,36 @@ Opencast.Watch = (function ()
         SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
         AUDIOPLAYER = "Audioplayer",
         PLAYERSTYLE = "advancedPlayer",
+        mediaResolutionOne = "",
+        mediaResolutionTwo = "",
         mediaUrlOne = "",
         mediaUrlTwo = "",
         mimetypeOne = "",
         mimetypeTwo = "",
-        mediaResolutionOne = "",
-        mediaResolutionTwo = "",
         coverUrlOne = "",
         coverUrlTwo = "",
-        slideLength = 0;
-    var time = 0;
-    var interval;
-    var intervalOn = false;
+        slideLength = 0,
+        timeoutTime = 400,
+        duration = 0;
+        
+    /**
+     * @memberOf Opencast.Watch
+     * @description Parses a query string
+     */
+    function parseQueryString(qs){
+        var urlParams = {};
+        var currentUrl = window.location.href;
+        var email_message = "mailto:?subject=I recommend you to take a look at this Opencast video&body=Please have a look at: "
+        document.getElementById("oc_btn-email").setAttribute("href", email_message + currentUrl);
+        var e, d = function(s){
+            return decodeURIComponent(s.replace(/\+/g, " "));
+        }, q = window.location.search.substring(1), r = /([^&=]+)=?([^&]*)/g;
+        while (e = r.exec(q))
+        {
+            urlParams[d(e[1])] = d(e[2]);
+        }
+        return urlParams;
+    }
     
     /**
      * @memberOf Opencast.Watch
@@ -30,8 +48,12 @@ Opencast.Watch = (function ()
      */
     function onPlayerReady()
     {
-        var mediaPackageId = Opencast.engage.getMediaPackageId();
-        var userId = Opencast.engage.getUserId();
+        // Hide Screen Settings until clicked 'play'
+        $("#oc_btn-dropdown").css("display", 'none');
+        $("#oc_player_video-dropdown").css("display", 'none');
+        
+        var mediaPackageId = Opencast.Utils.getURLParameter('id');
+        var userId = Opencast.Utils.getURLParameter('user');
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
         Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
         Opencast.Player.setUserId(userId);
@@ -52,13 +74,25 @@ Opencast.Watch = (function ()
     /**
      * @memberOf Opencast.Watch
      * @description Sets up the html page after the player and the Plugins have been initialized.
+     * @param error flag if error occured (=> display nothing, hide initialize); optional: set only if an error occured
      */
-    function continueProcessing()
+    function continueProcessing(error)
     {
+        var err = error||false;
+        if(error)
+        {
+            $('#oc_Videodisplay').hide();
+            $('#initializing').html('The media is not available.');
+            $('#oc_flash-player-loading').css('width', '60%');
+            $('#loading-init').hide();
+            return;
+        }
+        
         // set the title of the page
         document.title = $('#oc-title').html() + " | Opencast Matterhorn - Media Player";
         var dcExtent = parseInt($('#dc-extent').html());
         Opencast.Analytics.setDuration(parseInt(parseInt(dcExtent) / 1000));
+        Opencast.Analytics.initialize();
         Opencast.Annotation_Chapter.setDuration(parseInt(parseInt(dcExtent) / 1000));
         Opencast.Annotation_Chapter.initialize();
         $('#oc_body').bind('resize', function ()
@@ -79,6 +113,23 @@ Opencast.Watch = (function ()
         // mimetypeTwo = "audio/x-flv";
         coverUrlOne = $('#oc-cover-presenter').html();
         coverUrlTwo = $('#oc-cover-presentation').html();
+        
+        // If URL Parameter display exists and is set to revert
+        var display = Opencast.Utils.getURLParameter('display');
+        if((display != null) && (display.toLowerCase() == 'invert'))
+        {
+            // Switch the displays and its covers
+            var tmpMediaURLOne = mediaUrlOne;
+            var tmpCoverURLOne = coverUrlOne;
+            var tmpMimetypeOne = mimetypeOne;
+            mediaUrlOne = mediaUrlTwo;
+            coverUrlOne = coverUrlTwo;
+            mimetypeOne = mimetypeTwo;
+            mediaUrlTwo = tmpMediaURLOne;
+            coverUrlTwo = tmpCoverURLOne;
+            mimetypeTwo = tmpMimetypeOne;
+        }
+        
         if (coverUrlOne === null)
         {
             coverUrlOne = coverUrlTwo;
@@ -142,6 +193,7 @@ Opencast.Watch = (function ()
         // init the segements_text
         Opencast.segments_text.initialize();
         slideLength = Opencast.segments.getSlideLength();
+            
         Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE, slideLength);
         if (mediaUrlOne !== '' && mediaUrlTwo !== '')
         {
@@ -197,36 +249,113 @@ Opencast.Watch = (function ()
         $('.segments-time').each(function ()
         {
             var seconds = $(this).html();
-            $(this).html(Opencast.engage.formatSeconds(seconds));
+            $(this).html(Opencast.Utils.formatSeconds(seconds));
         });
         // Set the Controls visible
         $('#oc_video-player-controls').show();
-        // Parse URL Parameters (time 't') and jump to the given Seconds
-        time = Opencast.Utils.parseSeconds(Opencast.Utils.getURLParameter('t'));
-        if (!intervalOn)
+        
+        // Hide loading indicators
+        $('#oc_flash-player-loading').hide();
+        
+        if(parseQueryString(window.location.search.substring(1)).embed) {
+            $('#oc_title-bar').hide();
+            $('#oc_btn-embed').hide();
+            $('#oc_slidetext').addClass('scroll');
+        }
+        // Show video controls and data
+        $('#oc_player_video-dropdown').show();
+        $('#data').show();
+        $('#oc_player-head-right').show();
+        $('#oc_ui_tabs').show();
+        
+        // Set Duration
+        var durDiv = $('#dc-extent').html();
+        if((durDiv !== undefined) && (durDiv !== null) && (durDiv != ''))
         {
-            interval = setInterval(forwardSeconds, 250);
-            intervalOn = true;
+            duration = parseInt(parseInt(durDiv) / 1000);
+            if((!isNaN(duration)) && (duration > 0))
+            {
+                Opencast.Player.setDuration(duration);
+            }
+        }
+        Opencast.Player.setTotalTime(Opencast.Utils.formatSeconds(Opencast.Player.getDuration()));
+        // Set seconds or autoplay
+        durationSet();
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Checks and executes the URL Parameters 't' and 'play'
+     *              Callback if duration time has been set
+     */
+    function durationSet()
+    {
+        var playParam = Opencast.Utils.getURLParameter('play');
+        var timeParam = Opencast.Utils.getURLParameter('t');
+        var durTextSet = ($('#oc_duration').text() != 'Initializing');
+        
+        var autoplay = (playParam !== null) && (playParam.toLowerCase() == 'true');
+        var time = (timeParam === null) ? 0 : Opencast.Utils.parseSeconds(timeParam);
+        time = (time < 0) ? 0 : time;
+        
+        var rdy = false;
+        // duration set
+        if(durTextSet)
+        {
+            // autoplay and jump to time OR autoplay and not jump to time
+            if((autoplay && (time != 0 )) || (autoplay && (time == 0 )))
+            {
+                // attention: first call 'play', after that 'jumpToTime', otherwise nothing happens!
+                if(Opencast.Player.doPlay() && jumpToTime(time))
+                {
+                    rdy = true;
+                }
+            }
+            // not autoplay and jump to time
+            else if(!autoplay && (time != 0 ))
+            {
+                if(jumpToTime(time))
+                {
+                    rdy = true;
+                }
+            }
+            // not autoplay and not jump to time
+            else
+            {
+                rdy = true;
+            }
+        } else
+        {
+            rdy = false;
+        }
+        
+        if(!rdy)
+        {
+            // If duration time not set, yet: set a timeout and call again
+            setTimeout(function()
+            {
+                Opencast.Watch.durationSet();
+            }, timeoutTime);
         }
     }
     
     /**
      * @memberOf Opencast.Watch
-     * @description Tries to forward to given Seconds if Player ready and Second set
+     * @description tries to jump to a given time
+     * @return true if successfully jumped, false else
      */
-    function forwardSeconds()
+    function jumpToTime(time)
     {
-        if (($('#oc_duration').text() != "NaN:NaN:NaN") && ($('#oc_duration').text() != ""))
+        var success = false;
+        try
         {
-            // Start playing the Video
-            // Videodisplay.play();
-            Videodisplay.seek(parseInt(time));
-            if (intervalOn)
-            {
-                clearInterval(interval);
-                intervalOn = false;
-            }
+            Videodisplay.seek(time);
+            success = true;
+        } catch(err)
+        {
+            success = false;
         }
+        return success;
     }
     
     /**
@@ -259,7 +388,7 @@ Opencast.Watch = (function ()
         $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + F = Forward the video.</span><br/>");
         $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + R = Rewind the video.</span><br/>");
         $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + T = the current time for the screen reader</span><br/>");
-        $('#oc_client_shortcuts').append('<a href="javascript: " id="oc_btn-leave_shortcut" onclick="$(\'#oc_shortcuts\').dialog(\'close\');" class="handcursor ui-helper-hidden-accessible" title="Leave shortcut dialog" role="button">Leave embed dialog</a>');
+        $('#oc_client_shortcuts').append('<a href="javascript: " id="oc_btn-leave_shortcut" onclick="$(\'#oc_shortcut-button\').trigger(\'click\');" class="handcursor ui-helper-hidden-accessible" title="Leave shortcut dialog" role="button">Leave embed dialog</a>');
         switch ($.client.os)
         {
         case "Windows":
@@ -279,6 +408,7 @@ Opencast.Watch = (function ()
         onPlayerReady: onPlayerReady,
         seekSegment: seekSegment,
         continueProcessing: continueProcessing,
+        durationSet: durationSet,
         getClientShortcuts: getClientShortcuts
     };
 }());

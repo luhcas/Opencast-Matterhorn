@@ -72,9 +72,7 @@ public interface WorkflowOperationHandler {
    *          the workflow instance
    * @param context
    *          the job context
-   * @return the {@link WorkflowOperationResult} containing a potentially modified MediaPackage and whether to put the
-   *         workflow instance into a wait state.
-   * 
+   * @return TODO
    * @throws WorkflowOperationException
    *           If the workflow operation fails to execute properly, and the default error handling should be invoked.
    */

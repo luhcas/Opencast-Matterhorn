@@ -15,41 +15,38 @@
  */
 package org.opencastproject.textanalyzer.impl.endpoint;
 
+import static org.opencastproject.util.doc.Status.badRequest;
+
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.textanalyzer.api.TextAnalyzerService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * The REST endpoint for {@link MediaAnalysisService}s
@@ -57,9 +54,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @Path("")
 public class TextAnalysisRestEndpoint extends AbstractJobProducerEndpoint {
 
-  /** The logger */
+  /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(TextAnalysisRestEndpoint.class);
-
+  
   /** The rest docs */
   protected String docs;
 
@@ -80,46 +77,20 @@ public class TextAnalysisRestEndpoint extends AbstractJobProducerEndpoint {
     docs = generateDocs(serviceUrl);
   }
 
-  public void deactivate() {
-  }
-
-  /**
-   * Callback from the OSGi declarative services to set the service registry.
-   * 
-   * @param serviceRegistry
-   *          the service registry
-   */
-  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
-    this.serviceRegistry = serviceRegistry;
-  }
-
-  /**
-   * Sets the text analyzer
-   * 
-   * @param textAnalyzer
-   *          the text analyzer
-   */
-  public void setTextAnalyzer(TextAnalyzerService textAnalyzer) {
-    this.service = textAnalyzer;
-  }
-
   @POST
   @Produces(MediaType.TEXT_XML)
-  @Path("/")
-  public Response analyze(@FormParam("image") String imageAsXml) {
+  @Path("")
+  public Response analyze(@FormParam("image") String image) {
+    if (service == null)
+      throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
     try {
-      DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(imageAsXml, "UTF-8"));
-      MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      if (element instanceof Attachment) {
-        Job job = service.extract((Attachment) element);
-        return Response.ok(new JaxbJob(job)).build();
-      } else {
-        return Response.status(Status.BAD_REQUEST).build();
-      }
+      MediaPackageElement element = MediaPackageElementParser.getFromXml(image);
+      if (!(element instanceof Attachment))
+        throw new WebApplicationException(Status.BAD_REQUEST);
+      Job job = service.extract((Attachment)element);
+      return Response.ok(new JaxbJob(job)).build();
     } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
+      logger.info(e.getMessage(), e);
       return Response.serverError().build();
     }
   }
@@ -140,20 +111,31 @@ public class TextAnalysisRestEndpoint extends AbstractJobProducerEndpoint {
     analyzeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .ok("The receipt to use when polling for the resulting mpeg7 catalog"));
     analyzeEndpoint.addRequiredParam(new Param("image", Type.TEXT, "", "The image to analyze for text."));
+    analyzeEndpoint.addStatus(badRequest("If the argument cannot be parsed into a media package element"));
     analyzeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, analyzeEndpoint);
 
-    // receipt
-    RestEndpoint receiptEndpoint = new RestEndpoint("receipt", RestEndpoint.Method.GET, "/{id}.xml",
-            "Retrieve a receipt for an analysis task");
-    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Results in an xml document containing the "
-            + "status of the analysis job, and the catalog produced by this analysis job if it the task is finished"));
-    receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
-    receiptEndpoint.addFormat(new Format("xml", null, null));
-    receiptEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
-
     return DocUtil.generate(data);
+  }
+
+  /**
+   * Callback from the OSGi declarative services to set the service registry.
+   * 
+   * @param serviceRegistry
+   *          the service registry
+   */
+  protected void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
+  }
+
+  /**
+   * Sets the text analyzer
+   * 
+   * @param textAnalyzer
+   *          the text analyzer
+   */
+  protected void setTextAnalyzer(TextAnalyzerService textAnalyzer) {
+    this.service = textAnalyzer;
   }
 
   /**

@@ -53,7 +53,7 @@ import javax.persistence.spi.PersistenceProvider;
  * IMPL for the capture-admin service (MH-1336, MH-1394, MH-1457, MH-1475 and MH-1476).
  */
 public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, ManagedService {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateServiceImpl.class);
 
   /** The name of the persistence unit for this class */
@@ -358,13 +358,15 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       if (state.equals(req.getState())) {
         logger.debug("Recording state not changed");
-        //Reset the state anyway so that the last-heard-from time is correct...
+        // Reset the state anyway so that the last-heard-from time is correct...
         req.setState(state);
         return true;
       } else {
         logger.debug("Setting Recording {} to state {}.", id, state);
         req.setState(state);
-        updateWorkflow(id, state);
+        if (!RecordingState.WORKFLOW_IGNORE_STATES.contains(state)) {
+          updateWorkflow(id, state);
+        }
         return true;
       }
     } else {

@@ -23,12 +23,16 @@ import java.util.Date;
  */
 public class SchedulerFilter {
 
-  protected String devicePattern;
-  protected String titlePattern;
   protected String creatorPattern;
+  protected String contributorPattern;
+  protected String devicePattern;
   protected String seriesPattern;
+  protected String seriesId;
+  protected String titlePattern;
   protected String order;
+  protected boolean betweenStartAndStop = false;
   protected boolean isAscending = true;
+  protected boolean includeCurrent = false;
   protected Date start;
   protected Date stop;
 
@@ -57,8 +61,27 @@ public class SchedulerFilter {
     return creatorPattern;
   }
 
+  /**
+   * Sets the search pattern for the creator string.
+   * @param creatorPattern
+   * @return SchedulerFilter
+   */
   public SchedulerFilter withCreatorFilter(String creatorPattern) {
     this.creatorPattern = creatorPattern;
+    return this;
+  }
+  
+  public String getContributorFilter() {
+    return contributorPattern;
+  }
+  
+  /**
+   * Sets the search pattern for the contributor string.
+   * @param contributorPattern
+   * @return SchedulerFilter
+   */
+  public SchedulerFilter withContributorFilter(String contributorPattern) {
+    this.contributorPattern = contributorPattern;
     return this;
   }
 
@@ -97,6 +120,15 @@ public class SchedulerFilter {
   public SchedulerFilter withSeriesFilter(String seriesPattern) {
     this.seriesPattern = seriesPattern;
     return this;
+  }
+  
+  public SchedulerFilter isPartOf(String seriesId) {
+    this.seriesId = seriesId;
+    return this;
+  }
+  
+  public String getSeriesId() {
+    return this.seriesId;
   }
 
   /**
@@ -137,6 +169,31 @@ public class SchedulerFilter {
   public SchedulerFilter withStop(Date stop) {
     this.stop = stop;
     return this;
+  }
+  
+  /**
+   * Sets the start and end periods between which events should be returned.
+   * Only events that start and stop in this period will be returned.
+   * 
+   * @param start
+   * @param stop
+   * @return SchedulerFilter
+   */
+  
+  public SchedulerFilter between(Date start, Date stop) {
+    this.start = start;
+    this.stop = stop;
+    this.betweenStartAndStop = true;
+    return this;
+  }
+  
+  public SchedulerFilter withCurrentAndUpcoming() {
+   this.includeCurrent = true; 
+   return this;
+  }
+  
+  public boolean getCurrentAndUpcoming() {
+    return this.includeCurrent;
   }
 
   /**

@@ -89,6 +89,7 @@ public class Activator implements BundleActivator {
       datasourceRegistration = bundleContext.registerService(DataSource.class.getName(), pooledDataSource, null);
     } catch (SQLException e) {
       logger.error("Connection attempt to {} failed", jdbcUrl);
+      logger.error("Exception: ", e);
       throw e;
     } finally {
       if (connection != null)
@@ -101,6 +102,7 @@ public class Activator implements BundleActivator {
     props.put("type", "persistence");
     props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
     props.put("eclipselink.target-database", vendor);
+    props.put("eclipselink.logging.logger", "JavaLogger");
     if ("true".equalsIgnoreCase(bundleContext.getProperty("org.opencastproject.db.ddl.generation"))) {
       props.put("eclipselink.ddl-generation", "create-tables");
       props.put("eclipselink.ddl-generation.output-mode", "database");

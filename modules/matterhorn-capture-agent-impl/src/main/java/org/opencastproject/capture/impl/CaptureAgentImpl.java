@@ -65,7 +65,6 @@ import org.gstreamer.Bus;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
-import org.gstreamer.event.EOSEvent;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
@@ -116,6 +115,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.gstreamer.message.EOSMessage;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines to store several tracks from a
@@ -540,11 +540,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       setAgentState(AgentState.IDLE);
     } else {
       // We must stop the capture as soon as possible, then check whatever needed
-      if (!pipe.sendEvent(new EOSEvent())) {
-        logger.warn("Unable to send EOS event to pipeline.");
-        setAgentState(AgentState.IDLE);
-        return false;
-      }
+      pipe.getBus().post(new EOSMessage(pipe));
       long startWait = System.currentTimeMillis();
       long timeout = 60000L;
       if (configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT) == null) {
@@ -850,7 +846,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
       // Take the least loaded one (first in line)
       ServiceRegistration ingestService = ingestServices.get(0);
-      url = new URL(UrlSupport.concat(ingestService.getHost(), ingestService.getPath()));
+      url = new URL(UrlSupport.concat(ingestService.getHost(), ingestService.getPath() + "/addZippedMediaPackage"));
     } catch (ServiceRegistryException e) {
       logger.warn("Unable to ingest media because communication with the remote service registry failed.", e);
       return -4;

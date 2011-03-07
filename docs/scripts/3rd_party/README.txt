@@ -16,15 +16,35 @@ and follow the steps in menu (starting with 0).
 
 2. automatically (batch)
 
+2a) compile everything for Linux/Mac
+
 Define some required variables and start the script:
 
 export HOME3P=<3rd_party_dir>   # use absolute path, not "."
 export SUDOPWD=<sudo_password>  # if needed
 ./do-all
 
-At the end of compilation (approx. 45 minutes) you'll have 3rd
+If you want a complete log of the compilation, use:
+./do-all 2>&1 | tee do-all.log
+
+At the end of compilation (approx. 30 minutes) you'll have 3rd
 party tools installed in /usr/local/bin on Linux or /opt/local/bin
-on Mac and packages (zip files) for installation on Windows.
+on Mac.
+
+2b) cross-compile everything for Windows
+
+Define some required variables and start the script:
+
+export HOME3P=<3rd_party_dir>   # use absolute path, not "."
+export SUDOPWD=<sudo_password>  # if needed
+./do-all-win32
+
+If you want a complete log of the cross-compilation, use:
+./do-all-win32 2>&1 | tee do-all-win32.log
+
+At the end of cross-compilation (approx. 30 minutes) you'll have 3rd
+party tools for Windows packed in zip files ready for installation
+on Windows.
 
 +----------------------------------------------------------------+
 | NOTE: Cross-compilation for Windows can be done only on Linux! |
@@ -59,15 +79,15 @@ the following newly installed operating systems:
 - 64-bit Linux
   CentOS 5.5, Red Hat Enterprise Linux Server 5.5, Ubuntu 10.04.x
 
+- Mac OS X Snow Leopard 10.6.* with Xcode 3.2.*
+
 All necessary prerequisites are downloaded and installed
 automatically, except for the following utilities, which should
 already be installed on the system:
 
 - java
-- zcat
-- bzcat
-- unzip
-- zip
+- gzip
+- bzip2
 
 
 Description of interactive run
@@ -191,12 +211,22 @@ a) do all for current platform
    (script do-all)
 
 This script, which can be used also for batch run, calls all actions
-for current platform in sequence: 0, 1, 2, 3 and 3z for Linux and
+for current platform in sequence: 0, 1 and 2 for Linux and
 0, 1 and 5 for Mac.
 
-At the end of compilation (approx. 45 minutes) you'll have 3rd
+At the end of compilation (approx. 30 minutes) you'll have 3rd
 party tools installed in /usr/local/bin on Linux or /opt/local/bin
-on Mac and packages (zip files) for installation on Windows.
+on Mac.
+
+w) do all for Windows
+   (script do-all-win32)
+
+This script, which can be used also for batch run, calls all actions
+for cross-compilation for Windows in sequence: 0, 1, 3 and 3z.
+
+At the end of cross-compilation (approx. 30 minutes) you'll have 3rd
+party tools for Windows packed in zip files ready for installation
+on Windows.
 
 l) view log of last action
 
@@ -246,7 +276,9 @@ All shell functions and global environment variables used in above
 mentioned scripts are defined in file $HOME3P/utilx.
 
 The following global variables are defined in utilx:
-export LOCAL_PREFIX=/usr/local
+export LOCAL_PREFIX=/usr/local  (for Linux)
+export LOCAL_PREFIX=/opt/local  (for Mac)
+export MACPORTS_SVN=http://svn.macports.org/repository/macports/trunk/dports
 export MINGW32=i686-pc-mingw32
 export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw
 export CFLAGS=""
@@ -286,7 +318,7 @@ On Vista, Windows 7 & 2008:
 C:\Users\matjaz> unzip _ffmpeg.zip
 
 This will create the directory .ffmpeg/..., which is a default location
-of ffmpeg preset files in ffmpeg.
+for ffmpeg preset files in ffmpeg.
 
 
 Windows installation of gstreamer

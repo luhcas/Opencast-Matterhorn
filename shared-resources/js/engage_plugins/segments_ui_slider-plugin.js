@@ -38,22 +38,14 @@ Opencast.segments_ui_slider_Plugin = (function ()
                                      '{/if}' +
                                  '{/if}' +
                              '{/if}' +
-                              '{if (t.type == "presenter/delivery")}' +
-                                  '{if (' +
-                                          '!((t.precedingSiblingType == "presentation/delivery") && t.precedingSiblingMimetypeIsVideo) &&' +
-                                          '!((t.followingSiblingType == "presentation/delivery") && t.followingSiblingMimetypeIsVideo)' +
-                                        ')}' +
-                                      '{if t.mimetype == "audio/x-adpcm"}' +
-                                          '{if t.url.substring(0, 4) == "http"}' +
-                                              '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
-                                                  '${t.url}' +
-                                              '</div>' +
-                                              '<div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">' +
-                                                  '${t.mimetype}' +
-                                              '</div>' +
-                                          '{/if}' +
-                                      '{/if}' +
-                                  '{/if}' +
+                             
+                              '{if !isVideo && (t.type == "presenter/delivery") && (t.mimetype == "audio/x-adpcm") && (t.url.substring(0, 4) == "http")}' +
+                                  '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
+                                      '${t.url}' +
+                                  '</div>' +
+                                  '<div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">' +
+                                      '${t.mimetype}' +
+                                  '</div>' +
                               '{/if}' +
                               
                              '{if t.type == "presentation/delivery"}' +

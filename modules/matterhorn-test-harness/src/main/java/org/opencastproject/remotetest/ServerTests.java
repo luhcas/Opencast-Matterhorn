@@ -41,6 +41,7 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
   WorkflowRestEndpointTest.class,
+  PreProcessingWorkflowTest.class,
   WorkingFileRepoRestEndpointTest.class,
   DistributionDownloadRestEndpointTest.class,
   IngestZipTest.class,
@@ -54,7 +55,6 @@ import org.junit.runners.Suite.SuiteClasses;
   UnscheduledCaptureTest.class,
   UploadTest.class,
   MaintenanceModeTest.class,
-  PreProcessingWorkflowTest.class,
   LtiAuthenticationTest.class
 })
 

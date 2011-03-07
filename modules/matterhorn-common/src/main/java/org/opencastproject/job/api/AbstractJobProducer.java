@@ -20,18 +20,21 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
 
-import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This class serves as a convenience for services that implement the {@link JobProducer} api to deal with handling long
  * running, asynchronous operations.
- * <p>
- * Subclasses need to make sure to call {@link #setServiceRegistry}
  */
 public abstract class AbstractJobProducer implements JobProducer {
 
   /** The types of job that this producer can handle */
   protected String jobType = null;
+
+  /** To enable threading when dispatching jobs */
+  protected ExecutorService executor = Executors.newCachedThreadPool();
 
   /**
    * Creates a new abstract job producer for jobs of the given type.
@@ -42,7 +45,7 @@ public abstract class AbstractJobProducer implements JobProducer {
   public AbstractJobProducer(String jobType) {
     this.jobType = jobType;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -68,27 +71,32 @@ public abstract class AbstractJobProducer implements JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#acceptJob(org.opencastproject.job.api.Job, java.lang.String,
-   *      java.util.List)
+   * @see org.opencastproject.job.api.JobProducer#acceptJob(org.opencastproject.job.api.Job)
    */
   @Override
-  public void acceptJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException {
-    try {
-      String result = process(job, operation, arguments);
-      job.setPayload(result);
-      job.setStatus(Status.FINISHED);
-    } catch (Exception e) {
-      job.setStatus(Status.FAILED);
-      if (e instanceof ServiceRegistryException)
-        throw (ServiceRegistryException) e;
-      throw new ServiceRegistryException("Error handling operation '" + operation + "': " + e.getMessage(), e);
-    } finally {
+  public boolean acceptJob(Job job) throws ServiceRegistryException {
+    if (isReadyToAccept(job)) {
       try {
+        job.setStatus(Job.Status.RUNNING);
         getServiceRegistry().updateJob(job);
       } catch (NotFoundException e) {
-        throw new ServiceRegistryException(e);
+        throw new IllegalStateException(e);
       }
+      executor.submit(new JobRunner(job));
+      return true;
+    } else {
+      return false;
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.JobProducer#isReadyToAccept(org.opencastproject.job.api.Job)
+   */
+  @Override
+  public boolean isReadyToAccept(Job job) throws ServiceRegistryException {
+    return true;
   }
 
   /**
@@ -103,15 +111,57 @@ public abstract class AbstractJobProducer implements JobProducer {
    * associated job as the payload.
    * 
    * @param job
-   *          TODO
-   * @param operation
-   *          the operation name
-   * @param arguments
-   *          the list of arguments for the operation
+   *          the job to process
    * 
    * @return the operation result
    * @throws Exception
    */
-  abstract protected String process(Job job, String operation, List<String> arguments) throws Exception;
+  protected abstract String process(Job job) throws Exception;
+
+  /**
+   * A utility class to run jobs
+   */
+  class JobRunner implements Callable<Void> {
+
+    /** The job */
+    private Job job = null;
+
+    /**
+     * Constructs a new job runner
+     * 
+     * @param job
+     *          the job to run
+     */
+    JobRunner(Job job) {
+      this.job = job;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.util.concurrent.Callable#call()
+     */
+    @Override
+    public Void call() throws Exception {
+      try {
+        String payload = process(job);
+        job.setPayload(payload);
+        job.setStatus(Status.FINISHED);
+      } catch (Exception e) {
+        job.setStatus(Status.FAILED);
+        if (e instanceof ServiceRegistryException)
+          throw (ServiceRegistryException) e;
+        throw new ServiceRegistryException("Error handling operation '" + job.getOperation() + "': " + e.getMessage(),
+                e);
+      } finally {
+        try {
+          getServiceRegistry().updateJob(job);
+        } catch (NotFoundException e) {
+          throw new ServiceRegistryException(e);
+        }
+      }
+      return null;
+    }
+  }
 
 }

@@ -248,7 +248,7 @@ Opencast.WorkflowInspect = (function() {
   }
 
   /** Build an object that can be rendered easily from the Configuration objects
-   *  of Workflow, Operation etc. If the same key is encountered twice ore more
+   *  of Workflow, Operation etc. If the same key is encountered twice or more
    *  the field is converted to an array.
    */
   function buildConfigObject(data) {

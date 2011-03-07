@@ -2,6 +2,53 @@ body {
 	padding-top: 20px;
 }
 
+/* Classes */
+
+.play-progress {
+    width: 0%;
+}
+
+/* Start: No Javascript activated Error Box */
+.noJSAlert-outer {
+    background-color: #FFFFFF;
+    border:1px solid red;
+    width:530px;
+    margin:20px;
+}
+
+.noJSAlert-inner-up {
+    text-align: left;
+    background:red;
+    color:white;
+    padding-top:2px;
+    padding-bottom:2px;
+}
+
+.noJSAlert-inner-down {
+    padding:10px;
+}
+
+.noJSAlert-inner-image {
+    margin-left:5px;
+    margin-right:5px;
+}
+
+.icon {
+    width:16px;
+    height:16px;
+    background-repeat: none;
+    background-position: center center;
+    float: left;
+}
+
+.icon-error {
+    background-image: url(../img/icons/exclamation.png);
+}
+/* End: No Javascript activated Error Box */
+
+/* IDs */
+
+/* Start: Header */
 #pageHeader {
 	position: absolute;
 	top: 0;
@@ -36,7 +83,6 @@ body {
 	position: absolute;
 	top: 0;
 }
-/* HEADER STYLE */
 
 #header {
     position:relative;
@@ -57,4 +103,15 @@ body {
 #logotitle {
 	position: absolute;
 	top: 16px;
+}
+/* End: Header */
+
+/* Misc */
+
+#draggable {
+    left: 0%;
+}
+
+#analytics-and-annotations {
+    height: 25px;
 }

@@ -144,7 +144,7 @@ table
 .oc_edit-time
 {
   width:                    60px;
-  background-color:         #E3E3D7 !important;
+  background-color:         #FFFFFF !important;
   color:                    #000000;
   text-align:               right;
 }
@@ -299,7 +299,7 @@ table
 
 #oc_video-cc
 {
-  margin-top:               7px;
+  margin-top:               5px;
   visibility:               hidden;
 }
 
@@ -354,6 +354,12 @@ table
   z-index:                  2;
   margin-left:              -4px;
   left:                     0;
+  display:                  none;
+}
+
+img
+{
+    border: none;
 }
 
 #draggable 
@@ -368,6 +374,13 @@ table
   z-index:                  3;
   margin-left:              -4px;
   left:                     0;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner,
+#draggable::-moz-focus-inner
+{
+    border: none;
 }
 
 .progress-segment 
@@ -396,7 +409,8 @@ table
 .progress-list 
 {
   background-color:         #FFFFFF;
-  height:                   10px;
+  height:                   6px;
+  margin-top:               -1px;
 }
 
 .load-progress 

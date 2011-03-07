@@ -221,7 +221,9 @@
     <tr class="method testform">
       <th scope="row">Testing:</th>
       <td>
-        <div class="spaced"><strong>Sample:</strong> <tt class="sample_url">${endpoint.path}${endpoint.queryString!}</tt></div>
+        <div class="spaced"><strong>Sample:</strong>
+        <tt class="sample_url">${endpoint.path}${endpoint.pathFormat}${endpoint.queryString!}</tt>
+        </div>
         <#if endpoint.form??>
         <#if endpoint.form.html??><#-- just dump the html value -->
         ${endpoint.form.html}
@@ -268,7 +270,7 @@
                 </td>
                 <td>
                   <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field <#if item.path>form_param_path<#else>form_param_submit</#if><#if item.required> form_param_required</#if>" 
-                    type="checkbox" value="${item.defaultValue!}" />
+                    type="checkbox" value="true" />
                 </td>
                 <td class="form_field_description">${item.description!}</td>
                 <#elseif item.type == "file">
@@ -478,7 +480,11 @@
                       var submitParams = {};
                       $form.find(".form_param_submit").each( function() {
                           var $param = $(this);
-                          submitParams[$param.attr('name')] = $param.val();
+                          var $value = $param.val();
+                          if (this.type == 'checkbox' && !this.checked) {
+                        	  $value = "false";
+                          }
+                          submitParams[$param.attr('name')] = $value;
                       });
                       //alert("params: " + $.param(submitParams));
                       var method = $form.find(".form_method").val();

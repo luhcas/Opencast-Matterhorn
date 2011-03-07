@@ -81,7 +81,7 @@ public class SchedulingTest {
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     try {
       sched.shutdown(true);
     } catch (SchedulerException e) {

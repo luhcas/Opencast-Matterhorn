@@ -21,7 +21,8 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBin;
 import org.opencastproject.capture.pipeline.bins.consumers.AudioMonitoring;
 import org.opencastproject.capture.pipeline.bins.consumers.VideoMonitoring;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
@@ -77,7 +78,7 @@ public final class PipelineFactory {
 
     String[] friendlyNames;
     try {
-      friendlyNames = getDeviceNames();
+      friendlyNames = getDeviceNames(props);
     } catch (NoCaptureDevicesSpecifiedException e) {
       e.printStackTrace();
       return null;
@@ -100,9 +101,9 @@ public final class PipelineFactory {
    * @throws NoCaptureDevicesSpecifiedException
    *           - If there are no capture devices specified in the configuration file we throw an exception.
    */
-  private static String[] getDeviceNames() throws NoCaptureDevicesSpecifiedException {
+  public static String[] getDeviceNames(Properties props) throws NoCaptureDevicesSpecifiedException {
     // Setup pipeline for all the devices specified
-    String deviceNames = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
+    String deviceNames = props.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
       throw new NoCaptureDevicesSpecifiedException("No capture devices specified in "
               + CaptureParameters.CAPTURE_DEVICE_NAMES);
@@ -203,16 +204,18 @@ public final class PipelineFactory {
     }
     String outputLoc = outputFile.getAbsolutePath();
 
-    if (srcLoc == null) {
-      throw new CannotFindSourceFileOrDeviceException("Unable to create pipeline for " + name
-              + " because its source file/device does not exist!");
-    }
+    
 
     if (type != null) {
       devName = ProducerType.valueOf(type);
       logger.debug("Device {} has been confirmed to be type {}", name, devName.toString());
+      /** For certain devices we need to check to make sure that the src is specified, others are exempt. **/
+      if (ProducerFactory.getInstance().requiresSrc(devName)) {  
+        checkSrcLocationExists(name, srcLoc);
+      }
     } else {
       logger.debug("Device {} has no type so we will determine it's type.", name);
+      checkSrcLocationExists(name, srcLoc);
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
@@ -230,7 +233,22 @@ public final class PipelineFactory {
     return name;
   }
 
-  private static ProducerType determineSourceFromJ4VLInfo(String srcLoc) throws UnrecognizedDeviceException {
+  
+  /**
+   * Double checks that the source location for capture is set, otherwise throws an exception. 
+   * @param name Friendly name of the capture device. 
+   * @param srcLoc The source location that should be set to something. 
+   * @throws CannotFindSourceFileOrDeviceException Thrown if the source location is null or the empty string. 
+   */
+  private static void checkSrcLocationExists(String name, String srcLoc) throws CannotFindSourceFileOrDeviceException {
+    if (srcLoc == null || ("").equals(srcLoc)) {
+      throw new CannotFindSourceFileOrDeviceException("Unable to create pipeline for " + name
+              + " because its source file/device does not exist!");
+    }
+  }
+
+  private static ProducerType determineSourceFromJ4VLInfo(String srcLoc)
+          throws UnrecognizedDeviceException {
     // ALSA source
     if (srcLoc.contains("hw:")) {
       return ProducerType.ALSASRC;
@@ -241,13 +259,13 @@ public final class PipelineFactory {
       try {
         V4LInfo v4linfo = JV4LInfo.getV4LInfo(srcLoc);
         String deviceString = v4linfo.toString();
-        if (deviceString.contains("Epiphan VGA2USB"))
+        if (deviceString.contains("Epiphan VGA2USB") || deviceString.contains("Epiphan VGA2PCI")) {
           return ProducerType.EPIPHAN_VGA2USB;
-        else if (deviceString.contains("Hauppauge") || deviceString.contains("WinTV"))
+        } else if (deviceString.contains("Hauppauge") || deviceString.contains("WinTV")) {
           return ProducerType.HAUPPAUGE_WINTV;
-        else if (deviceString.contains("BT878"))
+        } else if (deviceString.contains("BT878")) {
           return ProducerType.BLUECHERRY_PROVIDEO;
-        else {
+        } else {
           throw new UnrecognizedDeviceException("Do not recognized device: " + srcLoc);
 
         }
@@ -299,7 +317,11 @@ public final class PipelineFactory {
     return pipeline;
   }
 
-  // TODO: Document me!
+  /** Creates a CaptureDevice used mostly for testing purposes from its important components. 
+   * @param srcLoc Where the capture device will capture from e.g. /dev/video0.
+   * @param devName The ProducerType of the capture device such as V4L2SRC.
+   * @param name The unique name of the capture device.
+   * @param outputLoc The output name of the capture media. **/
   public static CaptureDevice createCaptureDevice(String srcLoc, ProducerType devName, String name, String outputLoc) {
     CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
     String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CODEC;

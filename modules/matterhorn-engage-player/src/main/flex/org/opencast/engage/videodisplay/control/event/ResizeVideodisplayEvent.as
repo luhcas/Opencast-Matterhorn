@@ -15,31 +15,32 @@
  */
 package org.opencast.engage.videodisplay.control.event
 {
-    import flash.events.Event;
+	import flash.events.Event;
+	/**
+	 *   ResizeVideodisplayEvent
+	 */
+	public class ResizeVideodisplayEvent extends Event
+	{
+		public static var EVENT_NAME:String='ResizeVideodisplayEvent';
 
-    /**
-     *   ResizeVideodisplayEvent
-     */
-    public class ResizeVideodisplayEvent extends Event
-    {
-        public static var EVENT_NAME : String = 'ResizeVideodisplayEvent';
+		/**
+		 * Constructor
+		 */
+		public function ResizeVideodisplayEvent(bubbles:Boolean=false, cancelable:Boolean=false)
+		{
+			super(EVENT_NAME, bubbles, cancelable);
+		}
 
-        /**
-         * Constructor
-         */
-        public function ResizeVideodisplayEvent( bubbles : Boolean = false, cancelable : Boolean = false )
-        {
-            super( EVENT_NAME, bubbles, cancelable );
-        }
-
-        /**
-         * clone
-         * Override the inherited clone() method.
-         * @return ResizeVideodisplayEvent
-         */
-        override public function clone() : Event
-        {
-            return new ResizeVideodisplayEvent( bubbles );
-        }
-    }
+		/**
+		 * clone
+		 * Override the inherited clone() method.
+		 * @return ResizeVideodisplayEvent
+		 */
+		override public function clone():Event
+		{
+			return new ResizeVideodisplayEvent(bubbles);
+		}
+	}
 }
+
+

@@ -3,6 +3,7 @@
  name="org.opencastproject.workflow.impl.WorkflowServiceSolrIndex" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.workflow.impl.WorkflowServiceSolrIndex" />
   <property name="service.description" value="Workflow Service Index" />
+  <property name="synchronousIndexing" value="false" />
   <service>
     <provide interface="org.opencastproject.workflow.impl.WorkflowServiceIndex" />
   </service>

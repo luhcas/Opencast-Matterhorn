@@ -23,6 +23,7 @@ import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.SearchQueryImpl;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -46,7 +47,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -158,8 +158,7 @@ public class SearchRestService {
             "Removes a mediapackage from the search index");
     removeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .noContent("The mediapackage was removed, no content to return"));
-    removeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .notFound("The mediapackage was not found"));
+    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.notFound("The mediapackage was not found"));
     removeEndpoint
             .addPathParam(new Param("id", Type.STRING, "", "The media package ID to remove from the search index"));
     removeEndpoint.setTestForm(RestTestForm.auto());
@@ -219,11 +218,11 @@ public class SearchRestService {
 
   @DELETE
   @Path("{id}")
-  public Response remove(@PathParam("id") String mediaPackageId) throws SearchException {
+  public Response remove(@PathParam("id") String mediaPackageId) throws SearchException, NotFoundException {
     try {
       if (searchService.delete(mediaPackageId))
         return Response.noContent().build();
-      throw new WebApplicationException(Response.Status.NOT_FOUND);
+      throw new NotFoundException();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().build();

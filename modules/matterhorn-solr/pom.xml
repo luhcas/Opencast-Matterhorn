@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
@@ -98,16 +98,13 @@
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
-              org.tartarus;-split-package:=merge-first,
               org.tartarus.snowball;-split-package:=merge-first,
               org.tartarus.snowball.ext;-split-package:=merge-first,
               org.opencastproject.solr.internal
             </Private-Package>
             <Export-Package>
               org.opencastproject.solr;version=${project.version},
-              org.apache.solr;version=1.4.1,
-              org.apache.solr.*;-split-package:=merge-first,
-              org.apache.solr.client.solrj;version=1.4.1
+              org.apache.solr.*;-split-package:=merge-first
             </Export-Package>
             <Embed-Dependency>
               solr-core;inline=true,

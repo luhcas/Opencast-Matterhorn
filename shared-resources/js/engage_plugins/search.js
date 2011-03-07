@@ -168,7 +168,7 @@ Opencast.search = (function ()
         $('#search-loading').show();
         $('#oc-search-result').hide();
         $('.oc-segments-preview').css('display', 'block');
-        var mediaPackageId = Opencast.engage.getMediaPackageId();
+        var mediaPackageId = Opencast.Utils.getURLParameter('id');
         // Request JSONP data
         $.ajax(
         {
@@ -181,9 +181,15 @@ Opencast.search = (function ()
                 // get rid of every '@' in the JSON data
                 // dataStor = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
                 dataStor = data;
+                var segmentsAvailable = true;
+                
+                if((dataStor === undefined) || (dataStor['search-results'] === undefined) || (dataStor['search-results'].result === undefined))
+                {
+                    segmentsAvailable = false;
+                }
                 // Check if Segments + Segments Text is available
-                var segmentsAvailable = (dataStor['search-results'].result.segments !== undefined) && (dataStor['search-results'].result.segments.segment.length > 0);
-                if (segmentsAvailable) // dataStor['search-results'] && dataStor['search-results'].result
+                segmentsAvailable = segmentsAvailable && (dataStor['search-results'].result.segments !== undefined) && (dataStor['search-results'].result.segments.segment.length > 0);
+                if (segmentsAvailable)
                 {
                     dataStor['search-results'].result.segments.currentTime = Opencast.Utils.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
                     // Set Duration until this Segment ends
@@ -199,7 +205,11 @@ Opencast.search = (function ()
                     // Prepare the Data
                     prepareData(searchValue);
                     // Create Trimpath Template nd add it to the HTML
-                    Opencast.search_Plugin.addAsPlugin($('#oc-search-result'), dataStor['search-results'].result.segments, searchValue);
+                    var seaPlug = Opencast.search_Plugin.addAsPlugin($('#oc-search-result'), dataStor['search-results'].result.segments, searchValue);
+                    if(!seaPlug)
+                    {
+                        $('#oc-search-result').html('No Segment Data available');
+                    }
                     // Make visible
                     $('.oc-segments-preview').css('display', 'block');
                 }

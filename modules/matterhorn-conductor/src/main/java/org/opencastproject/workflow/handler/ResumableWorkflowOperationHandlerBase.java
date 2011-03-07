@@ -158,4 +158,8 @@ public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOpera
     return createResult(Action.CONTINUE);
   }
 
+  @Override
+  public boolean isAlwaysPause() {
+    return false;
+  }
 }

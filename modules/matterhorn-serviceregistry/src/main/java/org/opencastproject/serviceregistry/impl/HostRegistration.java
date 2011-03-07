@@ -17,14 +17,21 @@ package org.opencastproject.serviceregistry.impl;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /**
  * A record of a host providing Matterhorn services.
  */
 @Entity(name = "HostRegistration")
-@Table(name = "HOST_REGISTRATION")
+@Table(name = "HOST_REGISTRATION", uniqueConstraints = @UniqueConstraint(columnNames = "HOST"))
+@NamedQueries({
+        @NamedQuery(name = "HostRegistration.cores", query = "SELECT sum(hr.maxJobs) FROM HostRegistration hr"),
+        @NamedQuery(name = "HostRegistration.byHostName", query = "SELECT hr from HostRegistration hr where hr.baseUrl = :host") })
 public class HostRegistration {
 
   /** No-arg constructor needed by JPA */
@@ -50,8 +57,13 @@ public class HostRegistration {
     this.maintenanceMode = maintenance;
   }
 
-  /** The base URL for this host */
+  /** The primary key identifying this host */
   @Id
+  @Column
+  @GeneratedValue
+  protected Long id;
+
+  /** The base URL for this host */
   @Column(name = "HOST", nullable = false)
   protected String baseUrl;
 
@@ -69,6 +81,25 @@ public class HostRegistration {
   /** Whether this host is in maintenance mode */
   @Column(name = "MAINTENANCE", nullable = false)
   protected boolean maintenanceMode;
+
+  /**
+   * Gets the primary key for this host registration.
+   * 
+   * @return the primary key
+   */
+  public Long getId() {
+    return id;
+  }
+
+  /**
+   * Sets the primary key for this host registration.
+   * 
+   * @param id
+   *          the primary key
+   */
+  public void setId(Long id) {
+    this.id = id;
+  }
 
   /**
    * @return the baseUrl for this host

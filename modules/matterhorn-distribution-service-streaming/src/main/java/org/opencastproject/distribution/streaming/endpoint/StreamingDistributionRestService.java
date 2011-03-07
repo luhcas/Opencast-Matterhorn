@@ -144,8 +144,8 @@ public class StreamingDistributionRestService extends AbstractJobProducerEndpoin
     RestEndpoint endpoint = new RestEndpoint("distribute", RestEndpoint.Method.POST, "/",
             "Distribute a media package to the streaming server");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null, "The media package identifier"));
-    endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, null, "A media package element"));
+    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.STRING, null, "The media package identifier"));
+    endpoint.addRequiredParam(new Param("element", Param.Type.TEXT, null, "A media package element"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
     endpoint.setTestForm(RestTestForm.auto());

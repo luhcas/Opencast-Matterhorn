@@ -402,7 +402,9 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     try {
       File f = workspace.get(catalog.getURI());
       in = new FileInputStream(f);
-      return mpeg7CatalogService.load(in);
+      Mpeg7Catalog tmp = mpeg7CatalogService.load(in);
+      in.close();
+      return tmp;
     } catch (NotFoundException e) {
       throw new IOException("Unable to open catalog " + catalog + ": " + e.getMessage());
     } finally {

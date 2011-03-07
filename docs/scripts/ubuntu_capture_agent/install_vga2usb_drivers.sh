@@ -70,7 +70,10 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 		echo -n "Loading driver... "
   		cd $CA_DIR/$VGA2USB_DIR
   		tar jxf $EPIPHAN
-  		sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
+  		# Fix for MH-6755: in new drivers, the 'num_frame_buffers' param is 'v4l_num_buffers'
+  		# Check first which one uses this driver, then uses that value to patch the compilation, as usual
+  		buffer_param=$(modinfo vga2usb.ko | grep -o  '\(num_frame_buffers\|v4l_num_buffers\)')
+  		sed -i "/sudo \/sbin\/insmod/s/\$/ ${buffer_param}=2/" Makefile
   		
   		# First "make" is necessary according with MH-3810
 		make &> /dev/null && make load &> /dev/null

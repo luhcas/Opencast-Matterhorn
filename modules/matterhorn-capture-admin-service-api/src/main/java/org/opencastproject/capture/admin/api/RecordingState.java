@@ -64,4 +64,7 @@ public interface RecordingState {
           MANIFEST, MANIFEST_ERROR, MANIFEST_FINISHED, COMPRESSING, COMPRESSING_ERROR, UPLOADING, UPLOAD_FINISHED,
           UPLOAD_ERROR });
 
+  /** Some of the known states should not be delivered to the workflow service */
+  List<String> WORKFLOW_IGNORE_STATES = Arrays.asList(new String[] { UPLOADING, UPLOAD_FINISHED, UPLOAD_ERROR });
+
 }

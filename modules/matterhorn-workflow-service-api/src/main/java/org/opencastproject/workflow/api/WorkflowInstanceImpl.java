@@ -81,9 +81,6 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   protected String[] errorMessages = new String[0];
 
   @XmlTransient
-  protected WorkflowOperationInstance currentOperation = null;
-
-  @XmlTransient
   protected boolean initialized = false;
 
   /**
@@ -219,47 +216,15 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   public WorkflowOperationInstance getCurrentOperation() {
     if (!initialized)
       init();
-    return currentOperation;
-  }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowInstance#getOperations()
-   */
-  public List<WorkflowOperationInstance> getOperations() {
-    if (operations == null)
-      operations = new ArrayList<WorkflowOperationInstance>();
-    if (!initialized)
-      init();
-    return new ArrayList<WorkflowOperationInstance>(operations);
-  }
-
-  /**
-   * Sets the workflow operations on this workflow instance
-   * 
-   * @param workflowOperationInstanceList
-   */
-  @Override
-  public final void setOperations(List<WorkflowOperationInstance> workflowOperationInstanceList) {
-    this.operations = workflowOperationInstanceList;
-    init();
-  }
-
-  protected void init() {
-    currentOperation = null;
     if (operations == null || operations.isEmpty())
-      return;
-
-    // Jaxb will lose the workflow operation's position, so we fix it here
-    for (int i = 0; i < operations.size(); i++) {
-      ((WorkflowOperationInstanceImpl) operations.get(i)).setPosition(i);
-    }
-
+      return null;
+    
+    WorkflowOperationInstance currentOperation = null;
+    
     // Handle newly instantiated workflows
     if (INSTANTIATED.equals(operations.get(0).getState())) {
       currentOperation = operations.get(0);
-      initialized = true;
     } else {
       OperationState previousState = null;
 
@@ -292,8 +257,65 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
         previousState = operation.getState();
         position++;
       }
+      
+      // If we are at the last operation and there is no more work to do, we're done
+      if (operations.get(operations.size() - 1) == currentOperation) {
+        switch (currentOperation.getState()) {
+          case FAILED:
+          case SKIPPED:
+          case SUCCEEDED:
+            currentOperation = null;
+            break;
+          case INSTANTIATED:
+          case PAUSED:
+          case RUNNING:
+            break;
+          default:
+            throw new IllegalStateException("Found operation in unknown state '" + currentOperation.getState() + "'");
+        }
+      }
 
     }
+    
+    return currentOperation;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowInstance#getOperations()
+   */
+  public List<WorkflowOperationInstance> getOperations() {
+    if (operations == null)
+      operations = new ArrayList<WorkflowOperationInstance>();
+    if (!initialized)
+      init();
+    
+    
+    
+    return new ArrayList<WorkflowOperationInstance>(operations);
+  }
+
+  /**
+   * Sets the workflow operations on this workflow instance
+   * 
+   * @param workflowOperationInstanceList
+   */
+  @Override
+  public final void setOperations(List<WorkflowOperationInstance> workflowOperationInstanceList) {
+    this.operations = workflowOperationInstanceList;
+    init();
+  }
+
+  protected void init() {
+    if (operations == null || operations.isEmpty())
+      return;
+
+    // Jaxb will lose the workflow operation's position, so we fix it here
+    for (int i = 0; i < operations.size(); i++) {
+      ((WorkflowOperationInstanceImpl) operations.get(i)).setPosition(i);
+    }
+
     initialized = true;
   }
 
@@ -396,18 +418,20 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       throw new IllegalStateException("Operations list must contain operations");
     if (!initialized)
       init();
+    
+    WorkflowOperationInstance currentOperation = getCurrentOperation();
     if (currentOperation == null)
       throw new IllegalStateException("Can't call next on a finished workflow");
 
     for (Iterator<WorkflowOperationInstance> opIter = operations.iterator(); opIter.hasNext();) {
       WorkflowOperationInstance op = opIter.next();
       if (op.equals(currentOperation) && opIter.hasNext()) {
+        currentOperation.setState(OperationState.SKIPPED);
         currentOperation = opIter.next();
         return currentOperation;
       }
     }
 
-    currentOperation = null;
     return null;
   }
 
@@ -424,6 +448,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       return false;
     if (operations == null || operations.size() == 0)
       throw new IllegalStateException("operations list must contain operations");
+    
+    WorkflowOperationInstance currentOperation = getCurrentOperation();
     if (currentOperation == null)
       return true;
     return operations.lastIndexOf(currentOperation) < operations.size() - 1;
@@ -532,6 +558,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       operations.add(new WorkflowOperationInstanceImpl(operationDefintion, -1));
     }
     setOperations(operations);
+    setTemplate(workflowDefinition.getId());
   }
 
 }

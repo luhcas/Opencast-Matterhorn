@@ -72,6 +72,7 @@ public class CustomAudioProducer extends ProducerBin {
    **/
   @Override
   protected void createElements() {
+    logger.info("Custom Audio Producer is using Pipeline: \"" + captureDeviceProperties.getCustomProducer() + "\"");
     bin = Bin.launch(captureDeviceProperties.getCustomProducer(), LINK_UNUSED_GHOST_PADS);
   }
 

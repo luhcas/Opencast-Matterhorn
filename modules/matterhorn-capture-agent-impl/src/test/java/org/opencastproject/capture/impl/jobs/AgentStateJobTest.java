@@ -37,10 +37,10 @@ import java.util.Map;
 
 @Ignore()
 public class AgentStateJobTest {
-  AgentStateJob job = null;
+  private AgentStateJob job = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     ConfigurationManager config = new ConfigurationManager();
     config.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost:8080/");
     config.setItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL, "http://localhost:8080/");

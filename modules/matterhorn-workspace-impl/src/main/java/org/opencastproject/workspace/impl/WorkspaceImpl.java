@@ -23,6 +23,7 @@ import org.opencastproject.workingfilerepository.api.PathMappable;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -182,11 +184,9 @@ public class WorkspaceImpl implements Workspace {
     File f = getWorkspaceFile(uri, false);
 
     // Does the file exist and is it up to date?
+    Long workspaceFileLastModified = null;
     if (f.isFile()) {
-      // We assume that this file is only being accessed through the workspace rather than through the working file
-      // repository. Since we do all the writing ourselves, it's safe to assume that it's up-to-date.
-      // TODO: Store ETags? What about remote servers that don't support them?
-      return f;
+      workspaceFileLastModified = new Long(f.lastModified());
     }
 
     if (wfrRoot != null && wfrUrl != null) {
@@ -194,19 +194,34 @@ public class WorkspaceImpl implements Workspace {
         String localPath = uri.toString().substring(wfrUrl.length());
         File wfrCopy = new File(PathSupport.concat(wfrRoot, localPath));
         if (wfrCopy.isFile()) {
-          if (linkingEnabled) {
-            FileSupport.link(wfrCopy, f);
-          } else {
-            FileSupport.copy(wfrCopy, f);
+          if (f.isFile()) {
+            // if the file exists in the workspace, but is older than the wfr copy, replace it
+            if (workspaceFileLastModified < wfrCopy.lastModified()) {
+              logger.debug("Replacing {} with an updated version from the file repository", f.getAbsolutePath());
+              if (linkingEnabled) {
+                FileUtils.deleteQuietly(f);
+                FileSupport.link(wfrCopy, f);
+              } else {
+                FileSupport.copy(wfrCopy, f);
+              }
+            } else {
+              logger.debug("{} is up to date");
+            }
+            logger.debug("Getting {} directly from working file repository root at {}", uri, f);
+            return new File(f.getAbsolutePath());
           }
-          logger.debug("Getting {} directly from working file repository root at {}", uri, f);
-          return f;
         }
       }
     }
 
-    logger.info("Downloading {} to {}", urlString, f.getAbsolutePath());
+    String ifNoneMatch = null;
+    if(f.isFile()) {
+      ifNoneMatch = md5(f);
+    }
+    
     HttpGet get = new HttpGet(urlString);
+    if(ifNoneMatch != null);
+    get.setHeader("If-None-Match", ifNoneMatch);
     InputStream in = null;
     OutputStream out = null;
     HttpResponse response = null;
@@ -214,7 +229,11 @@ public class WorkspaceImpl implements Workspace {
       response = trustedHttpClient.execute(get);
       if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
         throw new NotFoundException(uri + " does not exist");
+      } else if(HttpServletResponse.SC_NOT_MODIFIED == response.getStatusLine().getStatusCode()) {
+        logger.debug("{} has not been modified.", urlString);
+        return f;
       }
+      logger.info("Downloading {} to {}", urlString, f.getAbsolutePath());
       in = response.getEntity().getContent();
       out = new FileOutputStream(f);
       IOUtils.copyLarge(in, out);
@@ -231,6 +250,29 @@ public class WorkspaceImpl implements Workspace {
   }
 
   /**
+   * Returns the md5 of a file
+   * 
+   * @param file
+   *          the source file
+   * @return the md5 hash
+   */
+  protected String md5(File file) throws IOException {
+    if (file == null) {
+      throw new IllegalArgumentException("File must not be null");
+    }
+    if (!file.exists() || !file.isFile()) {
+      throw new IllegalArgumentException("File " + file.getAbsolutePath() + " can not be read");
+    }
+    InputStream in = null;
+    try {
+      in = new FileInputStream(file);
+      return DigestUtils.md5Hex(in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workspace.api.Workspace#delete(java.net.URI)
@@ -238,19 +280,21 @@ public class WorkspaceImpl implements Workspace {
   @Override
   public void delete(URI uri) throws NotFoundException, IOException {
     String uriPath = uri.toString();
-    if (uriPath.indexOf(WorkingFileRepository.COLLECTION_PATH_PREFIX) > 0) {
-      String[] uriElements = uriPath.split("/");
-      if (uriElements.length > 2) {
-        String collectionId = uriElements[uriElements.length - 2];
-        String filename = uriElements[uriElements.length - 1];
-        wfr.deleteFromCollection(collectionId, filename);
-      }
-    } else if (uriPath.indexOf(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX) > 0) {
-      String[] uriElements = uriPath.split("/");
-      if (uriElements.length >= 3) {
-        String mediaPackageId = uriElements[uriElements.length - 3];
-        String elementId = uriElements[uriElements.length - 2];
-        wfr.delete(mediaPackageId, elementId);
+    if (uriPath.startsWith(wfr.getBaseUri().toString())) {
+      if (uriPath.indexOf(WorkingFileRepository.COLLECTION_PATH_PREFIX) > 0) {
+        String[] uriElements = uriPath.split("/");
+        if (uriElements.length > 2) {
+          String collectionId = uriElements[uriElements.length - 2];
+          String filename = uriElements[uriElements.length - 1];
+          wfr.deleteFromCollection(collectionId, filename);
+        }
+      } else if (uriPath.indexOf(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX) > 0) {
+        String[] uriElements = uriPath.split("/");
+        if (uriElements.length >= 3) {
+          String mediaPackageId = uriElements[uriElements.length - 3];
+          String elementId = uriElements[uriElements.length - 2];
+          wfr.delete(mediaPackageId, elementId);
+        }
       }
     }
 
@@ -369,6 +413,7 @@ public class WorkspaceImpl implements Workspace {
     // Cleanup
     try {
       tee.close();
+      out.close();
     } catch (IOException e) {
       logger.warn("Unable to close file stream: " + e.getLocalizedMessage());
     }
@@ -452,7 +497,8 @@ public class WorkspaceImpl implements Workspace {
       URI copyURI = wfr.getURI(toMediaPackage, toMediaPackageElement, filename);
       File copy = getWorkspaceFile(copyURI, true);
       FileUtils.forceMkdir(copy.getParentFile());
-      FileUtils.moveFile(original, copy);
+      FileUtils.copyFile(original, copy);
+      original.delete();
     }
 
     // Tell working file repository
@@ -476,7 +522,11 @@ public class WorkspaceImpl implements Workspace {
    */
   @Override
   public void deleteFromCollection(String collectionId, String fileName) throws NotFoundException, IOException {
-    wfr.deleteFromCollection(collectionId, fileName);
+    try {
+      wfr.deleteFromCollection(collectionId, fileName);
+    } catch (IllegalArgumentException e) {
+      throw new NotFoundException(e);
+    }
     File f = new File(PathSupport.concat(new String[] { wsRoot, WorkingFileRepository.COLLECTION_PATH_PREFIX,
             collectionId, fileName }));
     FileUtils.deleteQuietly(f);
@@ -537,6 +587,7 @@ public class WorkspaceImpl implements Workspace {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workspace.api.Workspace#getBaseUri()
    */
   @Override

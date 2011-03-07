@@ -41,14 +41,13 @@
     <!-- LOGIN / LOGOUT MECHANISMS -->
     <!-- ######################### -->
 
-    <!-- Enable x509 client certificates for identifying clients -->
-    <sec:x509 subject-principal-regex="CN=(.*?)," user-service-ref="userDetailsService" />
+    <!-- Uncomment to enable x509 client certificates for identifying clients -->
+    <!-- sec:x509 subject-principal-regex="CN=(.*?)," user-service-ref="userDetailsService" / -->
 
     <!-- Enable and configure the failure URL for form-based logins -->
     <sec:form-login authentication-failure-url="/login.html?error" />
 
-    <!-- Enable support for openID. Note that *any* URL specified in the user detail service (see below) can log in to the 
-      system -->
+    <!-- Comment out to enable support for openID. OpenID URLs must be specified in the user detail service below -->
     <sec:openid-login authentication-failure-url="/login.html?error" user-service-ref="userDetailsService" />
 
     <!-- Digest auth is used by capture agents and is used to enable transparent clustering of services -->
@@ -60,6 +59,9 @@
     <!-- Enables "remember me" functionality -->
     <sec:remember-me key="matterhorn" user-service-ref="userDetailsService" />
 
+    <!-- Set the request cache -->
+    <sec:request-cache ref="requestCache"/>
+    
     <!-- If any URLs are to be exposed to anonymous users, the "sec:anonymous" filter must be present -->
     <sec:anonymous />
 
@@ -104,6 +106,9 @@
     </property>
   </bean>
 
+  <!-- Do not use a request cache -->
+  <bean id="requestCache" class="org.springframework.security.web.savedrequest.NullRequestCache" />
+  
   <!-- OAuth for supporting the LTI 'basic' profile -->
   <bean name="oAuthConsumerDetailsService" class="org.opencastproject.security.OAuthSingleConsumerDetailsService">
     <constructor-arg index="0" ref="userDetailsService" />
@@ -124,11 +129,11 @@
     </property>
   </bean>
 
-  <!-- Exposes spring security's context holder via jsr 250 annotations -->
-  <sec:global-method-security jsr250-annotations="enabled" />
+  <!-- Uncomment to expose spring security's context holder via jsr 250 annotations -->
+  <!-- sec:global-method-security jsr250-annotations="enabled" / -->
 
-  <!-- Logging interceptors, in case they are needed -->
-  <bean class="org.springframework.security.access.event.LoggerListener" />
-  <bean class="org.springframework.security.authentication.event.LoggerListener" />
+  <!-- Uncomment to enable logging interceptors -->
+  <!-- bean class="org.springframework.security.access.event.LoggerListener" / -->
+  <!-- bean class="org.springframework.security.authentication.event.LoggerListener" / -->
 
 </beans>

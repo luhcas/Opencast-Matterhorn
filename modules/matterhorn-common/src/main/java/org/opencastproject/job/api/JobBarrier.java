@@ -22,7 +22,10 @@ import org.opencastproject.util.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,8 +41,8 @@ public class JobBarrier {
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(JobBarrier.class);
 
-  /** Default polling interval is 5 seconds */
-  protected static final long DEFAULT_POLLING_INTERVAL = 5000L;
+  /** Default polling interval is 1 second */
+  protected static final long DEFAULT_POLLING_INTERVAL = 1000L;
 
   /** The service registry used to do the polling */
   protected ServiceRegistry serviceRegistry = null;
@@ -51,10 +54,21 @@ public class JobBarrier {
   protected Throwable pollingException = null;
 
   /** The jobs to wait on */
-  protected Job[] jobs = null;
+  protected List<Job> jobs = null;
 
   /** The status map */
   protected Result status = null;
+
+  /**
+   * Creates a barrier without any jobs, using <code>registry</code> to poll for the outcome of the monitored jobs using
+   * the default polling interval {@link #DEFAULT_POLLING_INTERVAL}. Use {@link #addJob(Job)} to add jobs to monitor.
+   * 
+   * @param registry
+   *          the registry
+   */
+  public JobBarrier(ServiceRegistry registry) {
+    this(registry, DEFAULT_POLLING_INTERVAL, new Job[] {});
+  }
 
   /**
    * Creates a barrier for <code>jobs</code>, using <code>registry</code> to poll for the outcome of the monitored jobs
@@ -72,6 +86,18 @@ public class JobBarrier {
   /**
    * Creates a wrapper for <code>job</code>, using <code>registry</code> to poll for the job outcome.
    * 
+   * @param registry
+   *          the registry
+   * @param pollingInterval
+   *          the time in miliseconds between two polling operations
+   */
+  public JobBarrier(ServiceRegistry registry, long pollingInterval) {
+    this(registry, pollingInterval, new Job[] {});
+  }
+
+  /**
+   * Creates a wrapper for <code>job</code>, using <code>registry</code> to poll for the job outcome.
+   * 
    * @param job
    *          the job to poll
    * @param registry
@@ -82,13 +108,13 @@ public class JobBarrier {
   public JobBarrier(ServiceRegistry registry, long pollingInterval, Job... jobs) {
     if (registry == null)
       throw new IllegalArgumentException("Service registry must not be null");
-    if (jobs == null || jobs.length == 0)
+    if (jobs == null)
       throw new IllegalArgumentException("Jobs must not be null");
     if (pollingInterval < 0)
       throw new IllegalArgumentException("Polling interval must be a positive number");
     this.serviceRegistry = registry;
     this.pollingInterval = pollingInterval;
-    this.jobs = jobs;
+    this.jobs = new ArrayList<Job>(Arrays.asList(jobs));
   }
 
   /**
@@ -104,8 +130,15 @@ public class JobBarrier {
    * Waits for a status change on all jobs and returns. If waiting for the status exceeds a certain limit, the method
    * returns even if some or all of the jobs are not yet finished. The same is true if at least one of the jobs fails or
    * gets stopped or deleted.
+   * 
+   * @param timeout
+   *          the maximum amount of time to wait
+   * @throws IllegalStateException
+   *           if there are no jobs to wait for
    */
-  public Result waitForJobs(long timeout) {
+  public Result waitForJobs(long timeout) throws IllegalStateException {
+    if (jobs.size() == 0)
+      throw new IllegalArgumentException("No jobs have been submitted");
     synchronized (this) {
       JobStatusUpdater updater = new JobStatusUpdater(timeout);
       try {
@@ -113,13 +146,26 @@ public class JobBarrier {
         wait();
       } catch (InterruptedException e) {
         logger.debug("Interrupted while waiting for job");
-      } finally {
-        updater.interrupt();
       }
     }
     if (pollingException != null)
       throw new IllegalStateException(pollingException);
     return getStatus();
+  }
+
+  /**
+   * Adds the job to the list of jobs to wait for. An {@link IllegalStateException} is thrown if the barrier has already
+   * been asked to wait for jobs by calling {@link #waitForJobs()}.
+   * 
+   * @param job
+   *          the job
+   * @throws IllegalStateException
+   *           if the barrier already started waiting
+   */
+  public void addJob(Job job) throws IllegalStateException {
+    if (job == null)
+      throw new IllegalArgumentException("Job must not be null");
+    jobs.add(job);
   }
 
   /**
@@ -184,9 +230,9 @@ public class JobBarrier {
           // Don't aks what we already know
           if (status.containsKey(job))
             continue;
-          
+
           boolean jobFinished = false;
-          
+
           // Get the job status from the service registry
           try {
             Job processedJob = serviceRegistry.getJob(job.getId());
@@ -202,6 +248,7 @@ public class JobBarrier {
                 break;
               case PAUSED:
               case QUEUED:
+              case DISPATCHING:
               case RUNNING:
                 logger.trace("Job {} is still in the works", JobBarrier.this);
                 allDone = false;
@@ -307,7 +354,7 @@ public class JobBarrier {
       }
       return true;
     }
-    
+
   }
 
 }

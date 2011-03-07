@@ -93,6 +93,20 @@ public interface Event {
   void setEndDate(Date endDate);
 
   /**
+   * Gets the date that this event was last updated
+   * 
+   * @return the date that the event was last updated
+   */
+  Date getLastModified();
+
+  /**
+   * Sets the date that this event was last modified
+   * 
+   * @param lastModified the date this event was last modified
+   */
+  void setLastModified(Date lastModified);
+
+  /**
    * @return Event id
    */
   Long getEventId();
@@ -268,19 +282,17 @@ public interface Event {
   void removeMetadata(Metadata m);
 
   /**
-   * Update the event and persist it in the database.
-   * Shortcut method that calls update(e, true), assumes
+   * Update the event and persist it in the database. Shortcut method that calls update(e, true), assumes
    * updateWithEmptyValues is true.
    * 
    * @param e
    *          Event to update this one with
    */
   void update(Event e);
-  
+
   /**
-   * Update the event and persist it in the database,
-   * if updateWithEmptyValues is true, properties of the event being updated
-   * will be replaced with empty strings for missing or empty values.
+   * Update the event and persist it in the database, if updateWithEmptyValues is true, properties of the event being
+   * updated will be replaced with empty strings for missing or empty values.
    * 
    * @param e
    *          Event to update this one with

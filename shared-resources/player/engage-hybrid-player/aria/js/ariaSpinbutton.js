@@ -46,6 +46,15 @@ Opencast.ariaSpinbutton = (function ()
    * each steps width for range
    */
   var rangeStepWidth = 0.0;
+  
+  /**
+   * saves last volume before mute
+   */
+  var beforeMute = 0;
+  /**
+   * saves last volume before mute
+   */
+  var mute = false;
 
 
   /**
@@ -88,6 +97,18 @@ Opencast.ariaSpinbutton = (function ()
 
     //initalise klick events
     this.parentEl.keydown(function(e) { Opencast.ariaSpinbutton.handleKeydownEvent(e); } );
+    
+    //hack: click event is handeld in flash Videodisplay.passCharCode(event.which);
+    $(document).keydown(function (event)
+    {
+      if (event.altKey === true && event.ctrlKey === true)
+      {
+        switch(event.keyCode) {
+        case 85: Opencast.ariaSpinbutton.increase(); break;
+        case 68: Opencast.ariaSpinbutton.decrease(); break;
+        }
+      }
+    });
   }
   
   /**
@@ -115,6 +136,8 @@ Opencast.ariaSpinbutton = (function ()
    */
   function jumpTo(position)
   {
+    //mute is always false if volume jumps to any position
+    this.mute = false;
     //check borders
     position = position > this.countSteps ? this.countSteps : position;
     position = position < 0 ? 0 : position;
@@ -202,6 +225,22 @@ Opencast.ariaSpinbutton = (function ()
   {
     this.jumpTo(this.currentPosition - 1);
   }
+  
+  function toggleMute()
+  {
+    if(!this.mute) {
+      this.beforeMute = this.currentPosition;
+      this.jumpToVisualOnly(0);
+      this.currentPosition = 0;
+      this.mute = true;
+    } else {
+      if(this.beforeMute === 0) {
+        this.jumpTo(this.countSteps);
+      } else {
+        this.jumpTo(this.beforeMute);
+      }
+    }
+  }
 
   return {
     initialize : initialize,
@@ -216,6 +255,7 @@ Opencast.ariaSpinbutton = (function ()
     initalizeARIA : initalizeARIA,
     updateARIA : updateARIA,
     decrease : decrease,
-    increase : increase
+    increase : increase,
+    toggleMute : toggleMute
   };
  }());

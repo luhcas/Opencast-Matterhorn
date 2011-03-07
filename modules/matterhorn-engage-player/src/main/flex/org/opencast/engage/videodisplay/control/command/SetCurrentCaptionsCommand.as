@@ -15,50 +15,50 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
-    import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
-    import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.opencast.engage.videodisplay.vo.CaptionSetVO;
-    import org.opencast.engage.videodisplay.vo.LanguageVO;
-    import org.swizframework.Swiz;
+	import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
+	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+	import org.opencast.engage.videodisplay.vo.CaptionSetVO;
+	import org.opencast.engage.videodisplay.vo.LanguageVO;
+	import org.swizframework.Swiz;
+	/**
+	 *   SetCurrentCaptionsCommand
+	 */
+	public class SetCurrentCaptionsCommand
+	{
 
-    /**
-     *   SetCurrentCaptionsCommand
-     */
-    public class SetCurrentCaptionsCommand
-    {
+		/**
+		 * Constructor
+		 */
+		public function SetCurrentCaptionsCommand()
+		{
+			Swiz.autowire(this);
+		}
 
-        [Autowire]
-        public var model : VideodisplayModel;
+		[Autowire]
+		public var model:VideodisplayModel;
 
-        /**
-         * Constructor
-         */
-        public function SetCurrentCaptionsCommand()
-        {
-            Swiz.autowire( this );
-        }
-
-        /**
-         * execute
-         * When the learner change the subtitltes from the ComboBox.
-         * @eventType SetCurrentCaptionsEvent event
-         * */
-        public function execute( event : SetCurrentCaptionsEvent ) : void
-        {
-            for( var i : int; i < model.languages.length; i++ )
-            {
-                if( LanguageVO( model.languages.getItemAt( i ) ).long_name == event.language )
-                {
-                    for( var j : int = 0; j < model.captionSets.length; j++ )
-                    {
-                        if( CaptionSetVO( model.captionSets.getItemAt( j ) ).lang == LanguageVO( model.languages.getItemAt( i ) ).short_name )
-                        {
-                            // set current capitons
-                            model.currentCaptionSet = CaptionSetVO( model.captionSets.getItemAt( j ) ).captions.toArray();
-                        }
-                    }
-                }
-            }
-        }
-    }
+		/**
+		 * execute
+		 * When the user changes the subtitles.
+		 * @eventType SetCurrentCaptionsEvent event
+		 * */
+		public function execute(event:SetCurrentCaptionsEvent):void
+		{
+			for (var i:int; i < model.languages.length; i++)
+			{
+				if (LanguageVO(model.languages.getItemAt(i)).long_name == event.language)
+				{
+					for (var j:int=0; j < model.captionSets.length; j++)
+					{
+						if (CaptionSetVO(model.captionSets.getItemAt(j)).lang == LanguageVO(model.languages.getItemAt(i)).short_name)
+						{
+							// set current capitons
+							model.currentCaptionSet=CaptionSetVO(model.captionSets.getItemAt(j)).captions.toArray();
+						}
+					}
+				}
+			}
+		}
+	}
 }
+

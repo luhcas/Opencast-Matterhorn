@@ -15,14 +15,15 @@
  */
 package org.opencast.engage.videodisplay.state
 {
+	/**
+	 *   CoverState
+	 */
+	public class CoverState
+	{
+		public static const ONECOVER:String='onecover';
 
-    /**
-     *   CoverState
-     */
-    public class CoverState
-    {
-        public static const ONECOVER : String = 'onecover';
-
-        public static const TWOCOVERS : String = 'twocovers';
-    }
+		public static const TWOCOVERS:String='twocovers';
+	}
 }
+
+

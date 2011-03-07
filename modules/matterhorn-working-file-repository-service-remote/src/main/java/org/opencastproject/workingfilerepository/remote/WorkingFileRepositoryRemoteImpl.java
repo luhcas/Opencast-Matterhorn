@@ -62,7 +62,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   @Override
   public URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement,
           String toFileName) throws IOException {
-    String urlSuffix = UrlSupport.concat(new String[] { "/files", "copy", fromCollection, fromFileName, toMediaPackage,
+    String urlSuffix = UrlSupport.concat(new String[] { "copy", fromCollection, fromFileName, toMediaPackage,
             toMediaPackageElement, toFileName });
     HttpPost post = new HttpPost(urlSuffix);
     HttpResponse response = getResponse(post);
@@ -89,7 +89,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   @Override
   public URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement,
           String toFileName) throws IOException {
-    String urlSuffix = UrlSupport.concat(new String[] { "/files", "move", fromCollection, fromFileName, toMediaPackage,
+    String urlSuffix = UrlSupport.concat(new String[] { "move", fromCollection, fromFileName, toMediaPackage,
             toMediaPackageElement });
     HttpPost post = new HttpPost(urlSuffix);
     HttpResponse response = getResponse(post);
@@ -114,7 +114,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public void delete(String mediaPackageID, String mediaPackageElementID) {
-    String urlSuffix = UrlSupport.concat(new String[] { "/files", mediaPackageID, mediaPackageElementID });
+    String urlSuffix = UrlSupport.concat(new String[] { mediaPackageID, mediaPackageElementID });
     HttpPost post = new HttpPost(urlSuffix);
     HttpResponse response = null;
     try {
@@ -136,7 +136,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public InputStream get(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
-    String urlSuffix = UrlSupport.concat(new String[] { "/files", mediaPackageID, mediaPackageElementID });
+    String urlSuffix = UrlSupport.concat(new String[] { mediaPackageID, mediaPackageElementID });
     HttpGet get = new HttpGet(urlSuffix);
     HttpResponse response = null;
     try {
@@ -158,7 +158,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI[] getCollectionContents(String collectionId) {
-    String urlSuffix = UrlSupport.concat(new String[] { "/files", "list", collectionId + ".json" });
+    String urlSuffix = UrlSupport.concat(new String[] { "list", collectionId + ".json" });
     HttpGet get = new HttpGet(urlSuffix);
     HttpResponse response = null;
     try {
@@ -201,7 +201,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   }
 
   protected JSONObject getStorageReport() {
-    String url = UrlSupport.concat(new String[] { "/files", "storage" });
+    String url = UrlSupport.concat(new String[] { "storage" });
     HttpGet get = new HttpGet(url);
     HttpResponse response = null;
     try {
@@ -226,7 +226,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public InputStream getFromCollection(String collectionId, String fileName) throws NotFoundException {
-    String url = UrlSupport.concat(new String[] { "/files", "collection", collectionId, fileName });
+    String url = UrlSupport.concat(new String[] { "collection", collectionId, fileName });
     HttpGet get = new HttpGet(url);
     HttpResponse response = null;
     try {
@@ -260,7 +260,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI getCollectionURI(String collectionID, String fileName) {
-    String url = UrlSupport.concat(new String[] { "/files", "collectionuri", collectionID, fileName });
+    String url = UrlSupport.concat(new String[] { "collectionuri", collectionID, fileName });
     HttpGet get = new HttpGet(url);
     HttpResponse response = null;
     try {
@@ -293,7 +293,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
-    String url = UrlSupport.concat(new String[] { "/files", "uri", mediaPackageID, mediaPackageElementID });
+    String url = UrlSupport.concat(new String[] { "uri", mediaPackageID, mediaPackageElementID });
     if (fileName != null)
       url = UrlSupport.concat(url, fileName);
     HttpGet get = new HttpGet(url);
@@ -329,8 +329,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
-    String url = UrlSupport.concat(new String[] { "/files", "mp", mediaPackageID,
-            mediaPackageElementID });
+    String url = UrlSupport.concat(new String[] { "mp", mediaPackageID, mediaPackageElementID });
     HttpPost post = new HttpPost(url);
     MultipartEntity entity = new MultipartEntity();
     ContentBody body = new InputStreamBody(in, filename);
@@ -356,7 +355,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI putInCollection(String collectionId, String fileName, InputStream in) {
-    String url = UrlSupport.concat(new String[] { "/files", "collection", collectionId });
+    String url = UrlSupport.concat(new String[] { "collection", collectionId });
     HttpPost post = new HttpPost(url);
     MultipartEntity entity = new MultipartEntity();
     ContentBody body = new InputStreamBody(in, fileName);
@@ -382,7 +381,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public void deleteFromCollection(String collectionId, String fileName) {
-    String url = UrlSupport.concat(new String[] { "/files", "collection", collectionId, fileName });
+    String url = UrlSupport.concat(new String[] { "collection", collectionId, fileName });
     System.out.println("");
     HttpDelete del = new HttpDelete(url);
     HttpResponse response = null;
@@ -403,7 +402,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public String hashCollectionElement(String collectionId, String fileName) throws IOException {
-    String url = UrlSupport.concat(new String[] { "/files", "collection", collectionId, fileName });
+    String url = UrlSupport.concat(new String[] { "collection", collectionId, fileName });
     HttpHead head = new HttpHead(url);
     HttpResponse response = null;
     try {
@@ -434,7 +433,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public String hashMediaPackageElement(String mediaPackageID, String mediaPackageElementID) throws IOException {
-    String url = UrlSupport.concat(new String[] { "/files", mediaPackageID, mediaPackageElementID });
+    String url = UrlSupport.concat(new String[] { mediaPackageID, mediaPackageElementID });
     HttpHead head = new HttpHead(url);
     HttpResponse response = null;
     try {

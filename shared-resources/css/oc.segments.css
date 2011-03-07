@@ -1,22 +1,15 @@
-
-#slider {
-    width: 80%;
+.scroll {
+    overflow: hidden;
+	width: 100%;
     margin: 0 auto;
     position: relative;
-    border: 1px solid #ccc;
-	  height: 85px;
-}
-
-.scroll {
-	overflow: hidden;
-	width: 100%;
-  margin: 0 auto;
-  position: relative;
-  height: 85px;
+    height: 85px;
 }
 
 .scrollContainer {
 	position: relative;
+	width: 0px;
+	left: 0px;
 }
 
 .scrollContainer div.panel {
@@ -35,7 +28,6 @@
 	height: 83px;
 }
 
-
 .scrollButtons {
     position: absolute;
     top: 17px;
@@ -51,9 +43,22 @@
 }
 
 .oc-segments-time {
-  padding-left: 5px;
-  padding-right: 5px;
-  vertical-align: top;
+    padding-left: 5px;
+    padding-right: 5px;
+    vertical-align: top;
+}
+
+.progress-segment {
+    width: 100%;
+}
+
+.segments {
+    border-spacing: 0;
+    padding: 0;
+}
+
+.oc-segments-preview {
+  display: none;
 }
 
 span.marked {
@@ -75,16 +80,39 @@ div.segment-tooltip
   z-index:                  1000;
 }
 
-.oc-segments-preview {
-  display: none;
+a.segments-time, a.segments-time:link, a.segments-time:visited{
+  margin-right: 16px;
+  cursor: pointer;
+  color: #2d8f8b;
+  text-decoration: none;
 }
 
-a.segments-time {
-    color:            #666666;
-    cursor:           pointer;
+a.segments-time:hover, a.segments-time:focus{
+  color: #2d8f8b;
+  text-decoration: underline;
 }
 
-.segments-time:hover {
-	color:          #A72123;
-    text-decoration:underline;
+#slider {
+    width: 80%;
+    margin: 0 auto;
+    position: relative;
+    border: 1px solid #ccc;
+	  height: 85px;
+}
+
+#oc-segments_text tr:hover {
+    background-color: #FFFFCC;
+}
+
+#segmentstable1 {
+    float: left;
+    /*
+    opacity: 0.65;
+    filter: alpha(opacity=65);
+    */
+}
+
+#segmentstable2 {
+    border-spacing: 0;
+    padding: 0;
 }

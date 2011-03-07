@@ -30,10 +30,11 @@ ocSeries.mode = CREATE_MODE;
 /*    UI FUNCTIONS    */
 ocSeries.init = function(){
   //Load i18n strings and replace default english
+  // disabled temporarily - see MH-6510
   ocSeries.Internationalize();
   
   //Add folding action for hidden sections.
-  $('.oc-ui-collapsible-widget .ui-widget-header').click(
+  $('.oc-ui-collapsible-widget .form-box-head').click(
     function() {
       $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
       $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
@@ -54,7 +55,7 @@ ocSeries.init = function(){
     ocSeries.mode = EDIT_MODE;
     $('#submitButton').val('Update Series');
     $('#i18n_page_title').text(i18n.page.title.edit);
-    $('#i18n_window_title').text(i18n.page.title.edit);
+    document.title = i18n.page.title.edit + " " + i18n.window.title.suffix;
     var seriesId = ocUtils.getURLParam('seriesId');
     if(seriesId !== '') {
       $('#seriesId').val(seriesId);
@@ -71,14 +72,19 @@ ocSeries.Internationalize = function(){
   });
   ocUtils.internationalize(i18n, 'i18n');
   //Handle special cases like the window title.
-  $('#i18n_page_title').text(i18n.page.title.add);
+  document.title = i18n.page.title.add + " " + i18n.window.title.suffix;
 }
 
 ocSeries.loadSeries = function(data) {
   $("#id").val(data.series.id);
   ocSeries.components['description'].setValue(data.series.description);
-  for(m in data.series.additionalMetadata.metadata){
-    var metadata = data.series.additionalMetadata.metadata[m];
+  if($.isArray(data.series.additionalMetadata.metadata)) {
+    mdlist = data.series.additionalMetadata.metadata;
+  } else {
+    mdlist = [data.series.additionalMetadata.metadata];
+  }
+  for(m in mdlist){
+    var metadata = mdlist[m];
     if(ocSeries.additionalComponents[metadata.key]){
       ocSeries.additionalComponents[metadata.key].setValue(metadata.value);
     }

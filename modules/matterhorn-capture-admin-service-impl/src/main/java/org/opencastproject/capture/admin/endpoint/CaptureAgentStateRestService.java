@@ -22,6 +22,7 @@ import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -89,7 +90,7 @@ public class CaptureAgentStateRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}")
-  public Response getAgentState(@PathParam("name") String agentName) {
+  public Response getAgentState(@PathParam("name") String agentName) throws NotFoundException {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -100,7 +101,7 @@ public class CaptureAgentStateRestService {
       return Response.ok(new AgentStateUpdate(ret)).build();
     } else {
       logger.debug("No such agent name: {}", agentName);
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+      throw new NotFoundException();
     }
 
   }
@@ -111,7 +112,7 @@ public class CaptureAgentStateRestService {
   // Todo: Capture agent may send an optional FormParam containing it's configured address.
   // If this exists don't use request.getRemoteHost() for the URL
   public Response setAgentState(@Context HttpServletRequest request, @FormParam("address") String address,
-          @PathParam("name") String agentName, @FormParam("state") String state) {
+          @PathParam("name") String agentName, @FormParam("state") String state) throws NotFoundException {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -136,7 +137,7 @@ public class CaptureAgentStateRestService {
       return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
     case CaptureAgentStateService.NO_SUCH_AGENT:
       logger.debug("The agent {} is not registered in the system");
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+      throw new NotFoundException();
     default:
       logger.error("Unexpected server error in setAgent endpoint");
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -145,7 +146,7 @@ public class CaptureAgentStateRestService {
 
   @DELETE
   @Path("agents/{name}")
-  public Response removeAgent(@PathParam("name") String agentName) {
+  public Response removeAgent(@PathParam("name") String agentName) throws NotFoundException {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -158,7 +159,7 @@ public class CaptureAgentStateRestService {
       return Response.ok(agentName + " removed").build();
     case CaptureAgentStateService.NO_SUCH_AGENT:
       logger.debug("The agent {} is not registered in the system", agentName);
-      return Response.status(Response.Status.NOT_FOUND).build();
+      throw new NotFoundException();
     default:
       logger.error("Unexpected server error in removeAgent endpoint");
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -203,7 +204,7 @@ public class CaptureAgentStateRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}/capabilities")
-  public Response getCapabilities(@PathParam("name") String agentName) {
+  public Response getCapabilities(@PathParam("name") String agentName) throws NotFoundException {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -221,7 +222,7 @@ public class CaptureAgentStateRestService {
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (NullPointerException e) {
       logger.debug("The agent {} is not registered in the system", agentName);
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+      throw new NotFoundException();
     }
   }
 
@@ -263,7 +264,7 @@ public class CaptureAgentStateRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings/{id}")
-  public Response getRecordingState(@PathParam("id") String id) {
+  public Response getRecordingState(@PathParam("id") String id) throws NotFoundException {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -275,7 +276,7 @@ public class CaptureAgentStateRestService {
       return Response.ok(new RecordingStateUpdate(rec)).build();
     } else {
       logger.debug("No such recording: {}", id);
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+      throw new NotFoundException();
     }
   }
 

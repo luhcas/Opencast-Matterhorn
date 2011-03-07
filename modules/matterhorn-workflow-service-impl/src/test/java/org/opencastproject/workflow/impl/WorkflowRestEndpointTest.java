@@ -69,11 +69,19 @@ public class WorkflowRestEndpointTest {
 
   @Test
   public void testGetWorkflowInstance() throws Exception {
-    Response json404Response = restService.getWorkflowAsJson(-1);
-    Assert.assertEquals(404, json404Response.getStatus());
+    try {
+      restService.getWorkflowAsJson(-1);
+      Assert.fail("This should have thrown a not found exception");
+    } catch(NotFoundException e) {
+      // expected
+    }
 
-    Response xml404Response = restService.getWorkflowAsXml(-1);
-    Assert.assertEquals(404, xml404Response.getStatus());
+    try {
+      restService.getWorkflowAsXml(-1);
+      Assert.fail("This should have thrown a not found exception");
+    } catch(NotFoundException e) {
+      // expected
+    }
 
     Response xmlResponse = restService.getWorkflowAsXml(1);
     Assert.assertEquals(200, xmlResponse.getStatus());

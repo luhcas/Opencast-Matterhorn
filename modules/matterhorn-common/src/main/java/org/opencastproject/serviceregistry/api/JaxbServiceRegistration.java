@@ -212,4 +212,38 @@ public class JaxbServiceRegistration implements ServiceRegistration {
   public void setJobProducer(boolean jobProducer) {
     this.jobProducer = jobProducer;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return toString().hashCode();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof ServiceRegistration))
+      return false;
+    ServiceRegistration registration = (ServiceRegistration)obj;
+    return getHost().equals(registration.getHost()) && getServiceType().equals(registration.getServiceType());
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return getServiceType() + "@" + getHost();
+  }
+
 }

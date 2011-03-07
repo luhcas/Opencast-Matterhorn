@@ -136,7 +136,7 @@ Opencast.pager = ( function() {
    * @description Gets the current page ID
    */
   function getCurrentPageID() {
-    var value = getGETParameter("page");
+    var value = Opencast.Utils.getURLParameter("page");
     /* if the GET parameter page is not there
      * Assume that we are on page 1
      * otherwise return the page value from the get parameter
@@ -153,7 +153,7 @@ Opencast.pager = ( function() {
    * @return The current search query
    */
   function getCurrentSearchQuery() {
-    var value = getGETParameter("q");
+    var value = Opencast.Utils.getURLParameter("q");
     return value;
   }
 
@@ -171,23 +171,6 @@ Opencast.pager = ( function() {
       maxPage += 1;
 
     return Math.max(1,maxPage);
-  }
-
-  /**
-   * @memberOf Opencast.pager
-   * @description Get the value of the GET parameter with the passed "name"
-   * @param string name
-   * @return The value of the GET parameter
-   */
-  function getGETParameter(name) {
-    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-    var regexS = "[\\?&]" + name + "=([^&#]*)";
-    var regex = new RegExp(regexS);
-    var results = regex.exec(window.location.href);
-    if (results == null)
-      return null;
-    else
-      return results[1];
   }
 
   return {

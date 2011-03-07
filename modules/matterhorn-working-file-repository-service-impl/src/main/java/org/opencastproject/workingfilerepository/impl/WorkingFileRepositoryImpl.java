@@ -47,7 +47,7 @@ import java.net.URISyntaxException;
  * ID as a subdirectory and the media package element ID as the file name.
  */
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMappable {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
 
   /** The extension we use for the md5 hash calculated from the file contents */
@@ -94,7 +94,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       throw new IllegalStateException("Server URL must be set");
 
     // working file repository 'facade' configuration
-    String servicePath = (String)cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
+    String servicePath = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
     String canonicalFileRepositoryUrl = cc.getBundleContext().getProperty("org.opencastproject.file.repo.url");
     if (StringUtils.isNotBlank(canonicalFileRepositoryUrl)) {
       try {
@@ -337,7 +337,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
 
   private File getFileFromCollection(String collectionId, String fileName) {
     File directory = getCollectionDirectory(collectionId);
-    File sourceFile = new File(directory, fileName);
+    File sourceFile = new File(directory, PathSupport.toSafeName(fileName));
     File md5File = getMd5File(sourceFile);
     if (!sourceFile.exists() || !md5File.exists()) {
       return null;
@@ -351,8 +351,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   }
 
   private File getCollectionDirectory(String collectionId) {
-    File collectionDir = new File(PathSupport
-            .concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId }));
+    File collectionDir = new File(
+            PathSupport.concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId }));
     if (!collectionDir.exists()) {
       try {
         FileUtils.forceMkdir(collectionDir);

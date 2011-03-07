@@ -29,8 +29,33 @@ public interface WorkflowOperationInstance extends Configurable {
     INSTANTIATED, RUNNING, PAUSED, SUCCEEDED, FAILED, SKIPPED
   }
 
-  String getId();
+  /**
+   * Gets the operation type.
+   * 
+   * @return the operation type
+   */
+  String getTemplate();
 
+  /**
+   * Gets the unique identifier for this operation, or null.
+   * 
+   * @return the identifier, or null if this operation has not yet run
+   */
+  Long getId();
+
+  /**
+   * Sets the unique identifier for this operation.
+   * 
+   * @param id
+   *          the identifier
+   */
+  void setId(Long id);
+
+  /**
+   * Gets the operation description
+   * 
+   * @return the description
+   */
   String getDescription();
 
   /**

@@ -5,12 +5,12 @@
   <artifactId>matterhorn-engage-ui</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-engage-ui</name>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
 
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
@@ -59,7 +59,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-search-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>1.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>
@@ -81,8 +81,8 @@
                 <resource>
                   <directory>../../shared-resources/player/</directory>
                   <includes>
-                    <include>engage-hybrid-player/</include>
-                    <include>style/</include>
+                    <include>engage-hybrid-player/**</include>
+                    <include>style/**</include>
                     <include>embed.html</include>
                     <include>preview.xml</include>
                     <include>Videodisplay.swf/</include>
@@ -105,9 +105,8 @@
                 <resource>
                   <directory>../../shared-resources/</directory>
                   <includes>
-                     <include>jquery/</include>
-                     <include>trimpath/</include>
-                     <include>infusion-1.1.2/</include>
+                     <include>jquery/**</include>
+                     <include>trimpath/**</include>
                   </includes>                  
                   <filtering>false</filtering>
                 </resource>
@@ -126,7 +125,7 @@
                 <resource>
                   <directory>../../shared-resources/img/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -145,7 +144,7 @@
                 <resource>
                   <directory>../../shared-resources/css/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -164,7 +163,7 @@
                 <resource>
                   <directory>../../shared-resources/js/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -183,7 +182,7 @@
                 <resource>
                   <directory>../../shared-resources/xsl/</directory>
                   <includes>
-                    <include> **/* </include>
+                    <include> **/** </include>
                   </includes>
                   <filtering>false</filtering>
                 </resource>
@@ -200,7 +199,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package> org.opencastproject.kernel.http;version=${project.version}, * </Import-Package>
+            <Import-Package> org.opencastproject.kernel.http;version=${project.version}</Import-Package>
             <Private-Package>ui.*</Private-Package>
             <Service-Component>
               OSGI-INF/engage-ui.xml

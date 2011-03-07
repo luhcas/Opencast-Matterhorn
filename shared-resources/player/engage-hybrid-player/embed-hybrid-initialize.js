@@ -167,7 +167,12 @@ Opencast.Initialize = (function ()
     {
         if (getDivId() === VIDEOSIZE)
         {
-            $('#oc_player_video-dropdown').css('left', $('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
+            $('#oc_player_video-dropdown').position(
+            {
+                of: $( "#oc_btn-dropdown" ),
+                my: "left bottom",
+                at: "left top"
+            });
             $('#oc_player_video-dropdown').css('visibility', 'visible');
             $('#oc_volume-menue').css('visibility', 'hidden');
             ddmenuitem = $('#oc_player_video-dropdown');
@@ -212,6 +217,16 @@ Opencast.Initialize = (function ()
             start = true;
             $('#oc_controlbar-embed').hide();
         }
+    }
+    
+    /**
+     @memberOf Opencast.Initialize
+     @description binds the Video Control Button
+     */
+    function bindVidSize()
+    {
+        $('#oc_video-size-controls').bind('mouseover', dropdownVideo_open);
+        $('#oc_video-size-controls').bind('mouseout', dropdown_timer);
     }
     
     $(document).ready(function ()
@@ -297,12 +312,16 @@ Opencast.Initialize = (function ()
                 }
             }
         });
-        $('#oc_video-size-controls').bind('mouseover', dropdownVideo_open);
         $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
-        $('#oc_video-size-controls').bind('mouseout', dropdown_timer);
         $('#oc_player_video-dropdown').bind('mouseout', dropdown_timer);
+        
         // Handler focus
         $('#oc_btn-dropdown').focus(function ()
+        {
+            setDivId(VIDEOSIZE);
+            dropdown_open();
+        });
+         $('#oc_btn-dropdown').click(function ()
         {
             setDivId(VIDEOSIZE);
             dropdown_open();
@@ -466,6 +485,13 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-play-pause').mouseover(function ()
         {
+            if(Opencast.Player.isPlaying())
+            {
+                $("#oc_btn-play-pause").attr("className", "oc_btn-pause-over");
+            } else
+            {
+                $("#oc_btn-play-pause").attr("className", "oc_btn-play-over");
+            }
             Opencast.Player.PlayPauseMouseOver();
         });
         $('#oc_btn-play-pause-embed').mouseover(function ()
@@ -498,6 +524,7 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-play-pause').mouseout(function ()
         {
+            $("#oc_btn-play-pause").attr("className", "oc_btn-play");
             Opencast.Player.PlayPauseMouseOut();
         });
         $('#oc_btn-play-pause-embed').mouseout(function ()
@@ -597,6 +624,10 @@ Opencast.Initialize = (function ()
             {
                 Opencast.Player.showEditTime();
             }
+        });
+	$('#oc_current-time').focus(function (event)
+        {
+	    Opencast.Player.showEditTime();
         });
         $('#oc_edit-time').keypress(function (event)
         {
@@ -731,7 +762,7 @@ Opencast.Initialize = (function ()
         $("#oc_image").css('height', newPreviewImageHeight + 'px');
         $("#oc_image").css('width', newPreviewImageWidth + 'px');
         $("#oc_image").css('margin-top', previewImageMarginTop + 'px');
-        var coverUrl = Opencast.engage.getCoverUrl();
+        var coverUrl = Opencast.Utils.getURLParameter('coverUrl');
         if (coverUrl === null)
         {
             var coverType;
@@ -741,7 +772,7 @@ Opencast.Initialize = (function ()
                 type: 'GET',
                 contentType: 'text/xml',
                 url: "../../search/episode.xml",
-                data: "id=" + Opencast.engage.getMediaPackageId(),
+                data: "id=" + Opencast.Utils.getURLParameter('id'),
                 dataType: 'xml',
                 success: function (xml)
                 {
@@ -840,6 +871,7 @@ Opencast.Initialize = (function ()
     }
     
     return {
+        bindVidSize: bindVidSize,
         dropdownVideo_open: dropdownVideo_open,
         dropdown_timer: dropdown_timer,
         dropdown_close: dropdown_close,

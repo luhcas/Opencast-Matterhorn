@@ -92,6 +92,16 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   protected ComponentContext componentContext = null;
 
   /**
+   * Activate this service implementation via the OSGI service component runtime.
+   * 
+   * @param componentContext
+   *          the component context
+   */
+  public void activate(ComponentContext componentContext) {
+    this.componentContext = componentContext;
+  }
+  
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.caption.api.CaptionService#convert(org.opencastproject.mediapackage.Catalog,
@@ -394,11 +404,13 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.AbstractJobProducer#process(Job, java.lang.String, java.util.List)
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(Job)
    */
   @Override
-  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+  protected String process(Job job) throws Exception {
     Operation op = null;
+    String operation = job.getOperation();
+    List<String> arguments = job.getArguments(); 
     try {
       op = Operation.valueOf(operation);
 

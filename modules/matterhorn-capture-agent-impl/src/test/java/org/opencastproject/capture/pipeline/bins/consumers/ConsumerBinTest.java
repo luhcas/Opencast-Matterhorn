@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins.consumers;
 
-import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
+import org.opencastproject.capture.pipeline.PipelineTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
@@ -25,7 +25,7 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.gstreamer.Element;
 import org.gstreamer.Gst;
@@ -48,7 +48,7 @@ import java.util.Properties;
 public class ConsumerBinTest {
 
   /** Capture Device Properties created for unit testing **/
-  CaptureDevice captureDevice = null;
+  private CaptureDevice captureDevice = null;
 
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
@@ -80,7 +80,7 @@ public class ConsumerBinTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
     try {
@@ -104,8 +104,9 @@ public class ConsumerBinTest {
 
   /** Salient queue properties to test are bufferCount, bufferBytes and bufferTime. **/
   private Properties createQueueProperties(String bufferCount, String bufferBytes, String bufferTime) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null,
-            null, null, bufferCount, bufferBytes, bufferTime, null);
+    Properties captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, null,
+            null, null, null, null);
+    captureDeviceProperties.putAll(PipelineTestHelpers.createQueueProperties(bufferCount, bufferBytes, bufferTime));
     return captureDeviceProperties;
   }
 
@@ -114,7 +115,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, maxSizeTimeDefault);
@@ -126,7 +127,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties("-1", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, "-1", maxSizeBytesDefault, maxSizeTimeDefault);
@@ -137,7 +138,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties("0", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, "0", maxSizeBytesDefault, maxSizeTimeDefault);
@@ -148,7 +149,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties("250", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, "250", maxSizeBytesDefault, maxSizeTimeDefault);
@@ -159,7 +160,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties("" + Integer.MAX_VALUE, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, "" + Integer.MAX_VALUE, maxSizeBytesDefault, maxSizeTimeDefault);
@@ -170,7 +171,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties("Invalid String", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     ConsumerBin sinkBin = createSinkBinWantException(captureDeviceProperties);
@@ -182,7 +183,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, "-1", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, "-1", maxSizeTimeDefault);
@@ -194,7 +195,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, "0", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, "0", maxSizeTimeDefault);
@@ -205,7 +206,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, "12485760", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, "12485760", maxSizeTimeDefault);
@@ -217,7 +218,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, "" + Integer.MAX_VALUE, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, "" + Integer.MAX_VALUE, maxSizeTimeDefault);
@@ -229,7 +230,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, "Invalid String", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     ConsumerBin sinkBin = createSinkBinWantException(captureDeviceProperties);
@@ -241,7 +242,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "-1");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "-1");
@@ -253,7 +254,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "0");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "0");
@@ -264,7 +265,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "1000000");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "1000000");
@@ -276,7 +277,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "" + Integer.MAX_VALUE);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "" + Integer.MAX_VALUE);
@@ -288,7 +289,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, "Invalid String", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     ConsumerBin sinkBin = createSinkBinWantException(captureDeviceProperties);
@@ -299,7 +300,7 @@ public class ConsumerBinTest {
     if (!gstreamerInstalled)
       return;
     Properties captureDeviceProperties = createQueueProperties(null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     ConsumerBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     List<Pad> binPads = sinkBin.getBin().getPads();

@@ -62,7 +62,10 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   @XmlAttribute(name = "id")
-  protected String id;
+  protected String template;
+
+  @XmlAttribute(name = "job")
+  protected Long jobId;
 
   @XmlAttribute(name = "state")
   protected OperationState state;
@@ -128,7 +131,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    */
   public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def, int position) {
     this.position = position;
-    setId(def.getId());
+    setTemplate(def.getId());
     setState(OperationState.INSTANTIATED);
     setDescription(def.getDescription());
     setFailWorkflowOnException(def.isFailWorkflowOnException());
@@ -153,16 +156,48 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    *          the state
    */
   public WorkflowOperationInstanceImpl(String id, OperationState state) {
-    setId(id);
+    setTemplate(id);
     setState(state);
   }
 
-  public String getId() {
-    return id;
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getId()
+   */
+  @Override
+  public Long getId() {
+    return jobId;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  /**
+   * Sets the job identifier
+   * 
+   * @param jobId
+   *          the job identifier
+   */
+  public void setId(Long jobId) {
+    this.jobId = jobId;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getTemplate()
+   */
+  @Override
+  public String getTemplate() {
+    return template;
+  }
+
+  /**
+   * Sets the template
+   * 
+   * @param template
+   *          the template
+   */
+  public void setTemplate(String template) {
+    this.template = template;
   }
 
   public String getDescription() {
@@ -454,7 +489,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
       return true;
     if (o instanceof WorkflowOperationInstance) {
       WorkflowOperationInstance other = (WorkflowOperationInstance) o;
-      return other.getId().equals(this.getId()) && other.getPosition() == this.position;
+      return other.getTemplate().equals(this.getTemplate()) && other.getPosition() == this.position;
     } else {
       return false;
     }
@@ -467,7 +502,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    */
   @Override
   public String toString() {
-    return "operation:'" + id + "', position:" + position + ", state:'" + this.state + "'";
+    return "operation:'" + template + "', position:" + position + ", state:'" + this.state + "'";
   }
 
   /**

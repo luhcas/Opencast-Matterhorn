@@ -29,10 +29,10 @@
 
 	<mx:Script>
 		<![CDATA[
-			import org.opencast.engage.videodisplay.state.CoverState;
 			import mx.core.Application;
-			import org.swizframework.Swiz;
 			import org.opencast.engage.videodisplay.model.VideodisplayModel;
+			import org.opencast.engage.videodisplay.state.CoverState;
+			import org.swizframework.Swiz;
 
 			[Autowire]
 			[Bindable]

@@ -36,9 +36,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -49,6 +47,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -67,24 +66,38 @@ import javax.xml.bind.annotation.XmlType;
 @NamedQueries({
         // Job queries
         @NamedQuery(name = "Job", query = "SELECT j FROM Job j "
-                + "where j.status = :status and j.creatorServiceRegistration.serviceType = :serviceType"),
+                + "where j.status = :status and j.creatorServiceRegistration.serviceType = :serviceType "
+                + "order by j.dateCreated"),
         @NamedQuery(name = "Job.type", query = "SELECT j FROM Job j "
-                + "where j.creatorServiceRegistration.serviceType = :serviceType"),
-        @NamedQuery(name = "Job.status", query = "SELECT j FROM Job j " + "where j.status = :status "),
-        @NamedQuery(name = "Job.all", query = "SELECT j FROM Job j"),
-        @NamedQuery(name = "Job.host.status", query = "SELECT j FROM Job j where j.status = :status and "
-                + "j.creatorServiceRegistration.hostRegistration.baseUrl = :host"),
+                + "where j.creatorServiceRegistration.serviceType = :serviceType order by j.dateCreated"),
+        @NamedQuery(name = "Job.status", query = "SELECT j FROM Job j "
+                + "where j.status = :status order by j.dateCreated"),
+        @NamedQuery(name = "Job.all", query = "SELECT j FROM Job j order by j.dateCreated"),
+        @NamedQuery(name = "Job.dispatchable.status", query = "SELECT j FROM Job j where j.dispatchable = true and "
+                + "j.status=:status order by j.dateCreated"),
+        @NamedQuery(name = "Job.processinghost.status", query = "SELECT j FROM Job j "
+                + "where j.status = :status and j.processorServiceRegistration is not null and "
+                + "j.processorServiceRegistration.serviceType = :serviceType and "
+                + "j.processorServiceRegistration.hostRegistration.baseUrl = :host order by j.dateCreated"),
         // Job count queries
         @NamedQuery(name = "Job.count", query = "SELECT COUNT(j) FROM Job j "
                 + "where j.status = :status and j.creatorServiceRegistration.serviceType = :serviceType"),
-        @NamedQuery(name = "Job.count.type", query = "SELECT COUNT(j) FROM Job j "
+        @NamedQuery(name = "Job.count.nullStatus", query = "SELECT COUNT(j) FROM Job j "
                 + "where j.creatorServiceRegistration.serviceType = :serviceType"),
-        @NamedQuery(name = "Job.count.status", query = "SELECT COUNT(j) FROM Job j " + "where j.status = :status "),
-        @NamedQuery(name = "Job.count.all", query = "SELECT COUNT(j) FROM Job j"),
         @NamedQuery(name = "Job.countByHost", query = "SELECT COUNT(j) FROM Job j "
                 + "where j.status = :status and j.processorServiceRegistration is not null and "
                 + "j.processorServiceRegistration.serviceType = :serviceType and "
-                + "j.creatorServiceRegistration.hostRegistration.baseUrl = :host") })
+                + "j.creatorServiceRegistration.hostRegistration.baseUrl = :host"),
+        @NamedQuery(name = "Job.countByOperation", query = "SELECT COUNT(j) FROM Job j "
+                + "where j.status = :status and j.operation = :operation and "
+                + "j.creatorServiceRegistration.serviceType = :serviceType"),
+        @NamedQuery(name = "Job.fullMonty", query = "SELECT COUNT(j) FROM Job j "
+                + "where j.status = :status and j.operation = :operation "
+                + "and j.processorServiceRegistration is not null and "
+                + "j.processorServiceRegistration.serviceType = :serviceType and "
+                + "j.creatorServiceRegistration.hostRegistration.baseUrl = :host")
+
+})
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name = "job", namespace = "http://job.opencastproject.org/")
 @XmlRootElement(name = "job", namespace = "http://job.opencastproject.org/")
@@ -99,7 +112,7 @@ public class JobJpaImpl extends JaxbJob {
   /** The service that is processing, or processed, this job */
   protected ServiceRegistrationJpaImpl processorServiceRegistration;
 
-  @ManyToMany(mappedBy = "root_id", fetch = FetchType.EAGER)
+  // @ManyToMany(mappedBy = "root_id", fetch = FetchType.EAGER)
   protected List<JobPropertyJpaImpl> properties;
 
   /** The job context, to be created after loading by JPA */
@@ -117,13 +130,12 @@ public class JobJpaImpl extends JaxbJob {
   }
 
   /**
-   * Constructor with everything needed for a newly instantiated job, using a random ID and setting the status to
-   * queued.
+   * Constructor with everything needed for a newly instantiated job.
    */
   public JobJpaImpl(ServiceRegistrationJpaImpl creatorServiceRegistration, String operation, List<String> arguments,
-          String payload, boolean queueImmediately) {
+          String payload, boolean dispatchable) {
     this();
-    this.operationType = operation;
+    this.operation = operation;
     this.context = new JaxbJobContext();
     if (arguments != null) {
       this.arguments = new ArrayList<String>(arguments);
@@ -132,14 +144,9 @@ public class JobJpaImpl extends JaxbJob {
     setDateCreated(new Date());
     setCreatedHost(creatorServiceRegistration.getHost());
     setJobType(creatorServiceRegistration.getServiceType());
+    setDispatchable(dispatchable);
+    setStatus(Status.INSTANTIATED);
     this.creatorServiceRegistration = creatorServiceRegistration;
-    if (queueImmediately) {
-      setDateStarted(getDateCreated());
-      setStatus(Status.QUEUED);
-    } else {
-      setStatus(Status.INSTANTIATED);
-    }
-
   }
 
   /**
@@ -201,7 +208,7 @@ public class JobJpaImpl extends JaxbJob {
   @XmlAttribute
   @Override
   public String getOperation() {
-    return operationType;
+    return operation;
   }
 
   /**
@@ -212,8 +219,9 @@ public class JobJpaImpl extends JaxbJob {
   @Lob
   @Column(name = "argument")
   @OrderColumn(name = "listindex")
-  @ElementCollection
-  @CollectionTable(name = "JOB_ARG", joinColumns = @JoinColumn(name = "ID", referencedColumnName = "ID"))
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "JOB_ARG", joinColumns = @JoinColumn(name = "ID", referencedColumnName = "ID"), uniqueConstraints = @UniqueConstraint(columnNames = {
+          "ID", "LISTINDEX" }))
   @XmlElement(name = "arg")
   @XmlElementWrapper(name = "args")
   @Override
@@ -327,12 +335,23 @@ public class JobJpaImpl extends JaxbJob {
     super.setPayload(payload);
   }
 
+  @Column
+  @XmlAttribute
+  @Override
+  public boolean isDispatchable() {
+    return super.dispatchable;
+  }
+
+  @Override
+  public void setDispatchable(boolean dispatchable) {
+    super.setDispatchable(dispatchable);
+  }
+  
   /**
    * @return the serviceRegistration where this job was created
    */
   @ManyToOne
-  @JoinColumns({ @JoinColumn(name = "CREATOR_SVC_TYPE", referencedColumnName = "SERVICE_TYPE", updatable = false),
-          @JoinColumn(name = "CREATOR_HOST", referencedColumnName = "HOST", updatable = false) })
+  @JoinColumn(name = "creator_svc")
   public ServiceRegistrationJpaImpl getCreatorServiceRegistration() {
     return creatorServiceRegistration;
   }
@@ -343,14 +362,18 @@ public class JobJpaImpl extends JaxbJob {
    */
   public void setCreatorServiceRegistration(ServiceRegistrationJpaImpl serviceRegistration) {
     this.creatorServiceRegistration = serviceRegistration;
+    if (creatorServiceRegistration == null) {
+      super.setCreatedHost(null);
+    } else {
+      super.setCreatedHost(creatorServiceRegistration.getHost());
+    }
   }
 
   /**
    * @return the processorServiceRegistration
    */
   @ManyToOne
-  @JoinColumns({ @JoinColumn(name = "PROCESSOR_SVC_TYPE", referencedColumnName = "SERVICE_TYPE", updatable = false),
-          @JoinColumn(name = "PROCESSOR_HOST", referencedColumnName = "HOST", updatable = false) })
+  @JoinColumn(name = "processor_svc")
   public ServiceRegistrationJpaImpl getProcessorServiceRegistration() {
     return processorServiceRegistration;
   }
@@ -361,13 +384,18 @@ public class JobJpaImpl extends JaxbJob {
    */
   public void setProcessorServiceRegistration(ServiceRegistrationJpaImpl processorServiceRegistration) {
     this.processorServiceRegistration = processorServiceRegistration;
+    if (processorServiceRegistration == null) {
+      super.setProcessingHost(null);
+    } else {
+      super.setProcessingHost(processorServiceRegistration.getHost());
+    }
   }
 
   @PreUpdate
   public void preUpdate() {
     if (properties != null)
       properties.clear();
-    else 
+    else
       properties = new ArrayList<JobPropertyJpaImpl>();
     for (Map.Entry<String, String> entry : context.getProperties().entrySet()) {
       properties.add(new JobPropertyJpaImpl(rootJob, entry.getKey(), entry.getValue()));
@@ -416,6 +444,8 @@ public class JobJpaImpl extends JaxbJob {
   /**
    * @return the properties
    */
+  @Transient
+  // TODO: remove to re-enable job context properties
   public List<JobPropertyJpaImpl> getProperties() {
     return properties;
   }

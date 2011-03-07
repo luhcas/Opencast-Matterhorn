@@ -20,6 +20,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.scheduler.endpoint.SchedulerRestService;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.impl.SeriesImpl;
@@ -73,7 +74,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
@@ -88,12 +93,12 @@ public class SchedulerServiceImplTest {
   private static final String resourcesRoot = "src" + File.separator + "main" + File.separator + "resources";
 
   private Event event;
-  
+
   private Event aEvent;
   private Event bEvent;
   private Event cEvent;
   private Event dEvent;
-  
+
   private DataSource datasource;
 
   private String seriesID;
@@ -142,20 +147,21 @@ public class SchedulerServiceImplTest {
     EasyMock.expect(
             workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
                     (Map<String, String>) EasyMock.anyObject())).andAnswer(new IAnswer<WorkflowInstance>() {
-                      public WorkflowInstance answer() throws Throwable {
-                        WorkflowInstanceImpl instance = new WorkflowInstanceImpl();
-                        Random gen = new Random(System.currentTimeMillis());
-                        instance.setId(gen.nextInt());
-                        instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
-                        instance.setState(WorkflowState.PAUSED);
+      public WorkflowInstance answer() throws Throwable {
+        WorkflowInstanceImpl instance = new WorkflowInstanceImpl();
+        Random gen = new Random(System.currentTimeMillis());
+        instance.setId(gen.nextInt());
+        instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+        instance.setState(WorkflowState.PAUSED);
 
-                        WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl(SchedulerServiceImpl.SCHEDULE_OPERATION_ID, OperationState.PAUSED);
-                        List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
-                        operations.add(op);
-                        instance.setOperations(operations);
-                        return instance;
-                      }
-                    }).anyTimes();
+        WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl(
+                SchedulerServiceImpl.SCHEDULE_OPERATION_ID, OperationState.PAUSED);
+        List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
+        operations.add(op);
+        instance.setOperations(operations);
+        return instance;
+      }
+    }).anyTimes();
     EasyMock.expect(workflowService.getWorkflowById(EasyMock.anyLong())).andReturn(workflowInstance).anyTimes();
     EasyMock.expect(workflowService.stop(EasyMock.anyLong())).andReturn(workflowInstance).anyTimes();
     workflowService.update((WorkflowInstance) EasyMock.anyObject());
@@ -218,37 +224,36 @@ public class SchedulerServiceImplTest {
     event.setDescription("a test description");
     event.addMetadata((Metadata) new MetadataImpl(event, "location", "testlocation"));
     event.addMetadata((Metadata) new MetadataImpl(event, "channelId", "unittest"));
-    
-    
+
     aEvent = new EventImpl();
     bEvent = new EventImpl();
     cEvent = new EventImpl();
     dEvent = new EventImpl();
-    
+
     aEvent.setTitle("Event A - Test");
     bEvent.setTitle("Event B - Bacon");
     cEvent.setTitle("Event C - Cheese");
     dEvent.setTitle("Event D - Donburi");
-    
-    aEvent.setStartDate(new Date(System.currentTimeMillis() + 10000)); //start now + 10 seconds
-    aEvent.setEndDate(new Date(System.currentTimeMillis() + 3610000)); //end hour and 10 seconds from now
-    bEvent.setStartDate(new Date(System.currentTimeMillis() + (12 * 60 * 60 * 1000))); //start 12 hours from now
-    bEvent.setEndDate(new Date(System.currentTimeMillis() + (13 * 60 * 60 * 1000))); //end 13 hours from now
-    cEvent.setStartDate(new Date(System.currentTimeMillis() - (60 * 60 * 1000))); //start an hour ago
-    cEvent.setEndDate(new Date(System.currentTimeMillis() - (10 * 60 * 1000))); //end 10 minutes ago
-    dEvent.setStartDate(new Date(System.currentTimeMillis() + 10000)); //same as aEvent
-    dEvent.setEndDate(new Date(System.currentTimeMillis() + 3610000)); //same as aEvent
-    
+
+    aEvent.setStartDate(new Date(System.currentTimeMillis() + 10000)); // start now + 10 seconds
+    aEvent.setEndDate(new Date(System.currentTimeMillis() + 3610000)); // end hour and 10 seconds from now
+    bEvent.setStartDate(new Date(System.currentTimeMillis() + (24 * 60 * 60 * 1000))); // start 24 hours from now
+    bEvent.setEndDate(new Date(System.currentTimeMillis() + (25 * 60 * 60 * 1000))); // end 25 hours from now
+    cEvent.setStartDate(new Date(System.currentTimeMillis() - (60 * 60 * 1000))); // start an hour ago
+    cEvent.setEndDate(new Date(System.currentTimeMillis() - (10 * 60 * 1000))); // end 10 minutes ago
+    dEvent.setStartDate(new Date(System.currentTimeMillis() + 10000)); // same as aEvent
+    dEvent.setEndDate(new Date(System.currentTimeMillis() + 3610000)); // same as aEvent
+
     aEvent.setDevice("Device A");
-    bEvent.setDevice("device a");
+    bEvent.setDevice("Device A");
     cEvent.setDevice("Device C");
     dEvent.setDevice("Device D");
-    
+
     aEvent.setCreator("Person A");
     bEvent.setCreator("person a");
     cEvent.setCreator("Person B");
     dEvent.setCreator("PERSON B");
-    
+
     aEvent.setSeries("Series A");
     bEvent.setSeries("series a");
     cEvent.setSeries("Series B");
@@ -268,7 +273,8 @@ public class SchedulerServiceImplTest {
     instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
     instance.setState(WorkflowState.PAUSED);
 
-    WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl(SchedulerServiceImpl.SCHEDULE_OPERATION_ID, OperationState.PAUSED);
+    WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl(SchedulerServiceImpl.SCHEDULE_OPERATION_ID,
+            OperationState.PAUSED);
     List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
     operations.add(op);
     instance.setOperations(operations);
@@ -459,25 +465,87 @@ public class SchedulerServiceImplTest {
     service.removeEvent(event.getEventId());
   }
 
-  
   @Test
   public void testSchedulerFilter() throws Exception {
-    
     service.addEvent(aEvent);
     service.addEvent(bEvent);
     service.addEvent(cEvent);
     service.addEvent(dEvent);
-    
+
     List<Event> events = service.getEvents(new SchedulerFilter().withTitleFilter("Event"));
     Assert.assertEquals(4, events.size());
-    
+
     events = service.getEvents(new SchedulerFilter().withDeviceFilter("Device A"));
-    Assert.assertEquals(1, events.size());
-    
+    Assert.assertEquals(2, events.size());
+
     events = service.getEvents(new SchedulerFilter().withCreatorFilter("PERSON B"));
-    Assert.assertEquals(1, events.size());
-    
+    Assert.assertEquals(2, events.size());
+
     events = service.getEvents(new SchedulerFilter().withSeriesFilter("series a"));
+    Assert.assertEquals(2, events.size());
+  }
+
+  @Test
+  public void testFindConflictingEvents() throws Exception {
+    Date start = new Date(System.currentTimeMillis());
+    Date end = new Date(System.currentTimeMillis() + (60 * 60 * 1000));
+
+    List<Event> events = service.findConflictingEvents("Some Other Device", start, end);
+    Assert.assertEquals(0, events.size());
+
+    events = service.findConflictingEvents("Device A", start, end);
     Assert.assertEquals(1, events.size());
+
+    events = service.findConflictingEvents("Device A", "FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR,SA", start,
+            new Date(start.getTime() + (48 * 60 * 60 * 1000)), new Long(36000));
+    Assert.assertEquals(2, events.size());
+  }
+
+  @Test
+  public void testCalendarNotModified() throws Exception {
+    HttpServletRequest request = EasyMock.createNiceMock(HttpServletRequest.class);
+    EasyMock.replay(request);
+    
+    SchedulerRestService restService = new SchedulerRestService();
+    restService.setService(service);
+
+    // Store an event
+    Event eventStored = service.addEvent(event);
+
+    String device = eventStored.getDevice();
+    Assert.assertNotNull(device);
+    Assert.assertNotNull(event.getLastModified());
+
+    // Request the calendar without specifying an etag. We should get a 200 with the icalendar in the response body
+    Response response = restService.getCalendarForCaptureAgent(device, request);
+    Assert.assertNotNull(response.getEntity());
+    Assert.assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+    final String etag = (String) response.getMetadata().getFirst(HttpHeaders.ETAG);
+
+    EasyMock.reset(request);
+    EasyMock.expect(request.getHeader("If-None-Match")).andAnswer(new IAnswer<String>() {
+      @Override
+      public String answer() throws Throwable {
+        return etag;
+      }
+    }).anyTimes();
+    EasyMock.replay(request);
+
+    // Request using the etag from the first response. We should get a 304 (not modified)
+    response = restService.getCalendarForCaptureAgent(device, request);
+    Assert.assertEquals(HttpServletResponse.SC_NOT_MODIFIED, response.getStatus());
+    Assert.assertNull(response.getEntity());
+
+    // Update the event
+    service.updateEvent(eventStored);
+
+    // Try using the same old etag. We should get a 200, since the event has changed
+    response = restService.getCalendarForCaptureAgent(device, request);
+    Assert.assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+    Assert.assertNotNull(response.getEntity());
+    String secondEtag = (String) response.getMetadata().getFirst(HttpHeaders.ETAG);
+
+    Assert.assertNotNull(secondEtag);
+    Assert.assertFalse(etag.equals(secondEtag));
   }
 }

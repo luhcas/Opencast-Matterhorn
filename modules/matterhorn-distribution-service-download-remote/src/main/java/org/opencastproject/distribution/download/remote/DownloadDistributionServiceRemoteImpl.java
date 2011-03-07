@@ -44,9 +44,6 @@ public class DownloadDistributionServiceRemoteImpl extends RemoteBase implements
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(DownloadDistributionServiceRemoteImpl.class);
 
-  /** The service type prefix */
-  public static final String REMOTE_SERVICE_TYPE_PREFIX = "org.opencastproject.distribution.";
-
   /** The property to look up and append to REMOTE_SERVICE_TYPE_PREFIX */
   public static final String REMOTE_SERVICE_CHANNEL = "distribution.channel";
 
@@ -54,14 +51,13 @@ public class DownloadDistributionServiceRemoteImpl extends RemoteBase implements
   protected String distributionChannel;
 
   public DownloadDistributionServiceRemoteImpl() {
-    // the service type is not available at construction time. we need to wait for activation to set this value
-    super("waiting for activation");
+    super(JOB_TYPE_PREFIX + ".download");
   }
 
   /** activates the component */
   protected void activate(ComponentContext cc) {
     this.distributionChannel = (String) cc.getProperties().get(REMOTE_SERVICE_CHANNEL);
-    super.serviceType = REMOTE_SERVICE_TYPE_PREFIX + this.distributionChannel;
+    super.serviceType = JOB_TYPE_PREFIX + this.distributionChannel;
   }
 
   /**

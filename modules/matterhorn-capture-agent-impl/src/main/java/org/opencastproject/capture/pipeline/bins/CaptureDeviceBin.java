@@ -23,7 +23,7 @@ import org.opencastproject.capture.pipeline.bins.consumers.NoConsumerFoundExcept
 import org.opencastproject.capture.pipeline.bins.producers.NoProducerFoundException;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerBin;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.gstreamer.Bin;
 import org.gstreamer.Element;

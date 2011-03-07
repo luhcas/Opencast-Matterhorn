@@ -40,6 +40,14 @@ public interface WorkflowOperationResult {
   Map<String, String> getProperties();
 
   /**
+   * Sets the action to take.
+   * 
+   * @param action
+   *          the action
+   */
+  void setAction(Action action);
+
+  /**
    * Operations may optionally request that the workflow be placed in a certain state.
    * 
    * @return The action that the workflow service should take on this workflow instance.

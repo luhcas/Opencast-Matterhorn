@@ -16,62 +16,215 @@ Opencast.Utils = (function ()
      */
     function getTimeInMilliseconds(data)
     {
-        var values = data.split(':');
-        // If the Format is correct
-        if (values.length == 3)
+        if((data!== null) && (data.indexOf(':') != -1))
         {
-            // Try to convert to Numbers
-            var val0 = values[0] * 1;
-            var val1 = values[1] * 1;
-            var val2 = values[2] * 1;
-            // Check and parse the Seconds
-            if (!isNaN(val0) && !isNaN(val1) && !isNaN(val2))
+            var values = data.split(':');
+            // If the Format is correct
+            if (values.length == 3)
             {
-                // Convert Hours, Minutes and Seconds to Milliseconds
-                val0 *= 60 * 60 * 1000; // 1 Hour = 60 Minutes = 60 * 60 Seconds = 60 * 60 * 1000 Milliseconds
-                val1 *= 60 * 1000; // 1 Minute = 60 Seconds = 60 * 1000 Milliseconds
-                val2 *= 1000; // 1 Second = 1000 Milliseconds
-                // Add the Milliseconds and return it
-                return val0 + val1 + val2;
-            }
-            else
-            {
-                return 0;
+                // Try to convert to Numbers
+                var val0 = values[0] * 1;
+                var val1 = values[1] * 1;
+                var val2 = values[2] * 1;
+                // Check and parse the Seconds
+                if (!isNaN(val0) && !isNaN(val1) && !isNaN(val2))
+                {
+                    // Convert Hours, Minutes and Seconds to Milliseconds
+                    val0 *= 60 * 60 * 1000; // 1 Hour = 60 Minutes = 60 * 60 Seconds = 60 * 60 * 1000 Milliseconds
+                    val1 *= 60 * 1000; // 1 Minute = 60 Seconds = 60 * 1000 Milliseconds
+                    val2 *= 1000; // 1 Second = 1000 Milliseconds
+                    // Add the Milliseconds and return it
+                    return val0 + val1 + val2;
+                }
             }
         }
-        else
+        return 0;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description Returns formatted Seconds
+     * @param seconds Seconds to format
+     * @return formatted Seconds
+     */
+    function formatSeconds(seconds)
+    {
+        if(seconds === null)
         {
-            return 0;
+            seconds = 0;
         }
+        var result = "";
+        if (parseInt(seconds / 3600) < 10)
+        {
+            result += "0";
+        }
+        result += parseInt(seconds / 3600);
+        result += ":";
+        if ((parseInt(seconds / 60) - parseInt(seconds / 3600) * 60) < 10)
+        {
+            result += "0";
+        }
+        result += parseInt(seconds / 60) - parseInt(seconds / 3600) * 60;
+        result += ":";
+        if (seconds % 60 < 10)
+        {
+            result += "0";
+        }
+        result += seconds % 60;
+        return result;
     }
     
     /**
      * @memberOf Opencast.Utils
      * @description Returns an Array of URL Arguments
-     * @return an Array of URL Arguments
+     * @return an Array of URL Arguments if successful, [] else
      */
     function parseURL()
     {
         var vars = [],
             hash;
         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-        for (var i = 0; i < hashes.length; i++)
+        if($.isArray(hashes))
         {
-            hash = hashes[i].split('=');
-            vars.push(hash[0]);
-            vars[hash[0]] = hash[1];
+            for (var i = 0; i < hashes.length; i++)
+            {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
         }
         return vars;
+    }
+   
+    /**
+     * @memberOf Opencast.Utils
+     * @description Removes the duplicates of a given array
+     * @param arr Array to remove the duplicates of
+     * @return a copy of arr wihout its duplicates if arr is a valid array, [] else
+     */     
+    function removeDuplicates(arr)
+    {
+        var newArr = [];
+        // check whether arr is an Array
+        if($.isArray(arr))
+        {
+            var ni = 0;
+            var dupl = false;
+            for(var i = 0; i < arr.length; ++i)
+            {
+                for(var j = i + 1; (j < arr.length) && !dupl; ++j)
+                {
+                    if(arr[i] == arr[j])
+                    {
+                        dupl = true;
+                    }
+                }
+                if(!dupl)
+                {
+                    newArr[ni] = arr[i];
+                    ++ni;
+                }
+                dupl = false;
+            }
+        }
+        return newArr;
+    }
+   
+    /**
+     * @memberOf Opencast.Utils
+     * @description Returns the url array to string, connected via links
+     * @param arr URL Array (e.g. created via parseURL())
+     * @param link11 first link (e.g. comes directly after the .html: ?)
+     * @param link12 second link, connects the parameters (e.g. &)
+     * @param link2 third link, connects the first and the second value of an URL parameter (e.g. =)
+     * @return the url array to string, connected via links, if arr is a valid array, '' else
+     */ 
+    function urlArrayToString(arr, link11, link12, link2)
+    {
+        var str = '';
+        // check whether arr is an Array
+        if($.isArray(arr))
+        {
+            // Set default values if nothings given
+            link11 = link11||'?';
+            link12 = link12||'&';
+            link2 = link2||'=';
+            for(var i = 0; i < arr.length; ++i)
+            {
+                var parsedUrlAt = getURLParameter(arr[i]);
+                if((parsedUrlAt !== undefined) && (parsedUrlAt !== null))
+                {
+                    var l = (i == 0) ? link11 : link12;
+                    str += l + arr[i] + link2 + parseURL()[arr[i]];
+                }
+            }
+        }
+        return str;
+    }
+
+    /**
+     * @memberOf Opencast.Utils
+     * @description Removes the duplicate URL parameters, e.g. url?a=b&a=c&a=d => url?a=d
+     * @return a cleaned URL
+     */ 
+    function getCleanedURL()
+    {
+        var urlArr = removeDuplicates(parseURL());
+        var windLoc = window.location.href;
+        windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
+        
+        return windLoc + urlArrayToString(urlArr, "?", "&", "=");
+    }
+
+    /**
+     * @memberOf Opencast.Utils
+     * @description Checks if URL parameters are duplicate and cleans it if appropriate (clean => page reload)
+     */ 
+    function gotoCleanedURL()
+    {
+        var loc = window.location;
+        var newLoc = Opencast.Utils.getCleanedURL();
+        // If necessary: remove duplicate URL parameters
+        if(loc != newLoc)
+        {
+            window.location = newLoc;
+        }
     }
     
     /**
      * @memberOf Opencast.Utils
      * @description Returns the value of URL-Parameter 'name'
-     * @return the value of URL-Parameter 'name'
+     *              Current used URL Parameters:
+     *                  - id:               the current media package id
+     *                  - user:             the user id
+     *                  - play:             autoplay, true or false
+     *                  - videoUrl:         the current url for video (1)
+     *                  - videoUrl2:        the current url for video 2
+     *                  - coverUrl:         the current url for cover (preview image)
+     *                  - t:                jump to given time
+     *                                          Valid Parameter Formats (as seen at Opencast.Utils.parseSeconds):
+     *                                              - Minutes and seconds:  XmYs    or    YsXm    or    XmY
+     *                                              - Minutes only:         Xm
+     *                                              - Seconds only:         Ys      or    Y
+     *                  - videomode/vmode:  The Video Mode (videomode preferred to vmode)
+     *                                          Valid Parameters:
+     *                                              - streaming (default)
+     *                                              - progressive
+     *                  - display:          the display alignment
+     *                                          Valid Parameter:
+     *                                              - invert
+     *                  - page
+     *                  - q
+     * @return the value of URL-Parameter 'name' or null if not defined
      */
     function getURLParameter(name)
     {
-        return parseURL()[name];
+        var urlParam = parseURL()[name];
+        if((urlParam === undefined) || (urlParam === ''))
+        {
+            return null;
+        }
+        return urlParam;
     }
     
     /**
@@ -211,7 +364,13 @@ Opencast.Utils = (function ()
 	}
     
     return {
+        removeDuplicates: removeDuplicates,
+        urlArrayToString: urlArrayToString,
+        getCleanedURL: getCleanedURL,
+        gotoCleanedURL: gotoCleanedURL,
         getTimeInMilliseconds: getTimeInMilliseconds,
+        formatSeconds: formatSeconds,
+        parseURL: parseURL,
         getURLParameter: getURLParameter,
         parseSeconds: parseSeconds,
         getLocaleDate: getLocaleDate,

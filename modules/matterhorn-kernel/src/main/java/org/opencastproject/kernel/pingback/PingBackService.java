@@ -16,6 +16,7 @@
 package org.opencastproject.kernel.pingback;
 
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -65,8 +66,9 @@ public class PingBackService {
     BundleContext bundleContext = cc.getBundleContext();
     logger.debug("start()");
     // Pingback server, if enabled
-    String pingbackUrl = bundleContext.getProperty("org.opencastproject.anonymous.feedback.url");
-    if (StringUtils.isNotBlank(pingbackUrl)) {
+    final String pingbackUrl = bundleContext.getProperty("org.opencastproject.anonymous.feedback.url");
+    final String hostUrl = bundleContext.getProperty("org.opencastproject.server.url");
+    if (StringUtils.isNotBlank(pingbackUrl) && StringUtils.isNotBlank(hostUrl)) {
       try {
         final URI uri = new URI(pingbackUrl);
         pingbackTimer = new Timer("Anonymous Feedback Service", true);
@@ -79,7 +81,7 @@ public class PingBackService {
               // TODO: we are currently using drupal to store this information. Use something less demanding so
               // we can simply post the data.
               params.add(new BasicNameValuePair("form_id", "webform_client_form_1834"));
-              params.add(new BasicNameValuePair("submitted[data]", getRuntimeInfo()));
+              params.add(new BasicNameValuePair("submitted[data]", getRuntimeInfo(hostUrl)));
               UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
               post.setEntity(entity);
               HttpResponse response = httpClient.execute(post);
@@ -115,8 +117,8 @@ public class PingBackService {
    * @throws IOException
    *           if reading the response body fails
    */
-  private String getRuntimeInfo() throws IOException {
-    HttpGet get = new HttpGet("/components.json");
+  private String getRuntimeInfo(String hostUrl) throws IOException {
+    HttpGet get = new HttpGet(UrlSupport.concat(hostUrl, "/info/components.json"));
     HttpResponse response = null;
     try {
       response = httpClient.execute(get);

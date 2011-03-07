@@ -18,8 +18,6 @@ package org.opencastproject.job.api;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 
-import java.util.List;
-
 /**
  * A service that creates jobs for long-running operations.
  */
@@ -42,15 +40,26 @@ public interface JobProducer {
   long countJobs(Status status) throws ServiceRegistryException;
 
   /**
-   * Asks the job producer to handle the given job using the provided operation and list of arguments.
+   * Asks the job producer to handle the given job using the provided operation and list of arguments. The
+   * implementation of this method <b>must</b> be asynchronous if the processing takes more than a few seconds.
    * 
-   * @param operation
-   *          the name of the operation
-   * @param arguments
-   *          the list of arguments
+   * @param job
+   *          the job being dispatched
+   * @return <code>true</code> if the job was accepted
    * @throws ServiceRegistryException
    *           if the producer was unable to start work as requested
    */
-  void acceptJob(Job job, String operation, List<String> arguments) throws ServiceRegistryException;
+  boolean acceptJob(Job job) throws ServiceRegistryException;
+
+  /**
+   * Whether the job can be accepted.
+   * 
+   * @param job
+   *          the job being dispatched
+   * @throws ServiceRegistryException
+   *           if the producer was unable to start work as requested
+   * @return whether the service is ready to accept the job
+   */
+  boolean isReadyToAccept(Job job) throws ServiceRegistryException;
 
 }

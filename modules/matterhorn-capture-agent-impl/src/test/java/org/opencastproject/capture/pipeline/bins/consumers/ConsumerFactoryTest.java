@@ -15,10 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins.consumers;
 
-import static org.easymock.EasyMock.createMock;
-
-import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
+import org.opencastproject.capture.pipeline.PipelineTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
@@ -26,7 +23,7 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.gstreamer.Gst;
 import org.junit.After;
@@ -44,10 +41,8 @@ import java.util.Properties;
 
 public class ConsumerFactoryTest {
 
-  CaptureAgent captureAgentMock;
-
   /** Capture Device Properties created for unit testing **/
-  CaptureDevice captureDevice = null;
+  private CaptureDevice captureDevice = null;
 
   /** Properties specifically designed for unit testing */
   private static Properties properties = null;
@@ -69,18 +64,16 @@ public class ConsumerFactoryTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
 
-    captureAgentMock = createMock(CaptureAgent.class);
+    Properties captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, null,
+            null, null, null, null);
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB,
+            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
 
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null,
-            null, null, null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB, "Friendly Name",
-            "/tmp/testpipe/test.mp2", captureDeviceProperties);
-
-    properties = BinTestHelpers.createConfidenceMonitoringProperties();
+    properties = PipelineTestHelpers.createConfidenceMonitoringProperties();
   }
 
   @After
@@ -93,7 +86,7 @@ public class ConsumerFactoryTest {
 
   @Test
   public void testXVImageSink() {
-    if (!BinTestHelpers.isLinux())
+    if (!PipelineTestHelpers.isLinux())
       return;
     if (!gstreamerInstalled)
       return;

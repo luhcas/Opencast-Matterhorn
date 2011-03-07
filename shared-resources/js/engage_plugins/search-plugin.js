@@ -18,7 +18,7 @@ Opencast.search_Plugin = (function ()
                                 '<td style="width:90px; text-align:center;" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
                                     '<a class="segments-time"' +
                                         'onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
-                                        '${Opencast.engage.formatSeconds(Math.floor(parseInt(s.time) / 1000))}' +
+                                        '${Opencast.Utils.formatSeconds(Math.floor(parseInt(s.time) / 1000))}' +
                                     '</a>' +
                                 '</td>' +
                                 '<td style="text-align:left;" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
@@ -67,6 +67,7 @@ Opencast.search_Plugin = (function ()
      * @description Add As Plug-in
      * @param elem Element to fill with the Data (e.g. a div)
      * @param data Data to fill the Element with
+     * @return true if successfully processed, false else
      */
     function addAsPlugin(elem, data, value)
     {
@@ -74,12 +75,13 @@ Opencast.search_Plugin = (function ()
         search_data = data;
         
         search_value = value;
-        createSearch();
+        return createSearch();
     }
 
     /**
      * @memberOf Opencast.search_Plugin
      * @description Processes the Data and puts it into the Element
+     * @return true if successfully processed, false else
      */
     function createSearch()
     {
@@ -95,6 +97,10 @@ Opencast.search_Plugin = (function ()
                 processedTemplate = template.process(search_data);
             }
             element.html(processedTemplate);
+            return true;
+        } else
+        {
+            return false;
         }
     }
 

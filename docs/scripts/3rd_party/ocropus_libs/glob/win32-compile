@@ -8,7 +8,9 @@ source "${HOME3P}/utilx"
 #
 [ -f .done-win32 ] && exit 0
 pkg1=`getcfg PKG1:`
+chkpkg "$pkg1" || exit 1
 pkg2=`getcfg PKG2:`
+chkpkg "$pkg2" || exit 1
 dir=`getcfg DIR:`
 [ -z "$dir" -o "$dir" = "/" ] && exit 1
 pcp=`getcfg PCP:`

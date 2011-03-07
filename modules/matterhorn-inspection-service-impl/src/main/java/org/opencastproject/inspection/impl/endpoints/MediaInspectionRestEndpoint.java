@@ -184,17 +184,6 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
     enrichEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, enrichEndpoint);
 
-    // getReceipt
-    RestEndpoint receiptEndpoint = new RestEndpoint("getReceipt", RestEndpoint.Method.GET, "/receipt/{id}.xml",
-            "Check on the status of an inspection receipt");
-    receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "ID of the receipt"));
-    receiptEndpoint.addFormat(Format.xml());
-    receiptEndpoint.addStatus(Status.ok("XML encoded receipt is returned"));
-    receiptEndpoint.addStatus(new Status(javax.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode(),
-            "No receipt with this identifier"));
-    receiptEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
-
     return DocUtil.generate(data);
   }
 

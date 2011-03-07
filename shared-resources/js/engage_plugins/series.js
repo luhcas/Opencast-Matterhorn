@@ -96,7 +96,17 @@ Opencast.Series = (function ()
                         at: "left bottom"
                     });
                     position_set = true;
+                    $(window).resize(function() {
+	                    $("#oc_series").position(
+                        {
+                            of: $("#oc_see-more-button"),
+                            my: "left top",
+                            at: "left bottom"
+                        });
+	                });
+	
                 }
+                                
                 $('#oc_series').show();
                 $('#oc_series').attr(
                 {
@@ -159,22 +169,25 @@ Opencast.Series = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
-                series_id = data['search-results'].result.dcIsPartOf;
-                if (series_id != '')
+                if((data !== undefined) && (data['search-results'] !== undefined) && (data['search-results'].result !== undefined))
                 {
-                    $.ajax(
+                    series_id = data['search-results'].result.dcIsPartOf;
+                    if (series_id != '')
                     {
-                        url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
-                        dataType: 'jsonp',
-                        jsonp: 'jsonp',
-                        success: function (data)
+                        $.ajax(
                         {
-                            if (data['search-results'].result.length > 1)
+                            url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
+                            dataType: 'jsonp',
+                            jsonp: 'jsonp',
+                            success: function (data)
                             {
-                                $('#oc_player-head-see-more').show();
+                                if (data['search-results'].result.length > 1)
+                                {
+                                    $('#oc_player-head-see-more').show();
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             }
         });

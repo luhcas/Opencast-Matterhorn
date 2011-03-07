@@ -132,7 +132,7 @@ public class StateRestEndpointTest {
   protected String createRecording() throws Exception {
     String recordingId;
     
-    HttpGet startCaptureRequest = new HttpGet(BASE_URL + "/capture/startCapture");
+    HttpGet startCaptureRequest = new HttpGet(BASE_URL + "/captureagent/startCapture");
     HttpResponse startCaptureResponse = client.execute(startCaptureRequest);
     
     Assert.assertEquals(200, startCaptureResponse.getStatusLine().getStatusCode());
@@ -145,7 +145,7 @@ public class StateRestEndpointTest {
     
     startCaptureRequest.abort();
     
-    HttpGet stopCaptureRequest = new HttpGet(BASE_URL + "/capture/stopCapture");
+    HttpGet stopCaptureRequest = new HttpGet(BASE_URL + "/captureagent/stopCapture");
     HttpResponse stopCaptureResponse = client.execute(stopCaptureRequest);
     
     Assert.assertEquals(200, stopCaptureResponse.getStatusLine().getStatusCode());

@@ -1,11 +1,11 @@
 <html>
   <head>
     <title>Hold for review</title>
-    <link rel="stylesheet" type="text/css" href="/admin/infusion-1.1.2/fss/css/fss-reset.css">
-    <link rel="stylesheet" type="text/css" href="/admin/infusion-1.1.2/fss/css/fss-layout.css">
+
     <link rel="stylesheet" type="text/css" href="/admin/css/admin.css">
+
     <style type="text/css">
-      #player-container {clear:both; border:none; width:90%; height:300;}
+      #player-container {clear:both; border:none; width:90%; height:300px;}
       #edit-link {float:right;margin-top:3px; margin-bottom:5px; margin-right:50px;}
       .hidden {display:none;}
       #loading-container {
@@ -18,6 +18,9 @@
       #notification {clear:both;padding-top:13px;padding-left:40px;font-size:80%;color:white;}
       #actions{clear:both;padding-top:13px;padding-left:40px;}
       .spandiv {display:table-cell;float:left;}
+      .hidden {display: none;}
+      #metadata-container {margin-bottom:8px;}
+      .formField-list label {width:30%; float: left; text-align: right; margin-right: 5px;}
     </style>
     <script type="text/javascript" src="/admin/jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
@@ -225,36 +228,36 @@
 
 
     <div id="metadata-container" style="display:none;">
-      <ul class="no-bullets formField-list fl-controls-right">
+      <ul class="no-bullets formField-list>
         <!-- captions files upload -->
         <!-- field: File -->
         <li class="ui-helper-clearfix">
-          <label class="fl-label"><span id="i18n_files_label">File(s)</span>:</label>
+          <label><span id="i18n_files_label">File(s)</span>:</label>
           <div id="files"></div>
         </li>
         <!-- field: Title -->
         <li id="container-title" class="ui-helper-clearfix" style="display:none;">
-          <label class="fl-label"><span id="i18n_title_label">Title</span>:</label>
+          <label><span id="i18n_title_label">Title</span>:</label>
           <span id="meta-title"></span>
         </li>
         <!-- field: Presenter -->
         <li id="container-creator" class="ui-helper-clearfix" style="display:none;">
-          <label class="fl-label"><span id="i18n_presenter_label">Presenter(s)</span>:</label>
+          <label><span id="i18n_presenter_label">Presenter(s)</span>:</label>
           <span id="meta-creator"></span>
         </li>
         <!-- field: Series -->
         <li id="container-isPartOf" class="ui-helper-clearfix" style="display:none;">
-          <label class="fl-label"><span id="i18n_dept_label">Series</span>:</label>
+          <label><span id="i18n_dept_label">Series</span>:</label>
           <span id="meta-isPartOf"></span>
         </li>
         <!-- field: Description -->
         <li id="container-description" class="ui-helper-clearfix" style="display:none;">
-          <label class="fl-label"><span id="i18n_dept_label">Description</span>:</label>
+          <label><span id="i18n_dept_label">Description</span>:</label>
           <span id="meta-description"></span>
         </li>
         <!-- field: Distribution channels -->
         <li id="container-dist" class="ui-helper-clearfix" style="display:none;">
-          <label class="fl-label"><span id="i18n_dept_label">Distribution channels</span>:</label>
+          <label><span id="i18n_dept_label">Distribution channels</span>:</label>
           <span id="meta-dist"></span>
         </li>
       </ul>

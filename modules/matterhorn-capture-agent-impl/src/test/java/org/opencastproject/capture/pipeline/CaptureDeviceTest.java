@@ -16,7 +16,7 @@
 package org.opencastproject.capture.pipeline;
 
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import junit.framework.Assert;
 

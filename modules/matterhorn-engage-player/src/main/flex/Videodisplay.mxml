@@ -36,39 +36,36 @@
 
 	<mx:Script>
 		<![CDATA[
-			import org.osmf.layout.VerticalAlign;
-			import org.opencast.engage.videodisplay.business.FlexAjaxBridge;
-			import bridge.ExternalFunction;
-			import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
-			import org.opencast.engage.videodisplay.control.util.TimeCode;
-			import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
-			import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
+			import flash.display.StageDisplayState;
 			import mx.collections.ArrayCollection;
-			import org.opencast.engage.videodisplay.vo.CaptionSetVO;
+			import bridge.ExternalFunction;
+			import org.opencast.engage.videodisplay.business.FlexAjaxBridge;
+			import org.opencast.engage.videodisplay.business.VideodisplayBean;
+			import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
+			import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
+			import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
 			import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
 			import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
+			import org.opencast.engage.videodisplay.control.util.TimeCode;
 			import org.opencast.engage.videodisplay.model.VideodisplayModel;
-			import org.opencast.engage.videodisplay.business.VideodisplayBean;
+			import org.opencast.engage.videodisplay.vo.CaptionSetVO;
+			import org.osmf.layout.VerticalAlign;
 			import org.swizframework.Swiz;
-			import flash.display.StageDisplayState;
-
 
 			[Autowire]
 			[Bindable]
 			public var model:VideodisplayModel;
 
+			private var flexAjaxBridge:FlexAjaxBridge;
 
 			/**
-			 * init
-			 * initialization
-			 *
-			 * @eventType Event event
+			 * getFlexAjaxBridge
+			 * Get the Flex Ajax Bridge
+			 * @return KeyboardEvent FlexAjaxBridge
 			 */
-			private function onApplicationComplete(event:Event):void
+			public function getFlexAjaxBridge():FlexAjaxBridge
 			{
-				/* Set up full screen handler. */
-				Application.application.stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler);
-				StyleManager.getStyleDeclaration("Application").setStyle('backgroundAlpha', '0');
+				return this.flexAjaxBridge;
 			}
 
 			/**
@@ -95,6 +92,30 @@
 			}
 
 			/**
+			 * onAddedToStage
+			 * Add an event listener for the keyboard.
+			 */
+			private function onAddedToStage():void
+			{
+				flexAjaxBridge=new FlexAjaxBridge();
+				stage.addEventListener(KeyboardEvent.KEY_UP, reportKeyUp);
+			}
+
+
+			/**
+			 * init
+			 * initialization
+			 *
+			 * @eventType Event event
+			 */
+			private function onApplicationComplete(event:Event):void
+			{
+				/* Set up full screen handler. */
+				Application.application.stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenHandler);
+				StyleManager.getStyleDeclaration("Application").setStyle('backgroundAlpha', '0');
+			}
+
+			/**
 			 * onPreinitialize
 			 * load Beans
 			 */
@@ -105,13 +126,12 @@
 			}
 
 			/**
-			 * onAddedToStage
-			 * Add an event listener for the keyboard.
+			 * playPause
+			 * Toggle between play and pause
 			 */
-			private function onAddedToStage():void
+			private function playPause():void
 			{
-				flexAjaxBridge=new FlexAjaxBridge();
-				stage.addEventListener(KeyboardEvent.KEY_UP, reportKeyUp);
+				ExternalInterface.call(ExternalFunction.PLAYPAUSE, '');
 			}
 
 			/**
@@ -122,27 +142,6 @@
 			private function reportKeyUp(event:KeyboardEvent):void
 			{
 				flexAjaxBridge.reportKeyUp(event);
-			}
-
-			private var flexAjaxBridge:FlexAjaxBridge;
-
-			/**
-			 * getFlexAjaxBridge
-			 * Get the Flex Ajax Bridge
-			 * @return KeyboardEvent FlexAjaxBridge
-			 */
-			public function getFlexAjaxBridge():FlexAjaxBridge
-			{
-				return this.flexAjaxBridge;
-			}
-
-			/**
-			 * playPause
-			 * Toggle between play and pause
-			 */
-			private function playPause():void
-			{
-				ExternalInterface.call(ExternalFunction.PLAYPAUSE, '');
 			}
 		]]>
 	</mx:Script>
@@ -198,6 +197,7 @@
 	<view:ErrorView id="bx_error"
 					visible="false"
 					includeInLayout="false"/>
+	<!--<mx:Style source="Icon_set.css"/>-->
 
 
 </mx:Application>

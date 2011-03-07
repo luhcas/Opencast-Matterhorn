@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.capture.api.CaptureAgent" immediate="true" activate="activate">
+ name="org.opencastproject.capture.impl.CaptureAgentImpl" immediate="true" activate="activate">
   <implementation class="org.opencastproject.capture.impl.CaptureAgentImpl" />
   <property name="service.description" value="Capture Service" />
   <property name="service.pid" value="org.opencastproject.capture.impl.CaptureAgentImpl" />

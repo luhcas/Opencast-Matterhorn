@@ -19,7 +19,6 @@
 ##    1 - Wrong value for a flag
 ##    2 - Unknown flag
 ##    3 - Wrong number of parameters
-##    4 - Invalid value for default answer
 ##    
 ####################################################################################################
 ask() {
@@ -89,10 +88,12 @@ ask() {
     # Check the syntax of the default answer, if any
     if [[ "$default" ]]; then
 	if [[ ! $default =~ $filter ]]; then
-	    echo "Invalid value for default answer"
-	    return 4
-	fi
+	    echo "Wrong value for argument -d: $default"
+	    # Unset the default value, rather than exiting
+	    unset default
+	else 
 	prompt="$prompt [$default]"
+    fi
     fi
 
     # Check if a help message is present, and include that info in the prompt
@@ -149,7 +150,6 @@ ask() {
 ##    2 - The specified default index is incorrect
 ##    3 - Flag unknown
 ##    4 - Insufficient number of parameters
-##    5 - Specified default index is out of range
 ##    
 ####################################################################################################
 choose() {
@@ -184,10 +184,10 @@ choose() {
 		case "${1:1}" in 
 		    d)  # Default value
 			if [[ ! $2 =~ ^0*[1-9][0-9]*$ ]]; then
-			    echo "The default value must be an integer greater than 0"
-			    return 2
+			    echo "Wrong value for argument -d: $2 (should be an integer greater than 0)"
+			else
+			    default_option="$2"
 			fi
-			default_option="$2"
 			;;
 		    t)  # Title
 			title="$2"
@@ -206,7 +206,7 @@ choose() {
 			;;
 		    o)  # Output array
 			if [[ ! $2 =~ ^[a-zA-Z0-9_][a-zA-Z0-9_]*$ ]]; then
-			    echo "Wrong variable name for the output array"
+			    echo "Wrong value for argument -o: $2 (it should be a valid variable name)"
 			    return 5
 			fi
 			output_array="$2"
@@ -248,10 +248,11 @@ choose() {
     # Check the default option, if present, and include it in the prompt
     if [[ "$default_option" ]]; then 
 	if [[ "$default_option" -ge $# ]]; then
-	    echo "Default value out of range"
-	    return 5
-	fi
+	    echo "Wrong value for argument -d: $default_option (out of range)"
+	    unset default_option
+	else
 	prompt="$prompt [${!default_option}]"
+    fi
     fi
 
     # Check if there is any help message, and include an indication of this in the prompt
@@ -339,7 +340,7 @@ yesno() {
 		    default="$noword"
 		else
 		    echo "Wrong value for argument $1: $2"
-		    return 1
+		    unset default
 		fi
 		shift
 		;;

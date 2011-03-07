@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
@@ -124,12 +124,6 @@
               org.opencastproject.metadata.dublincore;version=${project.version},
               *;resolution:=optional
       			</Import-Package>
-            <Private-Package>
-              net.fortuna.ical4j.*
-            </Private-Package>
-            <Embed-Dependency>
-              ical4j;inline=true
-            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/usertracking-service.xml,
               OSGI-INF/usertracking-service-rest.xml

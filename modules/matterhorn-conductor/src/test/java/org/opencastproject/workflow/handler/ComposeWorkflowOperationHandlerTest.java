@@ -191,7 +191,7 @@ public class ComposeWorkflowOperationHandlerTest {
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operation = new WorkflowOperationInstanceImpl("op", OperationState.RUNNING);
-    operation.setId("compose");
+    operation.setTemplate("compose");
     operation.setState(OperationState.RUNNING);
     for (String key : configurations.keySet()) {
       operation.setConfiguration(key, configurations.get(key));

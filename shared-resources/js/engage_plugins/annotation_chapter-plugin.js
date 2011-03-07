@@ -43,31 +43,38 @@ Opencast.Annotation_ChapterPlugin = (function(){
      * @description Add As Plug-in
      * @param elem Element to put the Data into
      * @param data The Data to process
+     * @return true if successfully processed, false else
      */
     function addAsPlugin(elem, data){
         element = elem;
         annotation_chapterData = data;
-        drawAnnotation_Chapter();
+        return drawAnnotation_Chapter();
     }
 
     /**
      * @memberOf Opencast.Annotation_ChapterPlugin
      * @description Resize Plug-in
+     * @return true if successfully processed, false else
      */
     function resizePlugin(){
-        drawAnnotation_Chapter();
+        return drawAnnotation_Chapter();
     }
 
     /**
      * @memberOf Opencast.Annotation_ChapterPlugin
      * @description Add annotations into template element
      * processing the template with service data
+     * @return true if successfully processed, false else
      */
     function drawAnnotation_Chapter(){
         if((element !== undefined) && (annotation_chapterData.annotation !== undefined) && (annotation_chapterData.annotation.length > 0))
         {
             processedTemplateData = template.process(annotation_chapterData);
             element.html(processedTemplateData);
+            return true;
+        } else
+        {
+            return false;
         }
     }
 

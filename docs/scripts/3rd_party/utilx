@@ -1,8 +1,16 @@
 # HOME3P must already be defined
 case `uname` in
-  Linux )  export LOCAL_PREFIX=/usr/local ;;
-  Darwin ) export LOCAL_PREFIX=/opt/local ;; # if compiling with MacPorts
-# Darwin ) export LOCAL_PREFIX=/usr/local ;;
+  Linux )
+    [ -s /etc/issue ] && head -1 /etc/issue
+    uname -smr
+    export LOCAL_PREFIX=/usr/local
+    ;;
+  Darwin )
+    sw_vers
+    uname -smr
+#   export LOCAL_PREFIX=/usr/local
+    export LOCAL_PREFIX=/opt/local # if compiling with MacPorts
+    ;;
 esac
 export MACPORTS_SVN=http://svn.macports.org/repository/macports/trunk/dports
 export MINGW32=i686-pc-mingw32
@@ -44,13 +52,13 @@ arch() {
 }
 #
 # os
-#  CentOS, RHEL, Ubuntu, Debian, openSUSE, MacOS, <unknown>
+#  CentOS, RHEL, Ubuntu, Debian, openSUSE, Amazon, MacOS, <unknown>
 #
 os() {
   set +x
   case `uname` in
     Linux )
-      # CentOS, RHEL, Ubuntu, Debian, openSUSE
+      # CentOS, RHEL, Ubuntu, Debian, openSUSE, Amazon
       awk '{
   sub("Welcome to",""); # Appears in openSUSE
   if (match($0, "Red Hat Enterprise Linux")) { print "RHEL"; }
@@ -74,14 +82,44 @@ os() {
 }
 #
 # chkprog
+#   $1 = binary to check
 #
 chkprog() {
   which "$1" >/dev/null 2>&1
   if [ $? -ne 0 ]; then
-    echo "$1 is missing"
+    echo "$1 is missing" 1>&2
     return 1
   fi
   return 0
+}
+#
+# chklib
+#   $1 = library to check (short form)
+#
+# Default library path:
+#   CentOS, RHEL:  /lib:/usr/lib:/lib/i686:/usr/lib/sse2:/usr/lib/tls
+#   Ubuntu:        /lib:/usr/lib:/lib/tls:/lib/i686:/usr/lib/sse2:/lib/tls/i686
+#   MacOS:         ~/lib:/usr/local/lib:/opt/local/lib:/lib:/usr/lib
+#
+chklib() {
+  case `uname` in
+    Linux )
+      for dir in /lib /usr/lib /lib/tls /lib/i686 /lib/tls/i686 /usr/lib/sse2 /usr/lib/tls; do
+        [ -s "$dir/lib$1.so" ] && return 0
+      done
+      for dir in /lib64 /usr/lib64 /lib64/tls /lib64/i686 /lib64/tls/i686 /usr/lib64/sse2 /usr/lib64/tls; do
+        [ -s "$dir/lib$1.so" ] && return 0
+      done
+      echo "lib$1.so is missing" 1>&2
+      ;;
+    Darwin )
+      for dir in /lib /usr/lib /opt/local/lib /usr/local/lib ~/lib; do
+        [ -s "$dir/lib$1.dylib" ] && return 0
+      done
+      echo "lib$1.dylib is missing" 1>&2
+      ;;
+  esac
+  return 1
 }
 #
 # chksudo
@@ -174,12 +212,27 @@ shasumx() {
 }
 #
 # copypkg
+#   $1 = package name
 #
 copypkg() {
   [ -z "$HOME3P" ] && HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
   [ ! -f "${HOME3P}/tarballs/$1" ] && return 1
   cp "${HOME3P}/tarballs/$1" .
   [ $? -ne 0 ] && return 1
+  return 0
+}
+#
+# chkpkg
+#   $1 = package name
+#
+chkpkg() {
+  set +x
+  if [ ! -s "$1" ]; then
+    echo "File $1 is missing - download it first!" 1>&2
+    set -x
+    return 1
+  fi
+  set -x
   return 0
 }
 #
@@ -200,7 +253,7 @@ download() {
         for url in `getcfg URL${ii}:`; do
           pkg=`getcfg PKG${ii}:`
           if [ -z "$pkg" ]; then
-            echo "PKG${ii} not defined for URL${ii}: $url"
+            echo "PKG${ii} not defined for URL${ii}: $url" 1>&2
             continue
           fi
           if [ ! -f "$pkg" ]; then
@@ -217,7 +270,7 @@ download() {
           if [ -n "$sha" ]; then
             shax=`shasumx "$pkg"`
             if [ "$shax" != "$sha" ]; then
-              echo "Error transferring PKG${ii}: $pkg"
+              echo "Error transferring PKG${ii}: $pkg" 1>&2
               return 1
             fi
           fi
@@ -292,7 +345,7 @@ compile() {
     MacOS-mac ) ;;
     MacOS-ports ) ;;
     * )
-      echo "Don't know how to compile $1 for \"$2\" on $OS"
+      echo "Don't know how to compile $1 for \"$2\" on $OS" 1>&2
       set -x
       return 1
       ;;

@@ -15,31 +15,32 @@
  */
 package org.opencast.engage.videodisplay.control.event
 {
-    import flash.events.Event;
+	import flash.events.Event;
+	/**
+	 *   ClosedCaptionsEvent
+	 */
+	public class ClosedCaptionsEvent extends Event
+	{
+		public static var EVENT_NAME:String='ClosedCaptionsEvent';
 
-    /**
-     *   ClosedCaptionsEvent
-     */
-    public class ClosedCaptionsEvent extends Event
-    {
-        public static var EVENT_NAME : String = 'ClosedCaptionsEvent';
+		/**
+		 * Constructor
+		 */
+		public function ClosedCaptionsEvent(bubbles:Boolean=false, cancelable:Boolean=false)
+		{
+			super(EVENT_NAME, bubbles, cancelable);
+		}
 
-        /**
-         * Constructor
-         */
-        public function ClosedCaptionsEvent( bubbles : Boolean = false, cancelable : Boolean = false )
-        {
-            super( EVENT_NAME, bubbles, cancelable );
-        }
-
-        /**
-         * clone
-         * Override the inherited clone() method.
-         * @return ClosedCaptionsEvent
-         */
-        override public function clone() : Event
-        {
-            return new ClosedCaptionsEvent( bubbles, cancelable );
-        }
-    }
+		/**
+		 * clone
+		 * Override the inherited clone() method.
+		 * @return ClosedCaptionsEvent
+		 */
+		override public function clone():Event
+		{
+			return new ClosedCaptionsEvent(bubbles, cancelable);
+		}
+	}
 }
+
+

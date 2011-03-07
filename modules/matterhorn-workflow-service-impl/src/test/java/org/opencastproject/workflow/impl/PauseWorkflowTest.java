@@ -19,6 +19,7 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -41,7 +42,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class PauseWorkflowTest {
@@ -60,7 +63,7 @@ public class PauseWorkflowTest {
   protected static final String getStorageRoot() {
     return "." + File.separator + "target" + File.separator + System.currentTimeMillis();
   }
-  
+
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
@@ -91,6 +94,9 @@ public class PauseWorkflowTest {
         return handlerRegistrations;
       }
     };
+    MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
+    EasyMock.replay(mds);
+    service.addMetadataService(mds);
 
     ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
     serviceRegistry.registerService(service);
@@ -126,16 +132,30 @@ public class PauseWorkflowTest {
     service.addWorkflowListener(pauseListener);
     synchronized (pauseListener) {
       workflow = service.start(def, mp, null);
-      pauseListener.wait(10000);
+      pauseListener.wait();
     }
-    service.removeWorkflowListener(pauseListener);
-    
+
     // Ensure that the first operation handler was called, but not the second
     Assert.assertTrue(firstHandler.isStarted());
     Assert.assertTrue(!secondHandler.isStarted());
 
     // The workflow should be in the paused state
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
+
+    // Resume the workflow with some properties
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("key", "value");
+
+    
+    service.addWorkflowListener(pauseListener);
+    synchronized (pauseListener) {
+      service.resume(workflow.getId(), properties);
+      pauseListener.wait();
+    }
+    service.removeWorkflowListener(pauseListener);
+    
+    // The handler should have picked up the properties
+    Assert.assertEquals(properties, firstHandler.getProperties());
   }
 
 }

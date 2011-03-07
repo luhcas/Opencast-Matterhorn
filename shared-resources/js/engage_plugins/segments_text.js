@@ -43,43 +43,55 @@ Opencast.segments_text = (function ()
         $('#segments_text-loading').show();
         $('#oc-segments_text').hide();
         $('.oc-segments-preview').css('display', 'block');
-        // Request JSONP data
-        $.ajax(
+        
+        // If cashed data are available
+        if(Opencast.segments_text_Plugin.createSegmentsTextFromCashe())
         {
-            url: '../../search/episode.json',
-            data: 'id=' + mediaPackageId,
-            dataType: 'jsonp',
-            jsonp: 'jsonp',
-            success: function (data)
+            // Make visible
+            $('#oc_slidetext').show();
+            $('#segments_text-loading').hide();
+            $('#oc-segments_text').show();
+            $('.oc-segments-preview').css('display', 'block');
+        } else
+        {
+            // Request JSONP data
+            $.ajax(
             {
-                // get rid of every '@' in the JSON data
-                // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
-                data['search-results'].result.segments.currentTime = Opencast.Utils.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
-                // Set Duration until this Segment ends
-                var completeDuration = 0;
-                $.each(data['search-results'].result.segments.segment, function (i, value)
+                url: '../../search/episode.json',
+                data: 'id=' + mediaPackageId,
+                dataType: 'jsonp',
+                jsonp: 'jsonp',
+                success: function (data)
                 {
-                    // Set a Duration until the Beginning of this Segment
-                    data['search-results'].result.segments.segment[i].durationExcludingSegment = completeDuration;
-                    completeDuration += parseInt(data['search-results'].result.segments.segment[i].duration);
-                    // Set a Duration until the End of this Segment
-                    data['search-results'].result.segments.segment[i].durationIncludingSegment = completeDuration;
-                });
-                // Create Trimpath Template
-                Opencast.segments_text_Plugin.addAsPlugin($('#oc-segments_text'), data['search-results'].result.segments);
-                // Make visible
-                $('#oc_slidetext').show();
-                $('#segments_text-loading').hide();
-                $('#oc-segments_text').show();
-                $('.oc-segments-preview').css('display', 'block');
-            },
-            // If no data comes back
-            error: function (xhr, ajaxOptions, thrownError)
-            {
-                $('#oc-segments_text').html('No Segment Text available');
-                $('#oc-segments_text').hide();
-            }
-        });
+                    // get rid of every '@' in the JSON data
+                    // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
+                    data['search-results'].result.segments.currentTime = Opencast.Utils.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
+                    // Set Duration until this Segment ends
+                    var completeDuration = 0;
+                    $.each(data['search-results'].result.segments.segment, function (i, value)
+                    {
+                        // Set a Duration until the Beginning of this Segment
+                        data['search-results'].result.segments.segment[i].durationExcludingSegment = completeDuration;
+                        completeDuration += parseInt(data['search-results'].result.segments.segment[i].duration);
+                        // Set a Duration until the End of this Segment
+                        data['search-results'].result.segments.segment[i].durationIncludingSegment = completeDuration;
+                    });
+                    // Create Trimpath Template
+                    Opencast.segments_text_Plugin.addAsPlugin($('#oc-segments_text'), data['search-results'].result.segments);
+                    // Make visible
+                    $('#oc_slidetext').show();
+                    $('#segments_text-loading').hide();
+                    $('#oc-segments_text').show();
+                    $('.oc-segments-preview').css('display', 'block');
+                },
+                // If no data comes back
+                error: function (xhr, ajaxOptions, thrownError)
+                {
+                    $('#oc-segments_text').html('No Segment Text available');
+                    $('#oc-segments_text').hide();
+                }
+            });
+        }
     }
     
     /**

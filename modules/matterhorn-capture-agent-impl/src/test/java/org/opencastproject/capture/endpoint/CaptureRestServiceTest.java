@@ -28,10 +28,10 @@ import org.junit.Test;
  * Tests the behavior of the composer rest endpoint, using a mock composer service.
  */
 public class CaptureRestServiceTest {
-  CaptureRestService service;
+  private CaptureRestService service;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     CaptureAgent agent = EasyMock.createNiceMock(CaptureAgent.class);
 
     EasyMock.expect(agent.startCapture()).andReturn("Unscheduled-12354356");

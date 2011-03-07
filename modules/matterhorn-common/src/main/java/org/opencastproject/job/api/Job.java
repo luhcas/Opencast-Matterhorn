@@ -26,7 +26,7 @@ public interface Job {
 
   /** The status of the job that this receipt represents */
   public static enum Status {
-    QUEUED, PAUSED, RUNNING, FINISHED, FAILED, DELETED, INSTANTIATED
+    QUEUED, PAUSED, RUNNING, FINISHED, FAILED, DELETED, INSTANTIATED, DISPATCHING
   }
 
   /**
@@ -82,6 +82,14 @@ public interface Job {
    * @return the arguments passed to the service operation
    */
   List<String> getArguments();
+
+  /**
+   * Sets the argument list.
+   * 
+   * @param arguments
+   *          the list of arguments
+   */
+  void setArguments(List<String> arguments);
 
   /**
    * Gets the receipt's current {@link Status}
@@ -185,4 +193,20 @@ public interface Job {
    * @return the root job identifier
    */
   Long getRootJobId();
+
+  /**
+   * Gets whether this job may be dispatched.
+   * 
+   * @return whether the job can be queued for dispatch or not
+   */
+  boolean isDispatchable();
+
+  /**
+   * Sets whether this job can be dispatched.
+   * 
+   * @param dispatchable
+   *          whether the job should be queueable for dispatch.
+   */
+  void setDispatchable(boolean dispatchable);
+
 }

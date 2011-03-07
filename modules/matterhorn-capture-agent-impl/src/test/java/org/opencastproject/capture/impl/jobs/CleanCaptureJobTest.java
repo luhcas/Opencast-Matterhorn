@@ -41,25 +41,23 @@ public class CleanCaptureJobTest {
 
   private static final Logger logger = LoggerFactory.getLogger(CleanCaptureJobTest.class);
 
-  XProperties props = null;
-  CleanCaptureJob theJob = null;
-  Vector<AgentRecording> theRecordings = null;
+  private XProperties props = null;
+  private CleanCaptureJob theJob = null;
+  private Vector<AgentRecording> theRecordings = null;
 
   // The size of this array determines the number of recordings created, one for each element
   // It should only include recording states, as specified by the interface RecordingState
-  String[] states = new String[] { RecordingState.UPLOAD_FINISHED, RecordingState.UPLOAD_FINISHED,
+  private String[] states = new String[] { RecordingState.UPLOAD_FINISHED, RecordingState.UPLOAD_FINISHED,
           RecordingState.CAPTURING, RecordingState.MANIFEST, RecordingState.UPLOADING };
 
-  int numberOfRecordings = 5;
-
-  File baseDir;
+  private File baseDir;
 
   @Before
   public void setUp() throws URISyntaxException, IOException {
     // Define particular instances for the CleanCaptureJob required arguments
     props = new XProperties();
     props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL,
-            new File(System.getProperty("java.io.tmpdir"), "clean-capture-test").getCanonicalPath());
+            new File("./target", "clean-capture-test").getCanonicalPath());
     theJob = new CleanCaptureJob();
     theRecordings = new Vector<AgentRecording>();
 

@@ -108,7 +108,7 @@ public class AnnotationRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("annotations.xml")
-  public Response getAnnotationsAsXml(@QueryParam("id") String id, @QueryParam("key") String key,
+  public Response getAnnotationsAsXml(@QueryParam("episode") String id, @QueryParam("type") String type,
           @QueryParam("day") String day, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 
     // Are the values of offset and limit valid?
@@ -119,12 +119,12 @@ public class AnnotationRestService {
     if (limit == 0)
       limit = 10;
 
-    if (!StringUtils.isEmpty(id) && !StringUtils.isEmpty(key))
-      return Response.ok(annotationService.getAnnotationsByTypeAndMediapackageId(key, id, offset, limit)).build();
-    else if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(day))
-      return Response.ok(annotationService.getAnnotationsByTypeAndDay(key, day, offset, limit)).build();
-    else if (!StringUtils.isEmpty(key))
-      return Response.ok(annotationService.getAnnotationsByType(key, offset, limit)).build();
+    if (!StringUtils.isEmpty(id) && !StringUtils.isEmpty(type))
+      return Response.ok(annotationService.getAnnotationsByTypeAndMediapackageId(type, id, offset, limit)).build();
+    else if (!StringUtils.isEmpty(type) && !StringUtils.isEmpty(day))
+      return Response.ok(annotationService.getAnnotationsByTypeAndDay(type, day, offset, limit)).build();
+    else if (!StringUtils.isEmpty(type))
+      return Response.ok(annotationService.getAnnotationsByType(type, offset, limit)).build();
     else if (!StringUtils.isEmpty(day))
       return Response.ok(annotationService.getAnnotationsByDay(day, offset, limit)).build();
     else
@@ -137,7 +137,7 @@ public class AnnotationRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("annotations.json")
-  public Response getAnnotationsAsJson(@QueryParam("id") String id, @QueryParam("type") String type,
+  public Response getAnnotationsAsJson(@QueryParam("episode") String id, @QueryParam("type") String type,
           @QueryParam("day") String day, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
     return getAnnotationsAsXml(id, type, day, limit, offset); // same logic, different @Produces annotation
   }
@@ -145,7 +145,7 @@ public class AnnotationRestService {
   @PUT
   @Path("")
   @Produces(MediaType.TEXT_XML)
-  public Response add(@FormParam("id") String mediapackageId, @FormParam("in") int inpoint,
+  public Response add(@FormParam("episode") String mediapackageId, @FormParam("in") int inpoint,
           @FormParam("out") int outpoint, @FormParam("type") String type, @FormParam("value") String value,
           @Context HttpServletRequest request) {
     String sessionId = request.getSession().getId();
@@ -159,7 +159,8 @@ public class AnnotationRestService {
     a = annotationService.addAnnotation(a);
     URI uri;
     try {
-      uri = new URI(UrlSupport.concat(new String[] {serverUrl, serviceUrl, Long.toString(a.getAnnotationId()), ".xml"}));
+      uri = new URI(
+              UrlSupport.concat(new String[] { serverUrl, serviceUrl, Long.toString(a.getAnnotationId()), ".xml" }));
     } catch (URISyntaxException e) {
       throw new WebApplicationException(e);
     }
@@ -169,24 +170,20 @@ public class AnnotationRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("/{id}.xml")
-  public AnnotationImpl getAnnotationAsXml(@PathParam("id") String idAsString) {
+  public AnnotationImpl getAnnotationAsXml(@PathParam("id") String idAsString) throws NotFoundException {
     Long id = null;
     try {
       id = Long.parseLong(idAsString);
     } catch (NumberFormatException e) {
       throw new WebApplicationException(e, Status.BAD_REQUEST);
     }
-    try {
-      return (AnnotationImpl) annotationService.getAnnotation(id);
-    } catch (NotFoundException e) {
-      throw new WebApplicationException(Status.NOT_FOUND);
-    }
+    return (AnnotationImpl) annotationService.getAnnotation(id);
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/{id}.xml")
-  public AnnotationImpl getAnnotationAsJson(@PathParam("id") String idAsString) {
+  public AnnotationImpl getAnnotationAsJson(@PathParam("id") String idAsString) throws NotFoundException {
     return getAnnotationAsXml(idAsString);
   }
 
@@ -222,9 +219,9 @@ public class AnnotationRestService {
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.created("The URL to this annotation is returned in the "
             + "Location header, and the annotation itelf is returned in the response body."));
     addEndpoint.addRequiredParam(new Param("episode", Type.STRING, null, "The ID of the episode"));
+    addEndpoint.addRequiredParam(new Param("type", Type.STRING, null, "The type of annotation"));
     addEndpoint.addRequiredParam(new Param("in", Type.STRING, null, "The time, or inpoint, of the annotation"));
     addEndpoint.addOptionalParam(new Param("out", Type.STRING, null, "The optional outpoint of the annotation"));
-    addEndpoint.addRequiredParam(new Param("type", Type.STRING, null, "The type of annotation"));
     addEndpoint.addRequiredParam(new Param("value", Type.TEXT, null, "The value of the annotation"));
     addEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, addEndpoint);
@@ -236,6 +233,8 @@ public class AnnotationRestService {
     annotationEndpoint.addFormat(new Format("JSON", null, null));
     annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The annotations, expressed as xml or json"));
     annotationEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
+    annotationEndpoint
+            .addOptionalParam(new Param("episode", Type.STRING, null, "The mediapackage (episode) identifier"));
     annotationEndpoint.addOptionalParam(new Param("type", Type.STRING, null, "The type of annotation"));
     annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));
     annotationEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",

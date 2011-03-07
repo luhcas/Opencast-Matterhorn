@@ -15,20 +15,18 @@
  */
 package org.opencast.engage.videodisplay.state
 {
-
 	/**
 	 *   SoundState
 	 */
 	public class SoundState
 	{
-		public static const VOLUMEMIN : String = 'audiomin';
 
-		public static const VOLUMEMED : String = 'audiomed';
+		public static const VOLUMEMAX:String='audiomax';
 
-		public static const VOLUMEMAX : String = 'audiomax';
+		public static const VOLUMEMED:String='audiomed';
+		public static const VOLUMEMIN:String='audiomin';
 
-		public static const VOLUMEMUTE : String = 'audioof';
-
+		public static const VOLUMEMUTE:String='audioof';
 	}
 }
 

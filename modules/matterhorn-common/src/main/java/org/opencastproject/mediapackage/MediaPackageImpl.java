@@ -18,6 +18,8 @@ package org.opencastproject.mediapackage;
 
 import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.identifier.Id;
+import org.opencastproject.mediapackage.identifier.IdBuilder;
+import org.opencastproject.mediapackage.identifier.UUIDIdBuilderImpl;
 import org.opencastproject.util.DateTimeSupport;
 
 import org.apache.commons.io.IOUtils;
@@ -54,8 +56,6 @@ import javax.xml.transform.stream.StreamSource;
 
 /**
  * Default implementation for a media media package.
- * 
- * TODO: Finish code documentation
  */
 @XmlType(name = "mediapackage", namespace = "http://mediapackage.opencastproject.org", propOrder = { "title", "series",
         "seriesTitle", "creators", "contributors", "subjects", "license", "language", "tracks", "catalogs",
@@ -75,9 +75,6 @@ public final class MediaPackageImpl implements MediaPackage {
 
   /** Context for serializing and deserializing */
   static final JAXBContext context;
-
-  /** The media media package meta data */
-  private ManifestImpl manifest = null;
 
   /** List of observers */
   protected List<MediaPackageObserver> observers = new ArrayList<MediaPackageObserver>();
@@ -112,6 +109,33 @@ public final class MediaPackageImpl implements MediaPackage {
   @XmlElement(name = "subject")
   protected Set<String> subjects = null;
 
+  /** id builder, for internal use only */
+  private static final IdBuilder idBuilder = new UUIDIdBuilderImpl();
+
+  /** The media package's identifier */
+  private Id identifier = null;
+
+  /** The start date and time */
+  private long startTime = 0L;
+
+  /** The media package duration */
+  private long duration = 0;
+
+  /** The media package's other (uncategorized) files */
+  private List<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
+
+  /** Number of tracks */
+  private int tracks = 0;
+
+  /** Number of metadata catalogs */
+  private int catalogs = 0;
+
+  /** Number of attachments */
+  private int attachments = 0;
+
+  /** Numer of unclassified elements */
+  private int others = 0;
+
   static {
     try {
       context = JAXBContext.newInstance("org.opencastproject.mediapackage", MediaPackageImpl.class.getClassLoader());
@@ -124,90 +148,113 @@ public final class MediaPackageImpl implements MediaPackage {
    * Creates a media package object.
    */
   MediaPackageImpl() {
-    this.manifest = new ManifestImpl();
+    this(idBuilder.createNew());
   }
 
   /**
    * Creates a media package object with the media package identifier.
    * 
-   * @param handle
+   * @param id
    *          the media package identifier
    */
-  MediaPackageImpl(Id handle) {
-    this.manifest = new ManifestImpl(handle);
+  MediaPackageImpl(Id id) {
+    this.identifier = id;
   }
 
   /**
-   * Creates a new media media package derived from the given media media package catalog document.
+   * {@inheritDoc}
    * 
-   * @param manifest
-   *          the manifest
-   */
-  MediaPackageImpl(ManifestImpl manifest) {
-    this.manifest = manifest;
-
-    // Set a reference to the media package
-    for (MediaPackageElement element : manifest.getEntries()) {
-      if (element instanceof AbstractMediaPackageElement) {
-        ((AbstractMediaPackageElement) element).setMediaPackage(this);
-      }
-    }
-  }
-
-  /**
    * @see org.opencastproject.mediapackage.MediaPackage#getIdentifier()
    */
   @XmlAttribute(name = "id")
   public Id getIdentifier() {
-    return manifest.getIdentifier();
-  }
-
-  public void setIdentifier(Id identifier) {
-    manifest.setIdentifier(identifier);
+    return identifier;
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#setIdentifier(org.opencastproject.mediapackage.identifier.Id)
+   */
+  public void setIdentifier(Id identifier) {
+    this.identifier = identifier;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getDuration()
    */
   @XmlAttribute(name = "duration")
   public long getDuration() {
-    return manifest.getDuration();
+    if (duration <= 0 && hasTracks()) {
+      for (Track t : getTracks()) {
+        if (duration < t.getDuration())
+          duration = t.getDuration();
+      }
+    }
+    return duration;
   }
 
   /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#setDuration(long)
+   */
+  @Override
+  public void setDuration(long duration) throws IllegalStateException {
+    if (hasTracks())
+      throw new IllegalStateException(
+              "The duration is determined by the length of the tracks and cannot be set manually");
+    this.duration = duration;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getDate()
    */
   public Date getDate() {
-    return new Date(manifest.getStartDate());
+    return new Date(startTime);
   }
 
+  /**
+   * Returns the recording time in utc format.
+   * 
+   * @return the recording time
+   */
   @XmlAttribute(name = "start")
   public String getStartDateAsString() {
-    long d = manifest.getStartDate();
-    String startDate = "";
-    if (d > 0) {
-      startDate = DateTimeSupport.toUTC(d);
-    }
-    return startDate;
+    if (startTime == 0)
+      return null;
+    return DateTimeSupport.toUTC(startTime);
   }
 
+  /**
+   * Sets the date and time of recording in utc format.
+   * 
+   * @param startTime
+   *          the start time
+   */
   public void setStartDateAsString(String startTime) {
     if (startTime != null && !"0".equals(startTime) && !startTime.isEmpty()) {
       try {
-        manifest.setStartDate(DateTimeSupport.fromUTC(startTime));
+        this.startTime = DateTimeSupport.fromUTC(startTime);
       } catch (Exception e) {
         logger.info("Unable to parse start time {}", startTime);
       }
     } else {
-      manifest.setStartDate(0);
+      this.startTime = 0;
     }
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#elements()
    */
   public Iterable<MediaPackageElement> elements() {
-    return Arrays.asList(manifest.getEntries());
+    return Arrays.asList(getElements());
   }
 
   /**
@@ -216,10 +263,16 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#getElements()
    */
   public MediaPackageElement[] getElements() {
-    return manifest.getEntries();
+    ArrayList<MediaPackageElement> entries = new ArrayList<MediaPackageElement>();
+    for (MediaPackageElement e : elements) {
+      entries.add(e);
+    }
+    return entries.toArray(new MediaPackageElement[entries.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getElementByReference(org.opencastproject.mediapackage.MediaPackageReference)
    */
   public MediaPackageElement getElementByReference(MediaPackageReference reference) {
@@ -234,14 +287,14 @@ public final class MediaPackageImpl implements MediaPackage {
    *      boolean)
    */
   public MediaPackageElement[] getElementsByReference(MediaPackageReference reference, boolean includeDerived) {
-    return manifest.getElements(reference, includeDerived);
+    return getElements(reference, includeDerived);
   }
 
   /**
    * @see org.opencastproject.mediapackage.MediaPackage#getElementById(java.lang.String)
    */
   public MediaPackageElement getElementById(String id) {
-    for (MediaPackageElement element : manifest.getEntries()) {
+    for (MediaPackageElement element : getElements()) {
       if (id.equals(element.getIdentifier()))
         return element;
     }
@@ -253,7 +306,7 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public MediaPackageElement[] getElementsByTag(String tag) {
     List<MediaPackageElement> result = new ArrayList<MediaPackageElement>();
-    for (MediaPackageElement element : manifest.getEntries()) {
+    for (MediaPackageElement element : getElements()) {
       if (element.containsTag(tag)) {
         result.add(element);
       }
@@ -282,7 +335,7 @@ public final class MediaPackageImpl implements MediaPackage {
       }
     }
     List<MediaPackageElement> result = new ArrayList<MediaPackageElement>();
-    for (MediaPackageElement element : manifest.getEntries()) {
+    for (MediaPackageElement element : getElements()) {
       boolean add = false;
       for (String elementTag : element.getTags()) {
         if (lose.contains(elementTag)) {
@@ -360,7 +413,7 @@ public final class MediaPackageImpl implements MediaPackage {
       throw new IllegalArgumentException("Flavor cannot be null");
 
     List<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
-    for (MediaPackageElement element : manifest.getEntries()) {
+    for (MediaPackageElement element : getElements()) {
       if (flavor.equals(element.getFlavor()))
         elements.add(element);
     }
@@ -371,7 +424,9 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#contains(org.opencastproject.mediapackage.MediaPackageElement)
    */
   public boolean contains(MediaPackageElement element) {
-    return manifest.contains(element);
+    if (element == null)
+      throw new IllegalArgumentException("Media package element must not be null");
+    return (elements.contains(element));
   }
 
   /**
@@ -382,7 +437,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @return <code>true</code> if the media package contains an element with this identifier
    */
   boolean contains(String identifier) {
-    for (MediaPackageElement element : manifest.getEntries()) {
+    for (MediaPackageElement element : getElements()) {
       if (element.getIdentifier().equals(identifier))
         return true;
     }
@@ -394,7 +449,7 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public void add(Catalog catalog) {
     integrateCatalog(catalog);
-    manifest.add(catalog);
+    addInternal(catalog);
     fireElementAdded(catalog);
   }
 
@@ -403,7 +458,7 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public void add(Track track) {
     integrateTrack(track);
-    manifest.add(track);
+    addInternal(track);
     fireElementAdded(track);
   }
 
@@ -412,7 +467,7 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public void add(Attachment attachment) {
     integrateAttachment(attachment);
-    manifest.add(attachment);
+    addInternal(attachment);
     fireElementAdded(attachment);
   }
 
@@ -420,7 +475,13 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#getCatalog(java.lang.String)
    */
   public Catalog getCatalog(String catalogId) {
-    return manifest.getCatalog(catalogId);
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e.getIdentifier().equals(catalogId) && e instanceof Catalog)
+          return (Catalog) e;
+      }
+    }
+    return null;
   }
 
   /**
@@ -429,16 +490,17 @@ public final class MediaPackageImpl implements MediaPackage {
   @XmlElementWrapper(name = "metadata")
   @XmlElement(name = "catalog")
   public Catalog[] getCatalogs() {
-    return manifest.getCatalogs();
+    Collection<Catalog> catalogs = loadCatalogs();
+    return catalogs.toArray(new Catalog[catalogs.size()]);
   }
 
   protected void setCatalogs(Catalog[] catalogs) {
     List<Catalog> newCatalogs = Arrays.asList(catalogs);
-    List<Catalog> oldCatalogs = Arrays.asList(manifest.getCatalogs());
+    List<Catalog> oldCatalogs = Arrays.asList(getCatalogs());
     // remove any catalogs not in this array
     for (Catalog existing : oldCatalogs) {
       if (!newCatalogs.contains(existing)) {
-        manifest.remove(existing);
+        remove(existing);
       }
     }
     for (Catalog newCatalog : newCatalogs) {
@@ -454,14 +516,32 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#getCatalogsByTag(java.lang.String)
    */
   public Catalog[] getCatalogsByTag(String tag) {
-    return manifest.getCatalogsByTag(tag);
+    List<Catalog> result = new ArrayList<Catalog>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Catalog && e.containsTag(tag))
+          result.add((Catalog) e);
+      }
+    }
+    return result.toArray(new Catalog[result.size()]);
   }
 
   /**
    * @see org.opencastproject.mediapackage.MediaPackage#getCatalogs(MediaPackageElementFlavor)
    */
-  public Catalog[] getCatalogs(MediaPackageElementFlavor type) {
-    return manifest.getCatalogs(type);
+  public Catalog[] getCatalogs(MediaPackageElementFlavor flavor) {
+    if (flavor == null)
+      throw new IllegalArgumentException("Unable to filter by null criterion");
+
+    // Go through catalogs and remove those that don't match
+    Collection<Catalog> catalogs = loadCatalogs();
+    List<Catalog> candidates = new ArrayList<Catalog>(catalogs);
+    for (Catalog c : catalogs) {
+      if (c.getFlavor() == null || !c.getFlavor().matches(flavor)) {
+        candidates.remove(c);
+      }
+    }
+    return candidates.toArray(new Catalog[candidates.size()]);
   }
 
   /**
@@ -479,7 +559,35 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   @Override
   public Catalog[] getCatalogs(MediaPackageReference reference, boolean includeDerived) {
-    return manifest.getCatalogs(reference, includeDerived);
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through catalogs and remove those that don't match
+    Collection<Catalog> catalogs = loadCatalogs();
+    List<Catalog> candidates = new ArrayList<Catalog>(catalogs);
+    for (Catalog c : catalogs) {
+      MediaPackageReference r = c.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && r != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+          r = getElement(r).getReference();
+        }
+
+        if (!indirectHit)
+          candidates.remove(c);
+      }
+    }
+
+    return candidates.toArray(new Catalog[candidates.size()]);
   }
 
   /**
@@ -487,39 +595,69 @@ public final class MediaPackageImpl implements MediaPackage {
    *      org.opencastproject.mediapackage.MediaPackageReference)
    */
   public Catalog[] getCatalogs(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
-    return manifest.getCatalogs(flavor, reference);
+    if (flavor == null)
+      throw new IllegalArgumentException("Unable to filter by null criterion");
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through catalogs and remove those that don't match
+    Collection<Catalog> catalogs = loadCatalogs();
+    List<Catalog> candidates = new ArrayList<Catalog>(catalogs);
+    for (Catalog c : catalogs) {
+      if (!flavor.equals(c.getFlavor()) || (c.getReference() != null && !c.getReference().matches(reference))) {
+        candidates.remove(c);
+      }
+    }
+    return candidates.toArray(new Catalog[candidates.size()]);
   }
 
   /**
    * @see org.opencastproject.mediapackage.MediaPackage#hasCatalogs()
    */
   public boolean hasCatalogs() {
-    return manifest.hasCatalogs();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Catalog)
+          return true;
+      }
+    }
+    return false;
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getTrack(java.lang.String)
    */
   public Track getTrack(String trackId) {
-    return manifest.getTrack(trackId);
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e.getIdentifier().equals(trackId) && e instanceof Track)
+          return (Track) e;
+      }
+    }
+    return null;
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getTracks()
    */
   @XmlElementWrapper(name = "media")
   @XmlElement(name = "track")
   public Track[] getTracks() {
-    return manifest.getTracks();
+    Collection<Track> tracks = loadTracks();
+    return tracks.toArray(new Track[tracks.size()]);
   }
 
   protected void setTracks(Track[] tracks) {
     List<Track> newTracks = Arrays.asList(tracks);
-    List<Track> oldTracks = Arrays.asList(manifest.getTracks());
+    List<Track> oldTracks = Arrays.asList(getTracks());
     // remove any catalogs not in this array
     for (Track existing : oldTracks) {
       if (!newTracks.contains(existing)) {
-        manifest.remove(existing);
+        remove(existing);
       }
     }
     for (Track newTrack : newTracks) {
@@ -535,17 +673,39 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#getTracksByTag(java.lang.String)
    */
   public Track[] getTracksByTag(String tag) {
-    return manifest.getTracksByTag(tag);
+    List<Track> result = new ArrayList<Track>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Track && e.containsTag(tag))
+          result.add((Track) e);
+      }
+    }
+    return result.toArray(new Track[result.size()]);
   }
 
   /**
-   * @see org.opencastproject.mediapackage.MediaPackage#getTracks(MediaPackageElementFlavor)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#getTracks(org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
-  public Track[] getTracks(MediaPackageElementFlavor type) {
-    return manifest.getTracks(type);
+  public Track[] getTracks(MediaPackageElementFlavor flavor) {
+    if (flavor == null)
+      throw new IllegalArgumentException("Unable to filter by null criterion");
+
+    // Go through tracks and remove those that don't match
+    Collection<Track> tracks = loadTracks();
+    List<Track> candidates = new ArrayList<Track>(tracks);
+    for (Track a : tracks) {
+      if (!flavor.equals(a.getFlavor())) {
+        candidates.remove(a);
+      }
+    }
+    return candidates.toArray(new Track[candidates.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getTracks(org.opencastproject.mediapackage.MediaPackageReference)
    */
   public Track[] getTracks(MediaPackageReference reference) {
@@ -559,54 +719,136 @@ public final class MediaPackageImpl implements MediaPackage {
    *      boolean)
    */
   public Track[] getTracks(MediaPackageReference reference, boolean includeDerived) {
-    return manifest.getTracks(reference, includeDerived);
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through tracks and remove those that don't match
+    Collection<Track> tracks = loadTracks();
+    List<Track> candidates = new ArrayList<Track>(tracks);
+    for (Track t : tracks) {
+      MediaPackageReference r = t.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && r != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+          r = getElement(r).getReference();
+        }
+
+        if (!indirectHit)
+          candidates.remove(t);
+      }
+    }
+
+    return candidates.toArray(new Track[candidates.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getTracks(org.opencastproject.mediapackage.MediaPackageElementFlavor,
    *      org.opencastproject.mediapackage.MediaPackageReference)
    */
   public Track[] getTracks(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
-    return manifest.getTracks(flavor, reference);
+    if (flavor == null)
+      throw new IllegalArgumentException("Unable to filter by null criterion");
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through tracks and remove those that don't match
+    Collection<Track> tracks = loadTracks();
+    List<Track> candidates = new ArrayList<Track>(tracks);
+    for (Track a : tracks) {
+      if (!flavor.equals(a.getFlavor()) || !reference.matches(a.getReference())) {
+        candidates.remove(a);
+      }
+    }
+    return candidates.toArray(new Track[candidates.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#hasTracks()
    */
   public boolean hasTracks() {
-    return manifest.hasTracks();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Track)
+          return true;
+      }
+    }
+    return false;
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getUnclassifiedElements()
    */
   public MediaPackageElement[] getUnclassifiedElements() {
-    return manifest.getUnclassifiedElements(null);
+    return getUnclassifiedElements(null);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getUnclassifiedElements(org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement[] getUnclassifiedElements(MediaPackageElementFlavor type) {
-    return manifest.getUnclassifiedElements(type);
+  public MediaPackageElement[] getUnclassifiedElements(MediaPackageElementFlavor flavor) {
+    List<MediaPackageElement> unclassifieds = new ArrayList<MediaPackageElement>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (!(e instanceof Attachment) && !(e instanceof Catalog) && !(e instanceof Track)) {
+          if (flavor == null || flavor.equals(e.getFlavor())) {
+            unclassifieds.add(e);
+          }
+        }
+      }
+    }
+    return unclassifieds.toArray(new MediaPackageElement[unclassifieds.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#hasUnclassifiedElements(org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
   public boolean hasUnclassifiedElements(MediaPackageElementFlavor type) {
-    return manifest.hasUnclassifiedElements(type);
+    if (type == null)
+      return others > 0;
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (!(e instanceof Attachment) && !(e instanceof Catalog) && !(e instanceof Track)) {
+          if (type.equals(e.getFlavor())) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#hasUnclassifiedElements()
    */
   public boolean hasUnclassifiedElements() {
-    return manifest.hasUnclassifiedElements();
+    return hasUnclassifiedElements(null);
   }
 
   /**
-   * @see org.opencastproject.mediapackage.MediaPackage#addObserver(MediaPackageObserver)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#addObserver(org.opencastproject.mediapackage.MediaPackageObserver)
    */
   public void addObserver(MediaPackageObserver observer) {
     synchronized (observers) {
@@ -615,28 +857,39 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getAttachment(java.lang.String)
    */
   public Attachment getAttachment(String attachmentId) {
-    return manifest.getAttachment(attachmentId);
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e.getIdentifier().equals(attachmentId) && e instanceof Attachment)
+          return (Attachment) e;
+      }
+    }
+    return null;
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getAttachments()
    */
   @XmlElementWrapper(name = "attachments")
   @XmlElement(name = "attachment")
   public Attachment[] getAttachments() {
-    return manifest.getAttachments();
+    Collection<Attachment> attachments = loadAttachments();
+    return attachments.toArray(new Attachment[attachments.size()]);
   }
 
   public void setAttachments(Attachment[] catalogs) {
     List<Attachment> newAttachments = Arrays.asList(catalogs);
-    List<Attachment> oldAttachments = Arrays.asList(manifest.getAttachments());
+    List<Attachment> oldAttachments = Arrays.asList(getAttachments());
     // remove any catalogs not in this array
     for (Attachment existing : oldAttachments) {
       if (!newAttachments.contains(existing)) {
-        manifest.remove(existing);
+        remove(existing);
       }
     }
     for (Attachment newAttachment : newAttachments) {
@@ -652,17 +905,39 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#getAttachmentsByTag(java.lang.String)
    */
   public Attachment[] getAttachmentsByTag(String tag) {
-    return manifest.getAttachmentsByTag(tag);
+    List<Attachment> result = new ArrayList<Attachment>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Attachment && e.containsTag(tag))
+          result.add((Attachment) e);
+      }
+    }
+    return result.toArray(new Attachment[result.size()]);
   }
 
   /**
-   * @see org.opencastproject.mediapackage.MediaPackage#getAttachments(MediaPackageElementFlavor)
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#getAttachments(org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
   public Attachment[] getAttachments(MediaPackageElementFlavor flavor) {
-    return manifest.getAttachments(flavor);
+    if (flavor == null)
+      throw new IllegalArgumentException("Unable to filter by null criterion");
+
+    // Go through attachments and remove those that don't match
+    Collection<Attachment> attachments = loadAttachments();
+    List<Attachment> candidates = new ArrayList<Attachment>(attachments);
+    for (Attachment a : attachments) {
+      if (!flavor.equals(a.getFlavor())) {
+        candidates.remove(a);
+      }
+    }
+    return candidates.toArray(new Attachment[candidates.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getAttachments(org.opencastproject.mediapackage.MediaPackageReference)
    */
   public Attachment[] getAttachments(MediaPackageReference reference) {
@@ -677,25 +952,77 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   @Override
   public Attachment[] getAttachments(MediaPackageReference reference, boolean includeDerived) {
-    return manifest.getAttachments(reference, includeDerived);
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through attachments and remove those that don't match
+    Collection<Attachment> attachments = loadAttachments();
+    List<Attachment> candidates = new ArrayList<Attachment>(attachments);
+    for (Attachment a : attachments) {
+      MediaPackageReference r = a.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && getElement(r) != null && r != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+          r = getElement(r).getReference();
+        }
+
+        if (!indirectHit)
+          candidates.remove(a);
+      }
+    }
+    return candidates.toArray(new Attachment[candidates.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#getAttachments(org.opencastproject.mediapackage.MediaPackageElementFlavor,
    *      org.opencastproject.mediapackage.MediaPackageReference)
    */
   public Attachment[] getAttachments(MediaPackageElementFlavor flavor, MediaPackageReference reference) {
-    return manifest.getAttachments(flavor, reference);
+    if (flavor == null)
+      throw new IllegalArgumentException("Unable to filter by null criterion");
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through attachments and remove those that don't match
+    Collection<Attachment> attachments = loadAttachments();
+    List<Attachment> candidates = new ArrayList<Attachment>(attachments);
+    for (Attachment a : attachments) {
+      if (!flavor.equals(a.getFlavor()) || !reference.matches(a.getReference())) {
+        candidates.remove(a);
+      }
+    }
+    return candidates.toArray(new Attachment[candidates.size()]);
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#hasAttachments()
    */
   public boolean hasAttachments() {
-    return manifest.hasAttachments();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Attachment)
+          return true;
+      }
+    }
+    return false;
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#remove(org.opencastproject.mediapackage.MediaPackageElement)
    */
   public void remove(MediaPackageElement element) {
@@ -703,6 +1030,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#remove(org.opencastproject.mediapackage.Attachment)
    */
   public void remove(Attachment attachment) {
@@ -710,6 +1039,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#remove(org.opencastproject.mediapackage.Catalog)
    */
   public void remove(Catalog catalog) {
@@ -717,9 +1048,12 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#remove(org.opencastproject.mediapackage.Track)
    */
   public void remove(Track track) {
+    duration = 0;
     removeElement(track);
   }
 
@@ -732,7 +1066,7 @@ public final class MediaPackageImpl implements MediaPackage {
     if (element instanceof AbstractMediaPackageElement) {
       ((AbstractMediaPackageElement) element).setMediaPackage(null);
     }
-    manifest.remove(element);
+    removeInternal(element);
     fireElementRemoved(element);
   }
 
@@ -758,7 +1092,7 @@ public final class MediaPackageImpl implements MediaPackage {
       mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
     MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(url);
-    add(element);
+    addInternal(element);
     return element;
   }
 
@@ -777,7 +1111,7 @@ public final class MediaPackageImpl implements MediaPackage {
       mediaPackageElementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     }
     MediaPackageElement element = mediaPackageElementBuilder.elementFromURI(uri, type, flavor);
-    add(element);
+    addInternal(element);
     return element;
   }
 
@@ -796,7 +1130,7 @@ public final class MediaPackageImpl implements MediaPackage {
     } else {
       integrate(element);
     }
-    manifest.add(element);
+    addInternal(element);
     fireElementAdded(element);
   }
 
@@ -823,11 +1157,11 @@ public final class MediaPackageImpl implements MediaPackage {
       throw new IllegalArgumentException("The derived element is null");
     if (sourceElement == null)
       throw new IllegalArgumentException("The source element is null");
-    if (!manifest.contains(sourceElement))
+    if (!contains(sourceElement))
       throw new IllegalStateException("The sourceElement needs to be part of the media package");
 
     derivedElement.referTo(sourceElement);
-    add(derivedElement);
+    addInternal(derivedElement);
 
     if (properties != null) {
       MediaPackageReference ref = derivedElement.getReference();
@@ -851,7 +1185,7 @@ public final class MediaPackageImpl implements MediaPackage {
 
     MediaPackageReference reference = new MediaPackageReferenceImpl(sourceElement);
     List<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
-    for (MediaPackageElement element : manifest.getEntries()) {
+    for (MediaPackageElement element : getElements()) {
       if (derivateFlavor.equals(element.getFlavor()) && reference.equals(element.getReference()))
         elements.add(element);
     }
@@ -898,7 +1232,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#renameTo(org.opencastproject.mediapackage.identifier.Id)
    */
   public void renameTo(Id identifier) {
-    manifest.setIdentifier(identifier);
+    this.identifier = identifier;
   }
 
   /**
@@ -924,7 +1258,7 @@ public final class MediaPackageImpl implements MediaPackage {
     // Check (uniqueness of) catalog identifier
     String id = catalog.getIdentifier();
     if (id == null || contains(id)) {
-      id = createElementIdentifier("catalog", manifest.getCatalogs().length + 1);
+      id = createElementIdentifier("catalog", getCatalogs().length + 1);
       catalog.setIdentifier(id.toString());
     }
     integrate(catalog);
@@ -941,9 +1275,10 @@ public final class MediaPackageImpl implements MediaPackage {
     // Check (uniqueness of) track identifier
     String id = track.getIdentifier();
     if (id == null || contains(id)) {
-      id = createElementIdentifier("track", manifest.getTracks().length + 1);
+      id = createElementIdentifier("track", getTracks().length + 1);
       track.setIdentifier(id.toString());
     }
+    duration = 0;
     integrate(track);
   }
 
@@ -958,7 +1293,7 @@ public final class MediaPackageImpl implements MediaPackage {
     // Check (uniqueness of) attachment identifier
     String id = attachment.getIdentifier();
     if (id == null || contains(id)) {
-      id = createElementIdentifier("attachment", manifest.getAttachments().length + 1);
+      id = createElementIdentifier("attachment", getAttachments().length + 1);
       attachment.setIdentifier(id.toString());
     }
     integrate(attachment);
@@ -987,7 +1322,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.mediapackage.MediaPackage#verify()
    */
   public void verify() throws MediaPackageException {
-    for (MediaPackageElement e : manifest.getEntries()) {
+    for (MediaPackageElement e : getElements()) {
       e.verify();
     }
   }
@@ -1046,8 +1381,8 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   @Override
   public String toString() {
-    if (manifest.getIdentifier() != null)
-      return manifest.getIdentifier().toString();
+    if (identifier != null)
+      return identifier.toString();
     else
       return "Unknown media package";
   }
@@ -1059,6 +1394,7 @@ public final class MediaPackageImpl implements MediaPackage {
     public MediaPackageImpl marshal(MediaPackage mp) throws Exception {
       return (MediaPackageImpl) mp;
     }
+
     public MediaPackage unmarshal(MediaPackageImpl mp) throws Exception {
       return mp;
     }
@@ -1252,9 +1588,9 @@ public final class MediaPackageImpl implements MediaPackage {
   @Override
   public void setDate(Date date) {
     if (date != null)
-      this.manifest.setStartDate(date.getTime());
+      this.startTime = date.getTime();
     else
-      this.manifest.setStartDate(0);
+      this.startTime = 0;
   }
 
   /**
@@ -1295,6 +1631,183 @@ public final class MediaPackageImpl implements MediaPackage {
   @Override
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  /**
+   * Returns the media package element that matches the given reference.
+   * 
+   * @param reference
+   *          the reference
+   * @return the element
+   */
+  MediaPackageElement getElement(MediaPackageReference reference) {
+    if (reference == null)
+      return null;
+    for (MediaPackageElement e : elements) {
+      if (e.getIdentifier().equals(reference.getIdentifier()))
+        return e;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the media package elements that contain the specified reference.
+   * 
+   * @param reference
+   *          the reference
+   * @return the tracks
+   */
+  MediaPackageElement[] getElements(MediaPackageReference reference, boolean includeDerived) {
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through tracks and remove those that don't match
+    Collection<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
+    elements.addAll(this.elements);
+    List<MediaPackageElement> candidates = new ArrayList<MediaPackageElement>(tracks);
+    for (MediaPackageElement e : elements) {
+      MediaPackageReference r = e.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && r != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+          r = getElement(r).getReference();
+        }
+
+        if (!indirectHit)
+          candidates.remove(e);
+      }
+    }
+
+    return candidates.toArray(new MediaPackageElement[candidates.size()]);
+  }
+
+  /**
+   * Registers a new media package element with this manifest.
+   * 
+   * @param element
+   *          the new element
+   * @throws MediaPackageException
+   *           if adding the element fails
+   */
+  void addInternal(MediaPackageElement element) {
+    if (element == null)
+      throw new IllegalArgumentException("Media package element must not be null");
+    String id = null;
+    if (elements.add(element)) {
+      if (element instanceof Track) {
+        tracks++;
+        id = "track-" + tracks;
+        long duration = ((Track) element).getDuration();
+        // Todo Do not demand equal durations for now... This is an issue that has to be discussed further
+        // if (this.duration > 0 && this.duration != duration)
+        // throw new MediaPackageException("Track " + element + " cannot be added due to varying duration (" + duration
+        // +
+        // " instead of " + this.duration +")");
+        // else
+        if (this.duration < 0)
+          this.duration = duration;
+      } else if (element instanceof Attachment) {
+        attachments++;
+        id = "attachment-" + attachments;
+      } else if (element instanceof Catalog) {
+        catalogs++;
+        id = "catalog-" + catalogs;
+      } else {
+        others++;
+        id = "unknown-" + others;
+      }
+    }
+
+    // Check if element has an id
+    if (element.getIdentifier() == null) {
+      if (element instanceof AbstractMediaPackageElement) {
+        ((AbstractMediaPackageElement) element).setIdentifier(id);
+      } else
+        throw new UnsupportedElementException(element, "Found unkown element without id");
+    }
+  }
+
+  /**
+   * Removes the media package element from the manifest.
+   * 
+   * @param element
+   *          the element to remove
+   */
+  void removeInternal(MediaPackageElement element) {
+    if (element == null)
+      throw new IllegalArgumentException("Media package element must not be null");
+    if (elements.remove(element)) {
+      if (element instanceof Track) {
+        tracks--;
+        if (tracks == 0)
+          duration = 0L;
+      } else if (element instanceof Attachment)
+        attachments--;
+      else if (element instanceof Catalog)
+        catalogs--;
+      else
+        others--;
+    }
+  }
+
+  /**
+   * Extracts the list of tracks from the media package.
+   * 
+   * @return the tracks
+   */
+  private Collection<Track> loadTracks() {
+    List<Track> tracks = new ArrayList<Track>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Track) {
+          tracks.add((Track) e);
+        }
+      }
+    }
+    return tracks;
+  }
+
+  /**
+   * Extracts the list of catalogs from the media package.
+   * 
+   * @return the catalogs
+   */
+  private Collection<Catalog> loadCatalogs() {
+    List<Catalog> catalogs = new ArrayList<Catalog>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Catalog) {
+          catalogs.add((Catalog) e);
+        }
+      }
+    }
+    return catalogs;
+  }
+
+  /**
+   * Extracts the list of attachments from the media package.
+   * 
+   * @return the attachments
+   */
+  private Collection<Attachment> loadAttachments() {
+    List<Attachment> attachments = new ArrayList<Attachment>();
+    synchronized (elements) {
+      for (MediaPackageElement e : elements) {
+        if (e instanceof Attachment) {
+          attachments.add((Attachment) e);
+        }
+      }
+    }
+    return attachments;
   }
 
 }

@@ -73,7 +73,7 @@ public class CaptureAgentImplTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
     // Create the configuration manager
@@ -81,7 +81,7 @@ public class CaptureAgentImplTest {
 
     Properties p = loadProperties("config/capture.properties");
     p.put("org.opencastproject.storage.dir",
-            new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
+            new File("./target", "capture-agent-test").getAbsolutePath());
     p.put("org.opencastproject.server.url", "http://localhost:8080");
     p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
@@ -111,7 +111,6 @@ public class CaptureAgentImplTest {
     config.deactivate();
     config = null;
     properties = null;
-    FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-agent-test"));
   }
 
   private XProperties loadProperties(String location) throws IOException {
@@ -141,7 +140,7 @@ public class CaptureAgentImplTest {
     // affirm the captured media exists in the appropriate location
     String[] devnames = config.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
     Assert.assertTrue(devnames.length >= 1);
-    Assert.assertFalse(devnames[0].equals(""));
+    Assert.assertFalse("".equals(devnames[0]));
 
     for (String devname : devnames) {
       File outputfile = new File(outputdir, config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + devname
@@ -526,7 +525,7 @@ public class CaptureAgentImplTest {
   private Properties setupConfigurationManagerProperties() throws IOException {
     Properties p = loadProperties("config/capture.properties");
     p.put("org.opencastproject.storage.dir",
-            new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
+            new File("./target/", "capture-agent-test").getAbsolutePath());
     p.put("org.opencastproject.server.url", "http://localhost:8080");
     p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());

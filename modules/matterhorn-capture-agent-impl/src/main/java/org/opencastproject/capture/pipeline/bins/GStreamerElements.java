@@ -19,6 +19,7 @@ package org.opencastproject.capture.pipeline.bins;
 public interface GStreamerElements {
   /** Source Module: gstreamer **/
   String CAPSFILTER = "capsfilter";
+  String FAKESRC = "fakesrc";
   String FILESINK = "filesink";
   String FILESRC = "filesrc";
   String IDENTITY = "identity";

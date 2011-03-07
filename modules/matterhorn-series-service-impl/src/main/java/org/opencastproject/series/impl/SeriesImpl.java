@@ -157,7 +157,7 @@ public class SeriesImpl implements Series {
     for (SeriesMetadata m : getMetadata())
       if (m.getKey().equals(key))
         return m.getValue();
-    return null;
+    return "";
   }
 
   /**

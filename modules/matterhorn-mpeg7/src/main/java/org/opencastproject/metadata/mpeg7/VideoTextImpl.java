@@ -237,28 +237,30 @@ public class VideoTextImpl implements VideoText {
       videoText.appendChild(locator.toXml(document));
 
     // Temporal Mask (Boundary)
-    Element temporalMask = document.createElement("SpatioTemporalMask");
-    videoText.appendChild(temporalMask);
-
-    Element subRegion = document.createElement("SubRegion");
-    temporalMask.appendChild(subRegion);
-    Element parameterTrajectory = document.createElement("ParameterTrajectory");
-    subRegion.appendChild(parameterTrajectory);
-
-    parameterTrajectory.appendChild(new MediaTimeImpl(new MediaTimePointImpl(), null).toXml(document));
-    Element initialRegion = document.createElement("InitialRegion");
-    parameterTrajectory.appendChild(initialRegion);
-
-    StringBuffer coordinates = new StringBuffer();
-    coordinates.append(boundary.getX()).append(" ");
-    coordinates.append(boundary.getY()).append(" ");
-    coordinates.append(boundary.getX() + boundary.getWidth()).append(" ");
-    coordinates.append(boundary.getY() + boundary.getHeight());
-
-    Element box = document.createElement("Box");
-    box.setAttribute("dim", "2 2");
-    box.appendChild(document.createTextNode(coordinates.toString()));
-    initialRegion.appendChild(box);
+    if (boundary != null) {
+      Element temporalMask = document.createElement("SpatioTemporalMask");
+      videoText.appendChild(temporalMask);
+  
+      Element subRegion = document.createElement("SubRegion");
+      temporalMask.appendChild(subRegion);
+      Element parameterTrajectory = document.createElement("ParameterTrajectory");
+      subRegion.appendChild(parameterTrajectory);
+  
+      parameterTrajectory.appendChild(new MediaTimeImpl(new MediaTimePointImpl(), null).toXml(document));
+      Element initialRegion = document.createElement("InitialRegion");
+      parameterTrajectory.appendChild(initialRegion);
+  
+      StringBuffer coordinates = new StringBuffer();
+      coordinates.append(boundary.getX()).append(" ");
+      coordinates.append(boundary.getY()).append(" ");
+      coordinates.append(boundary.getX() + boundary.getWidth()).append(" ");
+      coordinates.append(boundary.getY() + boundary.getHeight());
+  
+      Element box = document.createElement("Box");
+      box.setAttribute("dim", "2 2");
+      box.appendChild(document.createTextNode(coordinates.toString()));
+      initialRegion.appendChild(box);
+    }
 
     // Text
     videoText.appendChild(text.toXml(document));

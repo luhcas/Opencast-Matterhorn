@@ -19,6 +19,7 @@ package org.opencastproject.scheduler.impl;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,8 +90,10 @@ public class CaptureAgentMetadataGenerator {
     }
 
     Properties caCatalog = new Properties();
-    if (event.containsKey("resources"))
+    if (StringUtils.isNotEmpty(event.getResources())) {
       caCatalog.setProperty("capture.device.names", event.getResources());
+    }
+    
     for (Entry<String, String> e : caMetadata.entrySet()) {
       caCatalog.put(e.getKey(), e.getValue());
     }

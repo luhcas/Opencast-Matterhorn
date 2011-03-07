@@ -18,3 +18,4 @@ a {color:blue;}*/
 .collapse-control-closed {background-image:url(../img/icons/arrow-right.png);background-position:top left !important; background-repeat:no-repeat;}
 .collapse-control-open {background-image:url(../img/icons/arrow-down.png);background-position:top left !important; background-repeat:no-repeat;}
 .titlebar {background-color:silver !important; padding-left:8px;}
+.progressStage {display: none; background-color: white; width: 850px; padding-left: 20px; padding-right: 20px;}

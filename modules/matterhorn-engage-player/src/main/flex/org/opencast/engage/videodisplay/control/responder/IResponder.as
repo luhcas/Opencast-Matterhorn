@@ -15,16 +15,17 @@
  */
 package org.opencast.engage.videodisplay.control.responder
 {
-    import mx.rpc.events.ResultEvent;
-
-    /**
-     *   IResponder
-     */
-    public interface IResponder
-    {
-        /**  */
-        function result( result : ResultEvent ) : void;
-        /**  */
-        function fault( info : Object ) : void;
-    }
+	import mx.rpc.events.ResultEvent;
+	/**
+	 *   IResponder
+	 */
+	public interface IResponder
+	{
+		/**  */
+		function fault(info:Object):void;
+		/**  */
+		function result(result:ResultEvent):void;
+	}
 }
+
+

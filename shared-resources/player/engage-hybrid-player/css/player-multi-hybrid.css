@@ -24,15 +24,21 @@ table
 {
   border-spacing:           0;
 }
-a, a:hover, a:link, a:visited, a:active, a:focus {
-color: #A42424;
-size: 1.3em;
-text-decoration: none;
+
+a, a:link, a:visited{
+  margin-right: 16px;
+  cursor: pointer;
+  color: #2d8f8b; /* #A42424 */
+  text-decoration: none;
 }
-a:hover {
-text-decoration: underline;
+a:hover, a:focus{
+  color: #2d8f8b;
+  text-decoration: underline;
 }
 
+label{
+	cursor:pointer;
+}
 
 #oc_title-bar
 {
@@ -179,7 +185,7 @@ color: #000;
 
 #oc_video-player-controls
 {
-  height:                   42px;
+  height:                   44px;
   background:               url("../img/player_controll_bg.png") repeat-x 0 0 #000;
 /*
   width:                    100%;
@@ -619,16 +625,16 @@ option:hover
 .progress-segment
 {
   border-bottom-color:      #BDBDBD;
-  border-bottom-style:      solid;
+  border-bottom-style:      none;
   border-bottom-width:      1px;
   border-top-color:         #EAEAEA;
-  border-top-style:         solid;
+  border-top-style:         none;
   border-top-width:         1px;
   border-left-color:        #EAEAEA;
-  border-left-style:        solid;
+  border-left-style:        none;
   border-left-width:        1px;
   border-right-color:       #EAEAEA;
-  border-right-style:       solid;
+  border-right-style:       none;
   border-right-width:       1px;
   border-left-color-ltr-source:physical;
   border-left-color-rtl-source:physical;
@@ -671,9 +677,11 @@ option:hover
   margin-left:              -4px;
 }
 
-#draggable:focus
+button::-moz-focus-inner,
+input::-moz-focus-inner,
+#draggable::-moz-focus-inner
 {
-	outline: 2px solid #FA6E23;
+    border: none;
 }
 
 #divToolTip
@@ -748,6 +756,7 @@ option:hover
 {
   background-color:         #FFFFFF;
   height:                   6px;
+  margin-top:               -1px;
 }
 
 .load-progress
@@ -810,7 +819,7 @@ option:hover
   height:                   25px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
-  border-bottom-width:      0px;
+  border-bottom-width:      1px;
   border-right-color:       #ffffff;
   border-right-style:       solid;
   border-right-width:       1px;
@@ -829,10 +838,10 @@ option:hover
 .segment-holder-over
 {
   background-color:         #d8d8d8;
-  height:                   25px;
+  height:                   23px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
-  border-bottom-width:      0px;
+  border-bottom-width:      1px;
   border-right-color:       #ffffff;
   border-right-style:       solid;
   border-right-width:       1px;

@@ -174,7 +174,7 @@ while [[ true ]]; do
     # On success, uncompress the felix files in their location
     if [[ $? -eq 0 ]]; then
 	echo -n "Uncompressing... "
-	dir_name=$(tar tzf ${FELIX_FILENAME} | grep -m 1 '^.*$')
+	dir_name=$(tar tzf ${FELIX_FILENAME} | grep -om1 '^[^/]*')
 	tar xzf ${FELIX_FILENAME}
 	if [[ $? -eq 0 ]]; then
 	    rm -rf $FELIX_HOME

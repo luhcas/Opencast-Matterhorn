@@ -5,11 +5,11 @@
   <artifactId>matterhorn-textanalyzer-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-textanalyzer-api</name>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
@@ -47,7 +47,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.textanalyzer.api;version=${project.version}</Export-Package>
+            <Export-Package>
+              org.opencastproject.textanalyzer.api;version=${project.version},
+              org.opencastproject.textextractor.api;version=${project.version}
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

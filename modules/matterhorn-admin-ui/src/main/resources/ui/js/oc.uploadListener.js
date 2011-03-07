@@ -86,7 +86,7 @@ ocUploadListener.uploadProgress = function(total, transfered) {
     totalMB = totalMB.toFixed(2);
   }
   ocUtils.log("transfered: " + transfered + " of " + total + " MB, " + percentage + "%");
-  ocUpload.setProgress(percentage,percentage,'Total: '+totalMB+' MB',megaBytes+' MB send');
+  ocUpload.setProgress(percentage,percentage,'Total: '+totalMB+' MB',megaBytes+' MB sent');
 }
 
 ocUploadListener.uploadComplete = function() {

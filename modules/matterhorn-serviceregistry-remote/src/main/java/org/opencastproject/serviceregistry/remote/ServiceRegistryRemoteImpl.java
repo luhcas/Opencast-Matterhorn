@@ -319,26 +319,30 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String)
    */
   @Override
   public Job createJob(String type, String operation) throws ServiceRegistryException {
     return createJob(type, operation, null, null, true);
   }
-  
+
   /**
    * {@inheritDoc}
-   *
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List)
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List)
    */
   @Override
   public Job createJob(String type, String operation, List<String> arguments) throws ServiceRegistryException {
     return createJob(type, operation, arguments, null, true);
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, java.lang.String)
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List, java.lang.String)
    */
   @Override
   public Job createJob(String type, String operation, List<String> arguments, String payload)
@@ -348,11 +352,13 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String, java.util.List, String, boolean)
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, java.lang.String,
+   *      java.util.List, String, boolean)
    */
   @Override
-  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean enqueueImmediately) throws ServiceRegistryException {
+  public Job createJob(String type, String operation, List<String> arguments, String payload, boolean enqueueImmediately)
+          throws ServiceRegistryException {
     String servicePath = "job";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
@@ -363,8 +369,8 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       if (payload != null)
         params.add(new BasicNameValuePair("payload", payload));
       params.add(new BasicNameValuePair("start", Boolean.toString(enqueueImmediately)));
-      if(arguments != null && ! arguments.isEmpty()) {
-        for(String argument : arguments) {
+      if (arguments != null && !arguments.isEmpty()) {
+        for (String argument : arguments) {
           params.add(new BasicNameValuePair("arg", argument));
         }
       }
@@ -388,7 +394,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to create a job of type '" + type);
+    throw new ServiceRegistryException("Unable to create a job of type '" + type + " (" + responseStatusCode + ")");
   }
 
   /**
@@ -428,7 +434,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to update " + job);
+    throw new ServiceRegistryException("Unable to update " + job + " (" + responseStatusCode + ")");
   }
 
   /**
@@ -456,7 +462,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to retrieve job " + id);
+    throw new ServiceRegistryException("Unable to retrieve job " + id + " (" + responseStatusCode + ")");
   }
 
   /**
@@ -467,8 +473,11 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public List<Job> getJobs(String serviceType, Status status) throws ServiceRegistryException {
-    String servicePath = new QueryStringBuilder("jobs.xml").add("serviceType", serviceType)
-            .add("status", status.toString()).toString();
+    QueryStringBuilder qsb = new QueryStringBuilder("jobs.xml").add("serviceType", serviceType);
+    if (status != null)
+      qsb.add("status", status.toString());
+    String servicePath = qsb.toString();
+
     String url = UrlSupport.concat(serviceURL, servicePath);
     HttpGet get = new HttpGet(url);
     HttpResponse response = null;
@@ -517,7 +526,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to get service registrations");
+    throw new ServiceRegistryException("Unable to get service registrations (" + responseStatusCode + ")");
   }
 
   /**
@@ -544,7 +553,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to get service registrations");
+    throw new ServiceRegistryException("Unable to get service registrations (" + responseStatusCode + ")");
   }
 
   /**
@@ -571,7 +580,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to get service registrations");
+    throw new ServiceRegistryException("Unable to get service registrations (" + responseStatusCode + ")");
   }
 
   /**
@@ -583,7 +592,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
   @Override
   public ServiceRegistration getServiceRegistration(String serviceType, String host) throws ServiceRegistryException {
     if (isBlank(serviceType) || isBlank(host)) {
-      throw new IllegalArgumentException("service type and host must be provided to locate service registrations");
+      throw new IllegalArgumentException("Service type and host must be provided to locate service registrations");
     }
     String servicePath = new QueryStringBuilder("services.xml").add("serviceType", serviceType).add("host", host)
             .toString();
@@ -601,7 +610,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to get service registrations");
+    throw new ServiceRegistryException("Unable to get service registrations (" + responseStatusCode + ")");
   }
 
   /**
@@ -628,7 +637,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to get service registrations");
+    throw new ServiceRegistryException("Unable to get service registrations (" + responseStatusCode + ")");
   }
 
   /**
@@ -655,7 +664,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to get service statistics");
+    throw new ServiceRegistryException("Unable to get service statistics (" + responseStatusCode + ")");
   }
 
   /**
@@ -666,22 +675,53 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public long count(String serviceType, Status status) throws ServiceRegistryException {
-    return count(serviceType, status, null);
+    return count(serviceType, null, null, status);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#count(java.lang.String,
-   *      org.opencastproject.job.api.Job.Status, java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#countByHost(java.lang.String, java.lang.String,
+   *      org.opencastproject.job.api.Job.Status)
    */
   @Override
-  public long count(String serviceType, Status status, String host) throws ServiceRegistryException {
-    if (isBlank(serviceType) || status == null) {
-      throw new IllegalArgumentException("service type and host must not be null");
+  public long countByHost(String serviceType, String host, Status status) throws ServiceRegistryException {
+    return count(serviceType, host, null, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#countByOperation(java.lang.String, java.lang.String,
+   *      org.opencastproject.job.api.Job.Status)
+   */
+  @Override
+  public long countByOperation(String serviceType, String operation, Status status) throws ServiceRegistryException {
+    return count(serviceType, null, operation, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#count(java.lang.String, java.lang.String,
+   *      java.lang.String, org.opencastproject.job.api.Job.Status)
+   */
+  @Override
+  public long count(String serviceType, String host, String operation, Status status) throws ServiceRegistryException {
+    if (isBlank(serviceType)) {
+      throw new IllegalArgumentException("Service type must not be null");
     }
-    String servicePath = new QueryStringBuilder("count").add("serviceType", serviceType)
-            .add("status", status.toString()).add("host", host).toString();
+    QueryStringBuilder queryStringBuilder = new QueryStringBuilder("count").add("serviceType", serviceType);
+    if (status != null) {
+      queryStringBuilder.add("status", status.toString());
+    }
+    if (StringUtils.isNotBlank(host)) {
+      queryStringBuilder.add("host", host);
+    }
+    if (StringUtils.isNotBlank(operation)) {
+      queryStringBuilder.add("operation", operation);
+    }
+    String servicePath = queryStringBuilder.toString();
     HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
     HttpResponse response = null;
     int responseStatusCode;
@@ -696,7 +736,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to get service statistics");
+    throw new ServiceRegistryException("Unable to get service statistics (" + responseStatusCode + ")");
   }
 
   /**
@@ -737,6 +777,30 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   void setTrustedHttpClient(TrustedHttpClient client) {
     this.client = client;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getMaxConcurrentJobs()
+   */
+  @Override
+  public int getMaxConcurrentJobs() throws ServiceRegistryException {
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, "/maxconcurrentjobs"));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        return Integer.parseInt(EntityUtils.toString(response.getEntity()));
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service statistics", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to get service statistics (" + responseStatusCode + ")");
   }
 
 }

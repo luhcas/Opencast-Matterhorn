@@ -46,6 +46,14 @@ public interface ResumableWorkflowOperationHandler extends WorkflowOperationHand
           throws WorkflowOperationException;
 
   /**
+   * Whether this operation handler will always pause. The workflow service may give preferential dispatching to
+   * operations that are guaranteed to pause.
+   * 
+   * @return whether this handler always pauses
+   */
+  boolean isAlwaysPause();
+
+  /**
    * Gets the URL for the user interface for resuming the workflow.
    * 
    * @param workflowInstance

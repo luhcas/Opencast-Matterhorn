@@ -65,6 +65,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Provides data access to the workflow service through file storage in the workspace, indexed via solr.
@@ -126,7 +128,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   private static final String TITLE_KEY = "title";
 
   /** The key in solr documents representing the workflow's mediapackage identifier */
-  private static final String MEDIAPACKAGE_KEY = "mp";
+  private static final String MEDIAPACKAGE_KEY = "mediapackageid";
 
   /** The key in solr documents representing the workflow's mediapackage creators */
   private static final String CREATOR_KEY = "creator";
@@ -143,6 +145,12 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   /** The service registry, managing jobs */
   private ServiceRegistry serviceRegistry = null;
 
+  /** Whether to index workflows synchronously as they are stored */
+  protected boolean synchronousIndexing = true;
+
+  /** The thread pool to use in asynchronous indexing */
+  protected ExecutorService indexingExecutor;
+
   /**
    * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
    * 
@@ -154,7 +162,9 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   }
 
   /**
-   * Callback from the OSGi environment on component registration.
+   * Callback from the OSGi environment on component registration. The indexing behavior can be set using component
+   * context properties. <code>synchronousIndexing=true|false</code> determines whether threads performing workflow
+   * updates block on adding the workflow instances to the search index.
    * 
    * @param cc
    *          the component context
@@ -174,6 +184,16 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
       if (storageDir == null)
         throw new IllegalStateException("Storage dir must be set (org.opencastproject.storage.dir)");
       solrRoot = PathSupport.concat(storageDir, "workflow");
+    }
+    Object syncIndexingConfig = cc.getProperties().get("synchronousIndexing");
+    if (syncIndexingConfig != null && (syncIndexingConfig instanceof Boolean)) {
+      this.synchronousIndexing = (Boolean) syncIndexingConfig;
+    }
+    if (this.synchronousIndexing) {
+      logger.debug("Workflows will be added to the search index synchronously");
+    } else {
+      logger.debug("Workflows will be added to the search index asynchronously");
+      indexingExecutor = Executors.newSingleThreadExecutor();
     }
     activate();
   }
@@ -233,14 +253,14 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
    *          the solr root directory
    */
   protected void setupSolr(File solrRoot) throws IOException, SolrServerException {
-    logger.info("Setting up solr search index at {}", solrRoot);
+    logger.debug("Setting up solr search index at {}", solrRoot);
     File solrConfigDir = new File(solrRoot, "conf");
 
     // Create the config directory
     if (solrConfigDir.exists()) {
-      logger.info("solr search index found at {}", solrConfigDir);
+      logger.debug("solr search index found at {}", solrConfigDir);
     } else {
-      logger.info("solr config directory doesn't exist.  Creating {}", solrConfigDir);
+      logger.debug("solr config directory doesn't exist.  Creating {}", solrConfigDir);
       FileUtils.forceMkdir(solrConfigDir);
     }
 
@@ -296,15 +316,34 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     }
   }
 
-  public void index(WorkflowInstance instance) throws WorkflowDatabaseException {
-    try {
-      SolrInputDocument doc = createDocument(instance);
-      synchronized (solrServer) {
-        solrServer.add(doc);
-        solrServer.commit();
+  public void index(final WorkflowInstance instance) throws WorkflowDatabaseException {
+    if (synchronousIndexing) {
+      try {
+        SolrInputDocument doc = createDocument(instance);
+        synchronized (solrServer) {
+          solrServer.add(doc);
+          solrServer.commit();
+        }
+      } catch (Exception e) {
+        throw new WorkflowDatabaseException("Unable to index workflow", e);
       }
-    } catch (Exception e) {
-      throw new WorkflowDatabaseException("unable to index workflow", e);
+    } else {
+      indexingExecutor.submit(new Runnable() {
+        public void run() {
+          try {
+            SolrInputDocument doc = createDocument(instance);
+            synchronized (solrServer) {
+              solrServer.add(doc);
+              // Use solr's autoCommit feature instead of committing on each document addition.
+              // See http://opencast.jira.com/browse/MH-7040 and
+              // http://osdir.com/ml/solr-user.lucene.apache.org/2009-09/msg00744.html
+              // solrServer.commit();
+            }
+          } catch (Exception e) {
+            WorkflowServiceSolrIndex.logger.warn("Unable to index {}: {}", instance, e);
+          }
+        }
+      });
     }
   }
 
@@ -331,7 +370,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     if (op == null) {
       doc.addField(OPERATION_KEY, NO_OPERATION_KEY);
     } else {
-      doc.addField(OPERATION_KEY, op.getId());
+      doc.addField(OPERATION_KEY, op.getTemplate());
     }
 
     MediaPackage mp = instance.getMediaPackage();
@@ -493,7 +532,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
               // Add the states
               FacetField stateFacet = response.getFacetField(STATE_KEY);
               for (Count stateValue : stateFacet.getValues()) {
-                WorkflowState state = WorkflowState.valueOf(stateValue.getName());
+                WorkflowState state = WorkflowState.valueOf(stateValue.getName().toUpperCase());
                 templateTotal += stateValue.getCount();
                 total += stateValue.getCount();
                 switch (state) {
@@ -593,7 +632,34 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     }
     sb.append(key);
     sb.append(":");
-    sb.append(ClientUtils.escapeQueryChars(value));
+    sb.append(ClientUtils.escapeQueryChars(value.toLowerCase()));
+    return sb;
+  }
+
+  /**
+   * Appends query parameters to a solr query in a way that they are found even though they are not treated as a full
+   * word in solr.
+   * 
+   * @param sb
+   *          The {@link StringBuilder} containing the query
+   * @param key
+   *          the key for this search parameter
+   * @param value
+   *          the value for this search parameter
+   * @return the appended {@link StringBuilder}
+   */
+  private StringBuilder appendFuzzy(StringBuilder sb, String key, String value) {
+    if (StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
+      return sb;
+    }
+    if (sb.length() > 0) {
+      sb.append(" AND ");
+    }
+    sb.append("(");
+    sb.append(key).append(":").append(ClientUtils.escapeQueryChars(value.toLowerCase()));
+    sb.append(" OR ");
+    sb.append(key).append(":*").append(ClientUtils.escapeQueryChars(value.toLowerCase())).append("*");
+    sb.append(")");
     return sb;
   }
 
@@ -636,16 +702,16 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     StringBuilder sb = new StringBuilder();
     append(sb, MEDIAPACKAGE_KEY, query.getMediaPackageId());
     append(sb, SERIES_ID_KEY, query.getSeriesId());
-    append(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
-    append(sb, FULLTEXT_KEY, query.getText());
+    appendFuzzy(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
+    appendFuzzy(sb, FULLTEXT_KEY, query.getText());
     append(sb, WORKFLOW_DEFINITION_KEY, query.getWorkflowDefinitionId());
     append(sb, CREATED_KEY, query.getFromDate(), query.getToDate());
-    append(sb, CREATOR_KEY, query.getCreator());
-    append(sb, CONTRIBUTOR_KEY, query.getContributor());
+    appendFuzzy(sb, CREATOR_KEY, query.getCreator());
+    appendFuzzy(sb, CONTRIBUTOR_KEY, query.getContributor());
     append(sb, LANGUAGE_KEY, query.getLanguage());
     append(sb, LICENSE_KEY, query.getLicense());
-    append(sb, TITLE_KEY, query.getTitle());
-    append(sb, SUBJECT_KEY, query.getSubject());
+    appendFuzzy(sb, TITLE_KEY, query.getTitle());
+    appendFuzzy(sb, SUBJECT_KEY, query.getSubject());
     appendMap(sb, OPERATION_KEY, query.getCurrentOperations());
     appendMap(sb, STATE_KEY, query.getStates());
 
@@ -732,7 +798,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
       }
       sb.append(key);
       sb.append(":");
-      sb.append(ClientUtils.escapeQueryChars(term.getValue()));
+      sb.append(ClientUtils.escapeQueryChars(term.getValue().toLowerCase()));
     }
     if (!positiveTerm) {
       sb.append(" AND *:*");
@@ -761,9 +827,11 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     if (query.getSort() != null) {
       ORDER order = query.isSortAscending() ? ORDER.asc : ORDER.desc;
       solrQuery.addSortField(getSortField(query.getSort()) + "_sort", order);
-      solrQuery.addSortField(getSortField(query.getSort()) + "_sort", order);
     }
-    solrQuery.addSortField(getSortField(Sort.DATE_CREATED) + "_sort", ORDER.asc);
+
+    if (!Sort.DATE_CREATED.equals(query.getSort())) {
+      solrQuery.addSortField(getSortField(Sort.DATE_CREATED) + "_sort", ORDER.desc);
+    }
 
     long totalHits;
     long time = System.currentTimeMillis();
@@ -820,6 +888,20 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   @Override
   public void update(WorkflowInstance instance) throws WorkflowDatabaseException {
     index(instance);
+  }
+
+  /**
+   * Clears the index of all workflow instances.
+   */
+  public void clear() throws WorkflowDatabaseException {
+    try {
+      synchronized (solrServer) {
+        solrServer.deleteByQuery("*:*");
+        solrServer.commit();
+      }
+    } catch (Exception e) {
+      throw new WorkflowDatabaseException(e);
+    }
   }
 
 }

@@ -40,6 +40,17 @@ public class JaxbJob implements Job {
   }
 
   /**
+   * Constructs a JaxbJob with a specific identifier
+   * 
+   * @param id
+   *          the job id
+   */
+  public JaxbJob(Long id) {
+    this();
+    this.id = id;
+  }
+
+  /**
    * Constructs a JaxbJob from an existing job
    * 
    * @param job
@@ -58,12 +69,13 @@ public class JaxbJob implements Job {
     this.createdHost = job.getCreatedHost();
     this.id = job.getId();
     this.jobType = job.getJobType();
-    this.operationType = job.getOperation();
+    this.operation = job.getOperation();
     this.arguments = job.getArguments();
     this.status = job.getStatus();
     this.context = new JaxbJobContext(job.getContext());
     this.parentJobId = job.getParentJobId();
     this.rootJobId = job.getRootJobId();
+    this.dispatchable = job.isDispatchable();
   }
 
   /** The job ID */
@@ -76,7 +88,7 @@ public class JaxbJob implements Job {
   protected String jobType;
 
   /** The operation type */
-  protected String operationType;
+  protected String operation;
 
   /** The arguments passed to the service operation */
   protected List<String> arguments;
@@ -117,6 +129,9 @@ public class JaxbJob implements Job {
   /** The output produced by this job, or null if it has not yet been generated (or was not due to an exception) */
   // @XmlJavaTypeAdapter(value = CdataAdapter.class)
   protected String payload;
+  
+  /** Whether this job is queueable */
+  protected boolean dispatchable;
 
   /**
    * {@inheritDoc}
@@ -208,7 +223,7 @@ public class JaxbJob implements Job {
   @XmlElement
   @Override
   public String getOperation() {
-    return operationType;
+    return operation;
   }
 
   /**
@@ -218,7 +233,7 @@ public class JaxbJob implements Job {
    */
   @Override
   public void setOperation(String operation) {
-    this.operationType = operation;
+    this.operation = operation;
   }
 
   /**
@@ -450,6 +465,23 @@ public class JaxbJob implements Job {
    */
   public void setRootJobId(Long rootJobId) {
     this.rootJobId = rootJobId;
+  }
+  
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#isDispatchable()
+   */
+  @Override
+  @XmlAttribute
+  public boolean isDispatchable() {
+    return dispatchable;
+  }
+  
+  @Override
+  public void setDispatchable(boolean dispatchable) {
+    this.dispatchable = dispatchable;
   }
 
   /**

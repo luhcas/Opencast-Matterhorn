@@ -49,6 +49,15 @@ public interface ServiceRegistry {
   void unregisterHost(String host) throws ServiceRegistryException;
 
   /**
+   * Returns the total number of jobs that can be handled by the currently registered hosts.
+   * 
+   * @return the total number of jobs that can be processed concurrently
+   * @throws ServiceRegistryException
+   *           if communication with the service registry fails
+   */
+  int getMaxConcurrentJobs() throws ServiceRegistryException;
+
+  /**
    * Registers a host to handle a specific type of job
    * 
    * @param serviceType
@@ -166,14 +175,14 @@ public interface ServiceRegistry {
    *          the arguments to the operation
    * @param payload
    *          an optional initial payload
-   * @param enqueueImmediately
-   *          whether the job should be enqueued for dispatch immediately. Otherwise, the job's initial state will be
-   *          {@link Status#INSTANTIATED}.
+   * @param queueable
+   *          whether the job can be enqueued for dispatch. If false, the job's initial state will be
+   *          {@link Status#INSTANTIATED} and will not be dispatched.
    * @return the job
    * @throws ServiceRegistryException
    *           if there is a problem creating the job
    */
-  Job createJob(String type, String operation, List<String> arguments, String payload, boolean enqueueImmediately)
+  Job createJob(String type, String operation, List<String> arguments, String payload, boolean queueable)
           throws ServiceRegistryException;
 
   /**
@@ -275,7 +284,7 @@ public interface ServiceRegistry {
   List<ServiceStatistics> getServiceStatistics() throws ServiceRegistryException;
 
   /**
-   * Count the number of receipts of this type in this {@link Status} across all hosts.
+   * Count the number of jobs of this type in this {@link Status} across all hosts.
    * 
    * @param serviceType
    *          The jobs run by this type of service. If null, the returned count will refer to all types of jobs.
@@ -288,19 +297,51 @@ public interface ServiceRegistry {
   long count(String serviceType, Status status) throws ServiceRegistryException;
 
   /**
-   * Count the number of jobs in this {@link Status} on this host
+   * Count the number of jobs running the given operation in this {@link Status}.
    * 
    * @param serviceType
    *          The jobs run by this type of service
+   * @param operation
+   *          the operation
    * @param status
    *          The status of the jobs
-   * @param host
-   *          The server that created and will be handling the job
    * @return the number of jobs
    * @throws ServiceRegistryException
    *           if there is a problem accessing the service registry
    */
-  long count(String serviceType, Status status, String host) throws ServiceRegistryException;
+  long countByOperation(String serviceType, String operation, Status status) throws ServiceRegistryException;
+
+  /**
+   * Count the number of jobs in this {@link Status} on this host
+   * 
+   * @param serviceType
+   *          The jobs run by this type of service
+   * @param host
+   *          The server that created and will be handling the job
+   * @param status
+   *          The status of the jobs
+   * @return the number of jobs
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
+   */
+  long countByHost(String serviceType, String host, Status status) throws ServiceRegistryException;
+
+  /**
+   * Count the number of jobs executing the given operation in this {@link Status} on this host.
+   * 
+   * @param serviceType
+   *          The jobs run by this type of service
+   * @param host
+   *          The server that created and will be handling the job
+   * @param operation
+   *          the operation
+   * @param status
+   *          The status of the jobs
+   * @return the number of jobs
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
+   */
+  long count(String serviceType, String host, String operation, Status status) throws ServiceRegistryException;
 
   /**
    * Get the load factors for each registered node.

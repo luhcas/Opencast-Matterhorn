@@ -86,11 +86,26 @@ function VideodisplayReady()
         b_Videodisplay_root.passCharCode(argInt);
     };
     
+    /*
+    * Note: pause()/resume() bug red5
+    */
     Videodisplay.seek = function (argNumber) {
         var progress = Opencast.engage.getLoadProgress();
-        if(progress === -1)
-            return b_Videodisplay_root.seek(argNumber);
+        if(progress === -1){
+            var isPlaying = Opencast.Player.isPlaying();
+            // red5 pause/resume bug
+            if(isPlaying) {
+            // if playing seek ok
+             return b_Videodisplay_root.seek(argNumber);
+             }
+            else{
+            // player in pause mode
+                b_Videodisplay_root.play();
+                return b_Videodisplay_root.seek(argNumber);
+                }
+        }
         else {
+        // progressive download
             var seekValue = Math.min(argNumber, progress);
             return b_Videodisplay_root.seek(seekValue);
         }
@@ -132,9 +147,7 @@ function VideodisplayReady()
         return b_Videodisplay_root.setMediaResolution(argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft);
     };
     
-    
-    
-    
+  
     
     b_Videodisplay_root.onBridgeReady();
 }
@@ -144,4 +157,3 @@ function VideodisplayReady()
  * Listen for the instantiation of the Flex application over the bridge
  */
 FABridge.addInitializationCallback("b_Videodisplay", VideodisplayReady);
-

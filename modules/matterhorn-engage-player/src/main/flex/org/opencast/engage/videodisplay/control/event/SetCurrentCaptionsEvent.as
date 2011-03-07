@@ -15,44 +15,45 @@
  */
 package org.opencast.engage.videodisplay.control.event
 {
-    import flash.events.Event;
+	import flash.events.Event;
+	/**
+	 *   SetCurrentCaptionsEvent
+	 */
+	public class SetCurrentCaptionsEvent extends Event
+	{
+		public static var EVENT_NAME:String='SetCurrentCaptionsEvent';
 
-    /**
-     *   SetCurrentCaptionsEvent
-     */
-    public class SetCurrentCaptionsEvent extends Event
-    {
-        public static var EVENT_NAME : String = 'SetCurrentCaptionsEvent';
+		/**
+		 * Constructor
+		 */
+		public function SetCurrentCaptionsEvent(language:String, bubbles:Boolean=false, cancelable:Boolean=false)
+		{
+			super(EVENT_NAME, bubbles, cancelable);
+			_language=language;
+		}
 
-        /**
-         * Constructor
-         */
-        public function SetCurrentCaptionsEvent( language : String, bubbles : Boolean = false, cancelable : Boolean = false )
-        {
-            super( EVENT_NAME, bubbles, cancelable );
-            _language = language;
-        }
+		private var _language:String;
 
-        private var _language : String;
+		/**
+		 * clone
+		 * Override the inherited clone() method.
+		 * @return SetCurrentCaptionsEvent
+		 */
+		override public function clone():Event
+		{
+			return new SetCurrentCaptionsEvent(language, bubbles, cancelable);
+		}
 
-        /**
-         * clone
-         * Override the inherited clone() method.
-         * @return SetCurrentCaptionsEvent
-         */
-        override public function clone() : Event
-        {
-            return new SetCurrentCaptionsEvent( language, bubbles, cancelable );
-        }
-
-        /**
-         * language
-         * Get the language.
-         * @return String _language
-         */
-        public function get language() : String
-        {
-            return _language;
-        }
-    }
+		/**
+		 * language
+		 * Get the language.
+		 * @return String _language
+		 */
+		public function get language():String
+		{
+			return _language;
+		}
+	}
 }
+
+

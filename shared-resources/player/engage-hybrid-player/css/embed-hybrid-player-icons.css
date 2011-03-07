@@ -233,7 +233,7 @@ input:hover
 .oc_btn-cc-off
 {
   background:               transparent url("../img/oc_icons.png");
-  background-position:      -0px -180px;
+  background-position:      -0px -182px;
   width:                    22px;
   height:                   17px;
 }
@@ -241,7 +241,7 @@ input:hover
 .oc_btn-cc-over
 {
   background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -180px;
+  background-position:      -30px -182px;
   width:                    22px;
   height:                   17px;
 }
@@ -249,7 +249,7 @@ input:hover
 .oc_btn-cc-on
 {
   background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -180px;
+  background-position:      -60px -182px;
   width:                    22px;
   height:                   17px;
 }
@@ -262,7 +262,7 @@ input:hover
 
 .oc_btn-singleDisplay-presenter
 {
-  background:               url("../img/oc_icons_2.png") no-repeat -240px -305px transparent;
+  background:               url("../img/oc_icons_2.png") no-repeat -300px -305px transparent;
   width:                   60px;
   height:                 19px;
   margin-top: 5px;
@@ -270,7 +270,7 @@ input:hover
 }
 .oc_btn-singleDisplay-presentation
 {
-  background:               url("../img/oc_icons_2.png") no-repeat -300px -305px transparent;
+  background:               url("../img/oc_icons_2.png") no-repeat -240px -305px transparent;
   width:                   60px;
   height:					19px;
   margin-top: 5px;

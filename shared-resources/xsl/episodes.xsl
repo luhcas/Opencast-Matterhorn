@@ -28,7 +28,7 @@
                         
                         <td style="vertical-align: top; text-align:left; padding-top: 10px; padding-right: 10px;">
                             <xsl:choose>
-                                 <xsl:when test="mediapackage/media/track/mimetype[.='video/x-flv'] or mediapackage/media/track/mimetype[.='audio/x-adpcm']">
+                                 <xsl:when test="mediapackage/media/track/mimetype[.='video/x-flv'] or mediapackage/media/track/mimetype[.='video/mp4'] or mediapackage/media/track/mimetype[.='audio/x-adpcm']">
                                     <b>
                                         <a class="itemtitle">
                                             <xsl:attribute name="href">watch.html?id=<xsl:value-of

@@ -19,26 +19,21 @@ import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.videosegmenter.api.VideoSegmenterService;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -47,18 +42,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * The REST endpoint for the {@link VideoSegmenterService} service
  */
 @Path("")
 public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
-
-  /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(VideoSegmenterRestEndpoint.class);
 
   /** The rest docs */
   protected String docs;
@@ -100,27 +89,35 @@ public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
     this.service = videoSegmenter;
   }
 
+  /**
+   * Segments a track.
+   * 
+   * @param trackAsXml the track xml to segment
+   * @return the job in the body of a JAX-RS response
+   * @throws Exception
+   */
   @POST
+  @Path("")
   @Produces(MediaType.TEXT_XML)
-  @Path("/")
-  public Response segment(@FormParam("track") String trackAsXml) {
-    try {
-      DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml, "UTF-8"));
-      MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      if (element instanceof Track) {
-        Job job = service.segment((Track) element);
-        return Response.ok(new JaxbJob(job)).build();
-      } else {
-        return Response.status(Status.BAD_REQUEST).build();
-      }
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-      return Response.serverError().build();
+  public Response segment(@FormParam("track") String trackAsXml) throws Exception {
+    // Ensure that the POST parameters are present
+    if (StringUtils.isBlank(trackAsXml)) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("track must not be null").build();
     }
-  }
 
+    // Deserialize the track
+    MediaPackageElement sourceTrack = MediaPackageElementParser.getFromXml(trackAsXml);
+    if (!Track.TYPE.equals(sourceTrack.getElementType())) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("mediapackage element must be of type track").build();
+    }
+
+    // Asynchronously segment the specified track
+    Job job = service.segment((Track) sourceTrack);
+    if (job == null)
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Segmentation failed").build();
+    return Response.ok().entity(new JaxbJob(job)).build();
+  }
+  
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
@@ -139,16 +136,6 @@ public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
     analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "", "The track to segment."));
     analyzeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, analyzeEndpoint);
-
-    // job
-    RestEndpoint receiptEndpoint = new RestEndpoint("job", RestEndpoint.Method.GET, "/{id}.xml",
-            "Retrieve a job for a segmentation task");
-    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Results in an xml document containing the "
-            + "status of the analysis job, and the catalog produced by this analysis job if it the task is finished"));
-    receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the job id"));
-    receiptEndpoint.addFormat(new Format("xml", null, null));
-    receiptEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
 
     return DocUtil.generate(data);
   }

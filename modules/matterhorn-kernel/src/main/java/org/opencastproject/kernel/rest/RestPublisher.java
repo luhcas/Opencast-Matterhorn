@@ -16,6 +16,7 @@
 package org.opencastproject.kernel.rest;
 
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.util.NotFoundException;
 
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
@@ -37,13 +38,20 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
@@ -51,7 +59,7 @@ import javax.xml.stream.XMLStreamWriter;
  * Listens for JAX-RS annotated services and publishes them to the global URL space using a single shared HttpContext.
  */
 public class RestPublisher implements RestConstants {
-  
+
   /** The logger **/
   private static final Logger logger = LoggerFactory.getLogger(RestPublisher.class);
 
@@ -61,6 +69,12 @@ public class RestPublisher implements RestConstants {
 
   /** A map that sets default xml namespaces in {@link XMLStreamWriter}s */
   protected static final ConcurrentHashMap<String, String> NAMESPACE_MAP;
+
+  /** The 404 Error page */
+  protected String fourOhFour = null;
+
+  @SuppressWarnings("rawtypes")
+  protected List providers = null;
 
   static {
     NAMESPACE_MAP = new ConcurrentHashMap<String, String>();
@@ -80,11 +94,26 @@ public class RestPublisher implements RestConstants {
   protected Map<String, ServiceRegistration> servletRegistrationMap;
 
   /** Activates this rest publisher */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   protected void activate(ComponentContext componentContext) {
     logger.debug("activate()");
     this.baseServerUri = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");
     this.componentContext = componentContext;
+    this.fourOhFour = "The resource you requested does not exist."; // TODO: Replace this with something a little nicer
     this.servletRegistrationMap = new ConcurrentHashMap<String, ServiceRegistration>();
+    this.providers = new ArrayList();
+
+    JSONProvider jsonProvider = new MatterhornJSONProvider();
+    jsonProvider.setIgnoreNamespaces(true);
+    jsonProvider.setNamespaceMap(NAMESPACE_MAP);
+
+    providers.add(jsonProvider);
+    providers.add(new ExceptionMapper<NotFoundException>() {
+      public Response toResponse(NotFoundException e) {
+        return Response.status(404).entity(fourOhFour).type(MediaType.TEXT_PLAIN).build();
+      }
+    });
+
     try {
       tracker = new JaxRsServiceTracker();
     } catch (InvalidSyntaxException e) {
@@ -109,8 +138,9 @@ public class RestPublisher implements RestConstants {
    * @param service
    *          The service itself
    */
+  @SuppressWarnings("unchecked")
   protected void createEndpoint(ServiceReference ref, Object service) {
-    CXFNonSpringServlet cxf = new CXFNonSpringServlet();
+    RestServlet cxf = new RestServlet();
     ServiceRegistration reg = null;
     String serviceType = (String) ref.getProperty(SERVICE_TYPE_PROPERTY);
     String servicePath = (String) ref.getProperty(SERVICE_PATH_PROPERTY);
@@ -129,15 +159,23 @@ public class RestPublisher implements RestConstants {
     }
     servletRegistrationMap.put(servicePath, reg);
 
+    // Wait for the servlet to be initialized. Since the servlet is published via the whiteboard, this may happen
+    // asynchronously
+    while (!cxf.isInitialized()) {
+      logger.debug("Waiting for the servlet at '{}' to be initialized", servicePath);
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        logger.warn("Interrupt while waiting for RestServlet initialization");
+        break;
+      }
+    }
+
     // Set up cxf
     Bus bus = cxf.getBus();
     JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
     factory.setBus(bus);
-
-    JSONProvider jsonProvider = new MatterhornJSONProvider();
-    jsonProvider.setIgnoreNamespaces(true);
-    jsonProvider.setNamespaceMap(NAMESPACE_MAP);
-    factory.setProvider(jsonProvider);
+    factory.setProviders(providers);
 
     // Set the service class
     factory.setServiceClass(service.getClass());
@@ -239,6 +277,32 @@ public class RestPublisher implements RestConstants {
       }
       createEndpoint(reference, service);
       return super.addingService(reference);
+    }
+  }
+
+  /**
+   * An HttpServlet that uses a JAX-RS service to handle requests.
+   */
+  public class RestServlet extends CXFNonSpringServlet {
+    /** Serialization UID */
+    private static final long serialVersionUID = -8963338160276371426L;
+
+    /** Whether this servlet has been initialized by the http service */
+    private boolean initialized = false;
+
+    /**
+     * Whether the http service has initialized this servlet.
+     * 
+     * @return the initialization state
+     */
+    public boolean isInitialized() {
+      return initialized;
+    }
+
+    @Override
+    public void init(ServletConfig servletConfig) throws ServletException {
+      super.init(servletConfig);
+      initialized = true;
     }
   }
 }

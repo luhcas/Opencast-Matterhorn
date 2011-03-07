@@ -219,9 +219,9 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
     instancesEndpoint.addOptionalParam(new Param("language", Type.STRING, null, "Filter results by language"));
     instancesEndpoint.addOptionalParam(new Param("license", Type.STRING, null, "Filter results by license"));
     instancesEndpoint.addOptionalParam(new Param("subject", Type.STRING, null, "Filter results by subject"));
-    instancesEndpoint.addOptionalParam(new Param("fromDate", Type.STRING, null,
+    instancesEndpoint.addOptionalParam(new Param("fromdate", Type.STRING, null,
             "Filter results by start date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
-    instancesEndpoint.addOptionalParam(new Param("toDate", Type.STRING, null,
+    instancesEndpoint.addOptionalParam(new Param("todate", Type.STRING, null,
             "Filter results by end date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
     instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
     instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "0", "Page offset"));
@@ -284,6 +284,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
             "Start a new workflow instance");
     startEndpoint.addFormat(new Format("xml", null, null));
     startEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("OK, workflow running or queued"));
+    startEndpoint.addStatus(org.opencastproject.util.doc.Status.badRequest("If required parameters are missing"));
     startEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(),
             "The media package upon which to perform the workflow"));
     String sampleDefinition = null;
@@ -465,20 +466,20 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("definition/{id}.json")
-  public Response getWorkflowDefinitionAsJson(@PathParam("id") String workflowDefinitionId) throws Exception {
+  public Response getWorkflowDefinitionAsJson(@PathParam("id") String workflowDefinitionId) throws NotFoundException {
     WorkflowDefinition def = null;
     try {
       def = service.getWorkflowDefinitionById(workflowDefinitionId);
-      return Response.ok(def).build();
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).build();
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
     }
+    return Response.ok(def).build();
   }
 
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("definition/{id}.xml")
-  public Response getWorkflowDefinitionAsXml(@PathParam("id") String workflowDefinitionId) throws Exception {
+  public Response getWorkflowDefinitionAsXml(@PathParam("id") String workflowDefinitionId) throws NotFoundException {
     return getWorkflowDefinitionAsJson(workflowDefinitionId);
   }
 
@@ -491,18 +492,14 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("configurationPanel")
-  public Response getConfigurationPanel(@QueryParam("definitionId") String definitionId) {
+  public Response getConfigurationPanel(@QueryParam("definitionId") String definitionId) throws NotFoundException {
+    WorkflowDefinition def = null;
     try {
-      WorkflowDefinition def = service.getWorkflowDefinitionById(definitionId);
-      if (def != null) {
-        String out = def.getConfigurationPanel();
-        return Response.ok(out).build();
-      } else {
-        return Response.serverError().status(Status.NOT_FOUND).build();
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+      def = service.getWorkflowDefinitionById(definitionId);
+      String out = def.getConfigurationPanel();
+      return Response.ok(out).build();
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -581,6 +578,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
     q.withLanguage(language);
     q.withLicense(license);
     q.withTitle(title);
+    q.withWorkflowDefintion(workflowDefinitionId);
 
     if (currentOperations != null && currentOperations.size() > 0) {
       for (String op : currentOperations) {
@@ -623,7 +621,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("instances.json")
   public Response getWorkflowsAsJson(@QueryParam("state") List<String> states, @QueryParam("q") String text,
-          @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
+          @QueryParam("seriesid") String seriesId, @QueryParam("seriestitle") String seriesTitle,
           @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
           @QueryParam("fromdate") String fromDate, @QueryParam("todate") String toDate,
           @QueryParam("language") String language, @QueryParam("license") String license,
@@ -639,22 +637,20 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("instance/{id}.xml")
-  public Response getWorkflowAsXml(@PathParam("id") long id) {
+  public Response getWorkflowAsXml(@PathParam("id") long id) throws NotFoundException {
     WorkflowInstance instance;
     try {
       instance = service.getWorkflowById(id);
+      return Response.ok(instance).build();
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).entity("Workflow instance " + id + " does not exist").build();
     }
-    return Response.ok(instance).build();
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("instance/{id}.json")
-  public Response getWorkflowAsJson(@PathParam("id") long id) {
+  public Response getWorkflowAsJson(@PathParam("id") long id) throws NotFoundException {
     return getWorkflowAsXml(id);
   }
 
@@ -664,13 +660,21 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   public WorkflowInstanceImpl start(@FormParam("definition") String workflowDefinitionXml,
           @FormParam("mediapackage") MediaPackageImpl mp, @FormParam("parent") String parentWorkflowId,
           @FormParam("properties") LocalHashMap localMap) {
+    if (mp == null)
+      throw new WebApplicationException(Status.BAD_REQUEST);
+    if (StringUtils.isBlank(workflowDefinitionXml))
+      throw new WebApplicationException(Status.BAD_REQUEST);
     WorkflowDefinition workflowDefinition;
     try {
       workflowDefinition = WorkflowParser.parseWorkflowDefinition(workflowDefinitionXml);
     } catch (WorkflowParsingException e) {
       throw new WebApplicationException(e);
     }
-    Map<String, String> properties = localMap.getMap();
+    Map<String, String> properties = null;
+    if (localMap != null)
+      properties = localMap.getMap();
+    else
+      properties = new HashMap<String, String>();
     Long parentIdAsLong = null;
     if (StringUtils.isNotEmpty(parentWorkflowId)) {
       try {
@@ -691,12 +695,10 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("stop")
   @Produces(MediaType.TEXT_XML)
-  public Response stop(@FormParam("id") long workflowInstanceId) {
+  public Response stop(@FormParam("id") long workflowInstanceId) throws NotFoundException {
     try {
       WorkflowInstance workflow = service.stop(workflowInstanceId);
       return Response.ok(workflow).build();
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     }
@@ -705,12 +707,10 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("suspend")
   @Produces(MediaType.TEXT_XML)
-  public Response suspend(@FormParam("id") long workflowInstanceId) {
+  public Response suspend(@FormParam("id") long workflowInstanceId) throws NotFoundException {
     try {
       WorkflowInstance workflow = service.suspend(workflowInstanceId);
       return Response.ok(workflow).build();
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     }
@@ -719,7 +719,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("resume")
   @Produces(MediaType.TEXT_XML)
-  public Response resume(@FormParam("id") long workflowInstanceId, @FormParam("properties") LocalHashMap properties) {
+  public Response resume(@FormParam("id") long workflowInstanceId, @FormParam("properties") LocalHashMap properties)
+          throws NotFoundException {
     Map<String, String> map;
     if (properties == null) {
       map = new HashMap<String, String>();
@@ -729,8 +730,6 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
     try {
       WorkflowInstance workflow = service.resume(workflowInstanceId, map);
       return Response.ok(workflow).build();
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowException e) {
       throw new WebApplicationException(e);
     }
@@ -740,7 +739,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @Path("replaceAndresume")
   @Produces(MediaType.TEXT_XML)
   public Response resume(@FormParam("id") long workflowInstanceId,
-          @FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("properties") LocalHashMap properties) {
+          @FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("properties") LocalHashMap properties)
+          throws NotFoundException {
     Map<String, String> map;
     if (properties == null) {
       map = new HashMap<String, String>();
@@ -757,8 +757,6 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
       return Response.ok(workflow).build();
     } catch (WorkflowException e) {
       throw new WebApplicationException(e);
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).build();
     }
   }
 
@@ -821,12 +819,10 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
 
   @DELETE
   @Path("/definition/{id}")
-  public Response unregisterWorkflowDefinition(@PathParam("id") String workflowDefinitionId) {
+  public Response unregisterWorkflowDefinition(@PathParam("id") String workflowDefinitionId) throws NotFoundException {
     try {
       service.unregisterWorkflowDefinition(workflowDefinitionId);
       return Response.status(Status.NO_CONTENT).build();
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowDatabaseException e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -837,7 +833,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
     JSONArray jsonArray = new JSONArray();
     for (WorkflowOperationInstance op : operations) {
       JSONObject jsOp = new JSONObject();
-      jsOp.put("name", op.getId());
+      jsOp.put("name", op.getTemplate());
       jsOp.put("description", op.getDescription());
       jsOp.put("state", op.getState().name().toLowerCase());
       jsOp.put("configurations", getConfigsAsJson(op));

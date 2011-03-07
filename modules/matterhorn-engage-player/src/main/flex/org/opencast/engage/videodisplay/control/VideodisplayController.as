@@ -17,7 +17,6 @@ package org.opencast.engage.videodisplay.control
 {
 	import mx.rpc.AsyncToken;
 	import mx.rpc.http.HTTPService;
-
 	import org.opencast.engage.videodisplay.control.command.ClosedCaptionsCommand;
 	import org.opencast.engage.videodisplay.control.command.DisplayCaptionCommand;
 	import org.opencast.engage.videodisplay.control.command.InitMediaPlayerCommand;
@@ -36,7 +35,6 @@ package org.opencast.engage.videodisplay.control
 	import org.opencast.engage.videodisplay.control.responder.LoadDFXPXMLResponder;
 	import org.swizframework.Swiz;
 	import org.swizframework.controller.AbstractController;
-
 	public class VideodisplayController extends AbstractController
 	{
 		/**
@@ -53,18 +51,6 @@ package org.opencast.engage.videodisplay.control
 			Swiz.addEventListener(SetCurrentCaptionsEvent.EVENT_NAME, setCurrentCaptions);
 			Swiz.addEventListener(ClosedCaptionsEvent.EVENT_NAME, closedCaptions);
 			Swiz.addEventListener(InitMediaPlayerEvent.EVENT_NAME, initMediaPlayer);
-		}
-
-
-		/**
-		 * initMediaPlayer
-		 * Create new InitMediaPlayerCommand and assign him the event.
-		 * @eventType InitMediaPlayerEvent event
-		 * */
-		public function initMediaPlayer(event:InitMediaPlayerEvent):void
-		{
-			var initMediaPlayerCommand:InitMediaPlayerCommand=new InitMediaPlayerCommand();
-			initMediaPlayerCommand.execute(event);
 		}
 
 		/**
@@ -87,6 +73,18 @@ package org.opencast.engage.videodisplay.control
 		{
 			var displayCaptionCommand:DisplayCaptionCommand=new DisplayCaptionCommand();
 			displayCaptionCommand.execute(event);
+		}
+
+
+		/**
+		 * initMediaPlayer
+		 * Create new InitMediaPlayerCommand and assign him the event.
+		 * @eventType InitMediaPlayerEvent event
+		 * */
+		public function initMediaPlayer(event:InitMediaPlayerEvent):void
+		{
+			var initMediaPlayerCommand:InitMediaPlayerCommand=new InitMediaPlayerCommand();
+			initMediaPlayerCommand.execute(event);
 		}
 
 		/**

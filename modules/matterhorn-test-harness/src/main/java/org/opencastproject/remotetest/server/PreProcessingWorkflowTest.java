@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.xpath.XPathConstants;
 
@@ -91,7 +92,7 @@ public class PreProcessingWorkflowTest {
   public void test() throws Exception {
     String workflowId = null;
     long waiting = 0;
-    long TIMEOUT = 5000L;
+    long TIMEOUT = TimeUnit.MILLISECONDS.convert(10, TimeUnit.SECONDS);
     long GRACE_PERIOD = 30000L;
 
     // Make sure the demo capture agent is online
@@ -111,19 +112,22 @@ public class PreProcessingWorkflowTest {
 
     // Schedule an event and make sure that, once the workflow is dispatched, it's on hold in the "schedule" operation
     workflowId = scheduleEvent(start, end);
-    while(WorkflowUtils.isWorkflowInState(workflowId, "INSTANTIATED")) {
-      logger.info("Waiting for workflow {} to be dispatched", workflowId);
-      Thread.sleep(1000);
+    while (WorkflowUtils.isWorkflowInState(workflowId, "INSTANTIATED")) {
+      logger.info("Waiting for scheduled recording workflow {} to be dispatched", workflowId);
+      Thread.sleep(TIMEOUT);
     }
-    if (!WorkflowUtils.isWorkflowInState(workflowId, "PAUSED") ) {
+    if (!WorkflowUtils.isWorkflowInState(workflowId, "PAUSED")) {
       fail("Workflow " + workflowId + " should be on hold in 'schedule', or ");
     }
+
+    logger.info("Scheduled recording {} is now paused, waiting for capture", workflowId);
 
     // Wait for the capture agent to start the recording and make sure the workflow enters the "capture" operation
     waiting = 120 * 1000L + GRACE_PERIOD; // 2 min +
     boolean agentIsCapturing = false;
     boolean inCaptureOperation = false;
     while (waiting > 0) {
+      logger.info("Waiting for capture agent to start capture");
       String workflowXml = WorkflowUtils.getWorkflowById(workflowId);
       if (CaptureUtils.recordingExists(workflowId)) {
         agentIsCapturing |= CaptureUtils.isInState(workflowId, "capturing");
@@ -140,10 +144,13 @@ public class PreProcessingWorkflowTest {
 
     // Are we already past the grace period?
     if (waiting <= 0) {
-      if (!agentIsCapturing)
+      if (!agentIsCapturing) {
+        logger.info("Capture agent failed to start capture");
         fail("Agent '" + CAPTURE_AGENT_ID + "' did not start recording '" + workflowId + "'");
-      else if (!inCaptureOperation)
+      } else if (!inCaptureOperation) {
+        logger.info("Workflow is not in the capturing state");
         fail("Workflow '" + workflowId + "' never entered the 'capture' hold state");
+      }
     }
 
     // Wait for capture agent to stop capturing
@@ -218,7 +225,7 @@ public class PreProcessingWorkflowTest {
     String eventXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><event>"
             + "<contributor>demo contributor</contributor><creator>demo creator</creator>"
             + "<startDate>{start}</startDate><endDate>{stop}</endDate><device>{device}</device>"
-            + "<language>en</language><license>creative commons</license><resources>vga, audio</resources>"
+            + "<language>en</language><license>creative commons</license>"
             + "<title>demo title</title><additionalMetadata><metadata id=\"0\"><key>location</key>"
             + "<value>demo location</value></metadata><metadata id=\"0\"><key>org.opencastproject.workflow.definition</key>"
             + "<value>" + WORKFLOW_DEFINITION_ID + "</value></metadata></additionalMetadata></event>";

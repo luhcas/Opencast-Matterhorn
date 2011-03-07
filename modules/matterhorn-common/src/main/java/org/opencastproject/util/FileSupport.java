@@ -253,13 +253,7 @@ public final class FileSupport {
     StreamHelper stderr = null;
     StringBuffer error = new StringBuffer();
     try {
-      if (overwrite) {
-        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
-                "-exec", "ln", "-fF", "{}", targetDirectory.getAbsolutePath() + File.separator, ";").start();
-      } else {
-        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
-                "-exec", "ln", "{}", targetDirectory.getAbsolutePath() + File.separator, ";").start();
-      }
+      p = createLinkDirectoryProcess(sourceDirectory, targetDirectory, overwrite);
       stdout = new StreamHelper(p.getInputStream());
       stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
       p.waitFor();
@@ -363,13 +357,7 @@ public final class FileSupport {
       StreamHelper stderr = null;
       StringBuffer error = new StringBuffer();
       try {
-        if (overwrite) {
-          p = new ProcessBuilder("find", sourceLocation.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
-                  "-exec", "ln", "-fF", "{}", dest.getAbsolutePath() + File.separator, ";").start();
-        } else {
-          p = new ProcessBuilder("find", sourceLocation.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
-                  "-exec", "ln", "{}", dest.getAbsolutePath() + File.separator, ";").start();
-        }
+        p = createLinkDirectoryProcess(sourceLocation, dest, overwrite);
         stdout = new StreamHelper(p.getInputStream());
         stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
         p.waitFor();
@@ -403,11 +391,7 @@ public final class FileSupport {
       StreamHelper stderr = null;
       StringBuffer error = new StringBuffer();
       try {
-        if (overwrite) {
-          p = new ProcessBuilder("ln", "-f", sourceLocation.getAbsolutePath(), dest.getAbsolutePath()).start();
-        } else {
-          p = new ProcessBuilder("ln", sourceLocation.getAbsolutePath(), dest.getAbsolutePath()).start();
-        }
+        p = createLinkFileProcess(sourceLocation, dest, overwrite);
         stdout = new StreamHelper(p.getInputStream());
         stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
         p.waitFor();
@@ -460,7 +444,7 @@ public final class FileSupport {
     StreamHelper stderr = null;
     StringBuffer error = new StringBuffer();
     try {
-      p = new ProcessBuilder("ln", "-f", sourceLocation.getAbsolutePath(), targetLocation.getAbsolutePath()).start();
+      p = createLinkFileProcess(sourceLocation, targetLocation, true);
       stdout = new StreamHelper(p.getInputStream());
       stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
       p.waitFor();
@@ -486,6 +470,52 @@ public final class FileSupport {
     return true;
   }
 
+  /**
+   * @param sourceLocation The location of the file you want to link. 
+   * @param targetLocation The location and name to place the link. 
+   * @param overwrite Whether to overwrite a link if it exists. 
+   * @return Returns a process that should link the two 
+   * @throws IOException
+   */
+  private static Process createLinkFileProcess(File sourceLocation, File targetLocation, boolean overwrite) throws IOException {
+    Process p;
+    if (!System.getProperty("os.name").startsWith("Windows")) {
+      if (overwrite) {
+        p = new ProcessBuilder("ln", "-f", sourceLocation.getAbsolutePath(), targetLocation.getAbsolutePath()).start();
+      } else {
+        p = new ProcessBuilder("ln", sourceLocation.getAbsolutePath(), targetLocation.getAbsolutePath()).start();
+      }
+    } else {
+      /** 
+       * Handle the windows special case by using mklink instead of ln. mklink is also a command in the cmd.exe command
+       * shell, not a separate application so we need to run a command shell with the /C switch to be able to use the
+       * utility. There also is no force in windows. **/
+      p = new ProcessBuilder("cmd", "/C", "mklink", "/H", targetLocation.getAbsolutePath(), sourceLocation.getAbsolutePath()).start();
+    }
+    return p;
+  }
+
+  private static Process createLinkDirectoryProcess(File sourceDirectory, File targetDirectory, boolean overwrite)
+          throws IOException {
+    Process p;
+    if (!System.getProperty("os.name").startsWith("Windows")) {
+      if (overwrite) {
+        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
+                "-exec", "ln", "-fF", "{}", targetDirectory.getAbsolutePath() + File.separator, ";").start();
+      } else {
+        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
+                "-exec", "ln", "{}", targetDirectory.getAbsolutePath() + File.separator, ";").start();
+      }
+    } else {
+      /** 
+       * Handle the windows special case by using mklink instead of ln. mklink is also a command in the cmd.exe command
+       * shell, not a separate application so we need to run a command shell with the /C switch to be able to use the
+       * utility. There also is no force in windows. **/
+      p = new ProcessBuilder("cmd", "/C", "mklink", "/J", sourceDirectory.getAbsolutePath(), targetDirectory.getAbsolutePath()).start();
+    }
+    return p;
+  }
+  
   private static File determineDestination(File targetLocation, File sourceLocation, boolean overwrite)
           throws IOException {
     File dest = null;

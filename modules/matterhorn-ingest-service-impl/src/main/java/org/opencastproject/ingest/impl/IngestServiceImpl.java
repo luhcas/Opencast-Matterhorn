@@ -68,7 +68,6 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
@@ -376,7 +375,9 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       throw new IngestException(e);
     } finally {
       try {
-        serviceRegistry.updateJob(job);
+        if (job != null) {
+          serviceRegistry.updateJob(job);
+        }
       } catch (Exception e) {
         throw new IngestException("Unable to update ingest job", e);
       }
@@ -459,7 +460,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
    * @param uri
    *          the URI to the dublin core document containing series metadata.
    */
-  protected void updateSeries(URI uri) throws IOException {
+  protected void updateSeries(URI uri) throws IOException, IngestException {
     HttpResponse response = null;
     InputStream in = null;
     try {
@@ -467,7 +468,11 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       response = httpClient.execute(getDc);
       in = response.getEntity().getContent();
       DublinCoreCatalog dc = dublinCoreService.load(in);
+      try {
       seriesService.addOrUpdate(dc);
+      } catch (Exception e) {
+        throw new IngestException(e);
+      }
     } finally {
       IOUtils.closeQuietly(in);
       httpClient.close(response);
@@ -585,7 +590,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
   @Override
   public WorkflowInstance ingest(MediaPackage mp) throws IngestException {
     try {
-      return ingest(mp, null);
+      return ingest(mp, null, null, null);
     } catch (NotFoundException e) {
       throw new IngestException(e);
     }
@@ -599,7 +604,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
    */
   @Override
   public WorkflowInstance ingest(MediaPackage mp, String wd) throws IngestException, NotFoundException {
-    return ingest(mp, wd, null);
+    return ingest(mp, wd, null, null);
   }
 
   /**
@@ -663,21 +668,39 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
         // if we are not in the last operation of the preprocessing workflow (due to the capture agent not reporting
         // on its recording status), we need to advance the workflow.
         WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
-        List<WorkflowOperationInstance> preProcessingOperations = workflow.getOperations();
-        while (preProcessingOperations.indexOf(currentOperation) < preProcessingOperations.size() - 1) {
-          logger.debug("Advancing workflow (skipping {})", currentOperation);
-          currentOperation.setState(OperationState.SKIPPED);
-          currentOperation = workflow.next();
-        }
-        // Ingest succeeded
-        currentOperation.setState(OperationState.SUCCEEDED);
+        int currentPosition = workflow.getOperations().indexOf(currentOperation);
+        int preProcessingOperations = workflow.getOperations().size();
 
         // Replace the current mediapackage with the new one
         workflow.setMediaPackage(mp);
+
+        // Extend the workflow operations
         workflow.extend(workflowDef);
+
+        // Advance the workflow
+        while (currentPosition < preProcessingOperations - 1) {
+          currentOperation = workflow.getCurrentOperation();
+          logger.debug("Advancing workflow (skipping {})", currentOperation);
+          if (currentOperation.getId() != null) {
+            try {
+              Job job = serviceRegistry.getJob(currentOperation.getId());
+              job.setStatus(Status.FINISHED);
+              serviceRegistry.updateJob(job);
+            } catch (ServiceRegistryException e) {
+              throw new IllegalStateException("Error updating job associated with skipped operation " + currentOperation, e);
+            }
+          }
+          currentOperation = workflow.next();
+          currentPosition++;
+        }
+
+        // Ingest succeeded
+        currentOperation.setState(OperationState.SUCCEEDED);
+
+        // Update
         workflowService.update(workflow);
 
-        // Extend the workflow by the operations found in the workflow definition
+        // resume the workflow
         workflowService.resume(workflowId.longValue(), properties);
 
         // Return the updated workflow instance
@@ -708,10 +731,11 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
 
   protected URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException {
     InputStream in = null;
+    HttpResponse response = null;
     try {
       if (uri.toString().startsWith("http")) {
         HttpGet get = new HttpGet(uri);
-        HttpResponse response = httpClient.execute(get);
+        response = httpClient.execute(get);
         int httpStatusCode = response.getStatusLine().getStatusCode();
         if (httpStatusCode != 200) {
           throw new IOException(uri + " returns http " + httpStatusCode);
@@ -725,6 +749,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       return returnedUri;
     } finally {
       IOUtils.closeQuietly(in);
+      httpClient.close(response);
     }
   }
 
@@ -825,11 +850,10 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
-   *      java.util.List)
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job)
    */
   @Override
-  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+  protected String process(Job job) throws Exception {
     throw new IllegalStateException("Ingest jobs are not expected to be dispatched");
   }
 

@@ -15,50 +15,48 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
-    import bridge.ExternalFunction;
+	import flash.external.ExternalInterface;
+	import bridge.ExternalFunction;
+	import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
+	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+	import org.swizframework.Swiz;
+	/**
+	 *   ClosedCaptionsCommand
+	 */
+	public class ClosedCaptionsCommand
+	{
 
-    import flash.external.ExternalInterface;
+		/**
+		 * Constructor
+		 */
+		public function ClosedCaptionsCommand()
+		{
+			Swiz.autowire(this);
+		}
 
-    import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
-    import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.swizframework.Swiz;
+		[Autowire]
+		public var model:VideodisplayModel;
 
-    /**
-     *   ClosedCaptionsCommand
-     */
-    public class ClosedCaptionsCommand
-    {
-
-        [Autowire]
-        public var model : VideodisplayModel;
-
-        /**
-         * Constructor
-         */
-        public function ClosedCaptionsCommand()
-        {
-            Swiz.autowire( this );
-        }
-
-        /**
-         * execute
-         * When the learner toggle the cc button.
-         * @eventType ClosedCaptionsEvent event
-         */
-        public function execute( event : ClosedCaptionsEvent ) : void
-        {
-            if( model.ccBoolean == true )
-            {
-                model.ccBoolean = false;
-                model.ccButtonBoolean = false;
-                ExternalInterface.call( ExternalFunction.SETCCICONOFF, '' );
-            }
-            else
-            {
-                model.ccBoolean = true;
-                model.ccButtonBoolean = true;
-                ExternalInterface.call( ExternalFunction.SETCCICONON, '' );
-            }
-        }
-    }
+		/**
+		 * execute
+		 * When the user toggle the cc button.
+		 * @eventType ClosedCaptionsEvent event
+		 */
+		public function execute(event:ClosedCaptionsEvent):void
+		{
+			if (model.ccBoolean == true)
+			{
+				model.ccBoolean=false;
+				model.ccButtonBoolean=false;
+				ExternalInterface.call(ExternalFunction.SETCCICONOFF, '');
+			}
+			else
+			{
+				model.ccBoolean=true;
+				model.ccButtonBoolean=true;
+				ExternalInterface.call(ExternalFunction.SETCCICONON, '');
+			}
+		}
+	}
 }
+

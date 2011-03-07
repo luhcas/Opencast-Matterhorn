@@ -16,7 +16,6 @@
 package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.ScheduledEventImpl;
@@ -29,6 +28,8 @@ import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.opencastproject.capture.impl.jobs.SerializeJob;
 import org.opencastproject.capture.impl.jobs.StartCaptureJob;
 import org.opencastproject.capture.impl.jobs.StopCaptureJob;
+import org.opencastproject.capture.pipeline.NoCaptureDevicesSpecifiedException;
+import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -36,6 +37,7 @@ import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
 import org.opencastproject.util.IoSupport;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
@@ -50,7 +52,12 @@ import net.fortuna.ical4j.model.property.Duration;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.message.BasicHeader;
 import org.osgi.service.cm.ConfigurationException;
 import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
@@ -120,6 +127,9 @@ public class SchedulerImpl {
   /** The time in milliseconds between attempts to fetch the calendar data */
   private long calendarPollTime = 0;
 
+  /** The last etag, if any, returned by a calendar polling request. */
+  private String lastCalendarEtag = null;
+
   /** A stored copy of the Calendar */
   private Calendar calendar = null;
 
@@ -127,7 +137,7 @@ public class SchedulerImpl {
   private ConfigurationManager configService = null;
 
   /** The capture agent this scheduler is scheduling for */
-  private CaptureAgent captureAgent = null;
+  private CaptureAgentImpl captureAgent = null;
 
   /** The trusted HttpClient used to talk to the core */
   private TrustedHttpClient trustedClient = null;
@@ -139,7 +149,7 @@ public class SchedulerImpl {
    */
   private boolean locked = false;
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   public SchedulerImpl(Dictionary dictionary, ConfigurationManager configurationManager,
           CaptureAgentImpl captureAgentImpl) throws ConfigurationException {
     configService = configurationManager;
@@ -205,7 +215,7 @@ public class SchedulerImpl {
    * @see org.osgi.service.cm.ManagedService#updated(Dictionary)
    */
   //@Override
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private void updated(Dictionary properties) throws ConfigurationException {
     log.debug("Scheduler updated.");
 
@@ -413,7 +423,7 @@ public class SchedulerImpl {
    * @param agent
    *          The agent.
    */
-  public void setCaptureAgent(CaptureAgent agent) {
+  public void setCaptureAgent(CaptureAgentImpl agent) {
     captureAgent = agent;
   }
 
@@ -502,9 +512,53 @@ public class SchedulerImpl {
    *         performed.
    */
   Calendar parseCalendar(URL url) {
-
+    URI uri;
+    try {
+      uri = url.toURI();
+    } catch (URISyntaxException e1) {
+      log.warn("{} is not a valid uri", url);
+      return null;
+    }
     String calendarString = null;
-    calendarString = IoSupport.readFileFromURL(url, trustedClient);
+    try {
+      if ("file".equals(url.getProtocol())) {
+        if (new File(uri).exists()) {
+          calendarString = IOUtils.toString(url.openStream(), "UTF-8");
+        } else {
+          log.debug("File {} does not exist", url);
+          return null;
+        }
+      } else {
+        HttpResponse response = null;
+        try {
+          HttpGet get = new HttpGet(uri);
+          Header[] requestHeaders = lastCalendarEtag == null ? null : new Header[] { new BasicHeader("If-None-Match",
+                  lastCalendarEtag) };
+          get.setHeaders(requestHeaders);
+          response = trustedClient.execute(get);
+          if (response.getStatusLine().getStatusCode() == 304) { // didn't find constants without bringing in more
+                                                                 // dependencies
+            log.debug("Calendar has not changed");
+            return null;
+          } else if (response.getStatusLine().getStatusCode() == 200) {
+            calendarString = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+            Header etagHeader = response.getFirstHeader("ETag");
+            if (etagHeader != null && StringUtils.isNotBlank(etagHeader.getValue())) {
+              lastCalendarEtag = etagHeader.getValue();
+            }
+            log.debug("Calendar updated from {}", url);
+          }
+        } catch (TrustedHttpClientException e) {
+          log.warn("Unable to fetch file from {}.", url, e);
+          return null;
+        } finally {
+          trustedClient.close(response);
+        }
+      }
+    } catch (IOException e) {
+      log.warn("Error parsing calendar", e);
+      return null;
+    }
 
     if (calendarString == null) {
       // If the calendar is null, which only happens the first time through
@@ -1029,11 +1083,12 @@ public class SchedulerImpl {
     }
 
     // Create job and trigger
-    JobDetail job = new JobDetail(SerializeJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE, 
-            SerializeJob.class);
+    JobDetail job = new JobDetail(SerializeJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE, SerializeJob.class);
 
-    /* Setup the trigger. The serialization job will automatically refire if it fails, 
-     so we don't need to worry about it */
+    /*
+     * Setup the trigger. The serialization job will automatically refire if it fails, so we don't need to worry about
+     * it
+     */
     SimpleTrigger trigger = new SimpleTrigger(SerializeJob.TRIGGER_PREFIX + recordingID, JobParameters.SUPPORT_TYPE,
             new Date());
     trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
@@ -1182,18 +1237,12 @@ public class SchedulerImpl {
    * 
    * @see org.opencastproject.capture.api.Scheduler#isSchedulerEnabled()
    */
-  /*@Override
-  public boolean isSchedulerEnabled() {
-    try {
-      if (scheduler != null && scheduler.isStarted()) {
-        return true;
-      }
-    } catch (SchedulerException e) {
-      log.warn("Unable to get scheduler state!");
-    }
-
-    return false;
-  }*/
+  /*
+   * @Override public boolean isSchedulerEnabled() { try { if (scheduler != null && scheduler.isStarted()) { return
+   * true; } } catch (SchedulerException e) { log.warn("Unable to get scheduler state!"); }
+   * 
+   * return false; }
+   */
 
   /**
    * {@inheritDoc}
@@ -1310,7 +1359,7 @@ class Event {
   private Date start;
   private Date end;
   private Duration duration;
-  private CaptureAgent captureAgent;
+  private CaptureAgentImpl captureAgent;
   private SchedulerImpl scheduler;
   private boolean isValid = true;
   private VEvent sourceEvent = null;
@@ -1318,7 +1367,7 @@ class Event {
   /** Simple Date Format used for start and end times of events to capture. **/
   private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
-  public Event(VEvent event, CaptureAgent agent, SchedulerImpl sched) {
+  public Event(VEvent event, CaptureAgentImpl agent, SchedulerImpl sched) {
 
     captureAgent = agent;
     scheduler = sched;
@@ -1467,11 +1516,10 @@ class Event {
       isValid = false;
       return false;
     } else if (captureIsHappeningNow(this.getStart(), this.getEnd())) {
-      if (!captureAgentIsCapturing()) {
+      if (!captureAgentIsCapturing() && !mediaFilesExist()) {
         // Try to handle a capture we have just missed.
         log.warn("Event {} is scheduled for a time that has already passed,"
                 + " but should be capturing.  Starting capture.", this.getUID());
-        this.setUID(this.getUID() + "-" + sdf.format(new Date()));
         this.setStart(new Date(System.currentTimeMillis() + (1 * CaptureParameters.MILLISECONDS)));
         // Sanity check on the duration
         if (this.getDuration().isNegative()) {
@@ -1502,6 +1550,88 @@ class Event {
     return true;
   }
 
+  /**
+   * Tests to see if there are media files on the hard drive that are evidence of an earlier capturing. This way we can
+   * check to see if the there was an earlier recording and not overwrite it.
+   * 
+   * @return True if there is evidence that a recording has already occurred with this UID.
+   */
+  private boolean mediaFilesExist() {
+    try {
+      XProperties properties = captureAgent.getConfigService().getAllProperties();
+      String[] deviceNames = PipelineFactory.getDeviceNames(properties);
+      if (deviceNames != null && deviceNames.length != 0 && deviceNames[0].contains("=")) {
+        deviceNames[0] = deviceNames[0].split("=")[1];
+      }
+      File captureLocation = determineRootURL(uid, properties);
+      for (String name : deviceNames) {
+        String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST;
+        if (!properties.containsKey(outputProperty)) {
+          // We can't check to see if this media has been created because we don't have an output location.
+          return true;
+        } 
+        File captureDirectory = new File(captureLocation.getAbsolutePath(), uid);
+        File outputFile = new File(captureDirectory.getAbsolutePath(), properties.get(outputProperty).toString());
+        if (outputFile.exists()) {
+          // At least one of the media files exist so return true.
+          return true;
+        }
+      }
+    } catch (NoCaptureDevicesSpecifiedException e) {
+      log.warn("There were no capture devices specified in the properties so we can't check to see if the media files exist. ");
+      return true;
+    } catch (IOException e) {
+      log.warn("Couldn't determine whether media files exists because " + e);
+      return true;
+    }
+    return false;
+    
+   
+  }
+
+  /**
+   * Determines the root URL and ID from the recording's properties //TODO: What if the properties object contains a
+   * character in the recording id or root url fields that is invalid for the filesystem?
+   * 
+   * @throws IOException
+   */
+  private File determineRootURL(String uid, XProperties props) throws IOException {
+    File baseDir;
+    if (props == null) {
+      log.info("Properties are null for recording, guessing that the root capture dir is java.io.tmpdir...");
+      props = new XProperties();
+      props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, System.getProperty("java.io.tmpdir"));
+    }
+
+    // Figures out where captureDir lives
+    if (props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
+      baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));
+      if (props.containsKey(CaptureParameters.RECORDING_ID)) {
+        // In this case they've set both the root URL and the recording ID, so we're done.
+        uid = props.getProperty(CaptureParameters.RECORDING_ID);
+      } else {
+        // In this case they've set the root URL, but not the recording ID. Get the id from that url instead then.
+        log.debug("{} was set, but not {}.", CaptureParameters.RECORDING_ROOT_URL, CaptureParameters.RECORDING_ID);
+        uid = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL)).getName();
+        props.put(CaptureParameters.RECORDING_ID, uid);
+      }
+    } else {
+      File cacheDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
+      // If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
+      if (props.containsKey(CaptureParameters.RECORDING_ID)) {
+        uid = props.getProperty(CaptureParameters.RECORDING_ID);
+        baseDir = new File(cacheDir, uid);
+      } else {
+        // Unscheduled capture, use a timestamp value instead
+        uid = "Unscheduled-" + props.getProperty(CaptureParameters.AGENT_NAME) + "-" + System.currentTimeMillis();
+        props.setProperty(CaptureParameters.RECORDING_ID, uid);
+        baseDir = new File(cacheDir, uid);
+      }
+      props.put(CaptureParameters.RECORDING_ROOT_URL, baseDir.getCanonicalPath());
+    }
+    return baseDir;
+  }
+  
   /**
    * Returns true if this event is valid (ie, scheduleable)
    * 

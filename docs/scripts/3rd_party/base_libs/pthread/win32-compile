@@ -8,6 +8,7 @@ source "${HOME3P}/utilx"
 #
 [ -f .done-win32 ] && exit 0
 pkg=`getcfg PKG:`
+chkpkg "$pkg" || exit 1
 dir=`getcfg DIR:`
 [ -z "$dir" -o "$dir" = "/" ] && exit 1
 pcp=`getcfg PCP:`
@@ -47,6 +48,9 @@ cd -
 zip "../$pcp" pthread/*.h
 [ $? -ne 0 ] && exit 1
 zip -j "../$pcp" pthreadGC2.dll libpthreadGC2.a
+[ $? -ne 0 ] && exit 1
+#
+copypc usr/local/bin pthreadGC2.dll
 [ $? -ne 0 ] && exit 1
 #
 touch ../.done-win32

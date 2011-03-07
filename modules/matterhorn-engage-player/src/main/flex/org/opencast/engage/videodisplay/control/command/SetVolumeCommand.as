@@ -15,36 +15,36 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
-    import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
-    import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.swizframework.Swiz;
+	import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
+	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+	import org.swizframework.Swiz;
+	/**
+	 *   SetVolumeCommand
+	 */
+	public class SetVolumeCommand
+	{
 
-    /**
-     *   SetVolumeCommand
-     */
-    public class SetVolumeCommand
-    {
+		/**
+		 * Constructor
+		 */
+		public function SetVolumeCommand()
+		{
+			Swiz.autowire(this);
+		}
 
-        [Autowire]
-        public var model : VideodisplayModel;
+		[Autowire]
+		public var model:VideodisplayModel;
 
-        /**
-         * Constructor
-         */
-        public function SetVolumeCommand()
-        {
-            Swiz.autowire( this );
-        }
-
-        /**
-         * execute
-         * Set the volume.
-         * @eventType SetVolumeEvent event
-         * */
-        public function execute( event : SetVolumeEvent ) : void
-        {
-            model.mediaPlayer.setVolume( event.volume );
-            model.playerVolume = event.volume;
-        }
-    }
+		/**
+		 * execute
+		 * Set the volume.
+		 * @eventType SetVolumeEvent event
+		 * */
+		public function execute(event:SetVolumeEvent):void
+		{
+			model.mediaPlayer.setVolume(event.volume);
+			model.playerVolume=event.volume;
+		}
+	}
 }
+

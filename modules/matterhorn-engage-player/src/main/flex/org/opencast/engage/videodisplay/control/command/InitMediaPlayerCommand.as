@@ -15,13 +15,9 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
-
-	import bridge.ExternalFunction;
-
 	import flash.external.ExternalInterface;
-
 	import mx.core.Application;
-
+	import bridge.ExternalFunction;
 	import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
 	import org.opencast.engage.videodisplay.control.util.OpencastMediaPlayer;
 	import org.opencast.engage.videodisplay.model.VideodisplayModel;
@@ -35,148 +31,146 @@ package org.opencast.engage.videodisplay.control.command
 	import org.osmf.media.MediaElement;
 	import org.osmf.media.URLResource;
 	import org.swizframework.Swiz;
-
 	/**
-	 *   InitMediaPlayerCommand
+	 * InitMediaPlayerCommand
+	 * This Command tries to initialize the player and the videos
+	 * It also handles errors, connection or stream not found
 	 */
 	public class InitMediaPlayerCommand
 	{
-
-		[Autowire]
-		public var model : VideodisplayModel;
-
-
-
 
 		/**
 		 * Constructor
 		 */
 		public function InitMediaPlayerCommand()
 		{
-			Swiz.autowire( this );
+			Swiz.autowire(this);
 		}
+
+		[Autowire]
+		public var model:VideodisplayModel;
 
 		/**
 		 * execute
 		 * Init the video player. Set the cover urls and set the video urls.
 		 * @eventType InitPlayerEvent event
 		 */
-		public function execute( event : InitMediaPlayerEvent ) : void
+		public function execute(event:InitMediaPlayerEvent):void
 		{
-			model.currentPlayerState = PlayerState.PAUSED;
-			ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
-			model.playerMode = event.playerMode;
-			model.slideLength = event.slideLength;
+			model.currentPlayerState=PlayerState.PAUSED;
+			ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING);
+			model.playerMode=event.playerMode;
+			model.slideLength=event.slideLength;
 
 			// set the cover URL One
-			model.coverURLOne = event.coverURLOne;
+			model.coverURLOne=event.coverURLOne;
 
 			// set the cover URL Two
-			model.coverURLTwo = event.coverURLTwo;
+			model.coverURLTwo=event.coverURLTwo;
 
 			// set the cover state
-			if( event.coverURLOne != '' && event.coverURLTwo == '' )
+			if (event.coverURLOne != '' && event.coverURLTwo == '')
 			{
-				model.coverState = CoverState.ONECOVER;
-				model.coverURLSingle = event.coverURLOne;
+				model.coverState=CoverState.ONECOVER;
+				model.coverURLSingle=event.coverURLOne;
 			}
 			else
 			{
-				model.coverState = CoverState.TWOCOVERS;
-				model.coverURLSingle = event.coverURLOne;
+				model.coverState=CoverState.TWOCOVERS;
+				model.coverURLSingle=event.coverURLOne;
 			}
 
 
 			// Single Video/Audio
-			if( event.mediaURLOne != '' && ( event.mediaURLTwo == '' || event.mediaURLTwo == ' ' ) )
+			if (event.mediaURLOne != '' && (event.mediaURLTwo == '' || event.mediaURLTwo == ' '))
 			{
 				//
-				model.mediaPlayer = new OpencastMediaPlayer( VideoState.SINGLE );
-				var pos : int = event.mimetypeOne.lastIndexOf( "/" );
+				model.mediaPlayer=new OpencastMediaPlayer(VideoState.SINGLE);
+				var pos:int=event.mimetypeOne.lastIndexOf("/");
 
-				var fileType : String = event.mimetypeOne.substring( 0, pos );
+				var fileType:String=event.mimetypeOne.substring(0, pos);
 
-				switch( fileType )
+				switch (fileType)
 				{
 					case "video":
 
 						//var newVideoElement : VideoElement = new VideoElement( new URLResource( event.mediaURLOne ) );
 						// Using OSMFs new LightweightVideoElelemt -> red5 rtmp stream not starting
-						var newVideoElement : LightweightVideoElement = new LightweightVideoElement( new URLResource( event.mediaURLOne ) );
-						newVideoElement.smoothing = true;
+						var newVideoElement:LightweightVideoElement=new LightweightVideoElement(new URLResource(event.mediaURLOne));
+						newVideoElement.smoothing=true;
 						//newVideoElement.defaultDuration = 1000;
-						var mediaElementVideo : MediaElement = newVideoElement;
+						var mediaElementVideo:MediaElement=newVideoElement;
 
-						model.mediaPlayer.setSingleMediaElement( mediaElementVideo );
+						model.mediaPlayer.setSingleMediaElement(mediaElementVideo);
 
-						if( event.mediaURLOne.charAt( 0 ) == 'h' || event.mediaURLOne.charAt( 0 ) == 'H' )
+						if (event.mediaURLOne.charAt(0) == 'h' || event.mediaURLOne.charAt(0) == 'H')
 						{
-							model.mediaTypeSingle = model.HTML;
-							model.mediaType = model.HTML;
+							model.mediaTypeSingle=model.HTML;
+							model.mediaType=model.HTML;
 						}
-						else if( event.mediaURLOne.charAt( 0 ) == 'r' || event.mediaURLOne.charAt( 0 ) == 'R' )
+						else if (event.mediaURLOne.charAt(0) == 'r' || event.mediaURLOne.charAt(0) == 'R')
 						{
-							model.mediaTypeSingle = model.RTMP;
+							model.mediaTypeSingle=model.RTMP;
 						}
 						break;
 
 					case "audio":
-						var mediaElementAudio : MediaElement = new AudioElement( new URLResource( event.mediaURLOne ) );
-						model.mediaPlayer.setSingleMediaElement( mediaElementAudio );
-						var position : int = event.mediaURLOne.lastIndexOf( '/' );
-						model.audioURL = event.mediaURLOne.substring( position + 1 );
+						var mediaElementAudio:MediaElement=new AudioElement(new URLResource(event.mediaURLOne));
+						model.mediaPlayer.setSingleMediaElement(mediaElementAudio);
+						var position:int=event.mediaURLOne.lastIndexOf('/');
+						model.audioURL=event.mediaURLOne.substring(position + 1);
 						Application.application.bx_audio.startVisualization();
-						model.mediaState = MediaState.AUDIO;
+						model.mediaState=MediaState.AUDIO;
 						break;
 
 					default:
-						errorMessage( "Error", "TRACK COULD NOT BE FOUND" );
+						errorMessage("Error", "TRACK COULD NOT BE FOUND");
 						break;
 				}
 			}
-			else if( event.mediaURLOne != '' && event.mediaURLTwo != '' )
+			else if (event.mediaURLOne != '' && event.mediaURLTwo != '')
 			{
-				if( event.mediaURLOne.charAt( 0 ) == 'h' || event.mediaURLOne.charAt( 0 ) == 'H' )
+				if (event.mediaURLOne.charAt(0) == 'h' || event.mediaURLOne.charAt(0) == 'H')
 				{
-					model.mediaTypeOne = model.HTML;
-					model.mediaType = model.HTML;
+					model.mediaTypeOne=model.HTML;
+					model.mediaType=model.HTML;
 				}
-				else if( event.mediaURLOne.charAt( 0 ) == 'r' || event.mediaURLOne.charAt( 0 ) == 'R' )
+				else if (event.mediaURLOne.charAt(0) == 'r' || event.mediaURLOne.charAt(0) == 'R')
 				{
-					model.mediaTypeOne = model.RTMP;
-				}
-
-				if( event.mediaURLTwo.charAt( 0 ) == 'h' || event.mediaURLTwo.charAt( 0 ) == 'H' )
-				{
-					model.mediaTypeTwo = model.HTML;
-					model.mediaType = model.HTML;
-				}
-				else if( event.mediaURLTwo.charAt( 0 ) == 'r' || event.mediaURLTwo.charAt( 0 ) == 'R' )
-				{
-					model.mediaTypeTwo = model.RTMP;
+					model.mediaTypeOne=model.RTMP;
 				}
 
+				if (event.mediaURLTwo.charAt(0) == 'h' || event.mediaURLTwo.charAt(0) == 'H')
+				{
+					model.mediaTypeTwo=model.HTML;
+					model.mediaType=model.HTML;
+				}
+				else if (event.mediaURLTwo.charAt(0) == 'r' || event.mediaURLTwo.charAt(0) == 'R')
+				{
+					model.mediaTypeTwo=model.RTMP;
+				}
 
-				model.mediaPlayer = new OpencastMediaPlayer( VideoState.MULTI );
+
+				model.mediaPlayer=new OpencastMediaPlayer(VideoState.MULTI);
 
 				//var newVideoElementOne : VideoElement = new VideoElement( new URLResource( event.mediaURLOne ) );
-				var newVideoElementOne : LightweightVideoElement = new LightweightVideoElement( new URLResource( event.mediaURLOne ) );
-				newVideoElementOne.smoothing = true;
+				var newVideoElementOne:LightweightVideoElement=new LightweightVideoElement(new URLResource(event.mediaURLOne));
+				newVideoElementOne.smoothing=true;
 				//newVideoElementOne.defaultDuration = 1000;
-				var mediaElementVideoOne : MediaElement = newVideoElementOne;
+				var mediaElementVideoOne:MediaElement=newVideoElementOne;
 				//model.mediaPlayer.setMediaElementOne( mediaElementVideoOne );
 
-				var newVideoElementTwo : LightweightVideoElement = new LightweightVideoElement( new URLResource( event.mediaURLTwo ) );
-				newVideoElementTwo.smoothing = true;
+				var newVideoElementTwo:LightweightVideoElement=new LightweightVideoElement(new URLResource(event.mediaURLTwo));
+				newVideoElementTwo.smoothing=true;
 				//newVideoElementTwo.defaultDuration = 1000;
-				var mediaElementVideoTwo : MediaElement = newVideoElementTwo;
+				var mediaElementVideoTwo:MediaElement=newVideoElementTwo;
 				//model.mediaPlayer.setMediaElementTwo( mediaElementVideoTwo );
 
-				model.mediaPlayer.setMediaElement(mediaElementVideoOne,mediaElementVideoTwo);
+				model.mediaPlayer.setMediaElement(mediaElementVideoOne, mediaElementVideoTwo);
 			}
 			else
 			{
-				errorMessage( "Error", "TRACK COULD NOT BE FOUND" );
+				errorMessage("Error", "TRACK COULD NOT BE FOUND");
 			}
 		}
 
@@ -185,11 +179,11 @@ package org.opencast.engage.videodisplay.control.command
 		 * Set the error Message and switch the stage.
 		 * @param String name, String message
 		 * */
-		private function errorMessage( name : String, message : String ) : void
+		private function errorMessage(name:String, message:String):void
 		{
-			model.mediaState = MediaState.ERROR;
-			model.errorMessage = name;
-			model.errorDetail = message;
+			model.mediaState=MediaState.ERROR;
+			model.errorMessage=name;
+			model.errorDetail=message;
 		}
 	}
 }

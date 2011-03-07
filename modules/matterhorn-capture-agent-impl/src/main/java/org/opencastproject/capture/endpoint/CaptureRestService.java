@@ -16,8 +16,6 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.ScheduledEvent;
-import org.opencastproject.capture.api.ScheduledEventImpl;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -33,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.LinkedList;
 import java.util.Properties;
 
 import javax.ws.rs.FormParam;
@@ -129,15 +126,6 @@ public class CaptureRestService {
             .error("failed to stop the capture, no current active capture, or no matching ID"));
     stopIDEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, stopIDEndpoint);
-
-    // // ingest(recordingID)
-    RestEndpoint ingestEndpoint = new RestEndpoint("ingest", RestEndpoint.Method.POST, "/ingest",
-            "Ingests the specified capture");
-    ingestEndpoint.addRequiredParam(new Param("recordingID", Type.STRING, null, "The ID for the recording to ingest"));
-    ingestEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("capture ingested succesfully"));
-    ingestEndpoint.addStatus(org.opencastproject.util.doc.Status.error("ingest failed"));
-    ingestEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, ingestEndpoint);
 
     // // configuration()
     RestEndpoint configEndpoint = new RestEndpoint(
@@ -323,12 +311,8 @@ public class CaptureRestService {
     }
 
     try {
-      // FIXME: This is incredibly lame, but JAXB breaks without this extra copy+cast
-      LinkedList<ScheduledEventImpl> list = new LinkedList<ScheduledEventImpl>();
-      for (ScheduledEvent event : service.getAgentSchedule()) {
-        list.add((ScheduledEventImpl) event);
-      }
-      return Response.ok(list).build();
+      ScheduledEventList eventList = new ScheduledEventList(service.getAgentSchedule());
+      return Response.ok(eventList).build();
     } catch (Exception e) {
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }

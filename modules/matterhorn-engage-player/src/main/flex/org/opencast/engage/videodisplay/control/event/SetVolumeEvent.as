@@ -15,44 +15,45 @@
  */
 package org.opencast.engage.videodisplay.control.event
 {
-    import flash.events.Event;
+	import flash.events.Event;
+	/**
+	 *   SetVolumeEvent
+	 */
+	public class SetVolumeEvent extends Event
+	{
+		public static var EVENT_NAME:String='SetVolumeEvent';
 
-    /**
-     *   SetVolumeEvent
-     */
-    public class SetVolumeEvent extends Event
-    {
-        public static var EVENT_NAME : String = 'SetVolumeEvent';
+		/**
+		 * Constructor
+		 */
+		public function SetVolumeEvent(volume:Number, bubbles:Boolean=false, cancelable:Boolean=false)
+		{
+			super(EVENT_NAME, bubbles, cancelable);
+			_volume=volume;
+		}
 
-        /**
-         * Constructor
-         */
-        public function SetVolumeEvent( volume : Number, bubbles : Boolean = false, cancelable : Boolean = false )
-        {
-            super( EVENT_NAME, bubbles, cancelable );
-            _volume = volume;
-        }
+		private var _volume:Number;
 
-        private var _volume : Number;
+		/**
+		 * clone
+		 * Override the inherited clone() method.
+		 * @return SetVolumeEvent
+		 */
+		override public function clone():Event
+		{
+			return new SetVolumeEvent(volume, bubbles, cancelable);
+		}
 
-        /**
-         * clone
-         * Override the inherited clone() method.
-         * @return SetVolumeEvent
-         */
-        override public function clone() : Event
-        {
-            return new SetVolumeEvent( volume, bubbles, cancelable );
-        }
-
-        /**
-         * volume
-         * Get the volume.
-         * @return Number _volume
-         */
-        public function get volume() : Number
-        {
-            return _volume;
-        }
-    }
+		/**
+		 * volume
+		 * Get the volume.
+		 * @return Number _volume
+		 */
+		public function get volume():Number
+		{
+			return _volume;
+		}
+	}
 }
+
+

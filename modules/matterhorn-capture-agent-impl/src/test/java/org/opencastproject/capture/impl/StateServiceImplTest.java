@@ -40,17 +40,17 @@ public class StateServiceImplTest {
 
   @AfterClass
   public static void after() {
-    FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-state-test"));
+    FileUtils.deleteQuietly(new File("./target", "capture-state-test"));
   }
 
   @Before
-  public void setup() {
+  public void setUp() {
     service = new CaptureAgentImpl();
     Assert.assertNotNull(service);
 
     cfg = new ConfigurationManager();
     Assert.assertNotNull(cfg);
-    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"),
+    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File("./target",
             "capture-state-test").getAbsolutePath());
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost");
@@ -62,7 +62,7 @@ public class StateServiceImplTest {
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     service.deactivate();
     service = null;
   }

@@ -19,11 +19,12 @@ import static org.easymock.EasyMock.createMock;
 
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
+import org.opencastproject.capture.pipeline.PipelineTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.gstreamer.Gst;
 import org.gstreamer.GstException;
@@ -44,10 +45,10 @@ import java.util.Properties;
 @Ignore
 public class ProducerFactoryTest {
 
-  CaptureAgent captureAgentMock;
+  private CaptureAgent captureAgentMock;
 
   /** Capture Device Properties created for unit testing **/
-  CaptureDevice captureDevice = null;
+  private CaptureDevice captureDevice = null;
 
   /** Properties specifically designed for unit testing */
   private static Properties properties = null;
@@ -71,15 +72,16 @@ public class ProducerFactoryTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
 
     captureAgentMock = createMock(CaptureAgent.class);
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
-            null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB, "Friendly Name",
-            "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null,
+            null, null);
+    captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0",
+            ProducerType.EPIPHAN_VGA2USB, "Friendly Name", "/tmp/testpipe/test.mp2",
+            captureDeviceProperties);
 
     // setup testing properties
     properties = new Properties();
@@ -104,8 +106,8 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an videotestsrc card.
-      captureDevice = BinTestHelpers.createCaptureDevice(null, ProducerType.VIDEOTESTSRC, "Video Test Source",
-              "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice(null, ProducerType.VIDEOTESTSRC,
+              "Video Test Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
       Assert.assertTrue(srcBin instanceof VideoTestSrcProducer);
@@ -121,8 +123,9 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an epiphan card.
-      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB,
-              "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0",
+              ProducerType.EPIPHAN_VGA2USB, "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg",
+              captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
       Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LProducer);
@@ -138,8 +141,9 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an epiphan card.
-      captureDevice = BinTestHelpers.createCaptureDevice("/woot/video0", ProducerType.EPIPHAN_VGA2USB,
-              "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/woot/video0",
+              ProducerType.EPIPHAN_VGA2USB, "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg",
+              captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
       Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LProducer);
@@ -155,8 +159,8 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an v4lsource
-      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.V4LSRC, "V4L Source",
-              "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.V4LSRC,
+              "V4L Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
       Assert.assertTrue(srcBin instanceof V4LProducer);
@@ -172,8 +176,8 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an v4lsource
-      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", ProducerType.V4LSRC, "V4L Source",
-              "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/woot!/video0", ProducerType.V4LSRC,
+              "V4L Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
       @SuppressWarnings("unused")
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
     } catch (UnableToCreateElementException e) {
@@ -188,8 +192,9 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an hauppage source.
-      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.HAUPPAUGE_WINTV,
-              "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0",
+              ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", "/tmp/testpipe/test.mpeg",
+              captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
       Assert.assertTrue(srcBin instanceof HauppaugePVR350VideoProducer);
@@ -205,8 +210,10 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an hauppage source.
-      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", ProducerType.HAUPPAUGE_WINTV,
-              "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/woot!/video0",
+              ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", "/tmp/testpipe/test.mpeg",
+              captureDeviceProperties);
+      @SuppressWarnings("unused")
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
     } catch (UnableToCreateElementException e) {
       logger.error("testVideoTestSrc in SourceFactoryTest", e);
@@ -220,8 +227,9 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an bluecherry card.
-      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.BLUECHERRY_PROVIDEO,
-              "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0",
+              ProducerType.BLUECHERRY_PROVIDEO, "Bluecherry Source", "/tmp/testpipe/test.mpeg",
+              captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
       Assert.assertTrue(srcBin instanceof BlueCherryBT878Producer);
@@ -237,7 +245,7 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an bluecherry card.
-      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", ProducerType.BLUECHERRY_PROVIDEO,
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/woot!/video0", ProducerType.BLUECHERRY_PROVIDEO,
               "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
@@ -255,7 +263,7 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an alsa source
-      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.ALSASRC, "Alsa Source",
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.ALSASRC, "Alsa Source",
               "/tmp/testpipe/test.mp2", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
@@ -273,7 +281,7 @@ public class ProducerFactoryTest {
       return;
     try {
       // Setup properties for an alsa source
-      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", ProducerType.ALSASRC, "Alsa Source",
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/woot!/video0", ProducerType.ALSASRC, "Alsa Source",
               "/tmp/testpipe/test.mp2", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
@@ -290,9 +298,9 @@ public class ProducerFactoryTest {
     if (!gstreamerInstalled)
       return;
     try {
-      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, "v4l2src device="
-              + BinTestHelpers.V4L2_LOCATION, null, null, null, null, null, null, null, null);
-      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video1", ProducerType.CUSTOM_VIDEO_SRC,
+      captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, "v4l2src device="
+              + PipelineTestHelpers.V4L2_LOCATION, null, null, null, null, null);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video1", ProducerType.CUSTOM_VIDEO_SRC,
               "Custom Video Bin Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
@@ -308,9 +316,9 @@ public class ProducerFactoryTest {
     if (!gstreamerInstalled)
       return;
     try {
-      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, "pulsesrc", null, null,
-              null, null, null, null, null, null);
-      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
+      captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, "pulsesrc", null, null,
+              null, null, null);
+      captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
               "Custom Audio Bin Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
@@ -327,8 +335,8 @@ public class ProducerFactoryTest {
     if (!gstreamerInstalled)
       return;
     try {
-      captureDevice = BinTestHelpers.createCaptureDevice(BinTestHelpers.HAUPPAGE_LOCATION, ProducerType.FILE_DEVICE,
-              "File Device Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+      captureDevice = PipelineTestHelpers.createCaptureDevice(PipelineTestHelpers.HAUPPAGE_LOCATION,
+              ProducerType.FILE_DEVICE, "File Device Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
       ProducerBin srcBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgentMock);
       // Make sure we got the right object back
       Assert.assertTrue(srcBin instanceof FileProducer);

@@ -32,7 +32,12 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowService;
 
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Recur;
 import net.fortuna.ical4j.model.ValidationException;
+import net.fortuna.ical4j.model.parameter.Value;
+import net.fortuna.ical4j.model.property.RRule;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -58,16 +63,9 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-/*
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.EntityType;
-*/
 import javax.persistence.spi.PersistenceProvider;
 
 /**
@@ -135,7 +133,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    */
   public void activate(ComponentContext componentContext) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.scheduler.impl", persistenceProperties);
-    logger.debug("SchedulerService activating.");
+    logger.info("SchedulerService activating.");
 
     if (componentContext == null) {
       logger.warn("Could not activate because of missing ComponentContext");
@@ -247,6 +245,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     try {
       event.setEventId(workflow.getId());
       event.setMetadataList(event.getMetadataList());
+      event.setLastModified(new Date());
       em = emf.createEntityManager();
       tx = em.getTransaction();
       event = (EventImpl) event;
@@ -287,6 +286,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     mediapackage.setSeriesTitle(event.getSeries());
     mediapackage.setDate(event.getStartDate());
     mediapackage.addCreator(event.getCreator());
+    mediapackage.setDuration(event.getDuration());
 
     // Build a properties set for this event
     Map<String, String> properties = new HashMap<String, String>();
@@ -328,15 +328,45 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @return The recurring event that has been persisted
    */
   public void addRecurringEvent(Event recurrence) throws SchedulerException {
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
     try {
-      for (Event e : recurrence.createEventsFromRecurrence()) {
-        logger.debug("Adding recurring event {}", e.getEventId());
-        addEvent(e);
+      tx.begin();
+      for (Event event : recurrence.createEventsFromRecurrence()) {
+        logger.debug("Adding recurring event {}", event.getEventId());
+
+        // Start a workflow so we have an event id that we can associate the event with
+        WorkflowInstance workflow = null;
+        try {
+          workflow = startWorkflowInstance(event);
+        } catch (WorkflowException workflowException) {
+          throw new SchedulerException(workflowException);
+        } catch (MediaPackageException mediaPackageException) {
+          throw new SchedulerException(mediaPackageException);
+        }
+
+        try {
+          event.setEventId(workflow.getId());
+          event.setMetadataList(event.getMetadataList());
+          event.setLastModified(new Date());
+          event = (EventImpl) event;
+          em.persist(event);
+        } catch (Exception ex) {
+          if (tx.isActive()) {
+            tx.rollback();
+          }
+          throw new SchedulerException("Unable to add event: {}", ex);
+        }
       }
+      tx.commit();
     } catch (ParseException pEx) {
       throw new SchedulerException("Unable to parse recurrence rule: {}", pEx);
     } catch (IncompleteDataException iDEx) {
       throw new SchedulerException("Recurring event is missing data: {}", iDEx);
+    } finally {
+      if (em != null) {
+        em.close();
+      }
     }
   }
 
@@ -384,36 +414,46 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       logger.debug("returning all events");
       return getAllEvents();
     }
-    StringBuilder queryBase = new StringBuilder("SELECT e FROM Event e WHERE ");
+    StringBuilder queryBase = new StringBuilder("SELECT e FROM Event e");
     ArrayList<String> where = new ArrayList<String>();
     EntityManager em = emf.createEntityManager();
-    
+
     if (StringUtils.isNotEmpty(filter.getCreatorFilter())) {
-      where.add("e.creator LIKE :creatorParam");
+      where.add("LOWER(e.creator) LIKE :creatorParam");
     }
-    
+
     if (StringUtils.isNotEmpty(filter.getDeviceFilter())) {
-      where.add("e.device LIKE :deviceParam");
+      where.add("LOWER(e.device) LIKE :deviceParam");
     }
-    
+
     if (StringUtils.isNotEmpty(filter.getTitleFilter())) {
-      where.add("e.title LIKE :titleParam");
+      where.add("LOWER(e.title) LIKE :titleParam");
     }
 
     if (StringUtils.isNotEmpty(filter.getSeriesFilter())) {
-      where.add("e.series LIKE :seriesParam");
+      where.add("LOWER(e.series) LIKE :seriesParam");
     }
-    
-    if (filter.getStart() != null && filter.getStop() != null) { // Events with dates between start and stop
-      where.add("e.startDate > :startParam AND e.endDate < :endParam");
+
+    if (filter.getSeriesId() != null) {
+      where.add("LOWER(e.seriesId) = :seriesIdParam");
+    }
+
+    if (filter.getStart() != null && filter.getStop() != null) { // Events intersecting start and stop
+      where.add("e.startDate < :stopParam AND e.endDate > :startParam");
     } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
       where.add("e.startDate > :startParam");
     } else if (filter.getStart() == null && filter.getStop() != null) { // All events with dates before end
-      where.add("e.startDate < :endParam");
+      where.add("e.startDate < :stopParam");
     }
     
-    queryBase.append(StringUtils.join(where, " AND "));
+//    if(filter.getCurrentAndUpcoming()){
+//      where.add("e.endDate > :now");
+//    }
     
+    if(where.size() > 0) {
+      queryBase.append(" WHERE " + StringUtils.join(where, " AND "));
+    }
+
     if (filter.getOrder() != null) {
       if (filter.isOrderAscending()) {
         queryBase.append(" ORDER BY e.title ASC");
@@ -425,16 +465,19 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     TypedQuery<EventImpl> eventQuery = em.createQuery(queryBase.toString(), EventImpl.class);
 
     if (StringUtils.isNotEmpty(filter.getCreatorFilter())) {
-      eventQuery.setParameter("creatorParam", "%" + filter.getCreatorFilter() + "%");
+      eventQuery.setParameter("creatorParam", "%" + filter.getCreatorFilter().toLowerCase() + "%");
     }
     if (StringUtils.isNotEmpty(filter.getDeviceFilter())) {
-      eventQuery.setParameter("deviceParam", "%" + filter.getDeviceFilter() + "%");
+      eventQuery.setParameter("deviceParam", "%" + filter.getDeviceFilter().toLowerCase() + "%");
     }
     if (StringUtils.isNotEmpty(filter.getTitleFilter())) {
-      eventQuery.setParameter("titleParam", "%" + filter.getTitleFilter() + "%");
+      eventQuery.setParameter("titleParam", "%" + filter.getTitleFilter().toLowerCase() + "%");
     }
     if (StringUtils.isNotEmpty(filter.getSeriesFilter())) {
-      eventQuery.setParameter("seriesParam", "%" + filter.getSeriesFilter() + "%");
+      eventQuery.setParameter("seriesParam", "%" + filter.getSeriesFilter().toLowerCase() + "%");
+    }
+    if (filter.getSeriesId() != null) {
+      eventQuery.setParameter("seriesIdParam", filter.getSeriesId());
     }
     if (filter.getStart() != null) {
       eventQuery.setParameter("startParam", filter.getStart());
@@ -442,9 +485,18 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     if (filter.getStop() != null) {
       eventQuery.setParameter("stopParam", filter.getStop());
     }
+//    if (filter.getCurrentAndUpcoming()) {
+//      eventQuery.setParameter("now", new Date(System.currentTimeMillis()));
+//    }
 
-    List<EventImpl> results = eventQuery.getResultList();
-    List<Event> returnList = new LinkedList<Event>();
+    List<EventImpl> results = new ArrayList<EventImpl>();
+    try {
+      results = eventQuery.getResultList();
+    } finally {
+      em.close();
+    }
+
+    List<Event> returnList = new ArrayList<Event>();
     for (EventImpl event : results) {
       returnList.add((Event) event);
     }
@@ -484,8 +536,9 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     Date now = new Date(System.currentTimeMillis());
     for (Event e : list) {
       Date enddate = e.getEndDate();
-      if (!(enddate == null) && !enddate.after(now))
+      if (!(enddate == null) && !enddate.after(now)) {
         list.remove(e);
+      }
     }
     return list;
   }
@@ -540,6 +593,25 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    *           if this event hasn't previously been saved
    */
   public void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException {
+    updateEvent(e, updateWorkflow, false);
+  }
+
+  /**
+   * Updates an event.
+   * 
+   * @param e
+   *          The event
+   * @param updateWorkflow
+   *          Whether to also update the associated workflow for this event
+   * @param updateWithEmptyValues
+   *          Overwrite stored event's fields with null if provided event's fields are null
+   * @throws SchedulerException
+   *           if the scheduled event can not be persisted
+   * @throws NotFoundException
+   *           if this event hasn't previously been saved
+   */
+  public void updateEvent(Event e, boolean updateWorkflow, boolean updateWithEmptyValues) throws NotFoundException,
+          SchedulerException {
     EntityManager em = null;
     EntityTransaction tx = null;
     Event storedEvent = getEvent(e.getEventId());
@@ -547,7 +619,8 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       em = emf.createEntityManager();
       tx = em.getTransaction();
       tx.begin();
-      storedEvent.update(e);
+      storedEvent.update(e, updateWithEmptyValues);
+      storedEvent.setLastModified(new Date());
       em.merge(storedEvent);
       tx.commit();
       if (updateWorkflow) {
@@ -568,7 +641,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     if (!WorkflowInstance.WorkflowState.PAUSED.equals(workflow.getState())) {
       throw new SchedulerException("The workflow is not in the paused state, so it can not be updated");
     }
-    if (!SCHEDULE_OPERATION_ID.equals(scheduleOperation.getId())) {
+    if (!SCHEDULE_OPERATION_ID.equals(scheduleOperation.getTemplate())) {
       throw new SchedulerException("The workflow is not in the paused state, so it can not be updated");
     }
     MediaPackage mediapackage = workflow.getMediaPackage();
@@ -580,8 +653,9 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     mediapackage.setSeries(event.getSeriesId());
     mediapackage.setSeriesTitle(event.getSeries());
     mediapackage.setDate(event.getStartDate());
-    //mediapackage supports multiple creators, interface does not. replace them all with this one
-    //We really should handle this better
+    mediapackage.setDuration(event.getDuration());
+    // mediapackage supports multiple creators, interface does not. replace them all with this one
+    // We really should handle this better
     for (String creator : mediapackage.getCreators()) {
       mediapackage.removeCreator(creator);
     }
@@ -607,29 +681,24 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    *          Event containing metadata to be updated.
    */
   public void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException {
-    EntityManager em = emf.createEntityManager();
-    em.getTransaction().begin();
-    try {
-      for (Long eventId : eventIdList) {
-        e.setEventId(eventId);
-        Event storedEvent = getEvent(e.getEventId());
-        logger.debug("Found stored event. {} -", storedEvent);
-        if (storedEvent == null) {
-          em.getTransaction().rollback();
-          em.close();
-          throw new NotFoundException("Couldn't find event" + eventId.toString());
-        }
-        storedEvent.update(e,false);
-        em.merge(storedEvent);
-        updateWorkflow(storedEvent);
+    List<Event> eventList = new LinkedList<Event>();
+    for (Long id : eventIdList) {
+      eventList.add(getEvent(id));
+    }
+    updateEvents(eventList, e, false);
+  }
+
+  public void updateEvents(List<Event> eventList, Event e, boolean updateWithEmptyValues) throws NotFoundException,
+          SchedulerException {
+    int sequence = 1;
+    String title = e.getTitle();
+    for (Event event : eventList) {
+      e.setEventId(event.getEventId());
+      if(eventList.size() > 1 && StringUtils.isNotEmpty(e.getTitle())) {
+        e.setTitle(title + " " + String.valueOf(sequence));
       }
-      em.getTransaction().commit();
-    } catch (Exception ex) {
-      logger.warn("Unable to update events: {}", ex);
-      em.getTransaction().rollback();
-      throw new SchedulerException(ex);
-    } finally {
-      em.close();
+      updateEvent(e, true, updateWithEmptyValues);
+      sequence++;
     }
   }
 
@@ -637,8 +706,33 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @param e
    * @return A list of events that conflict with the start, or end dates of provided event.
    */
-  public List<Event> findConflictingEvents(Event e) {
-    return null;
+  public List<Event> findConflictingEvents(String device, Date startDate, Date endDate) {
+    SchedulerFilter filter = new SchedulerFilter();
+    filter.withDeviceFilter(device).withStart(startDate).withStop(endDate);
+    return getEvents(filter);
+  }
+
+  public List<Event> findConflictingEvents(String device, String rrule, Date startDate, Date endDate, Long duration)
+          throws ParseException, ValidationException {
+    RRule rule = new RRule(rrule);
+    rule.validate();
+    Recur recur = rule.getRecur();
+    DateTime start = new DateTime(startDate.getTime());
+    start.setUtc(true);
+    DateTime end = new DateTime(endDate.getTime());
+    end.setUtc(true);
+    DateList dates = recur.getDates(start, end, Value.DATE_TIME);
+    List<Event> events = new ArrayList<Event>();
+
+    for (Object d : dates) {
+      Date filterStart = (Date) d;
+      SchedulerFilter filter = new SchedulerFilter().withDeviceFilter(device).withStart(filterStart)
+              .withStop(new Date(filterStart.getTime() + duration));
+      List<Event> filterEvents = getEvents(filter);
+      events.addAll(filterEvents);
+    }
+
+    return events;
   }
 
   public void destroy() {
@@ -743,8 +837,22 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    */
   public SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
     SchedulerFilter filter = new SchedulerFilter();
-    filter.withDeviceFilter(captureAgentID).withOrder("startDate").withStart(new Date(System.currentTimeMillis()));
+    filter.withDeviceFilter(captureAgentID).withOrder("startDate");
     return filter;
   }
 
+  public Date getScheduleLastModified(String captureAgentId) throws SchedulerException {
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query q = em.createNamedQuery("Event.getLastUpdated").setParameter("device", captureAgentId);
+      return (Date) q.getSingleResult();
+    } catch (NoResultException e) {
+      logger.debug("No events scheduled for {}", captureAgentId);
+    } catch (Exception e) {
+      throw new SchedulerException(e);
+    } finally {
+      em.close();
+    }
+    return null;
+  }
 }

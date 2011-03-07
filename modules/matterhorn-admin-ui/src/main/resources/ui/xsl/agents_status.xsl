@@ -16,24 +16,21 @@
         <table id="agentsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
             <thead>
                 <tr>
-                    <th width="33%" class="sortable">Agent Name</th>
-                    <th width="33%" class="sortable">Capabilities</th>
-                    <th width="33%" class="sortable">Status</th>
+                    <th width="33%" class="ui-widget-header"><div>Agent Name</div></th>
+                    <th width="33%" class="ui-widget-header"><div>Capabilities</div></th>
+                    <th width="33%" class="ui-widget-header"><div>Status</div></th>
                 </tr>
             </thead>
             <tbody>
                 <xsl:for-each select="ns1:agent-state-updates/ns1:agent-state-update">
                     <tr class="highlightable">
-                        <td>
-                          <a title="Confidence Monitoring">
-                            <xsl:attribute name="href"><xsl:value-of select="url" />/confidence-monitoring/index.html</xsl:attribute>
+                        <td class="ui-state-active">
                             <xsl:value-of select="name" />
-                          </a>
                         </td>
-                        <td>
+                        <td class="ui-state-active">
                           <xsl:value-of select="capabilities" />
                         </td>
-                        <td>
+                        <td class="ui-state-active">
                             <span>
                                 <xsl:attribute name="class">icon icon-<xsl:value-of select="state" /></xsl:attribute>
                             </span>

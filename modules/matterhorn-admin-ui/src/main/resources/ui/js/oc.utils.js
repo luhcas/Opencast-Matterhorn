@@ -85,16 +85,134 @@ ocUtils.makeLocaleDateString = function(timestamp) {
   return date.toLocaleString();
 }
 
+/** converts a date to a human readable date string
+ * @param date
+ * @return formatted date string
+ */
+ocUtils.getDateString = function(date) {
+  var days = [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" ];
+  var months = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ];
+  var daySeparator = ", ";
+  var dateSeparator = " ";
+  var yearSeparator = " ";
+	var d = date;
+	var datestring = days[(d.getDate() + 1) % 7];
+	datestring += daySeparator;
+	datestring += months[d.getMonth() % 12];
+	datestring += dateSeparator;
+	datestring += (d.getDate() >= 10) ? d.getDate() : "0".concat(d.getDate());
+	datestring += yearSeparator;
+	datestring += d.getFullYear();
+	return datestring;
+}
+
+/** converts a date to a human readable time string
+ * @param date
+ * @return formatted time string
+ */
+ocUtils.getTimeString = function(date) {
+    var timeSeparator = ":";
+	var d = date;
+	var h = (d.getHours() >= 10) ? d.getHours() : "0".concat(d.getHours());
+	var m = (d.getMinutes() >= 10) ? d.getMinutes() : "0"
+			.concat(d.getMinutes());
+	var s = (d.getSeconds() >= 10) ? d.getSeconds() : "0"
+			.concat(d.getSeconds());
+	return (h + timeSeparator + m /* + timeSeparator + s*/);
+}
+
 ocUtils.fromUTCDateString = function(UTCDate) {
   var date = new Date(0);
-  if(UTCDate[UTCDate.length - 1] === "Z") {
+  if(UTCDate[UTCDate.length - 1] == 'Z') {
     var dateTime = UTCDate.slice(0,-1).split("T");
     var ymd = dateTime[0].split("-");
     var hms = dateTime[1].split(":");
-    date.setUTCFullYear(ymd[0], parseInt(ymd[1]) - 1, ymd[2]);
-    date.setUTCHours(hms[0], hms[1], hms[2]);
+    date.setUTCMilliseconds(0);
+    date.setUTCSeconds(parseInt(hms[2], 10));
+    date.setUTCMinutes(parseInt(hms[1], 10));
+    date.setUTCHours(parseInt(hms[0], 10));
+    date.setUTCDate(parseInt(ymd[2], 10));
+    date.setUTCMonth(parseInt(ymd[1], 10) - 1);
+    date.setUTCFullYear(parseInt(ymd[0], 10));
   }
   return date;
+}
+
+/** converts a date to a human readable date and time string
+ * @description Returns formatted Seconds
+ * @param seconds Seconds to format
+ * @return formatted Seconds
+ */
+ocUtils.formatSeconds = function(seconds)
+{
+    var result = "";
+    if (parseInt(seconds / 3600) < 10)
+    {
+        result += "0";
+    }
+    result += parseInt(seconds / 3600);
+    result += ":";
+    if ((parseInt(seconds / 60) - parseInt(seconds / 3600) * 60) < 10)
+    {
+        result += "0";
+    }
+    result += parseInt(seconds / 60) - parseInt(seconds / 3600) * 60;
+    result += ":";
+    if (seconds % 60 < 10)
+    {
+        result += "0";
+    }
+    result += Math.round(seconds % 60);
+    return result;
+}
+
+/** converts a duration in ms to a human readable duration string
+ * @param duration duration in ms
+ * @return formatted duration string, '' is duration is null or < 0
+ */
+ocUtils.getDuration = function(duration) {
+    var durationSeparator = "<br />Duration: ";
+    if((duration !== null) && (duration >= 0)) {
+        return durationSeparator + ocUtils.formatSeconds(duration / 1000);
+    } else {
+        return '';
+    }
+}
+
+/** converts a date to a human readable date and time string
+ * @param UTCDate
+ * @return formatted date and time string
+ */
+ocUtils.fromUTCDateStringToFormattedTime = function(UTCDate, duration) {
+  var dateTimeSeparator = " - ";
+  var date = ocUtils.fromUTCDateString(UTCDate);
+  return (ocUtils.getDateString(date) + dateTimeSeparator + ocUtils.getTimeString(date) + ocUtils.getDuration(duration));
+}
+
+/* Convert Date object to yyyy-MM-dd'T'HH:mm:ss'Z' string.
+ *
+ */
+ocUtils.toISODate = function(date, utc) {
+  var out;
+  if(typeof utc == 'undefined') {
+    utc = true;
+  }
+  if(utc) {
+    out = date.getUTCFullYear() + '-' + 
+          ocUtils.padString((date.getUTCMonth()+1) ,'0' , 2) + '-' + 
+          ocUtils.padString(date.getUTCDate() ,'0' , 2) + 'T' +
+          ocUtils.padString(date.getUTCHours() ,'0' , 2) + ':' + 
+          ocUtils.padString(date.getUTCMinutes() ,'0' , 2) + ':' + 
+          ocUtils.padString(date.getUTCSeconds() ,'0' , 2) + 'Z';
+  } else {
+    out = date.getFullYear() + '-' + 
+          ocUtils.padString((date.getMonth()+1) ,'0' , 2) + '-' + 
+          ocUtils.padString(date.getDate() ,'0' , 2) + 'T' +
+          ocUtils.padString(date.getHours() ,'0' , 2) + ':' + 
+          ocUtils.padString(date.getMinutes() ,'0' , 2) + ':' + 
+          ocUtils.padString(date.getSeconds() ,'0' , 2);
+  }
+  return out;
 }
 
 ocUtils.padString = function(str, pad, padlen){
@@ -149,4 +267,19 @@ ocUtils.ensureArray = function(obj) {
   } else {
     return [obj];
   }
+}
+
+ocUtils.sizeOf = function(obj) {
+  var length = 0;
+  if (obj === undefined) {
+    return 0;
+  }
+  if ($.isArray(obj) || typeof obj == 'string') {
+    return obj.length;
+  } else if (typeof obj == 'object') {
+    for (i in obj) {
+      length++;
+    }
+  }
+  return length;
 }

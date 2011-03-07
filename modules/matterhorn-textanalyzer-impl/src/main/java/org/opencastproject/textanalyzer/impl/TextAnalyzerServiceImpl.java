@@ -19,7 +19,6 @@ import org.opencastproject.dictionary.api.DictionaryService;
 import org.opencastproject.dictionary.api.DictionaryService.DICT_TOKEN;
 import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -42,14 +41,13 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.textanalyzer.api.TextAnalyzerException;
 import org.opencastproject.textanalyzer.api.TextAnalyzerService;
-import org.opencastproject.textanalyzer.impl.ocropus.OcropusLine;
-import org.opencastproject.textanalyzer.impl.ocropus.OcropusTextAnalyzer;
-import org.opencastproject.textanalyzer.impl.ocropus.OcropusTextFrame;
+import org.opencastproject.textextractor.api.TextExtractor;
+import org.opencastproject.textextractor.api.TextExtractorException;
+import org.opencastproject.textextractor.api.TextFrame;
+import org.opencastproject.textextractor.api.TextLine;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
-import org.apache.commons.lang.StringUtils;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +74,9 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "ocrtext";
 
+  /** The text extraction implemenetation */
+  private TextExtractor textExtractor = null;
+
   /** Reference to the receipt service */
   private ServiceRegistry serviceRegistry = null;
 
@@ -88,19 +89,11 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   /** The dictionary service */
   protected DictionaryService dictionaryService;
 
-  /** Path to the ocropus binary */
-  private String ocropusbinary = OcropusTextAnalyzer.OCROPUS_BINARY_DEFAULT;
-
   /**
    * Creates a new instance of the text analyzer service.
    */
   public TextAnalyzerServiceImpl() {
     super(JOB_TYPE);
-  }
-
-  protected void activate(ComponentContext cc) {
-    if (cc.getBundleContext().getProperty("org.opencastproject.textanalyzer.ocrocmd") != null)
-      ocropusbinary = (String) cc.getBundleContext().getProperty("org.opencastproject.textanalyzer.ocrocmd");
   }
 
   /**
@@ -195,12 +188,13 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job, java.lang.String,
-   *      java.util.List)
+   * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job)
    */
   @Override
-  protected String process(Job job, String operation, List<String> arguments) throws Exception {
+  protected String process(Job job) throws Exception {
     Operation op = null;
+    String operation = job.getOperation();
+    List<String> arguments = job.getArguments();
     try {
       op = Operation.valueOf(operation);
       switch (op) {
@@ -218,49 +212,6 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
     } catch (Exception e) {
       throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(long)
-   */
-  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    return serviceRegistry.getJob(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#getJobType()
-   */
-  @Override
-  public String getJobType() {
-    return JOB_TYPE;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
-   */
-  public long countJobs(Status status) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    return serviceRegistry.count(JOB_TYPE, status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
-   */
-  public long countJobs(Status status, String host) throws ServiceRegistryException {
-    if (status == null)
-      throw new IllegalArgumentException("status must not be null");
-    if (host == null)
-      throw new IllegalArgumentException("host must not be null");
-    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -284,28 +235,29 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
     }
 
     List<VideoText> videoTexts = new ArrayList<VideoText>();
-    OcropusTextAnalyzer analyzer = new OcropusTextAnalyzer(ocropusbinary);
-    OcropusTextFrame textFrame = analyzer.analyze(imageFile);
+    TextFrame textFrame = null;
+    try {
+      textFrame = textExtractor.extract(imageFile);
+    } catch (IOException e) {
+      logger.warn("Error reading image file {}: {}", imageFile, e.getMessage());
+      throw new TextAnalyzerException(e);
+    } catch (TextExtractorException e) {
+      logger.warn("Error extracting text from {}: {}", imageFile, e.getMessage());
+      throw new TextAnalyzerException(e);
+    }
+
     int i = 1;
-    for (OcropusLine line : textFrame.getLines()) {
+    for (TextLine line : textFrame.getLines()) {
       VideoText videoText = new VideoTextImpl(id + "-" + i++);
       videoText.setBoundary(line.getBoundaries());
       Textual text = null;
       if (languagesInstalled) {
-        String[] potentialWords = StringUtils.split(line.getText());
+        String[] potentialWords = line.getText() == null ? new String[0] : line.getText().split("\\W");
         String[] languages = dictionaryService.detectLanguage(potentialWords);
         if (languages.length == 0) {
-          StringBuilder potentialWordsBuilder = new StringBuilder();
-          for (int j = 0; j < potentialWords.length; j++) {
-            if (potentialWordsBuilder.length() > 0) {
-              potentialWordsBuilder.append(" ");
-            }
-            potentialWordsBuilder.append(potentialWords[j]);
-          }
-          logger.warn(
-                  "Unable to determine the language for these words: '{}'.  Perhaps the language pack(s) are missing.",
-                  potentialWordsBuilder.toString());
-          text = new TextualImpl(line.getText());
+          // There are languages installed, but these words are part of one of those languages
+          logger.debug("No languages found for '{}'.", line.getText());
+          continue;
         } else {
           String language = languages[0];
           DICT_TOKEN[] tokens = dictionaryService.cleanText(potentialWords, language);
@@ -322,6 +274,7 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
           text = new TextualImpl(cleanLine.toString(), language);
         }
       } else {
+        logger.info("No languages installed.  For better results, please install at least one language pack");
         text = new TextualImpl(line.getText());
       }
       videoText.setText(text);
@@ -348,6 +301,16 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   @Override
   protected ServiceRegistry getServiceRegistry() {
     return serviceRegistry;
+  }
+
+  /**
+   * Sets the text extractor.
+   * 
+   * @param textExtractor
+   *          a text extractor implementation
+   */
+  protected void setTextExtractor(TextExtractor textExtractor) {
+    this.textExtractor = textExtractor;
   }
 
   /**

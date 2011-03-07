@@ -42,9 +42,9 @@ import java.text.ParseException;
 public class IngestJobTest {
   private String recordingID = "fake-Recording-ID";
   private String postfix = recordingID;
-  CaptureAgentImpl captureAgentMock;
-  Scheduler scheduler;
-  ConfigurationManager configurationManager;
+  private CaptureAgentImpl captureAgentMock;
+  private Scheduler scheduler;
+  private ConfigurationManager configurationManager;
   private Waiter waiter = new Waiter();
 
   @Before
@@ -73,7 +73,7 @@ public class IngestJobTest {
     private int sleepTime = 100;
     private int maxSleepTime = 15000;
     private int sleepAccumulator = 0;
-    boolean done = false;
+    private boolean done = false;
 
     public void sleepWait() throws InterruptedException {
       sleepAccumulator = 0;

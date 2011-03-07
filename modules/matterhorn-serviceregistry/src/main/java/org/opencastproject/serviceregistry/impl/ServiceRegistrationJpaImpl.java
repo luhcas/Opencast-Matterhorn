@@ -26,9 +26,9 @@ import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -36,6 +36,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -50,12 +51,16 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "service", namespace = "http://serviceregistry.opencastproject.org")
 @Entity(name = "ServiceRegistration")
 @Access(AccessType.PROPERTY)
-@Table(name = "SERVICE_REGISTRATION")
+@Table(name = "SERVICE_REGISTRATION", uniqueConstraints = @UniqueConstraint(columnNames = { "HOST_REG", "SERVICE_TYPE" }))
 @NamedQueries({
         @NamedQuery(name = "ServiceRegistration.statistics", query = "SELECT sr, job.status, "
                 + "count(job.status) as numJobs, " + "avg(job.queueTime) as meanQueue, "
-                + "avg(job.runTime) as meanRun " + "FROM ServiceRegistration sr LEFT OUTER JOIN sr.processorJobs job "
+                + "avg(job.runTime) as meanRun FROM ServiceRegistration sr LEFT OUTER JOIN sr.processorJobs job "
                 + "group by sr, job.status"),
+        @NamedQuery(name = "ServiceRegistration.hostload", query = "SELECT sr, job.status, count(job.status) as numJobs "
+                + "FROM ServiceRegistration sr LEFT OUTER JOIN sr.processorJobs job "
+                + "WHERE sr.online=true and sr.hostRegistration.maintenanceMode=false "
+                + "GROUP BY sr, job.status"),
         @NamedQuery(name = "ServiceRegistration.getRegistration", query = "SELECT r from ServiceRegistration r "
                 + "where r.hostRegistration.baseUrl = :host and r.serviceType = :serviceType"),
         @NamedQuery(name = "ServiceRegistration.getAll", query = "SELECT rh FROM ServiceRegistration rh"),
@@ -67,6 +72,9 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ServiceRegistrationJpaImpl.class);
+
+  /** The primary key */
+  protected Long id;
 
   /** The set of jobs created with this service registration */
   protected Set<JobJpaImpl> creatorJobs;
@@ -114,7 +122,28 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
     this.hostRegistration = hostRegistration;
   }
 
+  /**
+   * Gets the primary key for this service registration.
+   * 
+   * @return the primary key
+   */
   @Id
+  @Column
+  @GeneratedValue
+  public Long getId() {
+    return id;
+  }
+
+  /**
+   * Sets the primary key identifier.
+   * 
+   * @param id
+   *          the identifier
+   */
+  public void setId(Long id) {
+    this.id = id;
+  }
+
   @Column(name = "SERVICE_TYPE", nullable = false)
   @XmlElement(name = "type")
   @Override
@@ -144,8 +173,6 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
   }
 
   @OneToMany(mappedBy = "creatorServiceRegistration")
-  @JoinColumns({ @JoinColumn(name = "host", referencedColumnName = "host", updatable = false),
-          @JoinColumn(name = "service_type", referencedColumnName = "service_creator_type", updatable = false) })
   public Set<JobJpaImpl> getCreatorJobs() {
     return creatorJobs;
   }
@@ -155,8 +182,6 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
   }
 
   @OneToMany(mappedBy = "processorServiceRegistration")
-  @JoinColumns({ @JoinColumn(name = "host", referencedColumnName = "host", updatable = false),
-          @JoinColumn(name = "service_type", referencedColumnName = "service_processor_type", updatable = false) })
   public Set<JobJpaImpl> getProcessorJobs() {
     return processorJobs;
   }
@@ -181,9 +206,8 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
    * 
    * @return the host registration
    */
-  @Id
-  @JoinColumn(name = "HOST", referencedColumnName = "HOST")
   @ManyToOne
+  @JoinColumn(name = "host_reg")
   public HostRegistration getHostRegistration() {
     return hostRegistration;
   }
@@ -205,10 +229,10 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
       super.maintenanceMode = hostRegistration.isMaintenanceMode();
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#toString()
    */
   @Override

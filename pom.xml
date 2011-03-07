@@ -4,7 +4,7 @@
   <groupId>org.opencastproject</groupId>
   <artifactId>base</artifactId>
   <packaging>pom</packaging>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <name>matterhorn</name>
   <description>The Opencast Project's Matterhorn software is a media capture, processing, and distribution system</description>
   <url>http://opencastproject.org</url>
@@ -216,6 +216,10 @@
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-textanalyzer-api</module>
         <module>modules/matterhorn-textanalyzer-impl</module>
+        <module>modules/matterhorn-textextractor-tesseract</module>
+        <!-- 
+        <module>modules/matterhorn-textextractor-ocropus</module>
+         -->
         <module>modules/matterhorn-videosegmenter-api</module>
         <module>modules/matterhorn-videosegmenter-impl</module>
         <module>modules/matterhorn-webconsole</module>
@@ -1262,6 +1266,28 @@
         <role>developer</role>
       </roles>
       <timezone>-6</timezone>
+    </developer>
+    <developer>
+      <id>denmeyer</id>
+      <name>Denis Meyer</name>
+      <email>denmeyer@uni-osnabrueck.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uni-osnabrueck.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
+      <id>mmoorman</id>
+      <name>Markus Moormann</name>
+      <email>mmoorman@uni-osnabrueck.de</email>
+      <organization>University of Osnabrueck</organization>
+      <organizationUrl>http://www.uni-osnabrueck.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
     </developer>
   </developers>
 

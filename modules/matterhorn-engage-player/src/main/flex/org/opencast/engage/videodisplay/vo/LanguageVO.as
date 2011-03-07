@@ -15,33 +15,34 @@
  */
 package org.opencast.engage.videodisplay.vo
 {
+	/**
+	 * 	LanguageVO
+	 */
+	[Bindable]
+	public class LanguageVO
+	{
+		/**
+		 * Constructor
+		 */
+		public function LanguageVO(short_name:String, long_name:String)
+		{
+			this.short_name=short_name;
+			this.long_name=long_name;
+		}
 
-    /**
-     * 	LanguageVO
-     */
-    [Bindable]
-    public class LanguageVO
-    {
-        /**
-         * Constructor
-         */
-        public function LanguageVO( short_name : String, long_name : String )
-        {
-            this.short_name = short_name;
-            this.long_name = long_name;
-        }
+		public var long_name:String;
 
-        public var long_name : String;
+		public var short_name:String;
 
-        public var short_name : String;
-
-        /**
-         * toString
-         * return the long_name
-         */
-        public function toString() : String
-        {
-            return long_name;
-        }
-    }
+		/**
+		 * toString
+		 * return the long_name
+		 */
+		public function toString():String
+		{
+			return long_name;
+		}
+	}
 }
+
+

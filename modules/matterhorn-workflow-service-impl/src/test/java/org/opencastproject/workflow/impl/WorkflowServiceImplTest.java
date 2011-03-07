@@ -20,6 +20,7 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -72,6 +73,7 @@ public class WorkflowServiceImplTest {
   private WorkflowServiceSolrIndex dao = null;
   private Set<HandlerRegistration> handlerRegistrations = null;
   private Workspace workspace = null;
+  private ServiceRegistryInMemoryImpl serviceRegistry = null;
 
   private File sRoot = null;
 
@@ -104,11 +106,16 @@ public class WorkflowServiceImplTest {
         return handlerRegistrations;
       }
     };
+
+    MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
+    EasyMock.replay(mds);
+    service.addMetadataService(mds);
+
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
+    serviceRegistry = new ServiceRegistryInMemoryImpl();
     serviceRegistry.registerService(service);
 
     dao = new WorkflowServiceSolrIndex();
@@ -161,7 +168,7 @@ public class WorkflowServiceImplTest {
 
   @After
   public void teardown() throws Exception {
-    System.out.println("All tests finished... tearing down...");
+    serviceRegistry.deactivate();
     dao.deactivate();
   }
 
@@ -239,31 +246,18 @@ public class WorkflowServiceImplTest {
 
   @Test
   public void testParentWorkflow() throws Exception {
-    WorkflowInstance originalInstance = startAndWait(workingDefinition, mediapackage1, WorkflowState.RUNNING);
+    WorkflowInstance originalInstance = startAndWait(workingDefinition, mediapackage1, WorkflowState.SUCCEEDED);
     WorkflowInstance childInstance = startAndWait(workingDefinition, mediapackage1, originalInstance.getId(),
-            WorkflowState.RUNNING);
+            WorkflowState.SUCCEEDED);
     Assert.assertNotNull(service.getWorkflowById(childInstance.getId()).getParentId());
     Assert.assertEquals(originalInstance.getId(), (long) service.getWorkflowById(childInstance.getId()).getParentId());
+
+    // Create a child workflow with a wrong parent id
     try {
       service.start(workingDefinition, mediapackage1, new Long(1876234678), null);
       Assert.fail("Workflows should not be started with bad parent IDs");
     } catch (NotFoundException e) {
     } // the exception is expected
-
-    // Wait for the workflows to finish running
-    WorkflowStateListener succeedListener = new WorkflowStateListener(WorkflowState.SUCCEEDED);
-    service.addWorkflowListener(succeedListener);
-    synchronized (succeedListener) {
-      if (service.getWorkflowById(originalInstance.getId()).getState().equals(WorkflowState.RUNNING)) {
-        succeedListener.wait(10000);
-      }
-    }
-    synchronized (succeedListener) {
-      if (service.getWorkflowById(childInstance.getId()).getState().equals(WorkflowState.RUNNING)) {
-        succeedListener.wait(10000);
-      }
-    }
-    service.removeWorkflowListener(succeedListener);
   }
 
   @Test
@@ -339,6 +333,28 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
+  public void testGetWorkflowByWildcardMatching() throws Exception {
+    String searchTerm = "another";
+    String searchTermWithoutQuotes = "yet another";
+    String searchTermInQuotes = "\"" + searchTermWithoutQuotes + "\"";
+    String title = "just" + searchTerm + " " + searchTermInQuotes + " rev129";
+
+    // Ensure that the database doesn't have any workflow instances
+    Assert.assertEquals(0, service.countWorkflowInstances());
+    mediapackage1.setTitle(title);
+    startAndWait(workingDefinition, mediapackage1, WorkflowState.SUCCEEDED);
+
+    WorkflowSet workflowsWithTitle = service.getWorkflowInstances(new WorkflowQuery().withTitle(searchTerm));
+    Assert.assertEquals(1, workflowsWithTitle.getTotalCount());
+
+    WorkflowSet workflowsWithQuotedTitle = service.getWorkflowInstances(new WorkflowQuery().withTitle(searchTermInQuotes));
+    Assert.assertEquals(1, workflowsWithQuotedTitle.getTotalCount());
+
+    WorkflowSet workflowsWithUnQuotedTitle = service.getWorkflowInstances(new WorkflowQuery().withTitle(searchTermWithoutQuotes));
+    Assert.assertEquals(1, workflowsWithUnQuotedTitle.getTotalCount());
+  }
+
+  @Test
   public void testNegativeWorkflowQuery() throws Exception {
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
@@ -379,7 +395,7 @@ public class WorkflowServiceImplTest {
       } else {
         instance = service.start(definition, mp, parentId, null);
       }
-      stateListener.wait(10000);
+      stateListener.wait();
     }
     service.removeWorkflowListener(stateListener);
 
@@ -458,10 +474,10 @@ public class WorkflowServiceImplTest {
 
     // Make sure the error handler has been added
     Assert.assertEquals(4, storedInstance.getOperations().size());
-    Assert.assertEquals("op1", storedInstance.getOperations().get(0).getId());
-    Assert.assertEquals("op3", storedInstance.getOperations().get(1).getId());
-    Assert.assertEquals("op1", storedInstance.getOperations().get(2).getId());
-    Assert.assertEquals("op2", storedInstance.getOperations().get(3).getId());
+    Assert.assertEquals("op1", storedInstance.getOperations().get(0).getTemplate());
+    Assert.assertEquals("op3", storedInstance.getOperations().get(1).getTemplate());
+    Assert.assertEquals("op1", storedInstance.getOperations().get(2).getTemplate());
+    Assert.assertEquals("op2", storedInstance.getOperations().get(3).getTemplate());
   }
 
   @Test
@@ -491,7 +507,7 @@ public class WorkflowServiceImplTest {
 
     while (stateListener.countStateChanges() < count) {
       synchronized (stateListener) {
-        stateListener.wait(10000);
+        stateListener.wait();
       }
     }
 

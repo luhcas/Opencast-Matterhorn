@@ -22,7 +22,8 @@ import static org.easymock.EasyMock.replay;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.PipelineTestHelpers;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.apache.commons.io.FileUtils;
 import org.gstreamer.Gst;
@@ -50,10 +51,10 @@ public class CaptureDeviceBinTest {
 
   private static final int SLEEP_TIME = 1500;
 
-  CaptureAgent captureAgentMock;
+  private CaptureAgent captureAgentMock;
 
   /** Capture Device Properties created for unit testing **/
-  CaptureDevice captureDevice = null;
+  private CaptureDevice captureDevice = null;
 
   /** Properties specifically designed for unit testing */
   private static Properties properties = null;
@@ -64,7 +65,7 @@ public class CaptureDeviceBinTest {
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBinTest.class);
 
-  private static String tempDirectory = System.getProperty("java.io.tmpdir") + "/CaptureDeviceBinTest";
+  private static String tempDirectory =  "./target/CaptureDeviceBinTest";
 
   private Properties captureDeviceProperties;
 
@@ -79,7 +80,7 @@ public class CaptureDeviceBinTest {
   }
 
   @Before
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
+  public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
 
@@ -93,8 +94,8 @@ public class CaptureDeviceBinTest {
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE, "false");
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION, "/tmp/testpipe/confidence");
 
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
-            null, null, null, null);
+    captureDeviceProperties.putAll(PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null,
+            null, null, null));
   }
 
   @After
@@ -140,8 +141,8 @@ public class CaptureDeviceBinTest {
           String outputLocation) {
     if (!gstreamerInstalled)
       return;
-    captureDevice = BinTestHelpers.createCaptureDevice(deviceLocation, deviceName, friendlyDeviceName, outputLocation,
-            captureDeviceProperties);
+    captureDevice = PipelineTestHelpers.createCaptureDevice(deviceLocation, deviceName, friendlyDeviceName,
+            outputLocation, captureDeviceProperties);
     expect(captureAgentMock.getAgentState()).andReturn(AgentState.CAPTURING);
     replay(captureAgentMock);
     CaptureDeviceBin captureDeviceBin = createCaptureDevice();
@@ -156,7 +157,7 @@ public class CaptureDeviceBinTest {
   public void testVideoTestSrcAndTestSink() throws InterruptedException {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.V4L_LOCATION, ProducerType.VIDEOTESTSRC, "Video Test Source", tempDirectory
+    runDeviceTest(PipelineTestHelpers.V4L_LOCATION, ProducerType.VIDEOTESTSRC, "Video Test Source", tempDirectory
             + "/videoTestSource.mpeg");
   }
 
@@ -164,37 +165,38 @@ public class CaptureDeviceBinTest {
   public void testV4LSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.V4L_LOCATION, ProducerType.V4LSRC, "V4L Source", tempDirectory + "/v4lSrc.mpeg");
+    runDeviceTest(PipelineTestHelpers.V4L_LOCATION, ProducerType.V4LSRC, "V4L Source", tempDirectory + "/v4lSrc.mpeg");
   }
 
   @Test
   public void testV4L2SrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.V4L2_LOCATION, ProducerType.V4L2SRC, "V4L2-Source", tempDirectory + "/v4l2Src.mpeg");
+    runDeviceTest(PipelineTestHelpers.V4L2_LOCATION, ProducerType.V4L2SRC, "V4L2-Source", tempDirectory
+            + "/v4l2Src.mpeg");
   }
 
   @Test
   public void testEpiphanSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.V4L_LOCATION, ProducerType.EPIPHAN_VGA2USB, "Epiphan VGA2USB Source", tempDirectory
-            + "/epiphanSrc.mpeg");
+    runDeviceTest(PipelineTestHelpers.V4L_LOCATION, ProducerType.EPIPHAN_VGA2USB, "Epiphan VGA2USB Source",
+            tempDirectory + "/epiphanSrc.mpeg");
   }
 
   @Test
   public void testBlueCherryAndTestSink() {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.V4L2_LOCATION, ProducerType.BLUECHERRY_PROVIDEO, "Blue Cherry Source", tempDirectory
-            + "/blueCherrySrc.mpeg");
+    runDeviceTest(PipelineTestHelpers.V4L2_LOCATION, ProducerType.BLUECHERRY_PROVIDEO, "Blue Cherry Source",
+            tempDirectory + "/blueCherrySrc.mpeg");
   }
 
   @Test
   public void testAudioTestSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.V4L2_LOCATION, ProducerType.AUDIOTESTSRC, "Audio Test Source", tempDirectory
+    runDeviceTest(PipelineTestHelpers.V4L2_LOCATION, ProducerType.AUDIOTESTSRC, "Audio Test Source", tempDirectory
             + "/audioTestSrc.mp2");
   }
 
@@ -202,7 +204,7 @@ public class CaptureDeviceBinTest {
   public void testPulseSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.V4L2_LOCATION, ProducerType.PULSESRC, "Audio Test Source", tempDirectory
+    runDeviceTest(PipelineTestHelpers.V4L2_LOCATION, ProducerType.PULSESRC, "Audio Test Source", tempDirectory
             + "/pulseSrc.mp2");
   }
 
@@ -211,8 +213,8 @@ public class CaptureDeviceBinTest {
     if (!gstreamerInstalled)
       return;
 
-    captureDeviceProperties.setProperty("customSource", "v4l2src device=" + BinTestHelpers.V4L2_LOCATION);
-    runDeviceTest(BinTestHelpers.V4L2_LOCATION, ProducerType.CUSTOM_VIDEO_SRC, "Custom Video Test Source",
+    captureDeviceProperties.setProperty("customSource", "v4l2src device=" + PipelineTestHelpers.V4L2_LOCATION);
+    runDeviceTest(PipelineTestHelpers.V4L2_LOCATION, ProducerType.CUSTOM_VIDEO_SRC, "Custom Video Test Source",
             tempDirectory + "/customVideoSrc.mpg");
   }
 
@@ -221,7 +223,7 @@ public class CaptureDeviceBinTest {
     if (!gstreamerInstalled)
       return;
     captureDeviceProperties.setProperty("customSource", "pulsesrc");
-    runDeviceTest(BinTestHelpers.V4L2_LOCATION, ProducerType.CUSTOM_AUDIO_SRC, "Custom Video Test Source",
+    runDeviceTest(PipelineTestHelpers.V4L2_LOCATION, ProducerType.CUSTOM_AUDIO_SRC, "Custom Video Test Source",
             tempDirectory + "/customAudioSrc.mp2");
   }
 
@@ -229,7 +231,7 @@ public class CaptureDeviceBinTest {
   public void testHauppageSrcNoContainerChangeAndFileBin() {
     if (!gstreamerInstalled)
       return;
-    runDeviceTest(BinTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
+    runDeviceTest(PipelineTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
             + "/hauppageNoChangeSrc.mpg");
   }
 
@@ -237,9 +239,9 @@ public class CaptureDeviceBinTest {
   public void testHauppageSrcContainerChange() {
     if (!gstreamerInstalled)
       return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, "ffenc_mpeg2video",
-            null, null, "mpegtsmux", null, null, null, null);
-    runDeviceTest(BinTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
+    captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, "ffenc_mpeg2video",
+            null, null, "mpegtsmux", null);
+    runDeviceTest(PipelineTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
             + "/hauppageSrc.mpg");
   }
 
@@ -247,9 +249,9 @@ public class CaptureDeviceBinTest {
   public void testFileSrc() {
     if (!gstreamerInstalled)
       return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
-            null, null, null, null);
-    runDeviceTest(BinTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
+    captureDeviceProperties = PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null,
+            null, null);
+    runDeviceTest(PipelineTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
             + "/fileSrc.mpg");
   }
 }

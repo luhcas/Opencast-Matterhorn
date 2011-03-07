@@ -52,6 +52,7 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
       return;
 
     try {
+      @SuppressWarnings("unused")
       EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(null, properties);
       Assert.fail();
     } catch (NullPointerException ex) {
@@ -60,6 +61,7 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
     }
 
     try {
+      @SuppressWarnings("unused")
       EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, null);
       Assert.fail();
     } catch (NullPointerException ex) {

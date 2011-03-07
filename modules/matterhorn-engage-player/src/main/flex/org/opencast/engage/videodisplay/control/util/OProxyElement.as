@@ -1,14 +1,12 @@
 package org.opencast.engage.videodisplay.control.util
 {
 	import org.osmf.elements.ProxyElement;
-	import org.osmf.media.MediaElement;
-	import org.osmf.traits.MediaTraitType;
 	import org.osmf.events.MediaElementEvent;
+	import org.osmf.media.MediaElement;
 	import org.osmf.traits.AudioTrait;
-
+	import org.osmf.traits.MediaTraitType;
 	public class OProxyElement extends ProxyElement
 	{
-
 
 		public function OProxyElement(proxiedElement:MediaElement=null)
 		{

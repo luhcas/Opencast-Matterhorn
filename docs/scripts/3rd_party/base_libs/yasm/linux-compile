@@ -8,6 +8,7 @@ source "${HOME3P}/utilx"
 #
 [ -f .done-linux ] && exit 0
 pkg=`getcfg PKG:`
+chkpkg "$pkg" || exit 1
 dir=`getcfg DIR:`
 [ -z "$dir" -o "$dir" = "/" ] && exit 1
 #

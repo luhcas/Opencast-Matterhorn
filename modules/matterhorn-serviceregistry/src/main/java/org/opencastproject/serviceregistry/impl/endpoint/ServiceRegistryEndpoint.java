@@ -206,14 +206,14 @@ public class ServiceRegistryEndpoint {
   @Path("/services.xml")
   @Produces(MediaType.TEXT_XML)
   public JaxbServiceRegistrationList getRegistrationsAsXml(@QueryParam("serviceType") String serviceType,
-          @QueryParam("host") String host) {
+          @QueryParam("host") String host) throws NotFoundException {
     JaxbServiceRegistrationList registrations = new JaxbServiceRegistrationList();
     try {
       if (isNotBlank(serviceType) && isNotBlank(host)) {
         // This is a request for one specific service. Return it, or 404 if not found
         ServiceRegistration reg = serviceRegistry.getServiceRegistration(serviceType, host);
         if (reg == null) {
-          throw new WebApplicationException(Status.NOT_FOUND);
+          throw new NotFoundException();
         } else {
           return new JaxbServiceRegistrationList(new JaxbServiceRegistration(reg));
         }
@@ -243,7 +243,7 @@ public class ServiceRegistryEndpoint {
   @Path("/services.json")
   @Produces(MediaType.APPLICATION_JSON)
   public JaxbServiceRegistrationList getRegistrationsAsJson(@QueryParam("serviceType") String serviceType,
-          @QueryParam("host") String host) {
+          @QueryParam("host") String host) throws NotFoundException {
     return getRegistrationsAsXml(serviceType, host);
   }
 
@@ -260,12 +260,15 @@ public class ServiceRegistryEndpoint {
     String operation = request.getParameter("operation");
     String host = request.getParameter("host");
     String payload = request.getParameter("payload");
-    boolean start = StringUtils.isBlank(request.getParameter("start")) || Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("start"));
+    boolean start = StringUtils.isBlank(request.getParameter("start"))
+            || Boolean.TRUE.toString().equalsIgnoreCase(request.getParameter("start"));
     try {
       Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(host, jobType, operation, arguments, payload,
               start);
       URI uri = new URI(UrlSupport.concat(new String[] { serverUrl, servicePath, "job", job.getId() + ".xml" }));
       return Response.created(uri).entity(new JaxbJob(job)).build();
+    } catch (IllegalArgumentException e) {
+      throw new WebApplicationException(Status.BAD_REQUEST);
     } catch (Exception e) {
       throw new WebApplicationException(e);
     }
@@ -274,13 +277,11 @@ public class ServiceRegistryEndpoint {
   @PUT
   @Path("/job/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response updateJob(@PathParam("id") String id, @FormParam("jobType") String jobXml) {
+  public Response updateJob(@PathParam("id") String id, @FormParam("jobType") String jobXml) throws NotFoundException {
     try {
       Job job = JobParser.parseJob(jobXml);
       serviceRegistry.updateJob(job);
       return Response.status(Status.NO_CONTENT).build();
-    } catch (NotFoundException e) {
-      return Response.status(Status.NOT_FOUND).build();
     } catch (Exception e) {
       throw new WebApplicationException(e);
     }
@@ -289,18 +290,16 @@ public class ServiceRegistryEndpoint {
   @GET
   @Path("/job/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public JaxbJob getJobAsXml(@PathParam("id") long id) {
+  public JaxbJob getJobAsXml(@PathParam("id") long id) throws NotFoundException {
     return getJobAsJson(id);
   }
 
   @GET
   @Path("/job/{id}.json")
   @Produces(MediaType.APPLICATION_JSON)
-  public JaxbJob getJobAsJson(@PathParam("id") long id) {
+  public JaxbJob getJobAsJson(@PathParam("id") long id) throws NotFoundException {
     try {
       return new JaxbJob(serviceRegistry.getJob(id));
-    } catch (NotFoundException e) {
-      throw new WebApplicationException(Status.NOT_FOUND);
     } catch (Exception e) {
       throw new WebApplicationException(e);
     }
@@ -323,17 +322,32 @@ public class ServiceRegistryEndpoint {
   @Path("/count")
   @Produces(MediaType.TEXT_PLAIN)
   public long count(@QueryParam("serviceType") String serviceType, @QueryParam("status") Job.Status status,
-          @QueryParam("host") String host) {
-    if (isBlank(serviceType) || status == null) {
-      throw new WebApplicationException(Response.serverError().entity("service type and status must not be null.")
-              .build());
+          @QueryParam("host") String host, @QueryParam("operation") String operation) {
+    if (isBlank(serviceType)) {
+      throw new WebApplicationException(Response.serverError().entity("Service type must not be null").build());
     }
     try {
-      if (isBlank(host)) {
-        return serviceRegistry.count(serviceType, status);
+      if (isNotBlank(host) && isNotBlank(operation)) {
+        return serviceRegistry.count(serviceType, host, operation, status);
+      } else if (isNotBlank(host)) {
+        return serviceRegistry.countByHost(serviceType, host, status);
+      } else if (isNotBlank(operation)) {
+        return serviceRegistry.countByOperation(serviceType, operation, status);
       } else {
-        return serviceRegistry.count(serviceType, status, host);
+        return serviceRegistry.count(serviceType, status);
       }
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
+  }
+
+  @GET
+  @Path("/maxconcurrentjobs")
+  @Produces(MediaType.TEXT_PLAIN)
+  public Response getMaximumConcurrentWorkflows() {
+    try {
+      Integer count = serviceRegistry.getMaxConcurrentJobs();
+      return Response.ok(count).build();
     } catch (ServiceRegistryException e) {
       throw new WebApplicationException(e);
     }
@@ -427,6 +441,7 @@ public class ServiceRegistryEndpoint {
     countEndpoint.addOptionalParam(new Param("status", Type.STRING, "FINISHED",
             "The job status: QUEUED, RUNNING, FINISHED, or FAILED"));
     countEndpoint.addOptionalParam(new Param("host", Type.STRING, serverUrl, "The host's base URL for this service"));
+    countEndpoint.addOptionalParam(new Param("operation", Type.STRING, null, "The operation name"));
     countEndpoint.addFormat(new Format("plain", null, null));
     countEndpoint.addStatus(org.opencastproject.util.doc.Status
             .ok("The number of jobs matching the request criteria has been returned in the http body."));
@@ -462,6 +477,8 @@ public class ServiceRegistryEndpoint {
             "Immediately start the job or simply queue it?"));
 
     createJobEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Returns the new job."));
+    createJobEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .badRequest("If any of the required parameters are missing."));
     createJobEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, createJobEndpoint);
 
