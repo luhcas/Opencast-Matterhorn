@@ -469,7 +469,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       in = response.getEntity().getContent();
       DublinCoreCatalog dc = dublinCoreService.load(in);
       try {
-      seriesService.addOrUpdate(dc);
+        seriesService.updateSeries(dc);
       } catch (Exception e) {
         throw new IngestException(e);
       }

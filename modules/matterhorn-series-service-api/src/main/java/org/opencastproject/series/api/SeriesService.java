@@ -18,84 +18,53 @@ package org.opencastproject.series.api;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.util.NotFoundException;
 
-import java.util.List;
-
 /**
- * FIXME -- Add javadocs
+ * Series service API for creating, removing and searching over series.
+ * 
  */
 public interface SeriesService {
 
   /**
-   * Adds a new Series
+   * Adds or updates series
    * 
-   * @param s
-   *          The series that should be stored
-   * @throws IllegalArgumentException
-   *           if a series already exists with this identifier
+   * @param dc
+   *          {@link DublinCoreCatalog} representing series
+   * @throws SeriesException
+   *           if adding or updating fails
    */
-  void addSeries(Series s) throws IllegalArgumentException;
+  void updateSeries(DublinCoreCatalog dc) throws SeriesException;
 
   /**
-   * Removes the series with the given seriesID
+   * Removes series
    * 
    * @param seriesID
-   *          The ID of the series that should be removed
+   *          ID of the series to be removed
+   * @throws SeriesException
+   *           if deleting fails
    * @throws NotFoundException
-   *           if the series doesn't exist
+   *           if series with specified ID does not exist
    */
-  void removeSeries(String seriesID) throws NotFoundException, SeriesException;
+  void deleteSeries(String seriesID) throws SeriesException, NotFoundException;
 
   /**
-   * updates an series in the database
-   * 
-   * @param s
-   *          The series that should be updated. A series with the given ID has to be in the database already!
-   * @throws NotFoundException
-   *           if the series doesn't exist
-   */
-  void updateSeries(Series s) throws NotFoundException, SeriesException;
-
-  /**
-   * returns the series with the provided ID
+   * Returns Dublin core representing series by series ID.
    * 
    * @param seriesID
-   *          The ID of the requested series
-   * @return The requested series
+   *          series to be retrieved
+   * @return {@link DublinCoreCatalog} representing series
+   * @throws SeriesException
+   *           if retrieving fails
    */
-  Series getSeries(String seriesID) throws NotFoundException;
+  DublinCoreCatalog getSeries(String seriesID) throws SeriesException, NotFoundException;
 
   /**
-   * returns all series as a List
+   * Search over series
    * 
-   * @return A List with the series'
+   * @param query
+   *          {@link SeriesQuery} representing query
+   * @return {@link SeriesResult} object that stores result of a query
+   * @throws SeriesException
+   *           if query could not be performed
    */
-  List<Series> getAllSeries();
-
-  /**
-   * returns the Dublin Core metadata set for the series specified by the ID
-   * 
-   * @param seriesID
-   *          The ID of the demanded series
-   * @return A dublin Core Element
-   */
-  DublinCoreCatalog getDublinCore(String seriesID) throws NotFoundException;
-
-  /**
-   * Adds or updates an existing series based on a dublin core catalog.
-   * 
-   * @param dcCatalog
-   *          The dublin core metadata catalog
-   * @return The updated series
-   */
-  Series addOrUpdate(DublinCoreCatalog dcCatalog) throws SeriesException;
-
-  /**
-   * Searches for all series' that fit into a certain pattern
-   * 
-   * @param pattern
-   *          a part the value of a metadata field
-   * @return a List of all series that match that pattern
-   */
-  List<Series> searchSeries(String pattern) throws NotFoundException;
-  
+  SeriesResult getSeries(SeriesQuery query) throws SeriesException;
 }

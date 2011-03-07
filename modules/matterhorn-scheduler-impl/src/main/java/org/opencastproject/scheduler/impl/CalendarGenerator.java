@@ -15,8 +15,9 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.scheduler.api.Event;
-import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
 
@@ -202,8 +203,8 @@ public class CalendarGenerator {
     }
 
     try {
-      Series series = seriesService.getSeries(seriesID);
-      Document doc = (series.getDublinCore()).toXml();
+      DublinCoreCatalog seriesDC = seriesService.getSeries(seriesID);
+      Document doc = seriesDC.toXml();
 
       Source source = new DOMSource(doc);
       StringWriter stringWriter = new StringWriter();
@@ -221,6 +222,8 @@ public class CalendarGenerator {
       logger.error("Could not open DublinCoreCatalog for Series to parse it: {}", e.getMessage());
     } catch (TransformerException e) {
       logger.error("Could not transform DublinCoreCatalog for Series: {}", e.getMessage());
+    } catch (SeriesException e) {
+      logger.error("Error loading DublinCoreCatalog for Series: {}", e.getMessage());
     }
     return null;
   }

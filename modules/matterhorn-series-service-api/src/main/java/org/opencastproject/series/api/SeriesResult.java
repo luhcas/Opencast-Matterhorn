@@ -15,50 +15,53 @@
  */
 package org.opencastproject.series.api;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
- * Exception thrown in Series Service
- * 
+ * API for series result. Stores results, search time and number of requested items and offset.
  */
-public class SeriesException extends Exception {
+@XmlJavaTypeAdapter(SeriesResultImpl.Adapter.class)
+public interface SeriesResult {
 
   /**
-   * UUID of exception
-   */
-  private static final long serialVersionUID = -4435449067684730731L;
-
-  /**
-   * Used to create exception without parameters.
-   */
-  public SeriesException() {
-  }
-
-  /**
-   * Used to create exception with exception message.
+   * Returns size of the result.
    * 
-   * @param message
-   *          exception message
+   * @return result size
    */
-  public SeriesException(String message) {
-    super(message);
-  }
+  long getSize();
 
   /**
-   * Used to create exception with a cause.
+   * Returns number off items corresponding query.
    * 
-   * @param cause
+   * @return number of items
    */
-  public SeriesException(Throwable cause) {
-    super(cause);
-  }
+  long getNumberOfItems();
 
   /**
-   * Used to create exception with a message and a cause
+   * Returns search time in milliseconds.
    * 
-   * @param message
-   * @param cause
+   * @return search time
    */
-  public SeriesException(String message, Throwable cause) {
-    super(message, cause);
-  }
+  long getSearchTime();
 
+  /**
+   * Returns result offset
+   * 
+   * @return start page
+   */
+  long getStartPage();
+
+  /**
+   * Returns page size
+   * 
+   * @return page size
+   */
+  long getPageSize();
+
+  /**
+   * Returns resulting items.
+   * 
+   * @return items
+   */
+  SeriesResultItem[] getItems();
 }

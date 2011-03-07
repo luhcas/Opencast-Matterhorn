@@ -13,51 +13,50 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.series.api;
+package org.opencastproject.series.impl;
 
 /**
- * Exception thrown in Series Service
+ * Presents exception that occurs while storing/retrieving series from permanent storage or from index.
  * 
  */
-public class SeriesException extends Exception {
+public class SeriesServiceDatabaseException extends Exception {
 
   /**
-   * UUID of exception
+   * UUID
    */
-  private static final long serialVersionUID = -4435449067684730731L;
+  private static final long serialVersionUID = 3686276964199249490L;
 
   /**
-   * Used to create exception without parameters.
+   * Create exception.
    */
-  public SeriesException() {
+  public SeriesServiceDatabaseException() {
   }
 
   /**
-   * Used to create exception with exception message.
+   * Create exception with a message.
    * 
    * @param message
-   *          exception message
    */
-  public SeriesException(String message) {
+  public SeriesServiceDatabaseException(String message) {
     super(message);
   }
 
   /**
-   * Used to create exception with a cause.
+   * Create exception with a cause.
    * 
    * @param cause
    */
-  public SeriesException(Throwable cause) {
+  public SeriesServiceDatabaseException(Throwable cause) {
     super(cause);
   }
 
   /**
-   * Used to create exception with a message and a cause
+   * Create exception with a message and a cause.
    * 
    * @param message
    * @param cause
    */
-  public SeriesException(String message, Throwable cause) {
+  public SeriesServiceDatabaseException(String message, Throwable cause) {
     super(message, cause);
   }
 

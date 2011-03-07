@@ -29,7 +29,12 @@
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-dublincore</artifactId>
       <version>${project.version}</version>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-solr</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -145,12 +150,15 @@
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package>
+              org.opencastproject.series.impl.solr;version=${project.version},
+              org.opencastproject.series.impl.persistence;version=${project.version},
               org.opencastproject.series.impl;version=${project.version},
               org.opencastproject.series.endpoint;version=${project.version}
             </Export-Package>
             <Import-Package>
               org.opencastproject.kernel.http;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
+              org.opencastproject.solr;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
@@ -162,10 +170,12 @@
               json_simple;inline=true
             </Embed-Dependency>
             <Service-Component>
+              OSGI-INF/series-service-index.xml,
+              OSGI-INF/series-service-persistence.xml,
               OSGI-INF/series-service.xml,
               OSGI-INF/series-service-rest.xml
             </Service-Component>
-            <JPA-PersistenceUnits>org.opencastproject.series.impl</JPA-PersistenceUnits>            
+            <JPA-PersistenceUnits>org.opencastproject.series.impl.persistence</JPA-PersistenceUnits>            
           </instructions>
         </configuration>
       </plugin>

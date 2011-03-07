@@ -17,16 +17,19 @@ package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.endpoint.SchedulerRestService;
-import org.opencastproject.series.api.Series;
-import org.opencastproject.series.api.SeriesMetadata;
-import org.opencastproject.series.impl.SeriesImpl;
-import org.opencastproject.series.impl.SeriesMetadataImpl;
 import org.opencastproject.series.impl.SeriesServiceImpl;
+import org.opencastproject.series.impl.persistence.SeriesServiceDatabaseImpl;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -68,7 +71,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -136,10 +138,17 @@ public class SchedulerServiceImplTest {
     service.setPersistenceProperties(props);
 
     SeriesServiceImpl seriesService = new SeriesServiceImpl();
-    seriesService.setPersistenceProvider(new PersistenceProvider());
-    seriesService.setPersistenceProperties(props);
+    SeriesServiceDatabaseImpl seriesDb = new SeriesServiceDatabaseImpl();
+    seriesDb.setDublinCoreService(new DublinCoreCatalogService());
+    seriesDb.setPersistenceProperties(props);
+    seriesDb.setPersistenceProvider(new PersistenceProvider());
+    seriesDb.activate(null);
+    seriesService.setPersistence(seriesDb);
     seriesService.activate(null);
+
     service.setSeriesService(seriesService);
+    service.activate(null);
+
 
     WorkflowInstance workflowInstance = getSampleWorkflowInstance();
 
@@ -169,37 +178,33 @@ public class SchedulerServiceImplTest {
     service.setWorkflowService(workflowService);
 
     // Add a series
-    Series series = new SeriesImpl();
-    LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
-    metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));
-    metadata.add(new SeriesMetadataImpl(series, "license", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "valid", "" + System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl(series, "publisher", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "creator", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "subject", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "temporal", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "audience", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "spatial", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "rightsHolder", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "extent", "3600000"));
-    metadata.add(new SeriesMetadataImpl(series, "created", "" + System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl(series, "language", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "isReplacedBy", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "type", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "available", "" + System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl(series, "modified", "" + System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl(series, "replaces", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "contributor", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "issued", "" + System.currentTimeMillis()));
-    series.setMetadata(metadata);
-    logger.info("Adding new series...");
-    seriesService.addSeries(series);
+    DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
+    seriesID = Long.toString(System.currentTimeMillis());
+    dc.set(DublinCoreCatalogImpl.PROPERTY_IDENTIFIER, seriesID);
+    dc.set(DublinCoreCatalogImpl.PROPERTY_TITLE, "demo title");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_LICENSE, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_PUBLISHER, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_CREATOR, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_SUBJECT, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_TEMPORAL, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_SPATIAL, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_RIGHTS_HOLDER, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_EXTENT, "3600000");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(new Date(), Precision.Minute));
+    dc.set(DublinCoreCatalogImpl.PROPERTY_LANGUAGE, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_IS_REPLACED_BY, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_TYPE, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_AVAILABLE, EncodingSchemeUtils.encodeDate(new Date(), Precision.Minute));
+    dc.set(DublinCoreCatalogImpl.PROPERTY_REPLACES, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_CONTRIBUTOR, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_DESCRIPTION, "demo");
+    
+//    metadata.add(new SeriesMetadataImpl(series, "valid", "" + System.currentTimeMillis()));
+//    metadata.add(new SeriesMetadataImpl(series, "audience", "demo"));
+//    metadata.add(new SeriesMetadataImpl(series, "modified", "" + System.currentTimeMillis()));
+//    metadata.add(new SeriesMetadataImpl(series, "issued", "" + System.currentTimeMillis()));
 
-    // now that the series has been persisted, grab its ID
-    seriesID = series.getSeriesId();
-
-    service.activate(null);
+    seriesService.updateSeries(dc);
 
     try {
       ((SchedulerServiceImpl) service).setDublinCoreGenerator(new DublinCoreGenerator(new FileInputStream(resourcesRoot
@@ -261,9 +266,10 @@ public class SchedulerServiceImplTest {
   }
 
   @After
-  public void teardown() {
+  public void teardown() throws Exception {
     service.destroy();
     service = null;
+    FileUtils.forceDelete(new File(PathSupport.concat(System.getProperty("java.io.tmpdir"), "series")));
   }
 
   protected WorkflowInstance getSampleWorkflowInstance() throws Exception {
