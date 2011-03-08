@@ -126,7 +126,7 @@ public class SeriesRestService {
 
   @GET
   @Produces({ "text/xml" })
-  @Path("{seriesID}.xml")
+  @Path("{seriesID: .+}.xml")
   public Response getSeriesXml(@PathParam("seriesID") String seriesID) {
     logger.debug("Series Lookup: {}", seriesID);
     try {
@@ -185,7 +185,7 @@ public class SeriesRestService {
   }
 
   @DELETE
-  @Path("/{seriesID}")
+  @Path("/{seriesID: .+}/remove")
   public Response deleteSeries(@PathParam("seriesID") String seriesID) {
     try {
       this.seriesService.deleteSeries(seriesID);
@@ -210,7 +210,7 @@ public class SeriesRestService {
           @QueryParam("license") String license, @QueryParam("subject") String subject,
           @QueryParam("abstract") String seriesAbstract, @QueryParam("description") String description,
           @QueryParam("sort") String sort, @QueryParam("startPage") int startPage, @QueryParam("count") int count) {
-  // CHECKSTYLE:ON  
+    // CHECKSTYLE:ON
     if ((count < 1) || (count > MAX_LIMIT)) {
       count = DEFAULT_LIMIT;
     }
@@ -304,7 +304,7 @@ public class SeriesRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, updateEndpoint);
 
     // remove
-    RestEndpoint removeEndpoint = new RestEndpoint("deleteSeries", RestEndpoint.Method.DELETE, "/{seriesId}",
+    RestEndpoint removeEndpoint = new RestEndpoint("deleteSeries", RestEndpoint.Method.DELETE, "/{seriesId}/remove",
             "Removes the specified series from the database. Returns true if the series could be removed.");
     removeEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Series has been successfully deleted."));
     removeEndpoint.addStatus(org.opencastproject.util.doc.Status
