@@ -1,7 +1,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:sec="http://www.springframework.org/schema/security"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:osgi="http://www.springframework.org/schema/osgi"
   xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/osgi  
+       http://www.springframework.org/schema/osgi/spring-osgi.xsd
        http://www.springframework.org/schema/security
        http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
@@ -60,8 +62,8 @@
     <sec:remember-me key="matterhorn" user-service-ref="userDetailsService" />
 
     <!-- Set the request cache -->
-    <sec:request-cache ref="requestCache"/>
-    
+    <sec:request-cache ref="requestCache" />
+
     <!-- If any URLs are to be exposed to anonymous users, the "sec:anonymous" filter must be present -->
     <sec:anonymous />
 
@@ -69,12 +71,10 @@
     <sec:logout />
   </sec:http>
 
-  <!-- Replace this with a user details service for your institution -->
-  <sec:user-service id="userDetailsService">
-    <sec:user name="admin" password="opencast" authorities="ROLE_ADMIN,ROLE_USER" />
-    <sec:user name="matterhorn_system_account" password="CHANGE_ME" authorities="ROLE_ADMIN,ROLE_USER" />
-  </sec:user-service>
-
+  <!-- Obtain a user details service from the OSGI service registry -->
+  <osgi:reference id="userDetailsService" cardinality="1..1"
+    interface="org.springframework.security.core.userdetails.UserDetailsService" />
+    
   <sec:authentication-manager>
     <sec:authentication-provider user-service-ref="oAuthConsumerDetailsService" />
   </sec:authentication-manager>
@@ -108,7 +108,7 @@
 
   <!-- Do not use a request cache -->
   <bean id="requestCache" class="org.springframework.security.web.savedrequest.NullRequestCache" />
-  
+
   <!-- OAuth for supporting the LTI 'basic' profile -->
   <bean name="oAuthConsumerDetailsService" class="org.opencastproject.security.OAuthSingleConsumerDetailsService">
     <constructor-arg index="0" ref="userDetailsService" />

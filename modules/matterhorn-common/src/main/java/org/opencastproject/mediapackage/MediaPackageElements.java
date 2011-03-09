@@ -103,6 +103,12 @@ public interface MediaPackageElements {
   MediaPackageElementFlavor PRESENTATION_FEED_PREVIEW = new MediaPackageElementFlavor("presentation", "feed+preview",
           "Presentation feed preview image");
 
+  // Security flavors
+
+  /** XACML Policy flavor */
+  MediaPackageElementFlavor XACML_POLICY = new MediaPackageElementFlavor("security", "xacml",
+          "Security policy for the mediapackage");
+  
   // Other flavors
 
   /** A flavor for DFXP caption files */

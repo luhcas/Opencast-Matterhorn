@@ -15,8 +15,14 @@
  */
 package org.opencastproject.security.api;
 
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageException;
+
+import java.util.List;
+
 /**
- * Provides access to the current user's username and roles, if any.
+ * Provides access to the current user's username and roles, if any, and provides generation and interpretation of XACML
+ * policy documents.
  */
 public interface SecurityService {
 
@@ -37,4 +43,36 @@ public interface SecurityService {
    */
   String[] getRoles();
 
+  /**
+   * Determines whether the current user can take the specified action on the mediapackage.
+   * 
+   * @param mediapackage
+   *          the mediapackage
+   * @param action
+   *          the action (e.g. read, modify, delete)
+   * @return whether the current user has the correct privileges to take this action
+   */
+  boolean hasPermission(MediaPackage mediapackage, String action);
+
+  /**
+   * Gets the permissions associated with this mediapackage, as specified by its XACML attachment.
+   * 
+   * @param mediapackage
+   *          the mediapackage
+   * @return the set of permissions and explicit denials
+   */
+  List<AccessControlEntry> getAccessControlList(MediaPackage mediapackage);
+
+  /**
+   * Attaches the provided policies to a mediapackage as a XACML attachment.
+   * 
+   * @param mediapackage
+   *          the mediapackage
+   * @param accessControlList
+   *          the tuples of roles to actions
+   * @return the mediapackage with attached XACML policy
+   * @throws MediaPackageException
+   *           if the policy can not be attached to the mediapackage
+   */
+  MediaPackage setAccessControl(MediaPackage mediapackage, List<AccessControlEntry> accessControlList) throws MediaPackageException;
 }
