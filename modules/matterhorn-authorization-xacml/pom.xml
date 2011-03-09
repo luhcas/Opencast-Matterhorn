@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>matterhorn-caption-impl</artifactId>
-  <name>matterhorn-caption-impl</name>
+  <artifactId>matterhorn-authorization-xacml</artifactId>
+  <name>matterhorn-authorization-xacml</name>
   <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -14,61 +14,89 @@
     <matterhorn.basedir>${project.basedir}/../..</matterhorn.basedir>
     <checkstyle.skip>false</checkstyle.skip>
   </properties>
+
   <dependencies>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-caption-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+  
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
       <version>${project.version}</version>
     </dependency>
+  
+    <dependency>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jboss-xacml</artifactId>
+      <version>2.0.5.final</version>
+      <exclusions>
+        <exclusion>
+          <groupId>apache-xerces</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.apache.cxf</groupId>
+      <artifactId>cxf-bundle-jaxrs</artifactId>
+    </dependency>
+
+    <!-- Logging -->
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
+    
+    <!-- Testing -->
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency>
-
-    <!-- testing -->
+    
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-
+    
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>2.5.1</version>
+      <scope>test</scope>
+    </dependency>
+        
   </dependencies>
+  
   <build>
     <plugins>
       <plugin>
@@ -78,28 +106,26 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Embed-Dependency>
+              jboss-xacml;inline=true
+            </Embed-Dependency>
+            <Private-Package>
+              org.jboss.security.xacml.core,
+              org.jboss.security.xacml.core.model.policy
+            </Private-Package>
             <Import-Package>
-              org.opencastproject.caption.api;version=${project.version},
-              javax.xml.parsers;version=0,
-              javax.xml.transform;version=0,
-              org.w3c.dom;version=0,
-              org.xml.sax;version=0,
-              org.xml.sax.helpers;version=0,
+              org.slf4j,
+              javax.xml.namespace;version=0,
+              org.opencastproject.security.api;version=${project.version},
+              org.opencastproject.workspace.api;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.caption.impl;version=${project.version},
-              org.opencastproject.caption.endpoint;version=${project.version},
-              org.opencastproject.caption.converters;version=${project.version}
+              org.opencastproject.authorization.xacml;version=${project.version},
             </Export-Package>
-            <Private-Package>
-              org.opencastproject.caption.util
-						</Private-Package>
             <Service-Component>
-              OSGI-INF/caption-service.xml,
-              OSGI-INF/converters/dfxp-caption-converter.xml,
-              OSGI-INF/converters/subrip-caption-converter.xml
+              OSGI-INF/authorization-service.xml
             </Service-Component>
           </instructions>
         </configuration>

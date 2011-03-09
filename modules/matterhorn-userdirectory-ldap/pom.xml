@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>matterhorn-caption-impl</artifactId>
-  <name>matterhorn-caption-impl</name>
+  <artifactId>matterhorn-userdirectory-ldap</artifactId>
+  <name>matterhorn-userdirectory-ldap</name>
   <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -17,23 +17,29 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-caption-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security.core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-workspace-api</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security.web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>org.springframework.osgi.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>org.springframework.jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security.ldap</artifactId>
+      <version>3.0.2.RELEASE</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -47,27 +53,24 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency>
 
-    <!-- testing -->
+    <!-- Testing -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+      <version>2.5.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -79,27 +82,13 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>
-              org.opencastproject.caption.api;version=${project.version},
-              javax.xml.parsers;version=0,
-              javax.xml.transform;version=0,
-              org.w3c.dom;version=0,
-              org.xml.sax;version=0,
-              org.xml.sax.helpers;version=0,
-              *;resolution:=optional
-            </Import-Package>
+            <Embed-Dependency>org.springframework.security.ldap;inline=true</Embed-Dependency>
+            <Private-Package>org.springframework.security.ldap</Private-Package>
             <Export-Package>
-              org.opencastproject.caption.impl;version=${project.version},
-              org.opencastproject.caption.endpoint;version=${project.version},
-              org.opencastproject.caption.converters;version=${project.version}
+              org.opencastproject.userdirectory.ldap;version=${project.version},
             </Export-Package>
-            <Private-Package>
-              org.opencastproject.caption.util
-						</Private-Package>
             <Service-Component>
-              OSGI-INF/caption-service.xml,
-              OSGI-INF/converters/dfxp-caption-converter.xml,
-              OSGI-INF/converters/subrip-caption-converter.xml
+              OSGI-INF/userdirectory-service.xml
             </Service-Component>
           </instructions>
         </configuration>

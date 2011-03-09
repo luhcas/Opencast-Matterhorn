@@ -18,27 +18,12 @@
   <dependencies>
   
     <dependency>
-        <groupId>org.opencastproject</groupId>
-        <artifactId>matterhorn-common</artifactId>
-        <version>${project.version}</version>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-common</artifactId>
+      <version>${project.version}</version>
     </dependency>
   
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-    </dependency>
-
-    <dependency>
+      <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -57,7 +42,84 @@
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+    </dependency>
     
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security.core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security.web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>org.springframework.security.openid</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security.oauth</groupId>
+      <artifactId>spring-security-oauth</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-cas-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jasig.cas</groupId>
+      <artifactId>com.springsource.org.jasig.cas.client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opensaml</groupId>
+      <artifactId>com.springsource.org.opensaml</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.openid4java</groupId>
+      <artifactId>com.springsource.org.openid4java</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.osgi</groupId>
+      <artifactId>org.springframework.osgi.core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.nekohtml</groupId>
+      <artifactId>com.springsource.org.cyberneko.html</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jboss.security</groupId>
+      <artifactId>jboss-xacml</artifactId>
+      <version>2.0.5.final</version>
+      <exclusions>
+        <exclusion>
+          <groupId>apache-xerces</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -109,6 +171,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Embed-Dependency>
+              spring-security-oauth;inline=true,
+              jboss-xacml;inline=true
+            </Embed-Dependency>
+            <Private-Package>
+              org.jboss.security.xacml.core,
+              org.jboss.security.xacml.core.model.policy
+            </Private-Package>
             <Import-Package>
               javax.activation,
               javax.servlet;version=2.5,
@@ -160,21 +230,66 @@
               org.osgi.service.http,
               org.osgi.util.tracker,
               org.slf4j,
+              javax.management,
+              javax.xml.namespace;version=0,
+              org.jasig.cas.client.authentication;resolution:=optional,
+              org.jasig.cas.client.proxy;resolution:=optional,
+              org.jasig.cas.client.session;resolution:=optional,
+              org.jasig.cas.client.util;resolution:=optional,
+              org.jasig.cas.client.validation;resolution:=optional,
+              org.springframework.beans,
+              org.springframework.beans.factory,
+              org.springframework.beans.factory.config,
+              org.springframework.beans.factory.support,
+              org.springframework.beans.factory.xml,
+              org.springframework.context,
+              org.springframework.context.annotation,
+              org.springframework.dao,
+              org.springframework.security,
+              org.springframework.security.access,
+              org.springframework.security.access.event,
+              org.springframework.security.authentication,
+              org.springframework.security.authentication.event,
+              org.springframework.security.cas;resolution:=optional,
+              org.springframework.security.cas.authentication;resolution:=optional,
+              org.springframework.security.cas.web;resolution:=optional,
+              org.springframework.security.config,
+              org.springframework.security.core,
+              org.springframework.security.core.userdetails,
+              org.springframework.security.core.userdetails.cache,
+              org.springframework.security.core.userdetails.memory,
+              org.springframework.security.openid;resolution:=optional,
+              org.springframework.security.web,
+              org.springframework.security.web.authentication,
+              org.springframework.security.web.authentication.www,
+              org.springframework.util,              
               org.opencastproject.job.api;version=${project.version},
               org.opencastproject.rest;version=${project.version},
               org.opencastproject.serviceregistry.api;version=${project.version},
               org.opencastproject.security.api;version=${project.version},
               org.opencastproject.util;version=${project.version},
+              *;resolution:=optional
             </Import-Package>
             <Export-Package>
               org.opencastproject.kernel.http;version=${project.version},
-              org.opencastproject.kernel.rest;version=${project.version}
+              org.opencastproject.kernel.pingback;version=${project.version},
+              org.opencastproject.kernel.rest;version=${project.version},
+              org.opencastproject.kernel.security;version=${project.version},
+              org.springframework.security.oauth;version=1.0.0.M1,
+              org.springframework.security.oauth.common;version=1.0.0.M1,
+              org.springframework.security.oauth.config;version=1.0.0.M1,
+              org.springframework.security.oauth.consumer;version=1.0.0.M1,
+              org.springframework.security.oauth.provider;version=1.0.0.M1,
+              org.springframework.security.oauth.provider.token;version=1.0.0.M1              
             </Export-Package>
             <Service-Component>
-              OSGI-INF/httpContext.xml,
+              OSGI-INF/http-client.xml,
+              OSGI-INF/http-context.xml,
               OSGI-INF/jsonp.xml,
               OSGI-INF/pingback.xml,
-              OSGI-INF/rest.xml
+              OSGI-INF/rest.xml,
+              OSGI-INF/security-service.xml,
+              OSGI-INF/security-config-scanner.xml
             </Service-Component>
           </instructions>
         </configuration>

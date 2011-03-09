@@ -13,28 +13,12 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.security.api;
+package org.opencastproject.kernel.security;
 
 /**
- * Provides access to the current user's username and roles, if any.
+ * An MxBean that exposes the number of open http connections to a JXM agent
  */
-public interface SecurityService {
-
-  /** The anonymous role array */
-  String[] ANONYMOUS = new String[] { "ROLE_ANONYMOUS" };
-
-  /**
-   * Gets the current user, or <code>null</code> if the user has not been authenticated.
-   * 
-   * @return the user id
-   */
-  String getUserId();
-
-  /**
-   * Gets the current user's roles. For anonymous users, this will return {@link Anonymous}.
-   * 
-   * @return the user's roles
-   */
-  String[] getRoles();
-
+public interface HttpConnectionMXBean {
+  /** Gets the number of open http connections */
+  int getOpenConnections();
 }

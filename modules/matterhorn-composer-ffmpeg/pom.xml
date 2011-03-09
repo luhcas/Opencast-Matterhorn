@@ -125,6 +125,9 @@
               org.osgi.service.component.*,
               org.apache.commons.httpclient.*,
               org.opencastproject.mediapackage;version=${project.version},
+              javax.xml.parsers;version=0,
+              org.xml.sax;version=0,
+              org.w3c.dom;version=0,
               *;resolution:=optional
             </Import-Package>
             <Private-Package> org.apache.xmlrpc.* </Private-Package>
