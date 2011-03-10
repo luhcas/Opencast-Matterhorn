@@ -18,6 +18,7 @@ package org.opencastproject.annotation.impl;
 import org.opencastproject.annotation.api.Annotation;
 import org.opencastproject.annotation.api.AnnotationList;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -55,7 +56,7 @@ public class AnnotationServiceJpaImplTest {
     
     // Set up a mock security service that always returns "me" as the current user
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUserId()).andReturn("me").anyTimes();
+    EasyMock.expect(securityService.getUser()).andReturn(new User("me")).anyTimes();
     EasyMock.replay(securityService);
 
     // Set up the annotation service
@@ -93,7 +94,7 @@ public class AnnotationServiceJpaImplTest {
     Assert.assertEquals(a.getMediapackageId(), a1FromDb.getMediapackageId());
     Assert.assertEquals(a.getSessionId(), a1FromDb.getSessionId());
     Assert.assertEquals(a.getUserId(), a1FromDb.getUserId());
-    Assert.assertEquals(a.getUserId(), annotationService.securityService.getUserId());
+    Assert.assertEquals(a.getUserId(), annotationService.securityService.getUser().getUserName());
   }
 
   @Test

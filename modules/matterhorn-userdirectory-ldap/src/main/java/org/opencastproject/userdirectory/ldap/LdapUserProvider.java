@@ -15,32 +15,27 @@
  */
 package org.opencastproject.userdirectory.ldap;
 
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserProvider;
+
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
-import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 
+import java.util.Collection;
 import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * LDAP implementation of the spring UserDetailsService, taking configuration information from the component context.
  */
-public class LdapUserDetailService implements UserDetailsService, ManagedService {
+public class LdapUserProvider implements UserProvider, ManagedService {
 
   /** The key to look up the ldap search filter in the service configuration properties */
   private static final String SEARCH_FILTER_KEY = "org.opencastproject.userdirectory.ldap.searchfilter";
@@ -58,42 +53,31 @@ public class LdapUserDetailService implements UserDetailsService, ManagedService
   protected LdapUserDetailsService delegate = null;
 
   /**
-   * A collection of accounts internal to Matterhorn.
-   */
-  protected Map<String, UserDetails> internalAccounts = null;
-  
-  /**
-   * Callback to activate the component.
-   * 
-   * @param cc
-   *          the declarative services component context
-   */
-  protected void activate(ComponentContext cc) {
-    internalAccounts = new HashMap<String, UserDetails>();
-    String digestUsername = cc.getBundleContext().getProperty("org.opencastproject.security.digest.user");
-    String digestUserPass = cc.getBundleContext().getProperty("org.opencastproject.security.digest.pass");
-    Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-    authorities.add(new GrantedAuthorityImpl("ROLE_ADMIN"));
-    User user = new User(digestUsername, digestUserPass, true, true, true, true, authorities);
-    internalAccounts.put(digestUsername, user);
-  }
-
-  /**
    * {@inheritDoc}
    * 
-   * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
+   * @see org.opencastproject.security.api.UserProvider#loadUser(java.lang.String)
    */
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
-    if(internalAccounts != null) {
-      if(internalAccounts.containsKey(username)) {
-        return internalAccounts.get(username);
-      }
-    }
+  public User loadUser(String userName) {
     if (delegate == null) {
       throw new IllegalStateException("The LDAP user detail service has not yet been configured");
     }
-    return delegate.loadUserByUsername(username);
+    UserDetails userDetails = null;
+    try {
+      userDetails = delegate.loadUserByUsername(userName);
+    } catch (UsernameNotFoundException e) {
+      return null;
+    }
+    Collection<GrantedAuthority> authorities = userDetails.getAuthorities();
+    String[] roles = null;
+    if (authorities != null) {
+      int i = 0;
+      roles = new String[authorities.size()];
+      for (GrantedAuthority authority : authorities) {
+        roles[i++] = authority.getAuthority();
+      }
+    }
+    return new User(userDetails.getUsername(), roles);
   }
 
   /**
@@ -124,4 +108,13 @@ public class LdapUserDetailService implements UserDetailsService, ManagedService
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return getClass().getName();
+  }
 }

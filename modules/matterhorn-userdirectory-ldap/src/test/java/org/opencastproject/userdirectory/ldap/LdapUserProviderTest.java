@@ -15,20 +15,21 @@
  */
 package org.opencastproject.userdirectory.ldap;
 
+import org.opencastproject.security.api.User;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
-import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 
-public class LdapUserDetailServiceTest {
+public class LdapUserProviderTest {
   
-  protected LdapUserDetailService service = null;
+  protected LdapUserProvider service = null;
   
   @Before
   public void setup() throws Exception {
@@ -38,17 +39,17 @@ public class LdapUserDetailServiceTest {
     props.put("org.opencastproject.userdirectory.ldap.url", "ldap://ldap.berkeley.edu");
     props.put("org.opencastproject.userdirectory.ldap.roleattributes", "berkeleyEduAffiliations,departmentNumber");
 
-    service = new LdapUserDetailService();
+    service = new LdapUserProvider();
     service.updated(props);
   }
   
   @Ignore("Ignore this test by default, since it requires internet connectivity, and the user's details may change.")
   @Test
   public void testLookup() throws Exception {
-    UserDetails user = service.loadUserByUsername("231693");
+    User user = service.loadUser("231693");
     Assert.assertNotNull(user);
-    Assert.assertTrue(user.getAuthorities().contains(new GrantedAuthorityImpl("ROLE_URSET")));
-    Assert.assertTrue(user.getAuthorities().contains(new GrantedAuthorityImpl("ROLE_EMPLOYEE-TYPE-STAFF")));
+    Assert.assertTrue(Arrays.asList(user.getRoles()).contains("ROLE_URSET"));
+    Assert.assertTrue(Arrays.asList(user.getRoles()).contains("ROLE_EMPLOYEE-TYPE-STAFF"));
   }
   
   /* At the time this test was written, the LDAP attributes for this user included the following:

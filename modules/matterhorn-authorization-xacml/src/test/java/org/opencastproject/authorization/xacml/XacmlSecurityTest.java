@@ -15,10 +15,13 @@
  */
 package org.opencastproject.authorization.xacml;
 
+import static org.opencastproject.security.api.User.ANONYMOUS_USER;
+
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -64,16 +67,10 @@ public class XacmlSecurityTest {
   @Before
   public void setup() throws Exception {
     workspace = new WorkspaceStub();
-    
     securityService = new SecurityService() {
       @Override
-      public String getUserId() {
-        return currentUser;
-      }
-      
-      @Override
-      public String[] getRoles() {
-        return currentRoles.toArray(new String[currentRoles.size()]);
+      public User getUser() {
+        return new User(currentUser, currentRoles);
       }
     };
     authzService = new XACMLAuthorizationService();
@@ -99,8 +96,8 @@ public class XacmlSecurityTest {
     acl.add(new AccessControlEntry("student", "read", true));
     acl.add(new AccessControlEntry("student", "comment", true));
 
-    acl.add(new AccessControlEntry(SecurityService.ANONYMOUS[0], "read", true));
-    acl.add(new AccessControlEntry(SecurityService.ANONYMOUS[0], "comment", false));
+    acl.add(new AccessControlEntry(ANONYMOUS_USER.getRoles()[0], "read", true));
+    acl.add(new AccessControlEntry(ANONYMOUS_USER.getRoles()[0], "comment", false));
 
     String xacml = XACMLUtils.getXacml(mediapackage, acl);
     logger.debug("XACML contents: {}", xacml);
@@ -127,7 +124,7 @@ public class XacmlSecurityTest {
     Assert.assertTrue(authzService.hasPermission(mediapackage, "comment"));
 
     currentRoles.clear();
-    currentRoles.add(SecurityService.ANONYMOUS[0]);
+    currentRoles.add(ANONYMOUS_USER.getRoles()[0]);
     Assert.assertFalse(authzService.hasPermission(mediapackage, "delete"));
     Assert.assertTrue(authzService.hasPermission(mediapackage, "read"));
     Assert.assertFalse(authzService.hasPermission(mediapackage, "comment"));

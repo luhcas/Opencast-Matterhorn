@@ -17,6 +17,7 @@ package org.opencastproject.runtimeinfo;
 
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -58,8 +59,8 @@ public class RuntimeInfo {
   private static final Logger logger = LoggerFactory.getLogger(RuntimeInfo.class);
 
   /** The rest publisher looks for any non-servlet with the 'opencast.service.path' property */
-  public static final String SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))(" + RestConstants.SERVICE_PATH_PROPERTY
-          + "=*))";
+  public static final String SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))("
+          + RestConstants.SERVICE_PATH_PROPERTY + "=*))";
 
   private SecurityService securityService;
   private BundleContext bundleContext;
@@ -152,13 +153,13 @@ public class RuntimeInfo {
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings("unchecked")
   public String getMyInfo() {
-    String username = securityService.getUserId();
+    JSONObject json = new JSONObject();
     JSONArray roles = new JSONArray();
-    for (String role : securityService.getRoles()) {
+    User user = securityService.getUser();
+    json.put("username", user.getUserName());
+    for (String role : user.getRoles()) {
       roles.add(role);
     }
-    JSONObject json = new JSONObject();
-    json.put("username", username);
     json.put("roles", roles);
     return json.toJSONString();
   }
@@ -182,7 +183,8 @@ public class RuntimeInfo {
       endpoint.put("description", description);
       endpoint.put("version", version);
       endpoint.put("docs", serverUrl + servletContextPath + "/docs"); // This is a Matterhorn convention
-      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&_type=xml"); // This triggers a CXF-specific handler
+      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&_type=xml"); // This triggers a CXF-specific
+                                                                                  // handler
       json.add(endpoint);
     }
     return json;

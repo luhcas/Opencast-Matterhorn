@@ -15,9 +15,6 @@
  */
 package org.opencastproject.userdirectory.jpa;
 
-import org.opencastproject.userdirectory.jpa.JpaUser;
-import org.opencastproject.userdirectory.jpa.JpaUserDetailService;
-
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import org.eclipse.persistence.jpa.PersistenceProvider;
@@ -25,19 +22,16 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class JpaUserTest {
+public class JpaUserProviderTest {
 
   private ComboPooledDataSource pooledDataSource = null;
-  private JpaUserDetailService userDetailService = null;
+  private JpaUserProvider provider = null;
 
   @Before
   public void setUp() throws Exception {
@@ -53,10 +47,10 @@ public class JpaUserTest {
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
 
-    userDetailService = new JpaUserDetailService();
-    userDetailService.setPersistenceProperties(props);
-    userDetailService.setPersistenceProvider(new PersistenceProvider());
-    userDetailService.activate(null);
+    provider = new JpaUserProvider();
+    provider.setPersistenceProperties(props);
+    provider.setPersistenceProvider(new PersistenceProvider());
+    provider.activate(null);
 
   }
 
@@ -67,16 +61,28 @@ public class JpaUserTest {
 
   @Test
   public void testLoadAndGetUser() throws Exception {
-    Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-    authorities.add(new GrantedAuthorityImpl("ROLE_ASTRO_101_SPRING_2011_STUDENT"));
-    JpaUser user = new JpaUser("user1", "pass1", true, true, true, true, authorities);
-    userDetailService.addUser(user);
-    Assert.assertNotNull(userDetailService.loadUserByUsername("user1"));
-    try {
-      userDetailService.loadUserByUsername("does not exist");
-      Assert.fail("Attempting to load 'does not exist' should throw an exception");
-    } catch (UsernameNotFoundException e) {
-      // expected
-    }
+    Set<String> authorities = new HashSet<String>();
+    authorities.add("ROLE_ASTRO_101_SPRING_2011_STUDENT");
+    JpaUser user = new JpaUser("user1", "pass1", authorities);
+    provider.addUser(user);
+    Assert.assertNotNull(provider.loadUser("user1"));
+    Assert.assertNull("Loading 'does not exist' should return null", provider.loadUser("does not exist"));
   }
+  
+  @Test
+  public void testRoles() throws Exception {
+    Set<String> authoritiesOne = new HashSet<String>();
+    authoritiesOne.add("ROLE_ONE");
+    JpaUser userOne = new JpaUser("user1", "pass1", authoritiesOne);
+    provider.addUser(userOne);
+
+    Set<String> authoritiesTwo = new HashSet<String>();
+    authoritiesTwo.add("ROLE_ONE");
+    authoritiesTwo.add("ROLE_TWO");
+    JpaUser userTwo = new JpaUser("user2", "pass2", authoritiesTwo);
+    provider.addUser(userTwo);
+
+    Assert.assertEquals("There should be two roles", 2, provider.getRoles().length);
+  }
+
 }

@@ -103,7 +103,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
     try {
       em = emf.createEntityManager();
       Query q = em.createNamedQuery("findTotal");
-      q.setParameter("userId", getCurrentUserName());
+      q.setParameter("userId", securityService.getUser().getUserName());
       return ((Long) q.getSingleResult()).intValue();
     } finally {
       em.close();
@@ -112,7 +112,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
 
   public Annotation addAnnotation(Annotation a) {
     // set the User ID on the annotation
-    a.setUserId(securityService.getUserId());
+    a.setUserId(securityService.getUser().getUserName());
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -155,7 +155,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
     try {
       em = emf.createEntityManager();
       Query q = em.createNamedQuery("findAnnotations");
-      q.setParameter("userId", getCurrentUserName());
+      q.setParameter("userId", securityService.getUser().getUserName());
       q.setFirstResult(offset);
       q.setMaxResults(limit);
       Collection<Annotation> annotations = q.getResultList();
@@ -179,7 +179,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
       result.setLimit(limit);
 
       Query q = em.createNamedQuery("findAnnotationsByTypeAndMediapackageId");
-      q.setParameter("userId", getCurrentUserName());
+      q.setParameter("userId", securityService.getUser().getUserName());
       q.setParameter("type", type);
       q.setParameter("mediapackageId", mediapackageId);
       q.setFirstResult(offset);
@@ -217,7 +217,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
       result.setLimit(limit);
 
       Query q = em.createNamedQuery("findAnnotationsByTypeAndIntervall");
-      q.setParameter("userId", getCurrentUserName());
+      q.setParameter("userId", securityService.getUser().getUserName());
       q.setParameter("type", type);
       q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
       q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
@@ -255,7 +255,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
       result.setLimit(limit);
 
       Query q = em.createNamedQuery("findAnnotationsByIntervall");
-      q.setParameter("userId", getCurrentUserName());
+      q.setParameter("userId", securityService.getUser().getUserName());
       q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
       q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
       q.setFirstResult(offset);
@@ -282,7 +282,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
       em = emf.createEntityManager();
       result.setTotal(getTotal(type, em));
       Query q = em.createNamedQuery("findAnnotationsByType");
-      q.setParameter("userId", getCurrentUserName());
+      q.setParameter("userId", securityService.getUser().getUserName());
       q.setParameter("type", type);
       q.setFirstResult(offset);
       q.setMaxResults(limit);
@@ -298,14 +298,14 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
 
   private int getTotal(String type, EntityManager em) {
     Query q = em.createNamedQuery("findTotalByType");
-    q.setParameter("userId", getCurrentUserName());
+    q.setParameter("userId", securityService.getUser().getUserName());
     q.setParameter("type", type);
     return ((Long) q.getSingleResult()).intValue();
   }
 
   private int getTotal(String type, String mediapackageId, EntityManager em) {
     Query q = em.createNamedQuery("findTotalByTypeAndMediapackageId");
-    q.setParameter("userId", getCurrentUserName());
+    q.setParameter("userId", securityService.getUser().getUserName());
     q.setParameter("type", type);
     q.setParameter("mediapackageId", mediapackageId);
     return ((Long) q.getSingleResult()).intValue();
@@ -313,7 +313,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
 
   private int getTotal(String type, Calendar calBegin, Calendar calEnd, EntityManager em) {
     Query q = em.createNamedQuery("findTotalByTypeAndIntervall");
-    q.setParameter("userId", getCurrentUserName());
+    q.setParameter("userId", securityService.getUser().getUserName());
     q.setParameter("type", type);
     q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
     q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
@@ -322,14 +322,9 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
 
   private int getTotal(Calendar calBegin, Calendar calEnd, EntityManager em) {
     Query q = em.createNamedQuery("findTotalByIntervall");
-    q.setParameter("userId", getCurrentUserName());
+    q.setParameter("userId", securityService.getUser().getUserName());
     q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
     q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
     return ((Long) q.getSingleResult()).intValue();
-  }
-
-  private String getCurrentUserName() {
-    String userName = securityService.getUserId();
-    return userName == null ? ".anon" : userName;
   }
 }

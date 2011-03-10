@@ -16,15 +16,16 @@
 package org.opencastproject.security.api;
 
 /**
- * Provides access to the current user's username and roles, if any.
+ * Provides access to users and roles.
  */
-public interface SecurityService {
+public interface UserProvider {
 
   /**
-   * Gets the current user, or <code>null</code> if the user has not been authenticated.
+   * Loads a user by username, or returns null if this user is not known to this provider.
    * 
+   * @param userName
+   *          the username
    * @return the user
    */
-  User getUser();
-
+  User loadUser(String userName);
 }

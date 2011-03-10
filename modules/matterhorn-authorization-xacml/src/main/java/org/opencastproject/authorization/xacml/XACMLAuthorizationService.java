@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -168,12 +169,14 @@ public class XACMLAuthorizationService implements AuthorizationService {
 
     RequestContext requestCtx = RequestResponseContextFactory.createRequestCtx();
 
+    User user = securityService.getUser();
+
     // Create a subject type
     SubjectType subject = new SubjectType();
     subject.getAttribute().add(
             RequestAttributeFactory.createStringAttributeType(XACMLUtils.SUBJECT_IDENTIFIER, XACMLUtils.ISSUER,
-                    securityService.getUserId()));
-    for (String role : securityService.getRoles()) {
+                    user.getUserName()));
+    for (String role : user.getRoles()) {
       AttributeType attSubjectID = RequestAttributeFactory.createStringAttributeType(
               XACMLUtils.SUBJECT_ROLE_IDENTIFIER, XACMLUtils.ISSUER, role);
       subject.getAttribute().add(attSubjectID);

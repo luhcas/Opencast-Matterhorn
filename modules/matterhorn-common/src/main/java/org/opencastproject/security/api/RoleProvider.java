@@ -16,15 +16,14 @@
 package org.opencastproject.security.api;
 
 /**
- * Provides access to the current user's username and roles, if any.
+ * Mix-in interface for directories that can list known roles.
  */
-public interface SecurityService {
-
+public interface RoleProvider {
   /**
-   * Gets the current user, or <code>null</code> if the user has not been authenticated.
+   * Gets all known roles.
    * 
-   * @return the user
+   * @return the roles
    */
-  User getUser();
+  String[] getRoles();
 
 }

@@ -16,16 +16,14 @@
 package org.opencastproject.kernel.security;
 
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A Spring Security implementation of {@link SecurityService}.
@@ -35,10 +33,10 @@ public class SecurityServiceSpringImpl implements SecurityService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.security.api.SecurityService#getUserId()
+   * @see org.opencastproject.security.api.SecurityService#getUser()
    */
   @Override
-  public String getUserId() {
+  public User getUser() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null) {
       return null;
@@ -47,35 +45,18 @@ public class SecurityServiceSpringImpl implements SecurityService {
       if (principal == null) {
         return null;
       }
-      if (principal instanceof UserDetails) {
-        UserDetails userDetails = (UserDetails) principal;
-        return userDetails.getUsername();
-      } else {
-        return principal.toString();
-      }
-    }
-  }
+      UserDetails userDetails = (UserDetails) principal;
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.security.api.SecurityService#getRoles()
-   */
-  @Override
-  public String[] getRoles() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth == null) {
-      return ANONYMOUS;
-    } else {
+      String[] roles = null;
       Collection<GrantedAuthority> authorities = auth.getAuthorities();
-      if (auth == null || authorities.size() == 0)
-        return ANONYMOUS;
-      List<String> roles = new ArrayList<String>(authorities.size());
-      for (GrantedAuthority ga : authorities) {
-        roles.add(ga.getAuthority());
+      if (authorities != null && authorities.size() > 0) {
+        roles = new String[authorities.size()];
+        int i = 0;
+        for (GrantedAuthority ga : authorities) {
+          roles[i++] = ga.getAuthority();
+        }
       }
-      Collections.sort(roles);
-      return roles.toArray(new String[roles.size()]);
+      return new User(userDetails.getUsername(), roles);
     }
   }
 

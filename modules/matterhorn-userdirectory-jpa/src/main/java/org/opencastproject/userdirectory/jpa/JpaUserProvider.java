@@ -15,32 +15,30 @@
  */
 package org.opencastproject.userdirectory.jpa;
 
+import org.opencastproject.security.api.RoleProvider;
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserProvider;
+
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 
 /**
  * Manages and locates users using JPA.
  */
-public class JpaUserDetailService implements UserDetailsService {
+public class JpaUserProvider implements UserProvider, RoleProvider {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(JpaUserDetailService.class);
+  private static final Logger logger = LoggerFactory.getLogger(JpaUserProvider.class);
 
   /** The JPA provider */
   protected PersistenceProvider persistenceProvider;
@@ -68,55 +66,33 @@ public class JpaUserDetailService implements UserDetailsService {
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
 
+  /**
+   * Callback for activation of this component.
+   * 
+   * @param cc
+   *          the component context
+   */
   public void activate(ComponentContext cc) {
     logger.debug("activate");
 
     // Set up persistence
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.userdirectory", persistenceProperties);
-
-    // Ensure that the inter-server remoting account exists
-    if (cc != null) {
-
-      // TODO: replace this with proper account provisioning
-
-      Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-      authorities.add(new GrantedAuthorityImpl("ROLE_ADMIN"));
-      authorities.add(new GrantedAuthorityImpl("ROLE_USER"));
-
-      String username = cc.getBundleContext().getProperty("org.opencastproject.security.digest.user");
-      String pass = cc.getBundleContext().getProperty("org.opencastproject.security.digest.pass");
-
-      try {
-        loadUserByUsername(username);
-      } catch (UsernameNotFoundException e) {
-        JpaUser systemAccount = new JpaUser(username, pass, true, true, true, true, authorities);
-        addUser(systemAccount);
-      }
-
-      try {
-        loadUserByUsername("admin");
-      } catch (UsernameNotFoundException e) {
-        JpaUser adminUser = new JpaUser("admin", "opencast", true, true, true, true, authorities);
-        logger.warn("Automatically adding the 'admin' user for development purposes (needs to be removed)");
-        addUser(adminUser);
-      }
-    }
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
+   * @see org.opencastproject.security.api.UserProvider#loadUser(java.lang.String)
    */
   @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
+  public User loadUser(String userName) {
     EntityManager em = emf.createEntityManager();
     try {
-      JpaUser user = em.find(JpaUser.class, username);
+      JpaUser user = em.find(JpaUser.class, userName);
       if (user == null) {
-        throw new UsernameNotFoundException(username);
+        return null;
       } else {
-        return user;
+        return new User(userName, user.getRoles());
       }
     } finally {
       em.close();
@@ -145,4 +121,31 @@ public class JpaUserDetailService implements UserDetailsService {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.RoleDirectoryService#getRoles()
+   */
+  @Override
+  public String[] getRoles() {
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query q = em.createNamedQuery("roles");
+      @SuppressWarnings("unchecked")
+      List<String> results = q.getResultList();
+      return results.toArray(new String[results.size()]);
+    } finally {
+      em.close();
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return getClass().getName();
+  }
 }

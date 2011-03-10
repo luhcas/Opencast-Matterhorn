@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+  
+  <scr:component name="org.opencastproject.userdirectory.UserDirectoryServiceImpl">
+    <implementation class="org.opencastproject.userdirectory.UserDirectoryServiceImpl" />
+    <property name="service.description" value="Provides a user directory" />
+    <service>
+      <provide interface="org.opencastproject.security.api.UserDirectoryService" />
+      <provide interface="org.springframework.security.core.userdetails.UserDetailsService" />
+    </service>
+    <reference name="userProviders" interface="org.opencastproject.security.api.UserProvider"
+      cardinality="1..n" policy="dynamic" bind="addUserProvider" unbind="removeUserProvider" />
+    <reference name="roleProviders" interface="org.opencastproject.security.api.RoleProvider"
+      cardinality="1..n" policy="dynamic" bind="addRoleProvider" unbind="removeRoleProvider" />
+  </scr:component>
+
+  <scr:component name="org.opencastproject.userdirectory.InMemoryUserProvider" activate="activate">
+    <implementation class="org.opencastproject.userdirectory.InMemoryUserProvider" />
+    <property name="service.description" value="A user and role provider" />
+    <service>
+      <provide interface="org.opencastproject.security.api.UserProvider" />
+      <provide interface="org.opencastproject.security.api.RoleProvider" />
+    </service>
+  </scr:component>
+
+</scr:components>
+

@@ -16,15 +16,7 @@
 package org.opencastproject.security.api;
 
 /**
- * Provides access to the current user's username and roles, if any.
+ * A marker interface for federation of all {@link UserProvider}s.
  */
-public interface SecurityService {
-
-  /**
-   * Gets the current user, or <code>null</code> if the user has not been authenticated.
-   * 
-   * @return the user
-   */
-  User getUser();
-
+public interface UserDirectoryService extends UserProvider {
 }

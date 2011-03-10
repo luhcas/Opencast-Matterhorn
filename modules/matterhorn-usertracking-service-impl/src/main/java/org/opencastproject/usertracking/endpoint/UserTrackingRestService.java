@@ -213,7 +213,7 @@ public class UserTrackingRestService {
   public Response add(@FormParam("id") String mediapackageId, @FormParam("in") String inString,
           @FormParam("out") String outString, @FormParam("type") String type, @Context HttpServletRequest request) {
     String sessionId = request.getSession().getId();
-    String userId = securityService.getUserId();
+    String userId = securityService.getUser().getUserName();
 
     // Parse the in and out strings, which might be empty (hence, we can't let jax-rs handle them properly)
     if (StringUtils.isEmpty(inString)) {
@@ -291,7 +291,7 @@ public class UserTrackingRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("footprint.xml")
   public FootprintsListImpl getFootprintAsXml(@QueryParam("id") String mediapackageId) {
-    String userId = securityService.getUserId();
+    String userId = securityService.getUser().getUserName();
 
     // Is the mediapackageId passed
     if (mediapackageId == null)
