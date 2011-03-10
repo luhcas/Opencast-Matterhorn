@@ -15,24 +15,67 @@
  */
 package org.opencastproject.userdirectory.ldap;
 
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
+
+import java.util.Dictionary;
 
 /**
- * TODO: Comment me!
+ * LDAP implementation of the spring UserDetailsService, taking configuration information from the component context.
  */
-public class LdapUserDetailService implements UserDetailsService {
+public class LdapUserDetailService implements UserDetailsService, ManagedService {
+
+  /** The key to look up the ldap search filter in the service configuration properties */
+  private static final String SEARCH_FILTER_KEY = "org.opencastproject.userdirectory.ldap.searchfilter";
+
+  /** The key to look up the ldap search base in the service configuration properties */
+  private static final String SEARCH_BASE_KEY = "org.opencastproject.userdirectory.ldap.searchbase";
+
+  /** The key to look up the ldap server URL in the service configuration properties */
+  private static final String LDAP_URL_KEY = "org.opencastproject.userdirectory.ldap.url";
+
+  /** The spring ldap userdetails service delegate */
+  protected LdapUserDetailsService delegate = null;
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
    */
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
-    // TODO Auto-generated method stub
-    return null;
+    if(delegate == null) {
+      throw new IllegalStateException("The LDAP user detail service has not yet been configured");
+    }
+    return delegate.loadUserByUsername(username);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  @Override
+  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+    String searchBase = (String) properties.get(SEARCH_BASE_KEY);
+    String searchFilter = (String) properties.get(SEARCH_FILTER_KEY);
+    String url = (String) properties.get(LDAP_URL_KEY);
+    DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(url);
+    contextSource.setAnonymousReadOnly(true);
+    try {
+      contextSource.afterPropertiesSet();
+    } catch (Exception e) {
+      throw new org.opencastproject.util.ConfigurationException("Unable to create a spring context source", e);
+    }
+    FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(searchBase, searchFilter, contextSource);
+    this.delegate = new LdapUserDetailsService(userSearch);
   }
 
 }

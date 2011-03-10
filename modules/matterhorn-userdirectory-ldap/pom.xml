@@ -84,6 +84,13 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Embed-Dependency>org.springframework.security.ldap;inline=true</Embed-Dependency>
             <Private-Package>org.springframework.security.ldap</Private-Package>
+            <Import-Package>
+              !netscape.ldap.ber.stream,
+              org.springframework.ldap,
+              org.springframework.ldap.core,
+              org.springframework.ldap.core.support,
+              *;resolution:=optional
+            </Import-Package>
             <Export-Package>
               org.opencastproject.userdirectory.ldap;version=${project.version},
             </Export-Package>
