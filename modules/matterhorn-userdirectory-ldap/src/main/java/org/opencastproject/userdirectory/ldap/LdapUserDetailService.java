@@ -15,6 +15,7 @@
  */
 package org.opencastproject.userdirectory.ldap;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.springframework.dao.DataAccessException;
@@ -23,6 +24,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 
 import java.util.Dictionary;
@@ -41,6 +43,9 @@ public class LdapUserDetailService implements UserDetailsService, ManagedService
   /** The key to look up the ldap server URL in the service configuration properties */
   private static final String LDAP_URL_KEY = "org.opencastproject.userdirectory.ldap.url";
 
+  /** The key to look up the role attributes in the service configuration properties */
+  private static final String ROLE_ATTRIBUTES_KEY = "org.opencastproject.userdirectory.ldap.roleattributes";
+
   /** The spring ldap userdetails service delegate */
   protected LdapUserDetailsService delegate = null;
 
@@ -51,7 +56,7 @@ public class LdapUserDetailService implements UserDetailsService, ManagedService
    */
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
-    if(delegate == null) {
+    if (delegate == null) {
       throw new IllegalStateException("The LDAP user detail service has not yet been configured");
     }
     return delegate.loadUserByUsername(username);
@@ -76,6 +81,13 @@ public class LdapUserDetailService implements UserDetailsService, ManagedService
     }
     FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(searchBase, searchFilter, contextSource);
     this.delegate = new LdapUserDetailsService(userSearch);
+
+    String roleAttributesGlob = (String) properties.get(ROLE_ATTRIBUTES_KEY);
+    if(StringUtils.isNotBlank(roleAttributesGlob)) {
+      LdapUserDetailsMapper mapper = new LdapUserDetailsMapper();
+      mapper.setRoleAttributes(roleAttributesGlob.split(","));
+      this.delegate.setUserDetailsMapper(mapper);
+    }
   }
 
 }
