@@ -42,7 +42,7 @@ public class LdapUserDetailServiceTest {
     service.updated(props);
   }
   
-  @Ignore("Ignore this test by default, since it requires internet connectivity")
+  @Ignore("Ignore this test by default, since it requires internet connectivity, and the user's details may change.")
   @Test
   public void testLookup() throws Exception {
     UserDetails user = service.loadUserByUsername("231693");
