@@ -23,6 +23,7 @@ import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
 import org.opencastproject.serviceregistry.api.JaxbServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -36,6 +37,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpOptions;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.osgi.framework.BundleContext;
@@ -136,7 +138,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   protected int maxJobs = 1;
 
   /** The thread pool to use for dispatching queued jobs. */
-  protected ScheduledExecutorService dispatcher = Executors.newScheduledThreadPool(1);
+  protected ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
 
   public void activate(ComponentContext cc) {
     logger.debug("activate");
@@ -204,7 +206,11 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
     // Schedule the job dispatching.
     if (dispatchInterval > 0)
-      dispatcher.scheduleWithFixedDelay(new JobDispatcher(), dispatchInterval, dispatchInterval, TimeUnit.MILLISECONDS);
+      scheduledExecutor.scheduleWithFixedDelay(new JobDispatcher(), dispatchInterval, dispatchInterval,
+              TimeUnit.MILLISECONDS);
+
+    // Schedule the service heartbeat
+    scheduledExecutor.scheduleWithFixedDelay(new JobProducerHearbeat(), 1, 1, TimeUnit.MINUTES);
   }
 
   public void deactivate() {
@@ -222,8 +228,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     }
 
     // Stop the job dispatcher
-    if (dispatcher != null)
-      dispatcher.shutdown();
+    if (scheduledExecutor != null)
+      scheduledExecutor.shutdown();
   }
 
   /**
@@ -1254,51 +1260,6 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   }
 
   /**
-   * This dispatcher implementation will check for jobs in the QUEUED {@link #org.opencastproject.job.api.Job.Status}. If new jobs are found, the
-   * dispatcher will attempt to dispatch each job to the least loaded service.
-   */
-  class JobDispatcher implements Runnable {
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.lang.Thread#run()
-     */
-    @Override
-    public void run() {
-      try {
-        List<Job> jobsToDispatch = getDispatchableJobs();
-        Map<String, Integer> hostLoads = getHostLoads(true);
-        List<ServiceRegistration> serviceRegistrations = getServiceRegistrations();
-
-        for (Job job : jobsToDispatch) {
-          try {
-            String hostAcceptingJob = dispatchJob(job,
-                    filterAndSortServiceRegistrations(serviceRegistrations, job.getJobType(), hostLoads));
-            if (hostAcceptingJob == null) {
-              ServiceRegistryJpaImpl.logger.debug("Job {} could not be dispatched and is put back into queue",
-                      job.getId());
-            } else {
-              ServiceRegistryJpaImpl.logger.debug("Job {} dispatched to {}", job.getId(), hostAcceptingJob);
-              if (hostLoads.containsKey(hostAcceptingJob)) {
-                Integer previousServiceLoad = hostLoads.get(hostAcceptingJob);
-                hostLoads.put(hostAcceptingJob, ++previousServiceLoad);
-              } else {
-                hostLoads.put(hostAcceptingJob, 1);
-              }
-            }
-          } catch (ServiceRegistryException e) {
-            Throwable cause = (e.getCause() != null) ? e.getCause() : e;
-            ServiceRegistryJpaImpl.logger.error("Error dispatching job " + job, cause);
-          }
-        }
-      } catch (Throwable t) {
-        ServiceRegistryJpaImpl.logger.warn("Error dispatching jobs", t);
-      }
-    }
-  }
-
-  /**
    * Returns a filtered list of service registrations, containing only those that are online, not in maintenance mode,
    * and with a specific service type, ordered by load.
    * 
@@ -1347,6 +1308,101 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       throw new ServiceRegistryException(e);
     } finally {
       em.close();
+    }
+  }
+
+  /**
+   * This dispatcher implementation will check for jobs in the QUEUED {@link #org.opencastproject.job.api.Job.Status}. If new jobs are found, the
+   * dispatcher will attempt to dispatch each job to the least loaded service.
+   */
+  class JobDispatcher implements Runnable {
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Thread#run()
+     */
+    @Override
+    public void run() {
+      try {
+        List<Job> jobsToDispatch = getDispatchableJobs();
+        Map<String, Integer> hostLoads = getHostLoads(true);
+        List<ServiceRegistration> serviceRegistrations = getServiceRegistrations();
+
+        for (Job job : jobsToDispatch) {
+          try {
+            String hostAcceptingJob = dispatchJob(job,
+                    filterAndSortServiceRegistrations(serviceRegistrations, job.getJobType(), hostLoads));
+            if (hostAcceptingJob == null) {
+              ServiceRegistryJpaImpl.logger.debug("Job {} could not be dispatched and is put back into queue",
+                      job.getId());
+            } else {
+              ServiceRegistryJpaImpl.logger.debug("Job {} dispatched to {}", job.getId(), hostAcceptingJob);
+              if (hostLoads.containsKey(hostAcceptingJob)) {
+                Integer previousServiceLoad = hostLoads.get(hostAcceptingJob);
+                hostLoads.put(hostAcceptingJob, ++previousServiceLoad);
+              } else {
+                hostLoads.put(hostAcceptingJob, 1);
+              }
+            }
+          } catch (ServiceRegistryException e) {
+            Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+            ServiceRegistryJpaImpl.logger.error("Error dispatching job " + job, cause);
+          }
+        }
+      } catch (Throwable t) {
+        ServiceRegistryJpaImpl.logger.warn("Error dispatching jobs", t);
+      }
+    }
+  }
+
+  /**
+   * A periodic check on each service registration to ensure that it is still alive.
+   */
+  class JobProducerHearbeat implements Runnable {
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.lang.Runnable#run()
+     */
+    @Override
+    public void run() {
+      logger.debug("Checking for unresponsive services");
+      int unresponsiveCount = 0;
+      List<ServiceRegistration> serviceRegistrations = getServiceRegistrations();
+      for (ServiceRegistration registration : serviceRegistrations) {
+        // We think this service is online and available. Prove it.
+        if (registration.isOnline() && !registration.isInMaintenanceMode() && registration.isJobProducer()) {
+          String[] urlParts = new String[] { registration.getHost(), registration.getPath(), "dispatch" };
+          String serviceUrl = UrlSupport.concat(urlParts);
+          HttpOptions options = new HttpOptions(serviceUrl);
+          HttpResponse response = null;
+          try {
+            try {
+              response = client.execute(options);
+              if (response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                // this service is reachable, continue checking other services
+                continue;
+              } else {
+                unresponsiveCount++;
+              }
+            } catch (TrustedHttpClientException e) {
+              // We can not reach this host. Update the registration to indicate that the service is offline.
+              logger.warn("Unable to reach {} : {}", registration, e);
+            }
+            try {
+              unRegisterService(registration.getServiceType(), registration.getHost());
+              logger.warn("Set {} to offline, since it is not accessible from this host", registration);
+            } catch (ServiceRegistryException e) {
+              logger.warn("Unable to unregister unreachable service: {} : {}", registration, e);
+            }
+          } finally {
+            client.close(response);
+          }
+        }
+      }
+      logger.debug("Finished checking for unresponsive services. Found {} to be unresponsive.", unresponsiveCount);
     }
   }
 
