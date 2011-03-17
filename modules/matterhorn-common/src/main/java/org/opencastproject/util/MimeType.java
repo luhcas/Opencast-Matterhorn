@@ -300,7 +300,7 @@ public final class MimeType implements Cloneable, Comparable<MimeType>, Serializ
    * @return <code>true</code> if this mime type is equal
    */
   public boolean isEquivalentTo(String type, String subtype) {
-    if (type.equalsIgnoreCase(type) && subtype.equalsIgnoreCase(subtype))
+    if (this.type.equalsIgnoreCase(type) && this.subtype.equalsIgnoreCase(subtype))
       return true;
     if (equivalents != null) {
       for (MIMEEquivalent equivalent : equivalents) {
