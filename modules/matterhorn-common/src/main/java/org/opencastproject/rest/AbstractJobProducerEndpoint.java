@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.kernel.rest;
+package org.opencastproject.rest;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;

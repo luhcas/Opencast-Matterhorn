@@ -253,7 +253,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.kernel.http;version=${project.version}</Import-Package>
+            <Import-Package>org.opencastproject.rest;version=${project.version}</Import-Package>
             <Private-Package>ui.*, uitests.*</Private-Package>
             <Service-Component>
               OSGI-INF/opencast-admin-ui.xml

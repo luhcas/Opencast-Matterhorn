@@ -1,4 +1,4 @@
-package org.opencastproject.kernel.rest.docs;
+package org.opencastproject.rest.docs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -27,11 +27,6 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -63,8 +58,8 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
@@ -144,7 +139,7 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               org.opencastproject.workflow.api;version=${project.version},
-              org.opencastproject.kernel.http;version=${project.version},
+              org.opencastproject.rest;version=${project.version},
               org.opencastproject.mediapackage;version=${project.version},
               *;resolution:=optional
             </Import-Package>

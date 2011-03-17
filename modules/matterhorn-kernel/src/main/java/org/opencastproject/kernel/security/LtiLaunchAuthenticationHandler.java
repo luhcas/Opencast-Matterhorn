@@ -77,6 +77,7 @@ public class LtiLaunchAuthenticationHandler implements
       userAuthorities = new HashSet<GrantedAuthority>();
       // TODO: should we add the authorities passed in from the tool consumer?
       userAuthorities.add(new GrantedAuthorityImpl("ROLE_USER"));
+      userAuthorities.add(new GrantedAuthorityImpl("ROLE_OAUTH_USER"));
       userDetails = new User(userIdFromConsumer, "oauth", true, true, true, true, userAuthorities);
     }
     Authentication ltiAuth = new PreAuthenticatedAuthenticationToken(userDetails, authentication.getCredentials(),

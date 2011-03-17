@@ -1,8 +1,8 @@
 package org.opencastproject.kernel.rest.docs;
 
-import org.opencastproject.kernel.rest.docs.RestParameter;
-import org.opencastproject.kernel.rest.docs.RestQuery;
-import org.opencastproject.kernel.rest.docs.RestResponse;
+import org.opencastproject.rest.docs.RestParameter;
+import org.opencastproject.rest.docs.RestQuery;
+import org.opencastproject.rest.docs.RestResponse;
 
 import org.junit.Assert;
 import org.junit.Test;

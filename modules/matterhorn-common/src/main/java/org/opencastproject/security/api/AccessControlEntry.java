@@ -49,25 +49,25 @@ public class AccessControlEntry {
   public boolean isAllow() {
     return allow;
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public boolean equals(Object obj) {
-    if(obj instanceof AccessControlEntry) {
+    if (obj instanceof AccessControlEntry) {
       AccessControlEntry other = (AccessControlEntry) obj;
       return this.allow == other.allow && this.role.equals(other.role) && this.action.equals(other.action);
     } else {
       return false;
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override

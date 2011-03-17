@@ -144,6 +144,37 @@ public class LtiAuthenticationTest {
       // expected
     }
   }
+  
+  @Test
+  public void testLtiLaunchFromUnknownConsumer() throws Exception {
+    // Construct a POST message with the oauth parameters
+    String nonce = UUID.randomUUID().toString();
+    String timestamp = Long.toString(TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()));
+    OAuthMessage oauthMessage = new OAuthMessage(OAuthMessage.POST, Main.BASE_URL + "/lti", null);
+    oauthMessage.addParameter(OAuth.OAUTH_CONSUMER_KEY, CONSUMER_KEY);
+    oauthMessage.addParameter(OAuth.OAUTH_SIGNATURE_METHOD, OAuth.HMAC_SHA1);
+    oauthMessage.addParameter(OAuth.OAUTH_NONCE, nonce);
+    oauthMessage.addParameter(OAuth.OAUTH_TIMESTAMP, timestamp);
+    
+    // Add some LTI parameters
+    oauthMessage.addParameter("user_id", LTI_CONSUMER_USER);
+    oauthMessage.addParameter("context_id", LTI_CONSUMER_CONTEXT);
+
+    // Sign the request
+    OAuthConsumer consumer = new OAuthConsumer(null, CONSUMER_KEY, "wrong secret", null);
+    OAuthAccessor accessor = new OAuthAccessor(consumer);
+    oauthMessage.sign(accessor);
+
+    // Get the response
+    try {
+      oauthClient.invoke(oauthMessage, ParameterStyle.BODY);
+      Assert.fail("OAuth with a bad signature should result in an exception");
+    } catch(OAuthProblemException e) {
+      // expected
+    }
+    
+  }
+
 
   @Test
   public void testLtiLaunchFromUnknownUser() throws Exception {

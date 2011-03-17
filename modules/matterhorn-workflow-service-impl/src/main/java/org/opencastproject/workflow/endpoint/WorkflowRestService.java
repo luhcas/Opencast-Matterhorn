@@ -16,8 +16,8 @@
 package org.opencastproject.workflow.endpoint;
 
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.MediaPackageImpl;
+import org.opencastproject.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
@@ -866,7 +866,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getService()
+   * @see org.opencastproject.rest.AbstractJobProducerEndpoint#getService()
    */
   @Override
   public JobProducer getService() {

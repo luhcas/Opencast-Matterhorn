@@ -30,7 +30,7 @@ import java.util.Map;
 public class InMemoryUserProvider implements UserProvider, RoleProvider {
 
   /** The roles associated with the matterhorn system account */
-  public static final String[] MH_SYSTEM_ROLES = new String[] { "ROLE_ADMIN", "ROLE_USER" };
+  public static final String[] MH_SYSTEM_ROLES = new String[] { "ROLE_ADMIN", "ROLE_OAUTH_USER", "ROLE_USER" };
 
   /**
    * A collection of accounts internal to Matterhorn.

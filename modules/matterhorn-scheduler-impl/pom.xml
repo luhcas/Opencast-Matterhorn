@@ -45,8 +45,8 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
@@ -166,7 +166,7 @@
               org.opencastproject.scheduler.endpoint;version=${project.version},
             </Export-Package>
             <Import-Package>
-              org.opencastproject.kernel.http;version=${project.version},
+              org.opencastproject.rest;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
               org.opencastproject.scheduler.api;version=${project.version},
               *;resolution:=optional

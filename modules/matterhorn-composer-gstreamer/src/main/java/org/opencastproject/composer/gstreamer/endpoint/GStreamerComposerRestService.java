@@ -24,7 +24,6 @@ import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -33,6 +32,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
@@ -476,7 +476,7 @@ public class GStreamerComposerRestService extends AbstractJobProducerEndpoint {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getService()
+   * @see org.opencastproject.rest.AbstractJobProducerEndpoint#getService()
    */
   @Override
   public JobProducer getService() {

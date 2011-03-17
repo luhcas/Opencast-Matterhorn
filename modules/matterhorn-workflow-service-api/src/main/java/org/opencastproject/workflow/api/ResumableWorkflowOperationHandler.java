@@ -17,7 +17,6 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.job.api.JobContext;
 
-import java.net.URL;
 import java.util.Map;
 
 /**
@@ -62,7 +61,7 @@ public interface ResumableWorkflowOperationHandler extends WorkflowOperationHand
    * @throws WorkflowOperationException
    *           If the url to the hold state ui can't be created
    */
-  URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+  String getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException;
 
   /**
    * Returns the title for the link to this operations hold state UI.

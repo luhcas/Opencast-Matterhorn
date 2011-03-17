@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import java.net.URL;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
@@ -78,7 +77,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   protected Set<WorkflowConfiguration> configurations;
 
   @XmlElement(name = "holdurl")
-  protected URL holdStateUserInterfaceUrl;
+  protected String holdStateUserInterfaceUrl;
 
   @XmlElement(name = "hold-action-title")
   protected String holdActionTitle;
@@ -336,7 +335,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   /**
    * @return the holdStateUserInterfaceUrl
    */
-  public URL getHoldStateUserInterfaceUrl() {
+  public String getHoldStateUserInterfaceUrl() {
     return holdStateUserInterfaceUrl;
   }
 
@@ -344,7 +343,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    * @param holdStateUserInterfaceUrl
    *          the holdStateUserInterfaceUrl to set
    */
-  public void setHoldStateUserInterfaceUrl(URL holdStateUserInterfaceUrl) {
+  public void setHoldStateUserInterfaceUrl(String holdStateUserInterfaceUrl) {
     this.holdStateUserInterfaceUrl = holdStateUserInterfaceUrl;
   }
 

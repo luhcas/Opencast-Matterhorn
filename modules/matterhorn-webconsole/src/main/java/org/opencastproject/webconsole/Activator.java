@@ -15,8 +15,8 @@
  */
 package org.opencastproject.webconsole;
 
-import org.opencastproject.kernel.http.StaticResource;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.rest.StaticResource;
 
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.osgi.framework.BundleActivator;
@@ -47,7 +47,7 @@ public class Activator implements BundleActivator {
    */
   @Override
   public void start(BundleContext bundleContext) throws Exception {
-    StaticResource staticResource = new StaticResource(bundleContext, "/res", "/system/console/res", null);
+    StaticResource staticResource = new StaticResource(getClass().getClassLoader(), "/res", "/system/console/res", null);
     Dictionary<String, String> resourceProps = new Hashtable<String, String>();
     resourceProps.put("contextId", RestConstants.HTTP_CONTEXT_ID);
     resourceProps.put("alias", "/system/console/res");

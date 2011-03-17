@@ -164,7 +164,7 @@
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-                org.opencastproject.kernel.http,
+                org.opencastproject.rest,
                 javax.servlet,
                 javax.ws.rs,
                 org.apache.commons.lang,

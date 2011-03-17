@@ -69,7 +69,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1113,7 +1112,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
 
         ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
         try {
-          URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
+          String url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
           if (url != null) {
             String holdActionTitle = resumableHandler.getHoldActionTitle();
             ((WorkflowOperationInstanceImpl) currentOperation).setHoldActionTitle(holdActionTitle);

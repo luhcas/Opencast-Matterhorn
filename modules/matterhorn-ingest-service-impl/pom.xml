@@ -54,8 +54,8 @@
       <artifactId>servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+      <groupId>javax.xml.bind</groupId>
+      <artifactId>jaxb-api</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
@@ -195,7 +195,7 @@
               json_simple;inline=true
             </Embed-Dependency>
             <Import-Package>
-              org.opencastproject.kernel.http;version=${project.version},
+              org.opencastproject.rest;version=${project.version},
               javax.persistence,
               *;resolution:=optional
             </Import-Package>

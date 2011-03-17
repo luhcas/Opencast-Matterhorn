@@ -120,7 +120,7 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.usertracking.*;version=${project.version} </Export-Package>
             <Import-Package>
-              org.opencastproject.kernel.http;version=${project.version},
+              org.opencastproject.rest;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
               *;resolution:=optional
       			</Import-Package>

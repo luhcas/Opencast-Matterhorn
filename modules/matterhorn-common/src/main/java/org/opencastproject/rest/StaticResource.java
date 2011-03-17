@@ -13,19 +13,17 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.kernel.http;
+package org.opencastproject.rest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -37,22 +35,34 @@ import javax.servlet.http.HttpServletResponse;
  * A static resource for registration with the http service.
  */
 public class StaticResource extends HttpServlet {
+  /** The java.io.serialization uid */
   private static final long serialVersionUID = 1L;
-  private static final Logger logger = LoggerFactory.getLogger(StaticResource.class);
-  private final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap(getClass().getClassLoader()
-          .getResourceAsStream("mimetypes"));
-  protected String classpath;
-  protected String alias;
-  protected String welcomeFile;
-  protected URL defaultUrl;
 
-  protected BundleContext bundleContext;
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(StaticResource.class);
+  
+  /** The mimetypes to use for delivering files */
+  private static final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap(StaticResource.class.getClassLoader()
+          .getResourceAsStream("mimetypes"));
+  
+  /** The classpath to search for the static resources */
+  protected String classpath = null;
+  
+  /** The base URL for these static resources */
+  protected String alias = null;
+  
+  /** The welcome file to redirect to, if only the alias is specified in the request */
+  protected String welcomeFile = null;
+
+  /** The classloader to use to search for the static resources.  Defaults to this class's classloader */
+  protected ClassLoader classloader = null;
 
   /**
    * Default no-arg constructor called by OSGI's declarative services. The static resource will be configured via DS
    * component properties.
    */
   public StaticResource() {
+    classloader = getClass().getClassLoader();
   }
 
   /**
@@ -67,17 +77,12 @@ public class StaticResource extends HttpServlet {
    * @param welcomeFile
    *          the default welcome file
    */
-  public StaticResource(BundleContext bundleContext, String classpath, String alias, String welcomeFile) {
+  public StaticResource(ClassLoader classloader, String classpath, String alias, String welcomeFile) {
+    this();
     this.classpath = classpath;
     this.alias = alias;
     this.welcomeFile = welcomeFile;
-    this.bundleContext = bundleContext;
-    String serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
-    try {
-      defaultUrl = new URL(serverUrl + alias);
-    } catch (MalformedURLException e) {
-      throw new IllegalStateException("unable to construct URL " + serverUrl + "/" + alias, e);
-    }
+    this.classloader = classloader;
   }
 
   /**
@@ -86,31 +91,24 @@ public class StaticResource extends HttpServlet {
    * @param componentContext
    *          the DS component context
    */
-  public void activate(ComponentContext componentContext) {
-    this.bundleContext = componentContext.getBundleContext();
+  public void activate(@SuppressWarnings("rawtypes") Map componentProperties) {
     if (welcomeFile == null)
-      welcomeFile = (String) componentContext.getProperties().get("welcome.file");
+      welcomeFile = (String) componentProperties.get("welcome.file");
     boolean welcomeFileSpecified = true;
     if (welcomeFile == null) {
       welcomeFileSpecified = false;
       welcomeFile = "index.html";
     }
     if (alias == null)
-      alias = (String) componentContext.getProperties().get("alias");
+      alias = (String) componentProperties.get("alias");
     if (classpath == null)
-      classpath = (String) componentContext.getProperties().get("classpath");
+      classpath = (String) componentProperties.get("classpath");
     logger.info("registering classpath:{} at {} with welcome file {} {}", new Object[] { classpath, alias, welcomeFile,
             welcomeFileSpecified ? "" : "(via default)" });
-    String serverUrl = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");
-    try {
-      defaultUrl = new URL(serverUrl + alias);
-    } catch (MalformedURLException e) {
-      throw new IllegalStateException("unable to construct URL " + serverUrl + "/" + alias, e);
-    }
   }
 
-  public URL getDefaultUrl() {
-    return defaultUrl;
+  public String getDefaultUrl() {
+    return alias;
   }
 
   @Override
@@ -154,8 +152,8 @@ public class StaticResource extends HttpServlet {
     if (!classpathToResource.startsWith("/"))
       classpathToResource = "/" + classpathToResource;
 
-    // Try to load the resource from the regular resources section
-    URL url = bundleContext.getBundle().getResource(classpathToResource);
+    // Try to load the resource from the classloader
+    URL url = classloader.getResource(classpathToResource);
 
     if (url == null) {
       resp.sendError(404);
@@ -184,6 +182,16 @@ public class StaticResource extends HttpServlet {
     } finally {
       IOUtils.closeQuietly(in);
     }
+  }
+
+  /**
+   * Sets the classloader for this static resource.
+   * 
+   * @param classloader
+   *          the classloader to set
+   */
+  public void setClassloader(ClassLoader classloader) {
+    this.classloader = classloader;
   }
 
 }

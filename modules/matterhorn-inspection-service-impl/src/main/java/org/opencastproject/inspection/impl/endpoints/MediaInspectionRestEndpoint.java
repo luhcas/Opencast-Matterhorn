@@ -19,10 +19,10 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.kernel.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.DocUtil;
@@ -190,7 +190,7 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.kernel.rest.AbstractJobProducerEndpoint#getService()
+   * @see org.opencastproject.rest.AbstractJobProducerEndpoint#getService()
    */
   @Override
   public JobProducer getService() {

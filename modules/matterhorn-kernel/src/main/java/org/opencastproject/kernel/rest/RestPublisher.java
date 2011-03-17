@@ -16,6 +16,7 @@
 package org.opencastproject.kernel.rest;
 
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.rest.StaticResource;
 import org.opencastproject.util.NotFoundException;
 
 import org.apache.cxf.Bus;
@@ -26,6 +27,7 @@ import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.codehaus.jettison.mapped.Configuration;
 import org.codehaus.jettison.mapped.MappedNamespaceConvention;
 import org.codehaus.jettison.mapped.MappedXMLStreamWriter;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -64,8 +67,11 @@ public class RestPublisher implements RestConstants {
   private static final Logger logger = LoggerFactory.getLogger(RestPublisher.class);
 
   /** The rest publisher looks for any non-servlet with the 'opencast.service.path' property */
-  public static final String SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))(" + SERVICE_PATH_PROPERTY
-          + "=*))";
+  public static final String JAX_RS_SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))("
+          + SERVICE_PATH_PROPERTY + "=*))";
+
+  /** The rest publisher looks for any servlet */
+  public static final String STATIC_RESOURCE_FILTER = "(objectClass=javax.servlet.Servlet)";
 
   /** A map that sets default xml namespaces in {@link XMLStreamWriter}s */
   protected static final ConcurrentHashMap<String, String> NAMESPACE_MAP;
@@ -85,7 +91,13 @@ public class RestPublisher implements RestConstants {
   protected ComponentContext componentContext;
 
   /** A service tracker that monitors JAX-RS annotated services, (un)publishing servlets as they (dis)appear */
-  protected ServiceTracker tracker = null;
+  protected ServiceTracker jaxRsTracker = null;
+
+  /**
+   * A service tracker that monitors StaticResource servlets, providing access to the appropriate classloader so these
+   * servlets remain free from OSGI dependencies.
+   */
+  protected ServiceTracker staticResourceTracker = null;
 
   /** The base URL for this server */
   protected String baseServerUri;
@@ -115,11 +127,13 @@ public class RestPublisher implements RestConstants {
     });
 
     try {
-      tracker = new JaxRsServiceTracker();
+      jaxRsTracker = new JaxRsServiceTracker();
+      staticResourceTracker = new StaticResourceTracker();
     } catch (InvalidSyntaxException e) {
       throw new IllegalStateException(e);
     }
-    tracker.open();
+    jaxRsTracker.open();
+    staticResourceTracker.open();
   }
 
   /**
@@ -127,7 +141,8 @@ public class RestPublisher implements RestConstants {
    */
   protected void deactivate() {
     logger.debug("deactivate()");
-    tracker.close();
+    jaxRsTracker.close();
+    staticResourceTracker.close();
   }
 
   /**
@@ -255,7 +270,8 @@ public class RestPublisher implements RestConstants {
   public class JaxRsServiceTracker extends ServiceTracker {
 
     JaxRsServiceTracker() throws InvalidSyntaxException {
-      super(componentContext.getBundleContext(), componentContext.getBundleContext().createFilter(SERVICE_FILTER), null);
+      super(componentContext.getBundleContext(), componentContext.getBundleContext()
+              .createFilter(JAX_RS_SERVICE_FILTER), null);
     }
 
     @Override
@@ -277,6 +293,49 @@ public class RestPublisher implements RestConstants {
       }
       createEndpoint(reference, service);
       return super.addingService(reference);
+    }
+  }
+
+  /**
+   * A classloader that delegates to an OSGI bundle for loading resources.
+   */
+  class StaticResourceClassLoader extends ClassLoader {
+    private Bundle bundle = null;
+
+    public StaticResourceClassLoader(Bundle bundle) {
+      super();
+      this.bundle = bundle;
+    }
+
+    @Override
+    public URL getResource(String name) {
+      URL url = bundle.getResource(name);
+      logger.debug("{} found resource {} from name {}", new Object[] { this, url, name });
+      return url;
+    }
+  }
+
+  /**
+   * Tracks {@link StaticResource} classes.
+   */
+  public class StaticResourceTracker extends ServiceTracker {
+    StaticResourceTracker() throws InvalidSyntaxException {
+      super(componentContext.getBundleContext(), componentContext.getBundleContext().createFilter(
+              STATIC_RESOURCE_FILTER), null);
+    }
+
+    @Override
+    public Object addingService(ServiceReference reference) {
+      Object service = context.getService(reference);
+      if (service instanceof StaticResource) {
+        ((StaticResource) service).setClassloader(new StaticResourceClassLoader(reference.getBundle()));
+      }
+      return super.addingService(reference);
+    }
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+      super.removedService(reference, service);
     }
   }
 
