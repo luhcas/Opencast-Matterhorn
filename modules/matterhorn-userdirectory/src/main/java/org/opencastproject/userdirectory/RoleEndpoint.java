@@ -57,22 +57,37 @@ public class RoleEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings("unchecked")
   public String getRoles() {
+
+    // Collect all roles from all providers in a sorted set
     SortedSet<String> knownRoles = new TreeSet<String>();
     for (RoleProvider provider : providers) {
       for (String role : provider.getRoles()) {
         knownRoles.add(role);
       }
     }
+
+    // Return the set as a json array
     JSONArray json = new JSONArray();
     json.addAll(knownRoles);
-
     return json.toJSONString();
   }
 
+  /**
+   * Adds a new role provider to the list of known providers.
+   * 
+   * @param roleProvider
+   *          the role provider
+   */
   public void addRoleProvider(RoleProvider roleProvider) {
     providers.add(roleProvider);
   }
 
+  /**
+   * Removes a role provider from the list of known providers.
+   * 
+   * @param roleProvider
+   *          the role provider
+   */
   public void removeRoleProvider(RoleProvider roleProvider) {
     if (!providers.remove(roleProvider)) {
       logger.warn("{} was not a registered role provider");
