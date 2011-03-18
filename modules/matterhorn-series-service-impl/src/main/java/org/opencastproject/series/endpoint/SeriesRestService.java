@@ -53,6 +53,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -199,10 +200,27 @@ public class SeriesRestService {
   }
 
   @GET
-  @Produces({ "text/xml" })
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("series.json")
+  // CHECKSTYLE:OFF
+  public Response getSeriesAsJson(@QueryParam("q") String text, @QueryParam("seriesId") String seriesId,
+          @QueryParam("seriesTitle") String seriesTitle, @QueryParam("creator") String creator,
+          @QueryParam("contributor") String contributor, @QueryParam("publisher") String publisher,
+          @QueryParam("rightsholder") String rightsHolder, @QueryParam("createdfrom") String createdFrom,
+          @QueryParam("createdto") String createdTo, @QueryParam("language") String language,
+          @QueryParam("license") String license, @QueryParam("subject") String subject,
+          @QueryParam("abstract") String seriesAbstract, @QueryParam("description") String description,
+          @QueryParam("sort") String sort, @QueryParam("startPage") int startPage, @QueryParam("count") int count) {
+    // CHECKSTYLE:ON
+    return getSeriesAsXml(text, seriesId, seriesTitle, creator, contributor, publisher, rightsHolder, createdFrom,
+            createdTo, language, license, subject, seriesAbstract, description, sort, startPage, count);
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
   @Path("series.xml")
   // CHECKSTYLE:OFF
-  public Response getWorkflowsAsXml(@QueryParam("q") String text, @QueryParam("seriesId") String seriesId,
+  public Response getSeriesAsXml(@QueryParam("q") String text, @QueryParam("seriesId") String seriesId,
           @QueryParam("seriesTitle") String seriesTitle, @QueryParam("creator") String creator,
           @QueryParam("contributor") String contributor, @QueryParam("publisher") String publisher,
           @QueryParam("rightsholder") String rightsHolder, @QueryParam("createdfrom") String createdFrom,
@@ -221,21 +239,49 @@ public class SeriesRestService {
     SeriesQuery q = new SeriesQuery();
     q.setCount(count);
     q.setStartPage(startPage);
-    q.setText(text.toLowerCase());
-    q.setSeriesId(seriesId.toLowerCase());
-    q.setSeriesTitle(seriesTitle.toLowerCase());
-    q.setCreator(creator.toLowerCase());
-    q.setContributor(contributor.toLowerCase());
-    q.setLanguage(language.toLowerCase());
-    q.setLicense(license.toLowerCase());
-    q.setSubject(subject.toLowerCase());
-    q.setPublisher(publisher.toLowerCase());
-    q.setSeriesAbstract(seriesAbstract.toLowerCase());
-    q.setDescription(description.toLowerCase());
-    q.setRightsHolder(rightsHolder.toLowerCase());
+    if (text != null) {
+      q.setText(text.toLowerCase());
+    }
+    if (seriesId != null) {
+      q.setSeriesId(seriesId.toLowerCase());
+    }
+    if (seriesTitle != null) {
+      q.setSeriesTitle(seriesTitle.toLowerCase());
+    }
+    if (creator != null) {
+      q.setCreator(creator.toLowerCase());
+    }
+    if (contributor != null) {
+      q.setContributor(contributor.toLowerCase());
+    }
+    if (language != null) {
+      q.setLanguage(language.toLowerCase());
+    }
+    if (license != null) {
+      q.setLicense(license.toLowerCase());
+    }
+    if (subject != null) {
+      q.setSubject(subject.toLowerCase());
+    }
+    if (publisher != null) {
+      q.setPublisher(publisher.toLowerCase());
+    }
+    if (seriesAbstract != null) {
+      q.setSeriesAbstract(seriesAbstract.toLowerCase());
+    }
+    if (description != null) {
+      q.setDescription(description.toLowerCase());
+    }
+    if (rightsHolder != null) {
+      q.setRightsHolder(rightsHolder.toLowerCase());
+    }
     try {
-      q.setCreatedFrom(SolrUtils.parseDate(createdFrom));
-      q.setCreatedTo(SolrUtils.parseDate(createdTo));
+      if (createdFrom != null) {
+        q.setCreatedFrom(SolrUtils.parseDate(createdFrom));
+      }
+      if (createdTo != null) {
+        q.setCreatedTo(SolrUtils.parseDate(createdTo));
+      }
     } catch (ParseException e1) {
       logger.warn("Could not parse date parameter: {}", e1);
     }

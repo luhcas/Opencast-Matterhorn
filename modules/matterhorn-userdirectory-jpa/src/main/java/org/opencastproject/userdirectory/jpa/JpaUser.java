@@ -99,5 +99,15 @@ public class JpaUser {
   public Set<String> getRoles() {
     return roles;
   }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "{username=" + username + ", roles=" + roles + "}";
+  }
 
 }
