@@ -114,6 +114,16 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
+    <dependency>
+    	<groupId>org.gstreamer</groupId>
+    	<artifactId>gstreamer-java</artifactId>
+    	<version>1.4-no-tests-and-bin-launch</version>
+    </dependency>
+    <dependency>
+    	<groupId>net.java.dev.jna</groupId>
+    	<artifactId>jna</artifactId>
+    	<version>3.2.4</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
