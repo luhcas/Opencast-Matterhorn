@@ -66,9 +66,11 @@
               json-simple;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/opencast-lti.xml,
-              OSGI-INF/opencast-lti-sample.xml
+              OSGI-INF/opencast-lti.xml
             </Service-Component>
+            <Http-Alias>/ltisample</Http-Alias>
+            <Http-Classpath>/ltisample</Http-Classpath>
+            <Http-Welcome>index.html</Http-Welcome>
           </instructions>
         </configuration>
       </plugin>

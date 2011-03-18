@@ -34,15 +34,16 @@ import javax.servlet.Servlet;
 public class Activator implements BundleActivator {
   /** The static resource registration */
   protected ServiceRegistration staticResourceRegistration = null;
-  
+
   /** The web console registration */
   protected ServiceRegistration webConsoleRegistration;
-  
+
   /** The web console servlet */
   protected OsgiManager manager;
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   @Override
@@ -59,9 +60,10 @@ public class Activator implements BundleActivator {
     consoleProps.put("contextId", RestConstants.HTTP_CONTEXT_ID);
     webConsoleRegistration = bundleContext.registerService(Servlet.class.getName(), manager, consoleProps);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
   @Override

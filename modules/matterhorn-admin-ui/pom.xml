@@ -17,7 +17,7 @@
     <checkstyle.skip>false</checkstyle.skip>
   </properties>
   <dependencies>
-<dependency>
+    <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
@@ -255,9 +255,9 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>org.opencastproject.rest;version=${project.version}</Import-Package>
             <Private-Package>ui.*, uitests.*</Private-Package>
-            <Service-Component>
-              OSGI-INF/opencast-admin-ui.xml
-            </Service-Component>
+            <Http-Alias>/admin</Http-Alias>
+            <Http-Classpath>/ui</Http-Classpath>
+            <Http-Welcome>recordings.html?show=all</Http-Welcome>
           </instructions>
         </configuration>
       </plugin>

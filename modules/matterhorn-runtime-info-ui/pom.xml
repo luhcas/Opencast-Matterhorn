@@ -184,9 +184,11 @@
                 json-simple
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/ui.xml,
               OSGI-INF/info.xml
             </Service-Component>
+            <Http-Alias>/</Http-Alias>
+            <Http-Classpath>/ui</Http-Classpath>
+            <Http-Welcome>welcome.html</Http-Welcome>
           </instructions>
         </configuration>
       </plugin>

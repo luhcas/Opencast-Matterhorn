@@ -54,16 +54,8 @@ public class StaticResource extends HttpServlet {
   /** The welcome file to redirect to, if only the alias is specified in the request */
   protected String welcomeFile = null;
 
-  /** The classloader to use to search for the static resources.  Defaults to this class's classloader */
+  /** The classloader to use to search for the static resources. */
   protected ClassLoader classloader = null;
-
-  /**
-   * Default no-arg constructor called by OSGI's declarative services. The static resource will be configured via DS
-   * component properties.
-   */
-  public StaticResource() {
-    classloader = getClass().getClassLoader();
-  }
 
   /**
    * Constructs a static resources.
@@ -78,7 +70,6 @@ public class StaticResource extends HttpServlet {
    *          the default welcome file
    */
   public StaticResource(ClassLoader classloader, String classpath, String alias, String welcomeFile) {
-    this();
     this.classpath = classpath;
     this.alias = alias;
     this.welcomeFile = welcomeFile;
@@ -183,15 +174,4 @@ public class StaticResource extends HttpServlet {
       IOUtils.closeQuietly(in);
     }
   }
-
-  /**
-   * Sets the classloader for this static resource.
-   * 
-   * @param classloader
-   *          the classloader to set
-   */
-  public void setClassloader(ClassLoader classloader) {
-    this.classloader = classloader;
-  }
-
 }

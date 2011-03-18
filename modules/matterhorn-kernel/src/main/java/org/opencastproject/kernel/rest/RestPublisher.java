@@ -28,10 +28,13 @@ import org.codehaus.jettison.mapped.Configuration;
 import org.codehaus.jettison.mapped.MappedNamespaceConvention;
 import org.codehaus.jettison.mapped.MappedXMLStreamWriter;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,9 +73,6 @@ public class RestPublisher implements RestConstants {
   public static final String JAX_RS_SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))("
           + SERVICE_PATH_PROPERTY + "=*))";
 
-  /** The rest publisher looks for any servlet */
-  public static final String STATIC_RESOURCE_FILTER = "(objectClass=javax.servlet.Servlet)";
-
   /** A map that sets default xml namespaces in {@link XMLStreamWriter}s */
   protected static final ConcurrentHashMap<String, String> NAMESPACE_MAP;
 
@@ -94,10 +94,9 @@ public class RestPublisher implements RestConstants {
   protected ServiceTracker jaxRsTracker = null;
 
   /**
-   * A service tracker that monitors StaticResource servlets, providing access to the appropriate classloader so these
-   * servlets remain free from OSGI dependencies.
+   * A bundle tracker that registers StaticResource servlets for bundles with the right headers.
    */
-  protected ServiceTracker staticResourceTracker = null;
+  protected BundleTracker bundleTracker = null;
 
   /** The base URL for this server */
   protected String baseServerUri;
@@ -128,12 +127,12 @@ public class RestPublisher implements RestConstants {
 
     try {
       jaxRsTracker = new JaxRsServiceTracker();
-      staticResourceTracker = new StaticResourceTracker();
+      bundleTracker = new StaticResourceBundleTracker(componentContext.getBundleContext());
     } catch (InvalidSyntaxException e) {
       throw new IllegalStateException(e);
     }
     jaxRsTracker.open();
-    staticResourceTracker.open();
+    bundleTracker.open();
   }
 
   /**
@@ -142,7 +141,7 @@ public class RestPublisher implements RestConstants {
   protected void deactivate() {
     logger.debug("deactivate()");
     jaxRsTracker.close();
-    staticResourceTracker.close();
+    bundleTracker.close();
   }
 
   /**
@@ -316,26 +315,45 @@ public class RestPublisher implements RestConstants {
   }
 
   /**
-   * Tracks {@link StaticResource} classes.
+   * Tracks bundles containing static resources to be exposed via HTTP URLs.
    */
-  public class StaticResourceTracker extends ServiceTracker {
-    StaticResourceTracker() throws InvalidSyntaxException {
-      super(componentContext.getBundleContext(), componentContext.getBundleContext().createFilter(
-              STATIC_RESOURCE_FILTER), null);
+  class StaticResourceBundleTracker extends BundleTracker {
+
+    /**
+     * Creates a new StaticResourceBundleTracker.
+     * 
+     * @param context
+     *          the bundle context
+     */
+    StaticResourceBundleTracker(BundleContext context) {
+      super(context, Bundle.ACTIVE, null);
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.osgi.util.tracker.BundleTracker#addingBundle(org.osgi.framework.Bundle, org.osgi.framework.BundleEvent)
+     */
     @Override
-    public Object addingService(ServiceReference reference) {
-      Object service = context.getService(reference);
-      if (service instanceof StaticResource) {
-        ((StaticResource) service).setClassloader(new StaticResourceClassLoader(reference.getBundle()));
+    public Object addingBundle(Bundle bundle, BundleEvent event) {
+      String classpath = (String) bundle.getHeaders().get(RestConstants.HTTP_CLASSPATH);
+      String alias = (String) bundle.getHeaders().get(RestConstants.HTTP_ALIAS);
+      String welcomeFile = (String) bundle.getHeaders().get(RestConstants.HTTP_WELCOME);
+
+      if (classpath != null && alias != null) {
+        Dictionary<String, String> props = new Hashtable<String, String>();
+        props.put("alias", alias);
+        props.put("contextId", RestConstants.HTTP_CONTEXT_ID);
+
+        StaticResource servlet = new StaticResource(new StaticResourceClassLoader(bundle), classpath, alias,
+                welcomeFile);
+
+        // We use the newly added bundle's context to register this service, so when that bundle shuts down, it brings
+        // down this servlet with it
+        bundle.getBundleContext().registerService(Servlet.class.getName(), servlet, props);
       }
-      return super.addingService(reference);
-    }
 
-    @Override
-    public void removedService(ServiceReference reference, Object service) {
-      super.removedService(reference, service);
+      return super.addingBundle(bundle, event);
     }
   }
 

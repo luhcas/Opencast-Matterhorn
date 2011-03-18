@@ -31,5 +31,13 @@ public interface RestConstants {
 
   /** The ID by which this http context is known by the extended http service */
   String HTTP_CONTEXT_ID = "opencast.httpcontext";
-  
+
+  /** The bundle header used to find the static resource URL alias */
+  String HTTP_ALIAS = "Http-Alias";
+
+  /** The bundle header used to find the static resource classpath */
+  String HTTP_CLASSPATH = "Http-Classpath";
+
+  /** The bundle header used to find the static resource welcome file */
+  String HTTP_WELCOME = "Http-Welcome";
 }

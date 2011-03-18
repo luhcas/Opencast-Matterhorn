@@ -126,8 +126,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.javamail-api-1.4</artifactId>
+      <groupId>javax.mail</groupId>
+      <artifactId>mail</artifactId>
     </dependency>
 
   <!-- include activation library even though it is part of JRE 6 otherwise
@@ -172,7 +172,7 @@
               gdata-youtube;inline=true,
               google-collections;inline=true,
               activation;inline=true,
-              org.apache.servicemix.specs.javamail-api-1.4;inline=true
+              mail;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/distribution-service-youtube.xml,
