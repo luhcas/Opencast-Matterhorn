@@ -349,6 +349,16 @@
     </profile>
 
     <profile>
+      <id>dataloader</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/matterhorn-dataloader</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>cas</id>
       <activation>
         <activeByDefault>false</activeByDefault>
