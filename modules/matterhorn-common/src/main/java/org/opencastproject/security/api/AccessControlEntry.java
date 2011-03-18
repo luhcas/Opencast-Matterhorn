@@ -15,14 +15,44 @@
  */
 package org.opencastproject.security.api;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 /**
  * A tuple of role, action, and whether the combination is to be allowed.
  */
-public class AccessControlEntry {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "ace", namespace = "org.opencastproject.security")
+@XmlRootElement(name = "ace", namespace = "org.opencastproject.security")
+public final class AccessControlEntry {
+
+  /** The role */
   private String role = null;
+
+  /** The action */
   private String action = null;
+
+  /** Whether this role is allowed to take this action */
   private boolean allow = false;
 
+  /**
+   * No-arg constructor needed by JAXB
+   */
+  public AccessControlEntry() {
+  }
+
+  /**
+   * Constructs an access control entry for a role, action, and allow tuple
+   * 
+   * @param role
+   *          the role
+   * @param action
+   *          the action
+   * @param allow
+   *          Whether this role is allowed to take this action
+   */
   public AccessControlEntry(String role, String action, boolean allow) {
     this.role = role;
     this.action = action;
