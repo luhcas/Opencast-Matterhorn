@@ -23,5 +23,20 @@
     </service>
   </scr:component>
 
+  <scr:component name="org.opencastproject.userdirectory.RoleEndpoint">
+    <implementation class="org.opencastproject.userdirectory.RoleEndpoint" />
+    <property name="service.description" value="Role listing REST endpoint" />
+
+    <property name="opencast.service.type" value="org.opencastproject.userdirectory.roles" />
+    <property name="opencast.service.path" value="/roles" />
+    <property name="opencast.service.jobproducer" value="false" />
+
+    <service>
+      <provide interface="org.opencastproject.userdirectory.RoleEndpoint" />
+    </service>
+    <reference name="roleProviders" interface="org.opencastproject.security.api.RoleProvider"
+      cardinality="1..n" policy="dynamic" bind="addRoleProvider" unbind="removeRoleProvider" />
+  </scr:component>
+
 </scr:components>
 

@@ -40,6 +40,11 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+    </dependency>
     
     <!-- Testing -->
     <dependency>
@@ -69,6 +74,12 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Private-Package>
+              org.json.*,
+            </Private-Package>
+            <Embed-Dependency>
+              json-simple;inline=true
+            </Embed-Dependency>
             <Export-Package>
               org.opencastproject.userdirectory;version=${project.version},
             </Export-Package>
