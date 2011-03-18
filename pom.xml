@@ -349,6 +349,16 @@
     </profile>
 
     <profile>
+      <id>cas</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <modules>
+        <module>modules/matterhorn-cas</module>
+      </modules>
+    </profile>
+    
+    <profile>
       <id>test</id>
       <activation>
         <activeByDefault>false</activeByDefault>

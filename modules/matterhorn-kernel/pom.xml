@@ -69,21 +69,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-cas-client</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jasig.cas</groupId>
-      <artifactId>com.springsource.org.jasig.cas.client</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opensaml</groupId>
-      <artifactId>com.springsource.org.opensaml</artifactId>
-    </dependency>
-
-    <dependency>
       <groupId>org.openid4java</groupId>
       <artifactId>com.springsource.org.openid4java</artifactId>
     </dependency>
@@ -232,11 +217,6 @@
               org.slf4j,
               javax.management,
               javax.xml.namespace;version=0,
-              org.jasig.cas.client.authentication;resolution:=optional,
-              org.jasig.cas.client.proxy;resolution:=optional,
-              org.jasig.cas.client.session;resolution:=optional,
-              org.jasig.cas.client.util;resolution:=optional,
-              org.jasig.cas.client.validation;resolution:=optional,
               org.springframework.beans,
               org.springframework.beans.factory,
               org.springframework.beans.factory.config,
@@ -250,9 +230,6 @@
               org.springframework.security.access.event,
               org.springframework.security.authentication,
               org.springframework.security.authentication.event,
-              org.springframework.security.cas;resolution:=optional,
-              org.springframework.security.cas.authentication;resolution:=optional,
-              org.springframework.security.cas.web;resolution:=optional,
               org.springframework.security.config,
               org.springframework.security.core,
               org.springframework.security.core.userdetails,
