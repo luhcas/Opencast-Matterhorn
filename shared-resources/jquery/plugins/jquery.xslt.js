@@ -35,29 +35,27 @@
         return this;
     }
     var str = /^\s*</;
-    if (document.recalc) { // IE 5+
+    if ($.browser.msie) { // IE 5+
         $.fn.xslt = function(xml, xslt, callback) {
             var target = $(this);
+
+            var xmlResult = $.ajax(
+            {
+              url: xml,
+              async: false
+            }).responseXML;
+
+            var xsltResult = $.ajax(
+            {
+              url: xslt,
+              async: false
+            }).responseXML;
                 
-            var change = function() {
-                
-                if (xm.XMLDocument && xm.XMLDocument.readyState == 4 && xs.XMLDocument && xs.XMLDocument.readyState == 4) {
-                    target.html(xm.transformNode(xs.XMLDocument));
-                    if (callback) {
-                      callback();
-                    }
-                }
-            };
+            target.html(xmlResult.transformNode(xsltResult));
+            if (callback) {
+              callback();
+            }
 
-            var xm = document.createElement('xml');
-            xm.onreadystatechange = change;
-            xm[str.test(xml) ? "innerHTML" : "src"] = xml;
-
-            var xs = document.createElement('xml');
-            xs.onreadystatechange = change;
-            xs[str.test(xslt) ? "innerHTML" : "src"] = xslt;
-
-            $('body').append(xm).append(xs);
             return this;
        };
     }
@@ -86,8 +84,8 @@
                 var xmDoc = null;
 
                 var change = function() {
-                    if(xm.readyState == 4){ xmDoc = xm.responseXML; }
-                    if(xs.readyState == 4){ xsDoc = xs.responseXML; }
+                    if(xm.readyState == 4){xmDoc = xm.responseXML;}
+                    if(xs.readyState == 4){xsDoc = xs.responseXML;}
                     if (xmDoc && xsDoc && !transformed) {
                         var processor = new XSLTProcessor();
                         if ($.isFunction(processor.transformDocument)) {
@@ -110,7 +108,7 @@
                     xm.responseXML = new DOMParser().parseFromString(xml, "text/xml");
                 }
                 else {
-                    xm = $.ajax({ dataType: "xml", url: xml});
+                    xm = $.ajax({dataType: "xml", url: xml});
                     xm.onreadystatechange = change;
                 }
 
@@ -119,7 +117,7 @@
                     change();
                 }
                 else {
-                    xs = $.ajax({ dataType: "xml", url: xslt});
+                    xs = $.ajax({dataType: "xml", url: xslt});
                     xs.onreadystatechange = change;
                 }
                 return this;
