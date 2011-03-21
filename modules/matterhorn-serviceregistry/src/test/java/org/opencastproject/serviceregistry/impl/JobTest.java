@@ -104,7 +104,7 @@ public class JobTest {
     JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null, null, false);
 
     Assert.assertNotNull(job.getUri());
-    
+
     Job jobFromDb = serviceRegistry.getJob(job.getId());
     Assert.assertEquals(Status.INSTANTIATED, jobFromDb.getStatus());
 
@@ -132,7 +132,7 @@ public class JobTest {
     serviceRegistry.updateJob(job);
 
     long id = job.getId();
-    
+
     // Search using both the job type and status
     List<Job> jobs = serviceRegistry.getJobs(JOB_TYPE_1, Status.RUNNING);
     Assert.assertEquals(1, jobs.size());
@@ -236,7 +236,8 @@ public class JobTest {
     otherTypeRunning.setProcessorServiceRegistration(regType2Localhost);
     serviceRegistry.updateJob(otherTypeRunning);
 
-    JobJpaImpl otherTypeFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2, OPERATION_NAME, null, null, false);
+    JobJpaImpl otherTypeFinished = (JobJpaImpl) serviceRegistry
+            .createJob(JOB_TYPE_2, OPERATION_NAME, null, null, false);
     // Simulate starting the job
     otherTypeFinished.setStatus(Status.RUNNING);
     otherTypeFinished.setProcessorServiceRegistration(regType2Localhost);
@@ -441,6 +442,46 @@ public class JobTest {
   @Test
   public void testNumberOfCores() throws Exception {
     Assert.assertEquals(2, serviceRegistry.getMaxConcurrentJobs());
+  }
+
+  @Test
+  public void testServiceUnregistration() throws Exception {
+    // Create a job
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some operation", null, null, false);
+
+    // Set its status to running on a localhost
+    job.setStatus(Status.RUNNING);
+    job.setDispatchable(true);
+    job.setProcessorServiceRegistration(regType1Localhost);
+    serviceRegistry.updateJob(job);
+
+    // Unregister the service
+    serviceRegistry.unRegisterService(JOB_TYPE_1, LOCALHOST);
+
+    // Ensure that the job is once again queued, so it can be dispatched to a server ready to accept it
+    Assert.assertEquals("Job should be queued", Status.QUEUED, serviceRegistry.getJob(job.getId()).getStatus());
+    Assert.assertNull("Job should have no associated processor", serviceRegistry.getJob(job.getId())
+            .getProcessingHost());
+  }
+
+  @Test
+  public void testHostUnregistration() throws Exception {
+    // Create a job
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, "some operation", null, null, false);
+
+    // Set its status to running on a localhost
+    job.setStatus(Status.RUNNING);
+    job.setDispatchable(true);
+    job.setProcessorServiceRegistration(regType1Localhost);
+    serviceRegistry.updateJob(job);
+
+    // Unregister the host that's running the service responsible for this job
+    serviceRegistry.unregisterHost(LOCALHOST);
+
+    // Ensure that the job is once again queued, so it can be dispatched to a server ready to accept it
+    Assert.assertEquals("Job should be queued", Status.QUEUED, serviceRegistry.getJob(job.getId()).getStatus());
+    Assert.assertNull("Job should have no associated processor", serviceRegistry.getJob(job.getId())
+            .getProcessingHost());
   }
 
 }

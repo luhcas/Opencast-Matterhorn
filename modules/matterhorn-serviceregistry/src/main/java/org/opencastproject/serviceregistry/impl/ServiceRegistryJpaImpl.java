@@ -587,9 +587,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       } else {
         existingHostRegistration.setOnline(false);
         for (ServiceRegistration serviceRegistration : getServiceRegistrationsByHost(host)) {
-          ((ServiceRegistrationJpaImpl) serviceRegistration).setOnline(false);
-          logger.info("Unregistering service '{}' on host {}", serviceRegistration.getServiceType(), host);
-          em.merge(serviceRegistration);
+          unRegisterService(serviceRegistration.getServiceType(), serviceRegistration.getHost());
         }
         em.merge(existingHostRegistration);
       }
