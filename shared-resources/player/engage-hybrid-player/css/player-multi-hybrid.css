@@ -187,6 +187,7 @@ color: #000;
 {
   height:                   44px;
   background:               url("../img/player_controll_bg.png") repeat-x 0 0 #000;
+  display:                  none;
 /*
   width:                    100%;
 */

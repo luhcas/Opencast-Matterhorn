@@ -146,16 +146,25 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
     if (searchService == null) {
       logger.warn("{} denies to handle request for {} due to missing search service", this, query);
       return false;
-    } else if (selector == null) {
-      logger.warn("{} denies to handle request for {} since no selector is defined", this);
+    } else if (uri == null) {
+      logger.warn("{} denies to handle request for {} since no uri is defined", this);
       return false;
     } else if (query.length == 0) {
       logger.debug("{} denies to handle unknown request", this);
       return false;
-    } else if (!query[0].toLowerCase().equals(selector)) {
+    }
+    
+    // Check the uri
+    if (!query[0].equalsIgnoreCase(uri)) {
       logger.debug("{} denies to handle request for {}", this, query);
       return false;
     }
+    
+    // Check the selector
+    if (selector != null && (query.length < 2 || !query[1].equalsIgnoreCase(selector))) {
+      return false;
+    }
+    
     logger.debug("{} accepts to handle request for {}", this, query);
     return true;
   }
@@ -230,7 +239,27 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
       }
     }
   }
-
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return super.hashCode();
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.feed.impl.AbstractFeedGenerator#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof AbstractFeedService) || selector == null)
+      return super.equals(o);
+    return super.equals(o) && selector.equals(((AbstractFeedService)o).selector);
+  }
+  
   /**
    * Ensures that this string is an absolute URL. If not, prepend the local serverUrl to the string.
    * 

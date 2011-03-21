@@ -1,5 +1,19 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
 var Opencast = Opencast || {};
 
 /**
@@ -11,7 +25,7 @@ Opencast.segments_Plugin = (function ()
     var template = '{for s in segment}' +
                         '<div id="panel_${s.index}" class="panel" style="float: left; position: relative;">' +
                             '<div role="button" class="inside" ' +
-                                'onmouseover="Opencast.segments_ui.hoverSegment(${parseInt(s.index)})" ' +
+                                'onmouseover="Opencast.segments_ui.hoverSegment(${parseInt(s.hoverSegmentIndex)}, ${parseInt(s.index)})" ' +
                                 'onmouseout="Opencast.segments_ui.hoverOutSegment(${parseInt(s.index)})">' +
                                     '<a href="javascript:Opencast.Watch.seekSegment(${parseInt(s.time) / 1000})">' +
                                         '<img width="111" alt="Slide ${parseInt(s.index) + 1} of ${segment.length}" ' +
@@ -29,7 +43,7 @@ Opencast.segments_Plugin = (function ()
     var segments_data;
     // Processed Data
     var processedTemplateData = false;
-
+    
     /**
      * @memberOf Opencast.segments_Plugin
      * @description Add As Plug-in
@@ -50,12 +64,15 @@ Opencast.segments_Plugin = (function ()
      */
     function createSegmentsFromCashe()
     {
-        if((processedTemplateData !== false) && (element !== undefined) && (segments_data.segment !==  undefined) && (segments_data.segment.length > 0))
+        if ((processedTemplateData !== false) && (element !== undefined) && (segments_data.segment !== undefined) && (segments_data.segment.length > 0))
         {
+            Opencast.Utils.log("Series Plugin: Data available, processing template");
             element.html(processedTemplateData);
             return true;
-        } else
+        }
+        else
         {
+            Opencast.Utils.log("Series Plugin: No data available");
             return false;
         }
     }
@@ -66,13 +83,13 @@ Opencast.segments_Plugin = (function ()
      */
     function createSegments()
     {
-        if ((element !== undefined) && (segments_data.segment !==  undefined) && (segments_data.segment.length > 0))
+        if ((element !== undefined) && (segments_data.segment !== undefined) && (segments_data.segment.length > 0))
         {
             processedTemplateData = template.process(segments_data);
             element.html(processedTemplateData);
         }
     }
-
+    
     return {
         createSegmentsFromCashe: createSegmentsFromCashe,
         addAsPlugin: addAsPlugin

@@ -1,5 +1,19 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
@@ -8,12 +22,21 @@ var Opencast = Opencast || {};
 Opencast.search = (function ()
 {
     // Variable for the storage of the processed jsonp-Data
-    var dataStor, staticInputElem, mediaPackageId;
-    var staticImg = 'url("../img/jquery/ui-bg_flat_75_fde7ce_40x100.png") repeat-x scroll 50% 50% #FDE7CE';
-    var SEARCH = 'Search this Recording';
-    var colorFirst = '#C0C0C0';
-    var colorSecond = '#ADD8E6';
-    var colorThird = '#90EE90';
+    var dataStor,
+        staticInputElem,
+        mediaPackageId,
+        staticImg = 'url("../../img/jquery/ui-bg_flat_75_fde7ce_40x100.png") repeat-x scroll 50% 50% #FDE7CE',
+        SEARCH = 'Search this Recording',
+        colorFirst = '#C0C0C0',
+        colorSecond = '#ADD8E6',
+        colorThird = '#90EE90',
+        foundAlready = false, // flag if something has already been found
+        lastHit = '',         // storage for latest successful search hit
+        validSegments = [],   // map of old and new segments
+        requestedValidSegments = false,
+        searchOpen = false,
+        currentInputElem = '',
+        currentSearchStr = '';
     
     /**
      * @memberOf Opencast.search
@@ -87,6 +110,13 @@ Opencast.search = (function ()
         // Prepare each segment
         $(dataStor['search-results'].result.segments.segment).each(function (i)
         {
+            var newSeg = validSegments[i];
+            var isValid = (newSeg != -1) ? true : false;
+            if(isValid)
+            {
+                var curr = dataStor['search-results'].result.segments.segment[newSeg];
+            }
+            
             var bgColor = 'none';
             var text = this.text + '';
             // Remove previously marked Text
@@ -125,8 +155,16 @@ Opencast.search = (function ()
             }
             // Set background of the table tr
             this.backgroundColor = bgColor;
+            var segment = '';
+            
             // Set background of the scrubber elements
-            var segment = 'td#segment' + i;
+            if(isValid)
+            {
+                segment = 'td#segment' + newSeg;
+            } else
+            {
+                segment = 'td#segment' + i;
+            }
             if (bgColor !== 'none')
             {
                 // The image from jquery ui overrides the background-color, so: remove it
@@ -145,12 +183,41 @@ Opencast.search = (function ()
     
     /**
      * @memberOf Opencast.search
+     * @description Returns the current input element
+     * @param Returns the current input element
+     */
+    function getCurrentInputElement()
+    {
+        return currentInputElem;
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Returns the current search string
+     * @param Returns the current search string
+     */
+    function getCurrentSearchString()
+    {
+        return currentSearchStr;
+    }
+    
+    /**
+     * @memberOf Opencast.search
      * @description Does the search
-     * @param elem The Input ELement (currently a workaround)
+     * @param elem The Input Element (currently a workaround)
      * @param searchValue The search value
      */
     function showResult(elem, searchValue)
     {
+        currentInputElem = elem;
+        currentSearchStr = searchValue;
+        // Request map of valid segments
+        if(!requestedValidSegments)
+        {
+            validSegments = [];
+            validSegments = Opencast.segments_ui.getSegmentNumbers();
+            requestedValidSegments = true;
+        }
         staticInputElem = elem;
         // Don't search for the default value
         if ((searchValue === SEARCH) || ($(staticInputElem).val() === SEARCH))
@@ -178,14 +245,18 @@ Opencast.search = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
+                Opencast.Utils.log("Search AJAX call: Requesting data succeeded");
                 // get rid of every '@' in the JSON data
                 // dataStor = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
                 dataStor = data;
                 var segmentsAvailable = true;
-                
-                if((dataStor === undefined) || (dataStor['search-results'] === undefined) || (dataStor['search-results'].result === undefined))
+                if ((dataStor === undefined) || (dataStor['search-results'] === undefined) || (dataStor['search-results'].result === undefined))
                 {
+                    Opencast.Utils.log("Search AJAX call: Data not available for search value '" + escape(searchValue) + "'");
                     segmentsAvailable = false;
+                } else
+                {
+                    Opencast.Utils.log("Search AJAX call: Data available for search value '" + escape(searchValue) + "'");
                 }
                 // Check if Segments + Segments Text is available
                 segmentsAvailable = segmentsAvailable && (dataStor['search-results'].result.segments !== undefined) && (dataStor['search-results'].result.segments.segment.length > 0);
@@ -206,38 +277,98 @@ Opencast.search = (function ()
                     prepareData(searchValue);
                     // Create Trimpath Template nd add it to the HTML
                     var seaPlug = Opencast.search_Plugin.addAsPlugin($('#oc-search-result'), dataStor['search-results'].result.segments, searchValue);
-                    if(!seaPlug)
+                    if (!seaPlug && !foundAlready)
                     {
-                        $('#oc-search-result').html('No Segment Data available');
+                        setNoSegmentDataAvailable();
+                    }
+                    else
+                    {
+                        foundAlready = true;
+                        lastHit = searchValue;
                     }
                     // Make visible
                     $('.oc-segments-preview').css('display', 'block');
                 }
                 else
                 {
-                    // If no Segment Data is available
-                    $('#oc-search-result').html('No Segment Data available');
+                    if (!foundAlready)
+                    {
+                        setNoSegmentDataAvailable();
+                    }
+                    else
+                    {
+                        setNoActualResultAvailable(searchValue);
+                    }
                 }
-                $('#oc_search-segment').show();
-                $('#search-loading').hide();
-                $('#oc-search-result').show();
+                displayResult();
             },
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                $('#oc-search-result').html('No Segment Data available');
-                $('#search-loading').hide();
-                $('#oc-search-result').show();
+                Opencast.Utils.log("Search Ajax call: Requesting data failed");
+                if (!foundAlready)
+                {
+                    setNoSegmentDataAvailable();
+                }
+                else
+                {
+                    setNoActualResultAvailable(searchValue);
+                }
+                displayResult();
             }
         });
         // If the Search Result Field contains nothing: Clear and display a Message
-        if($('#oc-search-result').empty)
+        if ($('#oc-search-result').empty)
         {
-            $('#oc-search-result').html('No Search Result available');
-            $('#oc_search-segment').show();
-            $('#search-loading').hide();
-            $('#oc-search-result').show();
+            if (!foundAlready)
+            {
+                setNoSearchResultAvailable();
+            }
+            else
+            {
+                setNoActualResultAvailable(searchValue);
+            }
+            displayResult();
         }
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Sets the search result to an error message
+     */
+    function setNoSegmentDataAvailable()
+    {
+        $('#oc-search-result').html('No Segment Data available');
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Sets the search result to an error message
+     */
+    function setNoSearchResultAvailable()
+    {
+        $('#oc-search-result').html('No Search Result available');
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Sets the search value display to indicate that the latest hit is displayed and that for the current search value no results exist
+     */
+    function setNoActualResultAvailable(sVal)
+    {
+        $('#searchValueDisplay').html('Results for &quot;' + unescape(lastHit) + '&quot; (no actual results for &quot;' + unescape(sVal) + '&quot; found)');
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description displays the search value and its result(s)
+     */
+    function displayResult()
+    {
+        searchOpen = true;
+        $('#oc_search-segment').show();
+        $('#search-loading').hide();
+        $('#oc-search-result').show();
     }
     
     /**
@@ -246,6 +377,7 @@ Opencast.search = (function ()
      */
     function hideSearch()
     {
+        searchOpen = false;
         $("#oc_btn-lecturer-search").attr('aria-pressed', 'false');
         $('#oc_search-segment').hide();
         // Write the default value if no search value has been given
@@ -261,7 +393,17 @@ Opencast.search = (function ()
      */
     function initialize()
     {
-        // Do nothing in here
+        requestedValidSegments = false;
+    }
+    
+    /**
+     * @memberOf Opencast.search
+     * @description Returns if search is opened
+     * @return true if search is opened, false else
+     */
+    function isOpen()
+    {
+        return searchOpen;
     }
     
     return {
@@ -269,8 +411,11 @@ Opencast.search = (function ()
         getSecondColor: getSecondColor,
         getThirdColor: getThirdColor,
         initialize: initialize,
+        getCurrentInputElement: getCurrentInputElement,
+        getCurrentSearchString: getCurrentSearchString,
         showResult: showResult,
         hideSearch: hideSearch,
+        isOpen: isOpen,
         setMediaPackageId: setMediaPackageId
     };
 }());

@@ -1,26 +1,40 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace segments_Plugin
+ * @namespace the global Opencast namespace segments_ui_Plugin
  */
 Opencast.segments_ui_Plugin = (function ()
 {
     // The Templates to process
     var templateSegments1 = '<tr>' +
                             '{for s in segment}' +
-                                '{if s.durationIncludingSegment >= currentTime}' +
+                                '{if (parseInt(s.duration) > 0)}' +
                                     '<td role="button" class="segment-holder ui-widget ui-widget-content" ' +
-                                         'id="segment${s.index}" ' +
-                                         'onmouseover="Opencast.segments_ui.hoverSegment(${parseInt(s.index)})" ' +
-                                         'onmouseout="Opencast.segments_ui.hoverOutSegment(${parseInt(s.index)})" ' +
-                                         'alt="Slide ${parseInt(s.index) + 1} of ${segment.length}" ' +
-                                         'onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})" ' +
-                                          'style="width: ${parseInt(s.duration) / parseInt(s.completeDuration) * 100}%;" ' +
-                                    '>' +
-                                        '<span class="segments-time" style="display: none">${Math.floor(parseInt(s.time) / 1000)}</span>' + 
-                                    '</td>' +
+                                        'id="segment${s.index}" ' +
+                                        'onmouseover="Opencast.segments_ui.hoverSegment(${parseInt(s.hoverSegmentIndex)}, ${parseInt(s.index)})" ' +
+                                        'onmouseout="Opencast.segments_ui.hoverOutSegment(${parseInt(s.index)})" ' +
+                                        'alt="Slide ${parseInt(s.index) + 1} of ${segment.length}" ' +
+                                        'onclick="Opencast.Watch.seekSegment(${parseInt(s.time) / 1000})" ' +
+                                        'style="width: ${parseInt(s.duration) / parseInt(s.completeDuration) * 100}%;" ' +
+                                     '>' +
+                                        '<span class="segments-time" style="display: none">${parseInt(s.time) / 1000}</span>' +
+                                     '</td>' +
                                  '{/if}' +
                              '{forelse}' +
                                  '<td style="width: 100%;" id="segment-holder-empty" class="segment-holder" />' +
@@ -262,7 +276,7 @@ Opencast.segments_ui_Plugin = (function ()
                                 '{/for}';
     
     var templateSegments2 = '{for s in segment}' +
-                                '{if s.durationIncludingSegment >= currentTime}' +
+                                '{if (parseInt(s.duration) > 0)}' +
                                     '<tr>' +
                                         '<td class="oc-segments-preview">' +
                                             '${s.previews.preview.$}' +
@@ -349,47 +363,64 @@ Opencast.segments_ui_Plugin = (function ()
      * @param withSegments true if process with Segments, false if without Segments
      */
     function createSegments(withSegments) {
+        var cs1 = false,
+            cs2 = false,
+            cs3 = false,
+            cs4 = false,
+            cs5 = false,
+            cs6 = false,
+            cs7 = false;
+            
         // Process Element Segments 1
         if (withSegments && (elementSegments1 !== undefined) && (segments_ui_dataSegments.segment !== undefined) && (segments_ui_dataSegments.segment.length > 0)) {
             processedTemplateData = templateSegments1.process(segments_ui_dataSegments);
             elementSegments1.html(processedTemplateData);
+            cs1 = true;
         }
 
         // Process Element Media 1
         if ((elementMedia1 !== undefined) && (segments_ui_dataMPMedia.track !== undefined) && (segments_ui_dataMPMedia.track.length > 0)) {
             processedTemplateData = templateMedia1.process(segments_ui_dataMPMedia);
             elementMedia1.html(processedTemplateData);
+            cs2 = true;
         }
 
         // Process Element Data 1
         if ((elementData1 !== undefined) && (segments_ui_data !== undefined)) {
             processedTemplateData = templateData1.process(segments_ui_data);
             elementData1.html(processedTemplateData);
+            cs3 = true;
         }
 
         // Process Element MediaPackage 1
         if ((elementMediaPackage1 !== undefined) && (segments_ui_dataMPAttach.attachment !== undefined) && (segments_ui_dataMPAttach.attachment.length > 0)) {
             processedTemplateData = templateMPAttach1.process(segments_ui_dataMPAttach);
             elementMediaPackage1.html(processedTemplateData);
+            cs4 = true;
         }
 
         // Process Element Data 2
         if ((elementData2 !== undefined) && (templateData2 !== undefined)) {
             processedTemplateData = templateData2.process(segments_ui_data);
             elementData2.html(processedTemplateData);
+            cs5 = true;
         }
 
         // Process Element MediaPackage 2
         if ((elementMediaPackage2 !== undefined) && (segments_ui_dataMPCatalog.catalog !== undefined) && (segments_ui_dataMPCatalog.catalog.length > 0)) {
             processedTemplateData = templateMPCatalog1.process(segments_ui_dataMPCatalog);
             elementMediaPackage2.html(processedTemplateData);
+            cs6 = true;
         }
 
         // Process Element Segments 2
         if (withSegments && (elementSegments2 !== undefined) && (segments_ui_dataSegments.segment !== undefined) && (segments_ui_dataSegments.segment.length > 0)) {
             processedTemplateData = templateSegments2.process(segments_ui_dataSegments);
             elementSegments2.html(processedTemplateData);
+            cs7 = true;
         }
+        var tl = '' + (cs1 ? " 1 " : '') + (cs2 ? " 2 " : '') + (cs3 ? " 3 " : '') + (cs4 ? " 4 " : '') + (cs5 ? " 5 " : '') + (cs6 ? " 6 " : '') + (cs7 ? " 7 " : '');
+        Opencast.Utils.log("Segments UI Plugin: Following Templates have (successfully) been proceeded: " + tl + " from 7 Templates possible");
     }
 
     return {

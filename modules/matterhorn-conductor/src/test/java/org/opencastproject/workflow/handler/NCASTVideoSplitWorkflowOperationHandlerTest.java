@@ -8,13 +8,13 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -25,6 +25,8 @@ import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -36,8 +38,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-
 public class NCASTVideoSplitWorkflowOperationHandlerTest {
+  private static final Logger logger = LoggerFactory.getLogger(NCASTVideoSplitWorkflowOperationHandlerTest.class);
+  
   private NCASTVideoSplitWorkflowOperationHandler operationHandler;
   
   private Workspace workspace;
@@ -99,7 +102,15 @@ public class NCASTVideoSplitWorkflowOperationHandlerTest {
     Map<String, String> configurations = new HashMap<String, String>();
     configurations.put("source-media-flavor", "presentation/source");
     
-    operationHandler = new NCASTVideoSplitWorkflowOperationHandler();
+    try {
+      operationHandler = new NCASTVideoSplitWorkflowOperationHandler();
+    } catch(UnsatisfiedLinkError e) {
+      logger.warn("Gstreamer not properly installed... skipping {}", this.getClass().getName());
+      return;
+    } catch(NoClassDefFoundError e) {
+      logger.warn("Gstreamer not properly installed... skipping {}", this.getClass().getName());
+      return;
+    }
     operationHandler.setWorkspace(workspace);
     operationHandler.activate(componentContext);
     try {
@@ -118,7 +129,15 @@ public class NCASTVideoSplitWorkflowOperationHandlerTest {
     Map<String, String> configurations = new HashMap<String, String>();
     configurations.put("source-media-flavor", "presentation/source");
     
-    operationHandler = new NCASTVideoSplitWorkflowOperationHandler();
+    try {
+      operationHandler = new NCASTVideoSplitWorkflowOperationHandler();
+    } catch(UnsatisfiedLinkError e) {
+      logger.warn("Gstreamer not properly installed... skipping {}", this.getClass().getName());
+      return;
+    } catch(NoClassDefFoundError e) {
+      logger.warn("Gstreamer not properly installed... skipping {}", this.getClass().getName());
+      return;
+    }
     operationHandler.setWorkspace(workspace);
     operationHandler.activate(componentContext);
     try {
@@ -170,7 +189,15 @@ public class NCASTVideoSplitWorkflowOperationHandlerTest {
       EasyMock.expect(inspectionService.inspect((URI) new URI("/tmp/split2_split.mp4"))).andReturn(job2).anyTimes();
       EasyMock.replay(inspectionService);
     
-      operationHandler = new NCASTVideoSplitWorkflowOperationHandler();
+      try {
+        operationHandler = new NCASTVideoSplitWorkflowOperationHandler();
+      } catch(UnsatisfiedLinkError e) {
+        logger.warn("Gstreamer not properly installed... skipping {}", this.getClass().getName());
+        return;
+      } catch(NoClassDefFoundError e) {
+        logger.warn("Gstreamer not properly installed... skipping {}", this.getClass().getName());
+        return;
+      }
       operationHandler.setWorkspace(workspace);
       operationHandler.activate(componentContext);
       operationHandler.setInspectionService(inspectionService);

@@ -76,6 +76,9 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   public WorkflowDefinition getWorkflowDefinitionById(String id) throws WorkflowDatabaseException, NotFoundException {
     HttpGet get = new HttpGet("/definition/" + id + ".xml");
     HttpResponse response = getResponse(get, HttpStatus.SC_NOT_FOUND, HttpStatus.SC_OK);
+    if (response == null) {
+      throw new WorkflowDatabaseException("Unable to connect to a remote workflow service");
+    }
     if (HttpStatus.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
       throw new NotFoundException("Workflow definition " + id + " does not exist.");
     } else {
@@ -96,6 +99,9 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   public WorkflowInstance getWorkflowById(long id) throws WorkflowDatabaseException, NotFoundException {
     HttpGet get = new HttpGet("/instance/" + id + ".xml");
     HttpResponse response = getResponse(get, HttpStatus.SC_NOT_FOUND, HttpStatus.SC_OK);
+    if (response == null) {
+      throw new WorkflowDatabaseException("Unable to connect to a remote workflow service");
+    }
     if (HttpStatus.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
       throw new NotFoundException("Workflow instance " + id + " does not exist.");
     } else {
@@ -208,6 +214,9 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
     HttpGet get = new HttpGet("/statistics");
     HttpResponse response = getResponse(get, HttpStatus.SC_OK);
+    if (response == null) {
+      throw new WorkflowDatabaseException("Unable to connect to a remote workflow service");
+    }
     try {
       return WorkflowParser.parseWorkflowStatistics(response.getEntity().getContent());
     } catch (Exception e) {
@@ -558,6 +567,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#addWorkflowListener(org.opencastproject.workflow.api.WorkflowListener)
    */
   @Override
@@ -567,11 +577,13 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#removeWorkflowListener(org.opencastproject.workflow.api.WorkflowListener)
    */
   @Override
   public void removeWorkflowListener(WorkflowListener listener) {
-    throw new UnsupportedOperationException("Removing workflow listeners from a remote workflow service is not supported");
+    throw new UnsupportedOperationException(
+            "Removing workflow listeners from a remote workflow service is not supported");
   }
 
 }

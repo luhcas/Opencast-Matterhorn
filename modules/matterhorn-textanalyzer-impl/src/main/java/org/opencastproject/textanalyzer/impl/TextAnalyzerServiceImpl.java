@@ -15,10 +15,14 @@
  */
 package org.opencastproject.textanalyzer.impl;
 
+import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.dictionary.api.DictionaryService;
 import org.opencastproject.dictionary.api.DictionaryService.DICT_TOKEN;
 import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobBarrier;
+import org.opencastproject.job.api.JobBarrier.Result;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -74,11 +78,17 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "ocrtext";
 
+  /** Name of encoding profile used to create tiff images */
+  public static final String TIFF_CONVERSION_PROFILE = "image-conversion.http";
+
   /** The text extraction implemenetation */
   private TextExtractor textExtractor = null;
 
   /** Reference to the receipt service */
   private ServiceRegistry serviceRegistry = null;
+
+  /** The composer service */
+  protected ComposerService composerService = null;
 
   /** The workspace to ue when retrieving remote media files */
   private Workspace workspace = null;
@@ -125,8 +135,36 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   @SuppressWarnings("unchecked")
   private Catalog extract(Job job, Attachment image) throws TextAnalyzerException, MediaPackageException {
 
-    final Attachment attachment = (Attachment) image;
-    final URI imageUrl = attachment.getURI();
+    final Attachment attachment;
+    final URI imageUrl;
+
+    // Make sure the attachment is a tiff
+
+    // Make sure this image is of type tif
+    if (!image.getURI().getPath().endsWith(".tif")) {
+      try {
+        logger.info("Converting " + image + " to tif format");
+        Job conversionJob;
+        conversionJob = composerService.convertImage(image, TIFF_CONVERSION_PROFILE);
+        JobBarrier barrier = new JobBarrier(serviceRegistry, conversionJob);
+        Result result = barrier.waitForJobs();
+        if (!result.isSuccess()) {
+          throw new TextAnalyzerException("Unable to convert " + image + " to tiff");
+        }
+        conversionJob = serviceRegistry.getJob(conversionJob.getId());  // get the latest copy
+        attachment = (Attachment) MediaPackageElementParser.getFromXml(conversionJob.getPayload());
+        imageUrl = attachment.getURI();
+      } catch (EncoderException e) {
+        throw new TextAnalyzerException(e);
+      } catch (NotFoundException e) {
+        throw new TextAnalyzerException(e);
+      } catch (ServiceRegistryException e) {
+        throw new TextAnalyzerException(e);
+      }
+    } else {
+      attachment = (Attachment) image;
+      imageUrl = attachment.getURI();
+    }
 
     try {
       Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
@@ -341,6 +379,16 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
    */
   protected void setDictionaryService(DictionaryService dictionaryService) {
     this.dictionaryService = dictionaryService;
+  }
+
+  /**
+   * OSGi callback to set the composer service.
+   * 
+   * @param composer
+   *          the composer
+   */
+  protected void setComposerService(ComposerService composer) {
+    this.composerService = composer;
   }
 
 }

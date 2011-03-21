@@ -446,9 +446,9 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       where.add("e.startDate < :stopParam");
     }
     
-//    if(filter.getCurrentAndUpcoming()){
-//      where.add("e.endDate > :now");
-//    }
+    if(filter.getCurrentAndUpcoming()){
+      where.add("e.endDate > :now");
+    }
     
     if(where.size() > 0) {
       queryBase.append(" WHERE " + StringUtils.join(where, " AND "));
@@ -485,9 +485,9 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     if (filter.getStop() != null) {
       eventQuery.setParameter("stopParam", filter.getStop());
     }
-//    if (filter.getCurrentAndUpcoming()) {
-//      eventQuery.setParameter("now", new Date(System.currentTimeMillis()));
-//    }
+    if (filter.getCurrentAndUpcoming()) {
+      eventQuery.setParameter("now", new Date(System.currentTimeMillis()));
+    }
 
     List<EventImpl> results = new ArrayList<EventImpl>();
     try {
@@ -837,7 +837,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    */
   public SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
     SchedulerFilter filter = new SchedulerFilter();
-    filter.withDeviceFilter(captureAgentID).withOrder("startDate");
+    filter.withDeviceFilter(captureAgentID).withCurrentAndUpcoming().withOrder("startDate");
     return filter;
   }
 

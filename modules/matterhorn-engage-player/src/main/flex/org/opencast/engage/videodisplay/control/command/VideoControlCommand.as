@@ -23,6 +23,8 @@ package org.opencast.engage.videodisplay.control.command
 	import org.opencast.engage.videodisplay.state.PlayerState;
 	import org.opencast.engage.videodisplay.state.VideoState;
 	import org.swizframework.Swiz;
+	import mx.controls.Alert;
+
 	/**
 	 * VideoControlCommand
 	 * Class handles the player commands like play/pause/stop etc.
@@ -57,7 +59,6 @@ package org.opencast.engage.videodisplay.control.command
 			{
 				case VideoControlEvent.PLAY:
 					model.mediaPlayer.play();
-
 					model.currentPlayerState=PlayerState.PLAYING;
 					currentPlayPauseState=PlayerState.PAUSED;
 					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
@@ -66,6 +67,7 @@ package org.opencast.engage.videodisplay.control.command
 					{
 						model.videoState=model.mediaPlayer.getVideoState();
 					}
+
 					break;
 
 				case VideoControlEvent.PAUSE:
@@ -77,6 +79,7 @@ package org.opencast.engage.videodisplay.control.command
 						//model.mediaPlayer.seek(model.currentPlayhead);
 						model.mediaPlayer.seek(model.currentSeekPosition);
 					}
+
 					model.currentPlayerState=PlayerState.PAUSED;
 					currentPlayPauseState=PlayerState.PLAYING;
 					ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
@@ -91,8 +94,11 @@ package org.opencast.engage.videodisplay.control.command
 						currentPlayPauseState=PlayerState.PLAYING;
 						ExternalInterface.call(ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState);
 					}
+					//if the video has been watched completely - OSMF TimeEvent.COMPLETE - mediaPlayer not playing anymore
 					else
 					{
+						model.mediaPlayer.play();
+						model.mediaPlayer.pause();
 						model.mediaPlayer.seek(0);
 					}
 					break;

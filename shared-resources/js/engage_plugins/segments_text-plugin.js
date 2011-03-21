@@ -1,5 +1,19 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
 var Opencast = Opencast || {};
 
 /**
@@ -29,14 +43,14 @@ Opencast.segments_text_Plugin = (function ()
                             'No Segment Text available' +
                         '{/for}' +
                     '</table>';
-
+    
     // The Element to put the div into
     var element;
     // Data to process
     var segments_data;
     // Precessed Data
     var processedTemplateData = false;
-
+    
     /**
      * @memberOf Opencast.segments_text_Plugin
      * @description Add As Plug-in
@@ -57,29 +71,34 @@ Opencast.segments_text_Plugin = (function ()
      */
     function createSegmentsTextFromCashe()
     {
-        if((processedTemplateData !== false) && (element !== undefined) && (segments_data.segment !==  undefined) && (segments_data.segment.length > 0))
+        if ((processedTemplateData !== false) && (element !== undefined) && (segments_data.segment !== undefined) && (segments_data.segment.length > 0))
         {
             element.html(processedTemplateData);
             return true;
-        } else
+        }
+        else
         {
             return false;
         }
     }
-
+    
     /**
      * @memberOf Opencast.segments_text_Plugin
      * @description Processes the Data and puts it into the Element
      */
     function createSegments()
     {
-        if ((element !== undefined) && (segments_data.segment !==  undefined) && (segments_data.segment.length > 0))
+        if ((element !== undefined) && (segments_data.segment !== undefined) && (segments_data.segment.length > 0))
         {
+            Opencast.Utils.log("Segments Text Plugin: Data available, processing template");
             processedTemplateData = template.process(segments_data);
             element.html(processedTemplateData);
+        } else
+        {
+            Opencast.Utils.log("Segments Text Plugin: No data available");
         }
     }
-
+    
     return {
         createSegmentsTextFromCashe: createSegmentsTextFromCashe,
         addAsPlugin: addAsPlugin

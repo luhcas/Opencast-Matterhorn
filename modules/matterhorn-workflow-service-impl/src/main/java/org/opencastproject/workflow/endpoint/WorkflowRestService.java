@@ -16,6 +16,8 @@
 package org.opencastproject.workflow.endpoint;
 
 import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.rest.RestConstants;
@@ -233,6 +235,9 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
                     "The sort order.  May include any "
                             + "of the following: DATE_CREATED, TITLE, SERIES_TITLE, SERIES_ID, MEDIA_PACKAGE_ID, WORKFLOW_DEFINITION_ID, CREATOR, "
                             + "CONTRIBUTOR, LANGUAGE, LICENSE, SUBJECT.  Add '_DESC' to reverse the sort order (e.g. TITLE_DESC)."));
+    instancesEndpoint.addOptionalParam(new Param("compact", Type.BOOLEAN, "false",
+            "Whether to return a compact version of the workflow instance, with mediapackage elements, "
+                    + "workflow and workflow operation configurations and non-current operations removed."));
     instancesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instancesEndpoint);
 
@@ -540,7 +545,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
           @QueryParam("title") String title, @QueryParam("subject") String subject,
           @QueryParam("workflowdefinition") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
           @QueryParam("op") List<String> currentOperations, @QueryParam("sort") String sort,
-          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
+          @QueryParam("startPage") int startPage, @QueryParam("count") int count, @QueryParam("compact") boolean compact)
+          throws Exception {
     // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT) {
       count = DEFAULT_LIMIT;
@@ -612,7 +618,35 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
         }
       }
     }
+
     WorkflowSet set = service.getWorkflowInstances(q);
+
+    // Marshalling of a full workflow takes a long time. Therefore, we strip everything that's not needed.
+    if (compact) {
+      for (WorkflowInstance instance : set.getItems()) {
+
+        // Remove all operations but the current one
+        WorkflowOperationInstance currentOperation = instance.getCurrentOperation();
+        List<WorkflowOperationInstance> operations = instance.getOperations();
+        operations.clear(); // instance.getOperations() is a copy
+        if (currentOperation != null) {
+          for (String key : currentOperation.getConfigurationKeys()) {
+            currentOperation.removeConfiguration(key);
+          }
+          operations.add(currentOperation);
+        }
+        instance.setOperations(operations);
+
+        // Remove all mediapackage elements (but keep the duration)
+        MediaPackage mediaPackage = instance.getMediaPackage();
+        long duration = instance.getMediaPackage().getDuration();
+        for (MediaPackageElement element : mediaPackage.elements()) {
+          mediaPackage.remove(element);
+        }
+        mediaPackage.setDuration(duration);
+      }
+    }
+
     return Response.ok(set).build();
   }
 
@@ -628,10 +662,12 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
           @QueryParam("title") String title, @QueryParam("subject") String subject,
           @QueryParam("workflowdefinition") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
           @QueryParam("op") List<String> currentOperations, @QueryParam("sort") String sort,
-          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
+          @QueryParam("startPage") int startPage, @QueryParam("count") int count, @QueryParam("compact") boolean compact)
+          throws Exception {
     // CHECKSTYLE:ON
     return getWorkflowsAsXml(states, text, seriesId, seriesTitle, creator, contributor, fromDate, toDate, language,
-            license, title, subject, workflowDefinitionId, mediapackageId, currentOperations, sort, startPage, count);
+            license, title, subject, workflowDefinitionId, mediapackageId, currentOperations, sort, startPage, count,
+            compact);
   }
 
   @GET

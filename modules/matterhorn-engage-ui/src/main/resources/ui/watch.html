@@ -71,7 +71,7 @@
         <div id="oc_title-bar">
             <div id="oc_title-bar-container">
                 <div id="oc_title-bar-logo">
-                    <a href="/welcome.html" title="Back to Opencast Matterhorn Welcome page">
+                    <a href="/welcome.html" title="Back to Opencast Matterhorn Welcome page" tabindex="25">
                         <div id="matterhorn-main-logo"></div>
                     </a>
                 </div>
@@ -107,12 +107,12 @@
                 </a>
             </div>
             <div id="oc_player-head-right">
-                <a href="javascript: " id="oc_shortcut-button" title="click to show shortcuts" role="button" aria-pressed="false" tabindex="70">
+                <a href="javascript: " id="oc_shortcut-button" title="click to show shortcuts" role="button" aria-pressed="false" tabindex="80">
                     <div>
                         Shortcuts
                     </div>
                 </a>
-                <a href="javascript: " id="oc_share-button" title="click to show share options" role="button" aria-pressed="false" tabindex="80">
+                <a href="javascript: " id="oc_share-button" title="click to show share options" role="button" aria-pressed="false" tabindex="70">
                     <div>
                         Share
                     </div>
@@ -156,57 +156,56 @@
             </div>
             
             <!-- START: Hide when no Javascript is activated -->
-            <script type="text/javascript">
-                document.write('<div id="oc_video-player-controls">');
-                    document.write('<div id="oc_video-time">');
-                        document.write('<div id="simpleEdit">');
-                            document.write('<input id="oc_current-time" class="oc_current-time handcursor ui-corner-all" type="text" name="Current Time" title="Current Time" value="00:00:00" />');
-                            document.write('<input id="oc_edit-time" class="oc_edit-time-hide handcursor ui-corner-all" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00" />');
-                            document.write('&nbsp;of&nbsp;');
-                            document.write('<span id="oc_duration" class="oc_duration" name="Duration" title="Duration">');
-                                document.write('Initializing');
-                            document.write('</span>&nbsp;');
-                            document.write('<span id="oc_video-cc">');
-                                document.write('<input id="oc_btn-cc" class="oc_btn-cc-off" type="checkbox" name="Closed Captions Off: Control + Alt + C" title="Closed Captions Off: Control + Alt + C" value="" />');
-                                document.write('<label for="oc_btn-cc" title="Closed Captions Off: Control + Alt + C">');
-                                    document.write('Show Captions');
-                                document.write('</label>');
-                            document.write('</span>');
-                        document.write('</div>');
-                    document.write('</div>');
-                    document.write('<!-- END #oc_video-time -->');
-                    document.write('<div id="oc_video-controls">');
-                        document.write('<span id="skip">');
-                            document.write('<a name="controls"></a>');
-                            document.write('<h2>');
-                                document.write('Video Player Controls');
-                            document.write('</h2>');
-                        document.write('</span>');
-                        document.write('<input id="oc_btn-skip-backward" class="oc_btn-skip-backward handcursor" type="image" src="img/space.png" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value="Jump To The Previous Slide" />');
-                        document.write('<input id="oc_btn-rewind" class="oc_btn-rewind handcursor" type="image" src="img/space.png" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value="Jump Back: Control + Alt + R" />');
-                        document.write('<input id="oc_btn-play-pause" class="oc_btn-play handcursor" type="image" src="img/space.png" name="Play: Control + Alt + P" alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value="Play: Control + Alt + P" />');
-                        document.write('<input id="oc_btn-fast-forward" class="oc_btn-fast-forward handcursor" type="image" src="img/space.png" name="Jump Forward: Control + Alt + F" alt="Jump Forward: Control + Alt + F" title="Jump Forward: Control + Alt + F" value="Jump Forward: Control + Alt + F" />');
-                        document.write('<input id="oc_btn-skip-forward" class="oc_btn-skip-forward handcursor" type="image" src="img/space.png" alt="Jump To The Next Slide" title="Jump To The Next Slide" value="Jump To The Next Slide" />');
-                    document.write('</div>');
-                    document.write('<!-- END #oc_video-controls -->');
-                    document.write('<div id="oc_sound">');
-                        document.write('<span id="oc_volume-dropdown">');
-                            document.write('<input id="oc_btn-volume" class="oc_btn-volume-high handcursor" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value="" />');
-                        document.write('</span>');
-                        document.write('<button id="oc_volume-container">');
-                            document.write('<div id="oc_volume-back">');
-                                document.write('<div id="oc_volume-front"></div>');
-                            document.write('</div>');
-                        document.write('</button>');
-                    document.write('</div>');
-                    document.write('<!-- END #oc_sound -->');
-                    document.write('<div id="oc_video-size-controls">');
-                        document.write('<span id="oc_video-size-dropdown">');
-                            document.write('<input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value="" />');
-                        document.write('</span>');
-                    document.write('</div>');
-                    document.write('<!-- END #oc_video-size-controls -->');
-                document.write('</div>');
+           <div id="oc_video-player-controls">
+                   <div id="oc_video-time">
+                       <div id="simpleEdit">
+                           <input id="oc_current-time" class="oc_current-time handcursor ui-corner-all" type="text" name="Current Time" title="Current Time" value="00:00:00" />
+                           <input id="oc_edit-time" class="oc_edit-time-hide handcursor ui-corner-all" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00" />
+                           &nbsp;of&nbsp;
+                           <span id="oc_duration" class="oc_duration" name="Duration" title="Duration">
+                               Initializing
+                           </span>&nbsp;
+                           <span id="oc_video-cc">
+                               <input id="oc_btn-cc" class="oc_btn-cc-off" type="checkbox" name="Closed Captions Off: Control + Alt + C" title="Closed Captions Off: Control + Alt + C" value="" />
+                               <label for="oc_btn-cc" title="Closed Captions Off: Control + Alt + C">
+                                   Show Captions
+                               </label>
+                           </span>
+                       </div>
+                   </div>
+                   <!-- END #oc_video-time -->
+                   <div id="oc_video-controls">
+                       <span id="skip">
+                           <a name="controls"></a>
+                           <h2>
+                               Video Player Controls
+                           </h2>
+                       </span>
+                       <input id="oc_btn-skip-backward" class="oc_btn-skip-backward handcursor" type="image" src="img/space.png" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value="Jump To The Previous Slide" />
+                       <input id="oc_btn-rewind" class="oc_btn-rewind handcursor" type="image" src="img/space.png" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value="Jump Back: Control + Alt + R" />
+                       <input id="oc_btn-play-pause" class="oc_btn-play handcursor" type="image" src="img/space.png" name="Play: Control + Alt + P" alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value="Play: Control + Alt + P" />
+                       <input id="oc_btn-fast-forward" class="oc_btn-fast-forward handcursor" type="image" src="img/space.png" name="Jump Forward: Control + Alt + F" alt="Jump Forward: Control + Alt + F" title="Jump Forward: Control + Alt + F" value="Jump Forward: Control + Alt + F" />
+                       <input id="oc_btn-skip-forward" class="oc_btn-skip-forward handcursor" type="image" src="img/space.png" alt="Jump To The Next Slide" title="Jump To The Next Slide" value="Jump To The Next Slide" />
+                   </div>
+                   <!-- END #oc_video-controls -->
+                   <div id="oc_sound">
+                       <span id="oc_volume-dropdown">
+                           <input id="oc_btn-volume" class="oc_btn-volume-high handcursor" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value="" />
+                       </span>
+                       <button id="oc_volume-container">
+                           <div id="oc_volume-back">
+                               <div id="oc_volume-front"></div>
+                           </div>
+                       </button>
+                   </div>
+                   <!-- END #oc_sound -->
+                   <div id="oc_video-size-controls">
+                       <span id="oc_video-size-dropdown">
+                           <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value="" />
+                       </span>
+                   </div>
+                   <!-- END #oc_video-size-controls -->
+               </div>
             </script>
             <!-- END: Hide when no Javascript is activated -->
             
@@ -416,11 +415,8 @@
                 <a href="javascript: " id="oc_btn-leave-session-time" onclick="$('#oc_embed').dialog('close');" class="handcursor ui-helper-hidden-accessible" title="Leave embed dialog" role="button">
                     Leave embed dialog
                 </a>
-            </div>
-            <!-- END #oc_embed-right -->
-            
-            <div class="clear"></div>
-            
+            </div>            
+            <div class="clear"></div>            
             <label for="oc_embed-textarea">
                 Choose your embed size. Copy the text and paste it in your html page.
             </label>

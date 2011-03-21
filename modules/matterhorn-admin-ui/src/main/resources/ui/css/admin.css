@@ -13,7 +13,7 @@ table tr:hover a { color: black!important; text-decoration: underline!important;
 .layout-inline { display: inline-block; }
 .layout-float-left { float: left; }
 .clear {clear:both; height: 0px; width: 0px;}
-
+.center { text-align: center;}
 
 /* Icons */
 .icon { width:16px; height:16px; background-repeat: none; background-position: center center; float: left; }
@@ -104,9 +104,9 @@ table tr:hover a { color: black!important; text-decoration: underline!important;
 .oc-ui-sortable-Descending div { background-image:url(../../img/icons/desc.gif); }
 table#agentsTable, table#seriesTable
 { margin-top: 30px;}
-table#agentsTable td, table#seriesTable td, table#recordingsTable td
+table#agentsTable td, table#seriesTable td, table#recordingsTable td, table#statsTable td
 { padding: 1px 3px; }
-table#agentsTable th, table#seriesTable th, table#recordingsTable th
+table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#statsTable th
 { padding: 2px 0; }
 
 /* FORM LISTS */
@@ -138,5 +138,10 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th
 #workflowConfigContainer fieldset { padding: 10px; }
 .scheduler-day-table td, .scheduler-day-table th { padding: 4px; border: 1px solid #AAAAAA;}
 #recordingType { width: 140px; text-align: left; }
-.scheduler-radio-list { display: inline-block; width: 200px; } 
+.scheduler-radio-list { display: inline-block; width: 200px; }
+
+/*Statistics*/
+#tableContainer h2 { color: #000; margin: 16px 3px 3px}
+#tableContainer { clear: both; }
+#controlsTopStatistic { float: left; margin: 10px 0; }
 

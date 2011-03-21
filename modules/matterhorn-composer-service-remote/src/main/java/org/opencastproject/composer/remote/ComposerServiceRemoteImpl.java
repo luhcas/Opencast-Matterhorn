@@ -24,8 +24,10 @@ import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
+import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.RemoteBase;
 
@@ -237,6 +239,43 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       closeConnection(response);
     }
     throw new EncoderException("Unable to compose an image from track " + sourceTrack
+            + " using the remote composer service proxy");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#convertImage(org.opencastproject.mediapackage.Attachment,
+   *      java.lang.String)
+   */
+  @Override
+  public Job convertImage(Attachment image, String profileId) throws EncoderException, MediaPackageException {
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    UrlEncodedFormEntity entity = null;
+    String url = "/convertimage";
+    HttpPost post = new HttpPost(url);
+    try {
+      params.add(new BasicNameValuePair("sourceImage", getXML(image)));
+      params.add(new BasicNameValuePair("profileId", profileId));
+      entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (Exception e) {
+      throw new EncoderException(e);
+    }
+    HttpResponse response = null;
+    try {
+      response = getResponse(post);
+      if (response != null) {
+        Job r = JobParser.parseJob(response.getEntity().getContent());
+        logger.info("Image conversion job {} started on a remote composer", r.getId());
+        return r;
+      }
+    } catch (Exception e) {
+      throw new EncoderException(e);
+    } finally {
+      closeConnection(response);
+    }
+    throw new EncoderException("Unable to convert image at " + image
             + " using the remote composer service proxy");
   }
 

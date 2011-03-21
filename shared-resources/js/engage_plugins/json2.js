@@ -1,5 +1,3 @@
-var Opencast = Opencast || {};
-
 /*
  Source: http://www.JSON.org/json2.js
  

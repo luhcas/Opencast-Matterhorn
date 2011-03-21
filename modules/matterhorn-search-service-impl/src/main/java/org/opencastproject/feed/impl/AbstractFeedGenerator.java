@@ -297,10 +297,9 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
       throw new IllegalStateException("Feed link template (feed.entry) must be configured");
 
     // Have the concrete implementation load the feed data
-    try {
-      result = loadFeedData(type, query, size, DEFAULT_OFFSET);
-    } catch (Exception e) {
-      logger.error("Cannot retrieve solr result for feed '" + type.toString() + "' with query '" + query + "'.");
+    result = loadFeedData(type, query, size, DEFAULT_OFFSET);
+    if (result == null) {
+      logger.debug("Cannot retrieve solr result for feed '" + type.toString() + "' with query '" + query + "'.");
       return null;
     }
 
@@ -876,6 +875,27 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     if (linkTemplate == null)
       throw new IllegalStateException("No template defined");
     return MessageFormat.format(linkTemplate, solrResultItem.getId());
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return uri.hashCode();
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof FeedGenerator))
+      return false;
+    FeedGenerator generator = (FeedGenerator)o;
+    return getIdentifier().equals(generator.getIdentifier());
   }
 
   /**

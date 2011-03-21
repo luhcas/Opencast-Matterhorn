@@ -57,6 +57,7 @@
     <script type="text/javascript">
             
       var PLAYER_URL = '/admin/embed.html';
+      var DEFAULT_SERIES_CATALOG_ID = 'seriesCatalog';
             
       var postData = {
         'id': parent.document.getElementById("holdWorkflowId").value
@@ -66,6 +67,8 @@
       var mediapackage = null;
       var DCmetadata = null;
       var metadataChanged = false;
+      var seriesChanged = false;
+      var seriesServiceURL = false;
 
       var inpoint = 0;
       var outpoint = 0;
@@ -81,10 +84,6 @@
       $(document).ready(function(){
         var id = postData.id;
 
-        $('.oc-ui-form-field').change(function() {
-          metadataChanged = true;
-        });
-                
         // Set default Values for In point and Out point
         $('#player-container').load(function(){
           $('#inPoint').val("00:00:00");
@@ -245,6 +244,13 @@
             $(mediapackage.documentElement).attr('start',$(clone).attr('start'));
             $(mediapackage.documentElement).attr('duration',$(clone).attr('duration'));
 
+            // populate series field if information present
+            var seriesid =  $(data.documentElement).find("mediapackage > series").text();
+            if (seriesid != '') {
+              $('#ispartof').val(seriesid);
+              $('#series').val($(data.documentElement).find("mediapackage > seriestitle").text());
+            }
+
             // load metadata from DC xml for editing
             catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
             $.ajax({
@@ -261,6 +267,12 @@
                     $('#meta-' + tagName).val($(elm).text());
                   }
                 });
+
+                // save information that some metadata changed
+                $('.dcMetaField').change(function() {
+                  metadataChanged = true;
+                });
+
                 parent.ocRecordings.adjustHoldActionPanelHeight();
               }
             });
@@ -327,13 +339,34 @@
           parent.ocRecordings.adjustHoldActionPanelHeight();
         });
 
-        $('#series').autocomplete({
-          source: '/series/search',
-          select: function(event, ui){
-            $('#ispartof').val(ui.item.id);
-          },
-          search: function(){
-            $('#ispartof').val('');
+        // try to obtain URL of series service endpoint from service registry
+        // on success enable series input field / init autocomplete on it
+        // TODO: use JSONP here so we can call services provieded by other hosts in a distributed deployment
+        var thisHost = window.location.protocol + '//' + window.location.host;
+        $.ajax({
+          type: 'GET',
+          url: '/services/services.json',
+          data: { serviceType: 'org.opencastproject.series',  host: thisHost},
+          dataType : 'json',
+          success: function(data){                      // we are asking for a series service on the host this site comes from
+            if (data.services.service !== undefined) {  // so there should always be none or one instance returned (instead of  data.services beeing an array
+              seriesServiceURL = data.services.service.host + data.services.service.path;
+              $('#series').removeAttr('disabled');
+              $('#series').autocomplete({
+                source: seriesServiceURL + '/search',
+                select: function(event, ui){
+                  $('#ispartof').val(ui.item.id);
+                },
+                search: function(){
+                  $('#ispartof').val('');
+                }
+              });
+              
+              // event handler: save information that series changed 
+              $('#series').change(function() {
+                seriesChanged = true;
+              });
+            }
           }
         });
 
@@ -495,16 +528,105 @@
           }
         }
 
+        if (seriesChanged) {
+          if ($('#series').val() == '') {
+            // remove series from mediapackage
+            ocUtils.log('Removing Series');
+            $(mediapackage.documentElement).find('series').remove();
+            $(mediapackage.documentElement).find('seriestitle').remove();
+            var $seriesCatalogRef = $(mediapackage.documentElement).find("metadata > catalog[type='dublincore/series']");
+            if ($seriesCatalogRef.length > 0) {
+              // delete series DC xml from working file repo
+              var seriesCatalogUrl = $seriesCatalogRef.find('url').text();
+              $.ajax({
+                url : seriesCatalogUrl,
+                type : 'delete',
+                error: function() {
+                  ocUtils.log('Failed to removed Series DC XML');
+                },
+                success: function() {
+                  ocUtils.log('Removed Series DC XML');
+                }
+              });
+              $seriesCatalogRef.remove();
+            }
+          } else {
+            // update/add series data to mediapackage
+            var seriesDcXml = '';
+            if ($('#ispartof').val() == '') {
+              // create series
+              ocUtils.log('Creating Series ' + $('#series').val());
+              seriesXml = '<series><additionalMetadata><metadata><key>title</key><value>' + $('#series').val() + '</value></metadata></additionalMetadata></series>';
+              $.ajax({
+                async: false,
+                type: 'PUT',
+                url: seriesServiceURL,
+                data: { series: seriesXml },
+                dataType : 'json',
+                success: function(data){
+                  $('#ispartof').val(data.series.id);
+                }
+              });
+            }
+            // get seriesDcXml
+            ocUtils.log('Getting DC catalog for series ' + $('#ispartof').val());
+            $.ajax({
+              url : seriesServiceURL + '/' + $('#ispartof').val() + '/dublincore',
+              type : 'get',
+              async : false,
+              dataType : 'xml',
+              error : function() {
+                ocUtils.log('Could not retrieve series DC catalog for series ' + $('#ispartof').val());
+              },
+              success : function(data) {
+                seriesDcXml = ocUtils.xmlToString(data);
+              }
+            });
+            
+            // find series dc ref in mediapackage
+            var seriesDcElm = $(mediapackage.documentElement).find("metadata > catalog[type='dublincore/series']");
+            var seriesDcFileId = '';        // MediaPackageElementId of series DC catalog
+            if (seriesDcElm.length == 0) {
+              var seriesDcElm = $('<catalog></catalog>',mediapackage.documentElement).attr('id', DEFAULT_SERIES_CATALOG_ID).attr('type', 'dublincore/series');
+              $('<mimetype></mimetype>',mediapackage.documentElement).text('text/xml').appendTo(seriesDcElm);
+              $('<url></url>',mediapackage.documentElement).appendTo(seriesDcElm);
+              $(mediapackage.documentElement).find('metadata').append(seriesDcElm);
+            }
+            // upload series dc xml
+            seriesDcFileId = seriesDcElm.attr('id');
+            var mediapackageId = $(mediapackage.documentElement).attr('id');
+            var url = '/files/mediapackage/' + mediapackageId + '/' + seriesDcFileId + '/dublincore.xml';
+            ocUtils.log('Saving Series DC Catalog to ' + url);
+            $.ajax({
+              url : url,
+              type : 'post',
+              async : false,
+              data: {content : seriesDcXml},
+              error: function() {
+                ocUtils.log('Failed to save DC metadata to ' + url);
+              },
+              success: function(data) {
+                ocUtils.log('Save DC metadata to ' + url);
+                seriesDcElm.find('url').text(data);
+              }
+            });
+            // finally update series in mediapackage instance
+            updateMPElement('seriestitle', $('#series').val());
+            updateMPElement('series', $('#ispartof').val());
+          }
+        }
+
         // If Input < Output
         if (trimFromData < trimToData) {
           var newduration = getTimeInMilliseconds(trimToData) - getTimeInMilliseconds(trimFromData);
           postData['trimin'] = getTimeInMilliseconds(trimFromData);
           //postData['trimout'] = getTimeInMilliseconds(trimToData);
           postData['newduration'] = newduration;
-          if (metadataChanged) {
+          if (metadataChanged || seriesChanged) {
             var mp = ocUtils.xmlToString(mediapackage);
-            mp = mp.replace(/ xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"/g,'');     // no luck with $(mediapackage.documentElement).find(MPname).removeAttr('xmlns');
+            mp = mp.replace(/ xmlns="http:\/\/www\.w3\.org\/1999\/xhtml"/g,'');     // no luck with $(element).removeAttr('xmlns');
             parent.ocRecordings.Hold.changedMediaPackage = mp;
+            //alert(mp);
           }
           parent.ocRecordings.continueWorkflow(postData);
         }
@@ -519,36 +641,25 @@
         parent.ocRecordings.hideHoldActionUI();
       }
 
-      function createSeriesFromSearchText(){
-        var seriesXml = '<series><additionalMetadata><metadata><key>title</key><value>' + $('#series').val() + '</value></metadata></additionalMetadata></series>';
-        var creationSucceeded = false;
-        $.ajax({
-          async: false,
-          type: 'PUT',
-          url: '/series',
-          data: { series: seriesXml },
-          dataType : 'json',
-          success: function(data){
-            creationSucceeded = true;
-            $('#ispartof').val(data.series.id);
-          }
-        });
-        return creationSucceeded;
-      }
-
       function updateDCMetadata() {
         ocUtils.log("Updating DC metadata");
         
         $('.dcMetaField').each(function(){
           var $field = $(this);
+          var fieldname = $field.attr('name');
           if ($field.val() != '') {
-            var $dcelm = $(DCmetadata.documentElement).find('dcterms\\:' + $field.attr('name'));
-            if ($dcelm.length != 0) {
+            var $dcelm = false;    //$(DCmetadata.documentElement).find('dcterms\\:' + $field.attr('name'));
+            $(DCmetadata.documentElement).children().each(function(index, elm) {
+              if (elm.tagName == 'dcterms:' + fieldname) {
+                $dcelm = $(elm);
+              }
+            });
+            if ($dcelm !== false) {
               ocUtils.log("updating " + $field.attr('name') + " to: " + $field.val());
               $dcelm.text($field.val());
             } else {
               ocUtils.log("creating " + $field.attr('name') + " with value: " + $field.val());
-              $('<dcterms:' + $field.attr('name') + '>').text($field.val()).appendTo(DCmetadata.documentElement);
+              $(DCmetadata.createElement('dcterms:' + $field.attr('name'))).text($field.val()).appendTo(DCmetadata.documentElement);
             }
           }
         });
@@ -562,15 +673,6 @@
         updateMetadataField('subject','subject');
         updateMetadataGroupField('creator', 'creators', 'creator');
         updateMetadataGroupField('contributor', 'contributors', 'contributor');
-
-        // update series
-        if ($('#series').val() != '') {
-          if ($('#ispartof').val() == '') {
-            createSeriesFromSearchText();
-          }
-          updateMPElement('seriestitle', $('#series').val());
-          updateMPElement('series', $('#ispartof').val());  
-        }
       }
 
       function updateMPElement(MPname, value) {
@@ -580,7 +682,7 @@
           $mpelm.text(value);
         } else {
           ocUtils.log('Creating ' + MPname + ' in MediaPackage with value ' + value);
-          $newelm = $('<' + MPname + '/>').text(value);
+          $newelm = $('<' + MPname + '></' + MPname + '>',mediapackage.documentElement).text(value);
           $newelm.appendTo(mediapackage.documentElement);
         }
       }
@@ -599,11 +701,11 @@
           if ($parent.length > 0) {
             $parent.empty();
           } else {
-            $parent = $('<' + MPgroupname + '/>');
+            $parent = $('<' + MPgroupname + '></' + MPgroupname + '>', mediapackage.documentElement);
             $(mediapackage.documentElement).append($parent);
           }
           $dcelms.each(function() {
-            $('<' + MPname + '/>').text($(this).text()).appendTo($parent);
+            $('<' + MPname + '></' + MPname + '>', mediapackage.documentElement).text($(this).text()).appendTo($parent);
           });
         }
       }
@@ -630,10 +732,10 @@
       <iframe id="player-container">
       </iframe>
       <div>
-      <label>
-        <span id="i18n_files_label">File(s)</span>:
-      </label>
-      <span id="files"></span>
+        <label>
+          <span id="i18n_files_label">File(s)</span>:
+        </label>
+        <span id="files"></span>
       </div>
     </center>
 
@@ -656,8 +758,8 @@
             </li>
             <li id="seriesContainer">
               <label class="scheduler-label" for="series" id="seriesLabel" style="width:15%;"><span id="i18n_series_label">Course/Series</span>:</label>
-              <input type="text" class="oc-ui-form-field" id="series" name="series" maxlength="255">
-              <input type="hidden" class="oc-ui-form-field" id="ispartof" name="ispartof">
+              <input type="text" class="oc-ui-form-field" id="series" name="series" maxlength="255" disabled="true">
+              <input type="hidden" class="" id="ispartof" name="ispartof">
             </li>
             <li class="additionalMeta">
               <label class="scheduler-label" for="contributor" id="contributorLabel" style="width:15%;"><span id="i18n_dept_label">Contributor</span>:</label>
@@ -681,8 +783,8 @@
     </div>
 
     <div id="actions"">
-      <!-- control buttons -->
-      <label for="inPoint" style="padding-left: 10px">
+         <!-- control buttons -->
+         <label for="inPoint" style="padding-left: 10px">
         In point
       </label>
       <input type="text" id="inPoint" readonly="readonly" class="pointInput"/><input type="button" style="width: 160px; background-color: #C7D7D7;" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button" /><input type="button" id="play-from-in" style="width: 160px; background-color: #C7D7D7;" title="Start playing at current In point" value="&gt; Play from In point" class="ui-button" /><input type="button" id="step-in-forward" style="background-color: #C7D7D7;" title="Increase In point by one second" value="&gt;&gt;" class="ui-button" /><input type="button" id="step-in-backward" style="background-color: #C7D7D7;" title="Decrease In point by one second" value="&lt;&lt;" class="ui-button" />

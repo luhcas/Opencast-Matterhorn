@@ -12,6 +12,8 @@ case `uname` in
     export LOCAL_PREFIX=/opt/local # if compiling with MacPorts
     ;;
 esac
+export CENTOS_MIRROR=http://mirrors.kernel.org
+export EPEL_MIRROR=http://mirror.switch.ch/ftp/mirror
 export MACPORTS_SVN=http://svn.macports.org/repository/macports/trunk/dports
 export MINGW32=i686-pc-mingw32
 export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw

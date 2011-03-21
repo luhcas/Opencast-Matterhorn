@@ -1,12 +1,23 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace annotation_chapter delegate. This file contains the rest endpoint and passes the data to the annotation_chapter plugin
- * description AnnotationType can be defined according to your needs. The type can be specified as described in: ../..annotation/docs
- * this plugin is an example for annotation handling in engage;
- * it allows a user to attach chapters/segments in a video wich do not include segments from a previous media analysis
+ * @namespace the global Opencast namespace Annotation_Chapter
  */
 Opencast.Annotation_Chapter = (function ()
 {
@@ -14,7 +25,6 @@ Opencast.Annotation_Chapter = (function ()
     var annotationChapterDisplayed = false;
     var ANNOTATION_CHAPTER = "Annotation",
         ANNOTATION_CHAPTERHIDE = "Annotation off";
-    
     var annotationType = "chapter";
     var annotationDataURL = '../../annotation/annotations.json'; // Test-Data can be found: "js/engage_plugins/demodata/annotation_demo.json"
     
@@ -34,23 +44,28 @@ Opencast.Annotation_Chapter = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
+                Opencast.Utils.log("Annotation AJAX call: Requesting data succeeded");
                 var tmpData = data['annotations'];
-                if((tmpData !== undefined) && (tmpData.annotation !== undefined))
+                if ((tmpData !== undefined) && (tmpData.annotation !== undefined))
                 {
+                    Opencast.Utils.log("Annotation AJAX call: Data available");
                     // Display the controls
                     $('#oc_checkbox-annotations').show();
                     $('#oc_label-annotations').show();
                     $('#oc_video-view').show();
                     Opencast.Analytics.initialize();
-                } else
+                }
+                else
                 {
-                    displayNoAnnotationsAvailable("No data available (undefined status, initialize)");
+                    Opencast.Utils.log("Annotation AJAX call: Data not available");
+                    displayNoAnnotationsAvailable("No data available");
                 }
             },
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                displayNoAnnotationsAvailable("No data available (1), initialize");
+                Opencast.Utils.log("Annotation Ajax call: Requesting data failed");
+                displayNoAnnotationsAvailable("No data available");
             }
         });
     }
@@ -70,18 +85,23 @@ Opencast.Annotation_Chapter = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
-                if((data === undefined) || (data['annotations'] === undefined) || (data['annotations'].annotation === undefined))
+                Opencast.Utils.log("Annotation AJAX call: Requesting data succeeded");
+                if ((data === undefined) || (data['annotations'] === undefined) || (data['annotations'].annotation === undefined))
                 {
-                    displayNoAnnotationsAvailable("No data defined (1)");
-                } else
+                    Opencast.Utils.log("Annotation AJAX call: Data not available");
+                    displayNoAnnotationsAvailable("No data defined");
+                }
+                else
                 {
+                    Opencast.Utils.log("Annotation AJAX call: Data available");
                     tmpData.duration = duration;
                     // Create Trimpath Template
                     var annotSet = Opencast.Annotation_ChapterPlugin.addAsPlugin($('#annotation'), data['annotations'].annotation);
-                    if(annotSet)
+                    if (annotSet)
                     {
-                        displayNoAnnotationsAvailable("No template available (1)");
-                    } else
+                        displayNoAnnotationsAvailable("No template available");
+                    }
+                    else
                     {
                         annotationChapterDisplayed = true;
                         var analyticsVisible = Opencast.Analytics.isVisible();
@@ -105,7 +125,8 @@ Opencast.Annotation_Chapter = (function ()
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                displayNoAnnotationsAvailable("No data available (1)");
+                Opencast.Utils.log("Annotation Ajax call: Requesting data failed");
+                displayNoAnnotationsAvailable("No data available");
             }
         });
     }
@@ -116,7 +137,7 @@ Opencast.Annotation_Chapter = (function ()
      * @param errorDesc Error Description (optional)
      */
     function displayNoAnnotationsAvailable(errorDesc)
-    {    
+    {
         errorDesc = errorDesc || '';
         var optError = (errorDesc != '') ? (": " + errorDesc) : '';
         $("#annotation").html("No Annotations available" + optError);
@@ -140,7 +161,7 @@ Opencast.Annotation_Chapter = (function ()
     }
     
     /**
-     * @memberOf Opencast.Analytics
+     * @memberOf Opencast.Annotation_Chapter
      * @description Toggle Analytics
      */
     function doToggleAnnotation_Chapter()
@@ -157,7 +178,7 @@ Opencast.Annotation_Chapter = (function ()
     }
     
     /**
-     * @memberOf Opencast.Analytics
+     * @memberOf Opencast.Annotation_Chapter
      * @description Set the mediaPackageId
      * @param String mediaPackageId
      */
@@ -167,7 +188,7 @@ Opencast.Annotation_Chapter = (function ()
     }
     
     /**
-     * @memberOf Annotation_Chapter
+     * @memberOf Opencast.Annotation_Chapter
      * @description Set the duration
      * @param int duration
      */

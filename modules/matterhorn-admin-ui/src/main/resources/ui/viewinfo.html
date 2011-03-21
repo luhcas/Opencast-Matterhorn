@@ -200,7 +200,7 @@
                             <textarea id="episodeTemplate" style="display:none;">
       <table>
         <tr>
-          <td class="td-key">Department:</td>
+          <td class="td-key">Contributor:</td>
           <td class="td-value">${dc.contributor}</td>
         </tr>
         <tr>
@@ -229,7 +229,7 @@
           <td class="td-value">${dc.creator}</td>
         </tr>
         <tr>
-          <td class="td-key">Department:</td>
+          <td class="td-key">Contributor:</td>
           <td class="td-value">${dc.contributor}</td>
         </tr>
         <tr>
@@ -247,6 +247,17 @@
         <tr>
           <td class="td-key">Description:</td>
           <td class="td-value">${dc.description}</td>
+        </tr>
+      </table>
+                            </textarea>
+
+                            <textarea id="catalogDownloadTemplate" style="display:none;">
+      <table>
+        <tr>
+          <td class="td-key">Dublin Core file:</td>
+          <td class="td-value">
+            <a href="${url}">dublincore.xml</a>
+          </td>
         </tr>
       </table>
                             </textarea>

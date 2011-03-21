@@ -116,12 +116,18 @@ public class RemoteBase {
       return null;
     }
 
+    if (remoteServices.size() == 0) {
+      logger.warn("No services of type '{}' are currently available", serviceType);
+      return null;
+    }
+
     Map<String, String> hostErrors = new HashMap<String, String>();
     URI originalUri = httpRequest.getURI();
     String uriSuffix = null;
     if (originalUri != null && StringUtils.isNotBlank(originalUri.toString())) {
       uriSuffix = originalUri.toString();
     }
+
     for (ServiceRegistration remoteService : remoteServices) {
       HttpResponse response = null;
       try {

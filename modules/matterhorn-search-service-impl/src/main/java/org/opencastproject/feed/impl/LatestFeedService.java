@@ -25,6 +25,8 @@ import org.opencastproject.search.impl.SearchQueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Properties;
+
 /**
  * This feed generator creates a feed for the latest episodes across all series.
  */
@@ -50,6 +52,18 @@ public class LatestFeedService extends AbstractFeedService implements FeedGenera
       logger.error("Cannot retrieve result for feed 'recent episodes'", e);
       return null;
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.feed.impl.AbstractFeedService#initialize(java.util.Properties)
+   */
+  @Override
+  public void initialize(Properties properties) {
+    super.initialize(properties);
+    // Clear the selector, since super.accept() relies on the fact that it's not set
+    selector = null;
   }
 
 }

@@ -1,9 +1,23 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
 var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace annotation_chapter delegate. This file contains the rest endpoint and passes the data to the annotation_chapter plugin
+ * @namespace the global Opencast namespace Series
  */
 Opencast.Series = (function ()
 {
@@ -28,7 +42,7 @@ Opencast.Series = (function ()
             $('#oc_series').focus();
         }
     }
-
+    
     /**
      * @memberOf Opencast.Series
      * @description Show the Series Page
@@ -44,10 +58,16 @@ Opencast.Series = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
+                Opencast.Utils.log("Series AJAX call: Requesting data succeeded");
                 data = createDataForPlugin(data);
                 data['search-results'].currentPage = page;
                 //add as a plugin
                 Opencast.Series_Plugin.addAsPlugin($('#oc_series'), data['search-results']);
+            },
+            // If no data comes back
+            error: function (xhr, ajaxOptions, thrownError)
+            {
+                Opencast.Utils.log("Series Ajax call: Requesting data failed");
             }
         });
     }
@@ -80,6 +100,7 @@ Opencast.Series = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
+                Opencast.Utils.log("Series AJAX call: Requesting data succeeded");
                 // get rid of every '@' in the JSON data
                 data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
                 data = createDataForPlugin(data);
@@ -96,17 +117,16 @@ Opencast.Series = (function ()
                         at: "left bottom"
                     });
                     position_set = true;
-                    $(window).resize(function() {
-	                    $("#oc_series").position(
+                    $(window).resize(function ()
+                    {
+                        $("#oc_series").position(
                         {
                             of: $("#oc_see-more-button"),
                             my: "left top",
                             at: "left bottom"
                         });
-	                });
-	
+                    });
                 }
-                                
                 $('#oc_series').show();
                 $('#oc_series').attr(
                 {
@@ -169,8 +189,10 @@ Opencast.Series = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
-                if((data !== undefined) && (data['search-results'] !== undefined) && (data['search-results'].result !== undefined))
+                Opencast.Utils.log("Series AJAX call #1: Requesting data succeeded");
+                if ((data !== undefined) && (data['search-results'] !== undefined) && (data['search-results'].result !== undefined))
                 {
+                    Opencast.Utils.log("Series AJAX call: Data available");
                     series_id = data['search-results'].result.dcIsPartOf;
                     if (series_id != '')
                     {
@@ -181,14 +203,28 @@ Opencast.Series = (function ()
                             jsonp: 'jsonp',
                             success: function (data)
                             {
+                                Opencast.Utils.log("Series AJAX call #2: Requesting data succeeded");
                                 if (data['search-results'].result.length > 1)
                                 {
                                     $('#oc_player-head-see-more').show();
                                 }
+                            },
+                            // If no data comes back
+                            error: function (xhr, ajaxOptions, thrownError)
+                            {
+                                Opencast.Utils.log("Series Ajax call #2: Requesting data failed");
                             }
                         });
                     }
+                } else
+                {
+                    Opencast.Utils.log("Series AJAX call: Data not available");
                 }
+            },
+            // If no data comes back
+            error: function (xhr, ajaxOptions, thrownError)
+            {
+                Opencast.Utils.log("Series Ajax call #1: Requesting data failed");
             }
         });
     }

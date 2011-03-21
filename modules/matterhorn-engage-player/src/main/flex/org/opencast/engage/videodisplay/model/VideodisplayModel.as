@@ -18,6 +18,7 @@ package org.opencast.engage.videodisplay.model
 	import mx.collections.ArrayCollection;
 	import mx.controls.ProgressBar;
 	import mx.core.Application;
+
 	import org.opencast.engage.videodisplay.control.util.OpencastMediaPlayer;
 	import org.opencast.engage.videodisplay.control.util.TimeCode;
 	import org.opencast.engage.videodisplay.state.CoverState;
@@ -345,6 +346,7 @@ package org.opencast.engage.videodisplay.model
 
 		// video Volume
 		public var videoVolume:Number=1;
+
 	}
 }
 

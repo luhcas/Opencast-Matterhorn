@@ -24,6 +24,7 @@ import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -296,6 +297,41 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   }
 
   /**
+   * Converts an image to another format.
+   * 
+   * @param sourceImageXml
+   *          The source image
+   * @param profileId
+   *          The profile to use in image conversion
+   * @return A {@link Response} with the resulting image in the response body
+   * @throws Exception
+   */
+  @POST
+  @Path("convertimage")
+  @Produces(MediaType.TEXT_XML)
+  public Response convertImage(@FormParam("sourceImage") String sourceImageXml, @FormParam("profileId") String profileId)
+          throws Exception {
+    // Ensure that the POST parameters are present
+    if (sourceImageXml == null || profileId == null) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("sourceImage and profileId must not be null").build();
+    }
+
+    // Deserialize the source track
+    MediaPackageElement sourceImage = MediaPackageElementParser.getFromXml(sourceImageXml);
+    if (!Attachment.TYPE.equals(sourceImage.getElementType())) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("sourceImage element must be of type track").build();
+    }
+
+    try {
+      Job job = composerService.convertImage((Attachment) sourceImage, profileId);
+      return Response.ok().entity(new JaxbJob(job)).build();
+    } catch (EncoderException e) {
+      logger.warn("Unable to convert image: " + e.getMessage());
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  /**
    * Embeds captions in media file.
    * 
    * @param sourceTrackXml
@@ -448,6 +484,18 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     imageEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, imageEndpoint);
 
+    // convert image
+    RestEndpoint imageConversionEndpoint = new RestEndpoint("convertimage", RestEndpoint.Method.POST, "/convertimage",
+            "Starts an image conversion process, based on the specified encoding profile ID and the source image");
+    imageConversionEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .ok("Results in an xml document containing the image attachment"));
+    imageConversionEndpoint.addRequiredParam(new Param("sourceImage", Type.TEXT, generateImageAttachment(),
+            "The original image"));
+    imageConversionEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "image-conversion.http",
+            "The encoding profile to use"));
+    imageConversionEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, imageConversionEndpoint);
+
     // captions
     RestEndpoint captionsEndpoint = new RestEndpoint("captions", RestEndpoint.Method.POST, "/captions",
             "Starts caption embedding process, based on the specified source track and captions");
@@ -567,6 +615,12 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             + "    <url>serverUrl/workflow/samples/captions_test_fra.srt</url>\n"
             + "    <checksum type=\"md5\">8f6cd99bbb6d591107f3b5c47ee51f2c</checksum>\n" + "    <tags>\n"
             + "      <tag>lang:fr</tag>\n" + "    </tags>\n" + "  </catalog>\n" + "</captions>\n";
+  }
+
+  protected String generateImageAttachment() {
+    return "<attachment id=\"track-3\">\n" + "  <mimetype>image/jpeg</mimetype>\n"
+            + "  <url>serverUrl/workflow/samples/image.jpg</url>\n"
+            + "</attachment>";
   }
 
 }

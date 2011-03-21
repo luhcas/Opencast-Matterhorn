@@ -16,6 +16,7 @@
 package org.opencastproject.composer.api;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
@@ -97,6 +98,21 @@ public interface ComposerService {
    */
   // TODO revise
   Job image(Track sourceTrack, String profileId, long... time) throws EncoderException, MediaPackageException;
+
+  /**
+   * Converts the given image to a different image format using the specified image profile.
+   * 
+   * @param image
+   *          the image
+   * @param profileId
+   *          the profile to use for conversion
+   * @return the job for the image conversion
+   * @throws EncoderException
+   *           if image conversion fails
+   * @throws MediaPackageException
+   *           if the mediapackage is invalid
+   */
+  Job convertImage(Attachment image, String profileId) throws EncoderException, MediaPackageException;
 
   /**
    * Insert captions in media package element identified by <code>mediaTrack</code> from catalog which contains

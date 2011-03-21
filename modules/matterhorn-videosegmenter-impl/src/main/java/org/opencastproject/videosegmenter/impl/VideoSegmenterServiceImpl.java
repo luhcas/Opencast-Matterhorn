@@ -331,6 +331,7 @@ public class VideoSegmenterServiceImpl extends AbstractJobProducer implements Vi
       mpeg7Catalog.setURI(uri);
 
       try {
+        ds.disconnect();
         workspace.delete(mjpegTrack.getURI());
       } catch (NotFoundException e) {
         throw new VideoSegmenterException("Unable to find the mjpeg in the workspace", e);

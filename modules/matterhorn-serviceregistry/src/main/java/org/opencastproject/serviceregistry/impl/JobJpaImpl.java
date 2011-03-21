@@ -21,6 +21,7 @@ import org.opencastproject.job.api.JaxbJobContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -160,6 +161,13 @@ public class JobJpaImpl extends JaxbJob {
   @Override
   public long getId() {
     return id;
+  }
+
+  @Transient
+  @XmlElement(name = "url")
+  @Override
+  public URI getUri() {
+    return super.getUri();
   }
 
   /**
@@ -346,7 +354,7 @@ public class JobJpaImpl extends JaxbJob {
   public void setDispatchable(boolean dispatchable) {
     super.setDispatchable(dispatchable);
   }
-  
+
   /**
    * @return the serviceRegistration where this job was created
    */

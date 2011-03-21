@@ -16,6 +16,7 @@ supportedDevices[3]="Hauppauge HVR-1600"
 supportedDevices[4]="Hauppauge WinTV PVR-150"
 supportedDevices[5]="Hauppauge WinTV-HVR1300 DVB-T/H"
 supportedDevices[6]="WinTV PVR USB2 Model Category 2"
+supportedDevices[7]="Epiphan VGA2USB #[A-Z0-9]+"
 
 # Include the utility functions
 . ${FUNCTIONS}
@@ -39,7 +40,7 @@ for (( i = 0; i < ${#devlist[@]}; i++ )); do
     for (( j = 0; j < ${#supportedDevices[@]}; j++ )); do
 	# Add the matches to an array. This construction avoids 'gaps' --unset positions
 	# Note both arrays devices and devNames will have the same size!
-	if [[ "$testLine" == "${supportedDevices[$j]}" ]]; then
+	if [[ -n "`echo \"$testLine\" | grep -e \"${supportedDevices[$j]}\"`" ]]; then
 	    device[${#device[@]}]="${devlist[$i]}"
 	    devName[${#devName[@]}]="${supportedDevices[$j]}"
 	fi

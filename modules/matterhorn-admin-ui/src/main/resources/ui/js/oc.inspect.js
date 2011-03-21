@@ -90,14 +90,25 @@ Opencast.WorkflowInspect = (function() {
       }
       mp.media.track = Opencast.RenderUtils.ensureArray(mp.media.track);
 
-      // Metadata catalogs
+      // search for URL of episode / series dublincore catalogs, prefere catalogs from same domain so we can load them via ajax
+      var thisHost = window.location.protocol + '//' + window.location.host;
       if (mp.metadata) {
         mp.metadata.catalog = Opencast.RenderUtils.ensureArray(mp.metadata.catalog);
         $.each(mp.metadata.catalog, function(index, catalog) {
           if (catalog.type == 'dublincore/episode') {
-            out.info.episodeDC = catalog.url;
+            if (out.info.episodeDC == false || out.info.episodeDC.sameHost == false) {
+              out.info.episodeDC = {
+                url : catalog.url,
+                sameHost : (catalog.url.indexOf(thisHost) === 0)
+              }
+            }
           } else if (catalog.type == 'dublincore/series') {
-            out.info.seriesDC = catalog.url;
+            if (out.info.seriesDC == false || out.info.seriesDC.sameHost == false) {
+              out.info.seriesDC = {
+                url : catalog.url,
+                sameHost : (catalog.url.indexOf(thisHost) === 0)
+              }
+            }
           }
         });
       } else {
@@ -161,9 +172,10 @@ Opencast.WorkflowInspect = (function() {
     $target.append(result);
 
     // Render Episode DC if present
-    if (workflow.workflow.info.episodeDC) {
+    if (workflow.workflow.info.episodeDC !== false) {
+      if (workflow.workflow.info.episodeDC.sameHost == true) {
       $.ajax({
-        url : workflow.workflow.info.episodeDC,
+        url : workflow.workflow.info.episodeDC.url,
         type : 'GET',
         dataType : 'xml',
         error : function() {
@@ -178,22 +190,31 @@ Opencast.WorkflowInspect = (function() {
           }
         }
       });
+      } else {
+        var episode = TrimPath.processDOMTemplate('catalogDownloadTemplate', workflow.workflow.info.episodeDC);
+        $('#episodeContainer').append(episode);
+      }
     }
 
     // Render Series DC if present
-    if (workflow.workflow.info.seriesDC) {
-      $.ajax({
-        url : workflow.workflow.info.seriesDC,
-        type : 'GET',
-        dataType : 'xml',
-        error : function() {
-          $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
-        },
-        success : function(data) {
-          var series = TrimPath.processDOMTemplate('seriesTemplate', Opencast.RenderUtils.DCXMLtoObj(data));
-          $('#seriesContainer').append(series);
-        }
-      });
+    if (workflow.workflow.info.seriesDC !== false) {
+      if (workflow.workflow.info.seriesDC.sameHost == true) {
+        $.ajax({
+          url : workflow.workflow.info.seriesDC.url,
+          type : 'GET',
+          dataType : 'xml',
+          error : function() {
+            $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
+          },
+          success : function(data) {
+            var series = TrimPath.processDOMTemplate('seriesTemplate', Opencast.RenderUtils.DCXMLtoObj(data));
+            $('#seriesContainer').append(series);
+          }
+        });
+      } else {
+        var series = TrimPath.processDOMTemplate('catalogDownloadTemplate', workflow.workflow.info.seriesDC);
+        $('#seriesContainer').append(series);
+      }
     }
 
     // care for unfoldable boxes

@@ -468,10 +468,15 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       response = httpClient.execute(getDc);
       in = response.getEntity().getContent();
       DublinCoreCatalog dc = dublinCoreService.load(in);
-      try {
-        seriesService.updateSeries(dc);
-      } catch (Exception e) {
-        throw new IngestException(e);
+      String id = dc.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER);
+      if (id == null) {
+        logger.warn("Series dublin core document contains no identifier");
+      } else {
+        try {
+          seriesService.updateSeries(dc);
+        } catch (Exception e) {
+          throw new IngestException(e);
+        }
       }
     } finally {
       IOUtils.closeQuietly(in);
@@ -687,7 +692,8 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
               job.setStatus(Status.FINISHED);
               serviceRegistry.updateJob(job);
             } catch (ServiceRegistryException e) {
-              throw new IllegalStateException("Error updating job associated with skipped operation " + currentOperation, e);
+              throw new IllegalStateException("Error updating job associated with skipped operation "
+                      + currentOperation, e);
             }
           }
           currentOperation = workflow.next();

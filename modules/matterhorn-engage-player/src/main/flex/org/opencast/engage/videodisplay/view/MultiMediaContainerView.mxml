@@ -27,7 +27,6 @@
 
 	<mx:Script>
 		<![CDATA[
-			import mx.controls.Alert;
 			import mx.core.Application;
 			import mx.core.Container;
 			import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
@@ -143,7 +142,7 @@
 			 bottom="{model.previewPlayer == true ? 0 : model.multiMediaContainerBottom}"
 			 top="0">
 		<!-- Debug view can be used to get feedback from the videoservers, html -->
-		<!--<view:DebugView/> -->
+		<!--<view:DebugView/>-->
 
 		<osmf:MediaContainerUIComponent id="mediaContainerLeftUIComponent"
 										addedToStage="initPlayerLeft()"/>

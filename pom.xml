@@ -123,7 +123,6 @@
         <module>modules/matterhorn-distribution-service-api</module>
         <module>modules/matterhorn-distribution-service-download-remote</module>
         <module>modules/matterhorn-distribution-service-streaming-remote</module>
-
 <!--
         <module>modules/matterhorn-distribution-service-itunesu-remote</module>
         <module>modules/matterhorn-distribution-service-youtube-remote</module>
@@ -179,12 +178,10 @@
         <module>modules/matterhorn-distribution-service-api</module>
         <module>modules/matterhorn-distribution-service-download-remote</module>
         <module>modules/matterhorn-distribution-service-streaming-remote</module>
-
 <!--
         <module>modules/matterhorn-distribution-service-itunesu-remote</module>
         <module>modules/matterhorn-distribution-service-youtube-remote</module>
 -->
-
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-lti</module>

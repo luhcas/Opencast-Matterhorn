@@ -21,6 +21,8 @@ import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.impl.SearchQueryImpl;
 
+import java.util.Properties;
+
 /**
  * This feed generator implements a feed for series. The series argument is taken from the first url parameter after the
  * feed type and version, and {@link #accept(String[])} returns <code>true</code> if the search service returns a result
@@ -110,6 +112,18 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
    */
   protected SearchResult loadFeedData(Type type, String[] query, int limit, int offset) {
     return seriesData.get();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.feed.impl.AbstractFeedService#initialize(java.util.Properties)
+   */
+  @Override
+  public void initialize(Properties properties) {
+    super.initialize(properties);
+    // Clear the selector, since super.accept() relies on the fact that it's not set
+    selector = null;
   }
 
 }

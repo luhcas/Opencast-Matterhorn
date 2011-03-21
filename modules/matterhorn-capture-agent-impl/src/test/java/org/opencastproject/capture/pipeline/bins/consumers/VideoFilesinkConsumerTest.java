@@ -127,7 +127,8 @@ public class VideoFilesinkConsumerTest {
 
   @Test
   public void settingCodecButNotContainerResultsInCorrectCodecAndDefaultMuxer() {
-    if (!gstreamerInstalled)
+    if (!gstreamerInstalled || PipelineTestHelpers.testGstreamerElement(VideoFilesinkConsumer.DEFAULT_ENCODER)
+            || PipelineTestHelpers.testGstreamerElement(VideoFilesinkConsumer.DEFAULT_MUXER))
       return;
     Properties captureDeviceProperties = createProperties("x264enc", "4096", null);
     captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",

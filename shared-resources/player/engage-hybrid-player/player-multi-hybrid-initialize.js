@@ -1,7 +1,5 @@
-/*global $, Player, Videodisplay,window, fluid, Scrubber*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 /**
- *  Copyright 2009 The Regents of the University of California
+ *  Copyright 2009-2011 The Regents of the University of California
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
@@ -16,13 +14,10 @@
  *
  */
  
-/**
- @namespace the global Opencast namespace
- */
 var Opencast = Opencast || {};
 
 /**
- @namespace FlashVersion
+ * @namespace the global Opencast namespace Initialize
  */
 Opencast.Initialize = (function ()
 {
@@ -395,6 +390,9 @@ Opencast.Initialize = (function ()
         {
             dropdown_timer();
         });
+
+        // Set the Controls visible
+        $('#oc_video-player-controls').show();
         Opencast.ariaSpinbutton.initialize('oc_volume-container', 'oc_volume-back', 'oc_volume-front', 8, 0, 100);
         // aria roles
         $("#editorContainer").attr("className", "oc_editTime");
@@ -1060,7 +1058,7 @@ Opencast.Initialize = (function ()
         var embedWidhtThree = 460
         var embedWidhtFour = 380;
         var embedWidhtFive = 300;
-        if (formatSingle !== 0)
+        if (formatSingle != 0)
         {
             setMaxFormat(formatSingle);
         }
@@ -1072,11 +1070,17 @@ Opencast.Initialize = (function ()
         {
             setMaxFormat(formatTwo);
         }
+        // you must not divide by zero
+        if(getMaxFormat() == 0)
+        {
+            setMaxFormat(1);
+        }
         var embedHeightOne = Math.round(embedWidhtOne / getMaxFormat()) + OTHERDIVHEIGHT;
         var embedHeightTwo = Math.round(540 / getMaxFormat()) + OTHERDIVHEIGHT;
         var embedHeightThree = Math.round(460 / getMaxFormat()) + OTHERDIVHEIGHT;
         var embedHeightFour = Math.round(380 / getMaxFormat()) + OTHERDIVHEIGHT;
         var embedHeightFive = Math.round(300 / getMaxFormat()) + OTHERDIVHEIGHT;
+        
         $("#oc_embed-icon-one").css("width", "110px");
         $("#oc_embed-icon-one").css("height", "73px");
         $("#oc_embed-icon-one").attr(
@@ -1163,26 +1167,45 @@ Opencast.Initialize = (function ()
      */
     function setMediaResolution(mediaResolutionOne, mediaResolutionTwo)
     {
-        var mediaResolutionOneString = mediaResolutionOne;
-        var mediaResolutionTwoString = mediaResolutionTwo;
+        var mediaResolutionOneString = mediaResolutionOne,
+            mediaResolutionTwoString = mediaResolutionTwo,
+            mediaOneWidth = 1,
+            mediaOneHeight = 1,
+            mediaTwoWidth = 1,
+            mediaTwoHeight = 1,
+            mediaSingleWidth = 1,
+            mediaSingleHeight = 1;
+        
+        // Parse first string
         var mediaResolutionOneArray = mediaResolutionOneString.split('x');
-        if (mediaResolutionTwoString !== '')
+        var v1 = parseInt(mediaResolutionOneArray[0], 10);
+        var v2 = parseInt(mediaResolutionOneArray[1], 10);
+        var arr1IsUndef = isNaN(v1) || isNaN(v2);
+        if(!arr1IsUndef)
         {
+            mediaOneWidth = v1;
+            mediaOneHeight = v2;
+            mediaSingleWidth = v1;
+            mediaSingleHeight = v2;
+            formatSingle = (mediaSingleHeight != 0) ? (mediaSingleWidth / mediaSingleHeight) : mediaSingleWidth;
+        }
+        if (!arr1IsUndef && (mediaResolutionTwoString != ''))
+        {
+            // Parse second string
             var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
-            var mediaOneWidth = parseInt(mediaResolutionOneArray[0], 10);
-            var mediaOneHeight = parseInt(mediaResolutionOneArray[1], 10);
-            var mediaTwoWidth = parseInt(mediaResolutionTwoArray[0], 10);
-            var mediaTwoHeight = parseInt(mediaResolutionTwoArray[1], 10);
-            formatOne = mediaOneWidth / mediaOneHeight;
-            formatTwo = mediaTwoWidth / mediaTwoHeight;
+            var v3 = parseInt(mediaResolutionTwoArray[0], 10);
+            var v4 = parseInt(mediaResolutionTwoArray[1], 10);
+            var arr2IsUndef = isNaN(v3) || isNaN(v4);
+            if(!arr2IsUndef)
+            {
+                mediaTwoWidth = v3;
+                mediaTwoHeight = v4;
+                formatOne = (mediaOneHeight >= 0) ? (mediaOneWidth / mediaOneHeight) : mediaOneWidth;
+                formatTwo = (mediaTwoHeight >= 0) ? (mediaTwoWidth / mediaTwoHeight) : mediaTwoWidth;
+            }
         }
-        else
-        {
-            var mediaSingleWidth = parseInt(mediaResolutionOneArray[0], 10);
-            var mediaSingleHeight = parseInt(mediaResolutionOneArray[1], 10);
-            formatSingle = mediaSingleWidth / mediaSingleHeight;
-        }
-        // set the emed section
+        
+        // set the embed section
         setEmbed();
     }
     

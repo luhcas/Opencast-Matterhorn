@@ -22,6 +22,9 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.capture.impl.XProperties;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.consumers.AudioFilesinkConsumer;
+import org.opencastproject.capture.pipeline.bins.consumers.ConsumerBin;
+import org.opencastproject.capture.pipeline.bins.consumers.VideoFilesinkConsumer;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.apache.commons.io.FileUtils;
@@ -278,7 +281,11 @@ public class PipelineFactoryTest {
 
   @Test
   public void pipelineFactoryWillIgnoreSrcPropertiesOnAllRelevantProducerTypes() {
-    if (!gstreamerInstalled || !PipelineTestHelpers.isLinux())
+    if (!gstreamerInstalled || !PipelineTestHelpers.isLinux()
+            || PipelineTestHelpers.testGstreamerElement(AudioFilesinkConsumer.DEFAULT_ENCODER)
+            || PipelineTestHelpers.testGstreamerElement(AudioFilesinkConsumer.DEFAULT_MUXER)
+            || PipelineTestHelpers.testGstreamerElement(VideoFilesinkConsumer.DEFAULT_ENCODER)
+            || PipelineTestHelpers.testGstreamerElement(VideoFilesinkConsumer.DEFAULT_MUXER))
       return;
     numberOfProducers = 14;
     CaptureAgent captureAgentMock = createMock(CaptureAgent.class);
@@ -306,7 +313,11 @@ public class PipelineFactoryTest {
 
   @Test
   public void pipelineFactoryWillCrashWhenMissingSrcLocations() {
-    if (!gstreamerInstalled || !PipelineTestHelpers.isLinux())
+    if (!gstreamerInstalled || !PipelineTestHelpers.isLinux()
+            || PipelineTestHelpers.testGstreamerElement(AudioFilesinkConsumer.DEFAULT_ENCODER)
+            || PipelineTestHelpers.testGstreamerElement(AudioFilesinkConsumer.DEFAULT_MUXER)
+            || PipelineTestHelpers.testGstreamerElement(VideoFilesinkConsumer.DEFAULT_ENCODER)
+            || PipelineTestHelpers.testGstreamerElement(VideoFilesinkConsumer.DEFAULT_MUXER))
       return;
     CaptureAgent captureAgentMock = createMock(CaptureAgent.class);
     numberOfProducers = 6;

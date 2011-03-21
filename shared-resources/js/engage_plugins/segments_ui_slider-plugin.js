@@ -1,5 +1,19 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
@@ -10,7 +24,7 @@ Opencast.segments_ui_slider_Plugin = (function ()
     // The Templates to process
     var templateSegmentsTable = '<tr>' +
                                 '{for s in segment}' +
-                                    '{if s.durationIncludingSegment >= currentTime}' +
+                                    '{if parseInt(s.duration) > 0}' +
                                         '<td class="segment-holder" style="width: 15px;" " ' +
                                              'id="segment${s.index}" ' +
                                              'onmouseover="Opencast.segments_ui.hoverSegment(${parseInt(s.index)})" ' +
@@ -146,24 +160,33 @@ Opencast.segments_ui_slider_Plugin = (function ()
      */
     function createSegments(withSegments)
     {
+        var cs1 = false,
+            cs2 = false,
+            cs3 = false;
+            
         // Process Element Segments Table 1
         if (withSegments && (elementSegmentsTable !== undefined) && (segments_ui_dataSegments.segment !== undefined) && (segments_ui_dataSegments.segment.length > 0))
         {
             processedTemplateData = templateSegmentsTable.process(segments_ui_dataSegments);
             elementSegmentsTable.html(processedTemplateData);
+            cs1 = true;
         }
         // Process Element Data 1
         if ((elementData1 !== undefined) && (segments_ui_dataData1.track !== undefined) && (segments_ui_dataData1.track.length > 0))
         {
             processedTemplateData = templateData1.process(segments_ui_dataData1);
             elementSegmentsTable.html(processedTemplateData);
+            cs2 = true;
         }
         // Process Element Data 2
         if ((elementData2 !== undefined) && (segments_ui_dataData2.attachment !== undefined) && (segments_ui_dataData2.attachment.length > 0))
         {
             processedTemplateData = templateData2.process(segments_ui_dataData2);
             elementSegmentsTable.html(processedTemplateData);
+            cs3 = true;
         }
+        var tl = '' + (cs1 ? " 1 " : '') + (cs2 ? " 2 " : '') + (cs3 ? " 3 " : '');
+        Opencast.Utils.log("Segments UI Slider Plugin: Following Templates have (successfully) been proceeded: " + tl+ " from 3 Templates possible");
     }
     
     return {

@@ -4,4 +4,4 @@ dc-1.xml
 audio.mp3
 camera.mpg
 screen.mpg
-
+image.jpg

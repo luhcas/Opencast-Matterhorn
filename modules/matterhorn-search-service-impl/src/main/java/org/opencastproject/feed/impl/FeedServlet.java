@@ -117,6 +117,10 @@ public class FeedServlet extends HttpServlet {
     for (FeedGenerator generator : feeds) {
       if (generator.accept(feedInfo.getQuery())) {
         feed = generator.createFeed(feedInfo.getType(), feedInfo.getQuery());
+        if (feed == null) {
+          response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+          return;
+        }
         break;
       }
     }

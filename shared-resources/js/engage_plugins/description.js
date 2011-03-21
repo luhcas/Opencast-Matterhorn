@@ -1,5 +1,19 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
@@ -10,7 +24,8 @@ Opencast.Description = (function ()
     var mediaPackageId, duration;
     var DESCRIPTION = "Description",
         DESCRIPTION_HIDE = "Hide Description";
-        
+    var defaultChar = '-';
+    
     /**
      * @memberOf Opencast.Description
      * @description Displays the Description Tab
@@ -32,15 +47,17 @@ Opencast.Description = (function ()
         $('#oc_description').show();
         $('#description-loading').show();
         $('#oc-description').hide();
-        
         // If cashed data are available
-        if(Opencast.Description_Plugin.createDescriptionFromCashe())
+        if (Opencast.Description_Plugin.createDescriptionFromCashe())
         {
+            Opencast.Utils.log("Cashing description plugin: yes");
             // Make visible
             $('#description-loading').hide();
             $('#oc-description').show();
-        } else
+        }
+        else
         {
+            Opencast.Utils.log("Cashing description plugin: no");
             // Request JSONP data
             $.ajax(
             {
@@ -50,45 +67,47 @@ Opencast.Description = (function ()
                 jsonp: 'jsonp',
                 success: function (data)
                 {
+                    Opencast.Utils.log("Description AJAX call #1: Requesting data succeeded");
                     if ((data === undefined) || (data['search-results'] === undefined) || (data['search-results'].result === undefined))
                     {
-                        displayNoDescriptionAvailable("No data defined (1)");
+                        displayNoDescriptionAvailable("No data defined");
                         return;
                     }
-                    
                     // Process data
-                    var defaultChar = '-';
                     // Trimpath throws (no) errors if a variable is not defined => assign default value
-                    data['search-results'].result.dcCreated = data['search-results'].result.dcCreated || defaultChar;
-                    data['search-results'].result.dcSeriesTitle = data['search-results'].result.mediapackage.seriestitle || defaultChar;
-                    data['search-results'].result.dcContributor = data['search-results'].result.dcContributor || defaultChar;
-                    data['search-results'].result.dcLanguage = data['search-results'].result.dcLanguage || defaultChar;
-                    data['search-results'].result.dcViews = data['search-results'].result.dcViews || defaultChar;
-                    data['search-results'].result.dcCreator = data['search-results'].result.dcCreator || defaultChar;
+                    data['search-results'].defaultChar = defaultChar;
+                    data['search-results'].result.dcSeriesTitle = checkForNullUndef(data['search-results'].result.mediapackage.seriestitle, defaultChar);
+                    data['search-results'].result.dcContributor = checkForNullUndef(data['search-results'].result.dcContributor, defaultChar);
+                    data['search-results'].result.dcLanguage = checkForNullUndef(data['search-results'].result.dcLanguage, defaultChar);
+                    data['search-results'].result.dcCreator = checkForNullUndef(data['search-results'].result.dcCreator, defaultChar);
+                    data['search-results'].result.dcViews = checkForNullUndef(data['search-results'].result.dcViews, defaultChar);
+                    data['search-results'].result.dcCreated = checkForNullUndef(data['search-results'].result.dcCreated, defaultChar);
+                    // format date if date is available
                     if (data['search-results'].result.dcCreated != defaultChar)
                     {
-                        var timeDate = data['search-results'].result.dcCreated;
-                        var sd = new Date();
-                        sd.setMinutes(parseInt(timeDate.substring(14, 16), 10));
-                        sd.setSeconds(parseInt(timeDate.substring(17, 19), 10));
-                        data['search-results'].result.dcCreated = sd.toLocaleString();
+                        var sd = Opencast.Utils.dateStringToDate(data['search-results'].result.dcCreated);
+                        data['search-results'].result.dcCreated = Opencast.Utils.getDateString(sd) + ' - ' + Opencast.Utils.getTimeString(sd);
                     }
-                    
                     // Request JSONP data (Stats)
                     $.ajax(
                     {
-                        url: '../../usertracking/stats.json?id=',
+                        url: '../../usertracking/stats.json',
                         data: 'id=' + mediaPackageId,
                         dataType: 'jsonp',
                         jsonp: 'jsonp',
                         success: function (result)
                         {
-                            data['search-results'].result.dcViews = result.stats.views;
+                            Opencast.Utils.log("Description AJAX call #2: Requesting data succeeded");
+                            var views = checkForNullUndef(result.stats.views);
+                            if ((result.stats.views == 0) || (views != defaultChar))
+                            {
+                                data['search-results'].result.dcViews = result.stats.views;
+                            }
                             // Create Trimpath Template
                             var descriptionSet = Opencast.Description_Plugin.addAsPlugin($('#oc-description'), data['search-results']);
                             if (!descriptionSet)
                             {
-                                displayNoDescriptionAvailable("No template available (2)");
+                                displayNoDescriptionAvailable("No template available");
                             }
                             else
                             {
@@ -100,17 +119,35 @@ Opencast.Description = (function ()
                         // If no data comes back (JSONP-Call #2)
                         error: function (xhr, ajaxOptions, thrownError)
                         {
-                            displayNoDescriptionAvailable("No data available (2)");
+                            Opencast.Utils.log("Description Ajax call #1: Requesting data failed");
+                            displayNoDescriptionAvailable("No data available");
                         }
                     });
                 },
                 // If no data comes back (JSONP-Call #1)
                 error: function (xhr, ajaxOptions, thrownError)
                 {
-                    displayNoDescriptionAvailable("No data available (1)");
+                    Opencast.Utils.log("Description Ajax call #2: Requesting data failed");
+                    displayNoDescriptionAvailable("No data available");
                 }
             });
         }
+    }
+    
+    /**
+     * @memberOf Opencast.Description
+     * @description Checks an Object for null and undefined
+     * @param toCheck Object to check
+     * @param char default character to return if toCheck is null or undefined
+     * @return char if object if null or undefined, toCheck else
+     */
+    function checkForNullUndef(toCheck, char)
+    {
+        if (!toCheck || (toCheck === null) || (toCheck === undefined))
+        {
+            return char;
+        }
+        return toCheck;
     }
     
     /**

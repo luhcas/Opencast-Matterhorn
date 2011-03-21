@@ -15,6 +15,7 @@
  */
 package org.opencastproject.job.api;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
@@ -76,6 +77,7 @@ public class JaxbJob implements Job {
     this.parentJobId = job.getParentJobId();
     this.rootJobId = job.getRootJobId();
     this.dispatchable = job.isDispatchable();
+    this.uri = job.getUri();
   }
 
   /** The job ID */
@@ -86,6 +88,9 @@ public class JaxbJob implements Job {
 
   /** The job type */
   protected String jobType;
+
+  /** The job location */
+  protected URI uri;
 
   /** The operation type */
   protected String operation;
@@ -482,6 +487,26 @@ public class JaxbJob implements Job {
   @Override
   public void setDispatchable(boolean dispatchable) {
     this.dispatchable = dispatchable;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getUri()
+   */
+  @Override
+  @XmlElement(name = "url")
+  public URI getUri() {
+    return uri;
+  }
+
+  /**
+   * Sets the URI.
+   * 
+   * @param uri the uri to set
+   */
+  public void setUri(URI uri) {
+    this.uri = uri;
   }
 
   /**

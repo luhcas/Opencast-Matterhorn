@@ -306,6 +306,10 @@ for proper operation of 3rd party tools on Windows.
 <Drive:>\usr\local\bin should be added to PATH variable for proper
 operation of Opencast Matterhorn.
 
+You also need to define environment variable TESSDATA_PREFIX as
+set TESSDATA_PREFIX=<Drive:>\usr\local\share\
+(last "\" is obligatory), where tesseract will find it's language files.
+
 If you want to use ffmpeg preset files (as supplied with the source),
 you can use the zip package _ffmpeg.zip, which is also created on $HOME3P.
 Transfer it to Windows and unzip it in user's home directory, for

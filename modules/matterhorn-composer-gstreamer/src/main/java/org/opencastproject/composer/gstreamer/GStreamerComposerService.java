@@ -72,7 +72,7 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
 
   /** List of available operations on jobs */
   private enum Operation {
-    Caption, Encode, Image, Mux, Trim
+    Caption, Encode, Image, ImageConversion, Mux, Trim
   };
 
   /** Encoding profile manager */
@@ -105,12 +105,12 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
    * 
    * @see org.opencastproject.job.api.AbstractJobProducer#process(org.opencastproject.job.api.Job)
    */
-  @Override
   protected String process(Job job) throws Exception {
     Operation op = null;
+    String operation = job.getOperation();
+    List<String> arguments = job.getArguments();
     try {
-      op = Operation.valueOf(job.getOperation());
-      List<String> arguments = job.getArguments();
+      op = Operation.valueOf(operation);
       Track firstTrack = null;
       Track secondTrack = null;
       String encodingProfile = null;
@@ -143,6 +143,12 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
           List<Attachment> resultingElements = image(job, firstTrack, encodingProfile, times);
           serialized = MediaPackageElementParser.getArrayAsXml(resultingElements);
           break;
+        case ImageConversion:
+          Attachment sourceImage = (Attachment) MediaPackageElementParser.getFromXml(arguments.get(0));
+          encodingProfile = arguments.get(1);
+          resultingElement = convertImage(job, sourceImage, encodingProfile);
+          serialized = MediaPackageElementParser.getAsXml(resultingElement);
+          break;
         case Mux:
           firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
           secondTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(1));
@@ -159,7 +165,7 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
           serialized = MediaPackageElementParser.getAsXml(resultingElement);
           break;
         default:
-          throw new IllegalStateException("Don't know how to handle operation '" + job.getOperation() + "'");
+          throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
 
       return serialized;
@@ -581,6 +587,45 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
         throw new EncoderException(e);
       }
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.api.ComposerService#convertImage(org.opencastproject.mediapackage.Attachment, java.lang.String)
+   */
+  @Override
+  public Job convertImage(Attachment image, String profileId) throws EncoderException, MediaPackageException {
+    if (image == null)
+      throw new IllegalArgumentException("Source image cannot be null");
+
+    String[] parameters = new String[2];
+    parameters[0] = MediaPackageElementParser.getAsXml(image);
+    parameters[1] = profileId;
+
+    try {
+      return serviceRegistry.createJob(JOB_TYPE, Operation.ImageConversion.toString(), Arrays.asList(parameters));
+    } catch (ServiceRegistryException e) {
+      throw new EncoderException("Unable to create a job", e);
+    }
+  }
+
+  /**
+   * Converts an image from <code>sourceImage</code> to a new format.
+   * 
+   * @param job
+   *          the associated job
+   * @param sourceImage
+   *          the source image
+   * @param profileId
+   *          the identifer of the encoding profile to use
+   * @return the image as an attachment element
+   * @throws EncoderException
+   *           if converting the image fails
+   */
+  protected Attachment convertImage(Job job, Attachment sourceImage, String profileId) throws EncoderException,
+          MediaPackageException {
+    // TODO: Implement this for gstreamer
+    throw new UnsupportedOperationException("Not yet implemented");
   }
 
   /**

@@ -5,6 +5,7 @@
     <property name="service.description" value="Tesseract Text Extractor" />
     <service>
       <provide interface="org.opencastproject.textextractor.api.TextExtractor" />
+      <provide interface="org.osgi.service.cm.ManagedService" />
     </service>
   </scr:component>
 </scr:components>

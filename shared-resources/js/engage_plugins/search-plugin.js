@@ -1,5 +1,19 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
@@ -31,6 +45,12 @@ Opencast.search_Plugin = (function ()
                     '{/for}' +
                     '</table>';
     
+    /**
+     * @memberOf Opencast.search_Plugin
+     * @description Returns the header
+     * @param searchValue The search value
+     * @return the header as a string
+     */
     function getHeader(searchValue)
     {
         var ret = '<div id="searchValueDisplay" style="float:left">' +
@@ -87,6 +107,7 @@ Opencast.search_Plugin = (function ()
     {
         if (element !== undefined)
         {
+            Opencast.Utils.log("Search Plugin: Data available, processing template");
             if (search_value !== '')
             {
                 var newTemplate = getHeader(search_value) + '<br />' + template;
@@ -100,6 +121,7 @@ Opencast.search_Plugin = (function ()
             return true;
         } else
         {
+            Opencast.Utils.log("Search Plugin: No data available");
             return false;
         }
     }

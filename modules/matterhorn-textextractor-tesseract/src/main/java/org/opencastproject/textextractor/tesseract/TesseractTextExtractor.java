@@ -25,22 +25,28 @@ import org.opencastproject.util.ProcessExecutor;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Dictionary;
 
 /**
  * Commandline wrapper around tesseract' <code>tesseract</code> command.
  */
-public class TesseractTextExtractor implements TextExtractor {
+public class TesseractTextExtractor implements TextExtractor, ManagedService {
 
   /** Default name of the tesseract binary */
   public static final String TESSERACT_BINARY_DEFAULT = "tesseract";
 
+  /** The configuration admin property that defines the path to the tesseract binary */
+  public static final String TESSERACT_BINARY_CONFIG_KEY = "tesseract.path";
+  
   /** Binary of the tesseract command */
-  protected String binary = TESSERACT_BINARY_DEFAULT;
+  protected String binary = null;
 
   /**
    * Creates a new tesseract command wrapper that will be using the default binary.
@@ -134,4 +140,11 @@ public class TesseractTextExtractor implements TextExtractor {
     return options.toString();
   }
 
+  @Override
+  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+    String path = (String)properties.get(TESSERACT_BINARY_CONFIG_KEY);
+    if(path != null) {
+      this.binary = path;
+    }
+  }
 }

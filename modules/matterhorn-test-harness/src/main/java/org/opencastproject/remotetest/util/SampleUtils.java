@@ -38,4 +38,9 @@ public final class SampleUtils {
             + "    <bitrate>540520</bitrate>\n" + "    <frameRate>2</frameRate>\n" + "  </video>\n" + "</track>";
   }
 
+  public static String generateImageAttachment(String serverUrl) {
+    return "<attachment id=\"image-1\" type=\"presentation/source\">\n" + "  <mimetype>image/jpeg</mimetype>\n"
+            + "  <url>" + serverUrl + "/workflow/samples/image.jpg</url></attachment>";
+  }
+
 }

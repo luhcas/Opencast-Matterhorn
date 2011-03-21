@@ -215,35 +215,49 @@ public class WorkspaceImpl implements Workspace {
     }
 
     String ifNoneMatch = null;
-    if(f.isFile()) {
+    if (f.isFile()) {
       ifNoneMatch = md5(f);
     }
-    
+
     HttpGet get = new HttpGet(urlString);
-    if(ifNoneMatch != null);
-    get.setHeader("If-None-Match", ifNoneMatch);
+    if (ifNoneMatch != null)
+      get.setHeader("If-None-Match", ifNoneMatch);
     InputStream in = null;
     OutputStream out = null;
     HttpResponse response = null;
+    File lockFile = new File(f.getParent(), f.getName() + ".lock");
     try {
       response = trustedHttpClient.execute(get);
       if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
         throw new NotFoundException(uri + " does not exist");
-      } else if(HttpServletResponse.SC_NOT_MODIFIED == response.getStatusLine().getStatusCode()) {
+      } else if (HttpServletResponse.SC_NOT_MODIFIED == response.getStatusLine().getStatusCode()) {
         logger.debug("{} has not been modified.", urlString);
         return f;
       }
+
+      // if the lock file exists, another thread is currently downloading the file. wait for it.
+      while (lockFile.isFile()) {
+        logger.debug("Waiting on another thread to download {}", urlString);
+        Thread.sleep(5000);
+        if (!lockFile.isFile() && f.isFile()) {
+          return f;
+        }
+      }
+
       logger.info("Downloading {} to {}", urlString, f.getAbsolutePath());
+      f.createNewFile();
       in = response.getEntity().getContent();
       out = new FileOutputStream(f);
       IOUtils.copyLarge(in, out);
     } catch (Exception e) {
       logger.warn("Could not copy {} to {}", urlString, f.getAbsolutePath());
+      FileUtils.deleteQuietly(f);
       throw new NotFoundException(e);
     } finally {
       IOUtils.closeQuietly(in);
       IOUtils.closeQuietly(out);
       trustedHttpClient.close(response);
+      FileUtils.deleteQuietly(lockFile);
     }
 
     return f;
@@ -494,11 +508,10 @@ public class WorkspaceImpl implements Workspace {
     // Move the local file
     File original = getWorkspaceFile(collectionURI, false);
     if (original.isFile()) {
-      URI copyURI = wfr.getURI(toMediaPackage, toMediaPackageElement, filename);
+      URI copyURI = wfr.getURI(toMediaPackage, toMediaPackageElement, toFileName);
       File copy = getWorkspaceFile(copyURI, true);
       FileUtils.forceMkdir(copy.getParentFile());
-      FileUtils.copyFile(original, copy);
-      original.delete();
+      FileUtils.moveFile(original, copy);
     }
 
     // Tell working file repository

@@ -227,6 +227,8 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
     } else {
       super.host = hostRegistration.getBaseUrl();
       super.maintenanceMode = hostRegistration.isMaintenanceMode();
+      if (!hostRegistration.online)
+        super.online = false;
     }
   }
 

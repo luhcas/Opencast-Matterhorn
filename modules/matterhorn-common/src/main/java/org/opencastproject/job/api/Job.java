@@ -15,6 +15,7 @@
  */
 package org.opencastproject.job.api;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.List;
 
@@ -208,5 +209,12 @@ public interface Job {
    *          whether the job should be queueable for dispatch.
    */
   void setDispatchable(boolean dispatchable);
+
+  /**
+   * Gets the URI of this job, which can be used to check its status.
+   * 
+   * @return the job's URI
+   */
+  URI getUri();
 
 }

@@ -128,7 +128,7 @@ CREATE TABLE `SERVICE_REGISTRATION` (
 CREATE TABLE `JOB` (
   `ID` bigint(20) NOT NULL,
   `STATUS` int(11) default NULL,
-  `PAYLOAD` text collate utf8_unicode_ci,
+  `PAYLOAD` longtext collate utf8_unicode_ci,
   `DATESTARTED` datetime default NULL,
   `RUNTIME` bigint(20) default NULL,
   `instance_version` bigint(20) default NULL,
@@ -154,7 +154,7 @@ CREATE TABLE `JOB` (
 
 CREATE TABLE `JOB_ARG` (
   `ID` bigint(20) NOT NULL,
-  `argument` text collate utf8_unicode_ci,
+  `argument` longtext collate utf8_unicode_ci,
   `listindex` int(11) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

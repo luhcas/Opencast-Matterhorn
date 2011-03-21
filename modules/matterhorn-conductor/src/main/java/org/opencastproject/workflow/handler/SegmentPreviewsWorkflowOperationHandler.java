@@ -37,6 +37,7 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -272,6 +273,13 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
           Job job = composerService.image(t, profile.getIdentifier(), timeArray);
           if (!waitForStatus(job).isSuccess()) {
             throw new WorkflowOperationException("Extracting preview image from " + t + " failed");
+          }
+
+          // Get the latest copy
+          try {
+            job = serviceRegistry.getJob(job.getId());
+          } catch (ServiceRegistryException e) {
+            throw new WorkflowOperationException(e);
           }
 
           // add this receipt's queue time to the total

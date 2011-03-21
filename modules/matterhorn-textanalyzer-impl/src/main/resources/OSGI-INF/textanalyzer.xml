@@ -16,6 +16,8 @@
       cardinality="1..1" policy="static" bind="setMpeg7CatalogService" />
     <reference name="dictionaryService" interface="org.opencastproject.dictionary.api.DictionaryService"
       cardinality="1..1" policy="static" bind="setDictionaryService" />
+    <reference name="composer" interface="org.opencastproject.composer.api.ComposerService"
+      cardinality="1..1" policy="static" bind="setComposerService" />
   </scr:component>
 
   <scr:component name="org.opencastproject.textanalyzer.impl.endpoint.TextAnalysisRestEndpoint" immediate="true"

@@ -839,14 +839,14 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     try {
       QueryResponse response = solrServer.query(solrQuery);
       SolrDocumentList items = response.getResults();
-      time = System.currentTimeMillis() - time;
+      long searchTime = System.currentTimeMillis() - time;
       totalHits = items.getNumFound();
 
       set = new WorkflowSetImpl();
       set.setPageSize(count);
       set.setTotalCount(totalHits);
       set.setStartPage(query.getStartPage());
-      set.setSearchTime(time);
+      set.setSearchTime(searchTime);
 
       // Iterate through the results
       for (SolrDocument doc : items) {
@@ -860,6 +860,8 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }
+    long totalTime = System.currentTimeMillis() - time;
+    logger.debug("Workflow query took {} ms", totalTime);
     return set;
   }
 

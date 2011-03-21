@@ -49,14 +49,17 @@ public class JsonpFilter implements Filter {
   /** The regular expression to ensure that the callback is safe for display to a browser */
   public static final Pattern SAFE_PATTERN = Pattern.compile("[a-zA-Z0-9\\.]+");
 
-  /** The default padding to use if the specified padding contains invalid characters */
-  public static final String DEFAULT_CALLBACK = "handleMatterhornData";
-
   /** The content type for jsonp is "application/x-javascript", not "application/json". */
   public static final String JS_CONTENT_TYPE = "application/x-javascript";
 
   /** The character encoding. */
   public static final String CHARACTER_ENCODING = "UTF-8";
+
+  /** The default padding to use if the specified padding contains invalid characters */
+  public static final String DEFAULT_CALLBACK = "handleMatterhornData";
+
+  /** The '(' constant. */
+  public static final String OPEN_PARENS = "(";
 
   /** The post padding, which is always ');' no matter what the pre-padding looks like */
   public static final String POST_PADDING = ");";
@@ -107,8 +110,7 @@ public class JsonpFilter implements Filter {
       }
 
       // Write the padded response
-      String preWrapper = callbackValue + "(";
-      HttpServletResponseContentWrapper wrapper = new HttpServletResponseContentWrapper(originalResponse, preWrapper);
+      HttpServletResponseContentWrapper wrapper = new HttpServletResponseContentWrapper(originalResponse, callbackValue);
       chain.doFilter(request, wrapper);
       wrapper.flushWrapper();
     }
@@ -125,9 +127,9 @@ public class JsonpFilter implements Filter {
     protected boolean enableWrapping = false;
     protected String preWrapper;
 
-    public HttpServletResponseContentWrapper(HttpServletResponse response, String preWrapper) {
+    public HttpServletResponseContentWrapper(HttpServletResponse response, String callbackValue) {
       super(response);
-      this.preWrapper = preWrapper;
+      this.preWrapper = callbackValue + OPEN_PARENS;
       this.buffer = new ByteArrayServletOutputStream();
     }
 
@@ -137,21 +139,16 @@ public class JsonpFilter implements Filter {
           bufferWriter.close();
         if (buffer != null)
           buffer.close();
-        byte[] content = wrap(buffer.toByteArray());
         getResponse().setContentType(JS_CONTENT_TYPE);
-        getResponse().setContentLength(content.length);
+        getResponse().setContentLength(
+                preWrapper.getBytes(CHARACTER_ENCODING).length + buffer.size() + POST_PADDING.getBytes().length);
         getResponse().setCharacterEncoding(CHARACTER_ENCODING);
-        getResponse().getOutputStream().write(content);
+        getResponse().getOutputStream().write(preWrapper.getBytes(CHARACTER_ENCODING));
+        getResponse().getOutputStream().write(buffer.toByteArray());
+        getResponse().getOutputStream().write(POST_PADDING.getBytes());
         getResponse().flushBuffer();
         committed = true;
       }
-    }
-
-    public byte[] wrap(byte[] content) throws IOException {
-      StringBuilder sb = new StringBuilder(preWrapper);
-      sb.append(new String(content, CHARACTER_ENCODING));
-      sb.append(POST_PADDING);
-      return sb.toString().getBytes(CHARACTER_ENCODING);
     }
 
     @Override

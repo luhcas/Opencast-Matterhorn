@@ -1,5 +1,19 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
@@ -8,6 +22,51 @@ var Opencast = Opencast || {};
  */
 Opencast.Utils = (function ()
 {
+    var asciiAlphabet;
+    var asciiAlphabetCashed = false;
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description Returns the ascii alphabet lower case (internal function for cashing)
+     * @return the alphabet lower case
+     */
+    function getAsciiAlphabet_internal()
+    {
+        var fullAscii = new Array();
+        for(var i = 0; i <= 255; ++i)
+        {
+            fullAscii[String.fromCharCode(i)] = i;
+        }
+        return fullAscii;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description Returns the ascii alphabet lower case
+     * @return the alphabet lower case
+     */
+    function getAsciiAlphabet()
+    {
+        if(!asciiAlphabetCashed)
+        {
+            // Cashe ASCII alphabet
+            asciiAlphabet = getAsciiAlphabet_internal();
+            asciiAlphabetCashed = true;
+        }
+        return asciiAlphabet;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description Returns the ASCII value of char
+     * @param char Character to get the ASCII value from
+     * @return the ASCII value of char
+     */
+    function toAscii(char)
+    {
+        return getAsciiAlphabet()[char]||'';
+    }
+        
     /**
      * @memberOf Opencast.Utils
      * @description Returns the Input Time in Milliseconds
@@ -16,7 +75,7 @@ Opencast.Utils = (function ()
      */
     function getTimeInMilliseconds(data)
     {
-        if((data!== null) && (data.indexOf(':') != -1))
+        if ((data !== undefined) && (data !== null) && (data != 0) && (data.length) && (data.indexOf(':') != -1))
         {
             var values = data.split(':');
             // If the Format is correct
@@ -49,7 +108,7 @@ Opencast.Utils = (function ()
      */
     function formatSeconds(seconds)
     {
-        if(seconds === null)
+        if (seconds === null)
         {
             seconds = 0;
         }
@@ -76,6 +135,80 @@ Opencast.Utils = (function ()
     
     /**
      * @memberOf Opencast.Utils
+     * @description Converts a date to a human readable date string
+     * @param date
+     * @return formatted date string
+     */
+    function getDateString(date)
+    {
+        var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        var daySeparator = ", ";
+        var dateSeparator = " ";
+        var yearSeparator = " ";
+        var d = date;
+        var datestring = days[(d.getDate() + 1) % 7];
+        datestring += daySeparator;
+        datestring += months[d.getMonth() % 12];
+        datestring += dateSeparator;
+        datestring += (d.getDate() >= 10) ? d.getDate() : "0".concat(d.getDate());
+        datestring += yearSeparator;
+        datestring += d.getFullYear();
+        return datestring;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description Converts a date to a human readable time string
+     * @param date
+     * @return formatted time string
+     */
+    function getTimeString(date)
+    {
+        var timeSeparator = ":";
+        var d = date;
+        var h = (d.getHours() >= 10) ? d.getHours() : "0".concat(d.getHours());
+        var m = (d.getMinutes() >= 10) ? d.getMinutes() : "0".concat(d.getMinutes());
+        var s = (d.getSeconds() >= 10) ? d.getSeconds() : "0".concat(d.getSeconds());
+        return (h + timeSeparator + m);
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description Converts a UTC date string to date
+     * @param dcc UTC date string, e.g. dcc = 2011-03-07T00:00:00+01:00
+     * @return date
+     */
+    function dateStringToDate(dcc)
+    {
+        var date = new Date(0);
+        if (dcc.indexOf('T') != -1)
+        {
+            var dateTime = dcc.slice(0, -1).split("T");
+            if (dateTime.length >= 2)
+            {
+                var ymd = dateTime[0].split("-");
+                if (ymd.length >= 3)
+                {
+                    date.setUTCFullYear(parseInt(ymd[0], 10));
+                    date.setUTCMonth(parseInt(ymd[1], 10) - 1);
+                    date.setUTCDate(parseInt(ymd[2], 10));
+                }
+                var hms = dateTime[1].split(":");
+                if (hms.length >= 3)
+                {
+                    date.setUTCMilliseconds(0);
+                    date.setUTCHours(parseInt(hms[0], 10));
+                    date.setUTCMinutes(parseInt(hms[1], 10));
+                    date.setUTCSeconds(parseInt(hms[2], 10));
+                }
+            }
+        }
+        return date;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
      * @description Returns an Array of URL Arguments
      * @return an Array of URL Arguments if successful, [] else
      */
@@ -84,7 +217,7 @@ Opencast.Utils = (function ()
         var vars = [],
             hash;
         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-        if($.isArray(hashes))
+        if ($.isArray(hashes))
         {
             for (var i = 0; i < hashes.length; i++)
             {
@@ -95,31 +228,32 @@ Opencast.Utils = (function ()
         }
         return vars;
     }
-   
+    
     /**
      * @memberOf Opencast.Utils
      * @description Removes the duplicates of a given array
      * @param arr Array to remove the duplicates of
      * @return a copy of arr wihout its duplicates if arr is a valid array, [] else
-     */     
+     */
     function removeDuplicates(arr)
     {
         var newArr = [];
         // check whether arr is an Array
-        if($.isArray(arr))
+        if ($.isArray(arr))
         {
             var ni = 0;
             var dupl = false;
-            for(var i = 0; i < arr.length; ++i)
+            for (var i = 0; i < arr.length; ++i)
             {
-                for(var j = i + 1; (j < arr.length) && !dupl; ++j)
+                for (var j = i + 1;
+                (j < arr.length) && !dupl; ++j)
                 {
-                    if(arr[i] == arr[j])
+                    if (arr[i] == arr[j])
                     {
                         dupl = true;
                     }
                 }
-                if(!dupl)
+                if (!dupl)
                 {
                     newArr[ni] = arr[i];
                     ++ni;
@@ -129,7 +263,7 @@ Opencast.Utils = (function ()
         }
         return newArr;
     }
-   
+    
     /**
      * @memberOf Opencast.Utils
      * @description Returns the url array to string, connected via links
@@ -138,21 +272,21 @@ Opencast.Utils = (function ()
      * @param link12 second link, connects the parameters (e.g. &)
      * @param link2 third link, connects the first and the second value of an URL parameter (e.g. =)
      * @return the url array to string, connected via links, if arr is a valid array, '' else
-     */ 
+     */
     function urlArrayToString(arr, link11, link12, link2)
     {
         var str = '';
         // check whether arr is an Array
-        if($.isArray(arr))
+        if ($.isArray(arr))
         {
             // Set default values if nothings given
-            link11 = link11||'?';
-            link12 = link12||'&';
-            link2 = link2||'=';
-            for(var i = 0; i < arr.length; ++i)
+            link11 = link11 || '?';
+            link12 = link12 || '&';
+            link2 = link2 || '=';
+            for (var i = 0; i < arr.length; ++i)
             {
                 var parsedUrlAt = getURLParameter(arr[i]);
-                if((parsedUrlAt !== undefined) && (parsedUrlAt !== null))
+                if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null))
                 {
                     var l = (i == 0) ? link11 : link12;
                     str += l + arr[i] + link2 + parseURL()[arr[i]];
@@ -161,31 +295,30 @@ Opencast.Utils = (function ()
         }
         return str;
     }
-
+    
     /**
      * @memberOf Opencast.Utils
      * @description Removes the duplicate URL parameters, e.g. url?a=b&a=c&a=d => url?a=d
      * @return a cleaned URL
-     */ 
+     */
     function getCleanedURL()
     {
         var urlArr = removeDuplicates(parseURL());
         var windLoc = window.location.href;
         windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
-        
         return windLoc + urlArrayToString(urlArr, "?", "&", "=");
     }
-
+    
     /**
      * @memberOf Opencast.Utils
      * @description Checks if URL parameters are duplicate and cleans it if appropriate (clean => page reload)
-     */ 
+     */
     function gotoCleanedURL()
     {
         var loc = window.location;
         var newLoc = Opencast.Utils.getCleanedURL();
         // If necessary: remove duplicate URL parameters
-        if(loc != newLoc)
+        if (loc != newLoc)
         {
             window.location = newLoc;
         }
@@ -220,7 +353,7 @@ Opencast.Utils = (function ()
     function getURLParameter(name)
     {
         var urlParam = parseURL()[name];
-        if((urlParam === undefined) || (urlParam === ''))
+        if ((urlParam === undefined) || (urlParam === ''))
         {
             return null;
         }
@@ -317,7 +450,6 @@ Opencast.Utils = (function ()
         return 0;
     }
     
-    
     /**
      * @memberOf Opencast.Utils
      * @description create date in format MM/DD/YYYY
@@ -335,18 +467,19 @@ Opencast.Utils = (function ()
      * @param max Max Value
      * @return a random Number in between [min, max]
      */
-    function getRandom(min, max) {
-	    if(min > max)
-	    {
-		    return max;
-	    }
-	    if(min == max)
-	    {
-		    return min;
-	    }
-	    return(min + parseInt(Math.random() * (max - min + 1)));
-	}
-	
+    function getRandom(min, max)
+    {
+        if (min > max)
+        {
+            return max;
+        }
+        if (min == max)
+        {
+            return min;
+        }
+        return (min + parseInt(Math.random() * (max - min + 1)));
+    }
+    
     /**
      * @memberOf Opencast.Utils
      * @description Returns if 'haystack' starts with 'start'
@@ -354,20 +487,48 @@ Opencast.Utils = (function ()
      * @param start String to search for
      * @return true if 'haystack' starts with 'start', false else
      */
-	function startsWith(haystack, start)
-	{
-	    if((typeof(haystack) == 'string') && (typeof(start) == 'string'))
-	    {
-	        return (haystack.substring(0, start.length).indexOf(start) != -1);
-	    }
-	    return false;
-	}
+    function startsWith(haystack, start)
+    {
+        if ((typeof(haystack) == 'string') && (typeof(start) == 'string'))
+        {
+            return (haystack.substring(0, start.length).indexOf(start) != -1);
+        }
+        return false;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
+     * @description Logs given arguments -- uses console.log
+     * @param any arguments console.log-valid
+     * @return true if window.console exists and arguments had been logged, false else
+     */
+    function log()
+    {
+        if(window.console)
+        {
+            try
+            {
+                window.console && console.log.apply(console, Array.prototype.slice.call(arguments));
+            }
+            catch(err)
+            {
+                console.log(e);
+            }
+            return true;
+        }
+        return false;
+    }
     
     return {
+        getAsciiAlphabet: getAsciiAlphabet,
+        toAscii: toAscii,
         removeDuplicates: removeDuplicates,
         urlArrayToString: urlArrayToString,
         getCleanedURL: getCleanedURL,
         gotoCleanedURL: gotoCleanedURL,
+        getDateString: getDateString,
+        getTimeString: getTimeString,
+        dateStringToDate: dateStringToDate,
         getTimeInMilliseconds: getTimeInMilliseconds,
         formatSeconds: formatSeconds,
         parseURL: parseURL,
@@ -375,6 +536,7 @@ Opencast.Utils = (function ()
         parseSeconds: parseSeconds,
         getLocaleDate: getLocaleDate,
         startsWith: startsWith,
-        getRandom: getRandom
+        getRandom: getRandom,
+        log: log
     };
 }());

@@ -1,22 +1,34 @@
-/*global $, Opencast*/
-/*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+/**
+ *  Copyright 2009-2011 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+ 
 var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace analytics delegate. This file contains the rest endpoint and passes the data to the analytics plugin
+ * @namespace the global Opencast namespace Analytics
  */
 Opencast.Analytics = (function ()
 {
-    var mediaPackageId, duration, interval;
-    var intervalRunning = false;
-    var updateInterval = 5000; // in ms
-    var analyticsDisplayed = false;
+    var mediaPackageId, duration, interval, dateIn, resizeEndTimeoutRunning;
     var ANALYTICS = "Analytics",
-        ANALYTICSHIDE = "Analytics off";
-    var dateIn,
-        resizeEndTimeoutRunning,
-        waitForMove = 150;
-
+        ANALYTICSHIDE = "Analytics off",
+        intervalRunning = false,
+        analyticsDisplayed = false,
+        waitForMove = 150,
+        updateInterval = 5000; // in ms
+    
     /**
      * @memberOf Opencast.Analytics
      * @description Returns if Analytics is currently visible
@@ -44,6 +56,7 @@ Opencast.Analytics = (function ()
             dataType: 'xml',
             success: function (xml)
             {
+                Opencast.Utils.log("Analytics AJAX call: Requesting data succeeded");
                 var tmpData = $(xml).find('footprint');
                 if (tmpData !== undefined)
                 {
@@ -51,7 +64,8 @@ Opencast.Analytics = (function ()
                     $('#oc_checkbox-statistics').show();
                     $('#oc_label-statistics').show();
                     $('#oc_video-view').show();
-                } else
+                }
+                else
                 {
                     displayNoAnalyticsAvailable("No data defined (1), initialize");
                 }
@@ -59,6 +73,7 @@ Opencast.Analytics = (function ()
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
+                Opencast.Utils.log("Analytics Ajax call: Requesting data failed");
                 displayNoAnalyticsAvailable("No data available (1), initialize");
             }
         });
@@ -71,10 +86,10 @@ Opencast.Analytics = (function ()
      */
     function showAnalytics(resized)
     {
-        if(resized && isVisible())
+        if (resized && isVisible())
         {
             var rez = Opencast.AnalyticsPlugin.resizePlugin();
-            if(rez)
+            if (rez)
             {
                 return;
             }
@@ -89,6 +104,7 @@ Opencast.Analytics = (function ()
             dataType: 'xml',
             success: function (xml)
             {
+                Opencast.Utils.log("Analytics AJAX call: Requesting data succeeded");
                 var position = 0;
                 var views;
                 var lastPosition = -1;
@@ -115,18 +131,19 @@ Opencast.Analytics = (function ()
                         lastViews = views;
                     });
                     var plugAn = Opencast.AnalyticsPlugin.addAsPlugin($('#analytics'), footprintData);
-                    if(plugAn)
+                    if (plugAn)
                     {
-                        if(Opencast.segments.getSlideLength() > 0)
+                        if (Opencast.segments.getSlideLength() > 0)
                         {
-                            if($.browser.webkit || $.browser.msie)
+                            if ($.browser.webkit || $.browser.msie)
                             {
                                 $(".segments").css('top', '-25px');
                                 $('#oc_video-view').css('top', '-22px');
-                            } else
+                            }
+                            else
                             {
                                 $(".segments").css('top', '-25px');
-                                $('#oc_video-view').css('top', '-21px');                            
+                                $('#oc_video-view').css('top', '-21px');
                             }
                             $('#segmentstable1').css('opacity', '0.65');
                             $('#segmentstable1').css('filter', 'alpha(opacity=65)');
@@ -134,21 +151,20 @@ Opencast.Analytics = (function ()
                         }
                         $('#annotation').css('top', '-25px');
                         $("#analytics").show();
-                        
                         //$.sparkline_display_visible();
                         analyticsDisplayed = true;
-                        
-                        if(!intervalRunning)
+                        if (!intervalRunning)
                         {
                             // Display actual Results every updateIntervall Milliseconds
-                            interval = setInterval(function()
+                            interval = setInterval(function ()
                             {
                                 showAnalytics(false);
                             }, updateInterval);
                             intervalRunning = true;
                             showAnalytics(false);
                         }
-                    } else
+                    }
+                    else
                     {
                         displayNoAnalyticsAvailable("No template available (1)");
                     }
@@ -161,6 +177,7 @@ Opencast.Analytics = (function ()
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
+                Opencast.Utils.log("Analytics Ajax call: Requesting data failed");
                 displayNoAnalyticsAvailable("No data available (1)");
             }
         });
@@ -190,13 +207,15 @@ Opencast.Analytics = (function ()
     function initResizeEnd()
     {
         resizeEndTimeoutRunning = false;
-        $(window).resize(function()
+        $(window).resize(function ()
         {
-            dateIn = new Date();
-            if (resizeEndTimeoutRunning === false)
+            if(analyticsDisplayed)
             {
-                resizeEndTimeoutRunning = true;
-                resizeEndTimeoutRunning = setTimeout(resizeEnd, waitForMove);
+                dateIn = new Date();
+                if (resizeEndTimeoutRunning === false)
+                {
+                    resizeEndTimeoutRunning = setTimeout(resizeEnd, waitForMove);
+                }
             }
         });
     }
@@ -212,7 +231,9 @@ Opencast.Analytics = (function ()
         if ((dateOut - dateIn) < waitForMove)
         {
             setTimeout(resizeEnd, waitForMove);
-        } else {
+        }
+        else
+        {
             // else: repaint Statistics div
             resizeEndTimeoutRunning = false;
             showAnalytics(true);
@@ -226,7 +247,7 @@ Opencast.Analytics = (function ()
     function hideAnalytics()
     {
         analyticsDisplayed = false;
-        if(intervalRunning)
+        if (intervalRunning)
         {
             // Clear Update-Intervall
             clearInterval(interval);

@@ -103,6 +103,7 @@ public class Activator implements BundleActivator {
     props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
     props.put("eclipselink.target-database", vendor);
     props.put("eclipselink.logging.logger", "JavaLogger");
+    props.put("eclipselink.cache.shared.default", "false");
     if ("true".equalsIgnoreCase(bundleContext.getProperty("org.opencastproject.db.ddl.generation"))) {
       props.put("eclipselink.ddl-generation", "create-tables");
       props.put("eclipselink.ddl-generation.output-mode", "database");

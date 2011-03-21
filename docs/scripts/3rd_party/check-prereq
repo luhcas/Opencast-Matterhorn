@@ -45,15 +45,16 @@ install_prog() {
   #
   case `os` in
     CentOS | RHEL )
+      rpms=""; upd_rpms=""
       case "$1" in
         wget ) # wget is missing, get it with java wget
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="wget-1.11.4-2.el5_4.1.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="wget-1.11.4-2.el5_4.1.x86_64.rpm"
               ;;
           esac
@@ -73,11 +74,11 @@ install_prog() {
         zip )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="zip-2.31-2.el5.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="zip-2.31-2.el5.x86_64.rpm"
               ;;
           esac
@@ -85,11 +86,11 @@ install_prog() {
         unzip )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="unzip-5.52-3.el5.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="unzip-5.52-3.el5.x86_64.rpm"
               ;;
           esac
@@ -97,24 +98,56 @@ install_prog() {
         xz )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="xz-4.999.9-0.3.beta.20091007git.el5.i386.rpm xz-libs-4.999.9-0.3.beta.20091007git.el5.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="xz-4.999.9-0.3.beta.20091007git.el5.x86_64.rpm xz-libs-4.999.9-0.3.beta.20091007git.el5.x86_64.rpm"
+              ;;
+          esac
+          ;;
+        gcc )
+          case `arch` in
+            i386 )
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
+              rpms="gcc-4.1.2-48.el5.i386.rpm cpp-4.1.2-48.el5.i386.rpm libgomp-4.4.0-6.el5.i386.rpm"
+              UPD_URL=${CENTOS_MIRROR}/centos/5/updates/i386/RPMS
+              upd_rpms="glibc-devel-2.5-49.el5_5.7.i386.rpm glibc-headers-2.5-49.el5_5.7.i386.rpm kernel-headers-2.6.18-194.32.1.el5.i386.rpm glibc-2.5-49.el5_5.7.i686.rpm glibc-common-2.5-49.el5_5.7.i386.rpm nscd-2.5-49.el5_5.7.i386.rpm"
+              ;;
+            x86_64 )
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
+              rpms="gcc-4.1.2-48.el5.x86_64.rpm cpp-4.1.2-48.el5.x86_64.rpm libgomp-4.4.0-6.el5.x86_64.rpm"
+              UPD_URL=${CENTOS_MIRROR}/centos/5/updates/x86_64/RPMS
+              upd_rpms="glibc-devel-2.5-49.el5_5.7.x86_64.rpm glibc-headers-2.5-49.el5_5.7.x86_64.rpm kernel-headers-2.6.18-194.32.1.el5.x86_64.rpm glibc-2.5-49.el5_5.7.i686.rpm glibc-2.5-49.el5_5.7.x86_64.rpm glibc-common-2.5-49.el5_5.7.x86_64.rpm nscd-2.5-49.el5_5.7.x86_64.rpm"
+              ;;
+          esac
+          ;;
+        g++ )
+          case `arch` in
+            i386 )
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
+              rpms="gcc-c++-4.1.2-48.el5.i386.rpm gcc-4.1.2-48.el5.i386.rpm cpp-4.1.2-48.el5.i386.rpm libgomp-4.4.0-6.el5.i386.rpm libstdc++-devel-4.1.2-48.el5.i386.rpm"
+              UPD_URL=${CENTOS_MIRROR}/centos/5/updates/i386/RPMS
+              upd_rpms="glibc-devel-2.5-49.el5_5.7.i386.rpm glibc-headers-2.5-49.el5_5.7.i386.rpm kernel-headers-2.6.18-194.32.1.el5.i386.rpm glibc-2.5-49.el5_5.7.i686.rpm glibc-common-2.5-49.el5_5.7.i386.rpm nscd-2.5-49.el5_5.7.i386.rpm"
+              ;;
+            x86_64 )
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
+              rpms="gcc-c++-4.1.2-48.el5.x86_64.rpm gcc-4.1.2-48.el5.x86_64.rpm cpp-4.1.2-48.el5.x86_64.rpm libgomp-4.4.0-6.el5.x86_64.rpm libstdc++-devel-4.1.2-48.el5.x86_64.rpm"
+              UPD_URL=${CENTOS_MIRROR}/centos/5/updates/x86_64/RPMS
+              upd_rpms="glibc-devel-2.5-49.el5_5.7.x86_64.rpm glibc-headers-2.5-49.el5_5.7.x86_64.rpm kernel-headers-2.6.18-194.32.1.el5.x86_64.rpm glibc-2.5-49.el5_5.7.i686.rpm glibc-2.5-49.el5_5.7.x86_64.rpm glibc-common-2.5-49.el5_5.7.x86_64.rpm nscd-2.5-49.el5_5.7.x86_64.rpm"
               ;;
           esac
           ;;
         yacc )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               #rpms="flex-2.5.4a-41.fc6.i386.rpm bison-2.3-2.1.i386.rpm"
               rpms="byacc-1.9-29.2.2.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               #rpms="flex-2.5.4a-41.fc6.x86_64.rpm bison-2.3-2.1.x86_64.rpm"
               rpms="byacc-1.9-29.2.2.x86_64.rpm"
               ;;
@@ -123,11 +156,11 @@ install_prog() {
         perl-dbi )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="perl-DBI-1.52-2.el5.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="perl-DBI-1.52-2.el5.x86_64.rpm"
               ;;
           esac
@@ -147,11 +180,11 @@ install_prog() {
         jam ) 
           case `arch` in
             i386 )
-              URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+              URL=${EPEL_MIRROR}/epel/5/i386
               rpms="jam-2.5-4.el5.i386.rpm"
               ;;
             x86_64 )
-              URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
+              URL=${EPEL_MIRROR}/epel/5/x86_64
               rpms="jam-2.5-4.el5.x86_64.rpm"
               ;;
           esac
@@ -171,11 +204,11 @@ install_prog() {
         ImageMagick )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="ImageMagick-6.2.8.0-4.el5_1.1.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="ImageMagick-6.2.8.0-4.el5_1.1.x86_64.rpm"
               ;;
           esac
@@ -183,35 +216,35 @@ install_prog() {
         automake )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
-              rpms="automake-1.9.6-2.3.el5.noarch.rpm"
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
+              rpms="automake-1.9.6-2.3.el5.noarch.rpm autoconf-2.59-12.noarch.rpm imake-1.0.2-3.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
-              rpms="automake-1.9.6-2.3.el5.noarch.rpm"
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
+              rpms="automake-1.9.6-2.3.el5.noarch.rpm autoconf-2.59-12.noarch.rpm imake-1.0.2-3.x86_64.rpm"
               ;;
           esac
           ;;
         gsl-devel )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
-              rpms="gsl-1.13-3.el5.i386.rpm gsl-devel-1.13-3.el5.i386.rpm"
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
+              rpms="gsl-devel-1.13-3.el5.i386.rpm gsl-1.13-3.el5.i386.rpm pkgconfig-0.21-2.el5.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
-              rpms="gsl-1.13-3.el5.x86_64.rpm gsl-devel-1.13-3.el5.x86_64.rpm"
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
+              rpms="gsl-devel-1.13-3.el5.i386.rpm gsl-devel-1.13-3.el5.x86_64.rpm gsl-1.13-3.el5.i386.rpm gsl-1.13-3.el5.x86_64.rpm pkgconfig-0.21-2.el5.x86_64.rpm"
               ;;
           esac
           ;;
         desktop-file-utils )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="desktop-file-utils-0.10-7.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="desktop-file-utils-0.10-7.x86_64.rpm"
               ;;
           esac
@@ -219,11 +252,11 @@ install_prog() {
         gmp )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="gmp-4.1.4-10.el5.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="gmp-4.1.4-10.el5.x86_64.rpm"
               ;;
           esac
@@ -231,11 +264,11 @@ install_prog() {
         zlib-devel )
           case `arch` in
             i386 )
-              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
               rpms="zlib-devel-1.2.3-3.i386.rpm"
               ;;
             x86_64 )
-              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
               rpms="zlib-devel-1.2.3-3.x86_64.rpm"
               ;;
           esac
@@ -257,7 +290,19 @@ install_prog() {
           fi
         fi
       done
-      install_rpms $rpms
+      for upd_rpm in $upd_rpms; do
+        if [ ! -s "$upd_rpm" ]; then
+          copypkg "$upd_rpm"
+          if [ $? -ne 0 ]; then
+            wget -4O "$upd_rpm" "$UPD_URL/$upd_rpm"
+            if [ $? -ne 0 ]; then
+              rm -f "$upd_rpm"
+              return 1
+            fi
+          fi
+        fi
+      done
+      install_rpms $rpms $upd_rpms
       [ $? -ne 0 ] && return 1
       ;;
     Ubuntu )
@@ -413,6 +458,8 @@ check_prereq() {
       chkprog zip     || install_prog zip      || return 1
       chkprog unzip   || install_prog unzip    || return 1
       chkprog xz      || install_prog xz       || return 1
+      chkprog gcc     || install_prog gcc      || return 1
+      chkprog g++     || install_prog g++      || return 1
       chkprog yacc    || install_prog yacc     || return 1
       # this was reported as missing on some systems and is needed by git
       chkprog dbiprof || install_prog perl-dbi || return 1
@@ -448,6 +495,7 @@ check_prereq() {
       chkprog zip     || install_prog zip      || return 1
       chkprog unzip   || install_prog unzip    || return 1
       chkprog alien   || install_prog alien    || return 1
+      chkprog gcc     || install_prog gcc      || return 1
       chkprog g++     || install_prog g++      || return 1
       chkprog yacc    || install_prog yacc     || return 1
       chkprog patch   || install_prog patch    || return 1
@@ -529,14 +577,15 @@ install_mingw32() {
   #
   case `os` in
     CentOS | RHEL | Ubuntu )
+      rpms=""
       case `arch` in
         i386 )
-          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
-          rpms="mingw32-gcc-4.3.2-12.el5.i386.rpm mingw32-binutils-2.19-3.el5.i386.rpm mingw32-cpp-4.3.2-12.el5.i386.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.91-1.el5.noarch.rpm"
+          URL=${EPEL_MIRROR}/epel/5/i386
+          rpms="mingw32-gcc-4.3.2-12.el5.i386.rpm mingw32-binutils-2.19-3.el5.i386.rpm mingw32-cpp-4.3.2-12.el5.i386.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.94-2.el5.noarch.rpm"
           ;;
         x86_64 )
-          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
-          rpms="mingw32-gcc-4.3.2-12.el5.x86_64.rpm mingw32-binutils-2.19-3.el5.x86_64.rpm mingw32-cpp-4.3.2-12.el5.x86_64.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.91-1.el5.noarch.rpm"
+          URL=${EPEL_MIRROR}/epel/5/x86_64
+          rpms="mingw32-gcc-4.3.2-12.el5.x86_64.rpm mingw32-binutils-2.19-3.el5.x86_64.rpm mingw32-cpp-4.3.2-12.el5.x86_64.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.94-2.el5.noarch.rpm"
           ;;
       esac
       for rpm in $rpms; do
@@ -554,13 +603,14 @@ install_mingw32() {
       install_rpms $rpms
       [ $? -ne 0 ] && return 1
       #
+      rpms=""
       case `arch` in
         i386 )
-          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+          URL=${EPEL_MIRROR}/epel/5/i386
           rpms="mingw32-gcc-c++-4.3.2-12.el5.i386.rpm"
           ;;
         x86_64 )
-          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
+          URL=${EPEL_MIRROR}/epel/5/x86_64
           rpms="mingw32-gcc-c++-4.3.2-12.el5.x86_64.rpm"
           ;;
       esac
@@ -681,11 +731,11 @@ EOF
       if [ ! -d /usr/libx ]; then
         case `arch` in
           i386 )
-            URL=ftp://mirror.switch.ch/pool/3/mirror/centos/5.5/os/i386/CentOS
+            URL=${CENTOS_MIRROR}/centos/5/os/i386/CentOS
             rpm=gmp-4.1.4-10.el5.i386.rpm
             ;;
           x86_64 )
-            URL=ftp://mirror.switch.ch/pool/3/mirror/centos/5.5/os/x86_64/CentOS
+            URL=${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
             rpm=gmp-4.1.4-10.el5.x86_64.rpm
             ;;
         esac

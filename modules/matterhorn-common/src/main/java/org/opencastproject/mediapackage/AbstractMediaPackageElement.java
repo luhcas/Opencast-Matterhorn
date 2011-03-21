@@ -551,7 +551,6 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
   @Override
   public String toString() {
     String s = (description != null) ? description : uri.toString();
-    s += " (" + flavor + ", " + mimeType + ")";
     return s.toLowerCase();
   }
 

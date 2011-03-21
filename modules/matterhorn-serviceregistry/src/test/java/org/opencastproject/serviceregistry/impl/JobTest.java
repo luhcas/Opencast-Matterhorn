@@ -103,6 +103,8 @@ public class JobTest {
     // Start a job, but don't allow it to be dispatched
     JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1, OPERATION_NAME, null, null, false);
 
+    Assert.assertNotNull(job.getUri());
+    
     Job jobFromDb = serviceRegistry.getJob(job.getId());
     Assert.assertEquals(Status.INSTANTIATED, jobFromDb.getStatus());
 
@@ -119,6 +121,7 @@ public class JobTest {
     serviceRegistry.updateJob(job);
 
     jobFromDb = serviceRegistry.getJob(job.getId());
+    Assert.assertNotNull(jobFromDb.getUri());
     Assert.assertEquals(job.getPayload(), jobFromDb.getPayload());
   }
 

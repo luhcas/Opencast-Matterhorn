@@ -49,7 +49,7 @@ PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
 PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$LOGDIR"
 UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.util.logging.properties"
 GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
-JAVA_OPTS="-Xms256m -Xmx256m -XX:MaxPermSize=128m"
+JAVA_OPTS="-Xms1024m -Xmx1024m -XX:MaxPermSize=256m"
 
 # If this computer is OS X and $DYLD_FALLBACK_LIBRARY_PATH environment variable
 # is not defined, then set it to /opt/local/lib. This is required for the demo

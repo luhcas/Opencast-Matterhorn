@@ -93,5 +93,8 @@ public class CustomFeedService extends AbstractFeedService implements FeedGenera
       logger.debug("Configuring custom feed with query '{}'", query);
     }
     super.initialize(properties);
+    // Clear the selector, since super.accept() relies on the fact that it's not set
+    selector = null;
   }
+
 }

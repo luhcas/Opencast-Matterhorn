@@ -21,6 +21,7 @@ import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.impl.solr.SolrFields;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +105,11 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
   public void initialize(Properties properties) {
     String series = (String) properties.get(PROP_SERIES);
     if (series != null && !"".equals(series)) {
-      setSeries(series.split("\\W"));
+      String[] seriesIds = series.split(",");
+      for (int i = 0; i < seriesIds.length; i++) {
+        seriesIds[i] = StringUtils.trim(seriesIds[i]);
+      }
+      setSeries(seriesIds);
       logger.debug("Configuring aggregation feed with series {}", series);
     }
     super.initialize(properties);

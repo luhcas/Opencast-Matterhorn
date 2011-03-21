@@ -43,7 +43,6 @@ import org.opencastproject.util.doc.RestTestForm;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -265,8 +264,7 @@ public class ServiceRegistryEndpoint {
     try {
       Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(host, jobType, operation, arguments, payload,
               start);
-      URI uri = new URI(UrlSupport.concat(new String[] { serverUrl, servicePath, "job", job.getId() + ".xml" }));
-      return Response.created(uri).entity(new JaxbJob(job)).build();
+      return Response.created(job.getUri()).entity(new JaxbJob(job)).build();
     } catch (IllegalArgumentException e) {
       throw new WebApplicationException(Status.BAD_REQUEST);
     } catch (Exception e) {

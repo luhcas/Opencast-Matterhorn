@@ -109,8 +109,45 @@ public class ComposerRestEndpointTest {
     // Grab the job from the response
     HttpResponse postResponse = client.execute(postEncode);
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
+    String jobId = getJobId(postResponseXml);
+
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
     Assert.assertTrue(postResponseXml.contains("job"));
+
+    // Poll the service for the status of the job.
+    while (!JobUtils.isJobInState(jobId, "FINISHED")) {
+      Thread.sleep(2000); // wait and try again
+      System.out.println("Waiting for image extraction job " + jobId + " to finish");
+      if(JobUtils.isJobInState(jobId, "FAILED")) {
+        Assert.fail();
+      }
+    }
+  }
+
+  @Test
+  public void testImageConversion() throws Exception {
+    HttpPost postEncode = new HttpPost(ComposerResources.getServiceUrl() + "convertimage");
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    formParams.add(new BasicNameValuePair("sourceImage", SampleUtils.generateImageAttachment(BASE_URL)));
+    formParams.add(new BasicNameValuePair("profileId", "image-conversion.http"));
+    postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+
+    // Grab the job from the response
+    HttpResponse postResponse = client.execute(postEncode);
+    String postResponseXml = EntityUtils.toString(postResponse.getEntity());
+    String jobId = getJobId(postResponseXml);
+
+    Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
+    Assert.assertTrue(postResponseXml.contains("job"));
+
+    // Poll the service for the status of the job.
+    while (!JobUtils.isJobInState(jobId, "FINISHED")) {
+      Thread.sleep(2000); // wait and try again
+      System.out.println("Waiting for image conversion job " + jobId + " to finish");
+      if(JobUtils.isJobInState(jobId, "FAILED")) {
+        Assert.fail();
+      }
+    }
   }
 
   @Test

@@ -192,7 +192,7 @@
               org.json.simple.parser
             </Private-Package>
             <Embed-Dependency>
-              json_simple;inline=true
+              json-simple;inline=true
             </Embed-Dependency>
             <Import-Package>
               org.opencastproject.rest;version=${project.version},
