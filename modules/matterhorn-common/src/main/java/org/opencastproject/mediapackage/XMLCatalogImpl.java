@@ -796,9 +796,10 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
                 name.getNamespaceName());
       }
     }
-    
+
     /**
      * {@inheritDoc}
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -901,6 +902,14 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
    */
   @Override
   public abstract Document toXml() throws ParserConfigurationException, TransformerException, IOException;
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.XMLCatalog#toJson()
+   */
+  @Override
+  public abstract String toJson() throws IOException;
 
   /**
    * {@inheritDoc}

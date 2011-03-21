@@ -36,6 +36,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-json</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.solr</groupId>
       <artifactId>solr-core</artifactId>
       <exclusions>
@@ -72,11 +77,6 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -147,13 +147,6 @@
               org.opencastproject.workflow.impl;version=${project.version},
               org.opencastproject.workflow.endpoint;version=${project.version}
             </Export-Package>
-            <Private-Package>
-              org.json.simple,
-              org.json.simple.parser
-            </Private-Package>
-            <Embed-Dependency>
-              json-simple;inline=true
-            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/workflow-service.xml,

@@ -101,9 +101,9 @@
       <version>1.0-rc2-patched</version>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-json</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
@@ -172,13 +172,8 @@
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
-              net.fortuna.ical4j.*;-split-package:=merge-last,
-              org.json.*
+              net.fortuna.ical4j.*;-split-package:=merge-last
             </Private-Package>
-            <Embed-Dependency>
-              ical4j;inline=true
-              json_simple;inline=true
-            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/scheduler-service.xml,
               OSGI-INF/scheduler-service-rest.xml

@@ -42,6 +42,7 @@
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-ingest-service-api</module>
         <module>modules/matterhorn-ingest-service-impl</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
@@ -71,6 +72,7 @@
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-ingest-service-api</module>
         <module>modules/matterhorn-ingest-service-impl</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
@@ -101,6 +103,7 @@
         <module>modules/matterhorn-distribution-service-youtube</module>
 -->
         <module>modules/matterhorn-dublincore</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
@@ -128,6 +131,7 @@
         <module>modules/matterhorn-distribution-service-youtube-remote</module>
 -->
         <module>modules/matterhorn-dublincore</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
@@ -143,15 +147,14 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
+        <module>modules/matterhorn-annotation-api</module>
+        <module>modules/matterhorn-annotation-impl</module>
         <module>modules/matterhorn-authorization-xacml</module>
         <module>modules/matterhorn-common</module>
         <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-engage-ui</module>
-        <module>modules/matterhorn-usertracking-service-api</module>
-        <module>modules/matterhorn-usertracking-service-impl</module>
-        <module>modules/matterhorn-annotation-api</module>
-        <module>modules/matterhorn-annotation-impl</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
@@ -162,6 +165,8 @@
         <module>modules/matterhorn-search-service-impl</module>
         <module>modules/matterhorn-solr</module>
         <module>modules/matterhorn-userdirectory</module>
+        <module>modules/matterhorn-usertracking-service-api</module>
+        <module>modules/matterhorn-usertracking-service-impl</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
     </profile>
@@ -183,6 +188,7 @@
         <module>modules/matterhorn-distribution-service-youtube-remote</module>
 -->
         <module>modules/matterhorn-dublincore</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
@@ -213,6 +219,7 @@
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-inspection-service-api</module>
         <module>modules/matterhorn-inspection-service-impl</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
@@ -244,6 +251,7 @@
         <module>modules/matterhorn-composer-service-remote</module>
         <module>modules/matterhorn-inspection-service-api</module>
         <module>modules/matterhorn-inspection-service-remote</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-textanalyzer-api</module>
@@ -334,6 +342,7 @@
       </activation>
       <modules>
         <module>modules/matterhorn-common</module>
+        <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-capture-admin-service-api</module>
         <module>modules/matterhorn-capture-agent-api</module>

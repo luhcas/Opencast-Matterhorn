@@ -47,9 +47,14 @@ import org.opencastproject.workspace.api.Workspace;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,6 +76,9 @@ import javax.xml.transform.stream.StreamResult;
  * Test class for the dublin core implementation.
  */
 public class DublinCoreTest {
+
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(DublinCoreTest.class);
 
   /**
    * The catalog name
@@ -129,6 +137,33 @@ public class DublinCoreTest {
     assertNull(dc.getFirst(PROPERTY_TITLE, "fr"));
     // Test custom metadata element
     assertEquals("true", dc.getFirst(PROPERTY_PROMOTED));
+  }
+
+  /**
+   * Test method for {@link DublinCoreCatalogImpl#toJson()} .
+   */
+  @Test
+  public void testToJson() throws Exception {
+    DublinCoreCatalog dc = null;
+    FileInputStream in = new FileInputStream(catalogFile);
+    dc = new DublinCoreCatalogImpl(in);
+    IOUtils.closeQuietly(in);
+
+    String jsonString = dc.toJson();
+
+    logger.info(jsonString);
+
+    JSONParser parser = new JSONParser();
+    JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
+
+    JSONObject dcTerms = (JSONObject) jsonObject.get(DublinCore.TERMS_NS_URI);
+    assertNotNull(dcTerms);
+
+    JSONArray titleArray = (JSONArray) dcTerms.get("title");
+    assertEquals("Two titles should be present", 2, titleArray.size());
+
+    JSONArray subjectArray = (JSONArray) dcTerms.get("subject");
+    assertEquals("The subject should be present", 1, subjectArray.size());
   }
 
   /**

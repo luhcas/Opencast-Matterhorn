@@ -46,6 +46,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-json</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -107,11 +112,6 @@
       <groupId>net.sourceforge.htmlunit</groupId>
       <artifactId>htmlunit</artifactId>
       <version>2.6</version>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
@@ -187,13 +187,6 @@
               META-INF.services;-split-package:=merge-first,
               de.schlichtherle.*;-split-package:=merge-first
             </Private-Package>
-            <Private-Package>
-              org.json.simple,
-              org.json.simple.parser
-            </Private-Package>
-            <Embed-Dependency>
-              json-simple;inline=true
-            </Embed-Dependency>
             <Import-Package>
               org.opencastproject.rest;version=${project.version},
               javax.persistence,

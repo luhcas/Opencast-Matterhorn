@@ -42,9 +42,9 @@
       <artifactId>commons-lang</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-json</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>
@@ -62,9 +62,6 @@
               *;resolution:=optional
             </Import-Package>
             <Private-Package>ltisample</Private-Package>
-            <Embed-Dependency>
-              json-simple;inline=true
-            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/opencast-lti.xml
             </Service-Component>

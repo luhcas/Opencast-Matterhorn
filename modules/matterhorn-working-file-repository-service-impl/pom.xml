@@ -26,6 +26,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-json</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -58,11 +63,6 @@
       <artifactId>tika-core</artifactId>
       <version>0.7</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -101,7 +101,6 @@
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.workingfilerepository.impl;version=${project.version} </Export-Package>
-            <Embed-Dependency>json-simple;inline=true</Embed-Dependency>
             <Service-Component>
               OSGI-INF/working-file-repo.xml
             </Service-Component>

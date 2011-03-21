@@ -43,6 +43,15 @@ public interface XMLCatalog {
   Document toXml() throws ParserConfigurationException, TransformerException, IOException;
 
   /**
+   * Serializes the catalog to a JSON string.
+   * 
+   * @return the json string
+   * @throws IOException
+   *           if an error with the catalog file handling occurs
+   */
+  String toJson() throws IOException;
+
+  /**
    * Writes an xml representation of this Catalog to a string.
    * 
    * @return the Catalog serialized to a string
