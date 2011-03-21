@@ -43,6 +43,12 @@ public final class AccessControlParser {
     }
   }
 
+  /**
+   * Disallow construction of this utility class.
+   */
+  private AccessControlParser() {
+  }
+
   public static AccessControlList parseAcl(String serializedForm) throws IOException {
     return parseAcl(IOUtils.toInputStream(serializedForm, "UTF-8"));
   }

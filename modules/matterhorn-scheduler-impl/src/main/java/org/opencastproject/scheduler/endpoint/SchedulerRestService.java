@@ -313,10 +313,12 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("filter")
+  // CHECKSTYLE:OFF
   public Response filterEventsDefault(@QueryParam("contributor") String contributor,
           @QueryParam("creator") String creator, @QueryParam("device") String device,
           @QueryParam("series") String series, @QueryParam("start") Long startDate, @QueryParam("end") Long endDate,
           @QueryParam("title") String title, @QueryParam("order") boolean isAsc) {
+    // CHECKSTYLE:ON
     return filterEvents(contributor, creator, device, series, startDate, endDate, title, isAsc);
   }
 
@@ -336,10 +338,12 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("filter.xml")
+  // CHECKSTYLE:OFF
   public Response filterEventsXml(@QueryParam("contributor") String contributor, @QueryParam("creator") String creator,
           @QueryParam("device") String device, @QueryParam("series") String series,
           @QueryParam("start") Long startDate, @QueryParam("end") Long endDate, @QueryParam("title") String title,
           @QueryParam("order") boolean isAsc) {
+    // CHECKSTYLE:ON
     return filterEvents(contributor, creator, device, series, startDate, endDate, title, isAsc);
   }
 
@@ -359,15 +363,19 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("filter.json")
+  // CHECKSTYLE:OFF
   public Response filterEventsJson(@QueryParam("contributor") String contributor,
           @QueryParam("creator") String creator, @QueryParam("device") String device,
           @QueryParam("series") String series, @QueryParam("start") Long startDate, @QueryParam("end") Long endDate,
           @QueryParam("title") String title, @QueryParam("order") boolean isAsc) {
+    // CHECKSTYLE:ON
     return filterEvents(contributor, creator, device, series, startDate, endDate, title, isAsc);
   }
 
+  // CHECKSTYLE:OFF
   private Response filterEvents(String contributor, String creator, String device, String series, Long startDate,
           Long endDate, String title, boolean isAsc) {
+    // CHECKSTYLE:ON
     SchedulerFilter filter = new SchedulerFilter().withCreatorFilter(creator).withDeviceFilter(device)
             .withSeriesFilter(series).withTitleFilter(title).withContributorFilter(contributor)
             .withOrderAscending("title", isAsc);

@@ -7,7 +7,8 @@
   <module name="Header">
     <property name="headerFile" value="${checkstyle.header.file}"/>
     <property name="ignoreLines" value="3"/>
-    <property name="fileExtensions" value="java js"/>
+    <property name="fileExtensions" value="java, js"/>
+    <property name="severity" value="error" />
   </module>
 
   <!-- Allow Java code to supress checkstyle audits via CHECKSTYLE:OFF and CHECKSTYLE:ON comments -->

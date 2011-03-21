@@ -349,8 +349,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
           event.setEventId(workflow.getId());
           event.setMetadataList(event.getMetadataList());
           event.setLastModified(new Date());
-          event = (EventImpl) event;
-          em.persist(event);
+          em.persist((EventImpl)event);
         } catch (Exception ex) {
           if (tx.isActive()) {
             tx.rollback();
@@ -445,12 +444,12 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     } else if (filter.getStart() == null && filter.getStop() != null) { // All events with dates before end
       where.add("e.startDate < :stopParam");
     }
-    
-    if(filter.getCurrentAndUpcoming()){
+
+    if (filter.getCurrentAndUpcoming()) {
       where.add("e.endDate > :now");
     }
-    
-    if(where.size() > 0) {
+
+    if (where.size() > 0) {
       queryBase.append(" WHERE " + StringUtils.join(where, " AND "));
     }
 
@@ -694,7 +693,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     String title = e.getTitle();
     for (Event event : eventList) {
       e.setEventId(event.getEventId());
-      if(eventList.size() > 1 && StringUtils.isNotEmpty(e.getTitle())) {
+      if (eventList.size() > 1 && StringUtils.isNotEmpty(e.getTitle())) {
         e.setTitle(title + " " + String.valueOf(sequence));
       }
       updateEvent(e, true, updateWithEmptyValues);
