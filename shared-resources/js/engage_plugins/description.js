@@ -141,11 +141,11 @@ Opencast.Description = (function ()
      * @param char default character to return if toCheck is null or undefined
      * @return char if object if null or undefined, toCheck else
      */
-    function checkForNullUndef(toCheck, char)
+    function checkForNullUndef(toCheck, defaultChar)
     {
         if (!toCheck || (toCheck === null) || (toCheck === undefined))
         {
-            return char;
+            return defaultChar;
         }
         return toCheck;
     }

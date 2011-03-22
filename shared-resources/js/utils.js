@@ -62,9 +62,9 @@ Opencast.Utils = (function ()
      * @param char Character to get the ASCII value from
      * @return the ASCII value of char
      */
-    function toAscii(char)
+    function toAscii(charToConvert)
     {
-        return getAsciiAlphabet()[char]||'';
+        return getAsciiAlphabet()[charToConvert]||'';
     }
         
     /**
