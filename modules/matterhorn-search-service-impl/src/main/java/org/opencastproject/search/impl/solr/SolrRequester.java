@@ -16,6 +16,8 @@
 
 package org.opencastproject.search.impl.solr;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
@@ -202,14 +204,18 @@ public class SolrRequester {
 
       // Add authorization information
       List<String> readRoles = new ArrayList<String>();
-      for (Object fieldValue : doc.getFieldValues(SolrFields.OC_READ_PERMISSIONS)) {
-        readRoles.add((String) fieldValue);
+      if (doc.getFieldValues(SolrFields.OC_READ_PERMISSIONS) != null) {
+        for (Object fieldValue : doc.getFieldValues(SolrFields.OC_READ_PERMISSIONS)) {
+          readRoles.add((String) fieldValue);
+        }
       }
       item.setReadRoles(readRoles.toArray(new String[readRoles.size()]));
 
       List<String> writeRoles = new ArrayList<String>();
-      for (Object fieldValue : doc.getFieldValues(SolrFields.OC_WRITE_PERMISSIONS)) {
-        writeRoles.add((String) fieldValue);
+      if (doc.getFieldValues(SolrFields.OC_WRITE_PERMISSIONS) != null) {
+        for (Object fieldValue : doc.getFieldValues(SolrFields.OC_WRITE_PERMISSIONS)) {
+          writeRoles.add((String) fieldValue);
+        }
       }
       item.setReadRoles(writeRoles.toArray(new String[writeRoles.size()]));
 
@@ -504,10 +510,10 @@ public class SolrRequester {
     String[] roles = user.getRoles();
     if (roles.length > 0) {
       sb.append(" AND (");
-      StringBuilder roleList = new StringBuilder();
+      StringBuilder roleList = new StringBuilder(SolrFields.OC_READ_PERMISSIONS).append(":").append(
+              ANONYMOUS_USER.getRoles()[0]);
       for (String role : roles) {
-        if (roleList.length() > 0)
-          roleList.append(" OR ");
+        roleList.append(" OR ");
         roleList.append(SolrFields.OC_READ_PERMISSIONS).append(":").append(role);
       }
       sb.append(roleList.toString());

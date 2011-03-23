@@ -41,7 +41,7 @@ public class SecurityServiceSpringImpl implements SecurityService {
   @Override
   public User getUser() {
     User delegatedUser = delegatedUserHolder.get();
-    if(delegatedUser != null) {
+    if (delegatedUser != null) {
       return delegatedUser;
     }
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -52,24 +52,28 @@ public class SecurityServiceSpringImpl implements SecurityService {
       if (principal == null) {
         return ANONYMOUS_USER;
       }
-      UserDetails userDetails = (UserDetails) principal;
+      if (principal instanceof UserDetails) {
+        UserDetails userDetails = (UserDetails) principal;
 
-      String[] roles = null;
-      Collection<GrantedAuthority> authorities = auth.getAuthorities();
-      if (authorities != null && authorities.size() > 0) {
-        roles = new String[authorities.size()];
-        int i = 0;
-        for (GrantedAuthority ga : authorities) {
-          roles[i++] = ga.getAuthority();
+        String[] roles = null;
+        Collection<GrantedAuthority> authorities = auth.getAuthorities();
+        if (authorities != null && authorities.size() > 0) {
+          roles = new String[authorities.size()];
+          int i = 0;
+          for (GrantedAuthority ga : authorities) {
+            roles[i++] = ga.getAuthority();
+          }
         }
+        return new User(userDetails.getUsername(), roles);
+      } else {
+        return ANONYMOUS_USER;
       }
-      return new User(userDetails.getUsername(), roles);
     }
   }
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.security.api.SecurityService#setUser(org.opencastproject.security.api.User)
    */
   @Override
