@@ -17,6 +17,7 @@ package org.opencastproject.serviceregistry.impl;
 
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.JaxbJobContext;
+import org.opencastproject.security.api.User;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,9 +134,10 @@ public class JobJpaImpl extends JaxbJob {
   /**
    * Constructor with everything needed for a newly instantiated job.
    */
-  public JobJpaImpl(ServiceRegistrationJpaImpl creatorServiceRegistration, String operation, List<String> arguments,
+  public JobJpaImpl(User user, ServiceRegistrationJpaImpl creatorServiceRegistration, String operation, List<String> arguments,
           String payload, boolean dispatchable) {
     this();
+    this.creator = user.getUserName();
     this.operation = operation;
     this.context = new JaxbJobContext();
     if (arguments != null) {
@@ -161,6 +163,13 @@ public class JobJpaImpl extends JaxbJob {
   @Override
   public long getId() {
     return id;
+  }
+
+  @Override
+  @Column(name = "creator", nullable = false)
+  @XmlElement(name = "creator")
+  public String getCreator() {
+    return creator;
   }
 
   @Transient

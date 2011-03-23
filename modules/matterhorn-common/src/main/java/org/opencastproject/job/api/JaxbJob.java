@@ -78,10 +78,14 @@ public class JaxbJob implements Job {
     this.rootJobId = job.getRootJobId();
     this.dispatchable = job.isDispatchable();
     this.uri = job.getUri();
+    this.creator = job.getCreator();
   }
 
   /** The job ID */
   protected long id;
+
+  /** The user that created this job */
+  protected String creator;
 
   /** The version, used for optimistic locking */
   protected long version;
@@ -134,7 +138,7 @@ public class JaxbJob implements Job {
   /** The output produced by this job, or null if it has not yet been generated (or was not due to an exception) */
   // @XmlJavaTypeAdapter(value = CdataAdapter.class)
   protected String payload;
-  
+
   /** Whether this job is queueable */
   protected boolean dispatchable;
 
@@ -471,8 +475,7 @@ public class JaxbJob implements Job {
   public void setRootJobId(Long rootJobId) {
     this.rootJobId = rootJobId;
   }
-  
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -483,12 +486,12 @@ public class JaxbJob implements Job {
   public boolean isDispatchable() {
     return dispatchable;
   }
-  
+
   @Override
   public void setDispatchable(boolean dispatchable) {
     this.dispatchable = dispatchable;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -503,10 +506,30 @@ public class JaxbJob implements Job {
   /**
    * Sets the URI.
    * 
-   * @param uri the uri to set
+   * @param uri
+   *          the uri to set
    */
   public void setUri(URI uri) {
     this.uri = uri;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getCreator()
+   */
+  @Override
+  @XmlElement(name = "creator")
+  public String getCreator() {
+    return creator;
+  }
+
+  /**
+   * @param creator
+   *          the creator to set
+   */
+  public void setCreator(String creator) {
+    this.creator = creator;
   }
 
   /**

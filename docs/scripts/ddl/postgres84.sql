@@ -99,6 +99,7 @@ CREATE TABLE host_registration (
 
 CREATE TABLE job (
     id bigint NOT NULL,
+    creator character varying(255),
     status integer,
     payload text,
     datestarted timestamp without time zone,

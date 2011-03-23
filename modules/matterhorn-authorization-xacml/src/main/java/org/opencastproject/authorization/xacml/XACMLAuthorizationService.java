@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
@@ -53,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -80,15 +80,16 @@ public class XACMLAuthorizationService implements AuthorizationService {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public List<AccessControlEntry> getAccessControlList(MediaPackage mediapackage) {
-    List<AccessControlEntry> acl = new ArrayList<AccessControlEntry>();
+  public AccessControlList getAccessControlList(MediaPackage mediapackage) {
+    AccessControlList accessControlList = new AccessControlList();
+    List<AccessControlEntry> acl = accessControlList.getEntries();
     Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
     if (xacmlAttachments.length == 0) {
       logger.warn("No XACML attachment found in {}", mediapackage);
-      return acl;
+      return accessControlList;
     } else if (xacmlAttachments.length > 1) {
       logger.warn("More than one XACML policy is attached to {}", mediapackage);
-      return acl;
+      return accessControlList;
     }
     File xacmlPolicyFile = null;
     try {
@@ -139,7 +140,7 @@ public class XACMLAuthorizationService implements AuthorizationService {
         logger.debug("Skipping {}", object);
       }
     }
-    return acl;
+    return accessControlList;
   }
 
   /**
@@ -248,12 +249,11 @@ public class XACMLAuthorizationService implements AuthorizationService {
    *      java.util.Set)
    */
   @Override
-  public MediaPackage setAccessControl(MediaPackage mediapackage, List<AccessControlEntry> roleActions)
-          throws MediaPackageException {
+  public MediaPackage setAccessControl(MediaPackage mediapackage, AccessControlList acl) throws MediaPackageException {
     // Get XACML representation of these role + action tuples
     String xacmlContent = null;
     try {
-      xacmlContent = XACMLUtils.getXacml(mediapackage, roleActions);
+      xacmlContent = XACMLUtils.getXacml(mediapackage, acl);
     } catch (JAXBException e) {
       throw new MediaPackageException("Unable to generate xacml for mediapackage " + mediapackage.getIdentifier());
     }

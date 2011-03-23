@@ -31,10 +31,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * This class models an item in the search result. It represents a 'video' or 'series' object.
+ * This class models an item in the search result. It represents a 'video' or 'series' object. It does not, however,
+ * represent the complete solr document. Authorization information, for instance, is not serialized.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "result", namespace = "http://search.opencastproject.org/")
@@ -157,6 +159,14 @@ public class SearchResultItemImpl implements SearchResultItem {
   @XmlElementWrapper(name = "segments")
   @XmlElement(name = "segment")
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
+
+  /** The roles that can read this result */
+  @XmlTransient
+  private String[] readRoles;
+
+  /** The roles that can write this result */
+  @XmlTransient
+  private String[] writeRoles;
 
   /**
    * {@inheritDoc}
@@ -645,4 +655,43 @@ public class SearchResultItemImpl implements SearchResultItem {
     mediaSegments.add((MediaSegmentImpl) segment); // TODO: assuming this
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchResultItem#getReadRoles()
+   */
+  @Override
+  public String[] getReadRoles() {
+    if (readRoles == null)
+      return new String[0];
+    return readRoles;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchResultItem#getWriteRoles()
+   */
+  @Override
+  public String[] getWriteRoles() {
+    if (writeRoles == null)
+      return new String[0];
+    return writeRoles;
+  }
+
+  /**
+   * @param readRoles
+   *          the readRoles to set
+   */
+  public void setReadRoles(String[] readRoles) {
+    this.readRoles = readRoles;
+  }
+
+  /**
+   * @param writeRoles
+   *          the writeRoles to set
+   */
+  public void setWriteRoles(String[] writeRoles) {
+    this.writeRoles = writeRoles;
+  }
 }

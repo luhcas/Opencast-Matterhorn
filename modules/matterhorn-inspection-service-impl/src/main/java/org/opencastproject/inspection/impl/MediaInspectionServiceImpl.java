@@ -37,6 +37,8 @@ import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.Checksum;
@@ -83,6 +85,12 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
   protected Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
   protected MediaPackageElementBuilderFactory elementFactory = MediaPackageElementBuilderFactory.newInstance();
 
+  /** The security service */
+  protected SecurityService securityService = null;
+
+  /** The user directory service */
+  protected UserDirectoryService userDirectoryService = null;
+
   /**
    * Creates a new media inspection service instance.
    */
@@ -120,7 +128,7 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
   protected String process(Job job) throws Exception {
     Operation op = null;
     String operation = job.getOperation();
-    List<String> arguments = job.getArguments(); 
+    List<String> arguments = job.getArguments();
     try {
       op = Operation.valueOf(operation);
       MediaPackageElement inspectedElement = null;
@@ -565,6 +573,46 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
   @Override
   protected ServiceRegistry getServiceRegistry() {
     return serviceRegistry;
+  }
+
+  /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * Callback for setting the user directory service.
+   * 
+   * @param userDirectoryService
+   *          the userDirectoryService to set
+   */
+  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
+    this.userDirectoryService = userDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
+   */
+  @Override
+  protected SecurityService getSecurityService() {
+    return securityService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getUserDirectoryService()
+   */
+  @Override
+  protected UserDirectoryService getUserDirectoryService() {
+    return userDirectoryService;
   }
 
 }

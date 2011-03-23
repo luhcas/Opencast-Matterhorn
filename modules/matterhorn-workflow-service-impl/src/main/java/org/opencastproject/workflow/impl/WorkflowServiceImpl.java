@@ -31,6 +31,9 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
@@ -149,6 +152,12 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
   /** The service registry */
   protected ServiceRegistry serviceRegistry = null;
 
+  /** The security service */
+  protected SecurityService securityService = null;
+
+  /** The user directory service */
+  protected UserDirectoryService userDirectoryService = null;
+
   static {
     YES = new HashSet<String>(Arrays.asList(new String[] { "yes", "true", "on" }));
     NO = new HashSet<String>(Arrays.asList(new String[] { "no", "false", "off" }));
@@ -202,12 +211,18 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
    */
   protected void fireListeners(final WorkflowInstance oldWorkflowInstance, final WorkflowInstance newWorkflowInstance)
           throws WorkflowParsingException {
+    final User currentUser = securityService.getUser();
     for (final WorkflowListener listener : listeners) {
       if (oldWorkflowInstance == null || !oldWorkflowInstance.getState().equals(newWorkflowInstance.getState())) {
         Runnable runnable = new Runnable() {
           @Override
           public void run() {
-            listener.stateChanged(newWorkflowInstance);
+            try {
+              securityService.setUser(currentUser);
+              listener.stateChanged(newWorkflowInstance);
+            } finally {
+              securityService.setUser(null);
+            }
           }
         };
         executorService.execute(runnable);
@@ -221,7 +236,12 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
           Runnable runnable = new Runnable() {
             @Override
             public void run() {
-              listener.operationChanged(newWorkflowInstance);
+              try {
+                securityService.setUser(currentUser);
+                listener.operationChanged(newWorkflowInstance);
+              } finally {
+                securityService.setUser(null);
+              }
             }
           };
           executorService.execute(runnable);
@@ -1450,6 +1470,26 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
   }
 
   /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * Callback for setting the user directory service
+   * 
+   * @param userDirectoryService
+   *          the userDirectoryService to set
+   */
+  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
+    this.userDirectoryService = userDirectoryService;
+  }
+
+  /**
    * Sets the search indexer to use in this service.
    * 
    * @param index
@@ -1513,8 +1553,8 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
    */
   public static class HandlerRegistration {
 
-    private WorkflowOperationHandler handler;
-    private String operationName;
+    protected WorkflowOperationHandler handler;
+    protected String operationName;
 
     public HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
       if (operationName == null)
@@ -1590,7 +1630,13 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
      */
     @Override
     public Void call() throws Exception {
-      process(job);
+      User jobUser = userDirectoryService.loadUser(job.getCreator());
+      try {
+        securityService.setUser(jobUser);
+        process(job);
+      } finally {
+        securityService.setUser(null);
+      }
       return null;
     }
   }

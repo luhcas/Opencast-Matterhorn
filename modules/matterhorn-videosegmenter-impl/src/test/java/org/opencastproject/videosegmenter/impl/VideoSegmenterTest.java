@@ -19,12 +19,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
+import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
@@ -34,6 +35,8 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.MimeTypes;
@@ -73,7 +76,7 @@ public class VideoSegmenterTest {
 
   /** The in-memory service registration */
   protected ServiceRegistry serviceRegistry = null;
-  
+
   /** The video segmenter */
   protected VideoSegmenterServiceImpl vsegmenter = null;
 
@@ -83,7 +86,7 @@ public class VideoSegmenterTest {
   protected static TrackImpl track = null;
 
   /** Temp file */
-  private File tempFile = null;
+  protected File tempFile = null;
 
   /**
    * Copies test files to the local file system, since jmf is not able to access movies from the resource section of a
@@ -129,10 +132,20 @@ public class VideoSegmenterTest {
     vsegmenter = new VideoSegmenterServiceImpl();
     serviceRegistry = new ServiceRegistryInMemoryImpl(vsegmenter);
     vsegmenter.setServiceRegistry(serviceRegistry);
-    
+
     vsegmenter.setMpeg7CatalogService(mpeg7Service);
     vsegmenter.setWorkspace(workspace);
-    
+
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(securityService);
+    vsegmenter.setSecurityService(securityService);
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    vsegmenter.setUserDirectoryService(userDirectoryService);
+
   }
 
   /**
@@ -141,7 +154,7 @@ public class VideoSegmenterTest {
   @After
   public void tearDown() throws Exception {
     FileUtils.deleteQuietly(tempFile);
-    ((ServiceRegistryInMemoryImpl)serviceRegistry).dispose();
+    ((ServiceRegistryInMemoryImpl) serviceRegistry).dispose();
   }
 
   @Test
@@ -149,7 +162,7 @@ public class VideoSegmenterTest {
     Job receipt = vsegmenter.segment(track);
     JobBarrier jobBarrier = new JobBarrier(serviceRegistry, 1000, receipt);
     jobBarrier.waitForJobs();
-    
+
     Catalog catalog = (Catalog) MediaPackageElementParser.getFromXml(receipt.getPayload());
 
     Mpeg7Catalog mpeg7 = new Mpeg7CatalogImpl(catalog.getURI().toURL().openStream());

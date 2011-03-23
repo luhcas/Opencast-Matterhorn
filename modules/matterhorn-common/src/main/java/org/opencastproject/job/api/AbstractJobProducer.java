@@ -16,9 +16,15 @@
 package org.opencastproject.job.api;
 
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +35,9 @@ import java.util.concurrent.Executors;
  * running, asynchronous operations.
  */
 public abstract class AbstractJobProducer implements JobProducer {
+
+  /** The logger */
+  static final Logger logger = LoggerFactory.getLogger(AbstractJobProducer.class);
 
   /** The types of job that this producer can handle */
   protected String jobType = null;
@@ -76,13 +85,14 @@ public abstract class AbstractJobProducer implements JobProducer {
   @Override
   public boolean acceptJob(Job job) throws ServiceRegistryException {
     if (isReadyToAccept(job)) {
+      User user = getUserDirectoryService().loadUser(job.getCreator());
       try {
         job.setStatus(Job.Status.RUNNING);
         getServiceRegistry().updateJob(job);
       } catch (NotFoundException e) {
         throw new IllegalStateException(e);
       }
-      executor.submit(new JobRunner(job));
+      executor.submit(new JobRunner(job, user));
       return true;
     } else {
       return false;
@@ -107,6 +117,20 @@ public abstract class AbstractJobProducer implements JobProducer {
   protected abstract ServiceRegistry getServiceRegistry();
 
   /**
+   * Returns a reference to the security service
+   * 
+   * @return the security service
+   */
+  protected abstract SecurityService getSecurityService();
+
+  /**
+   * Returns a reference to the user directory service
+   * 
+   * @return the user directory service
+   */
+  protected abstract UserDirectoryService getUserDirectoryService();
+
+  /**
    * Asks the overriding class to process the arguments using the given operation. The result will be added to the
    * associated job as the payload.
    * 
@@ -122,18 +146,22 @@ public abstract class AbstractJobProducer implements JobProducer {
    * A utility class to run jobs
    */
   class JobRunner implements Callable<Void> {
-
+    
     /** The job */
-    private Job job = null;
+    private final Job job;
 
+    /** The user to run this job as */
+    private final User user;
+        
     /**
      * Constructs a new job runner
      * 
      * @param job
      *          the job to run
      */
-    JobRunner(Job job) {
+    JobRunner(Job job, User user) {
       this.job = job;
+      this.user = user;
     }
 
     /**
@@ -144,6 +172,7 @@ public abstract class AbstractJobProducer implements JobProducer {
     @Override
     public Void call() throws Exception {
       try {
+        getSecurityService().setUser(user);
         String payload = process(job);
         job.setPayload(payload);
         job.setStatus(Status.FINISHED);
@@ -151,9 +180,10 @@ public abstract class AbstractJobProducer implements JobProducer {
         job.setStatus(Status.FAILED);
         if (e instanceof ServiceRegistryException)
           throw (ServiceRegistryException) e;
-        throw new ServiceRegistryException("Error handling operation '" + job.getOperation() + "': " + e.getMessage(),
+        logger.warn("Error handling operation '" + job.getOperation() + "': " + e.getMessage(),
                 e);
       } finally {
+        getSecurityService().setUser(null);
         try {
           getServiceRegistry().updateJob(job);
         } catch (NotFoundException e) {

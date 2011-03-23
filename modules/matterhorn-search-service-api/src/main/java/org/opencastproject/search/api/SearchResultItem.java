@@ -65,7 +65,7 @@ public interface SearchResultItem {
    * @return the dcDescription
    */
   String getDcDescription();
-  
+
   /**
    * @return the dcCreator
    */
@@ -178,4 +178,17 @@ public interface SearchResultItem {
    */
   MediaSegment[] getSegments();
 
+  /**
+   * Gets the roles allowed to read this result item.
+   * 
+   * @return the read roles
+   */
+  String[] getReadRoles();
+
+  /**
+   * Gets the roles allowed to write this result item.
+   * 
+   * @return the write roles
+   */
+  String[] getWriteRoles();
 }

@@ -15,11 +15,14 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -94,6 +97,14 @@ public class PauseWorkflowTest {
         return handlerRegistrations;
       }
     };
+
+    service.setSecurityService(new SecurityServiceStub());
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
     MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.replay(mds);
     service.addMetadataService(mds);
@@ -146,14 +157,13 @@ public class PauseWorkflowTest {
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("key", "value");
 
-    
     service.addWorkflowListener(pauseListener);
     synchronized (pauseListener) {
       service.resume(workflow.getId(), properties);
       pauseListener.wait();
     }
     service.removeWorkflowListener(pauseListener);
-    
+
     // The handler should have picked up the properties
     Assert.assertEquals(properties, firstHandler.getProperties());
   }

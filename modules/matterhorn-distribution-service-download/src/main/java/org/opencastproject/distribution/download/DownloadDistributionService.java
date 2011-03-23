@@ -22,6 +22,8 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.FileSupport;
@@ -73,6 +75,12 @@ public class DownloadDistributionService extends AbstractJobProducer implements 
 
   /** The workspace reference */
   protected Workspace workspace = null;
+
+  /** The security service */
+  protected SecurityService securityService = null;
+
+  /** The user directory service */
+  protected UserDirectoryService userDirectoryService = null;
 
   /**
    * Creates a new instance of the download distribution service.
@@ -240,7 +248,7 @@ public class DownloadDistributionService extends AbstractJobProducer implements 
   protected String process(Job job) throws Exception {
     Operation op = null;
     String operation = job.getOperation();
-    List<String> arguments = job.getArguments(); 
+    List<String> arguments = job.getArguments();
     try {
       op = Operation.valueOf(operation);
       String mediapackageId = arguments.get(0);
@@ -340,4 +348,43 @@ public class DownloadDistributionService extends AbstractJobProducer implements 
     return serviceRegistry;
   }
 
+  /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * Callback for setting the user directory service.
+   * 
+   * @param userDirectoryService
+   *          the userDirectoryService to set
+   */
+  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
+    this.userDirectoryService = userDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
+   */
+  @Override
+  protected SecurityService getSecurityService() {
+    return securityService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getUserDirectoryService()
+   */
+  @Override
+  protected UserDirectoryService getUserDirectoryService() {
+    return userDirectoryService;
+  }
 }

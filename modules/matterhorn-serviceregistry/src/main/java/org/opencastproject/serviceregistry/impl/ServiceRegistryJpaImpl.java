@@ -22,8 +22,11 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.security.api.TrustedHttpClientException;
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.JaxbServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -113,7 +116,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /** The thread pool to use for dispatching queued jobs and checking on phantom services. */
   protected ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
+  
+  /** The security service */
+  protected SecurityService securityService = null;
 
+  /** The user directory service */
+  protected UserDirectoryService userDirectoryService = null;
+  
   @SuppressWarnings("rawtypes")
   protected Map persistenceProperties;
 
@@ -294,6 +303,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   public Job createJob(String host, String serviceType, String operation, List<String> arguments, String payload,
           boolean dispatchable) throws ServiceRegistryException {
+    User currentUser = securityService.getUser();
     if (StringUtils.isBlank(host))
       throw new IllegalArgumentException("Host can't be null");
     if (StringUtils.isBlank(serviceType))
@@ -305,23 +315,23 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationJpaImpl creator = getServiceRegistration(em, serviceType, host);
-      if (creator == null) {
+      ServiceRegistrationJpaImpl creatingService = getServiceRegistration(em, serviceType, host);
+      if (creatingService == null) {
         throw new ServiceRegistryException("No service registration exists for type '" + serviceType + "' on host '"
                 + host + "'");
       }
-      if (creator.getHostRegistration().isMaintenanceMode()) {
-        logger.warn("Creating a job from {}, which is currently in maintenance mode.", creator.getHost());
+      if (creatingService.getHostRegistration().isMaintenanceMode()) {
+        logger.warn("Creating a job from {}, which is currently in maintenance mode.", creatingService.getHost());
       }
-      JobJpaImpl job = new JobJpaImpl(creator, operation, arguments, payload, dispatchable);
+      JobJpaImpl job = new JobJpaImpl(currentUser, creatingService, operation, arguments, payload, dispatchable);
 
-      creator.creatorJobs.add(job);
+      creatingService.creatorJobs.add(job);
 
       // if this job is not dispatchable, it must be handled by the host that has created it
       if (dispatchable) {
         job.setStatus(Status.QUEUED);
       } else {
-        creator.processorJobs.add(job);
+        creatingService.processorJobs.add(job);
       }
 
       em.persist(job);
@@ -343,11 +353,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   protected JobJpaImpl createJob(ServiceRegistrationJpaImpl serviceRegistration, String operation,
           List<String> arguments, String payload, boolean dispatchable) {
+    User currentUser = securityService.getUser();
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      JobJpaImpl job = new JobJpaImpl(serviceRegistration, operation, arguments, payload, dispatchable);
+      JobJpaImpl job = new JobJpaImpl(currentUser, serviceRegistration, operation, arguments, payload, dispatchable);
       serviceRegistration.creatorJobs.add(job);
       // if this job is not dispatchable, it must be handled by the host that has created it
       if (dispatchable) {
@@ -1206,6 +1217,24 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   void setTrustedHttpClient(TrustedHttpClient client) {
     this.client = client;
   }
+  
+  /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * Callback for setting the user directory service.
+   * 
+   * @param userDirectoryService the userDirectoryService to set
+   */
+  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
+    this.userDirectoryService = userDirectoryService;
+  }
 
   /**
    * Dispatches the job to the least loaded service that will accept the job, or throws a
@@ -1377,7 +1406,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         List<ServiceRegistration> serviceRegistrations = getServiceRegistrations();
 
         for (Job job : jobsToDispatch) {
+          String creator = job.getCreator();
+          User user = userDirectoryService.loadUser(creator);
           try {
+            if(user != null) {
+              securityService.setUser(user);
+            }
             String hostAcceptingJob = dispatchJob(em, job,
                     filterAndSortServiceRegistrations(serviceRegistrations, job.getJobType(), hostLoads));
             if (hostAcceptingJob == null) {
@@ -1395,6 +1429,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
           } catch (ServiceRegistryException e) {
             Throwable cause = (e.getCause() != null) ? e.getCause() : e;
             ServiceRegistryJpaImpl.logger.error("Error dispatching job " + job, cause);
+          } finally {
+            securityService.setUser(null);
           }
         }
       } catch (Throwable t) {

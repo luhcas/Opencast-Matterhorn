@@ -15,11 +15,12 @@
  */
 package org.opencastproject.authorization.xacml;
 
-import static org.opencastproject.security.api.User.ANONYMOUS_USER;
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.util.NotFoundException;
@@ -72,6 +73,10 @@ public class XacmlSecurityTest {
       public User getUser() {
         return new User(currentUser, currentRoles);
       }
+      @Override
+      public void setUser(User user) {
+        throw new UnsupportedOperationException();
+      }
     };
     authzService = new XACMLAuthorizationService();
     authzService.setWorkspace(new WorkspaceStub());
@@ -89,7 +94,8 @@ public class XacmlSecurityTest {
     // Create a mediapackage and some role/action tuples
     MediaPackage mediapackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
 
-    List<AccessControlEntry> acl = new ArrayList<AccessControlEntry>();
+    AccessControlList accessControlList = new AccessControlList();
+    List<AccessControlEntry> acl = accessControlList.getEntries();
     acl.add(new AccessControlEntry("admin", "delete", true));
     acl.add(new AccessControlEntry("admin", "read", true));
 
@@ -99,11 +105,11 @@ public class XacmlSecurityTest {
     acl.add(new AccessControlEntry(ANONYMOUS_USER.getRoles()[0], "read", true));
     acl.add(new AccessControlEntry(ANONYMOUS_USER.getRoles()[0], "comment", false));
 
-    String xacml = XACMLUtils.getXacml(mediapackage, acl);
+    String xacml = XACMLUtils.getXacml(mediapackage, accessControlList);
     logger.debug("XACML contents: {}", xacml);
     
     // Add the security policy to the mediapackage
-    mediapackage = authzService.setAccessControl(mediapackage, acl);
+    mediapackage = authzService.setAccessControl(mediapackage, accessControlList);
     
     // Ensure that the permissions specified are respected by the security service
     currentRoles.clear();
@@ -112,11 +118,10 @@ public class XacmlSecurityTest {
     Assert.assertTrue(authzService.hasPermission(mediapackage, "read"));
     Assert.assertFalse(authzService.hasPermission(mediapackage, "comment"));
 
-    List<AccessControlEntry> computedAcl = authzService.getAccessControlList(mediapackage);
-    Assert.assertTrue("ACLs are the same size?", computedAcl.size() == acl.size());
-    Assert.assertTrue("ACLs contain the same ACEs?", computedAcl.containsAll(acl));
-    
-    
+    AccessControlList computedAcl = authzService.getAccessControlList(mediapackage);
+    Assert.assertTrue("ACLs are the same size?", computedAcl.getEntries().size() == acl.size());
+    Assert.assertTrue("ACLs contain the same ACEs?", computedAcl.getEntries().containsAll(acl));
+
     currentRoles.clear();
     currentRoles.add("student");
     Assert.assertFalse(authzService.hasPermission(mediapackage, "delete"));

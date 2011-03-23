@@ -15,12 +15,15 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -99,13 +102,20 @@ public class HoldStateTest {
         return handlerRegistrations;
       }
     };
+
+    service.setSecurityService(new SecurityServiceStub());
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
     MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.replay(mds);
     service.addMetadataService(mds);
 
-
     ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
-    
+
     dao = new WorkflowServiceSolrIndex();
     dao.solrRoot = sRoot + File.separator + "solr";
     dao.setServiceRegistry(serviceRegistry);
@@ -160,7 +170,7 @@ public class HoldStateTest {
     service.removeWorkflowListener(succeedListener);
 
     Assert.assertEquals("Workflow expected to succeed", 1, succeedListener.countStateChanges(WorkflowState.SUCCEEDED));
-    
+
     WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
     String xmlFromDb = WorkflowParser.toXml(fromDb);
     logger.info("checking for the existence of 'anotherproperty', which should have been replaced");
@@ -181,7 +191,7 @@ public class HoldStateTest {
     // Simulate a user resuming the workflow, but the handler still keeps the workflow in a hold state
     holdingOperationHandler.setResumeAction(Action.PAUSE);
 
-    // Resume the workflow again.  It should quickly reenter the paused state
+    // Resume the workflow again. It should quickly reenter the paused state
     synchronized (pauseListener) {
       service.resume(workflow.getId());
       pauseListener.wait();
@@ -195,21 +205,22 @@ public class HoldStateTest {
 
     // Resume the workflow again, and this time continue with the workflow
     holdingOperationHandler.setResumeAction(Action.CONTINUE);
-    
+
     WorkflowStateListener succeedListener = new WorkflowStateListener(WorkflowState.SUCCEEDED, WorkflowState.FAILED);
     service.addWorkflowListener(succeedListener);
-    synchronized(succeedListener) {
+    synchronized (succeedListener) {
       service.resume(workflow.getId());
       succeedListener.wait();
     }
     service.removeWorkflowListener(succeedListener);
-    
+
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
   }
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
+            throws WorkflowOperationException {
       return createResult(Action.CONTINUE);
     }
 
@@ -228,5 +239,5 @@ public class HoldStateTest {
       return "ContinuingWorkflowOperationHandler";
     }
   }
-  
+
 }

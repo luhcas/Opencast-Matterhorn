@@ -15,6 +15,8 @@
  */
 package org.opencastproject.userdirectory;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.security.api.RoleDirectoryService;
 import org.opencastproject.security.api.RoleProvider;
 import org.opencastproject.security.api.User;
@@ -122,13 +124,13 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
       if (user != null)
         return user;
     }
-    return User.ANONYMOUS_USER;
+    return ANONYMOUS_USER;
   }
 
   public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException,
           org.springframework.dao.DataAccessException {
     User user = loadUser(userName);
-    if (user.equals(User.ANONYMOUS_USER)) {
+    if (user.equals(ANONYMOUS_USER)) {
       throw new UsernameNotFoundException(userName);
     } else {
       Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();

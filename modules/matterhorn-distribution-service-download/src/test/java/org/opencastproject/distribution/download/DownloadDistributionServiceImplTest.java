@@ -15,12 +15,16 @@
  */
 package org.opencastproject.distribution.download;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.UrlSupport;
@@ -40,7 +44,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 public class DownloadDistributionServiceImplTest {
-  
+
   private DownloadDistributionService service = null;
   private MediaPackage mp = null;
   private File distributionRoot = null;
@@ -58,36 +62,50 @@ public class DownloadDistributionServiceImplTest {
     } finally {
       IOUtils.closeQuietly(is);
     }
-    
+
     distributionRoot = new File("./target/static");
     service = new DownloadDistributionService();
 
     serviceRegistry = new ServiceRegistryInMemoryImpl(service);
     service.setServiceRegistry(serviceRegistry);
-    
+
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(securityService);
+    service.setSecurityService(securityService);
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject()))
+            .andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
     service.distributionDirectory = distributionRoot;
     service.serviceUrl = UrlSupport.DEFAULT_BASE_URL;
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
-    
-    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "media.mov"));
-    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "dublincore.xml"));
-    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "mpeg7.xml"));
-    EasyMock.expect(workspace.get((URI)EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "attachment.txt"));
+
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "media.mov"));
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "dublincore.xml"));
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "mpeg7.xml"));
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(mediaPackageRoot, "attachment.txt"));
     EasyMock.replay(workspace);
   }
 
   @After
   public void teardown() throws Exception {
     FileUtils.deleteDirectory(distributionRoot);
-    ((ServiceRegistryInMemoryImpl)serviceRegistry).dispose();
+    ((ServiceRegistryInMemoryImpl) serviceRegistry).dispose();
   }
-  
+
   @Test
   public void testPartialDistribution() throws Exception {
     // Distribute only some of the elements in the mediapackage
-    Job job1 = service.distribute(mp.getIdentifier().compact(), mp.getTrack("track-1")); // "catalog-2" and "notes" are not to be distributed
-    Job job2 = service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-1")); // "catalog-2" and "notes" are not to be distributed
+    Job job1 = service.distribute(mp.getIdentifier().compact(), mp.getTrack("track-1")); // "catalog-2" and "notes" are
+                                                                                         // not to be distributed
+    Job job2 = service.distribute(mp.getIdentifier().compact(), mp.getCatalog("catalog-1")); // "catalog-2" and "notes"
+                                                                                             // are not to be
+                                                                                             // distributed
     JobBarrier jobBarrier = new JobBarrier(serviceRegistry, 500, job1, job2);
     jobBarrier.waitForJobs();
 
@@ -133,10 +151,12 @@ public class DownloadDistributionServiceImplTest {
     Job job5 = service.retract(mp.getIdentifier().compact());
     jobBarrier = new JobBarrier(serviceRegistry, 500, job5);
     jobBarrier.waitForJobs();
-    
+
     Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("track-1")).isFile());
-    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-1")).isFile());
-    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-2")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-1"))
+            .isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-2"))
+            .isFile());
     Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("notes")).isFile());
   }
 

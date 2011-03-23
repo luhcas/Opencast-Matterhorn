@@ -28,6 +28,8 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.MimeType;
@@ -54,7 +56,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.activation.MimetypesFileTypeMap;
+import javax.activation.FileTypeMap;
 
 /**
  * Implementation of {@link CaptionService}. Uses {@link ComponentContext} to get all registered
@@ -87,6 +89,12 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
 
   /** Reference to remote service manager */
   protected ServiceRegistry serviceRegistry;
+
+  /** The security service */
+  protected SecurityService securityService = null;
+
+  /** The user directory service */
+  protected UserDirectoryService userDirectoryService = null;
 
   /** Component context needed for retrieving Converter Engines */
   protected ComponentContext componentContext = null;
@@ -207,7 +215,7 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
       MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
       Catalog catalog = (Catalog) elementBuilder.elementFromURI(exported, Catalog.TYPE, new MediaPackageElementFlavor(
               "captions", outputFormat));
-      String[] mimetype = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(exported.getPath()).split("/");
+      String[] mimetype = FileTypeMap.getDefaultFileTypeMap().getContentType(exported.getPath()).split("/");
       catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
       catalog.addTag("lang:" + language);
 
@@ -454,6 +462,44 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
     this.serviceRegistry = serviceRegistry;
   }
 
+  /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * Callback for setting the user directory service.
+   * 
+   * @param userDirectoryService the userDirectoryService to set
+   */
+  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
+    this.userDirectoryService = userDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
+   */
+  @Override
+  protected SecurityService getSecurityService() {
+    return securityService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getUserDirectoryService()
+   */
+  @Override
+  protected UserDirectoryService getUserDirectoryService() {
+    return userDirectoryService;
+  }
+  
   /**
    * {@inheritDoc}
    * 

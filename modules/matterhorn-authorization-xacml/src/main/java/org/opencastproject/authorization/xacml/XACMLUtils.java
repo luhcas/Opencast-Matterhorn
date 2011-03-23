@@ -17,6 +17,7 @@ package org.opencastproject.authorization.xacml;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
 
 import org.jboss.security.xacml.core.model.policy.ActionMatchType;
 import org.jboss.security.xacml.core.model.policy.ActionType;
@@ -36,7 +37,6 @@ import org.jboss.security.xacml.core.model.policy.SubjectAttributeDesignatorType
 import org.jboss.security.xacml.core.model.policy.TargetType;
 
 import java.io.StringWriter;
-import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -87,8 +87,7 @@ public final class XACMLUtils {
    * @return
    * @throws JAXBException
    */
-  public static String getXacml(MediaPackage mediapackage, List<AccessControlEntry> accessControlList)
-          throws JAXBException {
+  public static String getXacml(MediaPackage mediapackage, AccessControlList accessControlList) throws JAXBException {
     ObjectFactory jbossXacmlObjectFactory = new ObjectFactory();
     PolicyType policy = new PolicyType();
     policy.setPolicyId(mediapackage.getIdentifier().toString());
@@ -117,7 +116,7 @@ public final class XACMLUtils {
     policy.setTarget(policyTarget);
 
     // Loop over roleActions and add a rule for each
-    for (AccessControlEntry ace : accessControlList) {
+    for (AccessControlEntry ace : accessControlList.getEntries()) {
       boolean allow = ace.isAllow();
 
       RuleType rule = new RuleType();

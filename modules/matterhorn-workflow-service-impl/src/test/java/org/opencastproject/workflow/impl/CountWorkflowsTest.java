@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
 
 import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -23,6 +24,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
@@ -99,10 +101,17 @@ public class CountWorkflowsTest {
         return handlerRegistrations;
       }
     };
+
+    service.setSecurityService(new SecurityServiceStub());
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
     MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.replay(mds);
     service.addMetadataService(mds);
-
 
     serviceRegistry = new ServiceRegistryInMemoryImpl();
 
@@ -175,7 +184,8 @@ public class CountWorkflowsTest {
    */
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
-    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context) throws WorkflowOperationException {
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
+            throws WorkflowOperationException {
       return createResult(Action.CONTINUE);
     }
 
@@ -194,5 +204,5 @@ public class CountWorkflowsTest {
       return "ContinuingWorkflowOperationHandler";
     }
   }
-  
+
 }

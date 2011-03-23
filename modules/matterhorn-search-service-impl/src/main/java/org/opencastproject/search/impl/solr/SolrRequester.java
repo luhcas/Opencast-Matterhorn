@@ -27,6 +27,8 @@ import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 import org.opencastproject.search.api.SearchResultItemImpl;
 import org.opencastproject.search.impl.SearchQueryImpl;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.util.SolrUtils;
 
 import org.apache.commons.lang.StringUtils;
@@ -60,16 +62,20 @@ public class SolrRequester {
   /** The connection to the solr database */
   private SolrServer solrServer = null;
 
+  /** The security service */
+  private SecurityService securityService;
+
   /**
    * Creates a new requester for solr that will be using the given connection object to query the search index.
    * 
    * @param connection
    *          the solr connection
    */
-  public SolrRequester(SolrServer connection) {
+  public SolrRequester(SolrServer connection, SecurityService securityService) {
     if (connection == null)
       throw new IllegalStateException("Unable to run queries on null connection");
     this.solrServer = connection;
+    this.securityService = securityService;
   }
 
   /**
@@ -193,6 +199,19 @@ public class SolrRequester {
         }
 
       }
+
+      // Add authorization information
+      List<String> readRoles = new ArrayList<String>();
+      for (Object fieldValue : doc.getFieldValues(SolrFields.OC_READ_PERMISSIONS)) {
+        readRoles.add((String) fieldValue);
+      }
+      item.setReadRoles(readRoles.toArray(new String[readRoles.size()]));
+
+      List<String> writeRoles = new ArrayList<String>();
+      for (Object fieldValue : doc.getFieldValues(SolrFields.OC_WRITE_PERMISSIONS)) {
+        writeRoles.add((String) fieldValue);
+      }
+      item.setReadRoles(writeRoles.toArray(new String[writeRoles.size()]));
 
       // Add the item to the result set
       result.addItem(item);
@@ -471,7 +490,7 @@ public class SolrRequester {
         sb.append(flavorBuilder);
       }
     }
-    
+
     if (q.getDeletedDate() != null) {
       if (sb.length() > 0)
         sb.append(" AND ");
@@ -480,6 +499,20 @@ public class SolrRequester {
 
     if (sb.length() == 0)
       sb.append("*:*");
+
+    User user = securityService.getUser();
+    String[] roles = user.getRoles();
+    if (roles.length > 0) {
+      sb.append(" AND (");
+      StringBuilder roleList = new StringBuilder();
+      for (String role : roles) {
+        if (roleList.length() > 0)
+          roleList.append(" OR ");
+        roleList.append(SolrFields.OC_READ_PERMISSIONS).append(":").append(role);
+      }
+      sb.append(roleList.toString());
+      sb.append(")");
+    }
 
     SolrQuery query = new SolrQuery(sb.toString());
 
@@ -490,7 +523,7 @@ public class SolrRequester {
     if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
       query.addFilterQuery(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     }
-    
+
     if (q.getDeletedDate() == null) {
       query.addFilterQuery("-" + SolrFields.OC_DELETED + ":[* TO *]");
     }
@@ -513,4 +546,13 @@ public class SolrRequester {
     return createSearchResult(query);
   }
 
+  /**
+   * Sets the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
 }

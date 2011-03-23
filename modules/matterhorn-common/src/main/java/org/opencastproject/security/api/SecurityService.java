@@ -20,11 +20,22 @@ package org.opencastproject.security.api;
  */
 public interface SecurityService {
 
+  /** The anonymous user */
+  User ANONYMOUS_USER = new User("anonymous", null, new String[] { "ROLE_ANONYMOUS" });
+
   /**
-   * Gets the current user, or <code>null</code> if the user has not been authenticated.
+   * Gets the current user, or <code>ANONYMOUS_USER</code> if the user has not been authenticated.
    * 
    * @return the user
    */
   User getUser();
 
+  /**
+   * Sets the current thread's user context to another user. This is useful when spawning new threads that must
+   * contain the parent thread's user context.
+   * 
+   * @param user
+   *          the user to set for the current user context
+   */
+  void setUser(User user);
 }

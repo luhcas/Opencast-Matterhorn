@@ -19,7 +19,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,13 +30,12 @@ public class AccessControlParserTest {
   public void testAclParsing() throws Exception {
     // Construct an ACL with 100 entries
     AccessControlList acl = new AccessControlList();
-    List<AccessControlEntry> entries = new ArrayList<AccessControlEntry>();
+    List<AccessControlEntry> entries = acl.getEntries();
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
         entries.add(new AccessControlEntry(Integer.toString(i), Integer.toString(j), (i + j % 2 == 0)));
       }
     }
-    acl.setEntries(entries);
     
     // Get the acl as an xml string
     String xml = AccessControlParser.toXml(acl);

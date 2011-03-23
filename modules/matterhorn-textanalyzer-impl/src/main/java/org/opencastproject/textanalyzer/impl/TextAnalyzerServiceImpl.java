@@ -41,6 +41,8 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.textanalyzer.api.TextAnalyzerException;
@@ -99,6 +101,12 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   /** The dictionary service */
   protected DictionaryService dictionaryService;
 
+  /** The security service */
+  protected SecurityService securityService = null;
+
+  /** The user directory service */
+  protected UserDirectoryService userDirectoryService = null;
+
   /**
    * Creates a new instance of the text analyzer service.
    */
@@ -151,7 +159,7 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
         if (!result.isSuccess()) {
           throw new TextAnalyzerException("Unable to convert " + image + " to tiff");
         }
-        conversionJob = serviceRegistry.getJob(conversionJob.getId());  // get the latest copy
+        conversionJob = serviceRegistry.getJob(conversionJob.getId()); // get the latest copy
         attachment = (Attachment) MediaPackageElementParser.getFromXml(conversionJob.getPayload());
         imageUrl = attachment.getURI();
       } catch (EncoderException e) {
@@ -391,4 +399,43 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
     this.composerService = composer;
   }
 
+  /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * Callback for setting the user directory service.
+   * 
+   * @param userDirectoryService
+   *          the userDirectoryService to set
+   */
+  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
+    this.userDirectoryService = userDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
+   */
+  @Override
+  protected SecurityService getSecurityService() {
+    return securityService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getUserDirectoryService()
+   */
+  @Override
+  protected UserDirectoryService getUserDirectoryService() {
+    return userDirectoryService;
+  }
 }

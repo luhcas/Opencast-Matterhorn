@@ -15,12 +15,15 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -71,7 +74,7 @@ public class WorkflowServiceImplTest {
   private SucceedingWorkflowOperationHandler succeedingOperationHandler = null;
   private WorkflowOperationHandler failingOperationHandler = null;
   private WorkflowServiceSolrIndex dao = null;
-  private Set<HandlerRegistration> handlerRegistrations = null;
+  protected Set<HandlerRegistration> handlerRegistrations = null;
   private Workspace workspace = null;
   private ServiceRegistryInMemoryImpl serviceRegistry = null;
 
@@ -106,6 +109,13 @@ public class WorkflowServiceImplTest {
         return handlerRegistrations;
       }
     };
+
+    service.setSecurityService(new SecurityServiceStub());
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
 
     MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.replay(mds);
@@ -347,10 +357,12 @@ public class WorkflowServiceImplTest {
     WorkflowSet workflowsWithTitle = service.getWorkflowInstances(new WorkflowQuery().withTitle(searchTerm));
     Assert.assertEquals(1, workflowsWithTitle.getTotalCount());
 
-    WorkflowSet workflowsWithQuotedTitle = service.getWorkflowInstances(new WorkflowQuery().withTitle(searchTermInQuotes));
+    WorkflowSet workflowsWithQuotedTitle = service.getWorkflowInstances(new WorkflowQuery()
+            .withTitle(searchTermInQuotes));
     Assert.assertEquals(1, workflowsWithQuotedTitle.getTotalCount());
 
-    WorkflowSet workflowsWithUnQuotedTitle = service.getWorkflowInstances(new WorkflowQuery().withTitle(searchTermWithoutQuotes));
+    WorkflowSet workflowsWithUnQuotedTitle = service.getWorkflowInstances(new WorkflowQuery()
+            .withTitle(searchTermWithoutQuotes));
     Assert.assertEquals(1, workflowsWithUnQuotedTitle.getTotalCount());
   }
 

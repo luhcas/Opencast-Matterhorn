@@ -15,6 +15,8 @@
  */
 package org.opencastproject.security.api;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -32,9 +34,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "user", namespace = "http://org.opencastproject.security")
 public final class User {
 
-  /** The anonymous user */
-  public static final User ANONYMOUS_USER = new User("anonymous", null, new String[] { "ROLE_ANONYMOUS" });
-  
   /** The user name */
   protected String userName;
 
@@ -70,6 +69,7 @@ public final class User {
    *          the set of roles for this user
    */
   public User(String userName, Collection<String> roleCollection) {
+    this.userName = userName;
     if (roleCollection == null) {
       roles = ANONYMOUS_USER.getRoles();
     } else {
@@ -135,5 +135,53 @@ public final class User {
    */
   public String[] getRoles() {
     return roles;
+  }
+
+  /**
+   * Returns whether the user is in a specific role.
+   * 
+   * @param role
+   *          the role to check
+   * @return whether the role is one of this user's roles
+   */
+  public boolean hasRole(String role) {
+    for (String r : roles) {
+      if (r.equals(role))
+        return true;
+    }
+    return false;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof User))
+      return false;
+    User other = (User) obj;
+    return this.userName.equals(other.userName);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return userName.hashCode();
+  };
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "User '" + userName + "'";
   }
 }

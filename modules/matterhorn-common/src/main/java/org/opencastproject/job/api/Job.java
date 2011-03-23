@@ -38,6 +38,14 @@ public interface Job {
   long getId();
 
   /**
+   * Gets the username of the subject responsible for creating the job initially. This job will execute with this user's
+   * roles and permissions.
+   * 
+   * @return the username that created the job
+   */
+  String getCreator();
+
+  /**
    * Gets the version of this job. Each time the job is updated, the version number is incremented. If a process
    * attempts to save a job that has been updated in another thread or on another host while the job was in memory, an
    * optimistic locking exception will be thrown.

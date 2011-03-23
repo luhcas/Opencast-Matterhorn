@@ -15,10 +15,14 @@
  */
 package org.opencastproject.inspection.impl;
 
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.Checksum;
@@ -85,6 +89,17 @@ public class MediaInspectionServiceImplTest {
     // set up services and mock objects
     service = new MediaInspectionServiceImpl();
     serviceRegistry = new ServiceRegistryInMemoryImpl(service);
+
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(securityService);
+    service.setSecurityService(securityService);
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject()))
+            .andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
 
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.get(uriTrack)).andReturn(f);

@@ -16,6 +16,12 @@
 
 package org.opencastproject.search.impl.solr;
 
+import static org.opencastproject.search.api.SearchService.READ_PERMISSION;
+import static org.opencastproject.search.api.SearchService.WRITE_PERMISSION;
+import static org.opencastproject.search.impl.solr.SolrFields.OC_READ_PERMISSIONS;
+import static org.opencastproject.search.impl.solr.SolrFields.OC_WRITE_PERMISSIONS;
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -47,6 +53,9 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
+import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.SolrUtils;
 import org.opencastproject.workspace.api.Workspace;
@@ -176,7 +185,7 @@ public class SolrIndexManager {
         logger.warn("Trying to delete non-existing (or already deleted) episode {} from the search index", id);
         return false;
       }
-      
+
       // Use all existing fields
       SolrDocument doc = solrResponse.getResults().get(0);
       SolrUpdateableInputDocument inputDocument = new SolrUpdateableInputDocument();
@@ -202,15 +211,19 @@ public class SolrIndexManager {
    * 
    * @param sourceMediaPackage
    *          the media package to post
+   * @param acl
+   *          the access control list for this mediapackage
    * @throws SolrServerException
    *           if an errors occurs while talking to solr
+   * @throws MediaPackageException
    */
-  public boolean add(MediaPackage sourceMediaPackage) throws SolrServerException {
+  public boolean add(MediaPackage sourceMediaPackage, AccessControlList acl) throws SolrServerException,
+          UnauthorizedException, MediaPackageException {
     SolrUpdateableInputDocument episodeDocument = null;
     SolrUpdateableInputDocument seriesDocument = null;
     try {
-      episodeDocument = createEpisodeInputDocument(sourceMediaPackage);
-      seriesDocument = createSeriesInputDocument(sourceMediaPackage);
+      episodeDocument = createEpisodeInputDocument(sourceMediaPackage, acl);
+      seriesDocument = createSeriesInputDocument(sourceMediaPackage, acl);
     } catch (Exception e) {
       throw new SolrServerException(e);
     }
@@ -246,11 +259,13 @@ public class SolrIndexManager {
    * 
    * @param mediaPackage
    *          the media package
+   * @param acl
+   *          the access control list for this mediapackage
    * @return an input document ready to be posted to solr
    * @throws MediaPackageException
    *           if serialization of the media package fails
    */
-  private SolrUpdateableInputDocument createEpisodeInputDocument(MediaPackage mediaPackage)
+  private SolrUpdateableInputDocument createEpisodeInputDocument(MediaPackage mediaPackage, AccessControlList acl)
           throws MediaPackageException, IOException {
 
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
@@ -307,7 +322,40 @@ public class SolrIndexManager {
     } else {
       logger.debug("No segmentation catalog found");
     }
+
+    addAuthorization(solrEpisodeDocument, acl);
+
     return solrEpisodeDocument;
+  }
+
+  /**
+   * Adds authorization fields to the solr document.
+   * 
+   * @param doc
+   *          the solr document
+   * @param acl
+   *          the access control list
+   */
+  protected void addAuthorization(SolrUpdateableInputDocument doc, AccessControlList acl) {
+    // Add authorization
+    if (acl.getEntries().isEmpty()) {
+      // if no access control is specified, we let the anonymous roles read the mediapackage
+      for (String role : ANONYMOUS_USER.getRoles()) {
+        doc.addField(OC_READ_PERMISSIONS, role);
+      }
+    } else {
+      for (AccessControlEntry entry : acl.getEntries()) {
+        if (!entry.isAllow()) {
+          logger.warn("Search service does not support denial via ACL, ignoring {}", entry);
+          continue;
+        }
+        if (READ_PERMISSION.equals(entry.getAction())) {
+          doc.addField(OC_READ_PERMISSIONS, entry.getRole());
+        } else if (WRITE_PERMISSION.equals(entry.getAction())) {
+          doc.addField(OC_WRITE_PERMISSIONS, entry.getRole());
+        }
+      }
+    }
   }
 
   protected DublinCoreCatalog loadDublinCoreCatalog(Catalog cat) throws IOException {
@@ -341,9 +389,12 @@ public class SolrIndexManager {
    * 
    * @param mediaPackage
    *          the media package
+   * @param acl
+   *          the access control list for this mediapackage
    * @return an input document ready to be posted to solr
    */
-  private SolrUpdateableInputDocument createSeriesInputDocument(MediaPackage mediaPackage) throws IOException {
+  private SolrUpdateableInputDocument createSeriesInputDocument(MediaPackage mediaPackage, AccessControlList acl)
+          throws IOException {
     SolrUpdateableInputDocument solrSeriesDocument = new SolrUpdateableInputDocument();
 
     // Check if there is a dublin core for series
@@ -378,6 +429,8 @@ public class SolrIndexManager {
     solrSeriesDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.Series);
     solrSeriesDocument.setField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
     addStandardDublincCoreFields(solrSeriesDocument, mediaPackage, MediaPackageElements.SERIES);
+
+    addAuthorization(solrSeriesDocument, acl);
 
     return solrSeriesDocument;
   }

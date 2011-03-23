@@ -267,6 +267,10 @@
    <field name="oc_elementtags" type="text" indexed="true" stored="true" omitNorms="true"/>
    <field name="oc_elementflavors" type="text" indexed="true" stored="true" omitNorms="true"/>
    
+   <!-- Authorization fields -->
+   <field name="oc_read" type="text" indexed="true" stored="true" multiValued="true"/>
+   <field name="oc_write" type="text" indexed="true" stored="true" multiValued="true"/>
+   
    <!-- The dynamic fields with segment text and hint -->
    <dynamicField name="oc_text_*"  type="text"  indexed="true"  stored="true"/>
    <dynamicField name="oc_hint_*"  type="text"   indexed="false"  stored="true"/>

@@ -18,13 +18,14 @@ package org.opencastproject.security.api;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageException;
 
-import java.util.List;
-
 /**
  * Provides generation and interpretation of policy documents in media packages
  */
 public interface AuthorizationService {
 
+  /** The Matterhorn administration role */
+  String ADMIN_ROLE = "ROLE_ADMIN";
+  
   /**
    * Determines whether the current user can take the specified action on the mediapackage.
    * 
@@ -47,7 +48,7 @@ public interface AuthorizationService {
    * @throws MediaPackageException
    *           if the policy can not be read from the mediapackage
    */
-  List<AccessControlEntry> getAccessControlList(MediaPackage mediapackage) throws MediaPackageException;
+  AccessControlList getAccessControlList(MediaPackage mediapackage) throws MediaPackageException;
 
   /**
    * Attaches the provided policies to a mediapackage as a XACML attachment.
@@ -60,6 +61,6 @@ public interface AuthorizationService {
    * @throws MediaPackageException
    *           if the policy can not be attached to the mediapackage
    */
-  MediaPackage setAccessControl(MediaPackage mediapackage, List<AccessControlEntry> accessControlList)
+  MediaPackage setAccessControl(MediaPackage mediapackage, AccessControlList accessControlList)
           throws MediaPackageException;
 }

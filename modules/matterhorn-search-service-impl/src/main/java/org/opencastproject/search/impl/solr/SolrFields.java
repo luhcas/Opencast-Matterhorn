@@ -54,7 +54,9 @@ public interface SolrFields {
   String OC_MEDIATYPE = "oc_mediatype";
   String OC_ELEMENTTAGS = "oc_elementtags";
   String OC_ELEMENTFLAVORS = "oc_elementflavors";
-
+  String OC_READ_PERMISSIONS = "oc_read";
+  String OC_WRITE_PERMISSIONS = "oc_write";
+  
   /** Solr ranking score */
   String SCORE = "score";
 

@@ -22,12 +22,14 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.util.UrlSupport;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import org.apache.commons.lang.StringUtils;
+import org.easymock.EasyMock;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Assert;
@@ -76,6 +78,11 @@ public class JobTest {
     serviceRegistry.setPersistenceProvider(new PersistenceProvider());
     serviceRegistry.setPersistenceProperties(props);
     serviceRegistry.activate(null);
+    
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(SecurityService.ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(securityService);
+    serviceRegistry.setSecurityService(securityService);
 
     // register the hosts
     serviceRegistry.registerHost(LOCALHOST, 1);

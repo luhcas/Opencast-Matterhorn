@@ -16,7 +16,10 @@
 
 package org.opencastproject.search.impl;
 
+import static org.opencastproject.security.api.AuthorizationService.ADMIN_ROLE;
+
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.search.api.SearchException;
@@ -25,6 +28,11 @@ import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrIndexManager;
 import org.opencastproject.search.impl.solr.SolrRequester;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AuthorizationService;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UnauthorizedException;
+import org.opencastproject.security.api.User;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.PathSupport;
@@ -78,10 +86,27 @@ public class SearchServiceImpl implements SearchService {
   private Workspace workspace;
 
   /** The registry of remote services */
-  protected ServiceRegistry remoteServiceManager;
+  protected ServiceRegistry serviceRegistry;
 
-  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
+  /** The security service */
+  private SecurityService securityService;
+
+  /** The authorization service */
+  private AuthorizationService authorizationService;
+
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+    if(solrRequester != null) {
+      solrRequester.setSecurityService(securityService);
+    }
+  }
+
+  public void setAuthorizationService(AuthorizationService authorizationService) {
+    this.authorizationService = authorizationService;
+  }
+
+  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
   }
 
   public void setDublincoreService(DublinCoreCatalogService dcService) {
@@ -188,7 +213,7 @@ public class SearchServiceImpl implements SearchService {
     }
 
     solrServer = SolrServerFactory.newEmbeddedInstance(solrRoot, solrDataDir);
-    solrRequester = new SolrRequester(solrServer);
+    solrRequester = new SolrRequester(solrServer, securityService);
     solrIndexManager = new SolrIndexManager(solrServer, workspace);
     solrIndexManager.setDcService(dcService);
     solrIndexManager.setMpeg7Service(mpeg7Service);
@@ -203,7 +228,7 @@ public class SearchServiceImpl implements SearchService {
   protected void setupSolr(URL url) throws IOException, SolrServerException {
     logger.info("Connecting to solr search index at {}", url);
     solrServer = SolrServerFactory.newRemoteInstance(url);
-    solrRequester = new SolrRequester(solrServer);
+    solrRequester = new SolrRequester(solrServer, securityService);
     solrIndexManager = new SolrIndexManager(solrServer, workspace);
     solrIndexManager.setDcService(dcService);
     solrIndexManager.setMpeg7Service(mpeg7Service);
@@ -246,13 +271,20 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#add(org.opencastproject.mediapackage.MediaPackage)
    */
-  public void add(MediaPackage mediaPackage) throws SearchException, IllegalArgumentException {
+  public void add(MediaPackage mediaPackage) throws SearchException, MediaPackageException, IllegalArgumentException,
+          UnauthorizedException {
     if (mediaPackage == null) {
       throw new IllegalArgumentException("Unable to add a null mediapackage");
     }
+    User currentUser = securityService.getUser();
+    if (!currentUser.hasRole(ADMIN_ROLE)
+            && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
+      throw new UnauthorizedException(currentUser, SearchService.WRITE_PERMISSION);
+    }
     try {
       logger.debug("Attempting to add mediapackage {} to search index", mediaPackage.getIdentifier());
-      if (solrIndexManager.add(mediaPackage)) {
+      AccessControlList acl = authorizationService.getAccessControlList(mediaPackage);
+      if (solrIndexManager.add(mediaPackage, acl)) {
         logger.info("Added mediapackage {} to the search index", mediaPackage.getIdentifier());
       } else {
         logger.warn("Failed to add mediapackage {} to the search index", mediaPackage.getIdentifier());
@@ -267,7 +299,30 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#delete(java.lang.String)
    */
-  public boolean delete(String mediaPackageId) throws SearchException {
+  public boolean delete(String mediaPackageId) throws SearchException, UnauthorizedException {
+    User user = securityService.getUser();
+
+    // admin is allowed to delete, regardless of the settings on this mediapackage
+    boolean authorized = user.hasRole(ADMIN_ROLE);
+    if(!authorized) {
+      SearchResult result = getByQuery(new SearchQueryImpl().withId(mediaPackageId));
+      if (result.getItems().length == 0) {
+        logger.warn("Can not delete mediapackage {}, which is not available in the search index.", mediaPackageId);
+        return false;
+      }
+      for (String writeRole : result.getItems()[0].getWriteRoles()) {
+        if (user.hasRole(writeRole)) {
+          authorized = true;
+          break;
+        }
+      }
+    }
+    
+    // if they are still not authorized, throw
+    if (!authorized) {
+      throw new UnauthorizedException(user, SearchService.WRITE_PERMISSION);
+    }
+    
     try {
       logger.info("Removing mediapackage {} from search index", mediaPackageId);
       return solrIndexManager.delete(mediaPackageId);
@@ -282,7 +337,11 @@ public class SearchServiceImpl implements SearchService {
    * @see org.opencastproject.search.api.SearchService#clear()
    */
   @Override
-  public void clear() throws SearchException {
+  public void clear() throws SearchException, UnauthorizedException {
+    User user = securityService.getUser();
+    if(!user.hasRole(ADMIN_ROLE)) {
+      throw new UnauthorizedException("User " + user + " is not allowed to clear the search index");
+    }
     try {
       logger.info("Clearing the search index");
       solrIndexManager.clear();

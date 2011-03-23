@@ -30,6 +30,9 @@ import java.util.Collection;
  */
 public class SecurityServiceSpringImpl implements SecurityService {
 
+  /** Holds delegates users for new threads that have been spawned from authenticated threads */
+  private static final ThreadLocal<User> delegatedUserHolder = new ThreadLocal<User>();
+
   /**
    * {@inheritDoc}
    * 
@@ -37,13 +40,17 @@ public class SecurityServiceSpringImpl implements SecurityService {
    */
   @Override
   public User getUser() {
+    User delegatedUser = delegatedUserHolder.get();
+    if(delegatedUser != null) {
+      return delegatedUser;
+    }
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null) {
-      return null;
+      return ANONYMOUS_USER;
     } else {
       Object principal = auth.getPrincipal();
       if (principal == null) {
-        return null;
+        return ANONYMOUS_USER;
       }
       UserDetails userDetails = (UserDetails) principal;
 
@@ -58,6 +65,16 @@ public class SecurityServiceSpringImpl implements SecurityService {
       }
       return new User(userDetails.getUsername(), roles);
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.security.api.SecurityService#setUser(org.opencastproject.security.api.User)
+   */
+  @Override
+  public void setUser(User user) {
+    delegatedUserHolder.set(user);
   }
 
 }

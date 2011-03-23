@@ -16,12 +16,14 @@
 package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
 
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
@@ -70,7 +72,7 @@ public class WorkflowStatisticsTest {
 
   private WorkflowServiceImpl service = null;
   private List<WorkflowDefinition> workflowDefinitions = null;
-  private Set<HandlerRegistration> workflowHandlers = null;
+  protected Set<HandlerRegistration> workflowHandlers = null;
   private WorkflowServiceSolrIndex dao = null;
   private Workspace workspace = null;
   private MediaPackage mediaPackage = null;
@@ -116,6 +118,13 @@ public class WorkflowStatisticsTest {
       }
     };
 
+    service.setSecurityService(new SecurityServiceStub());
+
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
     MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.replay(mds);
     service.addMetadataService(mds);
@@ -124,7 +133,7 @@ public class WorkflowStatisticsTest {
     for (WorkflowDefinition workflowDefinition : workflowDefinitions) {
       service.registerWorkflowDefinition(workflowDefinition);
     }
-    
+
     // Mock the workspace
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
@@ -154,7 +163,7 @@ public class WorkflowStatisticsTest {
     } catch (Exception e) {
       Assert.fail(e.getMessage());
     }
-    
+
     // Register the workflow service with the service registry
     serviceRegistry.registerService(service);
   }
@@ -184,15 +193,15 @@ public class WorkflowStatisticsTest {
 
   class IndividualWorkflowListener implements WorkflowListener {
     long id = -1;
-    
+
     IndividualWorkflowListener(long id) {
-      this.id = id;    
+      this.id = id;
     }
-    
+
     @Override
     public void operationChanged(WorkflowInstance workflow) {
     }
-    
+
     @Override
     public void stateChanged(WorkflowInstance workflow) {
       if (workflow.getId() != id)
@@ -205,8 +214,7 @@ public class WorkflowStatisticsTest {
       }
     }
   }
-  
-  
+
   /**
    * Tests whether the workflow service statistics are gathered correctly.
    */
@@ -244,16 +252,16 @@ public class WorkflowStatisticsTest {
         listener.wait();
       }
     }
-    
+
     service.removeWorkflowListener(listener);
-    
+
     // Resume all of them, so some will be finished, some won't
     int j = 0;
     for (WorkflowInstance instance : instances) {
       WorkflowListener instanceListener = new IndividualWorkflowListener(instance.getId());
       service.addWorkflowListener(instanceListener);
       for (int k = 0; k <= (j % OPERATION_COUNT - 1); k++) {
-        synchronized(instanceListener) {
+        synchronized (instanceListener) {
           service.resume(instance.getId(), null);
           instanceListener.wait();
         }

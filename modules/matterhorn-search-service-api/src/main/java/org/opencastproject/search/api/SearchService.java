@@ -17,6 +17,8 @@
 package org.opencastproject.search.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.UnauthorizedException;
 
 /**
  * Provides search capabilities, possibly to the engage tools, possibly to other services.
@@ -28,14 +30,30 @@ public interface SearchService {
   String JOB_TYPE = "org.opencastproject.search";
 
   /**
+   * The {@link org.opencastproject.security.api.AccessControlEntry#getAction()} that allows a user in a particular role
+   * to see a mediapackage in the search index.
+   */
+  String READ_PERMISSION = "read";
+
+  /**
+   * The {@link org.opencastproject.security.api.AccessControlEntry#getAction()} that allows a user in a particular role
+   * to update or remove a mediapackage from the search index.
+   */
+  String WRITE_PERMISSION = "write";
+
+  /**
    * Adds the media package to the search index.
    * 
    * @param mediaPackage
    *          the media package
    * @throws SearchException
    *           if an error occurs while adding the media package
+   * @throws MediaPackageException
+   *           if an error occurs accessing the media package
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to add this mediapackage to the search index
    */
-  void add(MediaPackage mediaPackage) throws SearchException;
+  void add(MediaPackage mediaPackage) throws SearchException, MediaPackageException, UnauthorizedException;
 
   /**
    * Removes the media package identified by <code>mediaPackageId</code> from the search index.
@@ -45,16 +63,20 @@ public interface SearchService {
    * @return <code>true</code> if the episode was found and deleted
    * @throws SearchException
    *           if an error occurs while removing the media package
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to remove this mediapackage from the search index
    */
-  boolean delete(String mediaPackageId) throws SearchException;
+  boolean delete(String mediaPackageId) throws SearchException, UnauthorizedException;
 
   /**
    * Clears the search index.
    * 
    * @throws SearchException
    *           if an error occurs while clearing the index
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to clear the search index
    */
-  void clear() throws SearchException;
+  void clear() throws SearchException, UnauthorizedException;
 
   /**
    * Find search results based on the specified query object
