@@ -145,3 +145,8 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 #tableContainer { clear: both; }
 #controlsTopStatistic { float: left; margin: 10px 0; }
 
+/* Role Privileges */
+.rolePrivilegeTable {margin-left: auto; margin-right: auto; margin-top:16px; margin-bottom: 16px;}
+.rolePrivilegeTable tr {border-top:1px solid silver; border-bottom:1px solid silver;}
+.rolePrivilegeTable td {margin-left:1px; margin-right:1px; padding:2px;}
+.rolePrivilegeTable .roleName {padding-right:20px;}

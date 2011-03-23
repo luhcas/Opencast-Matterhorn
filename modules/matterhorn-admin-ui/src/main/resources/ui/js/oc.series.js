@@ -18,6 +18,7 @@
 var ocSeries        = ocSeries || {};
 ocSeries.components = {};
 ocSeries.additionalComponents = {};
+ocSeries.rolePrivileges = [];
 
 /*    PAGE CONFIGURATION    */
 var SERIES_SERVICE_URL = "/series";
@@ -61,6 +62,24 @@ ocSeries.init = function(){
       $('#seriesId').val(seriesId);
       $.getJSON(SERIES_SERVICE_URL + "/" + seriesId + ".json", ocSeries.loadSeries);
     }
+  }
+
+  if (ocSeries.mode == CREATE_MODE) {
+    ocSecurity.loadRoles(function(roles) {
+      $(roles).each(function(index, role) {
+        ocSeries.rolePrivileges.push(new ocSecurity.Role(role));
+      });
+    });
+    var rolesTable = TrimPath.processDOMTemplate('rolesTableTemplate', {roles: ocSeries.rolePrivileges});
+    $('#rolesTableContainer').append(rolesTable);
+
+    //
+    // to update the privileges from values in the UI do
+    //
+    // ocSecurity.updatePrivileges(ocSeries.rolePrivileges);
+
+  } else if (ocSeries.mode == EDIT_MODE) {
+    // TODO get privileges from series and populate UI accordingly
   }
 }
 

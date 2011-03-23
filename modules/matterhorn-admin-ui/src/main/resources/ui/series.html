@@ -1,184 +1,227 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-    <head>
-        <!-- PAGE TITLE -->
-        <title>Series | Opencast Matterhorn</title>
-        <link rel="shortcut icon" href="img/favicon.ico" />
-        <!-- META -->
-        <!-- STYLESHEETS -->
-        <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css" />
-        <link rel="stylesheet" type="text/css" href="css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css" />
-        <link rel="stylesheet" type="text/css" href="css/admin.css" />
-        <!-- SCRIPTS -->
-        <script type="text/javascript" src="jquery/jquery-1.4.4.min.js"></script>
-        <script type="text/javascript" src="jquery/jquery-ui-1.8.9.custom.min.js"></script>
-        <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
-        <script type="text/javascript" src="js/oc.admin.js"></script>
-        <script type="text/javascript" src="js/oc.utils.js"></script>
-        <script type="text/javascript" src="js/oc.series.js"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
-                ocSeries.init();
-                $('#submitButton, #cancelButton').button();
-                $("#tabsWrapper").tabs({
-                  select: function (event, ui) {
-                    switch (ui.index) {
-                      case 0:
-                        window.location = 'recordings.html';
-                        return false;
-                        break;
-                      case 1:
-                        window.location = 'series_list.html';
-                        return false;
-                        break;
-                      case 2:
-                        window.location = 'agents_status.html';
-                        return false;
-                        break;
-                      case 3:
-                        window.location = 'statistics.html';
-                        return false;
-                        break;
-                    }
-                  },
-                  selected: 1
-                });
-            });
-        </script>
-    </head>
-    <body>
-        <div id="pageHeader">
-            <span id="currentVersion"></span>
-            <a href="/j_spring_security_logout">Log out</a>
-            <div class="clear"></div>
+  <head>
+    <!-- PAGE TITLE -->
+    <title>Series | Opencast Matterhorn</title>
+    <link rel="shortcut icon" href="img/favicon.ico" />
+    <!-- META -->
+    <!-- STYLESHEETS -->
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css" />
+    <link rel="stylesheet" type="text/css" href="css/admin.css" />
+    <!-- SCRIPTS -->
+    <script type="text/javascript" src="jquery/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
+    <script type="text/javascript" src="js/oc.admin.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.series.js"></script>
+    <script type="text/javascript" src="js/oc.security.js"></script>
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        ocSeries.init();
+        $('#submitButton, #cancelButton').button();
+        $("#tabsWrapper").tabs({
+          select: function (event, ui) {
+            switch (ui.index) {
+              case 0:
+                window.location = 'recordings.html';
+                return false;
+                break;
+              case 1:
+                window.location = 'series_list.html';
+                return false;
+                break;
+              case 2:
+                window.location = 'agents_status.html';
+                return false;
+                break;
+              case 3:
+                window.location = 'statistics.html';
+                return false;
+                break;
+            }
+          },
+          selected: 1
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id="pageHeader">
+      <span id="currentVersion"></span>
+      <a href="/j_spring_security_logout">Log out</a>
+      <div class="clear"></div>
+    </div>
+
+    <!-- notification that javaScript is disabled -->
+    <noscript>
+      <center>
+        <div style="border:1px solid red;width:530px;margin:20px;">
+          <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
+            <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
+            JavaScript is disabled
+          </div>
+          <div style="padding:10px;">
+            JavaScript is turned off in your web browser, so this site won't work properly! <br />
+            <strong>
+              Please turn JavaScript on to use this site, then refresh the page.
+            </strong>
+          </div>
         </div>
+      </center>
+    </noscript>
 
-        <!-- notification that javaScript is disabled -->
-        <noscript>
-            <center>
-                <div style="border:1px solid red;width:530px;margin:20px;">
-                    <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
-                        <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
-                        JavaScript is disabled
-                    </div>
-                    <div style="padding:10px;">
-                        JavaScript is turned off in your web browser, so this site won't work properly! <br />
-                        <strong>
-                            Please turn JavaScript on to use this site, then refresh the page.
-                        </strong>
-                    </div>
-                </div>
-            </center>
-        </noscript>
+    <div id="ad_wrapper">
+      <div id="header">
+        <a href="recordings.html" style="text-decoration: none;">
+          <img src="img/MatterhornLogo.png" onclick="window.location='../welcome.html'; return false;" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
+            <h1>Admin Tools</h1>
+        </a>
+        <a href="http://www.opencastproject.org" id="oc-logo">
+          <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">
+        </a>
+        <div class="clear"></div>
+      </div>
 
-        <div id="ad_wrapper">
-            <div id="header">
-                <a href="recordings.html" style="text-decoration: none;">
-                   <img src="img/MatterhornLogo.png" onclick="window.location='../welcome.html'; return false;" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
-                        <h1>Admin Tools</h1>
-                </a>
-                <a href="http://www.opencastproject.org" id="oc-logo">
-                    <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">
-                </a>
-                <div class="clear"></div>
+
+
+      <div id="tabsWrapper" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+        <ul id="tabs">
+          <li>
+            <a href="#recordingsA" id="i18n_tab_recording">Recordings</a>
+          </li>
+          <li>
+            <a href="#seriesA" id="i18n_tab_series">Series</a>
+          </li>
+          <li>
+            <a href='#agents_statusA' id="i18n_tab_agent">Capture Agents</a>
+          </li>
+          <li>
+            <a href="#statisticsA" id="i18n_tab_statistics">Statistics</a>
+          </li>
+        </ul>
+        <!-- CONTENT AREA -->
+        <div class="layout-page-content">
+          <div>
+            <h2 style="text-align:center"><span id="i18n_page_title">Add Series</span></h2>
+          </div>
+          <div class="form-box layout-centered ui-widget">
+            <div class="form-box-content ui-widget-content ui-corner-all">
+              <ul class="oc-ui-form-list">
+                <li>
+                  <label for="title"><span id="i18n_title">Series Title</span>:</label>
+                  <input type="text" class="oc-ui-form-field" id="title" />
+                </li>
+                <li>
+                  <label for="creator"><span id="i18n_creator">Organizer</span>:</label>
+                  <input type="text" class="oc-ui-form-field" id="creator" />
+                </li>
+                <li>
+                  <label for="contributor"><span id="i18n_contributor">Contributor</span>:</label>
+                  <input type="text" class="oc-ui-form-field" id="contributor" />
+                </li>
+              </ul>
             </div>
-
-
-
-            <div id="tabsWrapper" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
-                <ul id="tabs">
-                    <li>
-                        <a href="#recordingsA" id="i18n_tab_recording">Recordings</a>
-                    </li>
-                    <li>
-                        <a href="#seriesA" id="i18n_tab_series">Series</a>
-                    </li>
-                    <li>
-                        <a href='#agents_statusA' id="i18n_tab_agent">Capture Agents</a>
-                    </li>
-                    <li>
-                        <a href="#statisticsA" id="i18n_tab_statistics">Statistics</a>
-                    </li>
+          </div>
+          <div class="form-box layout-centered ui-widget oc-ui-collapsible-widget">
+            <div class="form-box-head ui-widget-header ui-corner-top oc-ui-cursor">
+              <div class="ui-icon ui-icon-triangle-1-e fold-icon"></div>
+              <div id="i18n_content_descriptors" class="fold-icon-text">Additional Content Descriptors</div>
+            </div>
+            <div class="ui-widget-content ui-corner-bottom">
+              <div id="additionalContentTabs" style="border: none;">
+                <ul>
+                  <li><a href="#commonTab" id="i18n_common_tab">Common Descriptors</a></li>
+                  <li><a href="#additionalTab" id="i18n_additional_tab">Additional Metadata</a></li>
                 </ul>
-                <!-- CONTENT AREA -->
-                <div class="layout-page-content">
-                    <div>
-                        <h2 style="text-align:center"><span id="i18n_page_title">Add Series</span></h2>
-                    </div>
-                    <div class="form-box layout-centered ui-widget">
-                        <div class="form-box-content ui-widget-content ui-corner-all">
-                            <ul class="oc-ui-form-list">
-                                <li>
-                                    <label for="title"><span id="i18n_title">Series Title</span>:</label>
-                                    <input type="text" class="oc-ui-form-field" id="title" />
-                                </li>
-                                <li>
-                                    <label for="creator"><span id="i18n_creator">Organizer</span>:</label>
-                                    <input type="text" class="oc-ui-form-field" id="creator" />
-                                </li>
-                                <li>
-                                    <label for="contributor"><span id="i18n_contributor">Contributor</span>:</label>
-                                    <input type="text" class="oc-ui-form-field" id="contributor" />
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="form-box layout-centered ui-widget oc-ui-collapsible-widget">
-                        <div class="form-box-head ui-widget-header ui-corner-top oc-ui-cursor">
-                            <div class="ui-icon ui-icon-triangle-1-e fold-icon"></div>
-                            <div id="i18n_content_descriptors" class="fold-icon-text">Additional Content Descriptors</div>
-                        </div>
-                        <div class="ui-widget-content ui-corner-bottom">
-                            <div id="additionalContentTabs" style="border: none;">
-                                <ul>
-                                    <li><a href="#commonTab" id="i18n_common_tab">Common Descriptors</a></li>
-                                    <li><a href="#additionalTab" id="i18n_additional_tab">Additional Metadata</a></li>
-                                </ul>
-                                <div id="commonTab">
-                                    <ul class="oc-ui-form-list">
-                                        <li>
-                                            <label for="subject"><span id="i18n_subject">Subject</span>:</label>
-                                            <input type="text" class="oc-ui-form-field" id="subject" />
-                                        </li>
-                                        <li>
-                                            <label for="language"><span id="i18n_langauge">Language</span>:</label>
-                                            <input type="text" class="oc-ui-form-field" id="language" />
-                                        </li>
-                                        <li>
-                                            <label for="license"><span id="i18n_license">License</span>:</label>
-                                            <input type="text" class="oc-ui-form-field" id="license" />
-                                        </li>
-                                        <li>
-                                            <label for="description"><span id="i18n_description">Description</span>:</label>
-                                            <textarea class="oc-ui-form-field" id="description"></textarea>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div id="additionalTab">Some Stuff</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-box layout-centered ui-widget">
-                        <div class="form-box-content ui-widget-content ui-corner-all">
-                            <form action="">
-                                <ul class="oc-ui-form-list">
-                                    <li>
-                                        <label>&nbsp;</label>
-                                        <input type="button" value="Save" id="submitButton" />
-                                        <input type="button" value="Cancel" id="cancelButton" />
-                                        <input type="hidden" id="id" />
-                                    </li>
-                                    <li>
-                                        <label class="scheduler-label">&nbsp;</label>
-                                        <span class="scheduler-required-text">*</span><span id="i18n_required">Required</span>
-                                    </li>
-                                </ul>
-                            </form>
-                        </div>
-                    </div>
+                <div id="commonTab">
+                  <ul class="oc-ui-form-list">
+                    <li>
+                      <label for="subject"><span id="i18n_subject">Subject</span>:</label>
+                      <input type="text" class="oc-ui-form-field" id="subject" />
+                    </li>
+                    <li>
+                      <label for="language"><span id="i18n_langauge">Language</span>:</label>
+                      <input type="text" class="oc-ui-form-field" id="language" />
+                    </li>
+                    <li>
+                      <label for="license"><span id="i18n_license">License</span>:</label>
+                      <input type="text" class="oc-ui-form-field" id="license" />
+                    </li>
+                    <li>
+                      <label for="description"><span id="i18n_description">Description</span>:</label>
+                      <textarea class="oc-ui-form-field" id="description"></textarea>
+                    </li>
+                  </ul>
                 </div>
-            </div><!-- END #tabsWrapper -->
+                <div id="additionalTab">Some Stuff</div>
+              </div>
+            </div>
+          </div>
+          <!-- PRIVILEGES -->
+          <div class="form-box layout-centered ui-widget oc-ui-collapsible-widget">
+            <div class="form-box-head ui-widget-header ui-corner-top oc-ui-cursor">
+              <div class="ui-icon ui-icon-triangle-1-e fold-icon"></div>
+              <div id="i18n_content_descriptors" class="fold-icon-text">Privileges</div>
+            </div>
+            <div id="rolesTableContainer" class="ui-widget-content ui-corner-bottom">
+            </div>
+          </div>
+          <div class="form-box layout-centered ui-widget">
+            <div class="form-box-content ui-widget-content ui-corner-all">
+              <form action="">
+                <ul class="oc-ui-form-list">
+                  <li>
+                    <label>&nbsp;</label>
+                    <input type="button" value="Save" id="submitButton" />
+                    <input type="button" value="Cancel" id="cancelButton" />
+                    <input type="hidden" id="id" />
+                  </li>
+                  <li>
+                    <label class="scheduler-label">&nbsp;</label>
+                    <span class="scheduler-required-text">*</span><span id="i18n_required">Required</span>
+                  </li>
+                </ul>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div><!-- END #tabsWrapper -->
 
-        </div><!-- END #wrapper -->
-    </body>
+    </div><!-- END #wrapper -->
+
+    <textarea id="rolesTableTemplate" style="display:none;">
+      <table class="rolePrivilegeTable">
+        {for role in roles}
+        <tr>
+          <td class="roleName">${role.name}</td>
+          <td>
+            <input type="checkbox" id="${role.name}CanRead" class="roleCheckbox roleCheckboxRead"
+            {if role.canRead}
+              checked="checked"
+            {/if}
+            />
+            <label for="${role.name}CanRead" class="roleLabelCanRead">Read</label>
+          </td>
+          <td>
+            <input type="checkbox" id="${role.name}CanWrite" class="roleCheckbox roleCheckboxWrite"
+            {if role.canWrite}
+              checked="checked"
+            {/if}
+            />
+            <label for="${role.name}CanRead" class="roleLabelCanWrite">Write</label>
+          </td>
+        </tr>
+        {forelse}
+        <tr>
+          <td colspan="3" style="color:darkgrey;">
+            No Roles available.
+          </td>
+        </tr>
+        {/for}
+      </table>
+    </textarea>
+  </body>
 </html>
