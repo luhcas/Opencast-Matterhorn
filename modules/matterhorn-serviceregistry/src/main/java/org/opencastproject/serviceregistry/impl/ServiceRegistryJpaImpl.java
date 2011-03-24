@@ -116,13 +116,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /** The thread pool to use for dispatching queued jobs and checking on phantom services. */
   protected ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(1);
-  
+
   /** The security service */
   protected SecurityService securityService = null;
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
-  
+
   @SuppressWarnings("rawtypes")
   protected Map persistenceProperties;
 
@@ -1217,11 +1217,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   void setTrustedHttpClient(TrustedHttpClient client) {
     this.client = client;
   }
-  
+
   /**
    * Callback for setting the security service.
    * 
-   * @param securityService the securityService to set
+   * @param securityService
+   *          the securityService to set
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
@@ -1230,7 +1231,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * Callback for setting the user directory service.
    * 
-   * @param userDirectoryService the userDirectoryService to set
+   * @param userDirectoryService
+   *          the userDirectoryService to set
    */
   public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
     this.userDirectoryService = userDirectoryService;
@@ -1409,7 +1411,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
           String creator = job.getCreator();
           User user = userDirectoryService.loadUser(creator);
           try {
-            if(user != null) {
+            if (user != null) {
               securityService.setUser(user);
             }
             String hostAcceptingJob = dispatchJob(em, job,

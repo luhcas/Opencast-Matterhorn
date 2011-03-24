@@ -78,6 +78,12 @@ public final class XACMLUtils {
   }
 
   /**
+   * Private constructor to disable clients from instantiating this class.
+   */
+  private XACMLUtils() {
+  }
+
+  /**
    * Builds an xml string containing the xacml for the mediapackage.
    * 
    * @param mediapackage

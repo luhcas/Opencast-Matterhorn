@@ -96,7 +96,7 @@ public class SearchServiceImpl implements SearchService {
 
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
-    if(solrRequester != null) {
+    if (solrRequester != null) {
       solrRequester.setSecurityService(securityService);
     }
   }
@@ -277,8 +277,7 @@ public class SearchServiceImpl implements SearchService {
       throw new IllegalArgumentException("Unable to add a null mediapackage");
     }
     User currentUser = securityService.getUser();
-    if (!currentUser.hasRole(ADMIN_ROLE)
-            && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
+    if (!currentUser.hasRole(ADMIN_ROLE) && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
       throw new UnauthorizedException(currentUser, SearchService.WRITE_PERMISSION);
     }
     try {
@@ -304,7 +303,7 @@ public class SearchServiceImpl implements SearchService {
 
     // admin is allowed to delete, regardless of the settings on this mediapackage
     boolean authorized = user.hasRole(ADMIN_ROLE);
-    if(!authorized) {
+    if (!authorized) {
       SearchResult result = getByQuery(new SearchQueryImpl().withId(mediaPackageId));
       if (result.getItems().length == 0) {
         logger.warn("Can not delete mediapackage {}, which is not available in the search index.", mediaPackageId);
@@ -317,12 +316,12 @@ public class SearchServiceImpl implements SearchService {
         }
       }
     }
-    
+
     // if they are still not authorized, throw
     if (!authorized) {
       throw new UnauthorizedException(user, SearchService.WRITE_PERMISSION);
     }
-    
+
     try {
       logger.info("Removing mediapackage {} from search index", mediaPackageId);
       return solrIndexManager.delete(mediaPackageId);
@@ -339,7 +338,7 @@ public class SearchServiceImpl implements SearchService {
   @Override
   public void clear() throws SearchException, UnauthorizedException {
     User user = securityService.getUser();
-    if(!user.hasRole(ADMIN_ROLE)) {
+    if (!user.hasRole(ADMIN_ROLE)) {
       throw new UnauthorizedException("User " + user + " is not allowed to clear the search index");
     }
     try {

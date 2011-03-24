@@ -166,12 +166,12 @@ public class LtiServlet extends HttpServlet {
 
     // We must return a 200 for some oauth client libraries to accept this as a valid response
 
-    // The URL of the LTI tool.  Currently, we don't have a real LTI tool, so make due with the sample
-    String toolUrl = "/ltisample/"; 
+    // The URL of the LTI tool. Currently, we don't have a real LTI tool, so make due with the sample
+    String toolUrl = "/ltisample/";
 
     // Always set the session cookie
     resp.setHeader("Set-Cookie", "JSESSIONID=" + session.getId() + ";Path=/");
-    
+
     // TODO: Write client-side js to sent the user someplace useful
     resp.getWriter().write("<a href=\"" + toolUrl + "\">continue...</a>");
   }
@@ -208,7 +208,7 @@ public class LtiServlet extends HttpServlet {
       resp.sendError(HttpServletResponse.SC_NOT_FOUND); // If there is no session, there is nothing to see here
     } else {
       Map<String, String> ltiAttributes = (Map<String, String>) session.getAttribute(SESSION_ATTRIBUTE_KEY);
-      if(ltiAttributes == null) {
+      if (ltiAttributes == null) {
         ltiAttributes = new HashMap<String, String>();
       }
       resp.setContentType("application/json");

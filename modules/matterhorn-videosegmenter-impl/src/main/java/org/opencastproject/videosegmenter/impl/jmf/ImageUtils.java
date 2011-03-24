@@ -30,7 +30,7 @@ import javax.media.Buffer;
 /**
  * A collection of utility methods used to deal with frame buffers and images.
  */
-public class ImageUtils {
+public final class ImageUtils {
 
   /** Disallow construction of this utility class */
   private ImageUtils() {

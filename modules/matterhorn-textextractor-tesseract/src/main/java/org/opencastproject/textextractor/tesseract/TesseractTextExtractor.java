@@ -44,7 +44,7 @@ public class TesseractTextExtractor implements TextExtractor, ManagedService {
 
   /** The configuration admin property that defines the path to the tesseract binary */
   public static final String TESSERACT_BINARY_CONFIG_KEY = "tesseract.path";
-  
+
   /** Binary of the tesseract command */
   protected String binary = null;
 
@@ -142,8 +142,8 @@ public class TesseractTextExtractor implements TextExtractor, ManagedService {
 
   @Override
   public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
-    String path = (String)properties.get(TESSERACT_BINARY_CONFIG_KEY);
-    if(path != null) {
+    String path = (String) properties.get(TESSERACT_BINARY_CONFIG_KEY);
+    if (path != null) {
       this.binary = path;
     }
   }

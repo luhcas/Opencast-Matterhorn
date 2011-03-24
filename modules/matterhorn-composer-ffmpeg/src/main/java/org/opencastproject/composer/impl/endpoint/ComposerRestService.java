@@ -46,6 +46,7 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -567,7 +568,8 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     String[] timeStringArray = times.split(",");
     List<Long> parsedTimeArray = new LinkedList<Long>();
     for (String timeString : timeStringArray) {
-      if (!(timeString = timeString.trim()).equals("")) {
+      String trimmed = StringUtils.trim(timeString);
+      if (StringUtils.isNotBlank(trimmed)) {
         parsedTimeArray.add(Long.parseLong(timeString));
       }
     }
@@ -619,8 +621,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
 
   protected String generateImageAttachment() {
     return "<attachment id=\"track-3\">\n" + "  <mimetype>image/jpeg</mimetype>\n"
-            + "  <url>serverUrl/workflow/samples/image.jpg</url>\n"
-            + "</attachment>";
+            + "  <url>serverUrl/workflow/samples/image.jpg</url>\n" + "</attachment>";
   }
 
 }

@@ -356,6 +356,7 @@ public class EdgeDetector {
          * multiplying both sides of each inequality by the greater of the two partial derivatives. The common comparand
          * is stored in a temporary variable (3) and reused in the mirror case (4).
          */
+        // CHECKSTYLE:OFF
         if (xGrad * yGrad <= (float) 0 /* (1) */
         ? Math.abs(xGrad) >= Math.abs(yGrad) /* (2) */
         ? (tmp = Math.abs(xGrad * gradMag)) >= Math.abs(yGrad * neMag - (xGrad + yGrad) * eMag) /* (3) */
@@ -367,6 +368,7 @@ public class EdgeDetector {
                 && tmp > Math.abs(yGrad * nwMag + (xGrad - yGrad) * wMag) /* (4) */
         : (tmp = Math.abs(yGrad * gradMag)) >= Math.abs(xGrad * seMag + (yGrad - xGrad) * sMag) /* (3) */
                 && tmp > Math.abs(xGrad * nwMag + (yGrad - xGrad) * nMag) /* (4) */
+        // CHECKSTYLE:ON
         ) {
           magnitude[index] = gradMag >= MAGNITUDE_LIMIT ? MAGNITUDE_MAX : (int) (MAGNITUDE_SCALE * gradMag);
           // NOTE: The orientation of the edge is not employed by this
