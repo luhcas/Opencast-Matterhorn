@@ -1,44 +1,49 @@
 <html>
   <head>
     <title>Select Workflow</title>
-    
-    <link rel="stylesheet" type="text/css" href="../../../css/admin.css">
-    <link rel="stylesheet" type="text/css" href="/admin/css/oc.layout.css" />
-    <link rel="stylesheet" type="text/css" href="/admin/css/themes/oc.default.css" />
-    <link rel="stylesheet" type="text/css" href="css/pages/oc.recordings.css" />
-
-    <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/admin/css/jquery-ui-1.8.6.custom.css" />
+    <link rel="stylesheet" type="text/css" href="/admin/css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css" />
+    <link rel="stylesheet" type="text/css" href="/admin/css/admin.css">
+    <script type="text/javascript" src="/admin/jquery/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="/admin/jquery/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
+    <script type="text/javascript" src="/admin/js/oc.utils.js"></script>
+    <script type="text/javascript" src="/admin/js/oc.workflow.js"></script>
+    <script type="text/javascript" src="/admin/js/upload.helptexts.json"></script>
+    <script type="text/javascript" src="/admin/js/oc.upload.js"></script>
+    <script type="text/javascript" src="/admin/js/oc.uploadListener.js"></script>
+    <script type="text/javascript" src="/admin/js/oc.ingest.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
-        var id = parent.document.getElementById("holdWorkflowId").value;
-        // get WorkflowInstance
-        $.ajax({
-          url : '../../../workflow/instance/' + id + '.xml',
-          dataType : 'xml',
-          success : function(data) {
-           	// TODO: update the ui
-            $('#error').css('display','none');
-            parent.Recordings.adjustHoldActionPanelHeight();
-          }
-        });
+    	ocWorkflow.init($('#workflowSelector'), $('#workflowConfigContainer'));
       });
+      
+      function continueWorkflow() {
+//     	  if (components) {
+//     	    components['org.opencastproject.workflow.config.workflowSelector'] = new ocAdmin.Component(['workflowSelector'], {nodeKey: 'org.opencastproject.workflow.config.workflowSelector'});
+//     	  }
+    	  parent.ocRecordings.continueWorkflow(components);
+      }
     </script>
   </head>
   <body style="padding:10px;">
     <h1>Select workflow</h1>
-    <div id="ingest" style="display:none;">
-      Please select a workflow.
-	  <p style="color:gray;">
-	    In this ui, we basically need the same functionality as it is available on the admin ui to select and start a workflow.
-	  </p>
-    </div>
-    <div id="error">
-      An error occured.
+    <!-- Processing Instructions -->
+    <div class="form-box layout-centered container ui-widget">
+        <div class="form-box-head ui-widget-header ui-corner-top"><b id="i18n_process_title">Processing</b></div>
+        <div class="form-box-content ui-widget-content ui-corner-bottom">
+            <ul class="oc-ui-form-list">
+                <li class="ui-helper-clearfix">
+                    <label class="scheduler-label"><span style="color: red;">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
+                    <select id="workflowSelector" name="workflowSelector" class="requiredField"></select>
+                </li>
+            </ul>
+            <div id="workflowConfigContainer"></div>
+        </div>
     </div>
     <div id="actions">
-       <!-- control buttons -->
-       <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.Recordings.continueWorkflow();" id="continueBtn" type="button">Start processing</button>
-       <button onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button">Cancel</button>
+      <input title="Start processing" style="margin-left: 65px; margin-right: 16px; width: 160px;" onclick="continueWorkflow()" id="continueBtn" type="button" class="ui-button ui-corner-all" value="Start processing" />
+      <a onclick="parent.ocRecordings.hideHoldActionUI()" title="Cancel" class="secondaryButton">Cancel</a>
     </div>
   </body>
 </html>

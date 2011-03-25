@@ -28,7 +28,7 @@ ocWorkflow.loadDefinitions = function(selector, container) {
   $.ajax({
     async: false,
     method: 'GET',
-    url: '../workflow/definitions.json',
+    url: '/workflow/definitions.json',
     dataType: 'json',
     success: function(data) {
       for (i in data.workflow_definitions) {
@@ -48,7 +48,7 @@ ocWorkflow.loadDefinitions = function(selector, container) {
 }
 
 ocWorkflow.definitionSelected = function(defId, container, callback) {
-  $(container).load('../workflow/configurationPanel?definitionId=' + defId,
+  $(container).load('/workflow/configurationPanel?definitionId=' + defId,
     function() {
       $('.holdCheckbox').attr('checked', false);
       $(container).show('fast');

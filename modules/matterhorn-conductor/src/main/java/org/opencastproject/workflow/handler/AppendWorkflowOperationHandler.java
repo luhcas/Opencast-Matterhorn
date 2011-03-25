@@ -47,7 +47,7 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   private static final Logger logger = LoggerFactory.getLogger(AppendWorkflowOperationHandler.class);
 
   /** Configuration value for the workflow operation definition */
-  public static final String OPT_WORKFLOW = "workflow.definition";
+  public static final String OPT_WORKFLOW = "workflowSelector";
 
   /** Path to the hold state ui */
   public static final String UI_RESOURCE_PATH = "/ui/operation/append/index.html";
