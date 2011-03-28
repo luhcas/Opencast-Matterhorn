@@ -23,8 +23,11 @@ public interface SolrFields {
   /** The key in solr documents representing the workflow's ID */
   String ID_KEY = "id";
 
-  /** The key in solr documents representing the workflow as xml */
+  /** The key in solr documents representing series DC as xml */
   String XML_KEY = "xml";
+  
+  /** The key representing Access Control List */
+  String ACCESS_CONTROL_KEY = "access_control";
 
   /** Dublin core fields */
   String TITLE_KEY = "dc_title";

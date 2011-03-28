@@ -24,8 +24,9 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
- * Enitity object for storing series in persistence storage. Series ID is stored as primary key and DUBLIN_CORE field is
- * used to store serialized Dublin core.
+ * Enitity object for storing series in persistence storage. Series ID is stored as primary key, DUBLIN_CORE field is
+ * used to store serialized Dublin core and ACCESS_CONTROL field is used to store information about access control
+ * rules.
  * 
  */
 @Entity(name = "SeriesEntity")
@@ -42,6 +43,11 @@ public class SeriesEntity {
   @Lob
   @Column(name = "DUBLIN_CORE")
   protected String dublinCoreXML;
+
+  /** Serialized access control */
+  @Lob
+  @Column(name = "ACCESS_CONTROL")
+  protected String accessControl;
 
   /**
    * Default constructor without any import.
@@ -72,7 +78,7 @@ public class SeriesEntity {
   }
 
   /**
-   * Returs serialized Dublin core.
+   * Returns serialized Dublin core.
    * 
    * @return serialized Dublin core
    */
@@ -89,4 +95,24 @@ public class SeriesEntity {
   public void setSeries(String dublinCoreXML) {
     this.dublinCoreXML = dublinCoreXML;
   }
+
+  /**
+   * Returns serialized access control
+   * 
+   * @return serialized access control
+   */
+  public String getAccessControl() {
+    return accessControl;
+  }
+
+  /**
+   * Sets serialized access control.
+   * 
+   * @param accessControl
+   *          serialized access control
+   */
+  public void setAccessControl(String accessControl) {
+    this.accessControl = accessControl;
+  }
+
 }

@@ -531,11 +531,21 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.mediapackage.XMLCatalogImpl#toJson()
    */
-  @SuppressWarnings("unchecked")
   public String toJson() throws IOException {
+    JSONObject json = toJsonObject();
+    return json.toJSONString();
+  }
+
+  /**
+   * Converts the catalog to JSON object.
+   * 
+   * @return JSON object
+   */
+  @SuppressWarnings("unchecked")
+  JSONObject toJsonObject() {
     // The top-level json object
     JSONObject json = new JSONObject();
 
@@ -582,7 +592,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
       }
     }
 
-    return json.toJSONString();
+    return json;
   }
 
   /**

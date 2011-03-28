@@ -13,15 +13,17 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.series.impl.persistence;
+package org.opencastproject.series.impl;
+
 
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
-import org.opencastproject.series.impl.Series;
+import org.opencastproject.series.api.SeriesQuery;
 import org.opencastproject.series.impl.persistence.SeriesServiceDatabaseImpl;
+import org.opencastproject.series.impl.solr.SeriesServiceSolrIndex;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 
@@ -43,23 +45,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Tests persistence: storing, merging, retrieving and removing.
- * 
+ * @author nejc
+ *
  */
-public class SeriesServicePersistenceTest {
+public class SeriesServiceImplTest {
 
   private ComboPooledDataSource pooledDataSource;
   private SeriesServiceDatabaseImpl seriesDatabase;
   private String storage;
   
+  private SeriesServiceSolrIndex index;
+  private DublinCoreCatalogService dcService;
+  private String root;
+  
+  private SeriesServiceImpl seriesService;
+  
   private DublinCoreCatalog testCatalog;
-
+  
   /**
    * @throws java.lang.Exception
    */
   @Before
   public void setUp() throws Exception {
-    
     long currentTime = System.currentTimeMillis();
     storage = PathSupport.concat("target", "db" + currentTime + ".h2.db");
     
@@ -78,10 +85,20 @@ public class SeriesServicePersistenceTest {
     seriesDatabase = new SeriesServiceDatabaseImpl();
     seriesDatabase.setPersistenceProvider(new PersistenceProvider());
     seriesDatabase.setPersistenceProperties(props);
-    DublinCoreCatalogService dcService = new DublinCoreCatalogService();
+    dcService = new DublinCoreCatalogService();
     seriesDatabase.setDublinCoreService(dcService);
     seriesDatabase.activate(null);
     
+    root = PathSupport.concat("target", Long.toString(currentTime));
+    index = new SeriesServiceSolrIndex(root);
+    index.setDublinCoreService(dcService);
+    index.activate();
+    
+    seriesService = new SeriesServiceImpl();
+    seriesService.setPersistence(seriesDatabase);
+    seriesService.setIndex(index);
+    seriesService.activate(null);
+
     InputStream in = null;
     try {
       in = getClass().getResourceAsStream("/dublincore.xml");
@@ -92,57 +109,71 @@ public class SeriesServicePersistenceTest {
   }
   
   @Test
-  public void testAdding() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
+  public void testSerieManagemnt() throws Exception {
+    testCatalog.set(DublinCore.PROPERTY_TITLE, "Some title");
+    seriesService.updateSeries(testCatalog);
+    DublinCoreCatalog retrivedSeries = seriesService.getSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+    Assert.assertEquals("Some title", retrivedSeries.getFirst(DublinCore.PROPERTY_TITLE));
+    
+    testCatalog.set(DublinCore.PROPERTY_TITLE, "Some other title");
+    seriesService.updateSeries(testCatalog);
+    retrivedSeries = seriesService.getSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+    Assert.assertEquals("Some other title", retrivedSeries.getFirst(DublinCore.PROPERTY_TITLE));
+    
+    seriesService.deleteSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+    try {
+      seriesService.getSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+      Assert.fail("Series should not be available after removal.");
+    } catch (NotFoundException e) {
+      // expected
+    }
   }
   
   @Test
-  public void testMerging() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
-    seriesDatabase.storeSeries(testCatalog);
+  public void testSeriesQuery() throws Exception {
+    testCatalog.set(DublinCore.PROPERTY_TITLE, "Some title");
+    seriesService.updateSeries(testCatalog);
+    SeriesQuery q = new SeriesQuery().setSeriesTitle("other");
+    List<DublinCoreCatalog> result = seriesService.getSeries(q).getCatalogList();
+    Assert.assertEquals(0, result.size());
+    
+    testCatalog.set(DublinCore.PROPERTY_TITLE, "Some other title");
+    seriesService.updateSeries(testCatalog);
+    result = seriesService.getSeries(q).getCatalogList();
+    Assert.assertEquals(1, result.size());
   }
   
   @Test
-  public void testDeleting() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
-    seriesDatabase.deleteSeries(testCatalog.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
-  }
-  
-  @Test
-  public void testRetrieving() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
-    Series[] series = seriesDatabase.getAllSeries();
-    Assert.assertTrue("Exactly one series should be returned", series.length == 1);
-    seriesDatabase.deleteSeries(testCatalog.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
-    series = seriesDatabase.getAllSeries();
-    Assert.assertTrue("Exactly zero series should be returned", series.length == 0);
-  }
-  
-  @Test
-  public void testAccessControlManagment() throws Exception {
+  public void testACLManagment() throws Exception {
     // sample access control list
     AccessControlList accessControlList = new AccessControlList();
     List<AccessControlEntry> acl = accessControlList.getEntries();
     acl.add(new AccessControlEntry("admin", "delete", true));
     
-    seriesDatabase.storeSeries(testCatalog);
-    String seriesID = testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER);
-    seriesDatabase.storeSeriesAccessControl(seriesID, accessControlList);
-    
-    Series[] seriesList = seriesDatabase.getAllSeries();
-    Assert.assertEquals(seriesList.length, 1);
-    AccessControlList retrievedACL = seriesList[0].getAccessControl();
-    Assert.assertNotNull(retrievedACL);
-    acl = retrievedACL.getEntries();
-    Assert.assertEquals(acl.size(), 1);
-    Assert.assertEquals(acl.get(0).getRole(), "admin");
-    
     try {
-      seriesDatabase.storeSeriesAccessControl("failid", accessControlList);
-      Assert.fail("Should fail when adding ACL to nonexistent series");
+      seriesService.updateAccessControl("failid", accessControlList);
+      Assert.fail("Should fail when adding ACL to nonexistent series,");
     } catch (NotFoundException e) {
       // expected
     }
+    
+    seriesService.updateSeries(testCatalog);
+    seriesService.updateAccessControl(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER), accessControlList);
+    AccessControlList retrievedACL = seriesService.getSeriesAccessControl(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+    Assert.assertNotNull(retrievedACL);
+    acl = retrievedACL.getEntries();
+    Assert.assertEquals(acl.size(), 1);
+    Assert.assertEquals("admin", acl.get(0).getRole());
+    
+    acl = accessControlList.getEntries();
+    acl.clear();
+    acl.add(new AccessControlEntry("student", "read", true));
+    seriesService.updateAccessControl(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER), accessControlList);
+    retrievedACL = seriesService.getSeriesAccessControl(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+    Assert.assertNotNull(retrievedACL);
+    acl = retrievedACL.getEntries();
+    Assert.assertEquals(acl.size(), 1);
+    Assert.assertEquals("student", acl.get(0).getRole());
   }
 
   /**
@@ -153,6 +184,10 @@ public class SeriesServicePersistenceTest {
     seriesDatabase.deactivate(null);
     pooledDataSource.close();
     FileUtils.forceDelete(new File(storage));
+    seriesDatabase = null;
+    index.deactivate();
+    FileUtils.deleteDirectory(new File(root));
+    index = null;
   }
 
 }

@@ -258,7 +258,7 @@
   <!-- Series fields -->
   
    <field name="xml" type="text" indexed="false" stored="true" multiValued="false"/>
-   
+   <field name="access_control" type="text" indexed="false" stored="true" multiValued="false"/>
   <!-- Sort fields -->
   
    <field name="dc_title_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>

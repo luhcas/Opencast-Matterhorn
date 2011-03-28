@@ -18,6 +18,9 @@ package org.opencastproject.series.impl.persistence;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AccessControlParser;
+import org.opencastproject.series.impl.Series;
 import org.opencastproject.series.impl.SeriesServiceDatabase;
 import org.opencastproject.series.impl.SeriesServiceDatabaseException;
 import org.opencastproject.util.NotFoundException;
@@ -31,6 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +54,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
 
   /** Persistence provider set by OSGi */
   protected PersistenceProvider persistenceProvider;
-  
+
   /** Persistence properties used to create {@link EntityManagerFactory} */
   protected Map<String, Object> persistenceProperties;
 
@@ -128,6 +132,20 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     return writer.toString();
   }
 
+  /**
+   * Parses Dublin core stored as string.
+   * 
+   * @param dcXML
+   *          string representation of Dublin core
+   * @return parsed {@link DublinCoreCatalog}
+   * @throws IOException
+   *           if parsing fails
+   */
+  private DublinCoreCatalog parseDublinCore(String dcXML) throws IOException {
+    DublinCoreCatalog dc = dcService.load(new ByteArrayInputStream(dcXML.getBytes("UTF-8")));
+    return dc;
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -145,10 +163,9 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       }
       em.remove(entity);
       tx.commit();
+    } catch (NotFoundException e) {
+      throw e;
     } catch (Exception e) {
-      if (e instanceof NotFoundException) {
-        throw (NotFoundException) e;
-      }
       logger.error("Could not delete series: {}", e.getMessage());
       throw new SeriesServiceDatabaseException(e);
     } finally {
@@ -163,7 +180,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public DublinCoreCatalog[] getAllSeries() throws SeriesServiceDatabaseException {
+  public Series[] getAllSeries() throws SeriesServiceDatabaseException {
     EntityManager em = emf.createEntityManager();
     Query query = em.createQuery("SELECT e FROM SeriesEntity e");
     List<SeriesEntity> seriesEntities = null;
@@ -175,18 +192,21 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     } finally {
       em.close();
     }
-    DublinCoreCatalog[] catalogArray = new DublinCoreCatalog[seriesEntities.size()];
-    for (int i = 0; i < seriesEntities.size(); i++) {
-      try {
-        String dcXML = seriesEntities.get(i).getDublinCoreXML();
-        DublinCoreCatalog dc = dcService.load(new ByteArrayInputStream(dcXML.getBytes("UTF-8")));
-        catalogArray[i] = dc;
-      } catch (Exception e) {
-        logger.error("Deserialization failed: {}", e.getMessage());
-        throw new SeriesServiceDatabaseException(e);
+    List<Series> seriesList = new LinkedList<Series>();
+    try {
+      for (SeriesEntity entity : seriesEntities) {
+        DublinCoreCatalog dc = parseDublinCore(entity.getDublinCoreXML());
+        AccessControlList ac = null;
+        if (entity.getAccessControl() != null) {
+          ac = AccessControlParser.parseAcl(entity.getAccessControl());
+        }
+        seriesList.add(new Series(dc, ac));
       }
+    } catch (Exception e) {
+      logger.error("Could not parse series entity: {}", e.getMessage());
+      throw new SeriesServiceDatabaseException(e);
     }
-    return catalogArray;
+    return seriesList.toArray(new Series[seriesList.size()]);
   }
 
   /*
@@ -231,6 +251,48 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       em.close();
     }
 
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.series.impl.SeriesServiceDatabase#storeSeriesAccessControl(java.lang.String,
+   * org.opencastproject.security.api.AccessControlList)
+   */
+  @Override
+  public void storeSeriesAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
+          SeriesServiceDatabaseException {
+    if (accessControl == null) {
+      logger.warn("Access control parameter is null: skipping update for series '{}'", seriesID);
+      return;
+    }
+
+    String serializedAC;
+    try {
+      serializedAC = AccessControlParser.toXml(accessControl);
+    } catch (Exception e) {
+      logger.error("Could not serialize access control parameter: {}", e.getMessage());
+      throw new SeriesServiceDatabaseException(e);
+    }
+    EntityManager em = emf.createEntityManager();
+    try {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      SeriesEntity entity = em.find(SeriesEntity.class, seriesID);
+      if (entity == null) {
+        throw new NotFoundException("Series with ID " + seriesID + " does not exist.");
+      }
+      entity.setAccessControl(serializedAC);
+      em.merge(entity);
+      tx.commit();
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("Could not update series: {}", e.getMessage());
+      throw new SeriesServiceDatabaseException(e);
+    } finally {
+      em.close();
+    }
   }
 
 }

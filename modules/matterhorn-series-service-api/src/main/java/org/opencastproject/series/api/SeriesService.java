@@ -16,6 +16,8 @@
 package org.opencastproject.series.api;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.util.NotFoundException;
 
 /**
@@ -33,6 +35,20 @@ public interface SeriesService {
    *           if adding or updating fails
    */
   void updateSeries(DublinCoreCatalog dc) throws SeriesException;
+
+  /**
+   * Updates access control rules for specified series.
+   * 
+   * @param seriesID
+   *          series to be updated
+   * @param accessControl
+   *          {@link AccessControlList} defining access control rules
+   * @throws NotFoundException
+   *           if series with given ID cannot be found
+   * @throws SeriesException
+   *           if exception occurred
+   */
+  void updateAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException, SeriesException;
 
   /**
    * Removes series
@@ -58,13 +74,26 @@ public interface SeriesService {
   DublinCoreCatalog getSeries(String seriesID) throws SeriesException, NotFoundException;
 
   /**
+   * Returns access control rules for series with given ID.
+   * 
+   * @param seriesID
+   *          ID of the series for which access control rules will be retrieved
+   * @return {@link AccessControlList} defining access control rules
+   * @throws NotFoundException
+   *           if series with given ID cannot be found
+   * @throws SeriesException
+   *           if exception occurred
+   */
+  AccessControlList getSeriesAccessControl(String seriesID) throws NotFoundException, SeriesException;
+
+  /**
    * Search over series
    * 
    * @param query
    *          {@link SeriesQuery} representing query
-   * @return {@link SeriesResult} object that stores result of a query
+   * @return List of all matching series
    * @throws SeriesException
    *           if query could not be performed
    */
-  SeriesResult getSeries(SeriesQuery query) throws SeriesException;
+  DublinCoreCatalogList getSeries(SeriesQuery query) throws SeriesException;
 }

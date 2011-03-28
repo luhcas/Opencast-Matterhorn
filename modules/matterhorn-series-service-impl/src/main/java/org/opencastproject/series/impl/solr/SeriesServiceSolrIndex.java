@@ -24,12 +24,10 @@ import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.InstantTemporal;
 import org.opencastproject.metadata.dublincore.PeriodTemporal;
 import org.opencastproject.metadata.dublincore.Temporal;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AccessControlParser;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesQuery;
-import org.opencastproject.series.api.SeriesResult;
-import org.opencastproject.series.api.SeriesResultImpl;
-import org.opencastproject.series.api.SeriesResultItem;
-import org.opencastproject.series.api.SeriesResultItemImpl;
 import org.opencastproject.series.impl.SeriesServiceDatabaseException;
 import org.opencastproject.series.impl.SeriesServiceIndex;
 import org.opencastproject.solr.SolrServerFactory;
@@ -61,7 +59,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -268,6 +265,46 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
       }
     } catch (Exception e) {
       throw new SeriesServiceDatabaseException("Unable to index series", e);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.series.impl.SeriesServiceIndex#index(java.lang.String,
+   * org.opencastproject.security.api.AccessControlList)
+   */
+  @Override
+  public void index(String seriesId, AccessControlList accessControl) throws NotFoundException,
+          SeriesServiceDatabaseException {
+    if (accessControl == null) {
+      logger.warn("Access control parameter is null: skipping update for series '{}'", seriesId);
+      return;
+    }
+    SolrDocument seriesDoc = getSolrDocumentByID(seriesId);
+    if (seriesDoc == null) {
+      logger.info("No series with ID " + seriesId + " found.");
+      throw new NotFoundException("Series with ID " + seriesId + " was not found.");
+    }
+    String serializedAC;
+    try {
+      serializedAC = AccessControlParser.toXml(accessControl);
+    } catch (Exception e) {
+      logger.error("Could not parse access control parameter: {}", e.getMessage());
+      throw new SeriesServiceDatabaseException(e);
+    }
+    
+    SolrInputDocument inputDoc = ClientUtils.toSolrInputDocument(seriesDoc);
+    inputDoc.setField(SolrFields.ACCESS_CONTROL_KEY, serializedAC);
+    
+    try {
+      synchronized (solrServer) {
+        solrServer.add(inputDoc);
+        solrServer.commit();
+      }
+    } catch (Exception e) {
+      logger.error("Unable to index series: {}", e.getMessage());
+      throw new SeriesServiceDatabaseException(e);
     }
   }
 
@@ -501,46 +538,46 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    */
   protected String getSortField(SeriesQuery.Sort sort) {
     switch (sort) {
-      case ABSTRACT:
-        return SolrFields.ABSTRACT_KEY;
-      case ACCESS:
-        return SolrFields.ACCESS_RIGHTS_KEY;
-      case AVAILABLE_FROM:
-        return SolrFields.AVAILABLE_FROM_KEY;
-      case AVAILABLE_TO:
-        return SolrFields.AVAILABLE_TO_KEY;
-      case CONTRIBUTOR:
-        return SolrFields.CONTRIBUTOR_KEY;
-      case CREATED:
-        return SolrFields.CREATED_KEY;
-      case CREATOR:
-        return SolrFields.CREATOR_KEY;
-      case DESCRIPTION:
-        return SolrFields.DESCRIPTION_KEY;
-      case IS_PART_OF:
-        return SolrFields.IS_PART_OF_KEY;
-      case LANGUAGE:
-        return SolrFields.LANGUAGE_KEY;
-      case LICENCE:
-        return SolrFields.LICENSE_KEY;
-      case PUBLISHER:
-        return SolrFields.PUBLISHER_KEY;
-      case REPLACES:
-        return SolrFields.REPLACES_KEY;
-      case RIGHTS_HOLDER:
-        return SolrFields.RIGHTS_HOLDER_KEY;
-      case SPATIAL:
-        return SolrFields.SPATIAL_KEY;
-      case SUBJECT:
-        return SolrFields.SUBJECT_KEY;
-      case TEMPORAL:
-        return SolrFields.TEMPORAL_KEY;
-      case TITLE:
-        return SolrFields.TITLE_KEY;
-      case TYPE:
-        return SolrFields.TYPE_KEY;
-      default:
-        throw new IllegalArgumentException("No mapping found between sort field and index");
+    case ABSTRACT:
+      return SolrFields.ABSTRACT_KEY;
+    case ACCESS:
+      return SolrFields.ACCESS_RIGHTS_KEY;
+    case AVAILABLE_FROM:
+      return SolrFields.AVAILABLE_FROM_KEY;
+    case AVAILABLE_TO:
+      return SolrFields.AVAILABLE_TO_KEY;
+    case CONTRIBUTOR:
+      return SolrFields.CONTRIBUTOR_KEY;
+    case CREATED:
+      return SolrFields.CREATED_KEY;
+    case CREATOR:
+      return SolrFields.CREATOR_KEY;
+    case DESCRIPTION:
+      return SolrFields.DESCRIPTION_KEY;
+    case IS_PART_OF:
+      return SolrFields.IS_PART_OF_KEY;
+    case LANGUAGE:
+      return SolrFields.LANGUAGE_KEY;
+    case LICENCE:
+      return SolrFields.LICENSE_KEY;
+    case PUBLISHER:
+      return SolrFields.PUBLISHER_KEY;
+    case REPLACES:
+      return SolrFields.REPLACES_KEY;
+    case RIGHTS_HOLDER:
+      return SolrFields.RIGHTS_HOLDER_KEY;
+    case SPATIAL:
+      return SolrFields.SPATIAL_KEY;
+    case SUBJECT:
+      return SolrFields.SUBJECT_KEY;
+    case TEMPORAL:
+      return SolrFields.TEMPORAL_KEY;
+    case TITLE:
+      return SolrFields.TITLE_KEY;
+    case TYPE:
+      return SolrFields.TYPE_KEY;
+    default:
+      throw new IllegalArgumentException("No mapping found between sort field and index");
     }
   }
 
@@ -550,7 +587,7 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    * @see org.opencastproject.workflow.SeriesServiceIndex.WorkflowServiceIndex#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowQuery)
    */
   @Override
-  public SeriesResult search(SeriesQuery query) throws SeriesServiceDatabaseException {
+  public List<DublinCoreCatalog> search(SeriesQuery query) throws SeriesServiceDatabaseException {
     int count = query.getCount() > 0 ? (int) query.getCount() : 20; // default to 20 items if not specified
     int startPage = query.getStartPage() > 0 ? (int) query.getStartPage() : 0; // default to page zero
 
@@ -570,62 +607,24 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
       solrQuery.addSortField(getSortField(SeriesQuery.Sort.CREATED) + "_sort", SolrQuery.ORDER.desc);
     }
 
-    SeriesResultImpl result = null;
+    List<DublinCoreCatalog> result;
 
     try {
-      long time = System.currentTimeMillis();
       QueryResponse response = solrServer.query(solrQuery);
       SolrDocumentList items = response.getResults();
-      time = System.currentTimeMillis() - time;
 
-      result = new SeriesResultImpl();
-      result.setSearchTime(time);
-      result.setStartPage(startPage);
-      result.setPageSize(count);
-      result.setNumberOfItems(items.getNumFound());
+      result = new LinkedList<DublinCoreCatalog>();
 
       // Iterate through the results
       for (SolrDocument doc : items) {
-        SeriesResultItem item = createResultItem(doc);
-        result.addItem(item);
+        DublinCoreCatalog item = parseDublinCore((String)doc.get(SolrFields.XML_KEY));
+        result.add(item);
       }
     } catch (Exception e) {
+      logger.error("Could not retrieve results: {}", e.getMessage());
       throw new SeriesServiceDatabaseException(e);
     }
     return result;
-  }
-
-  /**
-   * Creates series result item out of solr document.
-   * 
-   * @param doc
-   *          {@link SolrDocument} to be parsed
-   * @return created {@link SeriesResultItem}
-   */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
-  protected SeriesResultItem createResultItem(SolrDocument doc) {
-    SeriesResultItemImpl item = new SeriesResultItemImpl();
-    item.setAbstract((Collection) doc.getFieldValues(SolrFields.ABSTRACT_KEY));
-    item.setAccessRights((Collection) doc.getFieldValues(SolrFields.ACCESS_RIGHTS_KEY));
-    item.setAvailableFrom((Date) doc.get(SolrFields.AVAILABLE_FROM_KEY));
-    item.setAvailableTo((Date) doc.get(SolrFields.AVAILABLE_TO_KEY));
-    item.setContributor((List) doc.getFieldValues(SolrFields.CONTRIBUTOR_KEY));
-    item.setCreated((Date) doc.get(SolrFields.CREATED_KEY));
-    item.setCreator((Collection) doc.getFieldValues(SolrFields.CREATOR_KEY));
-    item.setDescription((Collection) doc.getFieldValues(SolrFields.DESCRIPTION_KEY));
-    item.setId((String) doc.get(SolrFields.ID_KEY));
-    item.setIsPartOf((Collection) doc.getFieldValues(SolrFields.IS_PART_OF_KEY));
-    item.setLanguage((Collection) doc.getFieldValues(SolrFields.LANGUAGE_KEY));
-    item.setLicense((Collection) doc.getFieldValues(SolrFields.LICENSE_KEY));
-    item.setPublisher((Collection) doc.getFieldValues(SolrFields.PUBLISHER_KEY));
-    item.setReplaces((Collection) doc.getFieldValues(SolrFields.REPLACES_KEY));
-    item.setRightsHolder((Collection) doc.getFieldValues(SolrFields.RIGHTS_HOLDER_KEY));
-    item.setSpatial((Collection) doc.getFieldValues(SolrFields.SPATIAL_KEY));
-    item.setSubject((Collection) doc.getFieldValues(SolrFields.SUBJECT_KEY));
-    item.setTemporal((Collection) doc.getFieldValues(SolrFields.TEMPORAL_KEY));
-    item.setTitle((String) doc.get(SolrFields.TITLE_KEY));
-    item.setType((Collection) doc.getFieldValues(SolrFields.TYPE_KEY));
-    return item;
   }
 
   /**
@@ -651,21 +650,13 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    * @see org.opencastproject.series.impl.SeriesServiceIndex#get(java.lang.String)
    */
   @Override
-  public DublinCoreCatalog get(String seriesId) throws SeriesServiceDatabaseException, NotFoundException {
-    String solrQueryString = SolrFields.ID_KEY + ":" + ClientUtils.escapeQueryChars(seriesId);
-    SolrQuery q = new SolrQuery(solrQueryString);
-    QueryResponse response;
-    try {
-      response = solrServer.query(q);
-    } catch (SolrServerException e) {
-      logger.error("Could not perform series retrieval: {}", e);
-      throw new SeriesServiceDatabaseException(e);
-    }
-    if (response.getResults().isEmpty()) {
+  public DublinCoreCatalog getDublinCore(String seriesId) throws SeriesServiceDatabaseException, NotFoundException {
+    SolrDocument result = getSolrDocumentByID(seriesId);
+    if (result == null) {
       logger.info("No series exists with ID {}", seriesId);
       throw new NotFoundException("Series with ID " + seriesId + " does not exist");
     } else {
-      String dcXML = (String) response.getResults().get(0).get(SolrFields.XML_KEY);
+      String dcXML = (String) result.get(SolrFields.XML_KEY);
       DublinCoreCatalog dc;
       try {
         dc = parseDublinCore(dcXML);
@@ -674,6 +665,59 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
         throw new SeriesServiceDatabaseException(e);
       }
       return dc;
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.series.impl.SeriesServiceIndex#getAccessControl(java.lang.String)
+   */
+  @Override
+  public AccessControlList getAccessControl(String seriesID) throws NotFoundException, SeriesServiceDatabaseException {
+    SolrDocument seriesDoc = getSolrDocumentByID(seriesID);
+    if (seriesDoc == null) {
+      logger.info("No series exists with ID '{}'", seriesID);
+      throw new NotFoundException("No series with ID " + seriesID + " found.");
+    }
+    String serializedAC = (String) seriesDoc.get(SolrFields.ACCESS_CONTROL_KEY);
+    AccessControlList accessControl;
+    if (serializedAC == null) {
+      accessControl = new AccessControlList();
+    } else {
+      try {
+        accessControl = AccessControlParser.parseAcl(serializedAC);
+      } catch (Exception e) {
+        logger.error("Could not parse access control: {}", e.getMessage());
+        throw new SeriesServiceDatabaseException(e);
+      }
+    }
+    return accessControl;
+  }
+
+  /**
+   * Returns SolrDocument corresponding to given ID or null if such document does not exist.
+   * 
+   * @param id
+   *          SolrDocument ID
+   * @return corresponding document
+   * @throws SeriesServiceDatabaseException
+   *           if exception occurred
+   */
+  protected SolrDocument getSolrDocumentByID(String id) throws SeriesServiceDatabaseException {
+    String solrQueryString = SolrFields.ID_KEY + ":" + ClientUtils.escapeQueryChars(id);
+    SolrQuery q = new SolrQuery(solrQueryString);
+    QueryResponse response;
+    try {
+      response = solrServer.query(q);
+      if (response.getResults().isEmpty()) {
+        return null;
+      } else {
+        return response.getResults().get(0);
+      }
+    } catch (SolrServerException e) {
+      logger.error("Could not perform series retrieval: {}", e);
+      throw new SeriesServiceDatabaseException(e);
     }
   }
 

@@ -16,6 +16,7 @@
 package org.opencastproject.series.impl;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.util.NotFoundException;
 
 /**
@@ -33,6 +34,21 @@ public interface SeriesServiceDatabase {
    *           if exception occurs
    */
   void storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException;
+
+  /**
+   * Store access control associated with specified series.
+   * 
+   * @param seriesID
+   *          ID of series to associate access control with
+   * @param accessControl
+   *          {@link AccessControlList} representing access control rules for specified series
+   * @throws NotFoundException
+   *           if series with specified ID does not exist
+   * @throws SeriesServiceDatabaseException
+   *           if exception occurred
+   */
+  void storeSeriesAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
+          SeriesServiceDatabaseException;
 
   /**
    * Removes series from persistent storage.
@@ -53,5 +69,5 @@ public interface SeriesServiceDatabase {
    * @throws SeriesServiceDatabaseException
    *           if exception occurs
    */
-  DublinCoreCatalog[] getAllSeries() throws SeriesServiceDatabaseException;
+  Series[] getAllSeries() throws SeriesServiceDatabaseException;
 }

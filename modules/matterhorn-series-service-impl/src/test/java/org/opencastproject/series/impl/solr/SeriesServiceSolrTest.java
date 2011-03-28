@@ -18,9 +18,10 @@ package org.opencastproject.series.impl.solr;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.series.api.SeriesQuery;
-import org.opencastproject.series.api.SeriesResult;
-import org.opencastproject.series.api.SeriesResultItem;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 
 import junit.framework.Assert;
@@ -34,6 +35,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * Tests indexing: indexing, removing, retrieving, merging and searching.
@@ -88,7 +90,7 @@ public class SeriesServiceSolrTest {
     index.index(secondCatalog);
     Assert.assertTrue("Index should contain one instance", index.count() == 1);
 
-    DublinCoreCatalog returnedCatalog = index.get(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+    DublinCoreCatalog returnedCatalog = index.getDublinCore(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
     Assert.assertTrue("Unexpected Dublin Core", returnedCatalog.getFirst(DublinCore.PROPERTY_TITLE)
             .equals("Test Title"));
   }
@@ -109,16 +111,16 @@ public class SeriesServiceSolrTest {
     index.index(secondCatalog);
 
     SeriesQuery q = new SeriesQuery().setSeriesTitle("cat");
-    SeriesResult result = index.search(q);
-    Assert.assertTrue("Only one title contains 'cat'", result.getSize() == 1);
+    List<DublinCoreCatalog> result = index.search(q);
+    Assert.assertTrue("Only one title contains 'cat'", result.size() == 1);
 
     q = new SeriesQuery().setSeriesTitle("dog");
     result = index.search(q);
-    Assert.assertTrue("Both titles contains 'dog'", result.getSize() == 2);
+    Assert.assertTrue("Both titles contains 'dog'", result.size() == 2);
 
     q = new SeriesQuery().setText("cat");
     result = index.search(q);
-    Assert.assertTrue("Both Dublin Cores contains 'cat'", result.getSize() == 2);
+    Assert.assertTrue("Both Dublin Cores contains 'cat'", result.size() == 2);
   }
 
   @Test
@@ -145,25 +147,33 @@ public class SeriesServiceSolrTest {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     SeriesQuery q = new SeriesQuery().setCreatedFrom(sdf.parse("2007-05-02")).setCreatedTo(sdf.parse("2007-05-06"));
-    SeriesResult result = index.search(q);
-    Assert.assertTrue("Two series satisfy time range", result.getSize() == 2);
+    List<DublinCoreCatalog> result = index.search(q);
+    Assert.assertTrue("Two series satisfy time range", result.size() == 2);
   }
-
+  
   @Test
-  public void testMultivaluedFields() throws Exception {
-    DublinCoreCatalog catalog = dcService.newInstance();
-    catalog.add(DublinCore.PROPERTY_IDENTIFIER, "10.0000/1");
-    catalog.add(DublinCore.PROPERTY_TITLE, "Cats and Dogs");
-    catalog.add(DublinCore.PROPERTY_CONTRIBUTOR, "John Smith");
-    catalog.add(DublinCore.PROPERTY_CONTRIBUTOR, "John Doe");
-    Assert.assertTrue(catalog.get(DublinCore.PROPERTY_CONTRIBUTOR).size() == 2);
-
-    index.index(catalog);
-
-    SeriesQuery q = new SeriesQuery().setSeriesId(catalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
-    SeriesResult result = index.search(q);
-    SeriesResultItem resultingCatalog = result.getItems()[0];
-    Assert.assertTrue(resultingCatalog.getContributor().size() == 2);
+  public void testAccessControlManagment() throws Exception {
+    // sample access control list
+    AccessControlList accessControlList = new AccessControlList();
+    List<AccessControlEntry> acl = accessControlList.getEntries();
+    acl.add(new AccessControlEntry("admin", "delete", true));
+    
+    index.index(testCatalog);
+    String seriesID = testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER);
+    index.index(seriesID, accessControlList);
+    
+    AccessControlList retrievedACL = index.getAccessControl(seriesID);
+    Assert.assertNotNull(retrievedACL);
+    acl = retrievedACL.getEntries();
+    Assert.assertEquals(acl.size(), 1);
+    Assert.assertEquals(acl.get(0).getRole(), "admin");
+    
+    try {
+      index.index("failid", accessControlList);
+      Assert.fail("Should fail when indexing ACL to nonexistent series");
+    } catch (NotFoundException e) {
+      // expected
+    }
   }
 
   /**

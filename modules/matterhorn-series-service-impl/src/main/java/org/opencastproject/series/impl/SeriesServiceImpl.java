@@ -15,16 +15,16 @@
  */
 package org.opencastproject.series.impl;
 
+import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesQuery;
-import org.opencastproject.series.api.SeriesResult;
 import org.opencastproject.series.api.SeriesService;
-import org.opencastproject.series.impl.solr.SeriesServiceSolrIndex;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.PathSupport;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.ServiceException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -89,9 +90,6 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     logger.info("Activating Series Service");
 
     if (cc == null) {
-      this.index = new SeriesServiceSolrIndex(PathSupport.concat(System.getProperty("java.io.tmpdir"), "series"));
-      ((SeriesServiceSolrIndex)index).setDublinCoreService(new DublinCoreCatalogService());
-      this.index.activate();
       this.synchronousIndexing = true;
     } else {
       Object syncIndexingConfig = cc.getProperties().get("synchronousIndexing");
@@ -114,12 +112,16 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     }
     if (instancesInSolr == 0L) {
       try {
-        DublinCoreCatalog[] databaseSeries = this.persistence.getAllSeries();
+        Series[] databaseSeries = persistence.getAllSeries();
         if (databaseSeries.length != 0) {
           logger.info("The series index is empty. Populating it now with {} series",
                   Integer.valueOf(databaseSeries.length));
-          for (DublinCoreCatalog dc : databaseSeries) {
-            this.index.index(dc);
+          for (Series series : databaseSeries) {
+            index.index(series.getSeriesCatalog());
+            if (series.getAccessControl() != null) {
+              String id = series.getSeriesCatalog().getFirst(DublinCore.PROPERTY_IDENTIFIER);
+              index.index(id, series.getAccessControl());
+            }
           }
           logger.info("Finished populating series search index");
         }
@@ -135,6 +137,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
+  @Override
   public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
   }
 
@@ -145,6 +148,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.metadata.dublincore.DublinCoreCatalog
    * )
    */
+  @Override
   public void updateSeries(final DublinCoreCatalog dc) throws SeriesException {
     try {
       this.persistence.storeSeries(dc);
@@ -165,7 +169,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
           try {
             index.index(dc);
           } catch (SeriesServiceDatabaseException e) {
-            SeriesServiceImpl.logger.warn("Unable to index {}: {}", dc, e);
+            SeriesServiceImpl.logger.warn("Unable to index {}: {}", dc, e.getMessage());
           }
         }
       });
@@ -173,9 +177,53 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   /*
    * (non-Javadoc)
+   * @see org.opencastproject.series.api.SeriesService#updateAccessControl(java.lang.String, org.opencastproject.security.api.AccessControlList)
+   */
+  @Override
+  public void updateAccessControl(final String seriesID, final AccessControlList accessControl) throws NotFoundException,
+          SeriesException {
+    if (StringUtils.isEmpty(seriesID)) {
+      throw new IllegalArgumentException("Series ID parameter must not be null or empty.");
+    }
+    if (accessControl == null) {
+      logger.warn("Trying to update series {} with <null> access control rules. Update will be skipped.", seriesID);
+      return;
+    }
+    
+    // try updating it in persistence first - not found is thrown if it doesn't exist
+    try {
+      persistence.storeSeriesAccessControl(seriesID, accessControl);
+    } catch (SeriesServiceDatabaseException e) {
+      logger.error("Could not update series {} with access control rules: {}", seriesID, e.getMessage());
+      throw new SeriesException(e);
+    }
+    
+    if (synchronousIndexing) {
+      try {
+        index.index(seriesID, accessControl);
+      } catch (Exception e) {
+        logger.warn("Could not update series {} with access control rules: {}", seriesID, e.getMessage());
+      }
+    } else {
+      indexingExecutor.submit(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            index.index(seriesID, accessControl);
+          } catch (Exception e) {
+            logger.warn("Could not update series {} with access control rules: {}", seriesID, e.getMessage());
+          }
+        }
+      });
+    }
+  }
+
+  /*
+   * (non-Javadoc)
    * 
    * @see org.opencastproject.series.api.SeriesService#deleteSeries(java.lang.String)
    */
+  @Override
   public void deleteSeries(final String seriesID) throws SeriesException, NotFoundException {
     try {
       this.persistence.deleteSeries(seriesID);
@@ -188,7 +236,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       try {
         this.index.delete(seriesID);
       } catch (SeriesServiceDatabaseException e) {
-        logger.warn("Unable to delete series with id {}: {}", seriesID, e);
+        logger.warn("Unable to delete series with id {}: {}", seriesID, e.getMessage());
       }
     else
       this.indexingExecutor.submit(new Runnable() {
@@ -196,7 +244,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
           try {
             index.delete(seriesID);
           } catch (SeriesServiceDatabaseException e) {
-            SeriesServiceImpl.logger.warn("Unable to delete series with id {}: {}", seriesID, e);
+            SeriesServiceImpl.logger.warn("Unable to delete series with id {}: {}", seriesID, e.getMessage());
           }
         }
       });
@@ -207,11 +255,15 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * 
    * @see org.opencastproject.series.api.SeriesService#getSeries(org.opencastproject.series.api.SeriesQuery)
    */
-  public SeriesResult getSeries(SeriesQuery query) throws SeriesException {
+  @Override
+  public DublinCoreCatalogList getSeries(SeriesQuery query) throws SeriesException {
     try {
-      return this.index.search(query);
+      List<DublinCoreCatalog> result = index.search(query);
+      DublinCoreCatalogList dcList = new DublinCoreCatalogList();
+      dcList.setCatalogList(result);
+      return dcList;
     } catch (SeriesServiceDatabaseException e) {
-      logger.error("Failed to execute search query: {}", e);
+      logger.error("Failed to execute search query: {}", e.getMessage());
       throw new SeriesException(e);
     }
   }
@@ -221,11 +273,26 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * 
    * @see org.opencastproject.series.api.SeriesService#getSeries(java.lang.String)
    */
+  @Override
   public DublinCoreCatalog getSeries(String seriesID) throws SeriesException, NotFoundException {
     try {
-      return this.index.get(seriesID);
+      return this.index.getDublinCore(seriesID);
     } catch (SeriesServiceDatabaseException e) {
-      logger.error("Exception occured while retrieving series: {}", e);
+      logger.error("Exception occured while retrieving series {}: {}", seriesID, e.getMessage());
+      throw new SeriesException(e);
+    }
+  }
+  
+  /*
+   * (non-Javadoc)
+   * @see org.opencastproject.series.api.SeriesService#getSeriesAccessControl(java.lang.String)
+   */
+  @Override
+  public AccessControlList getSeriesAccessControl(String seriesID) throws NotFoundException, SeriesException {
+    try {
+      return index.getAccessControl(seriesID);
+    } catch (SeriesServiceDatabaseException e) {
+      logger.error("Exception occurred while retrieving access control rules for series {}: {}", seriesID, e.getMessage());
       throw new SeriesException(e);
     }
   }

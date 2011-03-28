@@ -16,9 +16,11 @@
 package org.opencastproject.series.impl;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.series.api.SeriesQuery;
-import org.opencastproject.series.api.SeriesResult;
 import org.opencastproject.util.NotFoundException;
+
+import java.util.List;
 
 /**
  * Defines methods for indexing, retrieving and searching through index.
@@ -46,6 +48,20 @@ public interface SeriesServiceIndex {
   void index(DublinCoreCatalog dublinCore) throws SeriesServiceDatabaseException;
 
   /**
+   * Index access control for existing series entry.
+   * 
+   * @param seriesId
+   *          ID of series for which access control will be associated with
+   * @param accessControl
+   *          {@link AccessControlList} defining access control rules
+   * @throws NotFoundException
+   *           if series with specified ID does not exist
+   * @throws SeriesServiceDatabaseException
+   *           if exception occurred
+   */
+  void index(String seriesId, AccessControlList accessControl) throws NotFoundException, SeriesServiceDatabaseException;
+
+  /**
    * Removes series from index.
    * 
    * @param seriesID
@@ -66,18 +82,31 @@ public interface SeriesServiceIndex {
    * @throws NotFoundException
    *           if no such series exists
    */
-  DublinCoreCatalog get(String seriesID) throws SeriesServiceDatabaseException, NotFoundException;
+  DublinCoreCatalog getDublinCore(String seriesID) throws SeriesServiceDatabaseException, NotFoundException;
+
+  /**
+   * Retrieves access control for series with specified ID.
+   * 
+   * @param seriesID
+   *          ID of the series for which access control will be retrieved
+   * @return {@link AccessControlList} for series with specified ID
+   * @throws NotFoundException
+   *           if no such series exists
+   * @throws SeriesServiceDatabaseException
+   *           if exception occurred
+   */
+  AccessControlList getAccessControl(String seriesID) throws NotFoundException, SeriesServiceDatabaseException;
 
   /**
    * Search over indexed series with query.
    * 
    * @param query
    *          {@link SeriesQuery} object storing query parameters
-   * @return {@link SeriesResult} with matching series
+   * @return List of all matching series
    * @throws SeriesServiceDatabaseException
    *           if query cannot be executed
    */
-  SeriesResult search(SeriesQuery query) throws SeriesServiceDatabaseException;
+  List<DublinCoreCatalog> search(SeriesQuery query) throws SeriesServiceDatabaseException;
 
   /**
    * Returns number of series in search index.
