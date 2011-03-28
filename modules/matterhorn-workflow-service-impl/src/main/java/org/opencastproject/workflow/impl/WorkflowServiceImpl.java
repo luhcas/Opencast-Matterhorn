@@ -28,12 +28,17 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
+import org.opencastproject.series.api.SeriesException;
+import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
@@ -154,6 +159,12 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
 
   /** The security service */
   protected SecurityService securityService = null;
+
+  /** The authorization service */
+  protected AuthorizationService authorizationService = null;
+
+  /** The series service */
+  private SeriesService seriesService;
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
@@ -475,11 +486,26 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
     if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
       throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
 
-    // Create and configure the workflow instance
     WorkflowInstance workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, parentWorkflowId,
             properties);
     workflowInstance = updateConfiguration(workflowInstance, properties);
 
+    populateMediaPackageMetadata(mediaPackage);
+    String seriesId = workflowInstance.getMediaPackage().getSeries();
+    if (seriesId != null) {
+      // If the mediapackage contains a series, find the series ACLs and add the security information to the
+      // mediapackage
+      try {
+        AccessControlList acl = seriesService.getSeriesAccessControl(seriesId);
+        authorizationService.setAccessControl(mediaPackage, acl);
+      } catch (SeriesException e) {
+        throw new WorkflowDatabaseException(e);
+      } catch (MediaPackageException e) {
+        throw new WorkflowDatabaseException(e);
+      }
+    }
+
+    // Create and configure the workflow instance
     try {
       // Create a new job for this workflow instance
       String workflowDefinitionXml = WorkflowParser.toXml(workflowDefinition);
@@ -1477,6 +1503,26 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
+  }
+
+  /**
+   * Callback for setting the authorization service.
+   * 
+   * @param authorizationService
+   *          the authorizationService to set
+   */
+  public void setAuthorizationService(AuthorizationService authorizationService) {
+    this.authorizationService = authorizationService;
+  }
+
+  /**
+   * Callback for setting the series service
+   * 
+   * @param seriesService
+   *          the series service
+   */
+  public void setSeriesService(SeriesService seriesService) {
+    this.seriesService = seriesService;
   }
 
   /**

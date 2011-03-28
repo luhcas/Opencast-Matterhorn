@@ -18,4 +18,10 @@
     cardinality="1..1" policy="static" bind="setSecurityService" />
   <reference name="user-directory" interface="org.opencastproject.security.api.UserDirectoryService"
     cardinality="1..1" policy="static" bind="setUserDirectoryService" />
+  <reference name="security" interface="org.opencastproject.security.api.SecurityService"
+    cardinality="1..1" policy="static" bind="setSecurityService" />
+  <reference name="authorization" interface="org.opencastproject.security.api.AuthorizationService"
+    cardinality="1..1" policy="static" bind="setAuthorizationService" />
+  <reference name="series" interface="org.opencastproject.series.api.SeriesService"
+    cardinality="1..1" policy="static" bind="setSeriesService" />
 </scr:component>
