@@ -15,6 +15,8 @@
  */
 package org.opencastproject.runtimeinfo;
 
+import static org.opencastproject.rest.RestConstants.SERVICES_FILTER;
+
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
@@ -23,6 +25,9 @@ import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
@@ -41,6 +46,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -54,6 +60,7 @@ import javax.ws.rs.core.MediaType;
  * opencast project with the contents of the {@link #getRuntimeInfo()} json feed.
  */
 @Path("/")
+@RestService(name = "RuntimeInfo", title = "Runtime Information", url = "", notes = { }, abstractText = "This service provides information about the runtime environment, including the servives that are deployed and the current user context.")
 public class RuntimeInfo {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(RuntimeInfo.class);
@@ -74,7 +81,7 @@ public class RuntimeInfo {
   }
 
   protected ServiceReference[] getRestServiceReferences() throws InvalidSyntaxException {
-    return bundleContext.getAllServiceReferences(null, SERVICE_FILTER);
+    return bundleContext.getAllServiceReferences(null, SERVICES_FILTER);
   }
 
   protected ServiceReference[] getUserInterfaceServiceReferences() throws InvalidSyntaxException {
@@ -138,6 +145,7 @@ public class RuntimeInfo {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("components.json")
+  @RestQuery(name = "services", description = "List the REST services and user interfaces running on this host", pathParameters = { }, queryParameters = { }, reponses = { @RestResponse(description = "The components running on this host", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   @SuppressWarnings("unchecked")
   public String getRuntimeInfo() {
     JSONObject json = new JSONObject();
@@ -151,6 +159,7 @@ public class RuntimeInfo {
   @GET
   @Path("me.json")
   @Produces(MediaType.APPLICATION_JSON)
+  @RestQuery(name = "me", description = "Information about the curent user", pathParameters = { }, queryParameters = { }, reponses = { @RestResponse(description = "Returns information about the current user", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   @SuppressWarnings("unchecked")
   public String getMyInfo() {
     JSONObject json = new JSONObject();

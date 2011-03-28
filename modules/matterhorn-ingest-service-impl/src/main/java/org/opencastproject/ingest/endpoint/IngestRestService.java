@@ -16,6 +16,10 @@
 package org.opencastproject.ingest.endpoint;
 
 import org.opencastproject.ingest.api.IngestService;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
+import org.opencastproject.util.doc.rest.RestParameter;
 import org.opencastproject.mediapackage.EName;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
@@ -66,6 +70,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.spi.PersistenceProvider;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -82,6 +87,10 @@ import javax.ws.rs.core.Response.Status;
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
  */
 @Path("/")
+@RestService(name = "ingestservice", title = "Ingest Service", url = "", notes = {
+        "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+        "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+        "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>" }, abstractText = "This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.")
 public class IngestRestService {
 
   private static final Logger logger = LoggerFactory.getLogger(IngestRestService.class);
@@ -147,6 +156,9 @@ public class IngestRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("createMediaPackage")
+  @RestQuery(name = "createMediaPackage", description = "Create an empty media package", pathParameters = {}, queryParameters = {}, reponses = {
+          @RestResponse(description = "Returns media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response createMediaPackage() {
     MediaPackage mp;
     try {
@@ -160,6 +172,9 @@ public class IngestRestService {
 
   @POST
   @Path("discardMediaPackage")
+  @RestQuery(name = "discardMediaPackage", description = "Discard a media package", pathParameters = {}, queryParameters = { @RestParameter(defaultValue = "", description = "Given media package to be destroyed", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response discardMediaPackage(@FormParam("mediaPackage") String mpx) {
     logger.debug("discardMediaPackage(MediaPackage): {}", mpx);
     try {
@@ -175,6 +190,12 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addTrack")
+  @RestQuery(name = "addTrackURL", description = "Add a media track to a given media package using an URL", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The location of the media", isRequired = true, name = "url", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The kind of media", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackageTrack(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") String mpx) {
     try {
@@ -191,6 +212,12 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addTrack")
+  @RestQuery(name = "addTrackInputStream", description = "Add a media track to a given media package using an input stream", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The kind of media track", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, bodyParameter = @RestParameter(defaultValue = "", description = "The media track file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackageTrack(@Context HttpServletRequest request) {
     return addMediaPackageElement(request, MediaPackageElement.Type.Track);
   }
@@ -198,6 +225,12 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addCatalog")
+  @RestQuery(name = "addCatalogURL", description = "Add a metadata catalog to a given media package using an URL", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The location of the catalog", isRequired = true, name = "url", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The kind of catalog", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackageCatalog(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") String mpx) {
     try {
@@ -215,6 +248,12 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addCatalog")
+  @RestQuery(name = "addCatalogInputStream", description = "Add a metadata catalog to a given media package using an input stream", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The kind of media catalog", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, bodyParameter = @RestParameter(defaultValue = "", description = "The metadata catalog file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackageCatalog(@Context HttpServletRequest request) {
     return addMediaPackageElement(request, MediaPackageElement.Type.Catalog);
   }
@@ -222,6 +261,12 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addAttachment")
+  @RestQuery(name = "addAttachmentURL", description = "Add an attachment to a given media package using an URL", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The location of the attachment", isRequired = true, name = "url", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The kind of attachment", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackageAttachment(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") String mpx) {
     try {
@@ -238,6 +283,12 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addAttachment")
+  @RestQuery(name = "addAttachmentInputStream", description = "Add an attachment to a given media package using an input stream", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The kind of attachment", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, bodyParameter = @RestParameter(defaultValue = "", description = "The attachment file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackageAttachment(@Context HttpServletRequest request) {
     return addMediaPackageElement(request, MediaPackageElement.Type.Attachment);
   }
@@ -274,17 +325,17 @@ public class IngestRestService {
           }
         }
         switch (type) {
-        case Attachment:
-          mp = ingestService.addAttachment(in, fileName, flavor, mp);
-          break;
-        case Catalog:
-          mp = ingestService.addCatalog(in, fileName, flavor, mp);
-          break;
-        case Track:
-          mp = ingestService.addTrack(in, fileName, flavor, mp);
-          break;
-        default:
-          throw new IllegalStateException("Type must be one of track, catalog, or attachment");
+          case Attachment:
+            mp = ingestService.addAttachment(in, fileName, flavor, mp);
+            break;
+          case Catalog:
+            mp = ingestService.addCatalog(in, fileName, flavor, mp);
+            break;
+          case Track:
+            mp = ingestService.addTrack(in, fileName, flavor, mp);
+            break;
+          default:
+            throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
         // ingestService.ingest(mp);
         return Response.ok(MediaPackageParser.getAsXml(mp)).build();
@@ -300,6 +351,39 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage")
+  @RestQuery(name = "addMediaPackage", description = "Create media package from a media tracks and optional Dublin Core metadata fields", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The kind of media track", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "abstract", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "accessRights", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "available", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "contributor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "coverage", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "created", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "creator", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "date", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "description", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "extent", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "format", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "identifier", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "isPartOf", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "isReferencedBy", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "isReplacedBy", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "language", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "license", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "publisher", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "relation", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "replaces", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "rights", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "rightsHolder", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "source", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "spatial", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "subject", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "temporal", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "title", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "type", type = RestParameter.Type.STRING) }, bodyParameter = @RestParameter(defaultValue = "", description = "The media track file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackage(@Context HttpServletRequest request) {
     return addMediaPackage(request, null);
   }
@@ -308,6 +392,39 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage/{wdID}")
+  @RestQuery(name = "addMediaPackage", description = "Create media package from a media tracks and optional Dublin Core metadata fields", pathParameters = { @RestParameter(defaultValue = "", description = "Workflow definition id", isRequired = true, name = "wdID", type = RestParameter.Type.STRING) }, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The kind of media track", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "abstract", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "accessRights", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "available", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "contributor", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "coverage", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "created", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "creator", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "date", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "description", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "extent", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "format", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "identifier", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "isPartOf", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "isReferencedBy", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "isReplacedBy", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "language", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "license", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "publisher", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "relation", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "replaces", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "rights", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "rightsHolder", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "source", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "spatial", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "subject", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "temporal", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "title", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "type", type = RestParameter.Type.STRING) }, bodyParameter = @RestParameter(defaultValue = "", description = "The media track file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addMediaPackage(@Context HttpServletRequest request, @PathParam("wdID") String wdID) {
     MediaPackageElementFlavor flavor = null;
     try {
@@ -351,6 +468,11 @@ public class IngestRestService {
   @POST
   @Path("addZippedMediaPackage")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "addZippedMediaPackage", description = "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "full", description = "The workflow definition ID to run on this mediapackage", isRequired = true, name = WORKFLOW_DEFINITION_ID_PARAM, type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "", description = "The workflow instance ID to associate with this zipped mediapackage", isRequired = false, name = WORKFLOW_INSTANCE_ID_PARAM, type = RestParameter.Type.STRING) }, bodyParameter = @RestParameter(defaultValue = "", description = "The compressed (application/zip) media package file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST) }, returnDescription = "")
   public Response addZippedMediaPackage(@Context HttpServletRequest request) {
     logger.debug("addZippedMediaPackage(HttpRequest)");
     FileInputStream zipInputStream = null;
@@ -420,6 +542,9 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
+  @RestQuery(name = "ingest", description = "Ingest the completed media package into the system, retrieving all URL-referenced files", pathParameters = {}, queryParameters = { @RestParameter(defaultValue = "", description = "The ID of the given media package", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+          @RestResponse(description = "Returns the media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST) }, returnDescription = "")
   public Response ingest(@FormParam("mediaPackage") String mpx) {
     logger.debug("ingest(MediaPackage): {}", mpx);
     try {
@@ -447,6 +572,9 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest/{wdID}")
   @SuppressWarnings("unchecked")
+  @RestQuery(name = "ingest", description = "Ingest the completed media package into the system, retrieving all URL-referenced files, and starting a specified workflow", pathParameters = { @RestParameter(defaultValue = "", description = "Workflow definition id", isRequired = true, name = "wdID", type = RestParameter.Type.STRING) }, queryParameters = { @RestParameter(defaultValue = "", description = "The ID of the given media package", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+          @RestResponse(description = "Returns the media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST) }, returnDescription = "")
   public Response ingest(@PathParam("wdID") String wdID, @Context HttpServletRequest request) {
     Map<String, String[]> params = request.getParameterMap();
     HashMap<String, String> wfConfig = new HashMap<String, String>();
@@ -651,6 +779,16 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addDCCatalog")
+  @RestQuery(name = "addDCCatalog", description = "Add a dublincore episode catalog to a given media package using an url", pathParameters = {}, queryParameters = {
+          @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT),
+          @RestParameter(defaultValue = "", description = "DublinCore catalog as XML", isRequired = true, name = "dublinCore", type = RestParameter.Type.STRING), // TODO
+                                                                                                                                                                  // should
+                                                                                                                                                                  // this
+                                                                                                                                                                  // be
+                                                                                                                                                                  // TEXT??
+          @RestParameter(defaultValue = "dublincore/episode", description = "DublinCore Flavor", isRequired = false, name = "flavor", type = RestParameter.Type.STRING) }, reponses = {
+          @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response addDCCatalog(@FormParam("mediaPackage") String mp, @FormParam("dublinCore") String dc,
           @FormParam("flavor") String flavor) {
     MediaPackageElementFlavor dcFlavor = MediaPackageElements.EPISODE;
@@ -692,21 +830,21 @@ public class IngestRestService {
   @Path("getProgress/{jobId}")
   public Response getProgress(@PathParam("jobId") String jobId) throws NotFoundException {
     // try to get UploadJob, responde 404 if not successful
-      UploadJob job = null;
-        if (jobs.containsKey(jobId)) {
-          job = jobs.get(jobId);
-        } else {
+    UploadJob job = null;
+    if (jobs.containsKey(jobId)) {
+      job = jobs.get(jobId);
+    } else {
       throw new NotFoundException("Job not found");
-        }
-      /*
-       * String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:" +
-       * Long.toString(job.getBytesReceived()) + "}"; return Response.ok(json).build();
-       */
-      JSONObject out = new JSONObject();
-      out.put("total", Long.toString(job.getBytesTotal()));
-      out.put("received", Long.toString(job.getBytesReceived()));
-      return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
     }
+    /*
+     * String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:" +
+     * Long.toString(job.getBytesReceived()) + "}"; return Response.ok(json).build();
+     */
+    JSONObject out = new JSONObject();
+    out.put("total", Long.toString(job.getBytesTotal()));
+    out.put("received", Long.toString(job.getBytesReceived()));
+    return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+  }
 
   @GET
   @Produces(MediaType.TEXT_HTML)
@@ -968,16 +1106,14 @@ public class IngestRestService {
 
     // createUploadJobHtml
     /* having '.html' in the URL yields Exception in Rest Docs Utility */
-    /*endpoint = new RestEndpoint(
-            "createUploadJobHtml",
-            RestEndpoint.Method.GET,
-            "/filechooser-local.html",
-            "Creates an upload job and returns an html form ready to submit the selected file to /addTrackMonitored with the newly created upload job Id.");
-    endpoint.addFormat(new Format("HTML", "HTML form for submitting the file with the newly created upload job", null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);*/
+    /*
+     * endpoint = new RestEndpoint( "createUploadJobHtml", RestEndpoint.Method.GET, "/filechooser-local.html",
+     * "Creates an upload job and returns an html form ready to submit the selected file to /addTrackMonitored with the newly created upload job Id."
+     * ); endpoint.addFormat(new Format("HTML", "HTML form for submitting the file with the newly created upload job",
+     * null)); endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
+     * endpoint.addStatus(org.opencastproject.util.doc.Status.error(null)); endpoint.setTestForm(RestTestForm.auto());
+     * data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+     */
 
     // addTrackMonitored
     /*

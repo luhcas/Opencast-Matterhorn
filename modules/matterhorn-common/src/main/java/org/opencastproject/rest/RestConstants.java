@@ -32,6 +32,10 @@ public interface RestConstants {
   /** The ID by which this http context is known by the extended http service */
   String HTTP_CONTEXT_ID = "opencast.httpcontext";
 
+  /** The OSGI service filter that returns all registered services published as REST endpoints */
+  String SERVICES_FILTER = "(&(!(objectClass=javax.servlet.Servlet))(" + RestConstants.SERVICE_PATH_PROPERTY
+          + "=*))";
+
   /** The bundle header used to find the static resource URL alias */
   String HTTP_ALIAS = "Http-Alias";
 

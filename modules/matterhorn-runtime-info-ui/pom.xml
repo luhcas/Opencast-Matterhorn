@@ -51,6 +51,13 @@
       <artifactId>org.osgi.compendium</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>matterhorn-common</artifactId>
+    	<version>${project.version}</version>
+    	<type>bundle</type>
+    	<scope>provided</scope>
+    </dependency>    
   </dependencies>
   <build>
     <plugins>
@@ -163,9 +170,12 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Bundle-Activator>org.opencastproject.runtimeinfo.Activator</Bundle-Activator>
             <Import-Package>
                 org.opencastproject.rest,
+                org.opencastproject.util.doc.rest,
                 javax.servlet,
+                javax.servlet.http,
                 javax.ws.rs,
                 org.apache.commons.lang,
                 org.opencastproject.security.api,

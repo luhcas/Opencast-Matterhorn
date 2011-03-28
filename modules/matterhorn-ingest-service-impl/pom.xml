@@ -167,6 +167,13 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>matterhorn-common</artifactId>
+    	<version>${project.version}</version>
+    	<type>bundle</type>
+    	<scope>provided</scope>
+    </dependency>        
   </dependencies>
   <build>
     <plugins>
@@ -189,6 +196,7 @@
             </Private-Package>
             <Import-Package>
               org.opencastproject.rest;version=${project.version},
+              org.opencastproject.util.doc.rest,
               javax.persistence,
               *;resolution:=optional
             </Import-Package>
