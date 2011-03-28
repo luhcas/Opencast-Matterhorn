@@ -18,10 +18,13 @@ package org.opencastproject.dataloader;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.userdirectory.jpa.JpaUser;
 import org.opencastproject.userdirectory.jpa.JpaUserProvider;
+import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +52,21 @@ public class UserAndSeriesLoader {
   protected void activate() {
     // Load 100 series
     for (int i = 0; i < 100; i++) {
+      String seriesId = "series_" + i;
       DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
+      AccessControlList acl = new AccessControlList(new AccessControlEntry("ROLE_SERIES_" + i, "read", true));
       try {
-        dc.set(DublinCore.PROPERTY_IDENTIFIER, "series_" + i);
+        dc.set(DublinCore.PROPERTY_IDENTIFIER, seriesId);
         dc.set(DublinCore.PROPERTY_TITLE, "Series #" + i);
         dc.set(DublinCore.PROPERTY_CREATOR, "Creator #" + i);
         dc.set(DublinCore.PROPERTY_CONTRIBUTOR, "Contributor #" + i);
         seriesService.updateSeries(dc);
+        seriesService.updateAccessControl(seriesId, acl);
         logger.info("Added series {}", dc);
       } catch (SeriesException e) {
         logger.warn("Unable to create series {}", dc);
+      } catch (NotFoundException e) {
+        logger.warn("Unable to find series {}", dc);
       }
     }
 

@@ -16,6 +16,7 @@
 package org.opencastproject.security.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -40,7 +41,11 @@ public final class AccessControlList {
    * No-arg constructor needed by JAXB
    */
   public AccessControlList() {
-    entries = new ArrayList<AccessControlEntry>();
+    this.entries = new ArrayList<AccessControlEntry>();
+  }
+
+  public AccessControlList(AccessControlEntry... entries) {
+    this.entries = new ArrayList<AccessControlEntry>(Arrays.asList(entries));
   }
 
   /**
