@@ -656,30 +656,6 @@ public class SearchResultItemImpl implements SearchResultItem {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchResultItem#getReadRoles()
-   */
-  @Override
-  public String[] getReadRoles() {
-    if (readRoles == null)
-      return new String[0];
-    return readRoles;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchResultItem#getWriteRoles()
-   */
-  @Override
-  public String[] getWriteRoles() {
-    if (writeRoles == null)
-      return new String[0];
-    return writeRoles;
-  }
-
-  /**
    * @param readRoles
    *          the readRoles to set
    */

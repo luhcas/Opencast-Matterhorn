@@ -104,4 +104,19 @@ public final class AccessControlEntry {
   public int hashCode() {
     return (role + action + Boolean.toString(allow)).hashCode();
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(role).append(" is ");
+    if (!allow)
+      sb.append("not ");
+    sb.append("allowed ");
+    sb.append(action);
+    return sb.toString();
+  }
+  
 }

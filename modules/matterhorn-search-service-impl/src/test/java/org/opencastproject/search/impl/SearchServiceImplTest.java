@@ -16,11 +16,10 @@
 
 package org.opencastproject.search.impl;
 
-import static org.junit.Assert.assertTrue;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
+import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -35,7 +34,6 @@ import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.security.api.User;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workspace.api.Workspace;
@@ -75,7 +73,7 @@ public class SearchServiceImplTest {
   private SecurityService securityService = null;
   
   /** The user returned by the mocked security service */
-  private User user = null;
+  private User userWithPermissions = null;
 
   @Before
   public void setup() throws Exception {
@@ -98,7 +96,7 @@ public class SearchServiceImplTest {
     EasyMock.replay(serviceRegistry);
     service.setServiceRegistry(serviceRegistry);
 
-    user = new User("sample", new String[] { "ROLE_STUDENT", "ROLE_OTHERSTUDENT" });
+    userWithPermissions = new User("sample", new String[] { "ROLE_STUDENT", "ROLE_OTHERSTUDENT" });
 
     acl = new AccessControlList();
     AuthorizationService authorizationService = EasyMock.createNiceMock(AuthorizationService.class);
@@ -111,7 +109,7 @@ public class SearchServiceImplTest {
     EasyMock.replay(authorizationService);
 
     securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUser()).andReturn(user).anyTimes();
+    EasyMock.expect(securityService.getUser()).andReturn(userWithPermissions).anyTimes();
     service.setSecurityService(securityService);
     EasyMock.replay(securityService);
   }
@@ -156,8 +154,8 @@ public class SearchServiceImplTest {
     }
 
     // Make sure our mocked ACL has the read and write permission
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.READ_PERMISSION, true));
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.WRITE_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.READ_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.WRITE_PERMISSION, true));
 
     // Add the media package to the search index
     service.add(mediaPackage);
@@ -171,7 +169,7 @@ public class SearchServiceImplTest {
 
     acl.getEntries().clear();
     acl.getEntries().add(new AccessControlEntry("ROLE_UNKNOWN", SearchService.READ_PERMISSION, true));
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.WRITE_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.WRITE_PERMISSION, true));
 
     // Add the media package to the search index
     service.add(mediaPackage);
@@ -205,8 +203,8 @@ public class SearchServiceImplTest {
     }
 
     // Make sure our mocked ACL has the read and write permission
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.READ_PERMISSION, true));
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.WRITE_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.READ_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.WRITE_PERMISSION, true));
 
     // Add the media package to the search index
     service.add(mediaPackage);
@@ -257,8 +255,8 @@ public class SearchServiceImplTest {
     }
 
     // Make sure our mocked ACL has the read and write permission
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.READ_PERMISSION, true));
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.WRITE_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.READ_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.WRITE_PERMISSION, true));
 
     // Add the media package to the search index
     service.add(mediaPackage);
@@ -294,28 +292,32 @@ public class SearchServiceImplTest {
     }
 
     // Make sure our mocked ACL has the read and write permission
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.READ_PERMISSION, true));
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.WRITE_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.READ_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.WRITE_PERMISSION, true));
 
     // Add the media package to the search index
     service.add(mediaPackage);
 
+    // Now take the role away from the user
+    User userWithoutPermissions = new User(userWithPermissions.getUserName(), new String[] {"ROLE_NOTHING"});
+
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(userWithoutPermissions).anyTimes();
+    service.setSecurityService(securityService);
+    EasyMock.replay(securityService);
+
     // Try to delete it
     Date deletedDate = new Date();
-    try {
-      service.delete(mediaPackage.getIdentifier().toString());
-      fail("Unauthorized user was able to delete a mediapackage");
-    } catch (UnauthorizedException e) {
-      // That's expected
-    }
+    boolean deleted = service.delete(mediaPackage.getIdentifier().toString());
+    Assert.assertFalse("Unauthorized user was able to delete a mediapackage", deleted);
 
     // Second try with a "fixed" roleset
     User adminUser = new User("admin", new String[] {AuthorizationService.ADMIN_ROLE});
-    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    securityService = EasyMock.createNiceMock(SecurityService.class);
     EasyMock.expect(securityService.getUser()).andReturn(adminUser).anyTimes();
     service.setSecurityService(securityService);
     EasyMock.replay(securityService);
-    boolean deleted = service.delete(mediaPackage.getIdentifier().toString());
+    deleted = service.delete(mediaPackage.getIdentifier().toString());
     assertTrue(deleted);
 
     // Now go back to the original security service and user
@@ -357,8 +359,8 @@ public class SearchServiceImplTest {
     }
 
     // Make sure our mocked ACL has the read and write permission
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.READ_PERMISSION, true));
-    acl.getEntries().add(new AccessControlEntry(user.getRoles()[0], SearchService.WRITE_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.READ_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry(userWithPermissions.getRoles()[0], SearchService.WRITE_PERMISSION, true));
 
     // Add the media package to the search index
     service.add(mediaPackage);

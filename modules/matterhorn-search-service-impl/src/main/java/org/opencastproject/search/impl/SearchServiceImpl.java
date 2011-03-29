@@ -299,30 +299,15 @@ public class SearchServiceImpl implements SearchService {
    * @see org.opencastproject.search.api.SearchService#delete(java.lang.String)
    */
   public boolean delete(String mediaPackageId) throws SearchException, UnauthorizedException {
-    User user = securityService.getUser();
-
-    // admin is allowed to delete, regardless of the settings on this mediapackage
-    boolean authorized = user.hasRole(ADMIN_ROLE);
-    if (!authorized) {
-      SearchResult result = getByQuery(new SearchQueryImpl().withId(mediaPackageId));
+    SearchResult result;
+    try {
+      result = solrRequester.getForWrite(new SearchQueryImpl().withId(mediaPackageId));
       if (result.getItems().length == 0) {
-        logger.warn("Can not delete mediapackage {}, which is not available in the search index.", mediaPackageId);
+        logger.warn(
+                "Can not delete mediapackage {}, which is not available for the current user to delete from the search index.",
+                mediaPackageId);
         return false;
       }
-      for (String writeRole : result.getItems()[0].getWriteRoles()) {
-        if (user.hasRole(writeRole)) {
-          authorized = true;
-          break;
-        }
-      }
-    }
-
-    // if they are still not authorized, throw
-    if (!authorized) {
-      throw new UnauthorizedException(user, SearchService.WRITE_PERMISSION);
-    }
-
-    try {
       logger.info("Removing mediapackage {} from search index", mediaPackageId);
       return solrIndexManager.delete(mediaPackageId);
     } catch (SolrServerException e) {
@@ -357,7 +342,7 @@ public class SearchServiceImpl implements SearchService {
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
     try {
       logger.debug("Searching index using query object '" + q + "'");
-      return solrRequester.getByQuery(q);
+      return solrRequester.getForRead(q);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

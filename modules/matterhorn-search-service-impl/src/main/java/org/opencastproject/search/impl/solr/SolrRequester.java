@@ -16,7 +16,9 @@
 
 package org.opencastproject.search.impl.solr;
 
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+import static org.opencastproject.search.api.SearchService.READ_PERMISSION;
+import static org.opencastproject.search.api.SearchService.WRITE_PERMISSION;
+import static org.opencastproject.search.impl.solr.SolrFields.OC_PERMISSION_PREFIX;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -81,7 +83,7 @@ public class SolrRequester {
   }
 
   /**
-   * Gets search results for a solr query string
+   * Returns the search results for a solr query string with read access for the current user.
    * 
    * @param q
    *          the query
@@ -95,7 +97,7 @@ public class SolrRequester {
   public SearchResult getByQuery(String q, int limit, int offset) throws SolrServerException {
     SearchQueryImpl q1 = new SearchQueryImpl();
     q1.withQuery(q).withLimit(limit).withOffset(offset);
-    return getByQuery(q1);
+    return getForRead(q1);
   }
 
   /**
@@ -201,23 +203,6 @@ public class SolrRequester {
         }
 
       }
-
-      // Add authorization information
-      List<String> readRoles = new ArrayList<String>();
-      if (doc.getFieldValues(SolrFields.OC_READ_PERMISSIONS) != null) {
-        for (Object fieldValue : doc.getFieldValues(SolrFields.OC_READ_PERMISSIONS)) {
-          readRoles.add((String) fieldValue);
-        }
-      }
-      item.setReadRoles(readRoles.toArray(new String[readRoles.size()]));
-
-      List<String> writeRoles = new ArrayList<String>();
-      if (doc.getFieldValues(SolrFields.OC_WRITE_PERMISSIONS) != null) {
-        for (Object fieldValue : doc.getFieldValues(SolrFields.OC_WRITE_PERMISSIONS)) {
-          writeRoles.add((String) fieldValue);
-        }
-      }
-      item.setReadRoles(writeRoles.toArray(new String[writeRoles.size()]));
 
       // Add the item to the result set
       result.addItem(item);
@@ -412,9 +397,11 @@ public class SolrRequester {
    * 
    * @param q
    *          the query
+   * @param action
+   *          one of {@link org.opencastproject.search.api.SearchService#READ_PERMISSION}, {@link org.opencastproject.search.api.SearchService#WRITE_PERMISSION}
    * @return the search results
    */
-  public SearchResult getByQuery(SearchQuery q) throws SolrServerException {
+  private SolrQuery getForAction(SearchQuery q, String action) throws SolrServerException {
     StringBuilder sb = new StringBuilder();
 
     String solrQueryRequest = q.getQuery();
@@ -510,11 +497,11 @@ public class SolrRequester {
     String[] roles = user.getRoles();
     if (roles.length > 0) {
       sb.append(" AND (");
-      StringBuilder roleList = new StringBuilder(SolrFields.OC_READ_PERMISSIONS).append(":").append(
-              ANONYMOUS_USER.getRoles()[0]);
+      StringBuilder roleList = new StringBuilder();
       for (String role : roles) {
-        roleList.append(" OR ");
-        roleList.append(SolrFields.OC_READ_PERMISSIONS).append(":").append(role);
+        if (roleList.length() > 0)
+          roleList.append(" OR ");
+        roleList.append(OC_PERMISSION_PREFIX).append(action).append(":").append(role);
       }
       sb.append(roleList.toString());
       sb.append(")");
@@ -549,6 +536,32 @@ public class SolrRequester {
     }
 
     query.setFields("* score");
+    return query;
+  }
+
+  /**
+   * Returns the search results that are accessible for read by the current user.
+   * 
+   * @param q
+   *          the search query
+   * @return the readable search result
+   * @throws SolrServerException
+   */
+  public SearchResult getForRead(SearchQuery q) throws SolrServerException {
+    SolrQuery query = getForAction(q, READ_PERMISSION);
+    return createSearchResult(query);
+  }
+
+  /**
+   * Returns the search results that are accessible for write by the current user.
+   * 
+   * @param q
+   *          the search query
+   * @return the writable search result
+   * @throws SolrServerException
+   */
+  public SearchResult getForWrite(SearchQuery q) throws SolrServerException {
+    SolrQuery query = getForAction(q, WRITE_PERMISSION);
     return createSearchResult(query);
   }
 
@@ -561,4 +574,5 @@ public class SolrRequester {
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
   }
+
 }

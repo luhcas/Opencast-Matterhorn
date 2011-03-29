@@ -54,4 +54,14 @@ public final class AccessControlList {
   public List<AccessControlEntry> getEntries() {
     return entries;
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return entries.toString();
+  }
+  
 }

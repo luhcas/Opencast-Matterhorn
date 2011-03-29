@@ -18,8 +18,7 @@ package org.opencastproject.search.impl.solr;
 
 import static org.opencastproject.search.api.SearchService.READ_PERMISSION;
 import static org.opencastproject.search.api.SearchService.WRITE_PERMISSION;
-import static org.opencastproject.search.impl.solr.SolrFields.OC_READ_PERMISSIONS;
-import static org.opencastproject.search.impl.solr.SolrFields.OC_WRITE_PERMISSIONS;
+import static org.opencastproject.security.api.AuthorizationService.ADMIN_ROLE;
 import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
 
 import org.opencastproject.mediapackage.Attachment;
@@ -83,6 +82,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -337,25 +338,45 @@ public class SolrIndexManager {
    *          the access control list
    */
   protected void addAuthorization(SolrUpdateableInputDocument doc, AccessControlList acl) {
-    // Add authorization
+    Map<String, List<String>> permissions = new HashMap<String, List<String>>();
+
+    // Define containers for common permissions
+    List<String> reads = new ArrayList<String>();
+    permissions.put(READ_PERMISSION, reads);
+    List<String> writes = new ArrayList<String>();
+    permissions.put(WRITE_PERMISSION, writes);
+
+    // The admin user can read and write
+    reads.add(ADMIN_ROLE);
+    writes.add(ADMIN_ROLE);
+    
     if (acl.getEntries().isEmpty()) {
       // if no access control is specified, we let the anonymous roles read the mediapackage
       for (String role : ANONYMOUS_USER.getRoles()) {
-        doc.addField(OC_READ_PERMISSIONS, role);
+        reads.add(role);
       }
+      permissions.put(READ_PERMISSION, reads);
     } else {
       for (AccessControlEntry entry : acl.getEntries()) {
         if (!entry.isAllow()) {
           logger.warn("Search service does not support denial via ACL, ignoring {}", entry);
           continue;
         }
-        if (READ_PERMISSION.equals(entry.getAction())) {
-          doc.addField(OC_READ_PERMISSIONS, entry.getRole());
-        } else if (WRITE_PERMISSION.equals(entry.getAction())) {
-          doc.addField(OC_WRITE_PERMISSIONS, entry.getRole());
+        List<String> actionPermissions = permissions.get(entry.getAction());
+        if (acl == null) {
+          actionPermissions = new ArrayList<String>();
+          permissions.put(entry.getAction(), actionPermissions);
         }
+        actionPermissions.add(entry.getRole());
       }
     }
+
+    // Write the permissions to the solr document
+    for (Map.Entry<String, List<String>> entry : permissions.entrySet()) {
+      String fieldName = SolrFields.OC_PERMISSION_PREFIX + entry.getKey();
+      doc.setField(fieldName, entry.getValue());
+    }
+
   }
 
   protected DublinCoreCatalog loadDublinCoreCatalog(Catalog cat) throws IOException {
