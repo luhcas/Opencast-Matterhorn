@@ -19,17 +19,14 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.endpoint.SchedulerRestService;
-import org.opencastproject.series.impl.SeriesServiceImpl;
-import org.opencastproject.series.impl.persistence.SeriesServiceDatabaseImpl;
+import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -137,18 +134,40 @@ public class SchedulerServiceImplTest {
     service.setPersistenceProvider(new PersistenceProvider());
     service.setPersistenceProperties(props);
 
-    SeriesServiceImpl seriesService = new SeriesServiceImpl();
-    SeriesServiceDatabaseImpl seriesDb = new SeriesServiceDatabaseImpl();
-    seriesDb.setDublinCoreService(new DublinCoreCatalogService());
-    seriesDb.setPersistenceProperties(props);
-    seriesDb.setPersistenceProvider(new PersistenceProvider());
-    seriesDb.activate(null);
-    seriesService.setPersistence(seriesDb);
-    seriesService.activate(null);
+    /*
+     * SeriesServiceImpl seriesService = new SeriesServiceImpl(); SeriesServiceDatabaseImpl seriesDb = new
+     * SeriesServiceDatabaseImpl(); seriesDb.setDublinCoreService(new DublinCoreCatalogService());
+     * seriesDb.setPersistenceProperties(props); seriesDb.setPersistenceProvider(new PersistenceProvider());
+     * seriesDb.activate(null); seriesService.setPersistence(seriesDb); seriesService.activate(null);
+     */
+
+    // Add a series
+    DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
+    seriesID = Long.toString(System.currentTimeMillis());
+    dc.set(DublinCoreCatalogImpl.PROPERTY_IDENTIFIER, seriesID);
+    dc.set(DublinCoreCatalogImpl.PROPERTY_TITLE, "demo title");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_LICENSE, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_PUBLISHER, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_CREATOR, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_SUBJECT, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_TEMPORAL, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_SPATIAL, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_RIGHTS_HOLDER, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_EXTENT, "3600000");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(new Date(), Precision.Minute));
+    dc.set(DublinCoreCatalogImpl.PROPERTY_LANGUAGE, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_IS_REPLACED_BY, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_TYPE, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_AVAILABLE, EncodingSchemeUtils.encodeDate(new Date(), Precision.Minute));
+    dc.set(DublinCoreCatalogImpl.PROPERTY_REPLACES, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_CONTRIBUTOR, "demo");
+    dc.set(DublinCoreCatalogImpl.PROPERTY_DESCRIPTION, "demo");
+
+    SeriesService seriesService = EasyMock.createMock(SeriesService.class);
+    EasyMock.expect(seriesService.getSeries((String)EasyMock.anyObject())).andReturn(dc).anyTimes();
 
     service.setSeriesService(seriesService);
     service.activate(null);
-
 
     WorkflowInstance workflowInstance = getSampleWorkflowInstance();
 
@@ -174,37 +193,8 @@ public class SchedulerServiceImplTest {
     EasyMock.expect(workflowService.getWorkflowById(EasyMock.anyLong())).andReturn(workflowInstance).anyTimes();
     EasyMock.expect(workflowService.stop(EasyMock.anyLong())).andReturn(workflowInstance).anyTimes();
     workflowService.update((WorkflowInstance) EasyMock.anyObject());
-    EasyMock.replay(workflowService);
+    EasyMock.replay(workflowService, seriesService);
     service.setWorkflowService(workflowService);
-
-    // Add a series
-    DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
-    seriesID = Long.toString(System.currentTimeMillis());
-    dc.set(DublinCoreCatalogImpl.PROPERTY_IDENTIFIER, seriesID);
-    dc.set(DublinCoreCatalogImpl.PROPERTY_TITLE, "demo title");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_LICENSE, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_PUBLISHER, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_CREATOR, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_SUBJECT, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_TEMPORAL, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_SPATIAL, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_RIGHTS_HOLDER, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_EXTENT, "3600000");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(new Date(), Precision.Minute));
-    dc.set(DublinCoreCatalogImpl.PROPERTY_LANGUAGE, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_IS_REPLACED_BY, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_TYPE, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_AVAILABLE, EncodingSchemeUtils.encodeDate(new Date(), Precision.Minute));
-    dc.set(DublinCoreCatalogImpl.PROPERTY_REPLACES, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_CONTRIBUTOR, "demo");
-    dc.set(DublinCoreCatalogImpl.PROPERTY_DESCRIPTION, "demo");
-    
-//    metadata.add(new SeriesMetadataImpl(series, "valid", "" + System.currentTimeMillis()));
-//    metadata.add(new SeriesMetadataImpl(series, "audience", "demo"));
-//    metadata.add(new SeriesMetadataImpl(series, "modified", "" + System.currentTimeMillis()));
-//    metadata.add(new SeriesMetadataImpl(series, "issued", "" + System.currentTimeMillis()));
-
-    seriesService.updateSeries(dc);
 
     try {
       ((SchedulerServiceImpl) service).setDublinCoreGenerator(new DublinCoreGenerator(new FileInputStream(resourcesRoot
@@ -269,7 +259,6 @@ public class SchedulerServiceImplTest {
   public void teardown() throws Exception {
     service.destroy();
     service = null;
-    FileUtils.forceDelete(new File(PathSupport.concat(System.getProperty("java.io.tmpdir"), "series")));
   }
 
   protected WorkflowInstance getSampleWorkflowInstance() throws Exception {
@@ -511,7 +500,7 @@ public class SchedulerServiceImplTest {
   public void testCalendarNotModified() throws Exception {
     HttpServletRequest request = EasyMock.createNiceMock(HttpServletRequest.class);
     EasyMock.replay(request);
-    
+
     SchedulerRestService restService = new SchedulerRestService();
     restService.setService(service);
 
