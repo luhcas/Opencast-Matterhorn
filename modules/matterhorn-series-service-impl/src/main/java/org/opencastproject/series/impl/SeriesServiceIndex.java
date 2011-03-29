@@ -43,7 +43,7 @@ public interface SeriesServiceIndex {
    * @param dublinCore
    *          {@link DublinCoreCatalog} representing series
    * @throws SeriesServiceDatabaseException
-   *           if indexing fails
+   *           if indexing fails and synchronous indexing is enabled
    */
   void index(DublinCoreCatalog dublinCore) throws SeriesServiceDatabaseException;
 
@@ -57,7 +57,7 @@ public interface SeriesServiceIndex {
    * @throws NotFoundException
    *           if series with specified ID does not exist
    * @throws SeriesServiceDatabaseException
-   *           if exception occurred
+   *           if exception occurred and synchronous indexing is enabled
    */
   void index(String seriesId, AccessControlList accessControl) throws NotFoundException, SeriesServiceDatabaseException;
 
@@ -67,7 +67,7 @@ public interface SeriesServiceIndex {
    * @param seriesID
    *          ID of the series to be removed
    * @throws SeriesServiceDatabaseException
-   *           if removing fails
+   *           if removing fails and synchronous indexing is enabled
    */
   void delete(String seriesID) throws SeriesServiceDatabaseException;
 

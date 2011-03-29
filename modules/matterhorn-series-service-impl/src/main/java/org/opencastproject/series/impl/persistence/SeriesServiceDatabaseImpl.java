@@ -20,7 +20,6 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AccessControlParser;
-import org.opencastproject.series.impl.Series;
 import org.opencastproject.series.impl.SeriesServiceDatabase;
 import org.opencastproject.series.impl.SeriesServiceDatabaseException;
 import org.opencastproject.util.NotFoundException;
@@ -30,7 +29,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -142,7 +140,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    *           if parsing fails
    */
   private DublinCoreCatalog parseDublinCore(String dcXML) throws IOException {
-    DublinCoreCatalog dc = dcService.load(new ByteArrayInputStream(dcXML.getBytes("UTF-8")));
+    DublinCoreCatalog dc = dcService.load(IOUtils.toInputStream(dcXML, "UTF-8"));
     return dc;
   }
 
@@ -180,7 +178,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    */
   @SuppressWarnings("unchecked")
   @Override
-  public Series[] getAllSeries() throws SeriesServiceDatabaseException {
+  public DublinCoreCatalog[] getAllSeries() throws SeriesServiceDatabaseException {
     EntityManager em = emf.createEntityManager();
     Query query = em.createQuery("SELECT e FROM SeriesEntity e");
     List<SeriesEntity> seriesEntities = null;
@@ -192,21 +190,45 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     } finally {
       em.close();
     }
-    List<Series> seriesList = new LinkedList<Series>();
+    List<DublinCoreCatalog> seriesList = new LinkedList<DublinCoreCatalog>();
     try {
       for (SeriesEntity entity : seriesEntities) {
         DublinCoreCatalog dc = parseDublinCore(entity.getDublinCoreXML());
-        AccessControlList ac = null;
-        if (entity.getAccessControl() != null) {
-          ac = AccessControlParser.parseAcl(entity.getAccessControl());
-        }
-        seriesList.add(new Series(dc, ac));
+        seriesList.add(dc);
       }
     } catch (Exception e) {
       logger.error("Could not parse series entity: {}", e.getMessage());
       throw new SeriesServiceDatabaseException(e);
     }
-    return seriesList.toArray(new Series[seriesList.size()]);
+    return seriesList.toArray(new DublinCoreCatalog[seriesList.size()]);
+  }
+  
+  /*
+   * (non-Javadoc)
+   * @see org.opencastproject.series.impl.SeriesServiceDatabase#getAccessControlList(java.lang.String)
+   */
+  @Override
+  public AccessControlList getAccessControlList(String seriesID) throws NotFoundException,
+          SeriesServiceDatabaseException {
+    EntityManager em = emf.createEntityManager();
+    try {
+      SeriesEntity entity = em.find(SeriesEntity.class, seriesID);
+      if (entity == null) {
+        throw new NotFoundException("Could not found series with ID " + seriesID);
+      }
+      AccessControlList acl = null;
+      if (entity.getAccessControl() != null) {
+        acl = AccessControlParser.parseAcl(entity.getAccessControl());
+      }
+      return acl;
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("Could not retrieve ACL for series '{}': {}", seriesID, e.getMessage());
+      throw new SeriesServiceDatabaseException(e);
+    } finally {
+      em.close();
+    }
   }
 
   /*
@@ -216,7 +238,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    * DublinCoreCatalog)
    */
   @Override
-  public void storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException {
+  public boolean storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException {
     if (dc == null) {
       throw new SeriesServiceDatabaseException("Invalid value for Dublin core catalog: null");
     }
@@ -229,6 +251,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       throw new SeriesServiceDatabaseException(e1);
     }
     EntityManager em = emf.createEntityManager();
+    boolean updated = false;
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
@@ -240,10 +263,12 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
         entity.setSeries(seriesXML);
         em.persist(entity);
       } else {
+        updated = true;
         entity.setSeries(seriesXML);
         em.merge(entity);
       }
       tx.commit();
+      return updated;
     } catch (Exception e) {
       logger.error("Could not update series: {}", e.getMessage());
       throw new SeriesServiceDatabaseException(e);
@@ -260,11 +285,11 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    * org.opencastproject.security.api.AccessControlList)
    */
   @Override
-  public void storeSeriesAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
+  public boolean storeSeriesAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
           SeriesServiceDatabaseException {
     if (accessControl == null) {
-      logger.warn("Access control parameter is null: skipping update for series '{}'", seriesID);
-      return;
+      logger.error("Access control parameter is <null> for series '{}'", seriesID);
+      throw new IllegalArgumentException("Argument for updating ACL for series " + seriesID + " is null");
     }
 
     String serializedAC;
@@ -275,6 +300,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       throw new SeriesServiceDatabaseException(e);
     }
     EntityManager em = emf.createEntityManager();
+    boolean updated = false;
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
@@ -282,9 +308,13 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       if (entity == null) {
         throw new NotFoundException("Series with ID " + seriesID + " does not exist.");
       }
+      if (entity.getAccessControl() != null) {
+        updated = true;
+      }
       entity.setAccessControl(serializedAC);
       em.merge(entity);
       tx.commit();
+      return updated;
     } catch (NotFoundException e) {
       throw e;
     } catch (Exception e) {

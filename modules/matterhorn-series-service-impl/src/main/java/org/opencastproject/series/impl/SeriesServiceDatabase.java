@@ -30,24 +30,27 @@ public interface SeriesServiceDatabase {
    * 
    * @param dc
    *          {@link DublinCoreCatalog} representing series
+   * @return true if existing series were updated or false if new series were created
    * @throws SeriesServiceDatabaseException
    *           if exception occurs
    */
-  void storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException;
+  boolean storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException;
 
   /**
-   * Store access control associated with specified series.
+   * Store access control associated with specified series. IllegalArgumentException is thrown if accessControl
+   * parameter is null.
    * 
    * @param seriesID
    *          ID of series to associate access control with
    * @param accessControl
    *          {@link AccessControlList} representing access control rules for specified series
+   * @return true if update happened, false if there was no previous entry
    * @throws NotFoundException
    *           if series with specified ID does not exist
    * @throws SeriesServiceDatabaseException
    *           if exception occurred
    */
-  void storeSeriesAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
+  boolean storeSeriesAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
           SeriesServiceDatabaseException;
 
   /**
@@ -69,5 +72,18 @@ public interface SeriesServiceDatabase {
    * @throws SeriesServiceDatabaseException
    *           if exception occurs
    */
-  Series[] getAllSeries() throws SeriesServiceDatabaseException;
+  DublinCoreCatalog[] getAllSeries() throws SeriesServiceDatabaseException;
+
+  /**
+   * Retrieves ACL for series with given ID.
+   * 
+   * @param seriesID
+   *          series for which ACL will be retrieved
+   * @return {@link AccessControlList} of series or null if series does not have ACL associated with it
+   * @throws NotFoundException
+   *           if series with given ID does not exist
+   * @throws SeriesServiceDatabaseException
+   *           if exception occurred
+   */
+  AccessControlList getAccessControlList(String seriesID) throws NotFoundException, SeriesServiceDatabaseException;
 }

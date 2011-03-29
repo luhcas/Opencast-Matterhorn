@@ -240,13 +240,18 @@ public class SeriesRestService {
       return Response.status(Response.Status.BAD_REQUEST).build();
     }
     try {
-      this.seriesService.updateSeries(dc);
+      boolean updated = seriesService.updateSeries(dc);
       if (accessControl != null) {
         seriesService.updateAccessControl(dc.getFirst(DublinCore.PROPERTY_IDENTIFIER), acl);
       }
-      logger.debug("Added series {} ", dc.getFirst(DublinCore.PROPERTY_IDENTIFIER));
-      return Response.status(Response.Status.OK).build();
+      if (updated) {
+        logger.debug("Added series {} ", dc.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+        return Response.status(Response.Status.OK).build();
+      }
+      logger.debug("Created series {} ", dc.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+      return Response.status(Response.Status.CREATED).build();
     } catch (Exception e) {
+      logger.warn("Could not add/update series: {}", e.getMessage());
     }
     throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
   }
@@ -267,8 +272,11 @@ public class SeriesRestService {
       return Response.status(Response.Status.BAD_REQUEST).build();
     }
     try {
-      seriesService.updateAccessControl(seriesID, acl);
-      return Response.ok().build();
+      boolean updated = seriesService.updateAccessControl(seriesID, acl);
+      if (updated) {
+        return Response.status(Status.OK).build();
+      }
+      return Response.status(Status.CREATED).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch (SeriesException e) {
@@ -450,6 +458,7 @@ public class SeriesRestService {
             "/",
             "Accepts an XML form parameter representing a new Series as Dublin Core document and optionally ACL and  stores them in the database. Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no series is supplied. 500 (Internal Server Error) if there was an error creating the series.");
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Series was created successfully."));
+    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Series was updated successfully."));
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status
             .badRequest("No series was supplied or invalid Dublin Core."));
 
@@ -464,8 +473,9 @@ public class SeriesRestService {
     // update acl
     RestEndpoint updateACLEndpoint = new RestEndpoint("updateAccessControl", RestEndpoint.Method.POST,
             "/{seriesID}/accesscontrol", "Updates access control rules of existing series.");
+    updateACLEndpoint.addStatus(org.opencastproject.util.doc.Status.created("New series ACL was created"));
+    updateACLEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Series ACL was updated successfully"));
     updateACLEndpoint.addStatus(org.opencastproject.util.doc.Status.badRequest("If access control parameter is missing."));
-    updateACLEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Series were updated successfully"));
     updateACLEndpoint.addStatus(org.opencastproject.util.doc.Status.notFound("Series with suplied ID does not exist"));
     updateACLEndpoint.addPathParam(new Param("seriesID", Param.Type.STRING, "10.0000/5819", "Identifier of the series"));
     updateACLEndpoint.addRequiredParam(new Param("acl", Param.Type.TEXT, generateAccessControlList(),

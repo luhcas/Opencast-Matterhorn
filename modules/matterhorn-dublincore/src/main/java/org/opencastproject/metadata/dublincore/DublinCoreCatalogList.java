@@ -91,7 +91,7 @@ public class DublinCoreCatalogList {
       DOMImplementation impl = builder.getDOMImplementation();
 
       Document doc = impl.createDocument(null, null, null);
-      Node root = doc.createElement("dublincore-list");
+      Node root = doc.createElement("dublincorelist");
       doc.appendChild(root);
       for (DublinCoreCatalog series : catalogList) {
         Node node = doc.importNode(series.toXml().getDocumentElement(), true);

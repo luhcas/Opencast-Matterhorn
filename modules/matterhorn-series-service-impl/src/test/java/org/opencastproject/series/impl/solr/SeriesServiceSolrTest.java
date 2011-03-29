@@ -56,7 +56,7 @@ public class SeriesServiceSolrTest {
     index.solrRoot = PathSupport.concat("target", Long.toString(System.currentTimeMillis()));
     dcService = new DublinCoreCatalogService();
     index.setDublinCoreService(dcService);
-    index.activate();
+    index.activate(null);
 
     InputStream in = null;
     try {

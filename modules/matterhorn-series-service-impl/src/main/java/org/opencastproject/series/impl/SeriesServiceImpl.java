@@ -34,8 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Implements {@link SeriesService}. Uses {@link SeriesServiceDatabase} for permanent storage and
@@ -49,15 +47,9 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   /** Index for searching */
   protected SeriesServiceIndex index;
-  
+
   /** Persistent storage */
   protected SeriesServiceDatabase persistence;
-  
-  /** Whether indexing is synchronous or asynchronous */
-  protected boolean synchronousIndexing;
-  
-  /** Executor used for asynchronous indexing */
-  protected ExecutorService indexingExecutor;
 
   /**
    * OSGi callback for setting index.
@@ -89,21 +81,6 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   public void activate(ComponentContext cc) throws Exception {
     logger.info("Activating Series Service");
 
-    if (cc == null) {
-      this.synchronousIndexing = true;
-    } else {
-      Object syncIndexingConfig = cc.getProperties().get("synchronousIndexing");
-      if ((syncIndexingConfig != null) && ((syncIndexingConfig instanceof Boolean))) {
-        this.synchronousIndexing = ((Boolean) syncIndexingConfig).booleanValue();
-      }
-    }
-    if (this.synchronousIndexing) {
-      logger.debug("Series will be added to the search index synchronously");
-    } else {
-      logger.debug("Series will be added to the search index asynchronously");
-      this.indexingExecutor = Executors.newSingleThreadExecutor();
-    }
-
     long instancesInSolr = 0L;
     try {
       instancesInSolr = this.index.count();
@@ -112,15 +89,16 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     }
     if (instancesInSolr == 0L) {
       try {
-        Series[] databaseSeries = persistence.getAllSeries();
+        DublinCoreCatalog[] databaseSeries = persistence.getAllSeries();
         if (databaseSeries.length != 0) {
           logger.info("The series index is empty. Populating it now with {} series",
                   Integer.valueOf(databaseSeries.length));
-          for (Series series : databaseSeries) {
-            index.index(series.getSeriesCatalog());
-            if (series.getAccessControl() != null) {
-              String id = series.getSeriesCatalog().getFirst(DublinCore.PROPERTY_IDENTIFIER);
-              index.index(id, series.getAccessControl());
+          for (DublinCoreCatalog series : databaseSeries) {
+            index.index(series);
+            String id = series.getFirst(DublinCore.PROPERTY_IDENTIFIER);
+            AccessControlList acl = persistence.getAccessControlList(id);
+            if (acl != null) {
+              index.index(id, acl);
             }
           }
           logger.info("Finished populating series search index");
@@ -149,73 +127,62 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * )
    */
   @Override
-  public void updateSeries(final DublinCoreCatalog dc) throws SeriesException {
+  public boolean updateSeries(final DublinCoreCatalog dc) throws SeriesException {
+    if (dc == null) {
+      throw new IllegalArgumentException("DC argument for updating series must not be null");
+    }
+
+    boolean updated;
     try {
-      this.persistence.storeSeries(dc);
+      updated = persistence.storeSeries(dc);
     } catch (SeriesServiceDatabaseException e1) {
       logger.error("Could not store series {}: {}", dc, e1);
       throw new SeriesException(e1);
     }
 
-    if (this.synchronousIndexing)
-      try {
-        this.index.index(dc);
-      } catch (SeriesServiceDatabaseException e) {
-        logger.warn("Unable to index {}: {}", dc, e);
-      }
-    else
-      this.indexingExecutor.submit(new Runnable() {
-        public void run() {
-          try {
-            index.index(dc);
-          } catch (SeriesServiceDatabaseException e) {
-            SeriesServiceImpl.logger.warn("Unable to index {}: {}", dc, e.getMessage());
-          }
-        }
-      });
+    try {
+      index.index(dc);
+    } catch (SeriesServiceDatabaseException e) {
+      logger.error("Unable to index series {}: {}", dc.getFirst(DublinCore.PROPERTY_IDENTIFIER), e.getMessage());
+      throw new SeriesException(e);
+    }
+
+    return updated;
   }
 
   /*
    * (non-Javadoc)
-   * @see org.opencastproject.series.api.SeriesService#updateAccessControl(java.lang.String, org.opencastproject.security.api.AccessControlList)
+   * 
+   * @see org.opencastproject.series.api.SeriesService#updateAccessControl(java.lang.String,
+   * org.opencastproject.security.api.AccessControlList)
    */
   @Override
-  public void updateAccessControl(final String seriesID, final AccessControlList accessControl) throws NotFoundException,
-          SeriesException {
+  public boolean updateAccessControl(final String seriesID, final AccessControlList accessControl)
+          throws NotFoundException, SeriesException {
     if (StringUtils.isEmpty(seriesID)) {
       throw new IllegalArgumentException("Series ID parameter must not be null or empty.");
     }
     if (accessControl == null) {
-      logger.warn("Trying to update series {} with <null> access control rules. Update will be skipped.", seriesID);
-      return;
+      throw new IllegalArgumentException("ACL parameter must not be null");
     }
-    
+
+    boolean updated;
     // try updating it in persistence first - not found is thrown if it doesn't exist
     try {
-      persistence.storeSeriesAccessControl(seriesID, accessControl);
+      updated = persistence.storeSeriesAccessControl(seriesID, accessControl);
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Could not update series {} with access control rules: {}", seriesID, e.getMessage());
       throw new SeriesException(e);
     }
-    
-    if (synchronousIndexing) {
-      try {
-        index.index(seriesID, accessControl);
-      } catch (Exception e) {
-        logger.warn("Could not update series {} with access control rules: {}", seriesID, e.getMessage());
-      }
-    } else {
-      indexingExecutor.submit(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            index.index(seriesID, accessControl);
-          } catch (Exception e) {
-            logger.warn("Could not update series {} with access control rules: {}", seriesID, e.getMessage());
-          }
-        }
-      });
+
+    try {
+      index.index(seriesID, accessControl);
+    } catch (Exception e) {
+      logger.error("Could not update series {} with access control rules: {}", seriesID, e.getMessage());
+      throw new SeriesException(e);
     }
+
+    return updated;
   }
 
   /*
@@ -232,22 +199,12 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       throw new SeriesException(e1);
     }
 
-    if (this.synchronousIndexing)
-      try {
-        this.index.delete(seriesID);
-      } catch (SeriesServiceDatabaseException e) {
-        logger.warn("Unable to delete series with id {}: {}", seriesID, e.getMessage());
-      }
-    else
-      this.indexingExecutor.submit(new Runnable() {
-        public void run() {
-          try {
-            index.delete(seriesID);
-          } catch (SeriesServiceDatabaseException e) {
-            SeriesServiceImpl.logger.warn("Unable to delete series with id {}: {}", seriesID, e.getMessage());
-          }
-        }
-      });
+    try {
+      index.delete(seriesID);
+    } catch (SeriesServiceDatabaseException e) {
+      logger.error("Unable to delete series with id {}: {}", seriesID, e.getMessage());
+      throw new SeriesException(e);
+    }
   }
 
   /*
@@ -282,9 +239,10 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       throw new SeriesException(e);
     }
   }
-  
+
   /*
    * (non-Javadoc)
+   * 
    * @see org.opencastproject.series.api.SeriesService#getSeriesAccessControl(java.lang.String)
    */
   @Override
@@ -292,7 +250,8 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     try {
       return index.getAccessControl(seriesID);
     } catch (SeriesServiceDatabaseException e) {
-      logger.error("Exception occurred while retrieving access control rules for series {}: {}", seriesID, e.getMessage());
+      logger.error("Exception occurred while retrieving access control rules for series {}: {}", seriesID,
+              e.getMessage());
       throw new SeriesException(e);
     }
   }

@@ -51,7 +51,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,6 +61,8 @@ import java.net.URL;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Implements {@link SeriesServiceIndex}.
@@ -95,6 +96,12 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
   /** Dublin core service */
   protected DublinCoreCatalogService dcService;
 
+  /** Whether indexing is synchronous or asynchronous */
+  protected boolean synchronousIndexing;
+
+  /** Executor used for asynchronous indexing */
+  protected ExecutorService indexingExecutor;
+
   /**
    * No-argument constructor for OSGi declarative services.
    */
@@ -125,9 +132,12 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    *          the component context
    */
   public void activate(ComponentContext cc) {
+
     if (cc == null) {
       if (solrRoot == null)
         throw new IllegalStateException("Storage dir must be set");
+      // default to synchronous indexing
+      synchronousIndexing = true;
     } else {
       String solrServerUrlConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(CONFIG_SOLR_URL));
       if (solrServerUrlConfig != null) {
@@ -144,7 +154,15 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
           throw new IllegalStateException("Storage dir must be set (org.opencastproject.storage.dir)");
         solrRoot = PathSupport.concat(storageDir, "series");
       }
+
+      Object syncIndexingConfig = cc.getProperties().get("synchronousIndexing");
+      if ((syncIndexingConfig != null) && ((syncIndexingConfig instanceof Boolean))) {
+        synchronousIndexing = ((Boolean) syncIndexingConfig).booleanValue();
+      } else {
+        synchronousIndexing = true;
+      }
     }
+
     activate();
   }
 
@@ -176,6 +194,14 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
       } catch (SolrServerException e) {
         throw new IllegalStateException("Unable to connect to solr at " + solrRoot, e);
       }
+    }
+
+    // set up indexing
+    if (this.synchronousIndexing) {
+      logger.debug("Series will be added to the search index synchronously");
+    } else {
+      logger.debug("Series will be added to the search index asynchronously");
+      indexingExecutor = Executors.newSingleThreadExecutor();
     }
   }
 
@@ -257,14 +283,32 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    */
   @Override
   public void index(DublinCoreCatalog dc) throws SeriesServiceDatabaseException {
-    try {
-      SolrInputDocument doc = createDocument(dc);
-      synchronized (solrServer) {
-        solrServer.add(doc);
-        solrServer.commit();
+
+    final SolrInputDocument doc = createDocument(dc);
+
+    if (synchronousIndexing) {
+      try {
+        synchronized (solrServer) {
+          solrServer.add(doc);
+          solrServer.commit();
+        }
+      } catch (Exception e) {
+        throw new SeriesServiceDatabaseException("Unable to index series", e);
       }
-    } catch (Exception e) {
-      throw new SeriesServiceDatabaseException("Unable to index series", e);
+    } else {
+      indexingExecutor.submit(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            synchronized (solrServer) {
+              solrServer.add(doc);
+              solrServer.commit();
+            }
+          } catch (Exception e) {
+            logger.warn("Unable to index series {}: {}", doc.getFieldValue(SolrFields.ID_KEY), e.getMessage());
+          }
+        }
+      });
     }
   }
 
@@ -293,18 +337,34 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
       logger.error("Could not parse access control parameter: {}", e.getMessage());
       throw new SeriesServiceDatabaseException(e);
     }
-    
-    SolrInputDocument inputDoc = ClientUtils.toSolrInputDocument(seriesDoc);
+
+    final SolrInputDocument inputDoc = ClientUtils.toSolrInputDocument(seriesDoc);
     inputDoc.setField(SolrFields.ACCESS_CONTROL_KEY, serializedAC);
-    
-    try {
-      synchronized (solrServer) {
-        solrServer.add(inputDoc);
-        solrServer.commit();
+
+    if (synchronousIndexing) {
+      try {
+        synchronized (solrServer) {
+          solrServer.add(inputDoc);
+          solrServer.commit();
+        }
+      } catch (Exception e) {
+        throw new SeriesServiceDatabaseException("Unable to index ACL", e);
       }
-    } catch (Exception e) {
-      logger.error("Unable to index series: {}", e.getMessage());
-      throw new SeriesServiceDatabaseException(e);
+    } else {
+      indexingExecutor.submit(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            synchronized (solrServer) {
+              solrServer.add(inputDoc);
+              solrServer.commit();
+            }
+          } catch (Exception e) {
+            logger.warn("Unable to index ACL for series {}: {}", inputDoc.getFieldValue(SolrFields.ID_KEY),
+                    e.getMessage());
+          }
+        }
+      });
     }
   }
 
@@ -617,7 +677,7 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
 
       // Iterate through the results
       for (SolrDocument doc : items) {
-        DublinCoreCatalog item = parseDublinCore((String)doc.get(SolrFields.XML_KEY));
+        DublinCoreCatalog item = parseDublinCore((String) doc.get(SolrFields.XML_KEY));
         result.add(item);
       }
     } catch (Exception e) {
@@ -633,14 +693,30 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    * @see org.opencastproject.workflow.SeriesServiceIndex.WorkflowServiceIndex#remove(long)
    */
   @Override
-  public void delete(String id) throws SeriesServiceDatabaseException {
-    try {
-      synchronized (solrServer) {
-        solrServer.deleteById(id);
-        solrServer.commit();
+  public void delete(final String id) throws SeriesServiceDatabaseException {
+    if (synchronousIndexing) {
+      try {
+        synchronized (solrServer) {
+          solrServer.deleteById(id);
+          solrServer.commit();
+        }
+      } catch (Exception e) {
+        throw new SeriesServiceDatabaseException(e);
       }
-    } catch (Exception e) {
-      throw new SeriesServiceDatabaseException(e);
+    } else {
+      indexingExecutor.submit(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            synchronized (solrServer) {
+              solrServer.deleteById(id);
+              solrServer.commit();
+            }
+          } catch (Exception e) {
+            logger.warn("Could not delete from index series {}: {}", id, e.getMessage());
+          }
+        }
+      });
     }
   }
 
@@ -763,7 +839,7 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    *           if parsing fails
    */
   private DublinCoreCatalog parseDublinCore(String dcXML) throws IOException {
-    DublinCoreCatalog dc = dcService.load(new ByteArrayInputStream(dcXML.getBytes("UTF-8")));
+    DublinCoreCatalog dc = dcService.load(IOUtils.toInputStream(dcXML, "UTF-8"));
     return dc;
   }
 }

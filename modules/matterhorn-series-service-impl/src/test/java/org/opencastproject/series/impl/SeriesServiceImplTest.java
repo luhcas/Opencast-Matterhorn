@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author nejc
+ * Test for Series Service.
  *
  */
 public class SeriesServiceImplTest {
@@ -92,7 +92,7 @@ public class SeriesServiceImplTest {
     root = PathSupport.concat("target", Long.toString(currentTime));
     index = new SeriesServiceSolrIndex(root);
     index.setDublinCoreService(dcService);
-    index.activate();
+    index.activate(null);
     
     seriesService = new SeriesServiceImpl();
     seriesService.setPersistence(seriesDatabase);
@@ -109,7 +109,7 @@ public class SeriesServiceImplTest {
   }
   
   @Test
-  public void testSerieManagemnt() throws Exception {
+  public void testSeriesManagemnt() throws Exception {
     testCatalog.set(DublinCore.PROPERTY_TITLE, "Some title");
     seriesService.updateSeries(testCatalog);
     DublinCoreCatalog retrivedSeries = seriesService.getSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));

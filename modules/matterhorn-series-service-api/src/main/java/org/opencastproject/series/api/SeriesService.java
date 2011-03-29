@@ -27,28 +27,32 @@ import org.opencastproject.util.NotFoundException;
 public interface SeriesService {
 
   /**
-   * Adds or updates series
+   * Adds or updates series. IllegalArgumentException is thrown if dc argument is null.
    * 
    * @param dc
    *          {@link DublinCoreCatalog} representing series
+   * @return true if existing series were updated or false it new series were created
    * @throws SeriesException
    *           if adding or updating fails
    */
-  void updateSeries(DublinCoreCatalog dc) throws SeriesException;
+  boolean updateSeries(DublinCoreCatalog dc) throws SeriesException;
 
   /**
-   * Updates access control rules for specified series.
+   * Updates access control rules for specified series. Not specifying series ID or trying to update series with null
+   * value will throw IllegalArgumentException.
    * 
    * @param seriesID
    *          series to be updated
    * @param accessControl
    *          {@link AccessControlList} defining access control rules
+   * @return true if ACL was updated and false it if was created
    * @throws NotFoundException
    *           if series with given ID cannot be found
    * @throws SeriesException
    *           if exception occurred
    */
-  void updateAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException, SeriesException;
+  boolean updateAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
+          SeriesException;
 
   /**
    * Removes series

@@ -20,8 +20,6 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
-import org.opencastproject.series.impl.Series;
-import org.opencastproject.series.impl.persistence.SeriesServiceDatabaseImpl;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 
@@ -111,7 +109,7 @@ public class SeriesServicePersistenceTest {
   @Test
   public void testRetrieving() throws Exception {
     seriesDatabase.storeSeries(testCatalog);
-    Series[] series = seriesDatabase.getAllSeries();
+    DublinCoreCatalog[] series = seriesDatabase.getAllSeries();
     Assert.assertTrue("Exactly one series should be returned", series.length == 1);
     seriesDatabase.deleteSeries(testCatalog.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
     series = seriesDatabase.getAllSeries();
@@ -129,9 +127,7 @@ public class SeriesServicePersistenceTest {
     String seriesID = testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER);
     seriesDatabase.storeSeriesAccessControl(seriesID, accessControlList);
     
-    Series[] seriesList = seriesDatabase.getAllSeries();
-    Assert.assertEquals(seriesList.length, 1);
-    AccessControlList retrievedACL = seriesList[0].getAccessControl();
+    AccessControlList retrievedACL = seriesDatabase.getAccessControlList(seriesID);
     Assert.assertNotNull(retrievedACL);
     acl = retrievedACL.getEntries();
     Assert.assertEquals(acl.size(), 1);
