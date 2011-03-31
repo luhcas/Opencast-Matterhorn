@@ -53,7 +53,6 @@
         <module>modules/matterhorn-series-service-api</module>
         <module>modules/matterhorn-series-service-impl</module>
         <module>modules/matterhorn-solr</module>
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-webconsole</module>
         <module>modules/matterhorn-workflow-service-api</module>
         <module>modules/matterhorn-workflow-service-impl</module>
@@ -79,7 +78,6 @@
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-series-service-api</module>
         <module>modules/matterhorn-series-service-impl</module>
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-workflow-service-api</module>
         <module>modules/matterhorn-workflow-service-remote</module>
       </modules>
@@ -109,7 +107,6 @@
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-static</module>
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
     </profile>
@@ -136,7 +133,6 @@
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
     </profile>
@@ -164,7 +160,6 @@
         <module>modules/matterhorn-search-service-feeds</module>
         <module>modules/matterhorn-search-service-impl</module>
         <module>modules/matterhorn-solr</module>
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-usertracking-service-api</module>
         <module>modules/matterhorn-usertracking-service-impl</module>
         <module>modules/matterhorn-webconsole</module>
@@ -196,7 +191,6 @@
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-search-service-api</module>
         <module>modules/matterhorn-search-service-remote</module>
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
     </profile>
@@ -230,7 +224,6 @@
         <!-- 
         <module>modules/matterhorn-textextractor-ocropus</module>
          -->
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-videosegmenter-api</module>
         <module>modules/matterhorn-videosegmenter-impl</module>
         <module>modules/matterhorn-webconsole</module>
@@ -256,7 +249,6 @@
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-textanalyzer-api</module>
         <module>modules/matterhorn-textanalyzer-remote</module>
-        <module>modules/matterhorn-userdirectory</module>
         <module>modules/matterhorn-videosegmenter-api</module>
         <module>modules/matterhorn-videosegmenter-remote</module>
         <module>modules/matterhorn-webconsole</module>
