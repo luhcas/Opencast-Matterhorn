@@ -15,13 +15,18 @@
  */
 package org.opencastproject.inspection.impl;
 
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
@@ -46,7 +51,7 @@ import java.io.File;
 import java.net.URI;
 
 public class MediaInspectionServiceImplTest {
-  
+
   private MediaInspectionServiceImpl service = null;
   private Workspace workspace = null;
   private ServiceRegistry serviceRegistry = null;
@@ -57,7 +62,7 @@ public class MediaInspectionServiceImplTest {
 
   /** True to run the tests */
   private static boolean mediainfoInstalled = true;
-  
+
   @BeforeClass
   public static void setupClass() {
     StreamHelper stdout = null;
@@ -88,18 +93,28 @@ public class MediaInspectionServiceImplTest {
     File f = new File(uriTrack);
     // set up services and mock objects
     service = new MediaInspectionServiceImpl();
-    serviceRegistry = new ServiceRegistryInMemoryImpl(service);
+    
+    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
+    service.setOrganizationDirectoryService(organizationDirectoryService);
 
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUser()).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
     EasyMock.replay(securityService);
     service.setSecurityService(securityService);
 
-    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject()))
-            .andReturn(ANONYMOUS_USER).anyTimes();
-    EasyMock.replay(userDirectoryService);
-    service.setUserDirectoryService(userDirectoryService);
+    serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
+    service.setServiceRegistry(serviceRegistry);
 
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.get(uriTrack)).andReturn(f);
@@ -107,25 +122,23 @@ public class MediaInspectionServiceImplTest {
     EasyMock.expect(workspace.get(uriTrack)).andReturn(f);
     EasyMock.replay(workspace);
     service.setWorkspace(workspace);
-
-    service.setServiceRegistry(serviceRegistry);
   }
 
   @After
   public void tearDown() throws Exception {
-    ((ServiceRegistryInMemoryImpl)serviceRegistry).dispose();
+    ((ServiceRegistryInMemoryImpl) serviceRegistry).dispose();
   }
 
   @Test
   public void testInspection() throws Exception {
     if (!mediainfoInstalled)
       return;
-    
+
     try {
       Job job = service.inspect(uriTrack);
       JobBarrier barrier = new JobBarrier(serviceRegistry, 1000, job);
       barrier.waitForJobs();
-      
+
       Track track = (Track) MediaPackageElementParser.getFromXml(job.getPayload());
       // test the returned values
       Checksum cs = Checksum.create(ChecksumType.fromString("md5"), "9d3523e464f18ad51f59564acde4b95a");

@@ -35,57 +35,14 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "job", namespace = "http://job.opencastproject.org/")
 public class JaxbJob implements Job {
 
-  /** Default constructor needed by jaxb */
-  public JaxbJob() {
-    this.context = new JaxbJobContext();
-  }
-
-  /**
-   * Constructs a JaxbJob with a specific identifier
-   * 
-   * @param id
-   *          the job id
-   */
-  public JaxbJob(Long id) {
-    this();
-    this.id = id;
-  }
-
-  /**
-   * Constructs a JaxbJob from an existing job
-   * 
-   * @param job
-   *          the job to use as a template for constructing this JaxbJob
-   */
-  public JaxbJob(Job job) {
-    this();
-    this.dateCompleted = job.getDateCompleted();
-    this.dateCreated = job.getDateCreated();
-    this.dateStarted = job.getDateStarted();
-    this.queueTime = job.getQueueTime();
-    this.runTime = job.getRunTime();
-    this.version = job.getVersion();
-    this.payload = job.getPayload();
-    this.processingHost = job.getProcessingHost();
-    this.createdHost = job.getCreatedHost();
-    this.id = job.getId();
-    this.jobType = job.getJobType();
-    this.operation = job.getOperation();
-    this.arguments = job.getArguments();
-    this.status = job.getStatus();
-    this.context = new JaxbJobContext(job.getContext());
-    this.parentJobId = job.getParentJobId();
-    this.rootJobId = job.getRootJobId();
-    this.dispatchable = job.isDispatchable();
-    this.uri = job.getUri();
-    this.creator = job.getCreator();
-  }
-
   /** The job ID */
   protected long id;
 
   /** The user that created this job */
   protected String creator;
+
+  /** The creator's organization */
+  protected String organization;
 
   /** The version, used for optimistic locking */
   protected long version;
@@ -141,6 +98,53 @@ public class JaxbJob implements Job {
 
   /** Whether this job is queueable */
   protected boolean dispatchable;
+
+  /** Default constructor needed by jaxb */
+  public JaxbJob() {
+    this.context = new JaxbJobContext();
+  }
+
+  /**
+   * Constructs a JaxbJob with a specific identifier
+   * 
+   * @param id
+   *          the job id
+   */
+  public JaxbJob(Long id) {
+    this();
+    this.id = id;
+  }
+
+  /**
+   * Constructs a JaxbJob from an existing job
+   * 
+   * @param job
+   *          the job to use as a template for constructing this JaxbJob
+   */
+  public JaxbJob(Job job) {
+    this();
+    this.dateCompleted = job.getDateCompleted();
+    this.dateCreated = job.getDateCreated();
+    this.dateStarted = job.getDateStarted();
+    this.queueTime = job.getQueueTime();
+    this.runTime = job.getRunTime();
+    this.version = job.getVersion();
+    this.payload = job.getPayload();
+    this.processingHost = job.getProcessingHost();
+    this.createdHost = job.getCreatedHost();
+    this.id = job.getId();
+    this.jobType = job.getJobType();
+    this.operation = job.getOperation();
+    this.arguments = job.getArguments();
+    this.status = job.getStatus();
+    this.context = new JaxbJobContext(job.getContext());
+    this.parentJobId = job.getParentJobId();
+    this.rootJobId = job.getRootJobId();
+    this.dispatchable = job.isDispatchable();
+    this.uri = job.getUri();
+    this.creator = job.getCreator();
+    this.organization = job.getOrganization();
+  }
 
   /**
    * {@inheritDoc}
@@ -525,11 +529,34 @@ public class JaxbJob implements Job {
   }
 
   /**
+   * Sets the user that created this job.
+   * 
    * @param creator
-   *          the creator to set
+   *          the creator
    */
   public void setCreator(String creator) {
     this.creator = creator;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.Job#getOrganization()
+   */
+  @Override
+  @XmlElement(name = "organization")
+  public String getOrganization() {
+    return organization;
+  }
+
+  /**
+   * Sets the organization that this job is associated with.
+   * 
+   * @param organization
+   *          the organization
+   */
+  public void setOrganization(String organization) {
+    this.organization = organization;
   }
 
   /**

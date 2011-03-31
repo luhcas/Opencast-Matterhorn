@@ -41,6 +41,7 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -106,6 +107,9 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   /**
    * Creates a new instance of the text analyzer service.
@@ -418,6 +422,16 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
     this.userDirectoryService = userDirectoryService;
   }
+  
+  /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
 
   /**
    * {@inheritDoc}
@@ -438,4 +452,15 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
+  }
+
 }

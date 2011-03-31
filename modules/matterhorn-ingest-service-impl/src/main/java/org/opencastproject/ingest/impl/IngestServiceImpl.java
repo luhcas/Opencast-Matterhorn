@@ -32,6 +32,7 @@ import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.security.api.UserDirectoryService;
@@ -122,6 +123,9 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   /** The local temp directory to use for unzipping mediapackages */
   private String tempFolder;
@@ -892,6 +896,16 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
   }
 
   /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
@@ -910,4 +924,15 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
+  }
+
 }

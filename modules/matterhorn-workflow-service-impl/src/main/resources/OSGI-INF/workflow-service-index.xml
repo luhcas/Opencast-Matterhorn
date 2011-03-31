@@ -9,4 +9,8 @@
   </service>
   <reference name="serviceregistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
     cardinality="1..1" policy="static" bind="setServiceRegistry" />
+  <reference name="authorization" interface="org.opencastproject.security.api.AuthorizationService"
+    cardinality="1..1" policy="static" bind="setAuthorizationService" />
+  <reference name="security" interface="org.opencastproject.security.api.SecurityService"
+    cardinality="1..1" policy="static" bind="setSecurityService" />
 </scr:component>

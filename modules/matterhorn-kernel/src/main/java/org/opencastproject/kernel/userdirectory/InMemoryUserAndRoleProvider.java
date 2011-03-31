@@ -13,7 +13,11 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.userdirectory;
+package org.opencastproject.kernel.userdirectory;
+
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ADMIN;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+import static org.opencastproject.security.api.SecurityConstants.MH_ADMIN;
 
 import org.opencastproject.security.api.RoleProvider;
 import org.opencastproject.security.api.User;
@@ -27,10 +31,11 @@ import java.util.Map;
 /**
  * An in-memory user directory containing the users and roles used by the system.
  */
-public class InMemoryUserProvider implements UserProvider, RoleProvider {
+public class InMemoryUserAndRoleProvider implements UserProvider, RoleProvider {
 
   /** The roles associated with the matterhorn system account */
-  public static final String[] MH_SYSTEM_ROLES = new String[] { "ROLE_ADMIN", "ROLE_OAUTH_USER", "ROLE_USER" };
+  public static final String[] MH_SYSTEM_ROLES = new String[] { "ROLE_ADMIN", "ROLE_OAUTH_USER", "ROLE_USER",
+          DEFAULT_ORGANIZATION_ADMIN };
 
   /**
    * A collection of accounts internal to Matterhorn.
@@ -47,12 +52,12 @@ public class InMemoryUserProvider implements UserProvider, RoleProvider {
     internalAccounts = new HashMap<String, User>();
     String digestUsername = cc.getBundleContext().getProperty("org.opencastproject.security.digest.user");
     String digestUserPass = cc.getBundleContext().getProperty("org.opencastproject.security.digest.pass");
-    User systemAccount = new User(digestUsername, digestUserPass, MH_SYSTEM_ROLES);
+    User systemAccount = new User(digestUsername, digestUserPass, DEFAULT_ORGANIZATION_ID, MH_SYSTEM_ROLES);
     internalAccounts.put(digestUsername, systemAccount);
-    
+
     String adminUsername = cc.getBundleContext().getProperty("org.opencastproject.security.demo.admin.user");
     String adminUserPass = cc.getBundleContext().getProperty("org.opencastproject.security.demo.admin.pass");
-    User administrator = new User(adminUsername, adminUserPass, MH_SYSTEM_ROLES);
+    User administrator = new User(adminUsername, adminUserPass, DEFAULT_ORGANIZATION_ID, MH_SYSTEM_ROLES);
     internalAccounts.put(adminUsername, administrator);
   }
 
@@ -78,11 +83,36 @@ public class InMemoryUserProvider implements UserProvider, RoleProvider {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     return getClass().getName();
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.RoleProvider#getLocalRole(java.lang.String)
+   */
+  @Override
+  public String getLocalRole(String role) {
+    if (role.equals(MH_ADMIN)) {
+      return "ROLE_ADMIN";
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.UserProvider#getOrganization()
+   */
+  @Override
+  public String getOrganization() {
+    return DEFAULT_ORGANIZATION_ID;
+  }
+
 }

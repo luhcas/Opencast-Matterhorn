@@ -175,14 +175,6 @@ public class SearchRestService {
     addEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);
 
-    // clear
-    RestEndpoint clearEndpoint = new RestEndpoint("clear", RestEndpoint.Method.POST, "/clear",
-            "Clears the entire search index");
-    clearEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .noContent("The search index was cleared, no content to return"));
-    clearEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, clearEndpoint);
-
     logger.debug("generated documentation for {}", data);
 
     return DocUtil.generate(data);
@@ -223,18 +215,6 @@ public class SearchRestService {
       if (searchService.delete(mediaPackageId))
         return Response.noContent().build();
       throw new NotFoundException();
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-      return Response.serverError().build();
-    }
-  }
-
-  @POST
-  @Path("clear")
-  public Response clear() throws SearchException {
-    try {
-      searchService.clear();
-      return Response.noContent().build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().build();

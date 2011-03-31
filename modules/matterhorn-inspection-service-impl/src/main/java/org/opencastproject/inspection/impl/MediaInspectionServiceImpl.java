@@ -37,6 +37,7 @@ import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -90,6 +91,9 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   /**
    * Creates a new media inspection service instance.
@@ -594,6 +598,16 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
   public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
     this.userDirectoryService = userDirectoryService;
   }
+  
+  /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
 
   /**
    * {@inheritDoc}
@@ -613,6 +627,16 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
   @Override
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
   }
 
 }

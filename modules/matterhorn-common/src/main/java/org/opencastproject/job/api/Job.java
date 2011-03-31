@@ -46,6 +46,13 @@ public interface Job {
   String getCreator();
 
   /**
+   * Returns the identifier of the organization that the creator is associated with.
+   * 
+   * @return the organization
+   */
+  String getOrganization();
+
+  /**
    * Gets the version of this job. Each time the job is updated, the version number is incremented. If a process
    * attempts to save a job that has been updated in another thread or on another host while the job was in memory, an
    * optimistic locking exception will be thrown.

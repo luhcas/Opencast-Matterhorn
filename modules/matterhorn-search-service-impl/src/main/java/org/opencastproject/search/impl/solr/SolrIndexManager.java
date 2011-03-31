@@ -18,8 +18,6 @@ package org.opencastproject.search.impl.solr;
 
 import static org.opencastproject.search.api.SearchService.READ_PERMISSION;
 import static org.opencastproject.search.api.SearchService.WRITE_PERMISSION;
-import static org.opencastproject.security.api.AuthorizationService.ADMIN_ROLE;
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
 
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
@@ -54,6 +52,7 @@ import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.SolrUtils;
@@ -120,6 +119,12 @@ public class SolrIndexManager {
 
   private Workspace workspace;
 
+  private SecurityService securityService;
+
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+  
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
@@ -346,14 +351,22 @@ public class SolrIndexManager {
     List<String> writes = new ArrayList<String>();
     permissions.put(WRITE_PERMISSION, writes);
 
+    String adminRole = null;
+    String anonymousRole = null;
+
+    adminRole = securityService.getOrganization().getAdminRole();
+    anonymousRole = securityService.getOrganization().getAnonymousRole();
+
     // The admin user can read and write
-    reads.add(ADMIN_ROLE);
-    writes.add(ADMIN_ROLE);
-    
+    if (adminRole != null) {
+      reads.add(adminRole);
+      writes.add(adminRole);
+    }
+
     if (acl.getEntries().isEmpty()) {
       // if no access control is specified, we let the anonymous roles read the mediapackage
-      for (String role : ANONYMOUS_USER.getRoles()) {
-        reads.add(role);
+      if (anonymousRole != null) {
+        reads.add(anonymousRole);
       }
       permissions.put(READ_PERMISSION, reads);
     } else {

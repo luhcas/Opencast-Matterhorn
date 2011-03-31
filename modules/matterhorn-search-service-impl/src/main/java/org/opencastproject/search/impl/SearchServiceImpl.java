@@ -16,8 +16,6 @@
 
 package org.opencastproject.search.impl;
 
-import static org.opencastproject.security.api.AuthorizationService.ADMIN_ROLE;
-
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -98,6 +96,9 @@ public class SearchServiceImpl implements SearchService {
     this.securityService = securityService;
     if (solrRequester != null) {
       solrRequester.setSecurityService(securityService);
+    }
+    if (solrIndexManager != null) {
+      solrIndexManager.setSecurityService(securityService);
     }
   }
 
@@ -230,6 +231,7 @@ public class SearchServiceImpl implements SearchService {
     solrServer = SolrServerFactory.newRemoteInstance(url);
     solrRequester = new SolrRequester(solrServer, securityService);
     solrIndexManager = new SolrIndexManager(solrServer, workspace);
+    solrIndexManager.setSecurityService(securityService);
     solrIndexManager.setDcService(dcService);
     solrIndexManager.setMpeg7Service(mpeg7Service);
   }
@@ -277,7 +279,8 @@ public class SearchServiceImpl implements SearchService {
       throw new IllegalArgumentException("Unable to add a null mediapackage");
     }
     User currentUser = securityService.getUser();
-    if (!currentUser.hasRole(ADMIN_ROLE) && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
+    String adminRole = securityService.getOrganization().getAdminRole();
+    if (!currentUser.hasRole(adminRole) && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
       throw new UnauthorizedException(currentUser, SearchService.WRITE_PERMISSION);
     }
     try {
@@ -316,16 +319,12 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * {@inheritDoc}
+   * Clears the complete solr index.
    * 
-   * @see org.opencastproject.search.api.SearchService#clear()
+   * @throws SearchException
+   *           if clearing the index fails
    */
-  @Override
-  public void clear() throws SearchException, UnauthorizedException {
-    User user = securityService.getUser();
-    if (!user.hasRole(ADMIN_ROLE)) {
-      throw new UnauthorizedException("User " + user + " is not allowed to clear the search index");
-    }
+  public void clear() throws SearchException {
     try {
       logger.info("Clearing the search index");
       solrIndexManager.clear();

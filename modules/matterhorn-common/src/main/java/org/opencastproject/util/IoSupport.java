@@ -228,9 +228,7 @@ public final class IoSupport {
           response = trustedClient.execute(get);
         } catch (TrustedHttpClientException e) {
           logger.warn("Unable to fetch file from {}.", url, e);
-          if (response != null) {
-            trustedClient.close(response);
-          }
+          trustedClient.close(response);
           return null;
         }
         in = new DataInputStream(response.getEntity().getContent());

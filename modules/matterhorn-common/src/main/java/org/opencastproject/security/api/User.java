@@ -15,10 +15,9 @@
  */
 package org.opencastproject.security.api;
 
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -44,6 +43,9 @@ public final class User {
   @XmlTransient
   protected String password;
 
+  /** The user's home organization identifier */
+  protected String organization;
+
   /**
    * No-arg constructor needed by JAXB
    */
@@ -51,59 +53,45 @@ public final class User {
   }
 
   /**
-   * Constructs a user with anonymous role.
+   * Constructs a user which is a member of the given organization that has the specified roles and no password set.
    * 
    * @param userName
    *          the username
-   */
-  public User(String userName) {
-    this(userName, ANONYMOUS_USER.getRoles());
-  }
-
-  /**
-   * Constructs a user with the specified roles.
-   * 
-   * @param userName
-   *          the username
-   * @param roleCollection
-   *          the set of roles for this user
-   */
-  public User(String userName, Collection<String> roleCollection) {
-    this.userName = userName;
-    if (roleCollection == null) {
-      roles = ANONYMOUS_USER.getRoles();
-    } else {
-      roles = roleCollection.toArray(new String[roleCollection.size()]);
-    }
-  }
-
-  /**
-   * Constructs a user with the specified roles.
-   * 
-   * @param userName
-   *          the username
+   * @param organization
+   *          the organization
    * @param roles
    *          the set of roles for this user
+   * @throws IllegalArgumentException
+   *           if <code>userName</code> or <code>organization</code> is <code>null</code>
    */
-  public User(String userName, String[] roles) {
-    this(userName, null, roles);
+  public User(String userName, String organization, String[] roles) throws IllegalArgumentException {
+    this(userName, null, organization, roles);
   }
 
   /**
-   * Constructs a user with the specified roles.
+   * Constructs a user which is a member of the given organization that has the specified roles.
    * 
    * @param userName
    *          the username
    * @param password
    *          the password
+   * @param organization
+   *          the organization
    * @param roles
    *          the set of roles for this user
+   * @throws IllegalArgumentException
+   *           if <code>userName</code> or <code>organization</code> is <code>null</code>
    */
-  public User(String userName, String password, String[] roles) {
+  public User(String userName, String password, String organization, String[] roles) throws IllegalArgumentException {
+    if (StringUtils.isBlank(userName))
+      throw new IllegalArgumentException("Username must be set");
+    if (StringUtils.isBlank(organization))
+      throw new IllegalArgumentException("Organization must be set");
     this.userName = userName;
     this.password = password;
+    this.organization = organization;
     if (roles == null || roles.length == 0) {
-      this.roles = ANONYMOUS_USER.getRoles();
+      this.roles = new String[] { SecurityConstants.MH_ANONYMOUS };
     } else {
       Arrays.sort(roles);
       this.roles = roles;
@@ -126,6 +114,15 @@ public final class User {
    */
   public String getPassword() {
     return password;
+  }
+
+  /**
+   * Returns the user's organization identifier.
+   * 
+   * @return the organization
+   */
+  public String getOrganization() {
+    return organization;
   }
 
   /**
@@ -162,7 +159,8 @@ public final class User {
     if (!(obj instanceof User))
       return false;
     User other = (User) obj;
-    return this.userName.equals(other.userName);
+    String organization = other.getOrganization();
+    return this.userName.equals(other.userName) && this.organization.equals(organization);
   }
 
   /**
@@ -173,7 +171,7 @@ public final class User {
   @Override
   public int hashCode() {
     return userName.hashCode();
-  };
+  }
 
   /**
    * {@inheritDoc}
@@ -182,6 +180,8 @@ public final class User {
    */
   @Override
   public String toString() {
-    return "User '" + userName + "'";
+    StringBuilder sb = new StringBuilder(organization).append(":").append(userName);
+    return sb.toString();
   }
+
 }

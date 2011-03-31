@@ -69,16 +69,6 @@ public interface SearchService {
   boolean delete(String mediaPackageId) throws SearchException, UnauthorizedException;
 
   /**
-   * Clears the search index.
-   * 
-   * @throws SearchException
-   *           if an error occurs while clearing the index
-   * @throws UnauthorizedException
-   *           if the current user is not authorized to clear the search index
-   */
-  void clear() throws SearchException, UnauthorizedException;
-
-  /**
    * Find search results based on the specified query object
    * 
    * @param q

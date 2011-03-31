@@ -125,7 +125,7 @@ public class SecurityConfigurationScanner {
         Dictionary props = new Hashtable<String, Boolean>();
         props.put("contextId", RestConstants.HTTP_CONTEXT_ID);
         props.put("pattern", ".*");
-        props.put("service.ranking", "1");
+        props.put("service.ranking", "2");
         if (reg != null) {
           reg.unregister();
           reg = null;

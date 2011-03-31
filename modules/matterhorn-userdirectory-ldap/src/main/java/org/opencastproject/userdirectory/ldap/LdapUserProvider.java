@@ -49,8 +49,14 @@ public class LdapUserProvider implements UserProvider, ManagedService {
   /** The key to look up the role attributes in the service configuration properties */
   private static final String ROLE_ATTRIBUTES_KEY = "org.opencastproject.userdirectory.ldap.roleattributes";
 
+  /** The key to look up the organization identifer in the service configuration properties */
+  private static final String ORGANIZATION_KEY = "org.opencastproject.userdirectory.ldap.org";
+
   /** The spring ldap userdetails service delegate */
   protected LdapUserDetailsService delegate = null;
+
+  /** The organization id */
+  protected String organization = null;
 
   /**
    * {@inheritDoc}
@@ -77,7 +83,17 @@ public class LdapUserProvider implements UserProvider, ManagedService {
         roles[i++] = authority.getAuthority();
       }
     }
-    return new User(userDetails.getUsername(), roles);
+    return new User(userDetails.getUsername(), getOrganization(), roles);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.UserProvider#getOrganization()
+   */
+  @Override
+  public String getOrganization() {
+    return organization;
   }
 
   /**
@@ -88,8 +104,17 @@ public class LdapUserProvider implements UserProvider, ManagedService {
   @Override
   public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
     String searchBase = (String) properties.get(SEARCH_BASE_KEY);
+    if (StringUtils.isBlank(searchBase))
+      throw new ConfigurationException(SEARCH_BASE_KEY, "is not set");
     String searchFilter = (String) properties.get(SEARCH_FILTER_KEY);
+    if (StringUtils.isBlank(searchFilter))
+      throw new ConfigurationException(SEARCH_FILTER_KEY, "is not set");
     String url = (String) properties.get(LDAP_URL_KEY);
+    if (StringUtils.isBlank(url))
+      throw new ConfigurationException(LDAP_URL_KEY, "is not set");
+    organization = (String) properties.get(ORGANIZATION_KEY);
+    if (StringUtils.isBlank(organization))
+      throw new ConfigurationException(ORGANIZATION_KEY, "is not set");
     DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(url);
     contextSource.setAnonymousReadOnly(true);
     try {
@@ -110,11 +135,12 @@ public class LdapUserProvider implements UserProvider, ManagedService {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     return getClass().getName();
   }
+
 }

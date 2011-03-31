@@ -28,12 +28,6 @@ import org.opencastproject.workflow.api.WorkflowStatistics;
  */
 public interface WorkflowServiceIndex {
   
-  /** Initialize the DAO, if necessary */
-  void activate();
-
-  /** Destroy the DAO, if necessary */
-  void deactivate();
-
   /**
    * Update the workflow instance, or add it to persistence if it is not already stored.
    * 

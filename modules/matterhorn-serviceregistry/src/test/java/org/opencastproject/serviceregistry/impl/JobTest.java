@@ -22,7 +22,11 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.util.UrlSupport;
 
@@ -78,9 +82,18 @@ public class JobTest {
     serviceRegistry.setPersistenceProvider(new PersistenceProvider());
     serviceRegistry.setPersistenceProperties(props);
     serviceRegistry.activate(null);
-    
+
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
+    serviceRegistry.setOrganizationDirectoryService(organizationDirectoryService);
+
+    User anonymous = new User("anonymous", organization.getId(), new String[] { organization.getAnonymousRole() });
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUser()).andReturn(SecurityService.ANONYMOUS_USER).anyTimes();
+    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
     EasyMock.replay(securityService);
     serviceRegistry.setSecurityService(securityService);
 

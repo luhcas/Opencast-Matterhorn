@@ -27,10 +27,6 @@ import java.io.IOException;
 import java.net.URL;
 
 import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -93,26 +89,6 @@ public class SharedHttpContext implements HttpContext {
     } catch (InvalidSyntaxException e) {
       logger.error(e.getMessage(), e);
       return false;
-    }
-  }
-
-  /**
-   * A {@link FilterChain} composed of {@link Filter}s with the
-   */
-  class Chain implements FilterChain {
-    private int current = 0;
-    private Filter[] filters;
-
-    Chain(Filter[] filters) {
-      this.filters = filters;
-    }
-
-    public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
-      if (current < filters.length && !response.isCommitted()) {
-        Filter filter = filters[current++];
-        logger.debug("doFilter() on " + filter);
-        filter.doFilter(request, response, this);
-      }
     }
   }
 }

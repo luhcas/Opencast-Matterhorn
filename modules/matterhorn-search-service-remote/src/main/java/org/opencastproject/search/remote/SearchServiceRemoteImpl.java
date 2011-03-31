@@ -27,7 +27,6 @@ import org.opencastproject.serviceregistry.api.RemoteBase;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -75,30 +74,6 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     }
     logger.info("Successfully added {} to the search service", mediaPackage);
     return;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#clear()
-   */
-  @Override
-  public void clear() throws SearchException {
-    HttpResponse response = null;
-    try {
-      HttpPost post = new HttpPost("/clear");
-      response = getResponse(post, HttpStatus.SC_NO_CONTENT);
-      if (response == null)
-        throw new SearchException("Unable to clear remote search index");
-      StatusLine status = response.getStatusLine();
-      if (status.getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-        logger.info("Successfully cleared remote search index");
-      } else {
-        throw new SearchException("Unable to clear remote search index, http status = " + status);
-      }
-    } finally {
-      closeConnection(response);
-    }
   }
 
   /**

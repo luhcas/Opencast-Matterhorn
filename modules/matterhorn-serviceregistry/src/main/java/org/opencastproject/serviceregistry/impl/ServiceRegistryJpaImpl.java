@@ -22,6 +22,8 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.security.api.TrustedHttpClientException;
@@ -122,6 +124,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   @SuppressWarnings("rawtypes")
   protected Map persistenceProperties;
@@ -303,13 +308,15 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   public Job createJob(String host, String serviceType, String operation, List<String> arguments, String payload,
           boolean dispatchable) throws ServiceRegistryException {
-    User currentUser = securityService.getUser();
     if (StringUtils.isBlank(host))
       throw new IllegalArgumentException("Host can't be null");
     if (StringUtils.isBlank(serviceType))
       throw new IllegalArgumentException("Service type can't be null");
     if (StringUtils.isBlank(operation))
       throw new IllegalArgumentException("Operation can't be null");
+
+    User currentUser = securityService.getUser();
+    Organization currentOrganization = securityService.getOrganization();
 
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
@@ -323,7 +330,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       if (creatingService.getHostRegistration().isMaintenanceMode()) {
         logger.warn("Creating a job from {}, which is currently in maintenance mode.", creatingService.getHost());
       }
-      JobJpaImpl job = new JobJpaImpl(currentUser, creatingService, operation, arguments, payload, dispatchable);
+      JobJpaImpl job = new JobJpaImpl(currentUser, currentOrganization, creatingService, operation, arguments, payload,
+              dispatchable);
 
       creatingService.creatorJobs.add(job);
 
@@ -354,11 +362,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   protected JobJpaImpl createJob(ServiceRegistrationJpaImpl serviceRegistration, String operation,
           List<String> arguments, String payload, boolean dispatchable) {
     User currentUser = securityService.getUser();
+    Organization currentOrganization = securityService.getOrganization();
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      JobJpaImpl job = new JobJpaImpl(currentUser, serviceRegistration, operation, arguments, payload, dispatchable);
+      JobJpaImpl job = new JobJpaImpl(currentUser, currentOrganization, serviceRegistration, operation, arguments,
+              payload, dispatchable);
       serviceRegistration.creatorJobs.add(job);
       // if this job is not dispatchable, it must be handled by the host that has created it
       if (dispatchable) {
@@ -1239,6 +1249,16 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   }
 
   /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
+
+  /**
    * Dispatches the job to the least loaded service that will accept the job, or throws a
    * <code>ServiceUnavailableException</code> if there is no such service.
    * 
@@ -1409,11 +1429,17 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
         for (Job job : jobsToDispatch) {
           String creator = job.getCreator();
+          String creatorOrganization = job.getOrganization();
+          Organization organization = organizationDirectoryService.getOrganization(creatorOrganization);
+          securityService.setOrganization(organization);
           User user = userDirectoryService.loadUser(creator);
+          if (user == null)
+            throw new IllegalStateException("Creator '" + creator + "' is not available");
+          if (organization == null)
+            throw new IllegalStateException("Organization '" + organization + "' is not available");
           try {
-            if (user != null) {
-              securityService.setUser(user);
-            }
+            securityService.setUser(user);
+            securityService.setOrganization(organization);
             String hostAcceptingJob = dispatchJob(em, job,
                     filterAndSortServiceRegistrations(serviceRegistrations, job.getJobType(), hostLoads));
             if (hostAcceptingJob == null) {
@@ -1433,6 +1459,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
             ServiceRegistryJpaImpl.logger.error("Error dispatching job " + job, cause);
           } finally {
             securityService.setUser(null);
+            securityService.setOrganization(null);
           }
         }
       } catch (Throwable t) {

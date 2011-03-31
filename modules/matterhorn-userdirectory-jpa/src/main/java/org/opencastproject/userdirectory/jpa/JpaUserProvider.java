@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -42,6 +43,9 @@ public class JpaUserProvider implements UserProvider, RoleProvider {
 
   /** The JPA provider */
   protected PersistenceProvider persistenceProvider;
+
+  /** Hard-coded organization name. TODO: Needs to be replaced */
+  protected static final String organization = "matterhorn";
 
   /**
    * @param persistenceProvider
@@ -92,7 +96,8 @@ public class JpaUserProvider implements UserProvider, RoleProvider {
       if (user == null) {
         return null;
       } else {
-        return new User(userName, user.getRoles());
+        Set<String> roles = user.getRoles();
+        return new User(userName, organization, roles.toArray(new String[roles.size()]));
       }
     } finally {
       em.close();
@@ -138,14 +143,36 @@ public class JpaUserProvider implements UserProvider, RoleProvider {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
+   * @see org.opencastproject.security.api.RoleProvider#getLocalRole(java.lang.String)
+   */
+  @Override
+  public String getLocalRole(String role) {
+    // TODO: Implement
+    return role;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.UserProvider#getOrganization()
+   */
+  @Override
+  public String getOrganization() {
+    return organization;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     return getClass().getName();
   }
+
 }

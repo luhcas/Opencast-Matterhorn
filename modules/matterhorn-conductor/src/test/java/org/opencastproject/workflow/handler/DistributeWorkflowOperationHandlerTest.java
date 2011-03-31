@@ -15,6 +15,9 @@
  */
 package org.opencastproject.workflow.handler;
 
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
@@ -26,6 +29,12 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
@@ -38,6 +47,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 
+import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,8 +71,24 @@ public class DistributeWorkflowOperationHandlerTest {
     uriMP = InspectWorkflowOperationHandler.class.getResource("/distribute_mediapackage.xml").toURI();
     mp = builder.loadFromXml(uriMP.toURL().openStream());
     service = new TestDistributionService();
-    serviceRegistry = new ServiceRegistryInMemoryImpl(service);
-    service.serviceRegistry = serviceRegistry;
+    
+    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.replay(userDirectoryService);
+
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
+
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
+    EasyMock.replay(securityService);
+
+    serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
 
     // set up the handler
     operationHandler = new DistributeWorkflowOperationHandler();
@@ -101,8 +127,6 @@ public class DistributeWorkflowOperationHandlerTest {
 
   class TestDistributionService implements DistributionService, JobProducer {
     public static final String JOB_TYPE = "distribute";
-
-    ServiceRegistry serviceRegistry = null;
 
     @Override
     public Job distribute(String mediaPackageId, MediaPackageElement element) throws DistributionException,

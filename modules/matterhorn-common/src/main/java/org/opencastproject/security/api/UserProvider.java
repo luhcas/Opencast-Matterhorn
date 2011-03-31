@@ -28,4 +28,12 @@ public interface UserProvider {
    * @return the user
    */
   User loadUser(String userName);
+
+  /**
+   * Returns the identifier for the organization that is associated with this user provider.
+   * 
+   * @return the defining organization
+   */
+  String getOrganization();
+
 }

@@ -15,12 +15,13 @@
  */
 package org.opencastproject.authorization.xacml;
 
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
-
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.util.NotFoundException;
@@ -47,16 +48,19 @@ import java.util.List;
  * Tests XACML features of the security service
  */
 public class XacmlSecurityTest {
-  
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(XacmlSecurityTest.class);
-  
+
   /** The stub workspace to store xacml files */
   WorkspaceStub workspace = null;
 
   /** The username to use with the security service */
   final String currentUser = "me";
-  
+
+  /** The organization to use */
+  final Organization organization = new DefaultOrganization();
+
   /** The roles to use with the security service */
   final List<String> currentRoles = new ArrayList<String>();
 
@@ -64,17 +68,28 @@ public class XacmlSecurityTest {
   SecurityService securityService = null;
 
   XACMLAuthorizationService authzService = null;
-  
+
   @Before
   public void setup() throws Exception {
     workspace = new WorkspaceStub();
     securityService = new SecurityService() {
       @Override
       public User getUser() {
-        return new User(currentUser, currentRoles);
+        return new User(currentUser, organization.getId(), currentRoles.toArray(new String[currentRoles.size()]));
       }
+
       @Override
       public void setUser(User user) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public Organization getOrganization() {
+        return organization;
+      }
+
+      @Override
+      public void setOrganization(Organization organization) {
         throw new UnsupportedOperationException();
       }
     };
@@ -82,12 +97,12 @@ public class XacmlSecurityTest {
     authzService.setWorkspace(new WorkspaceStub());
     authzService.setSecurityService(securityService);
   }
-  
+
   @After
   public void teardown() throws Exception {
     workspace.file.delete();
   }
-  
+
   @Test
   public void testSecurity() throws Exception {
 
@@ -102,15 +117,15 @@ public class XacmlSecurityTest {
     acl.add(new AccessControlEntry("student", "read", true));
     acl.add(new AccessControlEntry("student", "comment", true));
 
-    acl.add(new AccessControlEntry(ANONYMOUS_USER.getRoles()[0], "read", true));
-    acl.add(new AccessControlEntry(ANONYMOUS_USER.getRoles()[0], "comment", false));
+    acl.add(new AccessControlEntry(SecurityConstants.MH_ANONYMOUS, "read", true));
+    acl.add(new AccessControlEntry(SecurityConstants.MH_ANONYMOUS, "comment", false));
 
     String xacml = XACMLUtils.getXacml(mediapackage, accessControlList);
     logger.debug("XACML contents: {}", xacml);
-    
+
     // Add the security policy to the mediapackage
     mediapackage = authzService.setAccessControl(mediapackage, accessControlList);
-    
+
     // Ensure that the permissions specified are respected by the security service
     currentRoles.clear();
     currentRoles.add("admin");
@@ -129,23 +144,23 @@ public class XacmlSecurityTest {
     Assert.assertTrue(authzService.hasPermission(mediapackage, "comment"));
 
     currentRoles.clear();
-    currentRoles.add(ANONYMOUS_USER.getRoles()[0]);
+    currentRoles.add(SecurityConstants.MH_ANONYMOUS);
     Assert.assertFalse(authzService.hasPermission(mediapackage, "delete"));
     Assert.assertTrue(authzService.hasPermission(mediapackage, "read"));
     Assert.assertFalse(authzService.hasPermission(mediapackage, "comment"));
-    
+
   }
-  
+
   static class WorkspaceStub implements Workspace {
     File file = null;
-    
+
     public WorkspaceStub() throws IOException {
       this.file = File.createTempFile("xacml", "xml");
     }
-    
+
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#get(java.net.URI)
      */
     @Override
@@ -155,7 +170,7 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#getBaseUri()
      */
     @Override
@@ -166,8 +181,9 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.opencastproject.workspace.api.Workspace#put(java.lang.String, java.lang.String, java.lang.String, java.io.InputStream)
+     * 
+     * @see org.opencastproject.workspace.api.Workspace#put(java.lang.String, java.lang.String, java.lang.String,
+     *      java.io.InputStream)
      */
     @Override
     public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in)
@@ -181,8 +197,9 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.opencastproject.workspace.api.Workspace#putInCollection(java.lang.String, java.lang.String, java.io.InputStream)
+     * 
+     * @see org.opencastproject.workspace.api.Workspace#putInCollection(java.lang.String, java.lang.String,
+     *      java.io.InputStream)
      */
     @Override
     public URI putInCollection(String collectionId, String fileName, InputStream in) throws IOException {
@@ -192,7 +209,7 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#getCollectionContents(java.lang.String)
      */
     @Override
@@ -203,40 +220,40 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#delete(java.net.URI)
      */
     @Override
     public void delete(URI uri) throws NotFoundException, IOException {
       // TODO Auto-generated method stub
-      
+
     }
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#delete(java.lang.String, java.lang.String)
      */
     @Override
     public void delete(String mediaPackageID, String mediaPackageElementID) throws NotFoundException, IOException {
       // TODO Auto-generated method stub
-      
+
     }
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#deleteFromCollection(java.lang.String, java.lang.String)
      */
     @Override
     public void deleteFromCollection(String collectionId, String fileName) throws NotFoundException, IOException {
       // TODO Auto-generated method stub
-      
+
     }
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#getURI(java.lang.String, java.lang.String)
      */
     @Override
@@ -246,7 +263,7 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#getCollectionURI(java.lang.String, java.lang.String)
      */
     @Override
@@ -257,8 +274,9 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.opencastproject.workspace.api.Workspace#moveTo(java.net.URI, java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @see org.opencastproject.workspace.api.Workspace#moveTo(java.net.URI, java.lang.String, java.lang.String,
+     *      java.lang.String)
      */
     @Override
     public URI moveTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement, String toFileName)
@@ -269,8 +287,9 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.opencastproject.workspace.api.Workspace#copyTo(java.net.URI, java.lang.String, java.lang.String, java.lang.String)
+     * 
+     * @see org.opencastproject.workspace.api.Workspace#copyTo(java.net.URI, java.lang.String, java.lang.String,
+     *      java.lang.String)
      */
     @Override
     public URI copyTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement, String toFileName)
@@ -278,6 +297,6 @@ public class XacmlSecurityTest {
       // TODO Auto-generated method stub
       return null;
     }
-    
+
   }
 }

@@ -85,7 +85,7 @@ public class XACMLAuthorizationService implements AuthorizationService {
     List<AccessControlEntry> acl = accessControlList.getEntries();
     Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
     if (xacmlAttachments.length == 0) {
-      logger.warn("No XACML attachment found in {}", mediapackage);
+      logger.debug("No XACML attachment found in {}", mediapackage);
       return accessControlList;
     } else if (xacmlAttachments.length > 1) {
       logger.warn("More than one XACML policy is attached to {}", mediapackage);
@@ -153,8 +153,8 @@ public class XACMLAuthorizationService implements AuthorizationService {
   public boolean hasPermission(MediaPackage mediapackage, String action) {
     Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
     if (xacmlAttachments.length == 0) {
-      logger.warn("No XACML attachment found in {}", mediapackage);
-      return false;
+      logger.info("No XACML attachment found in {}", mediapackage);
+      return true;
     } else if (xacmlAttachments.length > 1) {
       logger.warn("More than one XACML policy is attached to {}", mediapackage);
       return false;

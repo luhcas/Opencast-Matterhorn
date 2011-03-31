@@ -15,7 +15,8 @@
  */
 package org.opencastproject.distribution.download;
 
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
@@ -23,7 +24,11 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
@@ -66,19 +71,27 @@ public class DownloadDistributionServiceImplTest {
     distributionRoot = new File("./target/static");
     service = new DownloadDistributionService();
 
-    serviceRegistry = new ServiceRegistryInMemoryImpl(service);
-    service.setServiceRegistry(serviceRegistry);
+    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
+    service.setOrganizationDirectoryService(organizationDirectoryService);
 
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUser()).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
     EasyMock.replay(securityService);
     service.setSecurityService(securityService);
 
-    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject()))
-            .andReturn(ANONYMOUS_USER).anyTimes();
-    EasyMock.replay(userDirectoryService);
-    service.setUserDirectoryService(userDirectoryService);
+    serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
+    service.setServiceRegistry(serviceRegistry);
 
     service.distributionDirectory = distributionRoot;
     service.serviceUrl = UrlSupport.DEFAULT_BASE_URL;

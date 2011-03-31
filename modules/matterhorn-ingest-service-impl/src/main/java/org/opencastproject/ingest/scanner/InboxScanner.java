@@ -16,9 +16,12 @@
 package org.opencastproject.ingest.scanner;
 
 import org.opencastproject.ingest.api.IngestService;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -51,6 +54,9 @@ public class InboxScanner implements ArtifactInstaller, ManagedService {
   /** The configuration key to use for determining the user to run as for ingest */
   public static final String USER_NAME = "user.name";
 
+  /** The configuration key to use for determining the user's organization */
+  public static final String USER_ORG = "user.organization";
+
   /** The configuration key to use for determining the workflow definition to use for ingest */
   public static final String WORKFLOW_DEFINITION = "workflow.definition";
 
@@ -69,51 +75,17 @@ public class InboxScanner implements ArtifactInstaller, ManagedService {
   /** The security service */
   protected SecurityService securityService = null;
 
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
+
   /** The user to run as during ingest */
   protected User user = null;
 
+  /** The user's organization */
+  protected Organization organization = null;
+
   /** The workflow definition ID to use during ingest */
   protected String workflowDefinition = null;
-
-  /**
-   * Sets the ingest service
-   * 
-   * @param ingestService
-   *          the ingest service
-   */
-  public void setIngestService(IngestService ingestService) {
-    this.ingestService = ingestService;
-  }
-
-  /**
-   * Sets the workspace
-   * 
-   * @param workspace
-   *          an instance of the workspace
-   */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
-  }
-
-  /**
-   * Callback for setting the security service.
-   * 
-   * @param securityService
-   *          the securityService to set
-   */
-  public void setSecurityService(SecurityService securityService) {
-    this.securityService = securityService;
-  }
-
-  /**
-   * Sets the user directory
-   * 
-   * @param userDirectoryService
-   *          the userDirectoryService to set
-   */
-  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
-    this.userDirectoryService = userDirectoryService;
-  }
 
   protected void activate(ComponentContext cc) {
     int maxThreads = 1;
@@ -140,6 +112,7 @@ public class InboxScanner implements ArtifactInstaller, ManagedService {
     return new Runnable() {
       public void run() {
         try {
+          securityService.setOrganization(organization);
           securityService.setUser(user);
           boolean mediaPackageIngestSuccess = false;
           if ("zip".equals(FilenameUtils.getExtension(artifact.getName()))) {
@@ -176,6 +149,7 @@ public class InboxScanner implements ArtifactInstaller, ManagedService {
           }
         } finally {
           securityService.setUser(null);
+          securityService.setOrganization(null);
         }
       }
     };
@@ -220,9 +194,68 @@ public class InboxScanner implements ArtifactInstaller, ManagedService {
     if (StringUtils.isNotBlank(userNameConfig)) {
       user = userDirectoryService.loadUser(userNameConfig);
     }
+    String organizationConfig = (String) properties.get(USER_ORG);
+    if (StringUtils.isNotBlank(organizationConfig)) {
+      try {
+        organization = organizationDirectoryService.getOrganization(organizationConfig);
+      } catch (NotFoundException e) {
+        throw new ConfigurationException(USER_ORG, "Organization '" + organizationConfig + "' does not exist");
+      }
+    }
     String workflowConfig = (String) properties.get(WORKFLOW_DEFINITION);
     if (StringUtils.isNotBlank(workflowConfig)) {
       workflowDefinition = workflowConfig;
     }
   }
+  
+  /**
+   * Sets the ingest service
+   * 
+   * @param ingestService
+   *          the ingest service
+   */
+  public void setIngestService(IngestService ingestService) {
+    this.ingestService = ingestService;
+  }
+
+  /**
+   * Sets the workspace
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * Sets the user directory
+   * 
+   * @param userDirectoryService
+   *          the userDirectoryService to set
+   */
+  public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
+    this.userDirectoryService = userDirectoryService;
+  }
+
+  /**
+   * Sets the organization directory server.
+   * 
+   * @param organizationDirectoryService
+   *          the organization directory service
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectoryService) {
+    this.organizationDirectoryService = organizationDirectoryService;
+  }
+
 }

@@ -13,16 +13,13 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.userdirectory;
+package org.opencastproject.kernel.userdirectory;
 
-import org.opencastproject.security.api.RoleProvider;
+import org.opencastproject.security.api.RoleDirectoryService;
 
 import org.json.simple.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -37,60 +34,31 @@ import javax.ws.rs.core.MediaType;
 @Path("/")
 public class RoleEndpoint {
 
-  /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(RoleEndpoint.class);
-
-  /** The set of role providers */
-  protected Set<RoleProvider> providers = null;
+  /** The role directory service */
+  protected RoleDirectoryService roleDirectoryService = null;
 
   // TODO: Add rest docs once the new annotations are available
-
-  /**
-   * Constructs a new RoleEndpoint
-   */
-  public RoleEndpoint() {
-    providers = new HashSet<RoleProvider>();
-  }
 
   @GET
   @Path("/list.json")
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings("unchecked")
   public String getRoles() {
-
-    // Collect all roles from all providers in a sorted set
     SortedSet<String> knownRoles = new TreeSet<String>();
-    for (RoleProvider provider : providers) {
-      for (String role : provider.getRoles()) {
-        knownRoles.add(role);
-      }
-    }
-
-    // Return the set as a json array
+    knownRoles.addAll(Arrays.asList(roleDirectoryService.getRoles()));
     JSONArray json = new JSONArray();
     json.addAll(knownRoles);
     return json.toJSONString();
   }
 
   /**
-   * Adds a new role provider to the list of known providers.
+   * Sets the role directory service
    * 
-   * @param roleProvider
-   *          the role provider
+   * @param roleDirectoryService
+   *          the roleDirectoryService to set
    */
-  public void addRoleProvider(RoleProvider roleProvider) {
-    providers.add(roleProvider);
+  public void setRoleDirectoryService(RoleDirectoryService roleDirectoryService) {
+    this.roleDirectoryService = roleDirectoryService;
   }
 
-  /**
-   * Removes a role provider from the list of known providers.
-   * 
-   * @param roleProvider
-   *          the role provider
-   */
-  public void removeRoleProvider(RoleProvider roleProvider) {
-    if (!providers.remove(roleProvider)) {
-      logger.warn("{} was not a registered role provider");
-    }
-  }
 }

@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -77,7 +78,10 @@ public class StreamingDistributionService extends AbstractJobProducer implements
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
-  
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
+
   /** The distribution directory */
   protected File distributionDirectory = null;
 
@@ -103,7 +107,7 @@ public class StreamingDistributionService extends AbstractJobProducer implements
       String distributionDirectoryPath = StringUtils.trimToNull(cc.getBundleContext().getProperty(
               "org.opencastproject.streaming.directory"));
       if (distributionDirectoryPath == null)
-       logger.warn("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
+        logger.warn("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
       else {
         distributionDirectory = new File(distributionDirectoryPath);
         if (!distributionDirectory.isDirectory()) {
@@ -137,7 +141,8 @@ public class StreamingDistributionService extends AbstractJobProducer implements
     if (StringUtils.isBlank(streamingUrl))
       throw new IllegalStateException("Stream url must be set (org.opencastproject.streaming.url)");
     if (distributionDirectory == null)
-      throw new IllegalStateException("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
+      throw new IllegalStateException(
+              "Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Distribute.toString(),
@@ -230,7 +235,8 @@ public class StreamingDistributionService extends AbstractJobProducer implements
       throw new IllegalArgumentException("Mediapackage ID must be specified");
 
     if (distributionDirectory == null)
-      throw new IllegalStateException("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
+      throw new IllegalStateException(
+              "Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
 
     try {
       return serviceRegistry.createJob(JOB_TYPE, Operation.Retract.toString(), Arrays.asList(mediaPackageId));
@@ -319,7 +325,7 @@ public class StreamingDistributionService extends AbstractJobProducer implements
   protected String process(Job job) throws Exception {
     Operation op = null;
     String operation = job.getOperation();
-    List<String> arguments = job.getArguments(); 
+    List<String> arguments = job.getArguments();
     try {
       op = Operation.valueOf(operation);
       String mediapackageId = arguments.get(0);
@@ -376,7 +382,8 @@ public class StreamingDistributionService extends AbstractJobProducer implements
   /**
    * Callback for setting the security service.
    * 
-   * @param securityService the securityService to set
+   * @param securityService
+   *          the securityService to set
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
@@ -385,30 +392,51 @@ public class StreamingDistributionService extends AbstractJobProducer implements
   /**
    * Callback for setting the user directory service.
    * 
-   * @param userDirectoryService the userDirectoryService to set
+   * @param userDirectoryService
+   *          the userDirectoryService to set
    */
   public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
     this.userDirectoryService = userDirectoryService;
   }
 
   /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
+
+  /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
    */
   @Override
   protected SecurityService getSecurityService() {
     return securityService;
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.job.api.AbstractJobProducer#getUserDirectoryService()
    */
   @Override
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
   }
 
 }

@@ -15,6 +15,9 @@
  */
 package org.opencastproject.kernel.security;
 
+import static org.opencastproject.security.api.SecurityConstants.MH_ANONYMOUS;
+
+import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 
@@ -33,6 +36,29 @@ public class SecurityServiceSpringImpl implements SecurityService {
   /** Holds delegates users for new threads that have been spawned from authenticated threads */
   private static final ThreadLocal<User> delegatedUserHolder = new ThreadLocal<User>();
 
+  /** Holds organization responsible for the current thread */
+  private static final ThreadLocal<Organization> organization = new ThreadLocal<Organization>();
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.SecurityService#getOrganization()
+   */
+  @Override
+  public Organization getOrganization() {
+    return SecurityServiceSpringImpl.organization.get();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.SecurityService#setOrganization(org.opencastproject.security.api.Organization)
+   */
+  @Override
+  public void setOrganization(Organization organization) {
+    SecurityServiceSpringImpl.organization.set(organization);
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -40,17 +66,19 @@ public class SecurityServiceSpringImpl implements SecurityService {
    */
   @Override
   public User getUser() {
+    Organization org = getOrganization();
     User delegatedUser = delegatedUserHolder.get();
     if (delegatedUser != null) {
       return delegatedUser;
     }
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String anonymousRole = org.getAnonymousRole();
     if (auth == null) {
-      return ANONYMOUS_USER;
+      return new User(MH_ANONYMOUS, org.getId(), new String[] { anonymousRole });
     } else {
       Object principal = auth.getPrincipal();
       if (principal == null) {
-        return ANONYMOUS_USER;
+        return new User(MH_ANONYMOUS, org.getId(), new String[] { anonymousRole });
       }
       if (principal instanceof UserDetails) {
         UserDetails userDetails = (UserDetails) principal;
@@ -64,9 +92,9 @@ public class SecurityServiceSpringImpl implements SecurityService {
             roles[i++] = ga.getAuthority();
           }
         }
-        return new User(userDetails.getUsername(), roles);
+        return new User(userDetails.getUsername(), org.getId(), roles);
       } else {
-        return ANONYMOUS_USER;
+        return new User(MH_ANONYMOUS, org.getId(), new String[] { anonymousRole });
       }
     }
   }

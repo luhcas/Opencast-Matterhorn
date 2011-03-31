@@ -15,9 +15,18 @@
  */
 package org.opencastproject.ingest.impl;
 
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -130,6 +139,22 @@ public class IngestServiceImplTest {
     EasyMock.replay(workflowInstance);
     EasyMock.replay(workflowService);
 
+    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.replay(userDirectoryService);
+
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
+
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
+    EasyMock.replay(securityService);
+
     HttpEntity entity = EasyMock.createMock(HttpEntity.class);
     InputStream is = getClass().getResourceAsStream("/av.mov");
     byte[] movie = IOUtils.toByteArray(is);
@@ -150,12 +175,13 @@ public class IngestServiceImplTest {
     EasyMock.expect(httpClient.execute((HttpGet) EasyMock.anyObject())).andReturn(httpResponse).anyTimes();
     EasyMock.replay(httpClient);
 
-    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
     service = new IngestServiceImpl();
     service.setHttpClient(httpClient);
     service.setTempFolder("target/temp/");
     service.setWorkspace(workspace);
     service.setWorkflowService(workflowService);
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
+    serviceRegistry.registerService(service);
     service.setServiceRegistry(serviceRegistry);
     service.defaultWorkflowDefinionId = "sample";
     serviceRegistry.registerService(service);

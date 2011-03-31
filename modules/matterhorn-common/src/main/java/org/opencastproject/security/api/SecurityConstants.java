@@ -16,19 +16,26 @@
 package org.opencastproject.security.api;
 
 /**
- * A marker interface for federation of all {@link UserProvider}s.
+ * Common security constant definitions.
  */
-public interface UserDirectoryService {
+public interface SecurityConstants {
 
-  /**
-   * Loads a user by username, or returns null if this user is not known to the thread's current organization.
-   * 
-   * @param userName
-   *          the username
-   * @return the user
-   * @throws IllegalStateException
-   *           if no organization is set for the current thread
-   */
-  User loadUser(String userName);
+  /** Name of the Matterhorn admin role */
+  String MH_ADMIN = "mh_admin";
 
+  /** Name of the Matterhorn admin role */
+  String MH_ANONYMOUS = "mh_anonymous";
+
+  /** The default organization identifier */
+  String DEFAULT_ORGANIZATION_ID = "mh_default_org";
+
+  /** The default organization name */
+  String DEFAULT_ORGANIZATION_NAME = "Opencast Project";
+
+  /** Name of the default organization's local admin role */
+  String DEFAULT_ORGANIZATION_ADMIN = "admin";
+
+  /** Name of the default organization's local anonymous role */
+  String DEFAULT_ORGANIZATION_ANONYMOUS = "anonymous";
+  
 }

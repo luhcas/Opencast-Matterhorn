@@ -13,15 +13,16 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.userdirectory;
+package org.opencastproject.kernel.userdirectory;
 
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
-
+import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.RoleDirectoryService;
 import org.opencastproject.security.api.RoleProvider;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.security.api.UserProvider;
+import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,17 +32,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
- * COMMENT ME
- * 
+ * Federates user and role providers.
  */
 public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetailsService, RoleDirectoryService {
 
@@ -49,10 +46,13 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
   private static final Logger logger = LoggerFactory.getLogger(UserDirectoryServiceImpl.class);
 
   /** The list of user providers */
-  protected List<UserProvider> userProviders = new ArrayList<UserProvider>();
+  protected Map<String, UserProvider> userProviders = new HashMap<String, UserProvider>();
 
   /** The list of role providers */
-  protected List<RoleProvider> roleProviders = new ArrayList<RoleProvider>();
+  protected Map<String, RoleProvider> roleProviders = new HashMap<String, RoleProvider>();
+
+  /** The security service */
+  protected SecurityService securityService = null;
 
   /**
    * Adds a user provider.
@@ -62,7 +62,7 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void addUserProvider(UserProvider userProvider) {
     logger.info("Adding {} to the list of user providers", userProvider);
-    this.userProviders.add(userProvider);
+    this.userProviders.put(userProvider.getOrganization(), userProvider);
   }
 
   /**
@@ -73,7 +73,7 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void removeUserProvider(UserProvider userProvider) {
     logger.info("Removing {} from the list of user providers", userProvider);
-    this.userProviders.remove(userProvider);
+    this.userProviders.remove(userProvider.getOrganization());
   }
 
   /**
@@ -84,7 +84,7 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void addRoleProvider(RoleProvider roleProvider) {
     logger.info("Adding {} to the list of role providers", roleProvider);
-    this.roleProviders.add(roleProvider);
+    this.roleProviders.put(roleProvider.getOrganization(), roleProvider);
   }
 
   /**
@@ -95,21 +95,25 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void removeRoleProvider(RoleProvider roleProvider) {
     logger.info("Removing {} from the list of role providers", roleProvider);
-    this.roleProviders.remove(roleProvider);
+    this.roleProviders.remove(roleProvider.getOrganization());
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.security.api.RoleProvider#getRoles()
+   * @see org.opencastproject.security.api.RoleDirectoryService#getRoles()
    */
   @Override
   public String[] getRoles() {
-    SortedSet<String> roles = new TreeSet<String>();
-    for (RoleProvider provider : roleProviders) {
-      roles.addAll(Arrays.asList(provider.getRoles()));
+    Organization org = securityService.getOrganization();
+    if (org == null) {
+      throw new IllegalStateException("No organization is set");
     }
-    return roles.toArray(new String[roles.size()]);
+    RoleProvider roleProvider = roleProviders.get(org.getId());
+    if (roleProvider == null) {
+      throw new IllegalStateException("No role provider for " + org);
+    }
+    return roleProvider.getRoles();
   }
 
   /**
@@ -118,19 +122,22 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    * @see org.opencastproject.security.api.UserDirectoryService#loadUser(java.lang.String)
    */
   @Override
-  public User loadUser(String userName) {
-    for (UserProvider provider : userProviders) {
-      User user = provider.loadUser(userName);
-      if (user != null)
-        return user;
+  public User loadUser(String userName) throws IllegalStateException {
+    Organization org = securityService.getOrganization();
+    if (org == null) {
+      throw new IllegalStateException("No organization is set");
     }
-    return ANONYMOUS_USER;
+    UserProvider userProvider = userProviders.get(org.getId());
+    if (userProvider == null) {
+      throw new IllegalStateException("No user provider for " + org);
+    }
+    return userProvider.loadUser(userName);
   }
 
   public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException,
           org.springframework.dao.DataAccessException {
     User user = loadUser(userName);
-    if (user.equals(ANONYMOUS_USER)) {
+    if (user == null) {
       throw new UsernameNotFoundException(userName);
     } else {
       Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
@@ -141,6 +148,34 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
       return new org.springframework.security.core.userdetails.User(user.getUserName(), password, true, true, true,
               true, authorities);
     }
-  };
+  }
+
+  /**
+   * Sets the security service
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.security.api.RoleDirectoryService#getLocalRole(java.lang.String)
+   */
+  @Override
+  public String getLocalRole(String role) throws NotFoundException {
+    Organization org = securityService.getOrganization();
+    if (org == null) {
+      throw new IllegalStateException("No organization is set");
+    }
+    RoleProvider roleProvider = roleProviders.get(org.getId());
+    if (roleProvider == null) {
+      throw new IllegalStateException("No role provider for " + org);
+    }
+    return roleProvider.getLocalRole(role);
+  }
 
 }

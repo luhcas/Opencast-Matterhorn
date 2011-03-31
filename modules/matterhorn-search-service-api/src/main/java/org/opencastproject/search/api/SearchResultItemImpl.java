@@ -31,7 +31,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -159,14 +158,6 @@ public class SearchResultItemImpl implements SearchResultItem {
   @XmlElementWrapper(name = "segments")
   @XmlElement(name = "segment")
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
-
-  /** The roles that can read this result */
-  @XmlTransient
-  private String[] readRoles;
-
-  /** The roles that can write this result */
-  @XmlTransient
-  private String[] writeRoles;
 
   /**
    * {@inheritDoc}
@@ -655,19 +646,4 @@ public class SearchResultItemImpl implements SearchResultItem {
     mediaSegments.add((MediaSegmentImpl) segment); // TODO: assuming this
   }
 
-  /**
-   * @param readRoles
-   *          the readRoles to set
-   */
-  public void setReadRoles(String[] readRoles) {
-    this.readRoles = readRoles;
-  }
-
-  /**
-   * @param writeRoles
-   *          the writeRoles to set
-   */
-  public void setWriteRoles(String[] writeRoles) {
-    this.writeRoles = writeRoles;
-  }
 }

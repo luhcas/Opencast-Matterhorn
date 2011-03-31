@@ -16,6 +16,8 @@
 package org.opencastproject.job.api;
 
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
@@ -85,14 +87,13 @@ public abstract class AbstractJobProducer implements JobProducer {
   @Override
   public boolean acceptJob(Job job) throws ServiceRegistryException {
     if (isReadyToAccept(job)) {
-      User user = getUserDirectoryService().loadUser(job.getCreator());
       try {
         job.setStatus(Job.Status.RUNNING);
         getServiceRegistry().updateJob(job);
       } catch (NotFoundException e) {
         throw new IllegalStateException(e);
       }
-      executor.submit(new JobRunner(job, user));
+      executor.submit(new JobRunner(job));
       return true;
     } else {
       return false;
@@ -131,6 +132,13 @@ public abstract class AbstractJobProducer implements JobProducer {
   protected abstract UserDirectoryService getUserDirectoryService();
 
   /**
+   * Returns a reference to the organization directory service.
+   * 
+   * @return the organization directory service
+   */
+  protected abstract OrganizationDirectoryService getOrganizationDirectoryService();
+
+  /**
    * Asks the overriding class to process the arguments using the given operation. The result will be added to the
    * associated job as the payload.
    * 
@@ -146,22 +154,18 @@ public abstract class AbstractJobProducer implements JobProducer {
    * A utility class to run jobs
    */
   class JobRunner implements Callable<Void> {
-    
+
     /** The job */
     private final Job job;
 
-    /** The user to run this job as */
-    private final User user;
-        
     /**
      * Constructs a new job runner
      * 
      * @param job
      *          the job to run
      */
-    JobRunner(Job job, User user) {
+    JobRunner(Job job) {
       this.job = job;
-      this.user = user;
     }
 
     /**
@@ -171,8 +175,12 @@ public abstract class AbstractJobProducer implements JobProducer {
      */
     @Override
     public Void call() throws Exception {
+      SecurityService securityService = getSecurityService();
+      Organization organization = getOrganizationDirectoryService().getOrganization(job.getOrganization());
       try {
-        getSecurityService().setUser(user);
+        securityService.setOrganization(organization);
+        User user = getUserDirectoryService().loadUser(job.getCreator());
+        securityService.setUser(user);
         String payload = process(job);
         job.setPayload(payload);
         job.setStatus(Status.FINISHED);
@@ -180,14 +188,15 @@ public abstract class AbstractJobProducer implements JobProducer {
         job.setStatus(Status.FAILED);
         if (e instanceof ServiceRegistryException)
           throw (ServiceRegistryException) e;
-        logger.warn("Error handling operation '" + job.getOperation() + "': " + e.getMessage(),
-                e);
+        logger.warn("Error handling operation '" + job.getOperation() + "': " + e.getMessage(), e);
       } finally {
-        getSecurityService().setUser(null);
         try {
           getServiceRegistry().updateJob(job);
         } catch (NotFoundException e) {
           throw new ServiceRegistryException(e);
+        } finally {
+          securityService.setUser(null);
+          securityService.setOrganization(null);
         }
       }
       return null;

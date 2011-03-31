@@ -35,6 +35,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -88,6 +89,9 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
 
   /** Reference to the receipt service */
   private ServiceRegistry serviceRegistry;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   /** Reference to the encoder engine factory */
   private GStreamerFactory encoderEngineFactory;
@@ -817,6 +821,16 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
   }
 
   /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
@@ -835,4 +849,15 @@ public class GStreamerComposerService extends AbstractJobProducer implements Com
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
+  }
+
 }

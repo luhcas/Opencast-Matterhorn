@@ -22,6 +22,7 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -81,6 +82,9 @@ public class DownloadDistributionService extends AbstractJobProducer implements 
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   /**
    * Creates a new instance of the download distribution service.
@@ -369,6 +373,16 @@ public class DownloadDistributionService extends AbstractJobProducer implements 
   }
 
   /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
@@ -387,4 +401,15 @@ public class DownloadDistributionService extends AbstractJobProducer implements 
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
+  }
+
 }

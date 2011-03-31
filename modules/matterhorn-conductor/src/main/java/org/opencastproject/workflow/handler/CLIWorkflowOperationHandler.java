@@ -27,6 +27,7 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,7 +173,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
         logger.info("Output file was found but was not deserializable to a MediaPackage object");
       } finally {
         try {
-          fil.close();
+          IOUtils.closeQuietly(fil);
         } catch (Exception e) {
           // supressed
         }

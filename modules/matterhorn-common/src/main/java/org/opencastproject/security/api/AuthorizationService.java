@@ -23,9 +23,6 @@ import org.opencastproject.mediapackage.MediaPackageException;
  */
 public interface AuthorizationService {
 
-  /** The Matterhorn administration role */
-  String ADMIN_ROLE = "ROLE_ADMIN";
-  
   /**
    * Determines whether the current user can take the specified action on the mediapackage.
    * 
@@ -63,4 +60,5 @@ public interface AuthorizationService {
    */
   MediaPackage setAccessControl(MediaPackage mediapackage, AccessControlList accessControlList)
           throws MediaPackageException;
+
 }

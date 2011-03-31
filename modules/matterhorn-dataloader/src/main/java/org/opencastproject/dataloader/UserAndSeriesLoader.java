@@ -51,6 +51,7 @@ public class UserAndSeriesLoader {
    */
   protected void activate() {
     // Load 100 series
+    logger.info("Adding 100 sample series...");
     for (int i = 0; i < 100; i++) {
       String seriesId = "series_" + i;
       DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
@@ -62,7 +63,7 @@ public class UserAndSeriesLoader {
         dc.set(DublinCore.PROPERTY_CONTRIBUTOR, "Contributor #" + i);
         seriesService.updateSeries(dc);
         seriesService.updateAccessControl(seriesId, acl);
-        logger.info("Added series {}", dc);
+        logger.debug("Added series {}", dc);
       } catch (SeriesException e) {
         logger.warn("Unable to create series {}", dc);
       } catch (NotFoundException e) {
@@ -71,6 +72,7 @@ public class UserAndSeriesLoader {
     }
 
     // Load 1000 users, all with ROLE_USER and a role in the series
+    logger.info("Adding 1000 sample users...");
     for (int i = 0; i < 1000; i++) {
       Set<String> roleSet = new HashSet<String>();
       roleSet.add("ROLE_USER");
@@ -78,12 +80,12 @@ public class UserAndSeriesLoader {
       JpaUser user = new JpaUser("user" + i, "pass" + i, roleSet);
       try {
         jpaUserProvider.addUser(user);
-        logger.info("Added {}", user);
+        logger.debug("Added {}", user);
       } catch (Exception e) {
         logger.warn("Can not add {}", user);
       }
     }
-
+    logger.info("Finished loading sample series and users");
   }
 
   /**

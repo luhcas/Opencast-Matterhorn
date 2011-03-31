@@ -16,13 +16,20 @@
 package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
 
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AuthorizationService;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
+import org.opencastproject.security.api.SecurityConstants;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -75,9 +82,12 @@ public class WorkflowStatisticsTest {
   protected Set<HandlerRegistration> workflowHandlers = null;
   private WorkflowServiceSolrIndex dao = null;
   private Workspace workspace = null;
+  private SecurityService securityService = null;
   private MediaPackage mediaPackage = null;
 
   private File sRoot = null;
+
+  private AccessControlList acl = new AccessControlList();
 
   protected static final String getStorageRoot() {
     return "." + File.separator + "target" + File.separator + System.currentTimeMillis();
@@ -118,12 +128,25 @@ public class WorkflowStatisticsTest {
       }
     };
 
-    service.setSecurityService(new SecurityServiceStub());
+    securityService = new SecurityServiceStub();
+    service.setSecurityService(securityService);
 
+    AuthorizationService authzService = EasyMock.createNiceMock(AuthorizationService.class);
+    EasyMock.expect(authzService.getAccessControlList((MediaPackage)EasyMock.anyObject())).andReturn(acl).anyTimes();
+    EasyMock.replay(authzService);
+    service.setAuthorizationService(authzService);
+    
+    User anonymous = new User("anonymous", "opencast.org", new String[] { SecurityConstants.MH_ANONYMOUS });
     UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
     EasyMock.replay(userDirectoryService);
     service.setUserDirectoryService(userDirectoryService);
+
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String)EasyMock.anyObject())).andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
+    service.setOrganizationDirectoryService(organizationDirectoryService);
 
     MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.replay(mds);
@@ -140,12 +163,14 @@ public class WorkflowStatisticsTest {
     EasyMock.replay(workspace);
 
     // Mock the service registry
-    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
 
     // Create the workflow database (solr)
     dao = new WorkflowServiceSolrIndex();
     dao.solrRoot = sRoot + File.separator + "solr." + System.currentTimeMillis();
+    dao.setSecurityService(securityService);
     dao.setServiceRegistry(serviceRegistry);
+    dao.setAuthorizationService(authzService);
     dao.activate();
     service.setDao(dao);
     service.activate(null);

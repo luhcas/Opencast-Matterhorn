@@ -28,6 +28,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -96,6 +97,9 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
 
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
+  
   /** Component context needed for retrieving Converter Engines */
   protected ComponentContext componentContext = null;
 
@@ -108,7 +112,7 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -418,7 +422,7 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   protected String process(Job job) throws Exception {
     Operation op = null;
     String operation = job.getOperation();
-    List<String> arguments = job.getArguments(); 
+    List<String> arguments = job.getArguments();
     try {
       op = Operation.valueOf(operation);
 
@@ -465,7 +469,8 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   /**
    * Callback for setting the security service.
    * 
-   * @param securityService the securityService to set
+   * @param securityService
+   *          the securityService to set
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
@@ -474,10 +479,21 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   /**
    * Callback for setting the user directory service.
    * 
-   * @param userDirectoryService the userDirectoryService to set
+   * @param userDirectoryService
+   *          the userDirectoryService to set
    */
   public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
     this.userDirectoryService = userDirectoryService;
+  }
+
+  /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
   }
 
   /**
@@ -493,13 +509,23 @@ public class CaptionServiceImpl extends AbstractJobProducer implements CaptionSe
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.job.api.AbstractJobProducer#getUserDirectoryService()
    */
   @Override
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
   }
-  
+
   /**
    * {@inheritDoc}
    * 

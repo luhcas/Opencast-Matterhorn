@@ -17,34 +17,36 @@ package org.opencastproject.security.api;
 
 import org.opencastproject.util.NotFoundException;
 
+import java.net.URL;
+import java.util.List;
+
 /**
- * Mix-in interface for directories that can list known roles.
+ * Manages organizations.
  */
-public interface RoleProvider {
+public interface OrganizationDirectoryService {
 
   /**
-   * Gets all known roles.
+   * Gets an organization by its identifier.
    * 
-   * @return the roles
+   * @param id
+   *          the identifier
+   * @return the organization with this identifier
    */
-  String[] getRoles();
+  Organization getOrganization(String id) throws NotFoundException;
 
   /**
-   * Returns the local role name as defined by the organization or <code>null</code> if undefined. For example, the
-   * matterhorn role <code>{@link AuthorizationService#ADMIN}</code> would translate to the local role name
-   * <code>ucb_admin</code>.
+   * Gets an organization by request URL.
    * 
-   * @return the local role name
-   * @throws NotFoundException
-   *           if there is no mapping for role <code>role</code>
+   * @param url
+   *          a request URL
+   * @return the organization that is mapped to this URL
    */
-  String getLocalRole(String role) throws NotFoundException;
+  Organization getOrganization(URL url) throws NotFoundException;
 
   /**
-   * Returns the identifier for the organization that is defining this set of roles.
+   * Gets all registered organizations.
    * 
-   * @return the defining organization
+   * @return the organizations
    */
-  String getOrganization();
-
+  List<Organization> getOrganizations();
 }

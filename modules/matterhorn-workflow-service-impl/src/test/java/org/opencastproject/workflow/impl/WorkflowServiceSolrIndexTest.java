@@ -19,7 +19,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -45,6 +48,8 @@ public class WorkflowServiceSolrIndexTest {
 
   private WorkflowServiceSolrIndex dao = null;
 
+  private AccessControlList acl = new AccessControlList();
+
   @Before
   public void setup() throws Exception {
     // Create a job with a workflow as its payload
@@ -64,12 +69,18 @@ public class WorkflowServiceSolrIndexTest {
     EasyMock.expect(serviceRegistry.getJob(123)).andReturn(job);
     EasyMock.replay(serviceRegistry);
 
+    AuthorizationService authzService = EasyMock.createNiceMock(AuthorizationService.class);
+    EasyMock.expect(authzService.getAccessControlList((MediaPackage)EasyMock.anyObject())).andReturn(acl).anyTimes();
+    EasyMock.replay(authzService);
+
     // Now create the dao
     dao = new WorkflowServiceSolrIndex();
     dao.solrRoot = PathSupport.concat("target", Long.toString(System.currentTimeMillis()));
     dao.setServiceRegistry(serviceRegistry);
+    dao.setAuthorizationService(authzService);
+    dao.setSecurityService(new SecurityServiceStub());
     dao.activate();
-  }
+}
 
   @After
   public void teardown() throws Exception {
@@ -85,7 +96,7 @@ public class WorkflowServiceSolrIndexTest {
   public void testBuildSimpleQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withMediaPackage("123").withSeriesId("series1");
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "mediapackageid:123 AND seriesid:series1";
+    String expected = "mediapackageid:123 AND seriesid:series1 AND (oc_acl_read:admin)";
     assertEquals(expected, solrQuery);
   }
 
@@ -97,7 +108,7 @@ public class WorkflowServiceSolrIndexTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withState(WorkflowState.RUNNING)
             .withState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (state:running OR state:paused)";
+    String expected = "seriesid:series1 AND (state:running OR state:paused) AND (oc_acl_read:admin)";
     assertEquals(expected, solrQuery);
   }
 
@@ -109,7 +120,7 @@ public class WorkflowServiceSolrIndexTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING)
             .withoutState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:running AND -state:paused AND *:*)";
+    String expected = "seriesid:series1 AND (-state:running AND -state:paused AND *:*) AND (oc_acl_read:admin)";
     assertEquals(expected, solrQuery);
   }
 
@@ -120,7 +131,7 @@ public class WorkflowServiceSolrIndexTest {
   public void testBuildNegativeStateQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:running AND *:*)";
+    String expected = "seriesid:series1 AND (-state:running AND *:*) AND (oc_acl_read:admin)";
     assertEquals(expected, solrQuery);
   }
 

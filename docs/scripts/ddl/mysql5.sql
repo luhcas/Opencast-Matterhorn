@@ -128,6 +128,7 @@ CREATE TABLE `SERVICE_REGISTRATION` (
 CREATE TABLE `JOB` (
   `ID` bigint(20) NOT NULL,
   `CREATOR` varchar(255) collate utf8_unicode_ci default NULL,
+  `ORGANIZATION` varchar(255) collate utf8_unicode_ci default NULL,
   `STATUS` int(11) default NULL,
   `PAYLOAD` longtext collate utf8_unicode_ci,
   `DATESTARTED` datetime default NULL,

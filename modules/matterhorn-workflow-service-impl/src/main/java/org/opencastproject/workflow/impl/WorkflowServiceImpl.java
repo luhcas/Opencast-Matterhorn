@@ -34,6 +34,8 @@ import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
@@ -168,6 +170,9 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
+  
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   static {
     YES = new HashSet<String>(Arrays.asList(new String[] { "yes", "true", "on" }));
@@ -223,6 +228,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
   protected void fireListeners(final WorkflowInstance oldWorkflowInstance, final WorkflowInstance newWorkflowInstance)
           throws WorkflowParsingException {
     final User currentUser = securityService.getUser();
+    final Organization currentOrganization = securityService.getOrganization();
     for (final WorkflowListener listener : listeners) {
       if (oldWorkflowInstance == null || !oldWorkflowInstance.getState().equals(newWorkflowInstance.getState())) {
         Runnable runnable = new Runnable() {
@@ -230,9 +236,11 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
           public void run() {
             try {
               securityService.setUser(currentUser);
+              securityService.setOrganization(currentOrganization);
               listener.stateChanged(newWorkflowInstance);
             } finally {
               securityService.setUser(null);
+              securityService.setOrganization(null);
             }
           }
         };
@@ -249,9 +257,11 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
             public void run() {
               try {
                 securityService.setUser(currentUser);
+                securityService.setOrganization(currentOrganization);
                 listener.operationChanged(newWorkflowInstance);
               } finally {
                 securityService.setUser(null);
+                securityService.setOrganization(null);
               }
             }
           };
@@ -1327,7 +1337,13 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
   @Override
   public synchronized boolean acceptJob(Job job) throws ServiceRegistryException {
     if (isReadyToAccept(job)) {
+      User originalUser = securityService.getUser();
+      Organization originalOrg = securityService.getOrganization();
       try {
+        Organization organization = organizationDirectoryService.getOrganization(job.getOrganization());
+        securityService.setOrganization(organization);
+        User user = userDirectoryService.loadUser(job.getCreator());
+        securityService.setUser(user);
         job.setStatus(Job.Status.RUNNING);
         serviceRegistry.updateJob(job);
         executorService.submit(new JobRunner(job));
@@ -1336,6 +1352,9 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
         if (e instanceof ServiceRegistryException)
           throw (ServiceRegistryException) e;
         throw new ServiceRegistryException(e);
+      } finally {
+        securityService.setUser(originalUser);
+        securityService.setOrganization(originalOrg);
       }
     } else {
       return false;
@@ -1536,6 +1555,16 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
   }
 
   /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
+
+  /**
    * Sets the search indexer to use in this service.
    * 
    * @param index
@@ -1676,12 +1705,15 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
      */
     @Override
     public Void call() throws Exception {
-      User jobUser = userDirectoryService.loadUser(job.getCreator());
+      Organization jobOrganization = organizationDirectoryService.getOrganization(job.getOrganization());
       try {
+        securityService.setOrganization(jobOrganization);
+        User jobUser = userDirectoryService.loadUser(job.getCreator());
         securityService.setUser(jobUser);
         process(job);
       } finally {
         securityService.setUser(null);
+        securityService.setOrganization(null);
       }
       return null;
     }

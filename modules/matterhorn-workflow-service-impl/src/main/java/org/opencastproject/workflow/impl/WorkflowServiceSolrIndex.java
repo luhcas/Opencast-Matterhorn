@@ -15,8 +15,16 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.workflow.api.WorkflowService.READ_PERMISSION;
+
 import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AuthorizationService;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.NotFoundException;
@@ -63,8 +71,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -142,24 +153,23 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   /** The key in solr documents representing the full text index */
   private static final String FULLTEXT_KEY = "fulltext";
 
+  /** The key in solr documents representing the prefix to an access control entry */
+  private static final String ACL_KEY_PREFIX = "oc_acl_";
+
   /** The service registry, managing jobs */
   private ServiceRegistry serviceRegistry = null;
+
+  /** The authorization service */
+  private AuthorizationService authorizationService = null;
+
+  /** The security service */
+  private SecurityService securityService = null;
 
   /** Whether to index workflows synchronously as they are stored */
   protected boolean synchronousIndexing = true;
 
   /** The thread pool to use in asynchronous indexing */
   protected ExecutorService indexingExecutor;
-
-  /**
-   * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
-   * 
-   * @param registry
-   *          the service registry
-   */
-  protected void setServiceRegistry(ServiceRegistry registry) {
-    this.serviceRegistry = registry;
-  }
 
   /**
    * Callback from the OSGi environment on component registration. The indexing behavior can be set using component
@@ -199,11 +209,8 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#activate()
+   * Activates the index by configuring solr with the server url that must have been set previously.
    */
-  @Override
   public void activate() {
     // Set up the solr server
     if (solrServerUrl != null) {
@@ -289,11 +296,8 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceIndex#deactivate()
+   * Shuts down the solr index.
    */
-  @Override
   public void deactivate() {
     SolrServerFactory.shutdown(solrServer);
   }
@@ -420,7 +424,63 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
       }
       doc.addField(SUBJECT_KEY, buf.toString());
     }
+
+    try {
+      AccessControlList acl = authorizationService.getAccessControlList(mp);
+      addAuthorization(doc, acl);
+    } catch (MediaPackageException e) {
+      throw new WorkflowDatabaseException(e);
+    }
+
     return doc;
+  }
+
+  /**
+   * Adds authorization fields to the solr document.
+   * 
+   * @param doc
+   *          the solr document
+   * @param acl
+   *          the access control list
+   */
+  protected void addAuthorization(SolrInputDocument doc, AccessControlList acl) {
+    Map<String, List<String>> permissions = new HashMap<String, List<String>>();
+
+    // Define containers for common permissions
+    List<String> reads = new ArrayList<String>();
+    permissions.put(WorkflowService.READ_PERMISSION, reads);
+    List<String> writes = new ArrayList<String>();
+    permissions.put(WorkflowService.WRITE_PERMISSION, writes);
+
+    // The admin user can read and write
+    String adminRole = securityService.getOrganization().getAdminRole();
+    reads.add(adminRole);
+    writes.add(adminRole);
+
+    if (acl.getEntries().isEmpty()) {
+      // TODO: Use authorization service to look up the current user's home organization's adminstrative role
+      permissions.put(WorkflowService.READ_PERMISSION, reads);
+    } else {
+      for (AccessControlEntry entry : acl.getEntries()) {
+        if (!entry.isAllow()) {
+          logger.warn("Search service does not support denial via ACL, ignoring {}", entry);
+          continue;
+        }
+        List<String> actionPermissions = permissions.get(entry.getAction());
+        if (acl == null) {
+          actionPermissions = new ArrayList<String>();
+          permissions.put(entry.getAction(), actionPermissions);
+        }
+        actionPermissions.add(entry.getRole());
+      }
+    }
+
+    // Write the permissions to the solr document
+    for (Map.Entry<String, List<String>> entry : permissions.entrySet()) {
+      String fieldName = ACL_KEY_PREFIX + entry.getKey();
+      doc.setField(fieldName, entry.getValue());
+    }
+
   }
 
   /**
@@ -720,6 +780,21 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
       sb.append("*:*");
     }
 
+    // Limit the results to only those workflow instances the current user can read
+    User user = securityService.getUser();
+    String[] roles = user.getRoles();
+    if (roles.length > 0) {
+      sb.append(" AND (");
+      StringBuilder roleList = new StringBuilder();
+      for (String role : roles) {
+        if (roleList.length() > 0)
+          roleList.append(" OR ");
+        roleList.append(ACL_KEY_PREFIX).append(READ_PERMISSION).append(":").append(role);
+      }
+      sb.append(roleList.toString());
+      sb.append(")");
+    }
+
     return sb.toString();
   }
 
@@ -904,6 +979,36 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }
+  }
+
+  /**
+   * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
+   * 
+   * @param registry
+   *          the service registry
+   */
+  protected void setServiceRegistry(ServiceRegistry registry) {
+    this.serviceRegistry = registry;
+  }
+
+  /**
+   * Callback for setting the authorization service.
+   * 
+   * @param authorizationService
+   *          the authorizationService to set
+   */
+  protected void setAuthorizationService(AuthorizationService authorizationService) {
+    this.authorizationService = authorizationService;
+  }
+
+  /**
+   * Callback for setting the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  protected void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
   }
 
 }

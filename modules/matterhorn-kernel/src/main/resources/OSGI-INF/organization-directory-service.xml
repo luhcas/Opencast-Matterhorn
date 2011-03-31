@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+
+  <scr:component name="org.opencastproject.kernel.security.OrganizationDirectoryServiceImpl" activate="activate" immediate="true">
+    <implementation class="org.opencastproject.kernel.security.OrganizationDirectoryServiceImpl" />
+    <property name="service.description" value="Organization Directory Service" />
+    <service>
+      <provide interface="org.opencastproject.security.api.OrganizationDirectoryService" />
+    </service>
+    <reference name="orgDirectory" interface="org.opencastproject.security.api.Organization"
+      cardinality="0..n" policy="dynamic" bind="addOrganizationDirectory" unbind="removeOrganizationDirectory" />
+  </scr:component>
+
+</scr:components>

@@ -17,7 +17,8 @@ package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
 
 import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -25,6 +26,13 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AuthorizationService;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -72,6 +80,8 @@ public class WorkflowOperationSkippingTest {
 
   private File sRoot = null;
 
+  private AccessControlList acl = new AccessControlList();
+  
   protected static final String getStorageRoot() {
     return "." + File.separator + "target" + File.separator + System.currentTimeMillis();
   }
@@ -105,22 +115,46 @@ public class WorkflowOperationSkippingTest {
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl();
-    serviceRegistry.registerService(service);
+    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.replay(userDirectoryService);
+    service.setUserDirectoryService(userDirectoryService);
+
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
+    service.setOrganizationDirectoryService(organizationDirectoryService);
+
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
+    EasyMock.replay(securityService);
+
+    securityService = new SecurityServiceStub();
+    service.setSecurityService(securityService);
+
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
 
     dao = new WorkflowServiceSolrIndex();
-    dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = sRoot + File.separator + "solr." + System.currentTimeMillis();
+
+    AuthorizationService authzService = EasyMock.createNiceMock(AuthorizationService.class);
+    EasyMock.expect(authzService.getAccessControlList((MediaPackage)EasyMock.anyObject())).andReturn(acl).anyTimes();
+    EasyMock.replay(authzService);
+    service.setAuthorizationService(authzService);
+
+    dao.setServiceRegistry(serviceRegistry);
+    dao.setSecurityService(securityService);
+    dao.setAuthorizationService(authzService);
+
     dao.activate();
     service.setDao(dao);
     service.activate(null);
     service.setServiceRegistry(serviceRegistry);
 
-    service.setSecurityService(new SecurityServiceStub());
-
-    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
-    EasyMock.replay(userDirectoryService);
     service.setUserDirectoryService(userDirectoryService);
 
     InputStream is = null;

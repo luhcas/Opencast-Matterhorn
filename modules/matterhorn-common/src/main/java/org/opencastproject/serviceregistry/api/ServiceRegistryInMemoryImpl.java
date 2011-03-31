@@ -20,6 +20,11 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
+import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
@@ -34,7 +39,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -65,26 +69,30 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
   /** The thread pool to use for dispatching queued jobs. */
   protected ScheduledExecutorService dispatcher = Executors.newScheduledThreadPool(1);
 
-  /** The threads to execute the dispatching */
-  protected ThreadPoolExecutor dispatchWorker = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-
   /** The job identifier */
   protected AtomicLong idCounter = new AtomicLong();
 
-  public ServiceRegistryInMemoryImpl(JobProducer service) throws ServiceRegistryException {
+  /**
+   * An (optional) security service. If set to a non-null value, this will be used to obtain the current user when
+   * creating new jobs.
+   */
+  protected SecurityService securityService = null;
+
+  /** The user directory service */
+  protected UserDirectoryService userDirectoryService = null;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
+
+  public ServiceRegistryInMemoryImpl(JobProducer service, SecurityService securityService,
+          UserDirectoryService userDirectoryService, OrganizationDirectoryService organizationDirectoryService)
+          throws ServiceRegistryException {
     if (service != null)
       registerService(service);
-    // Schedule the job dispatching.
-    dispatcher.scheduleWithFixedDelay(new JobDispatcher(), DEFAULT_DISPATCHER_TIMEOUT, DEFAULT_DISPATCHER_TIMEOUT,
-            TimeUnit.MILLISECONDS);
-  }
-
-  /**
-   * Creates a new service registry in memory.
-   */
-  public ServiceRegistryInMemoryImpl() {
-    // Schedule the job dispatching.
-    dispatcher.scheduleWithFixedDelay(new JobDispatcher(), DEFAULT_DISPATCHER_TIMEOUT, DEFAULT_DISPATCHER_TIMEOUT,
+    this.securityService = securityService;
+    this.userDirectoryService = userDirectoryService;
+    this.organizationDirectoryService = organizationDirectoryService;
+    this.dispatcher.scheduleWithFixedDelay(new JobDispatcher(), DEFAULT_DISPATCHER_TIMEOUT, DEFAULT_DISPATCHER_TIMEOUT,
             TimeUnit.MILLISECONDS);
   }
 
@@ -269,6 +277,10 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
     JaxbJob job = null;
     synchronized (this) {
       job = new JaxbJob(idCounter.addAndGet(1));
+      if (securityService != null) {
+        job.setCreator(securityService.getUser().getUserName());
+        job.setOrganization(securityService.getOrganization().getId());
+      }
       job.setJobType(type);
       job.setOperation(operation);
       job.setArguments(arguments);
@@ -561,6 +573,10 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
           Job job = null;
           try {
             job = JobParser.parseJob(serializedJob);
+            User creator = userDirectoryService.loadUser(job.getCreator());
+            Organization organization = organizationDirectoryService.getOrganization(job.getOrganization());
+            securityService.setUser(creator);
+            securityService.setOrganization(organization);
             if (Status.QUEUED.equals(job.getStatus())) {
               job.setStatus(Status.DISPATCHING);
               if (!dispatchJob(job)) {
@@ -577,12 +593,18 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
             logger.error("Error dispatching job " + job, cause);
           } catch (IOException e) {
             throw new IllegalStateException("Error unmarshaling job", e);
+          } catch (NotFoundException e) {
+            throw new IllegalStateException("Creator organization not found", e);
+          } catch (Throwable e) {
+            logger.error("Error dispatching job " + job, e);
           } finally {
             try {
               jobs.put(job.getId(), JobParser.toXml(job));
             } catch (IOException e) {
               throw new IllegalStateException("Error unmarshaling job", e);
             }
+            securityService.setUser(null);
+            securityService.setOrganization(null);
           }
         }
       }
@@ -593,7 +615,6 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
    * Shuts down this service registry, logging all jobs and their statuses.
    */
   public void deactivate() {
-    dispatchWorker.shutdownNow();
     dispatcher.shutdownNow();
     Map<Status, AtomicInteger> counts = new HashMap<Job.Status, AtomicInteger>();
     synchronized (jobs) {
@@ -628,4 +649,13 @@ public class ServiceRegistryInMemoryImpl implements ServiceRegistry {
     return Integer.MAX_VALUE;
   }
 
+  /**
+   * Sets the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
 }

@@ -19,7 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.opencastproject.security.api.SecurityService.ANONYMOUS_USER;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobBarrier;
@@ -35,7 +36,11 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
@@ -129,23 +134,31 @@ public class VideoSegmenterTest {
     });
     EasyMock.replay(workspace);
 
-    vsegmenter = new VideoSegmenterServiceImpl();
-    serviceRegistry = new ServiceRegistryInMemoryImpl(vsegmenter);
-    vsegmenter.setServiceRegistry(serviceRegistry);
+    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
+    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.replay(userDirectoryService);
 
-    vsegmenter.setMpeg7CatalogService(mpeg7Service);
-    vsegmenter.setWorkspace(workspace);
+    Organization organization = new DefaultOrganization();
+    OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
+    EasyMock.replay(organizationDirectoryService);
 
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUser()).andReturn(ANONYMOUS_USER).anyTimes();
+    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
     EasyMock.replay(securityService);
+
+    vsegmenter = new VideoSegmenterServiceImpl();
+    serviceRegistry = new ServiceRegistryInMemoryImpl(vsegmenter, securityService, userDirectoryService,
+            organizationDirectoryService);
+    vsegmenter.setServiceRegistry(serviceRegistry);
+    vsegmenter.setMpeg7CatalogService(mpeg7Service);
+    vsegmenter.setWorkspace(workspace);
     vsegmenter.setSecurityService(securityService);
-
-    UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(ANONYMOUS_USER).anyTimes();
-    EasyMock.replay(userDirectoryService);
     vsegmenter.setUserDirectoryService(userDirectoryService);
-
+    vsegmenter.setOrganizationDirectoryService(organizationDirectoryService);
   }
 
   /**

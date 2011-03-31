@@ -40,6 +40,7 @@ import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.VideoStream;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -100,6 +101,9 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
 
   /** Reference to the embedder engine factory */
   private EmbedderEngineFactory embedderEngineFactory;
+
+  /** The organization directory service */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
 
   /** Id builder used to create ids for encoded tracks */
   private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
@@ -1045,6 +1049,16 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
   }
 
   /**
+   * Sets a reference to the organization directory service.
+   * 
+   * @param organizationDirectory
+   *          the organization directory
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
+    this.organizationDirectoryService = organizationDirectory;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.job.api.AbstractJobProducer#getSecurityService()
@@ -1062,6 +1076,16 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
   @Override
   protected UserDirectoryService getUserDirectoryService() {
     return userDirectoryService;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.job.api.AbstractJobProducer#getOrganizationDirectoryService()
+   */
+  @Override
+  protected OrganizationDirectoryService getOrganizationDirectoryService() {
+    return organizationDirectoryService;
   }
 
 }

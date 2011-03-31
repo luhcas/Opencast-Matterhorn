@@ -72,6 +72,9 @@
     <field name="license_sort" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
     <field name="subject_sort" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
 
+   <!-- Authorization fields -->
+   <dynamicField name="oc_acl_*"  type="text"  indexed="true"  stored="true" multiValued="true" />
+
   </fields>
 
   <uniqueKey>id</uniqueKey>
