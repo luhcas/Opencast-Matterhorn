@@ -16,7 +16,7 @@
             $(elm).attr('value', filename);
             $('#file').append(elm);
           }
-          parent.ocUploadListener.fileSelectedAjax($('#file').val(),'');
+          parent.ocUpload.UI.formFieldChanged();
         });
       });
 
@@ -27,7 +27,7 @@
         var TRACK_ID = 'source-track';
         var file = $('#file').val();
         var flavor = $('#flavor').val();
-        var mp = parent.ocIngest.mediaPackage;
+        var mp = $('#mediapackage').val();
         var mpId = $(mp.documentElement).attr('id');
         $.ajax({
           url : '../../files/move/inbox/' + file + '/' + mpId + '/' + TRACK_ID + "/" + file,
@@ -40,17 +40,20 @@
             track = $(track).append(url);
             $(mp.documentElement).find('media').append(track);
             $('#mp').val(parent.ocUtils.xmlToString(mp));
-            parent.ocUploadListener.uploadComplete();
+            parent.ocUpload.Listener.uploadComplete($('#jobId').val());
           }
         });
       }
     </script>
   </head>
-  <body style="margin:0;padding:0;border:0;outline:0;vertical-align:baseline;background: transparent">
+  <body style="margin:0;padding:0;border:0;outline:0;vertical-align:baseline;background:transparent;">
+    <input type="hidden" name="jobId" id="jobId" class="track-id" value="{jobId}" />
+    <input type="hidden" id="mediapackage" value=""/>
     <form name="uploadForm" id="uploadForm" action="javascript: submit();">
       <input type="hidden" name="flavor" id="flavor" value="">
       <input type="hidden" name="mediaPackage" id="mp" value="">
-      <select id="file" onchange="parent.ocUploadListener.fileSelectedAjax(this.value,'');" style="width:250px;">
+      <select id="file" class="file-selector" onchange="parent.ocUpload.UI.formFieldChanged();" style="width:250px;">
+        <option value="">select a file</option>
       </select>
     </form>
   </body>

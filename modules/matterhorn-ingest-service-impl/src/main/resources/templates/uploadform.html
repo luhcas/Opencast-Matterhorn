@@ -6,12 +6,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   </head>
   <body style="margin:0;padding:0;border:0;outline:0;vertical-align:baseline;background: transparent">
+    <input type="hidden" name="jobId" class="track-id" value="{jobId}" />
     <form id="uploadForm" name="uploadForm" method="POST" action="{uploadURL}" enctype="multipart/form-data">
-      <input type="hidden" name="flavor" value="">
-      <input type="hidden" name="mediaPackage" value="">
+      <input id="flavor" type="hidden" name="flavor" value="">
+      <input id="mediapackage" type="hidden" name="mediaPackage" value="">
       <input type="hidden" name="elementType" value="track">
-      <input type="file" name="file" onchange="parent.ocUploadListener.fileSelectedAjax(this.value,'{jobId}');">
-      <!-- <input type="submit" value="Submit"> -->
+      <input type="file" name="file" class="file-selector" onchange="parent.ocUpload.UI.formFieldChanged();">
     </form>
   </body>
 </html>

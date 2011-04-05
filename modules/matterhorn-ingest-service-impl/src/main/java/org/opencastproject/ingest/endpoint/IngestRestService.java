@@ -690,7 +690,7 @@ public class IngestRestService {
         }
       } catch (NoResultException e) {
         logger.warn("Upload job not found for Id: " + jobId);
-        return buildUploadFailedRepsonse();
+        return buildUploadFailedRepsonse(job);
       }
       if (ServletFileUpload.isMultipartContent(request)) {
         ServletFileUpload upload = new ServletFileUpload();
@@ -727,6 +727,7 @@ public class IngestRestService {
                 is = getClass().getResourceAsStream("/templates/complete.html");
                 String html = IOUtils.toString(is, "UTF-8");
                 html = html.replaceAll("\\{mediaPackage\\}", MediaPackageParser.getAsXml(mp));
+                html = html.replaceAll("\\{jobId\\}", job.getId());
                 return Response.ok(html).build();
               } finally {
                 IOUtils.closeQuietly(is);
@@ -737,11 +738,11 @@ public class IngestRestService {
       } else {
         logger.warn("Job " + job.getId() + ": message is not multipart/form-data encoded");
       }
-      return buildUploadFailedRepsonse();
+      return buildUploadFailedRepsonse(job);
     } catch (Exception ex) {
       logger.error(ex.getMessage());
       ex.printStackTrace();
-      return buildUploadFailedRepsonse();
+      return buildUploadFailedRepsonse(job);
     } finally {
       em.close();
     }
@@ -752,11 +753,12 @@ public class IngestRestService {
    * 
    * @return HTML that calls the UploadListener.uploadFailed js function
    */
-  private Response buildUploadFailedRepsonse() {
+  private Response buildUploadFailedRepsonse(UploadJob job) {
     InputStream is = null;
     try {
       is = getClass().getResourceAsStream("/templates/error.html");
       String html = IOUtils.toString(is, "UTF-8");
+      html = html.replaceAll("\\{jobId\\}", job.getId());
       return Response.ok(html).build();
     } catch (IOException ex) {
       logger.error("Unable to build upload failed Response");
@@ -841,6 +843,7 @@ public class IngestRestService {
      * Long.toString(job.getBytesReceived()) + "}"; return Response.ok(json).build();
      */
     JSONObject out = new JSONObject();
+    out.put("filename", job.getFilename());
     out.put("total", Long.toString(job.getBytesTotal()));
     out.put("received", Long.toString(job.getBytesReceived()));
     return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
