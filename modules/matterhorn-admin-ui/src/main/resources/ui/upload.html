@@ -1,306 +1,370 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-    <!-- HEAD -->
-    <head>
-        <title id="i18n_window_title">Upload Recording | Opencast Matterhorn</title>
-        <meta http-equiv="cache-control" content="no-cache">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="shortcut icon" href="img/favicon.ico">
-        
-        <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css" />
-        <link rel="stylesheet" type="text/css" href="css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css" />
-        <link rel="stylesheet" type="text/css" href="css/admin.css" />
-        <link type="text/css" rel="stylesheet" href="css/upload.css">
-        <link type="text/css" rel="stylesheet" href="css/progress.css">
+  <!-- HEAD -->
+  <head>
+    <title id="i18n_window_title">Upload Recording | Opencast Matterhorn</title>
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="shortcut icon" href="img/favicon.ico">
 
-        <!-- scripts -->
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css" />
+    <link rel="stylesheet" type="text/css" href="css/admin.css" />
+    <link type="text/css" rel="stylesheet" href="css/progress.css">
 
-        <script type="text/javascript" src="jquery/jquery-1.4.4.min.js"></script>
-        <script type="text/javascript" src="jquery/jquery-ui-1.8.9.custom.min.js"></script>
-        <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
-        <script type="text/javascript" src="js/upload.helptexts.json"></script>
-        <script type="text/javascript" src="js/oc.workflow.js"></script>
-        <script type="text/javascript" src="js/oc.upload.js"></script>
-        <script type="text/javascript" src="js/oc.uploadListener.js"></script>
-        <script type="text/javascript" src="js/oc.utils.js"></script>
-        <script type="text/javascript" src="js/oc.ingest.js"></script>
-        <script type="text/javascript">
-            $(document).ready(function() {
-              ocUpload.init();
-              $('#BtnSubmit, #btnCancel').button();
-              $( "#tabsWrapper" ).tabs({
-                select: function (event, ui) {
-                  switch (ui.index) {
-                    case 0:
-                      window.location = 'recordings.html';
-                      return false;
-                      break;
-                    case 1:
-                      window.location = 'series_list.html';
-                      return false;
-                      break;
-                    case 2:
-                      window.location = 'agents_status.html';
-                      return false;
-                      break;
-                    case 3:
-                      window.location = 'statistics.html';
-                      return false;
-                      break;
-                  }
-                },
-                selected: 0
-              });
-            });
-        </script>
-    </head>
+    <!-- scripts -->
 
-    <body>
-        <div id="pageHeader">
-            <span id="currentVersion"></span>
-            <a href="/j_spring_security_logout">Log out</a>
-            <div class="clear"></div>
+    <script type="text/javascript" src="jquery/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.upload.new.js"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+        ocUpload.UI.init();
+        $( "#tabsWrapper" ).tabs({
+          select: function (event, ui) {
+            switch (ui.index) {
+              case 0:
+                window.location = 'recordings.html';
+                return false;
+                break;
+              case 1:
+                window.location = 'series_list.html';
+                return false;
+                break;
+              case 2:
+                window.location = 'agents_status.html';
+                return false;
+                break;
+              case 3:
+                window.location = 'statistics.html';
+                return false;
+                break;
+            }
+          },
+          selected: 0
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="pageHeader">
+      <span id="currentVersion"></span>
+      <a href="/j_spring_security_logout">Log out</a>
+      <div class="clear"></div>
+    </div>
+
+    <!-- notification that javaScript is disabled -->
+    <noscript>
+      <div style="border:1px solid red;width:530px;margin:20px;margin-left:auto;margin-right:auto;">
+        <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
+          <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
+          JavaScript is disabled
+        </div>
+        <div style="padding:10px;">
+          JavaScript is turned off in your web browser, so this site won't work properly! <br />
+          <strong>
+            Please turn JavaScript on to use this site, then refresh the page.
+          </strong>
+        </div>
+      </div>
+    </noscript>
+
+    <div id="wrapper">
+      <div id="header">
+        <a href="recordings.html" style="text-decoration: none;">
+          <img src="img/MatterhornLogo.png" onclick="window.location='../welcome.html'; return false;" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
+          <h1>Admin Tools</h1>
+        </a>
+        <a href="http://www.opencastproject.org" id="oc-logo">
+          <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">
+        </a>
+        <div class="clear"></div>
+      </div>
+
+      <div id="tabsWrapper" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+        <ul id="tabs">
+          <li>
+            <a href="#recordingsA" id="i18n_tab_recording">Recordings</a>
+          </li>
+          <li>
+            <a href="#seriesA" id="i18n_tab_series">Series</a>
+          </li>
+          <li>
+            <a href='#agents_statusA' id="i18n_tab_agent">Capture Agents</a>
+          </li>
+          <li>
+            <a href="#statisticsA" id="i18n_tab_statistics">Statistics</a>
+          </li>
+        </ul>
+
+        <!-- BEGIN of stage -->
+        <div class="layout-page-content">
+
+          <div id="stage" class="layout-centered form-box" style="background:white; margin-top: 10px;">
+            <div class="layout-centered">
+              <center><h2><span id="i18n_page_title">Upload Recording</span></h2></center>
+            </div>
+
+            <!-- missing fields notification -->
+
+            <div  id="missingFieldsContainer" class="layout-page-header ui-helper-hidden">
+              <div class="layout-centered ui-state-error ui-corner-all scheduler-info-container">
+                <h3 style="position: relative; padding-left: 20px;">
+                  <span class="ui-icon ui-icon-alert"></span> <b>Missing or invalid input</b>
+                </h3>
+                <ul>
+                  <li id="item-title" class="missing-fields-item">
+                    <span class="ui-icon ui-icon-carat-1-e"></span>
+                    <span>
+                      Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
+                    </span>
+                  </li>
+                  <li id="item-track" class="missing-fields-item">
+                    <span class="ui-icon ui-icon-carat-1-e"></span>
+                    <span>
+                      Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. Supported file formats are: .avi, .mp3, .mp4, .mov, .mpg, .mkv, .flv or .wmv.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <form id="uploadForm" name="uploadForm" action="../ingest/addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
+
+              <div class="form-box layout-centered ui-widget">
+                <div class="form-box-content ui-widget-content ui-corner-all">
+                  <form action="">
+                    <ul class="oc-ui-form-list">
+                      <li>
+                        <label class="scheduler-label" for="title" id="titleLabel"><span style="color: red;">* </span><span id="i18n_title_label">Title</span>:</label>
+                        <input type="text" id="titleField" name="title" class="oc-ui-form-field requiredField dc-metadata-field" maxlength="255" />
+                      </li>
+                      <li>
+                        <label class="scheduler-label" for="creator" id="creatorLabel"><span id="i18n_presenter_label">Presenter</span>:</label>
+                        <input type="text" class="oc-ui-form-field" name="creator" id="creator" class="oc-ui-form-field dc-metadata-field"  maxlength="255"/>
+                      </li>
+                      <li id="seriesContainer">
+                        <label class="scheduler-label" for="series" id="seriesLabel"><span id="i18n_series_label">Course/Series</span>:</label>
+                        <input type="text" class="oc-ui-form-field" id="series" name="series" maxlength="255">
+                        <input type="hidden" class="oc-ui-form-field dc-metadata-field" id="ispartof" name="ispartof" value="">
+                      </li>
+                    </ul>
+                  </form>
+                </div>
+              </div>
+
+              <!-- Optional Information -->
+              <div class="form-box layout-centered ui-widget oc-ui-collapsible-widget">
+                <div class="form-box-head ui-widget-header ui-corner-top oc-ui-cursor unfoldable-header">
+                  <div class="ui-icon unfoldable-icon ui-icon-triangle-1-e"></div>
+                  <div id="i18n_additional">Additional Description</div>
+                  <div class="clear"></div>
+                </div>
+                <div class="form-box-content ui-widget-content ui-corner-bottom unfoldable-content">
+                  <form action="">
+                    <ul class="oc-ui-form-list">
+                      <li class="additionalMeta">
+                        <label class="scheduler-label" for="contributor" id="contributorLabel"><span id="i18n_dept_label">Contributor</span>:</label>
+                        <input type="text" class="oc-ui-form-field dc-metadata-field" name="contributor" id="contributor" maxlength="255" />
+                      </li>
+                      <li class="additionalMeta">
+                        <label class="scheduler-label" for="subject" id="subjectLabel"><span id="i18n_sub_label">Subject</span>:</label>
+                        <input type="text" class="oc-ui-form-field dc-metadata-field" name="subject" id="subject" maxlength="255" />
+                      </li>
+                      <li class="additionalMeta">
+                        <label class="scheduler-label" for="language" id="languageLabel"><span id="i18n_lang_label">Language</span>:</label>
+                        <input type="text" class="oc-ui-form-field dc-metadata-field" name="language" id="language" maxlength="255" />
+                      </li>
+                      <li class="additionalMeta">
+                        <label class="scheduler-label" for="description" id="descriptionLabel"><span id="i18n_desc_label">Description</span>:</label>
+                        <textarea name="description" id="description" class="oc-ui-form-field dc-metadata-field" rows="5" cols="10"></textarea>
+                      </li>
+                    </ul>
+                  </form>
+                </div>
+              </div>
+
+              <!-- file upload -->
+              <div class="form-box layout-centered container ui-widget">
+                <div class="form-box-head ui-widget-header ui-corner-top"><span id="i18n_upload_title">File Upload</span></div>
+                <div class="form-box-content ui-widget-content ui-corner-bottom">
+
+                  <input type="hidden" name="track" id="track" class="requiredField" value="">
+
+                  <div style="width:100px; margin-left: auto; margin-right: auto; margin-bottom:10px;">
+                    <input class="uploadType-single uploadtype-select" type="radio" name="singlMultiSwitch" value="single" checked="checked"/><label for="singleUploadRadio">Single File</label>
+                    <br />
+                    <input class="uploadType-multi uploadtype-select" type="radio" name="singlMultiSwitch" value="multi" /><label for="multiUploadRadio">Multiple Files</label>
+                  </div>
+
+                  <div id="uploadContainerSingle">
+                    <ul class="oc-ui-form-list upload-widget">
+                      <li class="ui-helper-clearfix" id="regularFileSelection">
+                        <label class="scheduler-label"><span id="i18n_file_location">File Location</span>:</label>
+                        <input type="radio" class="file-source-select" name="fileSourceSingle" value="local" checked="true">Local hard drive
+                        &nbsp;&nbsp;
+                        <input type="radio" class="file-source-select" name="fileSourceSingle" value="inbox">Designated inbox on server
+                      </li>
+                      <!-- field: Media File -->
+                      <li class="ui-helper-clearfix">
+                        <label class="scheduler-label"><span class="color-red">* </span><span id="i18n_upload_file">Media File</span>:</label>
+                      <iframe class="uploadForm-container" frameborder="0" scrolling="no" src="../ingest/filechooser-local.html" class="uploadForm-container"></iframe>
+                      </li>
+                      <li class="ui-helper-clearfix">
+                        <label class="scheduler-label"><span id="i18n_upload_flavor">Media Characteristics</span>:</label>
+                        <input type="checkbox" class="flavor-presentation-checkbox">
+                        <input type="hidden" class="track-flavor" value="presenter/source">
+                        <label for="containsSlides" style="text-align: left; width: 300px;">Contains discrete images/slides/scenes</label>
+                      </li>
+                      <li class="ui-helper-clearfix">
+                        <label class="scheduler-label">&nbsp;</label>
+                        <span style="font-size:80%;color:gray;">(Analysis and processing will occur to enable slide thumbnail navigation and possibly</span>
+                      </li>
+                      <li class="ui-helper-clearfix">
+                        <label class="scheduler-label">&nbsp;</label>
+                        <span style="font-size:80%;color:gray;">in-video text search)</span>
+                      </li>
+                    </ul>
+
+                  </div>
+
+                  <!-- MULTI FILE UPLOAD -->
+                  <div id="uploadContainerMulti" style="display:none;">
+
+                    <fieldset class="upload-widget">
+                      <legend>File with segmentable video</legend>
+                      <div class="informationText">
+                        Contains discrete images/slides/scenes; may also include audio.
+                      </div>
+                      <ul class="oc-ui-form-list">
+                        <li class="ui-helper-clearfix" id="regularFileSelection">
+                          <label class="scheduler-label"><span class="i18n_file_location">File Location</span>:</label>
+                          <input type="radio" class="file-source-select"  name="fileSourcePresentation" value="local" checked="true">Local hard drive
+                          &nbsp;&nbsp;
+                          <input type="radio" class="file-source-select" name="fileSourcePresentation" value="inbox">Designated inbox on server
+                        </li>
+                        <!-- field: Media File -->
+                        <li class="ui-helper-clearfix" id="regularFileChooser">
+                          <label class="scheduler-label"><span class="i18n_upload_file">Media File</span>:</label>
+                        <iframe class="uploadForm-container" frameborder="0" scrolling="no" src="../ingest/filechooser-local.html" class="uploadForm-container"></iframe>
+                        <input type="hidden" class="track-flavor" value="presentation/source">
+                        </li>
+                      </ul>
+                    </fieldset>
+
+                    <fieldset class="upload-widget">
+                      <legend>File with non-segmentable video</legend>
+                      <div class="informationText">
+                        Has no clear changes that could identify new segments; may include audio but if you select an Audio-only file below, the audio in this video-containing file will be ignored.
+                      </div>
+                      <ul class="oc-ui-form-list">
+                        <li class="ui-helper-clearfix" id="regularFileSelection">
+                          <label class="scheduler-label"><span class="i18n_file_location">File Location</span>:</label>
+                          <input type="radio" class="file-source-select" name="fileSourcePresenter" value="local" checked="true">Local hard drive
+                          &nbsp;&nbsp;
+                          <input type="radio" class="file-source-select" name="fileSourcePresenter" value="inbox">Designated inbox on server
+                        </li>
+                        <!-- field: Media File -->
+                        <li class="ui-helper-clearfix" id="regularFileChooserMultiPresenter">
+                          <label class="scheduler-label"><span class="i18n_upload_file">Media File</span>:</label>
+                        <iframe class="uploadForm-container" frameborder="0" scrolling="no" src="../ingest/filechooser-local.html" class="uploadForm-container"></iframe>
+                        <input type="hidden" class="track-flavor" value="presenter/source">
+                        </li>
+                      </ul>
+                    </fieldset>
+
+                    <fieldset class="upload-widget">
+                      <legend>Audio-only file</legend>
+                      <div class="informationText">
+                        If you select a file here, this files's audio will override audio in "File with non-segmentable video" above.
+                      </div>
+                      <ul class="oc-ui-form-list">
+                        <li class="ui-helper-clearfix" id="regularFileSelection">
+                          <label class="scheduler-label"><span class="i18n_file_location">File Location</span>:</label>
+                          <input type="radio" class="file-source-select" name="fileSourceAudio" value="local" checked="true">Local hard drive
+                          &nbsp;&nbsp;
+                          <input type="radio" class="file-source-select" name="fileSourceAudio" value="inbox">Designated inbox on server
+                        </li>
+                        <!-- field: Media File -->
+                        <li class="ui-helper-clearfix" id="regularFileChooserAudioOnly">
+                          <label class="scheduler-label"><span class="i18n_upload_file">Media File</span>:</label>
+                        <iframe class="uploadForm-container" frameborder="0" scrolling="no" src="../ingest/filechooser-local.html" class="uploadForm-container"></iframe>
+                        <input type="hidden" class="track-flavor" value="presenter-audio/source">
+                        </li>
+                      </ul>
+                    </fieldset>
+
+                  </div>
+                  <!-- END OF MULTI FILE UPLOAD -->
+                </div>
+              </div>
+
+              <!-- Processing Instructions -->
+              <div class="form-box layout-centered container ui-widget">
+                <div class="form-box-head ui-widget-header ui-corner-top"><b id="i18n_process_title">Processing</b></div>
+                <div class="form-box-content ui-widget-content ui-corner-bottom">
+                  <ul class="oc-ui-form-list">
+                    <li class="ui-helper-clearfix">
+                      <label class="scheduler-label"><span style="color: red;">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
+                      <select id="workflowSelector" id="workflowSelector" class="workflowSelector"></select>
+                    </li>
+                    <li class="workflowConfigContainer" id="workflowConfigContainer">
+                      <div class="workflowConfigPanel"></div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- submit/cancel controls -->
+              <div class="form-box layout-centered ui-widget">
+                <div class="form-box-content ui-widget-content ui-corner-all">
+                  <form action="">
+                    <ul class="oc-ui-form-list">
+                      <!-- submit / cancal button -->
+                      <li class="ui-helper-clearfix">
+                        <label class="scheduler-label">&nbsp;</label>
+                        <button id="submitButton" type="button" class="mouseover-pointer control-button">Upload</button>
+                        <button id="cancelButton" type="button" class="mouseover-pointer control-button">Cancel</button>
+                      </li>
+                      <!-- * = required -->
+                      <li class="ui-helper-clearfix">
+                        <label class="scheduler-label">&nbsp;</label>
+                        <span class="color-red">* </span><span id="i18n_required">Required</span>
+                      </li>
+                    </ul>
+                </div>
+              </div>
+            </form>
+
+            <!-- END of stage -->
+          </div>
         </div>
 
-        <!-- notification that javaScript is disabled -->
-        <noscript>
-            <div style="border:1px solid red;width:530px;margin:20px;margin-left:auto;margin-right:auto;">
-                <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
-                    <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
-                    JavaScript is disabled
-                </div>
-                <div style="padding:10px;">
-                    JavaScript is turned off in your web browser, so this site won't work properly! <br />
-                    <strong>
-                        Please turn JavaScript on to use this site, then refresh the page.
-                    </strong>
-                </div>
-            </div>
-        </noscript>
+        <textarea id="console" style="width:500px;height:300px;display:none;"></textarea>
 
-        <div id="wrapper">
-            <div id="header">
-                <a href="recordings.html" style="text-decoration: none;">
-                   <img src="img/MatterhornLogo.png" onclick="window.location='../welcome.html'; return false;" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
-                    <h1>Admin Tools</h1>
-                </a>
-                <a href="http://www.opencastproject.org" id="oc-logo">
-                    <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">
-                </a>
-                <div class="clear"></div>
-            </div>
+        <div id="gray-out">
+          &nbsp;
+        </div>
+        
+        <div id="progressStage" class="ui-corner-all progress-stage" style="display:none;">
+          <div class="progress-label-top upload-label">
+            &nbsp;
+          </div>
+          <div class="progressbar ui-corner-all ui-helper-clearfix">
+            <div class="progressbar-indicator ui-state-default ui-corner-all" style="width:0%;">&nbsp;</div>
+            <div class="progressbar-label"><span id="i18n_progress"></span></div>
+          </div>
+          <div class="progress-label-left upload-label">&nbsp;</div>
+          <div class="progress-label-right upload-label">&nbsp;</div>
+        </div>
 
+      </div><!-- END #tabsWrapper -->
 
-
-            <div id="tabsWrapper" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
-                <ul id="tabs">
-                    <li>
-                        <a href="#recordingsA" id="i18n_tab_recording">Recordings</a>
-                    </li>
-                    <li>
-                        <a href="#seriesA" id="i18n_tab_series">Series</a>
-                    </li>
-                    <li>
-                        <a href='#agents_statusA' id="i18n_tab_agent">Capture Agents</a>
-                    </li>
-                    <li>
-                        <a href="#statisticsA" id="i18n_tab_statistics">Statistics</a>
-                    </li>
-                </ul>
-
-                <!-- BEGIN of stage -->
-                <div class="layout-page-content">
-
-                    <div id="stage" class="layout-centered form-box" style="background:white; margin-top: 10px;">
-                        <div class="layout-centered">
-                            <center><h2><span id="i18n_page_title">Upload Recording</span></h2></center>
-                        </div>
-
-                        <!-- missing fields notification -->
-                                
-                         <div class="layout-page-header ui-helper-hidden" id="containerMissingFields">
-                            <div class="layout-centered ui-state-error ui-corner-all scheduler-info-container">
-                                <h3 style="position: relative; padding-left: 20px;">
-                                  <span class="ui-icon ui-icon-alert"></span> <b>Missing or invalid input</b>
-                                </h3>
-                                <ul>
-                                    <li id="notificationtitle" class="missing-fields-item">
-                                        <span class="ui-icon ui-icon-carat-1-e"></span>
-                                        <span>
-                                            Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
-                                        </span>
-                                    </li>
-                                    <li id="notificationtrack" class="missing-fields-item">
-                                        <span class="ui-icon ui-icon-carat-1-e"></span>
-                                        <span>
-                                            Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. Supported file formats are: .avi, .mp3, .mp4, .mov, .mpg, .mkv, .flv or .wmv.
-                                        </span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <form id="uploadForm" name="uploadForm" action="../ingest/addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
-
-                            <div class="form-box layout-centered ui-widget">
-                                <div class="form-box-content ui-widget-content ui-corner-all">
-                                    <form action="">
-                                        <ul class="oc-ui-form-list">
-                                            <li>
-                                                <label class="scheduler-label" for="title" id="titleLabel"><span style="color: red;">* </span><span id="i18n_title_label">Title</span>:</label>
-                                                <input type="text" id="title" name="title" class="oc-ui-form-field requiredField" maxlength="255" />
-                                            </li>
-                                            <li>
-                                                <label class="scheduler-label" for="creator" id="creatorLabel"><span id="i18n_presenter_label">Presenter</span>:</label>
-                                                <input type="text" class="oc-ui-form-field" name="creator" id="creator" class="oc-ui-form-field"  maxlength="255"/>
-                                            </li>
-                                            <li id="seriesContainer">
-                                                <label class="scheduler-label" for="series" id="seriesLabel"><span id="i18n_series_label">Course/Series</span>:</label>
-                                                <input type="text" class="oc-ui-form-field" id="series" name="series" maxlength="255">
-                                                <input type="hidden" class="oc-ui-form-field" id="ispartof" name="ispartof">
-                                            </li>
-                                        </ul>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <!-- Optional Information -->
-                            <div class="form-box layout-centered ui-widget oc-ui-collapsible-widget">
-                                <div class="form-box-head ui-widget-header ui-corner-top oc-ui-cursor collapse-control2">
-                                    <div id="additional_icon" class="ui-icon ui-icon-triangle-1-e"></div>
-                                    <div id="i18n_additional">Additional Description</div>
-                                    <div class="clear"></div>
-                                </div>
-                                <div class="form-box-content ui-widget-content ui-corner-bottom collapsable">
-                                    <form action="">
-                                        <ul class="oc-ui-form-list">
-                                            <li class="additionalMeta">
-                                                <label class="scheduler-label" for="contributor" id="contributorLabel"><span id="i18n_dept_label">Contributor</span>:</label>
-                                                <input type="text" class="oc-ui-form-field" name="contributor" id="contributor" maxlength="255" />
-                                            </li>
-                                            <li class="additionalMeta">
-                                                <label class="scheduler-label" for="subject" id="subjectLabel"><span id="i18n_sub_label">Subject</span>:</label>
-                                                <input type="text" class="oc-ui-form-field" name="subject" id="subject" maxlength="255" />
-                                            </li>
-                                            <li class="additionalMeta">
-                                                <label class="scheduler-label" for="language" id="languageLabel"><span id="i18n_lang_label">Language</span>:</label>
-                                                <input type="text" class="oc-ui-form-field" name="language" id="language" maxlength="255" />
-                                            </li>
-                                            <li class="additionalMeta">
-                                                <label class="scheduler-label" for="description" id="descriptionLabel"><span id="i18n_desc_label">Description</span>:</label>
-                                                <textarea name="description" id="description" class="oc-ui-form-field" rows="5" cols="10"></textarea>
-                                            </li>
-                                        </ul>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <!-- file upload -->
-                            <div class="form-box layout-centered container ui-widget">
-                                <div class="form-box-head ui-widget-header ui-corner-top"><span id="i18n_upload_title">File Upload</span></div>
-                                <div class="form-box-content ui-widget-content ui-corner-bottom">
-                                    <input type="hidden" name="track" id="track" class="requiredField" value="">
-                                    <ul class="oc-ui-form-list">
-                                        <li id="retryFile" class="ui-helper-clearfix" style="display:none;">
-                                            <label class="scheduler-label"><span id="i18n_upload_content">File</span>:</label>
-                                            <!-- div style="display:table-cell;">
-                                              <input type="hidden" id="previous-file-url" value="">
-                                              <input type="hidden" id="previous-file-flavor" value="">
-                                              <input type="radio" name="use-file" class="use-file" value="previous-file" id="use-file-previous" checked="true">Use previously uploaded/captured file:&nbsp;<a id="previous-file-link"></a><br>
-                                              <input type="radio" name="use-file" class="use-file" value="replace-file" id="use-file-replace">Upload replacement file
-                                            </div -->
-                                            <span id="previousFileList">
-                                            </span>
-                                        </li>
-                                        <li class="ui-helper-clearfix" id="regularFileSelection">
-                                            <label class="scheduler-label"><span id="i18n_file_location">File Location</span>:</label>
-                                            <input type="radio" id="ingestUpload" name="fileLocation" class="file-location" value="local" checked="true">Local hard drive
-                                            &nbsp;&nbsp;
-                                            <input type="radio" id="ingestInbox" name="fileLocation" class="file-location" value="inbox">Designated inbox on server
-                                        </li>
-                                        <!-- field: Media File -->
-                                        <li class="ui-helper-clearfix" id="regularFileChooser">
-                                            <label class="scheduler-label"><span class="color-red">* </span><span id="i18n_upload_file">Media File</span>:</label>
-                                        <iframe name="fileChooserAjax" id="fileChooserAjax" frameborder="0" scrolling="no" src="../ingest/filechooser-local.html" style="height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
-                                        </iframe>
-                                        </li>
-                                        <li class="ui-helper-clearfix" id="regularFileChooserFlavor">
-                                            <label class="scheduler-label"><span id="i18n_upload_flavor">Media Characteristics</span>:</label>
-                                            <input type="hidden" name="flavor" id="flavor" value="presenter/source">
-                                            <input type="checkbox" id="containsSlides">
-                                            <label for="containsSlides" style="text-align: left; width: 300px;">Contains discrete images/slides/scenes</label>
-                                        </li>
-                                        <li class="ui-helper-clearfix">
-                                            <label class="scheduler-label">&nbsp;</label>
-                                            <span style="font-size:80%;color:gray;">(Analysis and processing will occur to enable slide thumbnail navigation and possibly</span>
-                                        </li>
-                                        <li class="ui-helper-clearfix">
-                                            <label class="scheduler-label">&nbsp;</label>
-                                            <span style="font-size:80%;color:gray;">in-video text search)</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <!-- Processing Instructions -->
-                            <div class="form-box layout-centered container ui-widget">
-                                <div class="form-box-head ui-widget-header ui-corner-top"><b id="i18n_process_title">Processing</b></div>
-                                <div class="form-box-content ui-widget-content ui-corner-bottom">
-                                    <ul class="oc-ui-form-list">
-                                        <li class="ui-helper-clearfix">
-                                            <label class="scheduler-label"><span style="color: red;">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
-                                            <select id="workflowSelector" id="workflowSelector" class="requiredField"></select>
-                                        </li>
-                                    </ul>
-                                    <div id="workflowConfigContainer"></div>
-                                </div>
-                            </div>
-
-                            <!-- submit/cancel controls -->
-                            <div class="form-box layout-centered ui-widget">
-                                <div class="form-box-content ui-widget-content ui-corner-all">
-                                    <form action="">
-                                        <ul class="oc-ui-form-list">
-                                            <!-- submit / cancal button -->
-                                            <li class="ui-helper-clearfix">
-                                                <label class="scheduler-label">&nbsp;</label>
-                                                <button type="button" id="BtnSubmit" class="mouseover-pointer control-button">Upload</button>
-                                                <button id="btnCancel" type="button" onclick="ocUpload.backToRecordings();" class="mouseover-pointer control-button">Cancel</button>
-                                                <!-- <a href="index.html" style="float:right;">Switch to AJAX upload form</a> -->
-                                            </li>
-                                            <!-- * = required -->
-                                            <li class="ui-helper-clearfix">
-                                                <label class="scheduler-label">&nbsp;</label>
-                                                <span class="color-red">* </span><span id="i18n_required">Required</span>
-                                            </li>
-                                        </ul>
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-- END of stage -->
-                    </div>
-                </div>
-
-                <textarea id="console" style="width:500px;height:300px;display:none;"></textarea>
-
-                <div id="gray-out">
-                    &nbsp;
-                </div>
-                <div id="progressStage" class="ui-corner-all progressStage">
-                    <div id="labelFilename">
-                        &nbsp;
-                    </div>
-                    <div id="progressBar" class="ui-corner-all ui-helper-clearfix">
-                        <div id="progressBarIndicator" class="ui-state-default ui-corner-all" style="width:0%;">&nbsp;</div>
-                        <div id="progressBarLabel"><span id="i18n_progress">Initializing upload...</span></div>
-                    </div>
-                    <div id="labelFilesize">&nbsp;</div>
-                    <div id="labelBytesTrasfered">&nbsp;</div>
-                </div>
-
-            </div><!-- END #tabsWrapper -->
-
-        </div><!-- END #wrapper -->
-    </body>
+    </div><!-- END #wrapper -->
+  </body>
 </html>
+

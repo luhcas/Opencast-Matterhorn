@@ -53,7 +53,8 @@ ocUpload.init = function() {
   // Event: File location selector clicked
   $(".file-location").change(function() {
     var location = $(this).val();
-    $('#fileChooserAjax').attr('src', '../ingest/filechooser-' + location + '.html');
+    var $container = $(this).parent().next('li').find('iframe');
+    $container.attr('src', '../ingest/filechooser-' + location + '.html');
   });
 
   // Event: Add form filed button clicked
@@ -146,6 +147,20 @@ ocUpload.init = function() {
     }
   });
 
+  $('#singleUploadRadio').change(function() {
+    if ($(this).is(':checked')) {
+      $('#multiUploadContainer').hide();
+      $('#singleUploadContainer').show();
+    }
+  });
+
+  $('#multiUploadRadio').change(function() {
+    if ($(this).is(':checked')) {
+      $('#singleUploadContainer').hide();
+      $('#multiUploadContainer').show();
+    }
+  });
+  
   ocWorkflow.init($('#workflowSelector'), $('#workflowConfigContainer'));
 
   // test if we upload a new recording or want to retry a workflow
@@ -308,7 +323,7 @@ ocUpload.showProgressStage = function() {
     width: 450,
     height: 'auto',
     position: ['center', 'center'],
-    title: 'Uploading Recording',
+    title: 'Ingesting Recording',
     create: function (event, ui)
     {
       $('.ui-dialog-titlebar-close').hide();

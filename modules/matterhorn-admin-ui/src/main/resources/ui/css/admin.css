@@ -31,8 +31,8 @@ table tr:hover a { color: black!important; text-decoration: underline!important;
 .icon-bullet {      background-image: url(../img/icons/bullet-arrow.png);  background-position: 0 0; }
 .inline-icon { display: inline-block; }
 .loadingAnimation { background-image:url(../img/loading.gif); background-position: center; background-repeat:no-repeat; height:40px; width:100%; }
-.progressbar {  /* q&d: to be removed after 0.5 */
-  background-image:url(../img/loading.gif); background-position: center; background-repeat:no-repeat; height:40px; width:240px; }
+/*.progressbar {
+  background-image:url(../img/loading.gif); background-position: center; background-repeat:no-repeat; height:40px; width:240px; }*/
 
 
 
@@ -111,7 +111,6 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 
 /* FORM LISTS */
 
-
 .oc-ui-form-list li { padding: 4px 0; }
 .oc-ui-form-list label { display: inline-block; width: 30%; text-align: right; vertical-align: top; }
 .oc-ui-form-field { border: 1px #aaa solid; width: 500px; }
@@ -120,7 +119,9 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 .form-box { margin-top: 10px; width: 800px; }
 .form-box .form-box-head { padding: 3px 5px }
 .form-box .form-box-content { padding: 20px; }
-#additional_icon, .fold-icon { float: left; margin-left: -5px; }
+#additional_icon, .fold-icon { float: left; margin-left: -5px; } 
+.unfoldable-icon { float: left; margin-left: -5px; }
+.uploadForm-container {height:30px;width:400px;padding:0px;overflow:hidden;border:none;}
 #i18n_additional, .fold_icon_text { padding-top: 2px; float: left; }
 .oc-ui-collapsible-widget .form-box-head { cursor: pointer; }
 .ui-datepicker-trigger { vertical-align: middle; }
@@ -150,3 +151,5 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 .rolePrivilegeTable tr {border-top:1px solid silver; border-bottom:1px solid silver;}
 .rolePrivilegeTable td {margin-left:1px; margin-right:1px; padding:2px;}
 .rolePrivilegeTable .roleName {padding-right:20px;}
+
+.informationText {font-size: 90%; color:grey; margin: 5px 10px 5px 10px;}
