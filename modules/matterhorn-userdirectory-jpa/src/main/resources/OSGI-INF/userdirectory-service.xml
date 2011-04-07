@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-  name="org.opencastproject.userdirectory.jpa.JpaUserProvider" activate="activate">
-  <implementation class="org.opencastproject.userdirectory.jpa.JpaUserProvider" />
+  name="org.opencastproject.userdirectory.jpa.JpaUserAndRoleProvider" activate="activate">
+  <implementation class="org.opencastproject.userdirectory.jpa.JpaUserAndRoleProvider" />
   <property name="service.description" value="Provides a user directory" />
   <service>
     <provide interface="org.opencastproject.security.api.UserProvider" />
     <provide interface="org.opencastproject.security.api.RoleProvider" />
-    <provide interface="org.opencastproject.userdirectory.jpa.JpaUserProvider" />
+    <provide interface="org.opencastproject.userdirectory.jpa.JpaUserAndRoleProvider" />
   </service>
   <reference name="persistence" interface="javax.persistence.spi.PersistenceProvider"
     cardinality="1..1" policy="static" bind="setPersistenceProvider" />

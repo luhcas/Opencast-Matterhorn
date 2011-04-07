@@ -47,6 +47,9 @@ public class JpaUser {
   @Column
   protected String password;
 
+  @Column
+  protected String organization;
+
   @ElementCollection
   @CollectionTable(name = "MH_ROLE", joinColumns = @JoinColumn(name = "USERNAME"))
   @Column(name = "ROLE")
@@ -65,13 +68,15 @@ public class JpaUser {
    *          the username
    * @param password
    *          the password
+   *          @param organization the organization
    * @param roles
    *          the roles
    */
-  public JpaUser(String username, String password, Set<String> roles) {
+  public JpaUser(String username, String password, String organization, Set<String> roles) {
     super();
     this.username = username;
     this.password = password;
+    this.organization = organization;
     this.roles = roles;
   }
 
@@ -94,6 +99,17 @@ public class JpaUser {
   }
 
   /**
+   * Gets the user's organization.
+   * 
+   * @return the organization
+   */
+  public String getOrganization() {
+    return organization;
+  }
+  
+  /**
+   * Gets the user's roles.
+   * 
    * @return the user's roles
    */
   public Set<String> getRoles() {
@@ -107,7 +123,7 @@ public class JpaUser {
    */
   @Override
   public String toString() {
-    return "{username=" + username + ", roles=" + roles + "}";
+    return "{username=" + username + ", organization=" + organization + ", roles=" + roles + "}";
   }
 
 }

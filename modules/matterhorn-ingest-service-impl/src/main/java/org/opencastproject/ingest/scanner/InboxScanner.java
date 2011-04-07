@@ -190,18 +190,33 @@ public class InboxScanner implements ArtifactInstaller, ManagedService {
   @SuppressWarnings("rawtypes")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
-    String userNameConfig = (String) properties.get(USER_NAME);
-    if (StringUtils.isNotBlank(userNameConfig)) {
-      user = userDirectoryService.loadUser(userNameConfig);
-    }
+
+    // Set the organization first
     String organizationConfig = (String) properties.get(USER_ORG);
-    if (StringUtils.isNotBlank(organizationConfig)) {
-      try {
-        organization = organizationDirectoryService.getOrganization(organizationConfig);
-      } catch (NotFoundException e) {
-        throw new ConfigurationException(USER_ORG, "Organization '" + organizationConfig + "' does not exist");
-      }
+    if (StringUtils.isBlank(organizationConfig)) {
+      throw new ConfigurationException(USER_ORG, USER_ORG + " must be specified");
     }
+    try {
+      organization = organizationDirectoryService.getOrganization(organizationConfig);
+    } catch (NotFoundException e) {
+      throw new ConfigurationException(USER_ORG, "Organization '" + organizationConfig + "' does not exist");
+    }
+
+    // Now that we have the organization to run as, we can load the user
+    String userNameConfig = (String) properties.get(USER_NAME);
+    if (StringUtils.isBlank(userNameConfig)) {
+      throw new ConfigurationException(USER_NAME, USER_NAME + " must be specified");
+    }
+
+    Organization originalOrg = securityService.getOrganization();
+    try {
+      securityService.setOrganization(organization);
+      user = userDirectoryService.loadUser(userNameConfig);
+    } finally {
+      securityService.setOrganization(originalOrg);
+    }
+
+    // Now load the workflow definition ID
     String workflowConfig = (String) properties.get(WORKFLOW_DEFINITION);
     if (StringUtils.isNotBlank(workflowConfig)) {
       workflowDefinition = workflowConfig;

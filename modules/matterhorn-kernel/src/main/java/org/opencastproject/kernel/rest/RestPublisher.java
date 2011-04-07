@@ -67,7 +67,7 @@ import javax.xml.stream.XMLStreamWriter;
 public class RestPublisher implements RestConstants {
 
   /** The logger **/
-  private static final Logger logger = LoggerFactory.getLogger(RestPublisher.class);
+  protected static final Logger logger = LoggerFactory.getLogger(RestPublisher.class);
 
   /** The rest publisher looks for any non-servlet with the 'opencast.service.path' property */
   public static final String JAX_RS_SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))("
@@ -226,7 +226,7 @@ public class RestPublisher implements RestConstants {
   /**
    * Extends the CXF JSONProvider for the grand purpose of removing '@' symbols from json and padded jsonp.
    */
-  private static class MatterhornJSONProvider extends JSONProvider {
+  protected static class MatterhornJSONProvider extends JSONProvider {
     private static final Charset UTF8 = Charset.forName("utf-8");
 
     /**
@@ -283,14 +283,19 @@ public class RestPublisher implements RestConstants {
     @Override
     public Object addingService(ServiceReference reference) {
       Object service = componentContext.getBundleContext().getService(reference);
-      Path pathAnnotation = service.getClass().getAnnotation(Path.class);
-      if (pathAnnotation == null) {
-        logger.warn("{} was registered with '{}={}', but the service is not annotated with the JAX-RS "
-                + "@Path annotation",
-                new Object[] { service, SERVICE_PATH_PROPERTY, reference.getProperty(SERVICE_PATH_PROPERTY) });
-        return null;
+      if (service == null) {
+        logger.info("JAX-RS service {} has not been instantiated yet, or has already been unregistered. Skipping "
+                + "endpoint creation.", reference);
+      } else {
+        Path pathAnnotation = service.getClass().getAnnotation(Path.class);
+        if (pathAnnotation == null) {
+          logger.warn("{} was registered with '{}={}', but the service is not annotated with the JAX-RS "
+                  + "@Path annotation",
+                  new Object[] { service, SERVICE_PATH_PROPERTY, reference.getProperty(SERVICE_PATH_PROPERTY) });
+        } else {
+          createEndpoint(reference, service);
+        }
       }
-      createEndpoint(reference, service);
       return super.addingService(reference);
     }
   }

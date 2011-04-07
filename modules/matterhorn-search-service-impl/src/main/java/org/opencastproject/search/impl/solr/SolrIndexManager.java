@@ -124,7 +124,7 @@ public class SolrIndexManager {
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
   }
-  
+
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
@@ -143,13 +143,23 @@ public class SolrIndexManager {
    * @param connection
    *          connection to the database
    */
-  public SolrIndexManager(SolrServer connection, Workspace workspace) {
+  public SolrIndexManager(SolrServer connection, Workspace workspace, DublinCoreCatalogService dcService,
+          Mpeg7CatalogService mpeg7Service, SecurityService securityService) {
     if (connection == null)
       throw new IllegalArgumentException("Unable to manage solr with null connection");
     if (workspace == null)
       throw new IllegalArgumentException("Unable to manager solr without a workspace");
+    if (dcService == null)
+      throw new IllegalArgumentException("Unable to manager solr without a dublin core service");
+    if (mpeg7Service == null)
+      throw new IllegalArgumentException("Unable to manager solr without an mpeg7 service");
+    if (securityService == null)
+      throw new IllegalArgumentException("Unable to manager solr without a security service");
     this.solrServer = connection;
     this.workspace = workspace;
+    this.dcService = dcService;
+    this.mpeg7Service = mpeg7Service;
+    this.securityService = securityService;
   }
 
   /**

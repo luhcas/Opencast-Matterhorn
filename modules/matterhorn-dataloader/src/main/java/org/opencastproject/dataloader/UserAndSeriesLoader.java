@@ -15,6 +15,8 @@
  */
 package org.opencastproject.dataloader;
 
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
@@ -23,7 +25,7 @@ import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.userdirectory.jpa.JpaUser;
-import org.opencastproject.userdirectory.jpa.JpaUserProvider;
+import org.opencastproject.userdirectory.jpa.JpaUserAndRoleProvider;
 import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
@@ -44,14 +46,14 @@ public class UserAndSeriesLoader {
   protected SeriesService seriesService = null;
 
   /** The JPA-based user provider, which includes an addUser() method */
-  protected JpaUserProvider jpaUserProvider = null;
+  protected JpaUserAndRoleProvider jpaUserProvider = null;
 
   /**
    * Callback on component activation.
    */
   protected void activate() {
     // Load 100 series
-    logger.info("Adding 100 sample series...");
+    logger.info("Adding sample series...");
     for (int i = 0; i < 100; i++) {
       String seriesId = "series_" + i;
       DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
@@ -72,17 +74,17 @@ public class UserAndSeriesLoader {
     }
 
     // Load 1000 users, all with ROLE_USER and a role in the series
-    logger.info("Adding 1000 sample users...");
+    logger.info("Adding sample users...");
     for (int i = 0; i < 1000; i++) {
       Set<String> roleSet = new HashSet<String>();
       roleSet.add("ROLE_USER");
       roleSet.add("ROLE_SERIES_" + (i % 100));
-      JpaUser user = new JpaUser("user" + i, "pass" + i, roleSet);
+      JpaUser user = new JpaUser("user" + i, "pass" + i, DEFAULT_ORGANIZATION_ID, roleSet);
       try {
         jpaUserProvider.addUser(user);
         logger.debug("Added {}", user);
       } catch (Exception e) {
-        logger.warn("Can not add {}", user);
+        logger.warn("Can not add {}: {}", user, e);
       }
     }
     logger.info("Finished loading sample series and users");
@@ -92,7 +94,7 @@ public class UserAndSeriesLoader {
    * @param jpaUserProvider
    *          the jpaUserProvider to set
    */
-  public void setJpaUserProvider(JpaUserProvider jpaUserProvider) {
+  public void setJpaUserProvider(JpaUserAndRoleProvider jpaUserProvider) {
     this.jpaUserProvider = jpaUserProvider;
   }
 

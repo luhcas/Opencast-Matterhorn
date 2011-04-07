@@ -32,6 +32,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchService;
@@ -96,15 +97,25 @@ public class SearchServiceImplTest {
         return EasyMock.getCurrentArguments()[0].toString().contains("series") ? dcSeriesFile : dcFile;
       }
     }).anyTimes();
-    EasyMock.replay(workspace);
 
-    service = new SearchServiceImpl();
-    service.setDublincoreService(new DublinCoreCatalogService());
-    service.setWorkspace(workspace);
-    service.setupSolr(new File(solrRoot));
     ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.replay(serviceRegistry);
+
+    Mpeg7CatalogService mpeg7Service = new Mpeg7CatalogService();
+
+    securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getUser()).andReturn(new User("sample", DEFAULT_ORGANIZATION_ID, new String[0]))
+    .anyTimes();
+
+    EasyMock.replay(workspace, securityService);
+
+    service = new SearchServiceImpl();
     service.setServiceRegistry(serviceRegistry);
+    service.setDublincoreService(new DublinCoreCatalogService());
+    service.setWorkspace(workspace);
+    service.setMpeg7Service(mpeg7Service);
+    service.setSecurityService(securityService);
+    service.setupSolr(new File(solrRoot));
 
     userWithPermissions = new User("sample", "opencastproject.org",
             new String[] { "ROLE_STUDENT", "ROLE_OTHERSTUDENT" });

@@ -16,6 +16,7 @@
 package org.opencastproject.userdirectory.jpa;
 
 import org.opencastproject.security.api.RoleProvider;
+import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserProvider;
 
@@ -36,16 +37,13 @@ import javax.persistence.spi.PersistenceProvider;
 /**
  * Manages and locates users using JPA.
  */
-public class JpaUserProvider implements UserProvider, RoleProvider {
+public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(JpaUserProvider.class);
+  private static final Logger logger = LoggerFactory.getLogger(JpaUserAndRoleProvider.class);
 
   /** The JPA provider */
   protected PersistenceProvider persistenceProvider;
-
-  /** Hard-coded organization name. TODO: Needs to be replaced */
-  protected static final String organization = "matterhorn";
 
   /**
    * @param persistenceProvider
@@ -97,7 +95,7 @@ public class JpaUserProvider implements UserProvider, RoleProvider {
         return null;
       } else {
         Set<String> roles = user.getRoles();
-        return new User(userName, organization, roles.toArray(new String[roles.size()]));
+        return new User(userName, user.getOrganization(), roles.toArray(new String[roles.size()]));
       }
     } finally {
       em.close();
@@ -162,7 +160,7 @@ public class JpaUserProvider implements UserProvider, RoleProvider {
    */
   @Override
   public String getOrganization() {
-    return organization;
+    return SecurityConstants.DEFAULT_ORGANIZATION_ID;
   }
 
   /**

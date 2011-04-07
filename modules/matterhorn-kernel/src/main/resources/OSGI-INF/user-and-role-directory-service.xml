@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
   
-  <scr:component name="org.opencastproject.kernel.userdirectory.UserDirectoryServiceImpl">
-    <implementation class="org.opencastproject.kernel.userdirectory.UserDirectoryServiceImpl" />
+  <scr:component name="org.opencastproject.kernel.userdirectory.UserAndRoleDirectoryServiceImpl" immediate="true">
+    <implementation class="org.opencastproject.kernel.userdirectory.UserAndRoleDirectoryServiceImpl" />
     <property name="service.description" value="Provides a user directory" />
     <service>
       <provide interface="org.opencastproject.security.api.UserDirectoryService" />
@@ -17,7 +17,8 @@
       cardinality="1..1" policy="static" bind="setSecurityService" />
   </scr:component>
 
-  <scr:component name="org.opencastproject.kernel.userdirectory.InMemoryUserAndRoleProvider" activate="activate">
+  <scr:component name="org.opencastproject.kernel.userdirectory.InMemoryUserAndRoleProvider" immediate="true"
+    activate="activate">
     <implementation class="org.opencastproject.kernel.userdirectory.InMemoryUserAndRoleProvider" />
     <property name="service.description" value="A user and role provider" />
     <service>
@@ -26,14 +27,14 @@
     </service>
   </scr:component>
 
-  <scr:component name="org.opencastproject.kernel.userdirectory.RoleEndpoint">
+  <scr:component name="org.opencastproject.kernel.userdirectory.RoleEndpoint" immediate="true">
     <implementation class="org.opencastproject.kernel.userdirectory.RoleEndpoint" />
     <property name="service.description" value="Role listing REST endpoint" />
     <property name="opencast.service.type" value="org.opencastproject.userdirectory.roles" />
     <property name="opencast.service.path" value="/roles" />
     <property name="opencast.service.jobproducer" value="false" />
     <service>
-      <provide interface="org.opencastproject.userdirectory.kernel.RoleEndpoint" />
+      <provide interface="org.opencastproject.kernel.userdirectory.RoleEndpoint" />
     </service>
     <reference name="roleDirectoryService" interface="org.opencastproject.security.api.RoleDirectoryService"
       cardinality="1..1" policy="static" bind="setRoleDirectoryService" />

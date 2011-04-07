@@ -32,24 +32,29 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
- * Federates user and role providers.
+ * Federates user and role providers, and exposes a spring UserDetailsService so user lookups can be used by spring
+ * security.
  */
-public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetailsService, RoleDirectoryService {
+public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, UserDetailsService, RoleDirectoryService {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(UserDirectoryServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserAndRoleDirectoryServiceImpl.class);
 
   /** The list of user providers */
-  protected Map<String, UserProvider> userProviders = new HashMap<String, UserProvider>();
+  protected Map<String, List<UserProvider>> userProviders = new HashMap<String, List<UserProvider>>();
 
   /** The list of role providers */
-  protected Map<String, RoleProvider> roleProviders = new HashMap<String, RoleProvider>();
+  protected Map<String, List<RoleProvider>> roleProviders = new HashMap<String, List<RoleProvider>>();
 
   /** The security service */
   protected SecurityService securityService = null;
@@ -62,7 +67,12 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void addUserProvider(UserProvider userProvider) {
     logger.info("Adding {} to the list of user providers", userProvider);
-    this.userProviders.put(userProvider.getOrganization(), userProvider);
+    List<UserProvider> providers = userProviders.get(userProvider.getOrganization());
+    if (providers == null) {
+      providers = new ArrayList<UserProvider>();
+      userProviders.put(userProvider.getOrganization(), providers);
+    }
+    providers.add(userProvider);
   }
 
   /**
@@ -73,7 +83,10 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void removeUserProvider(UserProvider userProvider) {
     logger.info("Removing {} from the list of user providers", userProvider);
-    this.userProviders.remove(userProvider.getOrganization());
+    List<UserProvider> providers = userProviders.get(userProvider.getOrganization());
+    if (providers != null) {
+      providers.remove(userProvider);
+    }
   }
 
   /**
@@ -84,7 +97,12 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void addRoleProvider(RoleProvider roleProvider) {
     logger.info("Adding {} to the list of role providers", roleProvider);
-    this.roleProviders.put(roleProvider.getOrganization(), roleProvider);
+    List<RoleProvider> providers = roleProviders.get(roleProvider.getOrganization());
+    if (providers == null) {
+      providers = new ArrayList<RoleProvider>();
+      roleProviders.put(roleProvider.getOrganization(), providers);
+    }
+    providers.add(roleProvider);
   }
 
   /**
@@ -95,7 +113,10 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
    */
   protected void removeRoleProvider(RoleProvider roleProvider) {
     logger.info("Removing {} from the list of role providers", roleProvider);
-    this.roleProviders.remove(roleProvider.getOrganization());
+    List<RoleProvider> providers = roleProviders.get(roleProvider.getOrganization());
+    if (providers != null) {
+      providers.remove(roleProvider);
+    }
   }
 
   /**
@@ -109,11 +130,17 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
     if (org == null) {
       throw new IllegalStateException("No organization is set");
     }
-    RoleProvider roleProvider = roleProviders.get(org.getId());
-    if (roleProvider == null) {
-      throw new IllegalStateException("No role provider for " + org);
+    List<RoleProvider> orgRoleProviders = roleProviders.get(org.getId());
+    if (orgRoleProviders == null || orgRoleProviders.isEmpty()) {
+      throw new IllegalStateException("No role providers for " + org);
     }
-    return roleProvider.getRoles();
+    SortedSet<String> roles = new TreeSet<String>();
+    for (RoleProvider roleProvider : orgRoleProviders) {
+      for (String role : roleProvider.getRoles()) {
+        roles.add(role);
+      }
+    }
+    return roles.toArray(new String[roles.size()]);
   }
 
   /**
@@ -127,13 +154,31 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
     if (org == null) {
       throw new IllegalStateException("No organization is set");
     }
-    UserProvider userProvider = userProviders.get(org.getId());
-    if (userProvider == null) {
-      throw new IllegalStateException("No user provider for " + org);
+    List<UserProvider> orgUserProviders = userProviders.get(org.getId());
+    if (orgUserProviders == null || orgUserProviders.isEmpty()) {
+      throw new IllegalStateException("No user providers for " + org);
     }
-    return userProvider.loadUser(userName);
+    // Collect all of the roles known from each of the user providers for this user
+    User user = null;
+    for (UserProvider userProvider : orgUserProviders) {
+      User providerUser = userProvider.loadUser(userName);
+      if (providerUser == null) {
+        continue;
+      }
+      if (user == null) {
+        user = providerUser;
+      } else {
+        user = mergeUsers(user, providerUser);
+      }
+    }
+    return user;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
+   */
   public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException,
           org.springframework.dao.DataAccessException {
     User user = loadUser(userName);
@@ -148,6 +193,30 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
       return new org.springframework.security.core.userdetails.User(user.getUserName(), password, true, true, true,
               true, authorities);
     }
+  }
+
+  /**
+   * Merges two representations of a user, as returned by two different user providers. The set or roles from the
+   * provided users will be merged into one set.
+   * 
+   * @param user1
+   *          the first user to merge
+   * @param user2
+   *          the second user to merge
+   * @return a user with a merged set of roles
+   */
+  protected User mergeUsers(User user1, User user2) {
+    String[] roles1 = user1.getRoles();
+    String[] roles2 = user2.getRoles();
+
+    String[] roles = new String[(roles1.length + roles2.length)];
+    for (int i = 0; i < roles.length; i++) {
+      roles[i] = i < roles1.length ? roles1[i] : roles2[i - roles1.length];
+    }
+    String userName = user1.getUserName();
+    String organization = user1.getOrganization();
+    String password = user1.getPassword() == null ? user2.getPassword() : null;
+    return new User(userName, password, organization, roles);
   }
 
   /**
@@ -171,11 +240,17 @@ public class UserDirectoryServiceImpl implements UserDirectoryService, UserDetai
     if (org == null) {
       throw new IllegalStateException("No organization is set");
     }
-    RoleProvider roleProvider = roleProviders.get(org.getId());
-    if (roleProvider == null) {
-      throw new IllegalStateException("No role provider for " + org);
+    List<RoleProvider> orgRoleProviders = roleProviders.get(org.getId());
+    if (orgRoleProviders == null || orgRoleProviders.isEmpty()) {
+      throw new IllegalStateException("No role providers for " + org);
     }
-    return roleProvider.getLocalRole(role);
+    for (RoleProvider roleProvider : orgRoleProviders) {
+      String localRole = roleProvider.getLocalRole(role);
+      if (localRole != null) {
+        return localRole;
+      }
+    }
+    throw new NotFoundException("No role '" + role + "' defined for organization '" + org.getId() + "'");
   }
 
 }

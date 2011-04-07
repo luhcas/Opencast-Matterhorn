@@ -39,7 +39,7 @@ import javax.servlet.Filter;
  */
 public class SecurityConfigurationScanner {
   public static final String SECURITY_CONFIG_FILE = "org.opencastproject.security.config";
-  private static final Logger logger = LoggerFactory.getLogger(SecurityConfigurationScanner.class);
+  protected static final Logger logger = LoggerFactory.getLogger(SecurityConfigurationScanner.class);
   protected ConfigurableOsgiBundleApplicationContext springContext;
   protected BundleContext bundleContext;
   protected ServiceRegistration reg;

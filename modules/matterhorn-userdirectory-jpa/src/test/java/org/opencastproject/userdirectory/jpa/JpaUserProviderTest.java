@@ -15,6 +15,8 @@
  */
 package org.opencastproject.userdirectory.jpa;
 
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import org.eclipse.persistence.jpa.PersistenceProvider;
@@ -31,7 +33,7 @@ import java.util.Set;
 public class JpaUserProviderTest {
 
   private ComboPooledDataSource pooledDataSource = null;
-  private JpaUserProvider provider = null;
+  private JpaUserAndRoleProvider provider = null;
 
   @Before
   public void setUp() throws Exception {
@@ -47,7 +49,7 @@ public class JpaUserProviderTest {
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
 
-    provider = new JpaUserProvider();
+    provider = new JpaUserAndRoleProvider();
     provider.setPersistenceProperties(props);
     provider.setPersistenceProvider(new PersistenceProvider());
     provider.activate(null);
@@ -63,23 +65,23 @@ public class JpaUserProviderTest {
   public void testLoadAndGetUser() throws Exception {
     Set<String> authorities = new HashSet<String>();
     authorities.add("ROLE_ASTRO_101_SPRING_2011_STUDENT");
-    JpaUser user = new JpaUser("user1", "pass1", authorities);
+    JpaUser user = new JpaUser("user1", "pass1", DEFAULT_ORGANIZATION_ID, authorities);
     provider.addUser(user);
     Assert.assertNotNull(provider.loadUser("user1"));
     Assert.assertNull("Loading 'does not exist' should return null", provider.loadUser("does not exist"));
   }
-  
+
   @Test
   public void testRoles() throws Exception {
     Set<String> authoritiesOne = new HashSet<String>();
     authoritiesOne.add("ROLE_ONE");
-    JpaUser userOne = new JpaUser("user1", "pass1", authoritiesOne);
+    JpaUser userOne = new JpaUser("user1", "pass1", DEFAULT_ORGANIZATION_ID, authoritiesOne);
     provider.addUser(userOne);
 
     Set<String> authoritiesTwo = new HashSet<String>();
     authoritiesTwo.add("ROLE_ONE");
     authoritiesTwo.add("ROLE_TWO");
-    JpaUser userTwo = new JpaUser("user2", "pass2", authoritiesTwo);
+    JpaUser userTwo = new JpaUser("user2", "pass2", DEFAULT_ORGANIZATION_ID, authoritiesTwo);
     provider.addUser(userTwo);
 
     Assert.assertEquals("There should be two roles", 2, provider.getRoles().length);

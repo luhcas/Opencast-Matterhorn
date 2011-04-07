@@ -215,9 +215,7 @@ public class SearchServiceImpl implements SearchService {
 
     solrServer = SolrServerFactory.newEmbeddedInstance(solrRoot, solrDataDir);
     solrRequester = new SolrRequester(solrServer, securityService);
-    solrIndexManager = new SolrIndexManager(solrServer, workspace);
-    solrIndexManager.setDcService(dcService);
-    solrIndexManager.setMpeg7Service(mpeg7Service);
+    solrIndexManager = new SolrIndexManager(solrServer, workspace, dcService, mpeg7Service, securityService);
   }
 
   /**
@@ -230,10 +228,7 @@ public class SearchServiceImpl implements SearchService {
     logger.info("Connecting to solr search index at {}", url);
     solrServer = SolrServerFactory.newRemoteInstance(url);
     solrRequester = new SolrRequester(solrServer, securityService);
-    solrIndexManager = new SolrIndexManager(solrServer, workspace);
-    solrIndexManager.setSecurityService(securityService);
-    solrIndexManager.setDcService(dcService);
-    solrIndexManager.setMpeg7Service(mpeg7Service);
+    solrIndexManager = new SolrIndexManager(solrServer, workspace, dcService, mpeg7Service, securityService);
   }
 
   // TODO: generalize this method
