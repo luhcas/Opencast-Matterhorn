@@ -83,8 +83,7 @@ public class Activator extends HttpServlet implements BundleActivator {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     String docPath = req.getParameter(PATH_PARAM);
     if (StringUtils.isBlank(docPath)) {
-      // write a listing of the available services and their descriptions
-      writeTableOfContents(req, resp);
+      resp.sendRedirect("rest_docs.html");
     } else {
       // write the details for this service
       writeServiceDocumentation(docPath, req, resp);
@@ -139,28 +138,6 @@ public class Activator extends HttpServlet implements BundleActivator {
 
     resp.setContentType("text/html");
     resp.getWriter().write(docs.toString());
-  }
-
-  private void writeTableOfContents(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    StringBuilder toc = new StringBuilder();
-    for (ServiceReference ref : getRestEndpointServices()) {
-      // TODO: replace this with proper templating
-      Object endpoint = bundleContext.getService(ref);
-      String alias = (String) ref.getProperty(SERVICE_PATH_PROPERTY);
-
-      toc.append("<div><a href=\"?");
-      toc.append(PATH_PARAM);
-      toc.append("=");
-      toc.append(alias);
-      toc.append("\">");
-      toc.append("<li>Alias: ");
-      toc.append(alias);
-      toc.append("</li><li>@Path annotation: ");
-      toc.append(endpoint.getClass().getAnnotation(Path.class).value());
-      toc.append("</li></a></div><hr/>");
-    }
-
-    resp.getWriter().write(toc.toString());
   }
 
   private ServiceReference[] getRestEndpointServices() {

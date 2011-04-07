@@ -39,11 +39,6 @@ public @interface RestService {
   String title();
 
   /**
-   * @return this is the absolute base URL for this endpoint, do not include the trailing slash (e.g. /workflow)
-   */
-  String url();
-
-  /**
    * @return an array of notes to add into the end of the documentation.
    */
   String[] notes();

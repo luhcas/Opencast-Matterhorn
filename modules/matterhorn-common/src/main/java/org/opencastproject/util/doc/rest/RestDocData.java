@@ -34,6 +34,16 @@ import javax.ws.rs.Produces;
 public class RestDocData extends DocData {
 
   /**
+   * The name to identify the endpoint holder for read endpoints (get/head).
+   */
+  private static final String READ_ENDPOINT_HOLDER_NAME = "READ";
+
+  /**
+   * The name to identify the endpoint holder for write endpoints (delete,post,put).
+   */
+  private static final String WRITE_ENDPOINT_HOLDER_NAME = "WRITE";
+
+  /**
    * Regular expression used to count the number of path parameters in a path.
    */
   public static final String PATH_PARAM_COUNTING_REGEX = "\\{(.+?)\\}";
@@ -76,8 +86,8 @@ public class RestDocData extends DocData {
     meta.put("url", url);
     // create the endpoint holders
     holders = new Vector<RestEndpointHolderData>(2);
-    holders.add(new RestEndpointHolderData(RestEndpointData.Type.READ.toString().toUpperCase(), "Read"));
-    holders.add(new RestEndpointHolderData(RestEndpointData.Type.WRITE.toString().toUpperCase(), "Write"));
+    holders.add(new RestEndpointHolderData(READ_ENDPOINT_HOLDER_NAME, "Read"));
+    holders.add(new RestEndpointHolderData(WRITE_ENDPOINT_HOLDER_NAME, "Write"));
   }
 
   /**
@@ -164,16 +174,16 @@ public class RestDocData extends DocData {
    * @throws IllegalStateException
    *           if the endpoint cannot be assigned to a group
    */
-  private void addEndpoint(RestEndpointData.Type type, RestEndpointData endpoint) throws IllegalStateException {
+  private void addEndpoint(String type, RestEndpointData endpoint) throws IllegalStateException {
     RestEndpointHolderData currentHolder = null;
     for (RestEndpointHolderData holder : holders) {
-      if (type.name().equals(holder.getName())) {
+      if (type.equalsIgnoreCase(holder.getName())) {
         currentHolder = holder;
         break;
       }
     }
     if (currentHolder == null) {
-      throw new IllegalStateException("Could not find holder of type: " + type.name() + ".");
+      throw new IllegalStateException("Could not find holder of type: " + type + ".");
     }
     currentHolder.addEndPoint(endpoint);
   }
@@ -275,10 +285,10 @@ public class RestDocData extends DocData {
 
     // Add the endpoint to the corresponding group based on its HTTP method
     if ((httpMethodString.equalsIgnoreCase("GET")) || (httpMethodString.equalsIgnoreCase("HEAD"))) {
-      addEndpoint(RestEndpointData.Type.READ, endpoint);
+      addEndpoint(READ_ENDPOINT_HOLDER_NAME, endpoint);
     } else if ((httpMethodString.equalsIgnoreCase("DELETE")) || (httpMethodString.equalsIgnoreCase("POST"))
             || (httpMethodString.equalsIgnoreCase("PUT"))) {
-      addEndpoint(RestEndpointData.Type.WRITE, endpoint);
+      addEndpoint(WRITE_ENDPOINT_HOLDER_NAME, endpoint);
     }
   }
 

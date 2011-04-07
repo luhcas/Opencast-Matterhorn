@@ -55,8 +55,6 @@
     	<groupId>org.opencastproject</groupId>
     	<artifactId>matterhorn-common</artifactId>
     	<version>${project.version}</version>
-    	<type>bundle</type>
-    	<scope>provided</scope>
     </dependency>    
   </dependencies>
   <build>

@@ -25,14 +25,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 public class RestEndpointData implements Comparable<RestEndpointData> {
 
   /**
-   * The type of endpoint. It is determined by the HTTP method used for this endpoint. If a method is invoked by GET and
-   * HEAD, the type is READ. If a method is invoked by PUT, POST and DELETE, the type is WRITE.
-   */
-  public static enum Type {
-    READ, WRITE
-  };
-
-  /**
    * The name of the endpoint, which should be unique. In the documentation page, the same type of endpoints are shown
    * in ascending order of name.
    */

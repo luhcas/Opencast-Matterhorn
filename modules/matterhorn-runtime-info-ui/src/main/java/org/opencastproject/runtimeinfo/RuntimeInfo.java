@@ -60,7 +60,7 @@ import javax.ws.rs.core.MediaType;
  * opencast project with the contents of the {@link #getRuntimeInfo()} json feed.
  */
 @Path("/")
-@RestService(name = "RuntimeInfo", title = "Runtime Information", url = "", notes = { }, abstractText = "This service provides information about the runtime environment, including the servives that are deployed and the current user context.")
+@RestService(name = "RuntimeInfo", title = "Runtime Information", notes = { }, abstractText = "This service provides information about the runtime environment, including the servives that are deployed and the current user context.")
 public class RuntimeInfo {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(RuntimeInfo.class);
@@ -191,6 +191,7 @@ public class RuntimeInfo {
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
       endpoint.put("version", version);
+      endpoint.put("path", servletContextPath);
       endpoint.put("docs", serverUrl + servletContextPath + "/docs"); // This is a Matterhorn convention
       endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&_type=xml"); // This triggers a CXF-specific
                                                                                   // handler
@@ -232,7 +233,7 @@ public class RuntimeInfo {
    *          the referencens
    * @return the sorted set of references
    */
-  protected SortedSet<ServiceReference> sort(ServiceReference[] references) {
+  protected static SortedSet<ServiceReference> sort(ServiceReference[] references) {
     // Sort the service references
     SortedSet<ServiceReference> sortedServiceRefs = new TreeSet<ServiceReference>(new Comparator<ServiceReference>() {
       @Override

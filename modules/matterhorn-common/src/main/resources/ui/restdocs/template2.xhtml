@@ -268,18 +268,6 @@
                   <input id="${endpoint.name}_${item.name}" name="${item.name}" class="form_field_file" class="form_field form_param_upload<#if item.required> form_param_required</#if>" type="file" />
                 </td>
                 <td class="form_field_description">${item.description!}</td>
-                <#elseif item.type == "enum">
-                <td class="form_label">
-                  <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:
-                </td>
-                <td>
-                  <select id="${endpoint.name}_${item.name}" class="form_field <#if item.path>form_param_path<#else>form_param_submit</#if><#if item.required> form_param_required</#if>" name="${item.name}">
-                    <#list item.choices as choice>
-                    <option value="${choice}"<#if (choice == item.defaultValue)> selected="selected"</#if>>${choice}</option>
-                    </#list>
-                  </select>
-                </td>
-                <td class="form_field_description">${item.description!}</td>
                 <#else>
                 <td class="form_label">
                   <#if item.required>* </#if><label for="${endpoint.name}_${item.name}">${item.name}</label>:

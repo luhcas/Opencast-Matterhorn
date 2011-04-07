@@ -20,16 +20,14 @@ import org.opencastproject.util.doc.DocData;
 import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /**
  * Represents a single parameter for an endpoint.
  */
 public final class RestParamData {
   public static enum Type {
-    BOOLEAN, ENUM, FILE, STRING, TEXT
+    BOOLEAN, FILE, STRING, TEXT
   };
 
   private String name; // unique key
@@ -38,11 +36,6 @@ public final class RestParamData {
   private String description;
   private boolean required = false;
   private boolean path = false; // This will be true for a path parameter.
-
-  /**
-   * List of ENUM choices when the parameter type is ENUM.
-   */
-  private List<String> choices;
 
   /**
    * Attributes are used for adjusting how the input field of this parameter is rendered in the test form. Currently,
@@ -98,36 +91,6 @@ public final class RestParamData {
   }
 
   /**
-   * Add a new choice to the list of ENUM choices when the parameter type is ENUM.
-   * 
-   * @param choice
-   *          the choice to add to the list of choices
-   */
-  public void addChoice(String choice) {
-    if (choices == null) {
-      choices = new Vector<String>();
-    }
-    choices.add(choice);
-  }
-
-  /**
-   * Set the list of ENUM choices when the parameter type is ENUM.
-   * 
-   * @param choices
-   *          the list of choices
-   */
-  public void setChoices(String[] choices) {
-    if (choices == null) {
-      this.choices = null;
-    } else {
-      this.choices = new Vector<String>(choices.length);
-      for (int i = 0; i < choices.length; i++) {
-        addChoice(choices[i]);
-      }
-    }
-  }
-
-  /**
    * Attributes are used for adjusting rendering of form elements related to this parameter.
    * 
    * @param key
@@ -146,15 +109,6 @@ public final class RestParamData {
     } else {
       attributes.put(key, value);
     }
-  }
-
-  /**
-   * Return the list of ENUM choices when the parameter type is ENUM.
-   * 
-   * @return the list of ENUM choices when the parameter type is ENUM
-   */
-  public List<String> getChoices() {
-    return choices;
   }
 
   /**
@@ -277,6 +231,6 @@ public final class RestParamData {
    */
   @Override
   public String toString() {
-    return "PAR:" + name + ":(" + type + "):" + defaultValue + ":" + choices;
+    return "PAR:" + name + ":(" + type + "):" + defaultValue;
   }
 }
