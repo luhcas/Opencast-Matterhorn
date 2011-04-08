@@ -69,17 +69,9 @@ CREATE TABLE `SEQUENCE` (
 
 CREATE TABLE `SERIES` (
   `SERIES_ID` varchar(128) collate utf8_unicode_ci NOT NULL,
-  `DESCRIPTION` text collate utf8_unicode_ci,
+  `ACCESS_CONTROL` text collate utf8_unicode_ci,
+  `DUBLIN_CORE` text collate utf8_unicode_ci,
   PRIMARY KEY  (`SERIES_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE `SERIES_METADATA` (
-  `METADATA_KEY` varchar(128) collate utf8_unicode_ci NOT NULL,
-  `METADATA_VAL` text collate utf8_unicode_ci,
-  `SERIES_ID` varchar(128) collate utf8_unicode_ci NOT NULL,
-  PRIMARY KEY  (`METADATA_KEY`,`SERIES_ID`),
-  KEY `FK_SERIES_METADATA_SERIES_ID` (`SERIES_ID`),
-  CONSTRAINT `FK_SERIES_METADATA_SERIES_ID` FOREIGN KEY (`SERIES_ID`) REFERENCES `SERIES` (`SERIES_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `UPLOAD` (
@@ -158,6 +150,24 @@ CREATE TABLE `JOB_ARG` (
   `ID` bigint(20) NOT NULL,
   `argument` longtext collate utf8_unicode_ci,
   `listindex` int(11) default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `MH_USER` (
+  `USERNAME` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `ORGANIZATION` varchar(255) collate utf8_unicode_ci default NULL,
+  `PASSWORD` varchar(255) collate utf8_unicode_ci default NULL,
+  PRIMARY KEY  (`USERNAME`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `MH_ROLE` (
+  `USERNAME` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `ROLE` varchar(255) collate utf8_unicode_ci default NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `MH_ROLE_MAPPING` (
+  `app` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `local` varchar(255) collate utf8_unicode_ci default NULL,
+  PRIMARY KEY  (`app`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `SEQUENCE` VALUES('SEQ_GEN', 50);

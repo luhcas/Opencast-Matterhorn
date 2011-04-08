@@ -61,13 +61,8 @@ CREATE TABLE sequence (
 
 CREATE TABLE series (
     series_id character varying(128) NOT NULL,
-    description text
-);
-
-CREATE TABLE series_metadata (
-    metadata_key character varying(128) NOT NULL,
-    metadata_val text,
-    series_id character varying(128) NOT NULL
+    access_control text,
+    dublin_core text
 );
 
 CREATE TABLE upload (
@@ -132,6 +127,22 @@ CREATE TABLE service_registration (
     host_reg bigint
 );
 
+CREATE TABLE mh_user (
+    username character varying(255) NOT NULL,
+    organization character varying(255),
+    password character varying(255)
+);
+
+CREATE TABLE mh_role (
+    username character varying(255) NOT NULL,
+    role character varying(255)
+);
+
+CREATE TABLE mh_role_mapping (
+    app character varying(255) NOT NULL,
+    local character varying(255)
+);
+
 ALTER TABLE ONLY annotation
     ADD CONSTRAINT annotation_pkey PRIMARY KEY (id);
 
@@ -149,9 +160,6 @@ ALTER TABLE ONLY sched_metadata
 
 ALTER TABLE ONLY sequence
     ADD CONSTRAINT sequence_pkey PRIMARY KEY (seq_name);
-
-ALTER TABLE ONLY series_metadata
-    ADD CONSTRAINT series_metadata_pkey PRIMARY KEY (metadata_key, series_id);
 
 ALTER TABLE ONLY series
     ADD CONSTRAINT series_pkey PRIMARY KEY (series_id);
@@ -197,6 +205,12 @@ ALTER TABLE ONLY job
 
 ALTER TABLE ONLY service_registration
     ADD CONSTRAINT fk_service_registration_host_reg FOREIGN KEY (host_reg) REFERENCES host_registration(id);
+
+ALTER TABLE ONLY mh_user
+    ADD CONSTRAINT mh_user_pkey PRIMARY KEY (username);
+
+ALTER TABLE ONLY mh_role_mapping
+    ADD CONSTRAINT mh_role_mapping_pkey PRIMARY KEY (app);
 
 INSERT INTO SEQUENCE VALUES('SEQ_GEN', 50);
 
