@@ -66,7 +66,7 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    *          the user provider to add
    */
   protected void addUserProvider(UserProvider userProvider) {
-    logger.info("Adding {} to the list of user providers", userProvider);
+    logger.debug("Adding {} to the list of user providers", userProvider);
     List<UserProvider> providers = userProviders.get(userProvider.getOrganization());
     if (providers == null) {
       providers = new ArrayList<UserProvider>();
@@ -82,7 +82,7 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    *          the user provider to remove
    */
   protected void removeUserProvider(UserProvider userProvider) {
-    logger.info("Removing {} from the list of user providers", userProvider);
+    logger.debug("Removing {} from the list of user providers", userProvider);
     List<UserProvider> providers = userProviders.get(userProvider.getOrganization());
     if (providers != null) {
       providers.remove(userProvider);
@@ -96,7 +96,7 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    *          the role provider to add
    */
   protected void addRoleProvider(RoleProvider roleProvider) {
-    logger.info("Adding {} to the list of role providers", roleProvider);
+    logger.debug("Adding {} to the list of role providers", roleProvider);
     List<RoleProvider> providers = roleProviders.get(roleProvider.getOrganization());
     if (providers == null) {
       providers = new ArrayList<RoleProvider>();
@@ -112,7 +112,7 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    *          the role provider to remove
    */
   protected void removeRoleProvider(RoleProvider roleProvider) {
-    logger.info("Removing {} from the list of role providers", roleProvider);
+    logger.debug("Removing {} from the list of role providers", roleProvider);
     List<RoleProvider> providers = roleProviders.get(roleProvider.getOrganization());
     if (providers != null) {
       providers.remove(roleProvider);

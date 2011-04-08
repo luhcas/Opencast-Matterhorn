@@ -140,6 +140,9 @@ public class IngestRestService {
     this.persistenceProperties = persistenceProperties;
   }
 
+  /**
+   * Callback for activation of this component.
+   */
   public void activate(ComponentContext context) {
     try {
       emf = persistenceProvider
@@ -150,6 +153,15 @@ public class IngestRestService {
     if (context != null) {
       String serviceUrl = (String) context.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
       docs = generateDocs(serviceUrl);
+    }
+  }
+  
+  /**
+   * Callback for deactivation of this component.
+   */
+  public void deactivate() {
+    if (emf != null && emf.isOpen()) {
+      emf.close();
     }
   }
 

@@ -18,8 +18,13 @@ package org.opencastproject.db;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import com.mchange.v2.c3p0.DataSources;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +45,7 @@ import javax.sql.DataSource;
 public class Activator implements BundleActivator {
 
   /** The logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(Activator.class);
+  protected static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
   /**
    * The persistence properties service registration
@@ -50,7 +55,9 @@ public class Activator implements BundleActivator {
   protected String rootDir;
   protected ServiceRegistration datasourceRegistration;
   protected ComboPooledDataSource pooledDataSource;
-
+  protected BundleContext bundleContext;
+  protected BundleListener jpaClientBundleListener;
+  
   public Activator() {
   }
 
@@ -66,6 +73,8 @@ public class Activator implements BundleActivator {
   @SuppressWarnings("unchecked")
   @Override
   public void start(BundleContext bundleContext) throws Exception {
+    this.bundleContext = bundleContext;
+    
     // Use the configured storage directory
     rootDir = bundleContext.getProperty("org.opencastproject.storage.dir") + File.separator + "db";
 
@@ -109,6 +118,10 @@ public class Activator implements BundleActivator {
       props.put("eclipselink.ddl-generation.output-mode", "database");
     }
     propertiesRegistration = bundleContext.registerService(Map.class.getName(), props, props);
+
+    // Listen for bundles with persistence units restarting
+    jpaClientBundleListener = new JpaClientBundleListener();
+    bundleContext.addBundleListener(jpaClientBundleListener);
   }
 
   /**
@@ -118,6 +131,7 @@ public class Activator implements BundleActivator {
    */
   @Override
   public void stop(BundleContext context) throws Exception {
+    context.removeBundleListener(jpaClientBundleListener);
     if (propertiesRegistration != null)
       propertiesRegistration.unregister();
     if (datasourceRegistration != null)
@@ -127,6 +141,35 @@ public class Activator implements BundleActivator {
 
   private String getConfigProperty(String config, String defaultValue) {
     return config == null ? defaultValue : config;
+  }
+
+  /**
+   * Listens for bundles using JPA, and refreshes the persistence provider bundle when they are updated.
+   */
+  class JpaClientBundleListener implements BundleListener {
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.osgi.framework.BundleListener#bundleChanged(org.osgi.framework.BundleEvent)
+     */
+    @Override
+    public void bundleChanged(BundleEvent event) {
+      if (event.getType() != BundleEvent.UPDATED)
+        return;
+      Bundle updatedBundle = event.getBundle();
+      if(updatedBundle.getEntry("/META-INF/persistence.xml") == null)
+        return;
+      ServiceReference jpaProviderRef = bundleContext.getServiceReference("javax.persistence.spi.PersistenceProvider");
+      if(jpaProviderRef != null) {
+        Bundle jpaBundle = jpaProviderRef.getBundle();
+        try {
+          jpaBundle.update();
+          logger.info("Updated the JPA provider bundle");
+        } catch (BundleException e) {
+          logger.info("Failed to update the JPA provider bundle: {}", e);
+        }
+      }
+    }
   }
 
 }

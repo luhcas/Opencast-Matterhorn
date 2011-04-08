@@ -84,15 +84,6 @@ public class SchedulerRestService {
   }
 
   /**
-   * Method to unset the service this REST endpoint uses
-   * 
-   * @param service
-   */
-  public void unsetService(SchedulerServiceImpl service) {
-    this.service = null;
-  }
-
-  /**
    * The method that will be called, if the service will be activated
    * 
    * @param cc

@@ -83,6 +83,15 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
   }
 
   /**
+   * Callback for deactivation of this component.
+   */
+  public void deactivate() {
+    if (emf != null && emf.isOpen()) {
+      emf.close();
+    }
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.security.api.UserProvider#loadUser(java.lang.String)
@@ -148,7 +157,8 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
    * existing mapping will be removed.
    */
   public void setRoleMapping(String applicationRole, String localRole) {
-    if(applicationRole == null) throw new IllegalArgumentException("applicationRole can not be null");
+    if (applicationRole == null)
+      throw new IllegalArgumentException("applicationRole can not be null");
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     JpaRoleMapping mapping = null;

@@ -57,6 +57,7 @@ public class UserTrackingServiceImpl implements UserTrackingService {
 
   private static final Logger logger = LoggerFactory.getLogger(UserTrackingServiceImpl.class);
 
+  @SuppressWarnings("unused")
   private SearchService searchService;
 
   /**
@@ -98,12 +99,6 @@ public class UserTrackingServiceImpl implements UserTrackingService {
   protected PersistenceProvider persistenceProvider;
 
   /**
-   * Deactivation callback
-   */
-  public void deactivate() {
-  }
-
-  /**
    * Activation callback to be executed once all dependencies are set
    */
   public void activate() {
@@ -111,6 +106,9 @@ public class UserTrackingServiceImpl implements UserTrackingService {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.usertracking", persistenceProperties);
   }
 
+  /**
+   * Deactivation callback
+   */
   public void destroy() {
     if (emf != null && emf.isOpen()) {
       emf.close();
@@ -268,6 +266,7 @@ public class UserTrackingServiceImpl implements UserTrackingService {
       q.setParameter("mediapackageId", mediapackageId);
       q.setFirstResult(offset);
       q.setMaxResults(limit);
+      @SuppressWarnings("unchecked")
       Collection<UserAction> userActions = q.getResultList();
 
       for (UserAction a : userActions) {
@@ -431,6 +430,7 @@ public class UserTrackingServiceImpl implements UserTrackingService {
       q.setFirstResult(offset);
       q.setMaxResults(limit);
 
+      @SuppressWarnings("unchecked")
       List<Object[]> result = q.getResultList();
       ReportItem item;
 
@@ -477,6 +477,7 @@ public class UserTrackingServiceImpl implements UserTrackingService {
       q.setFirstResult(offset);
       q.setMaxResults(limit);
 
+      @SuppressWarnings("unchecked")
       List<Object[]> result = q.getResultList();
       ReportItem item;
 
@@ -502,6 +503,7 @@ public class UserTrackingServiceImpl implements UserTrackingService {
       Query q = em.createNamedQuery("findUserActionsByTypeAndMediapackageIdOrderByOutpointDESC");
       q.setParameter("type", FOOTPRINT_KEY);
       q.setParameter("mediapackageId", mediapackageId);
+      @SuppressWarnings("unchecked")
       Collection<UserAction> userActions = q.getResultList();
 
       int[] resultArray = new int[1];
