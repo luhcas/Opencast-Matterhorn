@@ -31,6 +31,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -143,14 +144,53 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
   }
 
   /**
+   * Creates or updates a mapping from an application role to a local role. If <code>localRole</code> is null, any
+   * existing mapping will be removed.
+   */
+  public void setRoleMapping(String applicationRole, String localRole) {
+    if(applicationRole == null) throw new IllegalArgumentException("applicationRole can not be null");
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    JpaRoleMapping mapping = null;
+    try {
+      tx.begin();
+      Query q = em.createNamedQuery("role");
+      q.setParameter("applicationRole", applicationRole);
+      mapping = (JpaRoleMapping) q.getSingleResult();
+      if (localRole == null) {
+        em.remove(mapping);
+      } else {
+        mapping.setLocalRole(localRole);
+        em.merge(mapping);
+      }
+    } catch (NoResultException e) {
+      // there is no mapping for this application role
+      mapping = new JpaRoleMapping(applicationRole, localRole);
+      em.persist(mapping);
+    } finally {
+      tx.commit();
+      em.close();
+    }
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.security.api.RoleProvider#getLocalRole(java.lang.String)
    */
   @Override
   public String getLocalRole(String role) {
-    // TODO: Implement
-    return role;
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query q = em.createNamedQuery("role");
+      q.setParameter("applicationRole", role);
+      JpaRoleMapping mapping = (JpaRoleMapping) q.getSingleResult();
+      return mapping.getLocalRole();
+    } catch (NoResultException e) {
+      return null;
+    } finally {
+      em.close();
+    }
   }
 
   /**

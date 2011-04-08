@@ -68,7 +68,8 @@ public class JpaUser {
    *          the username
    * @param password
    *          the password
-   *          @param organization the organization
+   * @param organization
+   *          the organization
    * @param roles
    *          the roles
    */
@@ -106,7 +107,7 @@ public class JpaUser {
   public String getOrganization() {
     return organization;
   }
-  
+
   /**
    * Gets the user's roles.
    * 
@@ -115,10 +116,10 @@ public class JpaUser {
   public Set<String> getRoles() {
     return roles;
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#toString()
    */
   @Override

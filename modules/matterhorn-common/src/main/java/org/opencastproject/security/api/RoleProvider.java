@@ -34,6 +34,8 @@ public interface RoleProvider {
    * matterhorn role <code>{@link AuthorizationService#ADMIN}</code> would translate to the local role name
    * <code>ucb_admin</code>.
    * 
+   * @param role
+   *          the application role
    * @return the local role name
    * @throws NotFoundException
    *           if there is no mapping for role <code>role</code>
