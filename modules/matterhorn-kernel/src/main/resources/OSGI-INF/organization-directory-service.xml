@@ -11,4 +11,17 @@
       cardinality="0..n" policy="dynamic" bind="addOrganizationDirectory" unbind="removeOrganizationDirectory" />
   </scr:component>
 
+  <scr:component name="org.opencastproject.kernel.security.OrganizationEndpoint" immediate="true">
+    <implementation class="org.opencastproject.kernel.security.OrganizationEndpoint" />
+    <property name="service.description" value="Organization listing REST endpoint" />
+    <property name="opencast.service.type" value="org.opencastproject.organization" />
+    <property name="opencast.service.path" value="/org" />
+    <property name="opencast.service.jobproducer" value="false" />
+    <service>
+      <provide interface="org.opencastproject.kernel.security.OrganizationEndpoint" />
+    </service>
+    <reference name="orgDirectoryService" interface="org.opencastproject.security.api.OrganizationDirectoryService"
+      cardinality="1..1" policy="static" bind="setOrgDirectoryService" />
+  </scr:component>
+
 </scr:components>
