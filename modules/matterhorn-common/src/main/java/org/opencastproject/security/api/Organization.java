@@ -15,10 +15,20 @@
  */
 package org.opencastproject.security.api;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 /**
  * An organization that is hosted on this Matterhorn instance.
@@ -46,6 +56,11 @@ public class Organization {
   /** The local anonymous role name */
   protected String anonymousRole = null;
 
+  /** Arbitrary string properties associated with this organization */
+  @XmlElement(name = "property")
+  @XmlElementWrapper(name = "properties")
+  protected List<OrgProperty> properties = null;
+
   /**
    * No-arg constructor needed by JAXB
    */
@@ -67,7 +82,28 @@ public class Organization {
    *          name of the local anonymous role
    */
   public Organization(String id, String name, String serverName, String adminRole, String anonymousRole) {
-    this(id, name, serverName, 80, adminRole, anonymousRole);
+    this(id, name, serverName, 80, adminRole, anonymousRole, null);
+  }
+
+  /**
+   * Constructs an organization with its attributes and a default server port of <code>80</code>.
+   * 
+   * @param id
+   *          the unique identifier
+   * @param name
+   *          the friendly name
+   * @param serverName
+   *          the host name
+   * @param adminRole
+   *          name of the local admin role
+   * @param anonymousRole
+   *          name of the local anonymous role
+   * @param properties
+   *          arbitrary properties defined for this organization, which might include branding, etc.
+   */
+  public Organization(String id, String name, String serverName, String adminRole, String anonymousRole,
+          Map<String, String> properties) {
+    this(id, name, serverName, 80, adminRole, anonymousRole, properties);
   }
 
   /**
@@ -85,14 +121,24 @@ public class Organization {
    *          name of the local admin role
    * @param anonymousRole
    *          name of the local anonymous role
+   * @param properties
+   *          arbitrary properties defined for this organization, which might include branding, etc.
    */
-  public Organization(String id, String name, String serverName, int serverPort, String adminRole, String anonymousRole) {
+  public Organization(String id, String name, String serverName, int serverPort, String adminRole,
+          String anonymousRole, Map<String, String> properties) {
+    this();
     this.id = id;
     this.name = name;
     this.serverName = serverName;
     this.serverPort = serverPort;
     this.adminRole = adminRole;
     this.anonymousRole = anonymousRole;
+    this.properties = new ArrayList<Organization.OrgProperty>();
+    if (properties != null && !properties.isEmpty()) {
+      for (Entry<String, String> entry : properties.entrySet()) {
+        this.properties.add(new OrgProperty(entry.getKey(), entry.getValue()));
+      }
+    }
   }
 
   /**
@@ -142,6 +188,19 @@ public class Organization {
   }
 
   /**
+   * Returns the organizational properties
+   * 
+   * @return the properties
+   */
+  public Map<String, String> getProperties() {
+    Map<String, String> map = new HashMap<String, String>();
+    for (OrgProperty prop : properties) {
+      map.put(prop.getKey(), prop.getValue());
+    }
+    return map;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see java.lang.Object#toString()
@@ -173,4 +232,52 @@ public class Organization {
     return id.hashCode();
   }
 
+  /**
+   * An organization property. To read about why this class is necessary, see http://java.net/jira/browse/JAXB-223
+   */
+  @XmlAccessorType(XmlAccessType.FIELD)
+  @XmlType(name = "property", namespace = "org.opencastproject.security")
+  public static class OrgProperty {
+
+    /** The property key */
+    @XmlAttribute
+    String key;
+
+    /** The property value */
+    @XmlValue
+    String value;
+
+    /**
+     * No-arg constructor needed by JAXB
+     */
+    public OrgProperty() {
+    }
+
+    /**
+     * Constructs an organization property with a key and a value.
+     * 
+     * @param key
+     *          the key
+     * @param value
+     *          the value
+     */
+    public OrgProperty(String key, String value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    /**
+     * @return the key
+     */
+    public String getKey() {
+      return key;
+    }
+
+    /**
+     * @return the value
+     */
+    public String getValue() {
+      return value;
+    }
+  }
 }

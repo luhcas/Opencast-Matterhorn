@@ -18,6 +18,7 @@ package org.opencastproject.runtimeinfo;
 import static org.opencastproject.rest.RestConstants.SERVICES_FILTER;
 
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.util.DocUtil;
@@ -42,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -163,13 +165,31 @@ public class RuntimeInfo {
   @SuppressWarnings("unchecked")
   public String getMyInfo() {
     JSONObject json = new JSONObject();
-    JSONArray roles = new JSONArray();
+
     User user = securityService.getUser();
     json.put("username", user.getUserName());
+
+    // Add the current user's roles
+    JSONArray roles = new JSONArray();
     for (String role : user.getRoles()) {
       roles.add(role);
     }
     json.put("roles", roles);
+
+    // Add the current user's organizational information
+    Organization org = securityService.getOrganization();
+    JSONObject jsonOrg = new JSONObject();
+    jsonOrg.put("id", org.getId());
+    jsonOrg.put("name", org.getName());
+
+    // and organization properties
+    JSONObject orgProps = new JSONObject(); 
+    jsonOrg.put("properties", orgProps);
+    for(Entry<String, String> entry : org.getProperties().entrySet()) {
+      orgProps.put(entry.getKey(), entry.getValue());
+    }
+    json.put("org", jsonOrg);
+    
     return json.toJSONString();
   }
 

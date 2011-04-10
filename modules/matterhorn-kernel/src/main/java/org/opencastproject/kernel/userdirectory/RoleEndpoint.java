@@ -15,7 +15,10 @@
  */
 package org.opencastproject.kernel.userdirectory;
 
+import org.opencastproject.rest.docs.RestQuery;
+import org.opencastproject.rest.docs.RestResponse;
 import org.opencastproject.security.api.RoleDirectoryService;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.json.simple.JSONArray;
 
@@ -32,16 +35,17 @@ import javax.ws.rs.core.MediaType;
  * Provides a sorted set of known roles
  */
 @Path("/")
+@RestService(name = "roles", title = "User Roles", notes = { "" }, abstractText = "Displays the roles available in "
+        + "the current user's organization")
 public class RoleEndpoint {
 
   /** The role directory service */
   protected RoleDirectoryService roleDirectoryService = null;
 
-  // TODO: Add rest docs once the new annotations are available
-
   @GET
   @Path("/list.json")
   @Produces(MediaType.APPLICATION_JSON)
+  @RestQuery(description = "Lists the roles as a json array", returnDescription = "The list of roles as a json array", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "OK, roles returned") })
   @SuppressWarnings("unchecked")
   public String getRoles() {
     SortedSet<String> knownRoles = new TreeSet<String>();

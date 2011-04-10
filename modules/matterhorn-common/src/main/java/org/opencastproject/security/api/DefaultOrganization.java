@@ -21,17 +21,31 @@ import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZ
 import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_NAME;
 import static org.opencastproject.util.UrlSupport.DEFAULT_BASE_URL;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The default organization.
  */
 public class DefaultOrganization extends Organization {
+
+  /** The default organization properties */
+  public static final Map<String, String> DEFAULT_PROPERTIES;
+
+  static {
+    Map<String, String> map = new HashMap<String, String>();
+    map.put("logo_large", "/img/MatterhornLogo_large.png");
+    map.put("logo_small", "/img/OpencastLogo.png");
+    DEFAULT_PROPERTIES = Collections.unmodifiableMap(map);
+  }
 
   /**
    * No-arg constructor needed by JAXB
    */
   public DefaultOrganization() {
     super(DEFAULT_ORGANIZATION_ID, DEFAULT_ORGANIZATION_NAME, DEFAULT_BASE_URL, DEFAULT_ORGANIZATION_ADMIN,
-            DEFAULT_ORGANIZATION_ANONYMOUS);
+            DEFAULT_ORGANIZATION_ANONYMOUS, DEFAULT_PROPERTIES);
   }
 
   /**
@@ -44,7 +58,7 @@ public class DefaultOrganization extends Organization {
    */
   public DefaultOrganization(String host, int port) {
     super(DEFAULT_ORGANIZATION_ID, DEFAULT_ORGANIZATION_NAME, host, port, DEFAULT_ORGANIZATION_ADMIN,
-            DEFAULT_ORGANIZATION_ANONYMOUS);
+            DEFAULT_ORGANIZATION_ANONYMOUS, DEFAULT_PROPERTIES);
   }
 
 }
