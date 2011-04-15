@@ -1300,6 +1300,16 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>kenneth</id>
+      <name>Kenneth Lui</name>
+      <email>hkkenneth@gmail.com</email>
+      <url>http://www.ugrad.cs.ubc.ca/~j7l6/</url>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>-8</timezone>
+    </developer>    
   </developers>
 
   <contributors><!-- TODO? -->
