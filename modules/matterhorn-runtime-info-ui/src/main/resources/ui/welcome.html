@@ -7,28 +7,28 @@
     
     <script type="text/javascript" src="jquery/jquery-1.4.4.min.js"></script>
     <script type="text/javascript">
-      (function($) {
-       $.getJSON("/info/components.json", function(data) {
-                 var contentDiv = $("#content");
-                 $.each(data, function(section) {
-                        if("rest" == section) {
-                          $.each(data.rest, function(i) {
-                            /*if(i < Math.floor(data.rest.length / 2)){
-                              col = $('#docs1');
-                            }else{
-                              col = $('#docs2');
-                            }*/
-                            var col = $('#docs1');
-                            col.append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
-                          })
-                        } else if("engage" == section) {
-                          $('#engagelink').attr('href', data.engage + '/engage/ui');
-                        } else if("admin" == section) {
-                          $('#adminlink').attr('href', data.admin + '/admin/');
-                        }
-                    });
-                 });
-       })(jQuery);
+     $(document).ready(function() {
+ ¬† ¬† ¬† $.getJSON("/info/components.json", function(data) {
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† var contentDiv = $("#content");
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† $.each(data, function(section) {
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†if("rest" == section) {
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†$.each(data.rest, function(i) {
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†/*if(i < Math.floor(data.rest.length / 2)){
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†col = $('#docs1');
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†}else{
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†col = $('#docs2');
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†}*/
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†var col = $('#docs1');
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†col.append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†})
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†} else if("engage" == section) {
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†$('#engagelink').attr('href', data.engage + '/engage/ui');
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†} else if("admin" == section) {
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†$('#adminlink').attr('href', data.admin + '/admin/');
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†}
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬†});
+ ¬† ¬† ¬† ¬† ¬† ¬† ¬† ¬† });
+ ¬† ¬† ¬†});
     </script>
     <link href="style.css" rel="stylesheet" type="text/css" />
   </head>

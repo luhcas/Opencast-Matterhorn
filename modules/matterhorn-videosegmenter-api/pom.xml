@@ -5,7 +5,6 @@
   <artifactId>matterhorn-videosegmenter-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-videosegmenter-api</name>
-  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>

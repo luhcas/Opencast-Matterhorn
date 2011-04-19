@@ -30,8 +30,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A JAXB-annotated implementation of {@link WorkflowDefinition}
  */
-@XmlType(name = "definition", namespace = "http://workflow.opencastproject.org/")
-@XmlRootElement(name = "definition", namespace = "http://workflow.opencastproject.org/")
+@XmlType(name = "definition", namespace = "http://workflow.opencastproject.org")
+@XmlRootElement(name = "definition", namespace = "http://workflow.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowDefinitionImpl implements WorkflowDefinition {
 

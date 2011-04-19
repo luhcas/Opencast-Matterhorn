@@ -5,7 +5,6 @@
   <artifactId>matterhorn-engage-ui</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-engage-ui</name>
-  <version>1.2-SNAPSHOT</version>
 
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -59,7 +58,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-search-service-api</artifactId>
-      <version>1.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>

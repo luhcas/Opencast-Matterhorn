@@ -444,8 +444,7 @@ public class EventImpl implements Event {
       additionalMetadata.clear();
     }
     for (Metadata m : metadata) {
-      m.setEvent(this);
-      this.additionalMetadata.add((MetadataImpl) m);
+      this.additionalMetadata.add(new MetadataImpl(this, m.getKey(), m.getValue()));
     }
   }
 

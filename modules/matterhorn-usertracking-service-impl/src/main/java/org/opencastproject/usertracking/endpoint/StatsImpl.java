@@ -27,8 +27,8 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A JAXB-annotated implementation of {@link Stats}
  */
-@XmlType(name = "stats", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "stats", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "stats", namespace = "http://usertracking.opencastproject.org")
+@XmlRootElement(name = "stats", namespace = "http://usertracking.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class StatsImpl implements Stats {
 

@@ -5,7 +5,6 @@
   <artifactId>matterhorn-capture-agent-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-capture-agent-api</name>
-  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>

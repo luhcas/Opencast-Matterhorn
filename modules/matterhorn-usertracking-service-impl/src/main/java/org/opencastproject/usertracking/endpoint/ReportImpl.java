@@ -32,8 +32,8 @@ import org.opencastproject.usertracking.api.Report;
 /**
  * A {@link Report}
  */
-@XmlType(name = "report", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "report", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "report", namespace = "http://usertracking.opencastproject.org")
+@XmlRootElement(name = "report", namespace = "http://usertracking.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ReportImpl implements Report {
 
@@ -58,7 +58,7 @@ public class ReportImpl implements Report {
   @XmlAttribute(name = "limit")
   protected int limit;
 
-  @XmlElement(name = "report-item", namespace = "http://usertracking.opencastproject.org/")
+  @XmlElement(name = "report-item", namespace = "http://usertracking.opencastproject.org")
   protected List<ReportItemImpl> reportItems;
 
   public void add(ReportItem reportItem) {

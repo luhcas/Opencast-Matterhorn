@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
  * Part of a search result that models a video segment.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "segment", namespace = "http://search.opencastproject.org/")
-@XmlRootElement(name = "segment", namespace = "http://search.opencastproject.org/")
+@XmlType(name = "segment", namespace = "http://search.opencastproject.org")
+@XmlRootElement(name = "segment", namespace = "http://search.opencastproject.org")
 public class MediaSegmentImpl implements MediaSegment, Comparable<MediaSegmentImpl> {
 
   /** The segment number **/

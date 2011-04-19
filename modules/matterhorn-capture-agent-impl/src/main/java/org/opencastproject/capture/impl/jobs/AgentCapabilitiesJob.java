@@ -41,7 +41,23 @@ import java.net.HttpURLConnection;
 public class AgentCapabilitiesJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
-
+  private static int globalCapabilityPushCount = 0;
+  private int uniqueID = -1;
+  /** 
+   * Creates a unique identifier that will allow us to track which updates are having errors to when they started.
+   * @return An ever increasing int that will wrap around once it hits Interger.MAX_VALUE
+   */
+  public synchronized int getStatePushCount(){
+    if(globalCapabilityPushCount == 0){
+      logger.info("Starting first capability push count.");
+    }
+    if(globalCapabilityPushCount == Integer.MAX_VALUE){
+      logger.info("Agent capability push count has reached maximum, resetting global state push count to zero.");
+      globalCapabilityPushCount = 0;
+    }
+    return globalCapabilityPushCount++;
+  }
+  
   /**
    * Pushes the agent's capabilities to the remote state service. {@inheritDoc}
    * 
@@ -49,6 +65,7 @@ public class AgentCapabilitiesJob implements Job {
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    uniqueID = getStatePushCount();
     ConfigurationManager config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
     CaptureAgent agent = (CaptureAgent) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
     TrustedHttpClient client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
@@ -56,7 +73,7 @@ public class AgentCapabilitiesJob implements Job {
     // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push capabilities to remote server.",
+      logger.warn("#" + uniqueID + " - URL for {} is invalid, unable to push capabilities to remote server.",
               CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
@@ -67,7 +84,7 @@ public class AgentCapabilitiesJob implements Job {
         url += "/" + config.getItem(CaptureParameters.AGENT_NAME) + "/capabilities";
       }
     } catch (StringIndexOutOfBoundsException e) {
-      logger.warn("Unable to build valid capabilities endpoint for agents.");
+      logger.warn("#" + uniqueID + " - Unable to build valid capabilities endpoint for agents.");
       return;
     }
 
@@ -77,23 +94,23 @@ public class AgentCapabilitiesJob implements Job {
     try {
       agent.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + agent.getAgentName());
     } catch (IOException e) {
-      logger.warn("Unable to serialize agent capabilities!");
+      logger.warn("#" + uniqueID + " - Unable to serialize agent capabilities!");
       return;
     }
     HttpPost remoteServer = new HttpPost(url);
     try {
       remoteServer.setEntity(new StringEntity(baos.toString()));
     } catch (UnsupportedEncodingException e) {
-      logger.warn("Unable to send agent capapbillities because correct encoding scheme is not supported!");
+      logger.warn("#" + uniqueID + " - Unable to send agent capapbillities because correct encoding scheme is not supported!");
       return;
     }
     try {
       resp = client.execute(remoteServer);
       if (resp.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logger.info("Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+        logger.info("#" + uniqueID + " - Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
       }
     } catch (TrustedHttpClientException e) {
-      logger.warn("Unable to post capabilities to {}, message reads: {}.", url, e);
+      logger.warn("#" + uniqueID + " - Unable to post capabilities to {}, message reads: {}.", url, e);
     } finally {
       if (resp != null) {
         client.close(resp);

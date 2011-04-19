@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
  * A long running, asynchronously executed job.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name = "job", namespace = "http://job.opencastproject.org/")
-@XmlRootElement(name = "job", namespace = "http://job.opencastproject.org/")
+@XmlType(name = "job", namespace = "http://job.opencastproject.org")
+@XmlRootElement(name = "job", namespace = "http://job.opencastproject.org")
 public class JaxbJob implements Job {
 
   /** The job ID */

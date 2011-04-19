@@ -21,10 +21,8 @@ import static org.easymock.EasyMock.verify;
 
 import org.opencastproject.capture.api.CaptureParameters;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;

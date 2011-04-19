@@ -5,7 +5,6 @@
   <artifactId>matterhorn-lti</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-lti</name>
-  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>

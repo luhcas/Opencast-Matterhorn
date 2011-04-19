@@ -58,8 +58,8 @@ import javax.xml.bind.annotation.XmlType;
         @NamedQuery(name = "findTotalByIntervall", query = "SELECT COUNT(a) FROM UserAction a WHERE :begin <= a.created AND a.created <= :end"),
         @NamedQuery(name = "findDistinctEpisodeIdTotalByIntervall", query = "SELECT COUNT(distinct a.mediapackageId) FROM UserAction a WHERE :begin <= a.created AND a.created <= :end"),
         @NamedQuery(name = "findTotalByTypeAndIntervall", query = "SELECT COUNT(a) FROM UserAction a WHERE :begin <= a.created AND a.created <= :end AND a.type = :type") })
-@XmlType(name = "action", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "action", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "action", namespace = "http://usertracking.opencastproject.org")
+@XmlRootElement(name = "action", namespace = "http://usertracking.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UserActionImpl implements UserAction {
 

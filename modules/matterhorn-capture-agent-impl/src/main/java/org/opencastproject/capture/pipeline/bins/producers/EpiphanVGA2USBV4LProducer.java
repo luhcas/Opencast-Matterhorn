@@ -331,7 +331,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
           if (buffer == null)
             throw new NullPointerException("Buffer is null");
         } catch (Exception ex) {
-          // logger.debug(ex.getMessage());
+          logger.debug(ex.getMessage());
           // epiphan pipeline is down, try to get buffer from testsrc pipeline
           sink = subBin.getSink();
           if (sink == null)
@@ -357,7 +357,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
 
       @Override
       public void stateChanged(GstObject source, State old, State current, State pending) {
-
+        logger.debug("Pipeline state change. {}", old.toString() + "," + current.toString() + "," + pending.toString());
         if (source == src) {
 
           if (old == State.NULL) {
@@ -390,10 +390,12 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     try {
       V4LInfo v4linfo = JV4LInfo.getV4LInfo(device);
       String deviceName = v4linfo.getVideoCapability().getName();
-      if ("Epiphan VGA2USB".equals(deviceName) || "Epiphan VGA2PCI".equals(deviceName)) {
+      
+      if (deviceName.contains("VGA2USB") || deviceName.contains("VGA2PCI")) {
         return true;
       }
     } catch (JV4LInfoException e) {
+      
       return false;
     }
     return false;
@@ -418,7 +420,9 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
       logger.debug("Start Epiphan VGA2USB polling thread!");
 
       while (!interrupted()) {
+        logger.debug("Thread not interrupted. Device: " + deviceBin.isBroken() + " Epiphan: " + checkEpiphan(location));
         if (deviceBin.isBroken() && checkEpiphan(location)) {
+          logger.debug("Device broken, attempting to reconnect pipeline.");
           try {
             EpiphanVGA2USBV4LSubDeviceBin newBin = new EpiphanVGA2USBV4LSubDeviceBin(captureDevice, caps);
             if (!newBin.start(DEVICEBIN_START_TIME)) {

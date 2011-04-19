@@ -33,8 +33,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 /**
  * A JAXB-annotated implementation of {@link WorkflowOperationInstance}
  */
-@XmlType(name = "operation-instance", namespace = "http://workflow.opencastproject.org/")
-@XmlRootElement(name = "operation-instance", namespace = "http://workflow.opencastproject.org/")
+@XmlType(name = "operation-instance", namespace = "http://workflow.opencastproject.org")
+@XmlRootElement(name = "operation-instance", namespace = "http://workflow.opencastproject.org")
 @XmlAccessorType(XmlAccessType.NONE)
 public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance {
 

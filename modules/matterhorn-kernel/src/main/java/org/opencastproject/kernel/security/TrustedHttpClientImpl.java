@@ -32,6 +32,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreConnectionPNames;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,12 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
 
   /** The configuration property specifying the digest authentication password */
   public static final String DIGEST_AUTH_PASS_KEY = "org.opencastproject.security.digest.pass";
+
+  /** The default time until a connection attempt fails */
+  public static final int DEFAULT_CONNECTION_TIMEOUT = 60 * 1000;
+
+  /** The default time between packets that causes a connection to fail */
+  public static final int DEFAULT_SOCKET_TIMEOUT = DEFAULT_CONNECTION_TIMEOUT;
 
   /** The configured username to send as part of the digest authenticated request */
   protected String user = null;
@@ -104,8 +111,14 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
    */
   @Override
   public HttpResponse execute(HttpUriRequest httpUriRequest) throws TrustedHttpClientException {
-    DefaultHttpClient httpClient = new DefaultHttpClient();
+    return execute(httpUriRequest, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_SOCKET_TIMEOUT);
+  }
 
+  @Override
+  public HttpResponse execute(HttpUriRequest httpUriRequest, int connectionTimeout, int socketTimeout)
+          throws TrustedHttpClientException {
+    DefaultHttpClient httpClient = new DefaultHttpClient();
+    httpClient.getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, connectionTimeout);
     // Add the request header to elicit a digest auth response
     httpUriRequest.addHeader(REQUESTED_AUTH_HEADER, DIGEST_AUTH);
 
@@ -173,6 +186,16 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
     }
   }
 
+  @Override
+  public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler, int connectionTimeout,
+          int socketTimeout) throws TrustedHttpClientException {
+    try {
+      return responseHandler.handleResponse(execute(httpUriRequest, connectionTimeout, socketTimeout));
+    } catch (IOException e) {
+      throw new TrustedHttpClientException(e);
+    }
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -199,11 +222,7 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
   @Override
   public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler)
           throws TrustedHttpClientException {
-    try {
-      return responseHandler.handleResponse(execute(httpUriRequest));
-    } catch (IOException e) {
-      throw new TrustedHttpClientException(e);
-    }
+    return execute(httpUriRequest, responseHandler, DEFAULT_CONNECTION_TIMEOUT, DEFAULT_SOCKET_TIMEOUT);
   }
 
   /**
@@ -245,10 +264,11 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.kernel.security.HttpConnectionMXBean#getOpenConnections()
+   * @see org.opencastproject.security.HttpConnectionMXBean#getOpenConnections()
    */
   @Override
   public int getOpenConnections() {
     return responseMap.size();
   }
+
 }

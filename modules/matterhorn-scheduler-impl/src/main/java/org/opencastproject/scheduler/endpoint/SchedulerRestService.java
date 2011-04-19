@@ -135,8 +135,9 @@ public class SchedulerRestService {
   }
 
   private Response getEvent(Long eventId) throws NotFoundException {
-    if (eventId == null)
+    if (eventId == null) {
       return Response.status(Status.BAD_REQUEST).build();
+    }
     Event e = service.getEvent(eventId);
     return Response.ok(e).build();
   }
@@ -169,8 +170,9 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("{eventId}/captureAgentMetadata")
   public Response getCaptureAgentMetadata(@PathParam("eventId") Long eventId) throws NotFoundException {
-    if (eventId == null)
+    if (eventId == null) {
       return Response.status(Status.BAD_REQUEST).build();
+    }
     String result = service.getCaptureAgentMetadata(eventId);
     return Response.ok(result).build();
   }

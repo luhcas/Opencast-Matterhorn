@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A {@link FootprintList}
  */
-@XmlType(name = "footprints", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "footprints", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "footprints", namespace = "http://usertracking.opencastproject.org")
+@XmlRootElement(name = "footprints", namespace = "http://usertracking.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class FootprintsListImpl implements FootprintList {
 

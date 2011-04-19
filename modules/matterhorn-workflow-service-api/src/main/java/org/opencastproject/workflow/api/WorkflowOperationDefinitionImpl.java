@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * See {@link WorkflowOperationDefinition}
  */
-@XmlType(name = "operation-definition", namespace = "http://workflow.opencastproject.org/")
-@XmlRootElement(name = "operation-definition", namespace = "http://workflow.opencastproject.org/")
+@XmlType(name = "operation-definition", namespace = "http://workflow.opencastproject.org")
+@XmlRootElement(name = "operation-definition", namespace = "http://workflow.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinition {
 

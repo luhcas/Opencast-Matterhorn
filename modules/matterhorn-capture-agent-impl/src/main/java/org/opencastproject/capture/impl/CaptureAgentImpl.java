@@ -123,6 +123,8 @@ import org.gstreamer.message.EOSMessage;
  */
 public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService,
         ConfigurationManagerListener {
+  // The amount of time to wait until shutting down the pipeline manually. 
+  private static final long DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT = 60000L;
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
@@ -539,30 +541,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       logger.warn("Pipeline is null, this is normal if running a mock capture.");
       setAgentState(AgentState.IDLE);
     } else {
-      // We must stop the capture as soon as possible, then check whatever needed
-      pipe.getBus().post(new EOSMessage(pipe));
-      long startWait = System.currentTimeMillis();
-      long timeout = 60000L;
-      if (configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT) == null) {
-        logger.warn("Unable to find shutdown timeout value.  Assuming 1 minute.  Missing key is {}.",
-                CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT);
-      } else {
-        timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT)) * 1000L;
-      }
-      while (pipe != null) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
-
-        // If we've timed out then force kill the pipeline
-        if (System.currentTimeMillis() - startWait >= timeout) {
-          if (pipe != null) {
-            pipe.setState(State.NULL);
-          }
-          pipe = null;
-        }
-      }
+      stopPipeline();
 
       // Checks there is a currentRecID defined --should always be
       if (currentRecID == null) {
@@ -601,6 +580,38 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     return true;
+  }
+
+  /**
+   * This method waits until the pipeline has had an opportunity to shutdown and if it surpasses the maximum timeout
+   * value it will be manually stopped.
+   */
+  private void stopPipeline() {
+    // We must stop the capture as soon as possible, then check whatever needed
+    pipe.getBus().post(new EOSMessage(pipe));
+    
+    long startWait = System.currentTimeMillis();
+    long timeout = DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT;
+    if (configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT) == null) {
+      logger.warn("Unable to find shutdown timeout value.  Assuming 1 minute.  Missing key is {}.",
+              CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT);
+    } else {
+      timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT)) * 1000L;
+    }
+    while (pipe != null) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
+
+      // If we've timed out then force kill the pipeline
+      if (System.currentTimeMillis() - startWait >= timeout) {
+        if (pipe != null) {
+          pipe.setState(State.NULL);
+        }
+        pipe = null;
+      }
+    }
   }
 
   /**
@@ -1288,7 +1299,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       schedulerProperties.put("org.quartz.scheduler.rmi.proxy", "false");
 
       schedulerProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-      schedulerProperties.put("org.quartz.threadPool.threadCount", "5");
+      schedulerProperties.put("org.quartz.threadPool.threadCount", "20");
 
       schedulerProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
       try {

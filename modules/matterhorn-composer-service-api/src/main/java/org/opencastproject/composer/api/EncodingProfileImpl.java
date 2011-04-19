@@ -34,8 +34,8 @@ import javax.xml.bind.annotation.XmlType;
  * Default implementation for encoding profiles.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "profile", namespace = "http://composer.opencastproject.org/")
-@XmlRootElement(name = "profile", namespace = "http://composer.opencastproject.org/")
+@XmlType(name = "profile", namespace = "http://composer.opencastproject.org")
+@XmlRootElement(name = "profile", namespace = "http://composer.opencastproject.org")
 public class EncodingProfileImpl implements EncodingProfile {
 
   /** The profile identifier, e. g. flash.http */

@@ -19,6 +19,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 
+import org.quartz.CronExpression;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDetail;
@@ -29,6 +30,7 @@ import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.Properties;
 
 /**
@@ -80,10 +82,8 @@ public class StartCaptureJob implements Job {
     }
 
     try {
-
       // Find the recording end time
       String time2Stop = properties.getProperty(CaptureParameters.RECORDING_END);
-
       JobDetail job = new JobDetail(StopCaptureJob.JOB_PREFIX + postfix, StopCaptureJob.class);
       job.setGroup(JobParameters.SUPPORT_TYPE);
       CronTrigger trigger = new CronTrigger(StopCaptureJob.TRIGGER_PREFIX + postfix, time2Stop);
@@ -94,8 +94,16 @@ public class StartCaptureJob implements Job {
       trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, postfix);
       trigger.getJobDataMap().put(JobParameters.SCHEDULER, sched);
 
-      // Actually does the service
-      String recordingID = captureAgentImpl.startCapture(mediaPackage, properties);
+      String recordingID = null;
+      synchronized (trigger) {
+        CronExpression endOfCaptureCronExpression = new CronExpression(trigger.getCronExpression());
+        if(endOfCaptureCronExpression.getNextValidTimeAfter(new Date()) == null) {
+          logger.warn("startCapture is trying to fire after endtime {}, canceling.", trigger);
+          return;
+        }
+        // Actually does the service
+        recordingID = captureAgentImpl.startCapture(mediaPackage, properties);
+      }
       if (recordingID == null) {
         logger.error("Capture agent returned null when trying to start capture!");
         return;
@@ -121,7 +129,7 @@ public class StartCaptureJob implements Job {
 
     } catch (SchedulerException e) {
       logger.error("Couldn't schedule task: {}", e);
-      // e.printStackTrace();
+      e.printStackTrace();
     } catch (Exception e) {
       logger.error("Unexpected exception: {}\nJob may have not been executed", e);
       e.printStackTrace();

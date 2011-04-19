@@ -38,8 +38,8 @@ import javax.xml.transform.stream.StreamSource;
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "search-results", namespace = "http://search.opencastproject.org/", propOrder = { "query", "resultSet" })
-@XmlRootElement(name = "search-results", namespace = "http://search.opencastproject.org/")
+@XmlType(name = "search-results", namespace = "http://search.opencastproject.org", propOrder = { "query", "resultSet" })
+@XmlRootElement(name = "search-results", namespace = "http://search.opencastproject.org")
 public class SearchResultImpl implements SearchResult {
 
   /** Context for serializing and deserializing */

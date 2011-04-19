@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * JAXB annotated implementation of {@link WorkflowConfiguration}
  */
-@XmlType(name = "configuration", namespace = "http://workflow.opencastproject.org/")
-@XmlRootElement(name = "configuration", namespace = "http://workflow.opencastproject.org/")
+@XmlType(name = "configuration", namespace = "http://workflow.opencastproject.org")
+@XmlRootElement(name = "configuration", namespace = "http://workflow.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowConfigurationImpl implements WorkflowConfiguration, Comparable<WorkflowConfiguration> {
   @XmlAttribute

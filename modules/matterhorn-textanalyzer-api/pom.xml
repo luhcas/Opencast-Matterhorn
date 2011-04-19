@@ -5,7 +5,6 @@
   <artifactId>matterhorn-textanalyzer-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-textanalyzer-api</name>
-  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>

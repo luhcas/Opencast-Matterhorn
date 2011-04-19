@@ -995,7 +995,7 @@ public class SchedulerImpl {
    * @return A cron-like scheduling string in a {@code CronExpression} object.
    * @throws ParseException
    */
-  CronExpression getCronString(Date date) throws ParseException {
+  public static CronExpression getCronString(Date date) throws ParseException {
     // TODO: Remove the deprecated calls here.
     StringBuilder sb = new StringBuilder();
     sb.append(date.getSeconds() + " ");

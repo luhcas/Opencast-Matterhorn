@@ -281,7 +281,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     MediaPackage mediapackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     mediapackage.setTitle(event.getTitle());
     mediapackage.setLanguage(event.getLanguage());
-    mediapackage.setLicense(event.getLicense());
+    mediapackage.setLicense(event.getMetadataValueByKey("license"));
     mediapackage.setSeries(event.getSeriesId());
     mediapackage.setSeriesTitle(event.getSeries());
     mediapackage.setDate(event.getStartDate());
@@ -648,7 +648,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     // update the mediapackage
     mediapackage.setTitle(event.getTitle());
     mediapackage.setLanguage(event.getLanguage());
-    mediapackage.setLicense(event.getLicense());
+    mediapackage.setLicense(event.getMetadataValueByKey("license"));
     mediapackage.setSeries(event.getSeriesId());
     mediapackage.setSeriesTitle(event.getSeries());
     mediapackage.setDate(event.getStartDate());

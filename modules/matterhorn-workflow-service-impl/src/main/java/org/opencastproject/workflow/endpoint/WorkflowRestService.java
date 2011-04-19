@@ -798,9 +798,10 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
 
   @POST
   @Path("update")
-  public Response update(@FormParam("workflow") WorkflowInstance workflowInstance) {
+  public Response update(@FormParam("workflow") String workflowInstance) {
     try {
-      service.update(workflowInstance);
+      WorkflowInstance instance = WorkflowParser.parseWorkflowInstance(workflowInstance);
+      service.update(instance);
       return Response.noContent().build();
     } catch (WorkflowException e) {
       throw new WebApplicationException(e);

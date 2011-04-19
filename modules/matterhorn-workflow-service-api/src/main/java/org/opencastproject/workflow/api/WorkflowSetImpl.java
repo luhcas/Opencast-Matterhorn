@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "workflows", namespace = "http://workflow.opencastproject.org/")
+@XmlRootElement(name = "workflows", namespace = "http://workflow.opencastproject.org")
 public class WorkflowSetImpl implements WorkflowSet {
 
   /** A list of search items. */

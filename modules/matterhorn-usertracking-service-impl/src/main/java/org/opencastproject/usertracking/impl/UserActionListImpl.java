@@ -31,8 +31,8 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A {@link List} of {@link UserActionList}s
  */
-@XmlType(name = "annotations", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "annotations", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "annotations", namespace = "http://usertracking.opencastproject.org")
+@XmlRootElement(name = "annotations", namespace = "http://usertracking.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class UserActionListImpl implements UserActionList {
 
@@ -45,7 +45,7 @@ public class UserActionListImpl implements UserActionList {
   @XmlAttribute(name = "limit")
   protected int limit;
 
-  @XmlElement(name = "annotation", namespace = "http://usertracking.opencastproject.org/")
+  @XmlElement(name = "annotation", namespace = "http://usertracking.opencastproject.org")
   protected List<UserActionImpl> annotations;
 
   public void add(UserAction annotation) {

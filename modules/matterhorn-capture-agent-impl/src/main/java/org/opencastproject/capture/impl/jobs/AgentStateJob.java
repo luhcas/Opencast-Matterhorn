@@ -45,13 +45,30 @@ import java.util.Map.Entry;
  */
 public class AgentStateJob implements Job {
 
+  private static int globalStatePushCount = 0;
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
 
   private ConfigurationManager config = null;
   private StateService state = null;
   private TrustedHttpClient client = null;
   private String localAddress = "";
-
+  private int statePushCount = -1; 
+  
+  /** 
+   * Creates a unique identifier that will allow us to track which updates are having errors to when they started.
+   * @return An ever increasing int that will wrap around once it hits Interger.MAX_VALUE
+   */
+  public synchronized int getStatePushCount(){
+    if(globalStatePushCount == 0){
+      logger.info("Starting first state push count.");
+    }
+    if(globalStatePushCount == Integer.MAX_VALUE){
+      logger.info("Agent state push count has reached maximum, resetting global state push count to zero.");
+      globalStatePushCount = 0;
+    }
+    return globalStatePushCount++;
+  }
+  
   /**
    * Pushes the agent's state to the remote state service. {@inheritDoc}
    * 
@@ -59,6 +76,7 @@ public class AgentStateJob implements Job {
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    statePushCount = getStatePushCount();
     setConfigManager((ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE));
     setStateService((StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE));
     setTrustedClient((TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT));
@@ -83,14 +101,13 @@ public class AgentStateJob implements Job {
    * Sends an agent state update to the capture-admin state service.
    */
   protected void sendAgentState() {
-
-    logger.debug("Sending agent {}'s state: {}", state.getAgentName(), state.getAgentState());
+    logger.info("#" + statePushCount + " - Sending agent " + state.getAgentName() + "'s state: " + state.getAgentState());
 
     // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push state to remote server.",
-              CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
+      logger.warn("#{} - URL for {} is invalid, unable to push state to remote server.",
+              statePushCount, CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
@@ -100,7 +117,7 @@ public class AgentStateJob implements Job {
         url += "/" + config.getItem(CaptureParameters.AGENT_NAME);
       }
     } catch (StringIndexOutOfBoundsException e) {
-      logger.warn("Unable to build valid state endpoint for agents.");
+      logger.warn("#" + statePushCount + " - Unable to build valid state endpoint for agents.");
       return;
     }
 
@@ -121,8 +138,8 @@ public class AgentStateJob implements Job {
     // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push recording state to remote server.",
-              CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
+      logger.warn("#{} - URL for {} is invalid, unable to push recording state to remote server.",
+              statePushCount, CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
@@ -130,7 +147,7 @@ public class AgentStateJob implements Job {
         url += "/";
       }
     } catch (StringIndexOutOfBoundsException e) {
-      logger.warn("Unable to build valid state endpoint for recordings.");
+      logger.warn("#{} - Unable to build valid state endpoint for recordings.", statePushCount);
       return;
     }
 
@@ -139,7 +156,7 @@ public class AgentStateJob implements Job {
     for (Entry<String, AgentRecording> e : recordings.entrySet()) {
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
       formParams.add(new BasicNameValuePair("state", e.getValue().getState()));
-      logger.debug("Sending recording {}'s state: {}.", e.getKey(), e.getValue().getState());
+      logger.debug("#" + statePushCount + " - Sending recording {}'s state: {}.", e.getKey(), e.getValue().getState());
       String myURL = url + e.getKey();
       send(formParams, myURL);
     }
@@ -160,21 +177,24 @@ public class AgentStateJob implements Job {
     try {
       remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
     } catch (UnsupportedEncodingException e) {
-      logger.error("Unable to send data because the URL encoding is not supported.");
+      logger.error("#" + statePushCount + " - Unable to send data because the URL encoding is not supported.");
       return;
     }
     try {
       if (client == null) {
-        logger.error("Unable to send data because http client is null.");
+        logger.error("#" + statePushCount + " - Unable to send data because http client is null.");
         return;
       }
 
       resp = client.execute(remoteServer);
       if (resp.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+        logger.info("#" + statePushCount + " - State push to " + toString() + " to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+      }
+      else {
+        logger.info("#" + statePushCount + " - State push {} to {} was successful.", toString(), url);
       }
     } catch (TrustedHttpClientException e) {
-      logger.warn("Unable to communicate with server at {}, message reads: {}.", url, e);
+      logger.warn("#" + statePushCount + " - Unable to communicate with server at {}, message reads: {}.", url, e);
     } finally {
       if (resp != null) {
         client.close(resp);

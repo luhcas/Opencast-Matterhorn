@@ -5,7 +5,6 @@
   <artifactId>matterhorn-distribution-service-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-distribution-service-api</name>
-  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>

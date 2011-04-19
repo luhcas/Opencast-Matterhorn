@@ -19,7 +19,6 @@ import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.CaptureParameters;
 
-import org.apache.commons.io.FileUtils;
 import org.gstreamer.Gst;
 import org.junit.After;
 import org.junit.Assert;
@@ -61,6 +60,10 @@ public class CaptureAgentImplTest {
 
   /** Waits for a particular state to occur or times out waiting. **/
   private WaitForState waiter;
+
+  private File manifestFile;
+
+  private File zippedMedia;
 
   @BeforeClass
   public static void testGst() {
@@ -155,17 +158,37 @@ public class CaptureAgentImplTest {
             agent.loadRecording(new File(agent.getKnownRecordings().get(id).getBaseDir(), id + ".recording"))
                     .getState());
 
-    Thread.sleep(2000);
-
-    // test creation of the manifest file
-    File manifestFile = new File(outputdir.getAbsolutePath(), CaptureParameters.MANIFEST_NAME);
-    Assert.assertTrue(manifestFile.exists());
-
-    Thread.sleep(2000);
-
-    // test zipping media
-    File zippedMedia = new File(outputdir.getAbsolutePath(), CaptureParameters.ZIP_NAME);
-    Assert.assertTrue(zippedMedia.exists());
+    // Test to make sure the manifest file gets created correctly. 
+    manifestFile = new File(outputdir.getAbsolutePath(), CaptureParameters.MANIFEST_NAME);
+    // Wait and see if the manifest file is actually there.
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (manifestFile != null) {
+          return manifestFile.exists();
+        } else {
+          return false;
+        }
+      }
+    });
+    Assert.assertTrue("Manifest file does not exist!", manifestFile.exists());
+    
+    // Test to make sure that the zipped media is created. 
+    zippedMedia = new File(outputdir.getAbsolutePath(), CaptureParameters.ZIP_NAME);
+    // Wait and see if the zipped media file is actually there.
+    waiter = new WaitForState();
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if (zippedMedia != null) {
+          return zippedMedia.exists();
+        } else {
+          return false;
+        }
+      }
+    });
+    Assert.assertTrue("Zipped media file does not exist!", zippedMedia.exists());
   }
 
   private void buildRecordingState(String id, String state) throws IOException {

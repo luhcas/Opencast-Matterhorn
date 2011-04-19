@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A JAXB-annotated implementation of ReportItem
  */
-@XmlType(name = "report-item", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "report-item", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "report-item", namespace = "http://usertracking.opencastproject.org")
+@XmlRootElement(name = "report-item", namespace = "http://usertracking.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ReportItemImpl implements ReportItem {
 

@@ -34,6 +34,21 @@ public interface TrustedHttpClient {
   HttpResponse execute(HttpUriRequest httpUriRequest) throws TrustedHttpClientException;
 
   /**
+   * Executes an HttpRequest using a secure, but not necessarily encrypted, http connection, waiting for the specified
+   * timeouts.
+   * 
+   * @param httpUriRequest
+   *          The http request
+   * @param connectionTimeout
+   *          the wait time in milliseconds at which a connection attempt will throw
+   * @param socketTimeout
+   *          the maximum time in milliseconds allowed between packets before this method will throw
+   * @return the http response returned by the server
+   */
+  HttpResponse execute(HttpUriRequest httpUriRequest, int connectionTimeout, int socketTimeout)
+          throws TrustedHttpClientException;
+
+  /**
    * Executes an HttpRequest using a secure, but not necessarily encrypted, http connection.
    * 
    * @param httpUriRequest
@@ -41,6 +56,24 @@ public interface TrustedHttpClient {
    * @return the http response returned by the server
    */
   <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler) throws TrustedHttpClientException;
+
+  /**
+   * Executes an HttpRequest using a secure, but not necessarily encrypted, http connection, waiting for the specified
+   * timeouts.
+   * 
+   * @param httpUriRequest
+   *          The http request
+   * @param responseHandler
+   *          the response handler
+   * @param connectionTimeout
+   *          the wait time in milliseconds at which a connection attempt will throw
+   * @param socketTimeout
+   *          the maximum time in milliseconds allowed between packets before this method will throw
+   * 
+   * @return the http response returned by the server
+   */
+  <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler, int connectionTimeout,
+          int socketTimeout) throws TrustedHttpClientException;
 
   /**
    * Closes this response. The caller must call close() once finished reading the response.

@@ -55,8 +55,8 @@ import javax.xml.bind.annotation.XmlType;
         @NamedQuery(name = "findTotalByIntervall", query = "SELECT COUNT(a) FROM Annotation a WHERE :begin <= a.created AND a.created <= :end AND a.userId = :userId"),
         @NamedQuery(name = "findDistinctEpisodeIdTotalByIntervall", query = "SELECT COUNT(distinct a.mediapackageId) FROM Annotation a WHERE :begin <= a.created AND a.created <= :end AND a.userId = :userId"),
         @NamedQuery(name = "findTotalByTypeAndIntervall", query = "SELECT COUNT(a) FROM Annotation a WHERE :begin <= a.created AND a.created <= :end AND a.type = :type AND a.userId = :userId") })
-@XmlType(name = "annotation", namespace = "http://annotation.opencastproject.org/")
-@XmlRootElement(name = "annotation", namespace = "http://annotation.opencastproject.org/")
+@XmlType(name = "annotation", namespace = "http://annotation.opencastproject.org")
+@XmlRootElement(name = "annotation", namespace = "http://annotation.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AnnotationImpl implements Annotation {
 

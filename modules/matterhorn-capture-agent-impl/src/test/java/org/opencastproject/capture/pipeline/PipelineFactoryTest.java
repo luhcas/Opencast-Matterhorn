@@ -23,7 +23,6 @@ import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.capture.impl.XProperties;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.consumers.AudioFilesinkConsumer;
-import org.opencastproject.capture.pipeline.bins.consumers.ConsumerBin;
 import org.opencastproject.capture.pipeline.bins.consumers.VideoFilesinkConsumer;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 

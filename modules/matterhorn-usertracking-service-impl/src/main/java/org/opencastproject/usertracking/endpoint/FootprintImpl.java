@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A JAXB-annotated implementation of {@link Footprint}
  */
-@XmlType(name = "footprint", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "footprint", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "footprint", namespace = "http://usertracking.opencastproject.org")
+@XmlRootElement(name = "footprint", namespace = "http://usertracking.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class FootprintImpl implements Footprint {
 

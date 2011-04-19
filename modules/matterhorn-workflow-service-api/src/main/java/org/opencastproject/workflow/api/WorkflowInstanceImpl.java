@@ -42,8 +42,8 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-@XmlType(name = "workflow", namespace = "http://workflow.opencastproject.org/")
-@XmlRootElement(name = "workflow", namespace = "http://workflow.opencastproject.org/")
+@XmlType(name = "workflow", namespace = "http://workflow.opencastproject.org")
+@XmlRootElement(name = "workflow", namespace = "http://workflow.opencastproject.org")
 @XmlAccessorType(XmlAccessType.NONE)
 public class WorkflowInstanceImpl implements WorkflowInstance {
 

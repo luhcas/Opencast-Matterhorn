@@ -38,8 +38,8 @@ import javax.xml.bind.annotation.XmlType;
  * represent the complete solr document. Authorization information, for instance, is not serialized.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "result", namespace = "http://search.opencastproject.org/")
-@XmlRootElement(name = "result", namespace = "http://search.opencastproject.org/")
+@XmlType(name = "result", namespace = "http://search.opencastproject.org")
+@XmlRootElement(name = "result", namespace = "http://search.opencastproject.org")
 public class SearchResultItemImpl implements SearchResultItem {
 
   /** Serial version id **/

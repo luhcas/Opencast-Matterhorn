@@ -28,8 +28,8 @@ import javax.xml.bind.annotation.XmlValue;
  * Part of a search result that models the preview url for a video segment.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "preview", namespace = "http://search.opencastproject.org/")
-@XmlRootElement(name = "preview", namespace = "http://search.opencastproject.org/")
+@XmlType(name = "preview", namespace = "http://search.opencastproject.org")
+@XmlRootElement(name = "preview", namespace = "http://search.opencastproject.org")
 public class MediaSegmentPreviewImpl implements MediaSegmentPreview {
 
   /** The preview type **/

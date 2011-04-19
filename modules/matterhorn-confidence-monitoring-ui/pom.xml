@@ -5,7 +5,6 @@
   <artifactId>matterhorn-confidence-monitoring-ui</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-confidence-monitoring-ui</name>
-  <version>1.2-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
