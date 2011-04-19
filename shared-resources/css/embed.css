@@ -1,3 +1,7 @@
+html {
+    background-color: #000000;
+}
+
 body {
 	overflow:hidden;
     background-color: #000000;
@@ -121,6 +125,6 @@ body {
     visibility: hidden;
 }
 
-#data, #analytics, #annotation, #segments_ui_slider_data1, #segments_ui_slider_data2, #segments_ui_slider_information, #segment-tooltip, #segments-table2 {
+#data, #analytics, #annotation, #segments_ui_slider_data1, #segments_ui_slider_data2, #segments_ui_slider_information, #segment-tooltip, #segments-table2, #oc_draggable-embed, #oc_segments-embed, #oc_video-player-controls, #oc_video-player-controls-embed, #oc_video-controls, #oc_video-time, #oc_sound {
     display: none;
 }

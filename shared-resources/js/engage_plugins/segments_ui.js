@@ -151,16 +151,15 @@ Opencast.segments_ui = (function ()
         $("#" + segmentId).toggleClass("segment-holder-over");
         $("#" + segmentId).toggleClass("ui-state-hover");
         $("#" + segmentId).toggleClass("ui-corner-all");
-        var index = parseInt(segmentId.substr(7)) - 1;
-        var imageHeight = 25;
-        var text = description;
-        $("#segment-tooltip").html(text);
+        var imageHeight = 22;
+        var gap = 3;
+        $("#segment-tooltip").html(description);
         var segmentLeft = $("#" + segmentId).offset().left;
         var segmentTop = $("#" + segmentId).offset().top;
         var segmentWidth = $("#" + segmentId).width();
         var tooltipWidth = $("#segment-tooltip").width();
         $("#segment-tooltip").css("left", (segmentLeft + segmentWidth / 2 - tooltipWidth / 2) + "px");
-        $("#segment-tooltip").css("top", segmentTop - (imageHeight + 7) + "px");
+        $("#segment-tooltip").css("top", segmentTop - (imageHeight + gap) + "px");
         $("#segment-tooltip").show();
     }
     
@@ -325,7 +324,10 @@ Opencast.segments_ui = (function ()
                         data['search-results'].result.segments.segment = newSegments;
                         retSegments = data['search-results'].result.segments;
                         Opencast.Utils.log("Removed " + (oldLength - newSegments.length) + "/" + oldLength + " Segments due to being too small in relation to the scrubber length:" + hiddenSegmentsStr);
-                        initResizeEnd();
+                        if(!$.browser.msie)
+                        {
+                            initResizeEnd();
+                        }
                     } else
                     {
                         Opencast.Utils.log("Segments not available");

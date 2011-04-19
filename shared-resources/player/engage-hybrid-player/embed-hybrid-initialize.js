@@ -305,6 +305,8 @@ Opencast.Initialize = (function ()
                 }
             }
         });
+        $('#oc_video-player-controls-embed').show();
+        
         $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
         $('#oc_player_video-dropdown').bind('mouseout', dropdown_timer);
         

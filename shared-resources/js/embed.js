@@ -71,6 +71,8 @@ Opencast.Watch = (function ()
         }
         else
         {
+            $('#oc_btn-skip-backward').hide();
+            $('#oc_btn-skip-forward').hide();
             continueProcessing();
         }
     }
@@ -243,6 +245,10 @@ Opencast.Watch = (function ()
         $('#oc_flash-player-loading').hide();
         // Show video controls and data
         $('#data').show();
+        $('#oc_video-player-controls').show();
+        $('#oc_video-time').show();
+        $('#oc_video-controls').show();
+        $('#oc_sound').show();
         // Set Duration
         var durDiv = $('#dc-extent').html();
         if ((durDiv !== undefined) && (durDiv !== null) && (durDiv != ''))
@@ -252,6 +258,11 @@ Opencast.Watch = (function ()
             {
                 Opencast.Player.setDuration(duration);
             }
+        }
+        // adjust the slider height
+        if(!(Opencast.segments.getNumberOfSegments() > 0))
+        {
+            $('.progress-list').height("6px");
         }
         var formattedSecs = Opencast.Utils.formatSeconds(Opencast.Player.getDuration());
         Opencast.Player.setTotalTime(formattedSecs);
@@ -278,12 +289,12 @@ Opencast.Watch = (function ()
             var timeParam = Opencast.Utils.getURLParameter('t');
             var durationStr = $('#oc_duration').text();
             var durTextSet = (durationStr != 'Initializing') && (Opencast.Utils.getTimeInMilliseconds(durationStr) != 0);
-            var autoplay = (playParam !== null) && (playParam.toLowerCase() == 'true');
+            var autoplay = ((playParam !== null) && (playParam.toLowerCase() == 'true')) || (!mediaPackageIdAvailable);
             var time = (timeParam === null) ? 0 : Opencast.Utils.parseSeconds(timeParam);
             time = (time < 0) ? 0 : time;
             var rdy = false;
             // duration set
-            if (durTextSet)
+            if (durTextSet||!mediaPackageIdAvailable)
             {
                 // autoplay and jump to time OR autoplay and not jump to time
                 if (autoplay)

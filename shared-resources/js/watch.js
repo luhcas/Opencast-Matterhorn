@@ -270,6 +270,13 @@ Opencast.Watch = (function ()
         });
         // Set the Controls visible
         $('#oc_video-player-controls').show();
+         /**
+         * !!!
+         * Opencast.ariaSpinbutton.initialize has to be called after #oc_video-player-controls
+         * is visible!
+         * !!!
+         */ 
+        Opencast.ariaSpinbutton.initialize('oc_volume-container', 'oc_volume-back', 'oc_volume-front', 8, 0, 100);
         // Hide loading indicators
         $('#oc_flash-player-loading').hide();
         if (parseQueryString(window.location.search.substring(1)).embed)
@@ -283,6 +290,7 @@ Opencast.Watch = (function ()
         $('#data').show();
         $('#oc_player-head-right').show();
         $('#oc_ui_tabs').show();
+        $('#oc_video-player-controls').show();
         // Set Duration
         var durDiv = $('#dc-extent').html();
         if ((durDiv !== undefined) && (durDiv !== null) && (durDiv != ''))

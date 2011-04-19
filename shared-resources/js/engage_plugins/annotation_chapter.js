@@ -45,8 +45,7 @@ Opencast.Annotation_Chapter = (function ()
             success: function (data)
             {
                 Opencast.Utils.log("Annotation AJAX call: Requesting data succeeded");
-                var tmpData = data['annotations'];
-                if ((tmpData !== undefined) && (tmpData.annotation !== undefined))
+                if ((data !== undefined) && (data['annotations'] !== undefined) && (data['annotations'].annotation !== undefined))
                 {
                     Opencast.Utils.log("Annotation AJAX call: Data available");
                     // Display the controls
@@ -94,10 +93,16 @@ Opencast.Annotation_Chapter = (function ()
                 else
                 {
                     Opencast.Utils.log("Annotation AJAX call: Data available");
-                    tmpData.duration = duration;
+                    data['annotations'].duration = duration * 1000; // duration is in seconds
+                    data['annotations'].nrOfSegments = Opencast.segments.getNumberOfSegments();
+                    var annoIndex = 0;
+                    $(data['annotations'].annotation).each(function (i)
+                    {
+                        data['annotations'].annotation[i].index = annoIndex++;
+                    });
                     // Create Trimpath Template
-                    var annotSet = Opencast.Annotation_ChapterPlugin.addAsPlugin($('#annotation'), data['annotations'].annotation);
-                    if (annotSet)
+                    var annotSet = Opencast.Annotation_ChapterPlugin.addAsPlugin($('#annotation'), data['annotations']);
+                    if (!annotSet)
                     {
                         displayNoAnnotationsAvailable("No template available");
                     }

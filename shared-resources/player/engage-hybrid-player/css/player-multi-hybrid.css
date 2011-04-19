@@ -197,6 +197,11 @@ color: #000;
 */
 }
 
+#oc_controlbar-embed
+{
+    display:                none;
+}
+
 #oc_video-time
 {
   margin-top:               5px;

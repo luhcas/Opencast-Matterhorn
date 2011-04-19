@@ -32,13 +32,14 @@ Opencast.Annotation_ChapterPlugin = (function ()
                            '<tr>' +
                                '{for a in annotation}' +
                                    '<td ' +
-                                     'onclick="Opencast.Watch.seekSegment(${a.inpoint})" ' +
-                                     'alt="Slide ${a.annotationId} of ${total}" ' +
-                                     'onmouseout="Opencast.segments_ui.hoverOutDescription(\'segment-${a.annotationId}\',\'${a.value}\')" ' +
-                                     'onmouseover="Opencast.segments_ui.hoverDescription(\'segment-${a.annotationId}\',\'${a.value}\')" ' +
-                                     'id="segment-${a.annotationId}" ' +
+                                     'id="segment${a.annotationId}" ' +
+                                     'onclick="Opencast.Watch.seekSegment(${parseInt(a.inpoint) / 1000})" ' +
+                                     'alt="Slide ${parseInt(a.index) + 1} of ${annotation.length}" ' +
+                                     'onmouseover="Opencast.segments_ui.hoverDescription(\'segment${a.annotationId}\', \'${a.value}\')" ' +
+                                     'onmouseout="Opencast.segments_ui.hoverOutDescription(\'segment${a.annotationId}\', \'${a.value}\')" ' +
                                      'style="width: ${parseInt(a.length) / parseInt(duration) * 100}%;" ' +
                                      'class="segment-holder-over ui-widget ui-widget-content">' +
+                                         // '${a.value}' + 
                                    '</td>' +
                                  '{/for}' +
                             '</tr>' +
@@ -84,7 +85,10 @@ Opencast.Annotation_ChapterPlugin = (function ()
      */
     function drawAnnotation_Chapter()
     {
-        if ((element !== undefined) && (annotation_chapterData.annotation !== undefined) && (annotation_chapterData.annotation.length > 0))
+        if ((element !== undefined) &&
+            (annotation_chapterData.annotation !== undefined) &&
+            (annotation_chapterData.annotation.length > 0) &&
+            (annotation_chapterData.duration > 0))
         {
             Opencast.Utils.log("Annotation Plugin: Data available, processing template");
             processedTemplateData = template.process(annotation_chapterData);
