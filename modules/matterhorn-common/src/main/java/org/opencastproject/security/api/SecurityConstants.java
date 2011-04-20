@@ -23,7 +23,7 @@ public interface SecurityConstants {
   /** Name of the Matterhorn admin role */
   String MH_ADMIN = "mh_admin";
 
-  /** Name of the Matterhorn admin role */
+  /** Name of the Matterhorn anonymous role */
   String MH_ANONYMOUS = "mh_anonymous";
 
   /** The default organization identifier */

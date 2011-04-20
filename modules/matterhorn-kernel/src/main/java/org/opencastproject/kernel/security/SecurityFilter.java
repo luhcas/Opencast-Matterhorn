@@ -16,15 +16,14 @@
 package org.opencastproject.kernel.security;
 
 import org.opencastproject.security.api.Organization;
-import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -32,30 +31,34 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * Inspects request URLs and sets the organization for the request.
+ * A servlet filter that delegates to the appropriate spring filter chain
  */
-public class OrganizationFilter implements Filter {
+public final class SecurityFilter implements Filter {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(OrganizationFilter.class);
+  private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
+  
+  /** The filters for each organization */
+  private Map<String, Filter> orgSecurityFilters = null;
 
   /** The security service */
   protected SecurityService securityService = null;
 
-  /** The organization directory to use when resolving organizations. This may be null. */
-  protected OrganizationDirectoryService organizationDirectory = null;
-
+  /** The filter configuration provided by the servlet container */
+  protected FilterConfig filterConfig = null;
+  
   /**
-   * Sets a reference to the organization directory service.
+   * Construct a new security filter.
    * 
-   * @param organizationDirectory
-   *          the organization directory
+   * @param securityService
+   *          the security service
    */
-  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectory) {
-    this.organizationDirectory = organizationDirectory;
+  public SecurityFilter(SecurityService securityService) {
+    this.securityService = securityService;
+    this.orgSecurityFilters = new HashMap<String, Filter>();
   }
 
   /**
@@ -65,6 +68,7 @@ public class OrganizationFilter implements Filter {
    */
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
+    this.filterConfig = filterConfig;
   }
 
   /**
@@ -76,6 +80,24 @@ public class OrganizationFilter implements Filter {
   public void destroy() {
   }
 
+  public void addFilter(String orgId, Filter filter) {
+    // First remove any existing filter, then add the new one
+    removeFilter(orgId);
+    try {
+      filter.init(filterConfig);
+      orgSecurityFilters.put(orgId, filter);
+    } catch (ServletException e) {
+      logger.error("Unable to initialize {}", filter);
+    }
+  }
+
+  public void removeFilter(String orgId) {
+    Filter filter = orgSecurityFilters.remove(orgId);
+    if(filter != null) {
+      filter.destroy();
+    }
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -85,29 +107,11 @@ public class OrganizationFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
           ServletException {
-    HttpServletRequest httpRequest = (HttpServletRequest) request;
-    URL url = new URL(httpRequest.getRequestURL().toString());
-    Organization org = null;
-    try {
-      org = organizationDirectory.getOrganization(url);
-      securityService.setOrganization(org);
-      chain.doFilter(request, response);
-    } catch (NotFoundException e) {
-      logger.warn("No organization is mapped to handle {}", url);
-    } finally {
-      securityService.setOrganization(null);
-      securityService.setUser(null);
+    Organization org = securityService.getOrganization();
+    Filter filter = orgSecurityFilters.get(org.getId());
+    if (filter == null) {
+      ((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN);
     }
+    filter.doFilter(request, response, chain);
   }
-
-  /**
-   * Sets the security service.
-   * 
-   * @param securityService
-   *          the securityService to set
-   */
-  public void setSecurityService(SecurityService securityService) {
-    this.securityService = securityService;
-  }
-
 }

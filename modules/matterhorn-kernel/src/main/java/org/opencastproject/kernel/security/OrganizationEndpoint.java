@@ -19,10 +19,9 @@ import org.opencastproject.rest.docs.RestQuery;
 import org.opencastproject.rest.docs.RestResponse;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
+import org.opencastproject.security.api.OrganizationList;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.rest.RestService;
-
-import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -44,15 +43,15 @@ public class OrganizationEndpoint {
   @Path("/all.xml")
   @Produces(MediaType.TEXT_XML)
   @RestQuery(description = "Lists the organizations as xml", returnDescription = "The list of org as xml", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "Organizations returned") })
-  public List<Organization> getOrganizationsAsXml() {
-    return orgDirectoryService.getOrganizations();
+  public OrganizationList getOrganizationsAsXml() {
+    return new OrganizationList(orgDirectoryService.getOrganizations());
   }
 
   @GET
   @Path("/all.json")
   @Produces(MediaType.APPLICATION_JSON)
   @RestQuery(description = "Lists the organizations as a json array", returnDescription = "The list of org as a json array", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "Organizations returned") })
-  public List<Organization> getOrganizationsAsJson() {
+  public OrganizationList getOrganizationsAsJson() {
     return getOrganizationsAsXml();
   }
 

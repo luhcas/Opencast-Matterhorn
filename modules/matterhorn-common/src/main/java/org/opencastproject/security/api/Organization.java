@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
@@ -34,11 +35,13 @@ import javax.xml.bind.annotation.XmlValue;
  * An organization that is hosted on this Matterhorn instance.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "org", namespace = "org.opencastproject.security")
-@XmlRootElement(name = "org", namespace = "org.opencastproject.security")
+@XmlType(name = "organization", namespace = "http://org.opencastproject.security")
+@XmlRootElement(name = "organization", namespace = "http://org.opencastproject.security")
 public class Organization {
 
   /** The organizational identifier */
+  @XmlID
+  @XmlAttribute
   protected String id = null;
 
   /** The friendly name of the organization */
@@ -241,11 +244,11 @@ public class Organization {
 
     /** The property key */
     @XmlAttribute
-    String key;
+    protected String key;
 
     /** The property value */
     @XmlValue
-    String value;
+    protected String value;
 
     /**
      * No-arg constructor needed by JAXB

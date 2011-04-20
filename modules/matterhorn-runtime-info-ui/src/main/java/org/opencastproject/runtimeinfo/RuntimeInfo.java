@@ -62,7 +62,7 @@ import javax.ws.rs.core.MediaType;
  * opencast project with the contents of the {@link #getRuntimeInfo()} json feed.
  */
 @Path("/")
-@RestService(name = "RuntimeInfo", title = "Runtime Information", notes = { }, abstractText = "This service provides information about the runtime environment, including the servives that are deployed and the current user context.")
+@RestService(name = "RuntimeInfo", title = "Runtime Information", notes = {}, abstractText = "This service provides information about the runtime environment, including the servives that are deployed and the current user context.")
 public class RuntimeInfo {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(RuntimeInfo.class);
@@ -147,7 +147,7 @@ public class RuntimeInfo {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("components.json")
-  @RestQuery(name = "services", description = "List the REST services and user interfaces running on this host", pathParameters = { }, queryParameters = { }, reponses = { @RestResponse(description = "The components running on this host", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
+  @RestQuery(name = "services", description = "List the REST services and user interfaces running on this host", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(description = "The components running on this host", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   @SuppressWarnings("unchecked")
   public String getRuntimeInfo() {
     JSONObject json = new JSONObject();
@@ -161,7 +161,7 @@ public class RuntimeInfo {
   @GET
   @Path("me.json")
   @Produces(MediaType.APPLICATION_JSON)
-  @RestQuery(name = "me", description = "Information about the curent user", pathParameters = { }, queryParameters = { }, reponses = { @RestResponse(description = "Returns information about the current user", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
+  @RestQuery(name = "me", description = "Information about the curent user", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(description = "Returns information about the current user", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   @SuppressWarnings("unchecked")
   public String getMyInfo() {
     JSONObject json = new JSONObject();
@@ -183,13 +183,13 @@ public class RuntimeInfo {
     jsonOrg.put("name", org.getName());
 
     // and organization properties
-    JSONObject orgProps = new JSONObject(); 
+    JSONObject orgProps = new JSONObject();
     jsonOrg.put("properties", orgProps);
-    for(Entry<String, String> entry : org.getProperties().entrySet()) {
+    for (Entry<String, String> entry : org.getProperties().entrySet()) {
       orgProps.put(entry.getKey(), entry.getValue());
     }
     json.put("org", jsonOrg);
-    
+
     return json.toJSONString();
   }
 
@@ -270,5 +270,4 @@ public class RuntimeInfo {
     sortedServiceRefs.addAll(Arrays.asList(references));
     return sortedServiceRefs;
   }
-
 }
