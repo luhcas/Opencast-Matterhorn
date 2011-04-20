@@ -51,6 +51,13 @@ UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.uti
 GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
 JAVA_OPTS="-Xms1024m -Xmx1024m -XX:MaxPermSize=256m"
 
+# The following lines are required to run Matterhorn as a service in Redhat.  
+# These lines should remain commented out.  
+# It is necessary to run "chkconfig matterhorn on" to enable matterhorn service management with Redhat.
+
+#chkconfig: 2345 20 80 
+#description: lecture recording and management system 
+
 # If this computer is OS X and $DYLD_FALLBACK_LIBRARY_PATH environment variable
 # is not defined, then set it to /opt/local/lib. This is required for the demo
 # capture agent.  
