@@ -165,21 +165,21 @@ ocSeries.RegisterComponents = function(){
 
 ocSeries.SubmitForm = function(){
   var seriesXml = ocSeries.FormManager.serialize();
-  if(seriesXml){
+  if(seriesXml && ocSeries.additionalComponents.title.validate()){
     if(ocSeries.mode === CREATE_MODE) {
-    $.ajax({
-      type: 'PUT',
-      url: SERIES_SERVICE_URL + '/',
-      data: { series: seriesXml },
-      complete: ocSeries.SeriesSubmitComplete
-    });
+      $.ajax({
+        type: 'PUT',
+        url: SERIES_SERVICE_URL + '/',
+        data: { series: seriesXml },
+        complete: ocSeries.SeriesSubmitComplete
+      });
     } else {
-    $.ajax({
-      type: 'POST',
-      url: SERIES_SERVICE_URL + '/' + $('#id').val(),
-      data: { series: seriesXml },
-      complete: ocSeries.SeriesSubmitComplete
-    });
+      $.ajax({
+        type: 'POST',
+        url: SERIES_SERVICE_URL + '/' + $('#id').val(),
+        data: { series: seriesXml },
+        complete: ocSeries.SeriesSubmitComplete
+      });
     }
   }
 }
