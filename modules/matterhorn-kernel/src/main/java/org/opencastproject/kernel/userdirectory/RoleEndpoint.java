@@ -15,9 +15,9 @@
  */
 package org.opencastproject.kernel.userdirectory;
 
-import org.opencastproject.rest.docs.RestQuery;
-import org.opencastproject.rest.docs.RestResponse;
 import org.opencastproject.security.api.RoleDirectoryService;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
 import org.opencastproject.util.doc.rest.RestService;
 
 import org.json.simple.JSONArray;
@@ -43,9 +43,9 @@ public class RoleEndpoint {
   protected RoleDirectoryService roleDirectoryService = null;
 
   @GET
-  @Path("/list.json")
+  @Path("list.json")
   @Produces(MediaType.APPLICATION_JSON)
-  @RestQuery(description = "Lists the roles as a json array", returnDescription = "The list of roles as a json array", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "OK, roles returned") })
+  @RestQuery(name="roles", description = "Lists the roles as a json array", returnDescription = "The list of roles as a json array", pathParameters = {}, restParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "OK, roles returned") })
   @SuppressWarnings("unchecked")
   public String getRoles() {
     SortedSet<String> knownRoles = new TreeSet<String>();

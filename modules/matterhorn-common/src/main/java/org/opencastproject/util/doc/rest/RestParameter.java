@@ -44,7 +44,7 @@ public @interface RestParameter {
   /**
    * @return a default value of the parameter.
    */
-  String defaultValue();
+  String defaultValue() default "";
 
   /**
    * @return a RestParameter.Type enum specifying the type of the parameter.

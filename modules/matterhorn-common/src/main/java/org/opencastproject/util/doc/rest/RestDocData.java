@@ -272,7 +272,7 @@ public class RestDocData extends DocData {
     }
 
     // Add query parameter (required and optional)
-    for (RestParameter restParam : restQuery.queryParameters()) {
+    for (RestParameter restParam : restQuery.restParameters()) {
       if (restParam.isRequired()) {
         endpoint.addRequiredParam(new RestParamData(restParam));
       } else {

@@ -15,12 +15,14 @@
  */
 package org.opencastproject.kernel.security;
 
-import org.opencastproject.rest.docs.RestQuery;
-import org.opencastproject.rest.docs.RestResponse;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.OrganizationList;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestParameter.Type;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
 import org.opencastproject.util.doc.rest.RestService;
 
 import javax.ws.rs.GET;
@@ -40,25 +42,25 @@ public class OrganizationEndpoint {
   protected OrganizationDirectoryService orgDirectoryService = null;
 
   @GET
-  @Path("/all.xml")
+  @Path("all.xml")
   @Produces(MediaType.TEXT_XML)
-  @RestQuery(description = "Lists the organizations as xml", returnDescription = "The list of org as xml", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "Organizations returned") })
+  @RestQuery(name = "orgsasxml", description = "Lists the organizations as xml", returnDescription = "The list of org as xml", reponses = { @RestResponse(responseCode = 200, description = "Organizations returned") })
   public OrganizationList getOrganizationsAsXml() {
     return new OrganizationList(orgDirectoryService.getOrganizations());
   }
 
   @GET
-  @Path("/all.json")
+  @Path("all.json")
   @Produces(MediaType.APPLICATION_JSON)
-  @RestQuery(description = "Lists the organizations as a json array", returnDescription = "The list of org as a json array", pathParameters = {}, queryParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "Organizations returned") })
+  @RestQuery(name = "orgsasjson", description = "Lists the organizations as a json array", returnDescription = "The list of org as a json array", reponses = { @RestResponse(responseCode = 200, description = "Organizations returned") })
   public OrganizationList getOrganizationsAsJson() {
     return getOrganizationsAsXml();
   }
 
   @GET
-  @Path("/{id}.xml")
+  @Path("{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  @RestQuery(description = "Gets an organizations as xml", returnDescription = "The org as xml", pathParameters = {}, queryParameters = {}, reponses = {
+  @RestQuery(name = "orgasxml", description = "Gets an organizations as xml", returnDescription = "The org as xml", pathParameters = { @RestParameter(name = "id", type = Type.STRING, description = "The job identifier", isRequired = true) }, reponses = {
           @RestResponse(responseCode = 200, description = "Organization returned"),
           @RestResponse(responseCode = 404, description = "No organization with this identifier found") })
   public Organization getOrganizationAsXml(@PathParam("id") String id) {
@@ -70,9 +72,9 @@ public class OrganizationEndpoint {
   }
 
   @GET
-  @Path("/{id}.json")
+  @Path("{id}.json")
   @Produces(MediaType.APPLICATION_JSON)
-  @RestQuery(description = "Gets an organizations as json", returnDescription = "The org as json", pathParameters = {}, queryParameters = {}, reponses = {
+  @RestQuery(name = "orgasjson", description = "Gets an organizations as json", returnDescription = "The org as json", pathParameters = { @RestParameter(name = "id", type = Type.STRING, description = "The job identifier", isRequired = true) }, reponses = {
           @RestResponse(responseCode = 200, description = "Organization returned"),
           @RestResponse(responseCode = 404, description = "No organization with this identifier found") })
   public Organization getOrganizationAsJson(@PathParam("id") String id) {

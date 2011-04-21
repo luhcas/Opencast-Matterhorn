@@ -15,6 +15,10 @@
  */
 package org.opencastproject.serviceregistry.impl.endpoint;
 
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -30,15 +34,13 @@ import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.impl.ServiceRegistryJpaImpl;
-import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestParameter.Type;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
@@ -64,7 +66,8 @@ import javax.ws.rs.core.Response.Status;
 /**
  * Displays hosts and the service IDs they provide.
  */
-@Path("")
+@Path("/")
+@RestService(name = "serviceregistry", title = "Service Registry", notes = { "All paths above are relative to the REST endpoint base" }, abstractText = "Provides registration and management functions for servers and services in this matterhorn instance or cluster.")
 public class ServiceRegistryEndpoint {
 
   /** The remote service maanger */
@@ -75,9 +78,6 @@ public class ServiceRegistryEndpoint {
 
   /** The service path for this endpoint */
   protected String servicePath = "/";
-
-  /** The runtime documentation for this endpoint */
-  protected String docs = null;
 
   /** Sets the service registry instance for delegation */
   public void setServiceRegistry(ServiceRegistry serviceRegistry) {
@@ -93,19 +93,12 @@ public class ServiceRegistryEndpoint {
   public void activate(ComponentContext cc) {
     serverUrl = (String) cc.getBundleContext().getProperty("org.opencastproject.server.url");
     servicePath = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(servicePath);
   }
 
   @GET
-  @Path("/docs")
-  @Produces(MediaType.TEXT_HTML)
-  public String getDocs() {
-    return docs;
-  }
-
-  @GET
-  @Path("/statistics.json")
+  @Path("statistics.json")
   @Produces(MediaType.APPLICATION_JSON)
+  @RestQuery(name = "statisticsasjson", description = "List the service registrations in the cluster, along with some simple statistics", returnDescription = "The service statistics.", reponses = { @RestResponse(responseCode = SC_OK, description = "A JSON representation of the service statistics") })
   public Response getStatisticsAsJson() {
     try {
       return Response.ok(new JaxbServiceStatisticsList(serviceRegistry.getServiceStatistics())).build();
@@ -115,15 +108,21 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
-  @Path("/statistics.xml")
+  @Path("statistics.xml")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "statisticsasxml", description = "List the service registrations in the cluster, along with some simple statistics", returnDescription = "The service statistics.", reponses = { @RestResponse(responseCode = SC_OK, description = "An XML representation of the service statistics") })
   public Response getStatisticsAsXml() throws ServiceRegistryException {
     return getStatisticsAsJson();
   }
 
   @POST
-  @Path("/register")
+  @Path("register")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "register", description = "Add a new service registration to the cluster.", returnDescription = "The service registration.", restParameters = {
+          @RestParameter(name = "serviceType", isRequired = true, description = "The service type identifier", type = Type.STRING, defaultValue = ""),
+          @RestParameter(name = "host", isRequired = true, description = "The host providing the service, including the http(s) protocol", type = Type.STRING, defaultValue = ""),
+          @RestParameter(name = "path", isRequired = true, description = "The service path on the host", type = Type.STRING, defaultValue = ""),
+          @RestParameter(name = "jobProducer", isRequired = true, description = "Whether this service is a producer of long running jobs requiring dispatch", type = Type.STRING, defaultValue = "false") }, reponses = { @RestResponse(responseCode = SC_OK, description = "An XML representation of the new service registration") })
   public JaxbServiceRegistration register(@FormParam("serviceType") String serviceType, @FormParam("host") String host,
           @FormParam("path") String path, @FormParam("jobProducer") boolean jobProducer) {
     try {
@@ -134,7 +133,10 @@ public class ServiceRegistryEndpoint {
   }
 
   @POST
-  @Path("/unregister")
+  @Path("unregister")
+  @RestQuery(name = "unregister", description = "Removes a service registration.", returnDescription = "No content", restParameters = {
+          @RestParameter(name = "serviceType", isRequired = true, description = "The service type identifier", type = Type.STRING),
+          @RestParameter(name = "host", isRequired = true, description = "The host providing the service, including the http(s) protocol", type = Type.STRING) }, reponses = { @RestResponse(responseCode = 204, description = "The service was unregistered successfully") })
   public Response unregister(@FormParam("serviceType") String serviceType, @FormParam("host") String host) {
     try {
       serviceRegistry.unRegisterService(serviceType, host);
@@ -145,7 +147,10 @@ public class ServiceRegistryEndpoint {
   }
 
   @POST
-  @Path("/registerhost")
+  @Path("registerhost")
+  @RestQuery(name = "registerhost", description = "Add a new server to the cluster.", returnDescription = "No content.", restParameters = {
+          @RestParameter(name = "host", isRequired = true, description = "The host name, including the http(s) protocol", type = Type.STRING),
+          @RestParameter(name = "maxJobs", isRequired = true, description = "The maximum number of concurrent jobs this host can run", type = Type.STRING) }, reponses = { @RestResponse(responseCode = 204, description = "The host was registered successfully") })
   public void register(@FormParam("host") String host, @FormParam("maxJobs") int maxJobs) {
     try {
       serviceRegistry.registerHost(host, maxJobs);
@@ -155,7 +160,8 @@ public class ServiceRegistryEndpoint {
   }
 
   @POST
-  @Path("/unregisterhost")
+  @Path("unregisterhost")
+  @RestQuery(name = "unregisterhost", description = "Removes a server from the cluster.", returnDescription = "No content.", restParameters = { @RestParameter(name = "host", isRequired = true, description = "The host name, including the http(s) protocol", type = Type.STRING) }, reponses = { @RestResponse(responseCode = 204, description = "The host was removed successfully") })
   public Response unregister(@FormParam("host") String host) {
     try {
       serviceRegistry.unregisterHost(host);
@@ -166,7 +172,10 @@ public class ServiceRegistryEndpoint {
   }
 
   @POST
-  @Path("/maintenance")
+  @Path("maintenance")
+  @RestQuery(name = "maintenance", description = "Sets the maintenance status for a server in the cluster.", returnDescription = "No content.", restParameters = {
+          @RestParameter(name = "host", isRequired = true, type = Type.STRING, description = "The host name, including the http(s) protocol"),
+          @RestParameter(name = "maintenance", isRequired = true, type = Type.BOOLEAN, description = "Whether this host should be put into maintenance mode (true) or not") }, reponses = { @RestResponse(responseCode = 204, description = "The host was registered successfully") })
   public Response setMaintenanceMode(@FormParam("host") String host, @FormParam("maintenance") boolean maintenance) {
     try {
       serviceRegistry.setMaintenanceStatus(host, maintenance);
@@ -177,8 +186,11 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
-  @Path("/available.xml")
+  @Path("available.xml")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "availableasxml", description = "Lists available services by service type identifier, ordered by load.", returnDescription = "The services list as XML", restParameters = { @RestParameter(name = "serviceType", isRequired = false, type = Type.STRING, description = "The service type identifier") }, reponses = {
+          @RestResponse(responseCode = SC_OK, description = "Returned the available services."),
+          @RestResponse(responseCode = SC_BAD_REQUEST, description = "No service type specified, bad request.") })
   public Response getAvailableServicesAsXml(@QueryParam("serviceType") String serviceType) {
     if (isBlank(serviceType))
       throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("Service type must be specified")
@@ -195,21 +207,29 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
-  @Path("/available.json")
+  @Path("available.json")
   @Produces(MediaType.APPLICATION_JSON)
+  @RestQuery(name = "availableasjson", description = "Lists available services by service type identifier, ordered by load.", returnDescription = "The services list as JSON", restParameters = { @RestParameter(name = "serviceType", isRequired = false, type = Type.STRING, description = "The service type identifier") }, reponses = {
+          @RestResponse(responseCode = SC_OK, description = "Returned the available services."),
+          @RestResponse(responseCode = SC_BAD_REQUEST, description = "No service type specified, bad request.") })
   public Response getAvailableServicesAsJson(@QueryParam("serviceType") String serviceType) {
     return getAvailableServicesAsXml(serviceType);
   }
 
   @GET
-  @Path("/services.xml")
+  @Path("services.xml")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "servicesasxml", description = "Returns a service registraton or list of available service registrations as XML.", returnDescription = "The services list as XML", restParameters = {
+          @RestParameter(name = "serviceType", isRequired = false, type = Type.STRING, description = "The service type identifier"),
+          @RestParameter(name = "host", isRequired = false, type = Type.STRING, description = "The host, including the http(s) protocol") }, reponses = {
+          @RestResponse(responseCode = SC_OK, description = "Returned the available service."),
+          @RestResponse(responseCode = SC_NOT_FOUND, description = "No service of that type on that host is registered.") })
   public JaxbServiceRegistrationList getRegistrationsAsXml(@QueryParam("serviceType") String serviceType,
           @QueryParam("host") String host) throws NotFoundException {
     JaxbServiceRegistrationList registrations = new JaxbServiceRegistrationList();
     try {
       if (isNotBlank(serviceType) && isNotBlank(host)) {
-        // This is a request for one specific service. Return it, or 404 if not found
+        // This is a request for one specific service. Return it, or SC_NOT_FOUND if not found
         ServiceRegistration reg = serviceRegistry.getServiceRegistration(serviceType, host);
         if (reg == null) {
           throw new NotFoundException();
@@ -239,16 +259,34 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
-  @Path("/services.json")
+  @Path("services.json")
   @Produces(MediaType.APPLICATION_JSON)
+  @RestQuery(name = "servicesasjson", description = "Returns a service registraton or list of available service registrations as JSON.", returnDescription = "The services list as XML", restParameters = {
+          @RestParameter(name = "serviceType", isRequired = false, type = Type.STRING, description = "The service type identifier"),
+          @RestParameter(name = "host", isRequired = false, type = Type.STRING, description = "The host, including the http(s) protocol") }, reponses = {
+          @RestResponse(responseCode = SC_OK, description = "Returned the available service."),
+          @RestResponse(responseCode = SC_NOT_FOUND, description = "No service of that type on that host is registered.") })
   public JaxbServiceRegistrationList getRegistrationsAsJson(@QueryParam("serviceType") String serviceType,
           @QueryParam("host") String host) throws NotFoundException {
     return getRegistrationsAsXml(serviceType, host);
   }
 
   @POST
-  @Path("/job")
+  @Path("job")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "createjob", description = "Creates a new job.", returnDescription = "An XML representation of the job.", restParameters = {
+          @RestParameter(name = "jobType", isRequired = true, type = Type.STRING, description = "The job type identifier"),
+          @RestParameter(name = "host", isRequired = true, type = Type.STRING, description = "The creating host, including the http(s) protocol"),
+          @RestParameter(name = "operation", isRequired = true, type = Type.STRING, description = "The operation this job should execute"),
+          @RestParameter(name = "payload", isRequired = false, type = Type.TEXT, description = "The job type identifier"),
+          @RestParameter(name = "start", isRequired = false, type = Type.BOOLEAN, description = "Whether the job should be queued for dispatch and execution"),
+          @RestParameter(name = "arg", isRequired = false, type = Type.TEXT, description = "An argument for the operation"),
+          @RestParameter(name = "arg", isRequired = false, type = Type.TEXT, description = "An argument for the operation"),
+          @RestParameter(name = "arg", isRequired = false, type = Type.TEXT, description = "An argument for the operation"),
+          @RestParameter(name = "arg", isRequired = false, type = Type.TEXT, description = "An argument for the operation"),
+          @RestParameter(name = "arg", isRequired = false, type = Type.TEXT, description = "An argument for the operation") }, reponses = {
+          @RestResponse(responseCode = SC_CREATED, description = "Job created."),
+          @RestResponse(responseCode = SC_BAD_REQUEST, description = "The required parameters were not supplied, bad request.") })
   public Response createJob(@Context HttpServletRequest request) {
     String[] argArray = request.getParameterValues("arg");
     List<String> arguments = null;
@@ -273,9 +311,10 @@ public class ServiceRegistryEndpoint {
   }
 
   @PUT
-  @Path("/job/{id}.xml")
+  @Path("job/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response updateJob(@PathParam("id") String id, @FormParam("jobType") String jobXml) throws NotFoundException {
+  @RestQuery(name = "updatejob", description = "Updates an existing job", returnDescription = "No content", pathParameters = { @RestParameter(name = "id", isRequired = true, type = Type.STRING, description = "The job identifier") }, restParameters = { @RestParameter(name = "job", isRequired = true, type = Type.TEXT, description = "The updated job as XML") }, reponses = { @RestResponse(responseCode = 204, description = "Job updated.") })
+  public Response updateJob(@PathParam("id") String id, @FormParam("job") String jobXml) throws NotFoundException {
     try {
       Job job = JobParser.parseJob(jobXml);
       serviceRegistry.updateJob(job);
@@ -286,25 +325,31 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
-  @Path("/job/{id}.xml")
+  @Path("job/{id}.xml")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "jobasxml", description = "Returns a job as XML.", returnDescription = "The job as XML", pathParameters = { @RestParameter(name = "id", isRequired = true, type = Type.STRING, description = "The job identifier") }, reponses = {
+          @RestResponse(responseCode = SC_OK, description = "Job found."),
+          @RestResponse(responseCode = SC_NOT_FOUND, description = "No job with that identifier exists.") })
   public JaxbJob getJobAsXml(@PathParam("id") long id) throws NotFoundException {
     return getJobAsJson(id);
   }
 
   @GET
-  @Path("/job/{id}.json")
+  @Path("job/{id}.json")
   @Produces(MediaType.APPLICATION_JSON)
+  @RestQuery(name = "jobasjson", description = "Returns a job as JSON.", returnDescription = "The job as JSON", pathParameters = { @RestParameter(name = "id", isRequired = true, type = Type.STRING, description = "The job identifier") }, reponses = {
+          @RestResponse(responseCode = SC_OK, description = "Job found."),
+          @RestResponse(responseCode = SC_NOT_FOUND, description = "No job with that identifier exists.") })
   public JaxbJob getJobAsJson(@PathParam("id") long id) throws NotFoundException {
     try {
       return new JaxbJob(serviceRegistry.getJob(id));
-    } catch (Exception e) {
+    } catch (ServiceRegistryException e) {
       throw new WebApplicationException(e);
     }
   }
 
   @GET
-  @Path("/jobs.xml")
+  @Path("jobs.xml")
   @Produces(MediaType.TEXT_XML)
   public JaxbJobList getJobsAsXml(@QueryParam("serviceType") String serviceType, @QueryParam("status") Job.Status status) {
     try {
@@ -317,8 +362,13 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
-  @Path("/count")
+  @Path("count")
   @Produces(MediaType.TEXT_PLAIN)
+  @RestQuery(name = "count", description = "Returns the number of jobs matching the query parameters as plain text.", returnDescription = "The number of matching jobs", restParameters = {
+          @RestParameter(name = "serviceType", isRequired = false, type = Type.STRING, description = "The service type identifier"),
+          @RestParameter(name = "status", isRequired = false, type = Type.STRING, description = "The job status"),
+          @RestParameter(name = "host", isRequired = false, type = Type.STRING, description = "The host executing the job"),
+          @RestParameter(name = "operation", isRequired = false, type = Type.STRING, description = "The job's operation") }, reponses = { @RestResponse(responseCode = SC_OK, description = "Job count returned.") })
   public long count(@QueryParam("serviceType") String serviceType, @QueryParam("status") Job.Status status,
           @QueryParam("host") String host, @QueryParam("operation") String operation) {
     if (isBlank(serviceType)) {
@@ -340,8 +390,9 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
-  @Path("/maxconcurrentjobs")
+  @Path("maxconcurrentjobs")
   @Produces(MediaType.TEXT_PLAIN)
+  @RestQuery(name = "maxconcurrentjobs", description = "Returns the number of jobs this server can execute concurrently.", returnDescription = "The maximum number of concurrent jobs", reponses = { @RestResponse(responseCode = SC_OK, description = "Maximum number of concurrent jobs returned.") })
   public Response getMaximumConcurrentWorkflows() {
     try {
       Integer count = serviceRegistry.getMaxConcurrentJobs();
@@ -349,150 +400,6 @@ public class ServiceRegistryEndpoint {
     } catch (ServiceRegistryException e) {
       throw new WebApplicationException(e);
     }
-  }
-
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("serviceregistry", "Service Registry", serviceUrl, null);
-    data.setAbstract("This service lists the members of this cluster.");
-
-    // statistics
-    RestEndpoint statistics = new RestEndpoint("stats", RestEndpoint.Method.GET, "/statistics.{format}",
-            "List the service registrations in the cluster, along with some simple statistics.");
-    statistics.addPathParam(new Param("format", Type.STRING, "xml", "the output format"));
-    statistics.addFormat(new Format("xml", null, null));
-    statistics.addFormat(new Format("json", null, null));
-    statistics.addStatus(org.opencastproject.util.doc.Status.ok("Returns the service statistics."));
-    statistics.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, statistics);
-
-    // services
-    RestEndpoint getServicesEndpoint = new RestEndpoint("services", RestEndpoint.Method.GET, "/services.{format}",
-            "Get a list of services matching the query criteria");
-    getServicesEndpoint.addOptionalParam(new Param("serviceType", Type.STRING, "org.opencastproject.[type]",
-            "The service identifier"));
-    getServicesEndpoint.addOptionalParam(new Param("host", Type.STRING, serverUrl, "The host providing the service"));
-    getServicesEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The format, xml or json"));
-    getServicesEndpoint.addFormat(new Format("xml", null, null));
-    getServicesEndpoint.addFormat(new Format("json", null, null));
-    getServicesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the services list."));
-    getServicesEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getServicesEndpoint);
-
-    // available services ordered by load
-    RestEndpoint getServicesByLoadEndpoint = new RestEndpoint("available", RestEndpoint.Method.GET,
-            "/available.{format}", "Get a list of available services ordered by load");
-    getServicesByLoadEndpoint.addOptionalParam(new Param("serviceType", Type.STRING, "org.opencastproject.[type]",
-            "The service identifier"));
-    getServicesByLoadEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The format, xml or json"));
-    getServicesByLoadEndpoint.addFormat(new Format("xml", null, null));
-    getServicesByLoadEndpoint.addFormat(new Format("json", null, null));
-    getServicesByLoadEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Returns the services list, ordered from least to most loaded."));
-    getServicesByLoadEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getServicesByLoadEndpoint);
-
-    // register
-    RestEndpoint registerEndpoint = new RestEndpoint("register", RestEndpoint.Method.POST, "/register",
-            "Add a new service registration to the cluster.");
-    registerEndpoint.addRequiredParam(new Param("serviceType", Type.STRING, "org.opencastproject.[type]",
-            "The service identifier"));
-    registerEndpoint
-            .addRequiredParam(new Param("host", Type.STRING, serverUrl, "The host's base URL for this service"));
-    registerEndpoint.addRequiredParam(new Param("path", Type.STRING, "/myservice",
-            "the path on the server responsible for handling this type of service"));
-    registerEndpoint.addRequiredParam(new Param("jobProducer", Type.BOOLEAN, "false",
-            "whether this service produces jobs, which track long running operations"));
-    registerEndpoint.addFormat(new Format("xml", null, null));
-    registerEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the service registration."));
-    registerEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, registerEndpoint);
-
-    // unregister
-    RestEndpoint unRegisterEndpoint = new RestEndpoint("unregister", RestEndpoint.Method.POST, "/unregister",
-            "Remove a service registration from the cluster.");
-    unRegisterEndpoint.addRequiredParam(new Param("serviceType", Type.STRING, "org.opencastproject.[type]",
-            "The service identifier"));
-    unRegisterEndpoint.addRequiredParam(new Param("host", Type.STRING, serverUrl,
-            "The host's base URL for this service"));
-    unRegisterEndpoint.addFormat(new Format("xml", null, null));
-    unRegisterEndpoint
-            .addStatus(org.opencastproject.util.doc.Status.noContent("The service registration was removed."));
-    unRegisterEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, unRegisterEndpoint);
-
-    // Set maintenance mode
-    RestEndpoint maintenanceEndpoint = new RestEndpoint("maintenance", RestEndpoint.Method.POST, "/maintenance",
-            "Sets the maintenance status for a host in the cluster.");
-    maintenanceEndpoint.addRequiredParam(new Param("host", Type.STRING, serverUrl, "The host"));
-    maintenanceEndpoint.addRequiredParam(new Param("maintenance", Type.STRING, Boolean.TRUE.toString(),
-            "The maintenance status"));
-    maintenanceEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .noContent("The host's maintenance status was set"));
-    maintenanceEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, maintenanceEndpoint);
-
-    // count jobs
-    RestEndpoint countEndpoint = new RestEndpoint("count", RestEndpoint.Method.GET, "/count",
-            "Count the number of jobs.");
-    countEndpoint.addOptionalParam(new Param("serviceType", Type.STRING, "org.opencastproject.[type]",
-            "The service identifier"));
-    countEndpoint.addOptionalParam(new Param("status", Type.STRING, "FINISHED",
-            "The job status: QUEUED, RUNNING, FINISHED, or FAILED"));
-    countEndpoint.addOptionalParam(new Param("host", Type.STRING, serverUrl, "The host's base URL for this service"));
-    countEndpoint.addOptionalParam(new Param("operation", Type.STRING, null, "The operation name"));
-    countEndpoint.addFormat(new Format("plain", null, null));
-    countEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("The number of jobs matching the request criteria has been returned in the http body."));
-    countEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, countEndpoint);
-
-    // get jobs
-    RestEndpoint getJobsEndpoint = new RestEndpoint("getJobs", RestEndpoint.Method.GET, "/jobs.{format}",
-            "Fetch jobs based on query parameters.");
-    getJobsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", null));
-    getJobsEndpoint.addOptionalParam(new Param("serviceType", Type.STRING, "org.opencastproject.[type]",
-            "The service identifier"));
-    getJobsEndpoint.addOptionalParam(new Param("status", Type.STRING, "FINISHED",
-            "The job status: QUEUED, RUNNING, FINISHED, or FAILED"));
-    getJobsEndpoint.addFormat(new Format("xml", null, null));
-    getJobsEndpoint.addFormat(new Format("json", null, null));
-    getJobsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("The jobs matching the request criteria are returned in the http body."));
-    getJobsEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getJobsEndpoint);
-
-    // create a job
-    RestEndpoint createJobEndpoint = new RestEndpoint("create", RestEndpoint.Method.POST, "/job",
-            "Creates a new job in the queued state");
-    createJobEndpoint.addRequiredParam(new Param("jobType", Type.STRING, "org.opencastproject.[type]",
-            "The service that is creating and handling this job"));
-    createJobEndpoint.addRequiredParam(new Param("operation", Type.STRING, null, "Operation to execute"));
-    createJobEndpoint.addRequiredParam(new Param("host", Type.STRING, "http://localhost:8080",
-            "The host that is creating the job"));
-    createJobEndpoint.addFormat(new Format("xml", null, null));
-    createJobEndpoint.addOptionalParam(new Param("payload", Type.TEXT, null, "Initial payload"));
-    createJobEndpoint.addOptionalParam(new Param("start", Type.BOOLEAN, null,
-            "Immediately start the job or simply queue it?"));
-
-    createJobEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Returns the new job."));
-    createJobEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("If any of the required parameters are missing."));
-    createJobEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, createJobEndpoint);
-
-    // getJob
-    RestEndpoint getJobEndpoint = new RestEndpoint("job", RestEndpoint.Method.GET, "/job/{id}.{format}",
-            "Get a job by its identifier");
-    getJobEndpoint.addPathParam(new Param("id", Type.STRING, null, "The job identifier"));
-    getJobEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The format, xml or json"));
-    getJobEndpoint.addFormat(new Format("xml", null, null));
-    getJobEndpoint.addFormat(new Format("json", null, null));
-    getJobEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the job."));
-    getJobEndpoint.addStatus(org.opencastproject.util.doc.Status.notFound("No job with this identifier exists."));
-    getJobEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getJobEndpoint);
-
-    return DocUtil.generate(data);
   }
 
 }

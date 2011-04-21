@@ -51,12 +51,12 @@ public @interface RestQuery {
   /**
    * @return a list of path parameters for this query.
    */
-  RestParameter[] pathParameters();
+  RestParameter[] pathParameters() default {};
 
   /**
    * @return a list of query parameters for this query.
    */
-  RestParameter[] queryParameters();
+  RestParameter[] restParameters() default {};
 
   /**
    * @return a body parameter for this query.

@@ -101,7 +101,7 @@ public class AgentStateJob implements Job {
    * Sends an agent state update to the capture-admin state service.
    */
   protected void sendAgentState() {
-    logger.info("#" + statePushCount + " - Sending agent " + state.getAgentName() + "'s state: " + state.getAgentState());
+    logger.debug("#" + statePushCount + " - Sending agent " + state.getAgentName() + "'s state: " + state.getAgentState());
 
     // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
@@ -188,10 +188,10 @@ public class AgentStateJob implements Job {
 
       resp = client.execute(remoteServer);
       if (resp.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logger.info("#" + statePushCount + " - State push to " + toString() + " to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+        logger.debug("#" + statePushCount + " - State push to " + toString() + " to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
       }
       else {
-        logger.info("#" + statePushCount + " - State push {} to {} was successful.", toString(), url);
+        logger.debug("#" + statePushCount + " - State push {} to {} was successful.", toString(), url);
       }
     } catch (TrustedHttpClientException e) {
       logger.warn("#" + statePushCount + " - Unable to communicate with server at {}, message reads: {}.", url, e);
