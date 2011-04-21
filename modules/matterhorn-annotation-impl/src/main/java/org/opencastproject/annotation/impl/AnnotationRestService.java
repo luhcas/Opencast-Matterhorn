@@ -15,18 +15,19 @@
  */
 package org.opencastproject.annotation.impl;
 
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_OK;
+
 import org.opencastproject.annotation.api.Annotation;
 import org.opencastproject.annotation.api.AnnotationService;
 import org.opencastproject.rest.RestConstants;
-import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestParameter.Type;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
@@ -54,6 +55,7 @@ import javax.ws.rs.core.Response.Status;
  * The REST endpoint for the annotation service.
  */
 @Path("/")
+@RestService(name = "annotation", title = "Annotation Service", notes = { "" }, abstractText = "This service is used for managing user generated annotations.")
 public class AnnotationRestService {
 
   /** The logger */
@@ -98,7 +100,6 @@ public class AnnotationRestService {
         serverUrl = ccServerUrl;
       }
       serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-      docs = generateDocs(serviceUrl);
     }
   }
 
@@ -108,6 +109,12 @@ public class AnnotationRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("annotations.xml")
+  @RestQuery(name = "annotationsasxml", description = "Get annotations by key and day", returnDescription = "The user annotations.", restParameters = {
+          @RestParameter(name = "episode", description = "The episode identifier", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "type", description = "The type of annotation", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "day", description = "The day of creation (format: YYYYMMDD)", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "limit", description = "The maximum number of items to return per page", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "offset", description = "The page number", isRequired = false, type = Type.STRING) }, reponses = { @RestResponse(responseCode = SC_OK, description = "An XML representation of the user annotations") })
   public Response getAnnotationsAsXml(@QueryParam("episode") String id, @QueryParam("type") String type,
           @QueryParam("day") String day, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 
@@ -137,6 +144,12 @@ public class AnnotationRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("annotations.json")
+  @RestQuery(name = "annotationsasjson", description = "Get annotations by key and day", returnDescription = "The user annotations.", restParameters = {
+          @RestParameter(name = "episode", description = "The episode identifier", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "type", description = "The type of annotation", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "day", description = "The day of creation (format: YYYYMMDD)", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "limit", description = "The maximum number of items to return per page", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "offset", description = "The page number", isRequired = false, type = Type.STRING) }, reponses = { @RestResponse(responseCode = SC_OK, description = "A JSON representation of the user annotations") })
   public Response getAnnotationsAsJson(@QueryParam("episode") String id, @QueryParam("type") String type,
           @QueryParam("day") String day, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
     return getAnnotationsAsXml(id, type, day, limit, offset); // same logic, different @Produces annotation
@@ -145,6 +158,12 @@ public class AnnotationRestService {
   @PUT
   @Path("")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "add", description = "Add an annotation on an episode", returnDescription = "The user annotation.", restParameters = {
+          @RestParameter(name = "episode", description = "The episode identifier", isRequired = true, type = Type.STRING),
+          @RestParameter(name = "type", description = "The type of annotation", isRequired = true, type = Type.STRING),
+          @RestParameter(name = "value", description = "The value of the annotation", isRequired = true, type = Type.TEXT),
+          @RestParameter(name = "in", description = "The time, or inpoint, of the annotation", isRequired = true, type = Type.STRING),
+          @RestParameter(name = "out", description = "The optional outpoint of the annotation", isRequired = false, type = Type.STRING) }, reponses = { @RestResponse(responseCode = SC_CREATED, description = "The URL to this annotation is returned in the Location header, and an XML representation of the annotation itelf is returned in the response body.") })
   public Response add(@FormParam("episode") String mediapackageId, @FormParam("in") int inpoint,
           @FormParam("out") int outpoint, @FormParam("type") String type, @FormParam("value") String value,
           @Context HttpServletRequest request) {
@@ -169,7 +188,8 @@ public class AnnotationRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("/{id}.xml")
+  @Path("{id}.xml")
+  @RestQuery(name = "annotationasxml", description = "Gets an annotation by its identifier", returnDescription = "An XML representation of the user annotation.", pathParameters = { @RestParameter(name = "id", description = "The episode identifier", isRequired = false, type = Type.STRING) }, reponses = { @RestResponse(responseCode = SC_OK, description = "An XML representation of the user annotation") })
   public AnnotationImpl getAnnotationAsXml(@PathParam("id") String idAsString) throws NotFoundException {
     Long id = null;
     try {
@@ -182,68 +202,10 @@ public class AnnotationRestService {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("/{id}.xml")
+  @Path("{id}.xml")
+  @RestQuery(name = "annotationasjson", description = "Gets an annotation by its identifier", returnDescription = "A JSON representation of the user annotation.", pathParameters = { @RestParameter(name = "id", description = "The episode identifier", isRequired = false, type = Type.STRING) }, reponses = { @RestResponse(responseCode = SC_OK, description = "A JSON representation of the user annotation") })
   public AnnotationImpl getAnnotationAsJson(@PathParam("id") String idAsString) throws NotFoundException {
     return getAnnotationAsXml(idAsString);
-  }
-
-  /**
-   * returns the REST documentation
-   * 
-   * @return the REST documentation, if available
-   */
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public String getDocumentation() {
-    return docs;
-  }
-
-  protected String docs;
-
-  /**
-   * Generates the REST documentation
-   * 
-   * @param
-   * @return The HTML with the documentation
-   */
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("annotation", "Annotation Service", serviceUrl, null);
-
-    // abstract
-    data.setAbstract("This service is used for managing user generated annotations.");
-
-    // add
-    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.PUT, "/", "Add an annotation on an episode");
-    addEndpoint.addFormat(new Format("XML", null, null));
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status.created("The URL to this annotation is returned in the "
-            + "Location header, and the annotation itelf is returned in the response body."));
-    addEndpoint.addRequiredParam(new Param("episode", Type.STRING, null, "The ID of the episode"));
-    addEndpoint.addRequiredParam(new Param("type", Type.STRING, null, "The type of annotation"));
-    addEndpoint.addRequiredParam(new Param("in", Type.STRING, null, "The time, or inpoint, of the annotation"));
-    addEndpoint.addOptionalParam(new Param("out", Type.STRING, null, "The optional outpoint of the annotation"));
-    addEndpoint.addRequiredParam(new Param("value", Type.TEXT, null, "The value of the annotation"));
-    addEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, addEndpoint);
-
-    // annotation
-    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotations.{format}",
-            "Get annotations by key and day");
-    annotationEndpoint.addFormat(new Format("XML", null, null));
-    annotationEndpoint.addFormat(new Format("JSON", null, null));
-    annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The annotations, expressed as xml or json"));
-    annotationEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
-    annotationEndpoint
-            .addOptionalParam(new Param("episode", Type.STRING, null, "The mediapackage (episode) identifier"));
-    annotationEndpoint.addOptionalParam(new Param("type", Type.STRING, null, "The type of annotation"));
-    annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));
-    annotationEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
-            "The maximum number of items to return per page"));
-    annotationEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
-    annotationEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, annotationEndpoint);
-
-    return DocUtil.generate(data);
   }
 
 }
