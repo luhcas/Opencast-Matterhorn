@@ -324,6 +324,49 @@ Opencast.Player = (function ()
         }
     }
     
+    function getCleanedUrl(embed, withTime)
+    {
+        embed = embed||false;
+        withTime = withTime||false;
+        if(withTime)
+        {
+            // add time to link "open in advanced player"
+            var seconds = parseInt(Opencast.Utils.getTimeInMilliseconds(text)) / 1000;
+        }
+        // parse URL string -- modified version of Opencast.Utils.parseURL-module
+        var vars = [],
+            hash,
+            str = window.location.href + (withTime ? ("&t=" +  seconds) : '');
+        var hashes = str.slice(str.indexOf('?') + 1).split('&');
+        if ($.isArray(hashes))
+        {
+            for (var i = 0; i < hashes.length; i++)
+            {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+        }
+        var urlArr = Opencast.Utils.removeDuplicates(vars);
+        var windLoc = window.location.href;
+        windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
+        // URL parameter array to string
+        var str = '';
+        for (var i = 0; i < urlArr.length; ++i)
+        {
+            var l = (i == 0) ? '?' : '&';
+            var parsedUrlAt = Opencast.Utils.getURLParameter(urlArr[i]);
+            if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null) && (urlArr[i] != 't'))
+            {
+                str += l + urlArr[i] + '=' + Opencast.Utils.parseURL()[urlArr[i]];
+            } else if(withTime && (urlArr[i] == 't'))
+            {
+                str += l + urlArr[i] + "=" + seconds;
+            }
+        }
+        return (embed ? windLoc.replace(/watch.html/g, 'embed.html') : windLoc) + str;
+    }
+    
     /**
      @memberOf Opencast.Player
      @description Set the current time of the video.
@@ -344,47 +387,8 @@ Opencast.Player = (function ()
             $("#scrubber").attr("aria-valuenow", text);
             
             if($('#oc-link-advanced-player'))
-            {
-                // add time to link "open in advanced player"
-                var seconds = parseInt(Opencast.Utils.getTimeInMilliseconds(text)) / 1000;
-                var loc = $('#oc-link-advanced-player').attr('href');
-                var seconds = Opencast.Utils.getTimeInMilliseconds(text) / 1000; 
-                // parse URL string -- modified version of Opencast.Utils.parseURL-module
-                var vars = [],
-                    hash,
-                    str = window.location.href + "&t=" + seconds;
-                var hashes = str.slice(str.indexOf('?') + 1).split('&');
-                if ($.isArray(hashes))
-                {
-                    for (var i = 0; i < hashes.length; i++)
-                    {
-                        hash = hashes[i].split('=');
-                        vars.push(hash[0]);
-                        vars[hash[0]] = hash[1];
-                    }
-                }
-                var urlArr = Opencast.Utils.removeDuplicates(vars);
-                var windLoc = window.location.href;
-                windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
-                // URL parameter array to string
-                var str = '';
-                for (var i = 0; i < urlArr.length; ++i)
-                {
-                    var l = (i == 0) ? '?' : '&';
-                    var parsedUrlAt = Opencast.Utils.getURLParameter(urlArr[i]);
-                    if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null) && (urlArr[i] != 'quality') && (urlArr[i] != 't'))
-                    {
-                        str += l + urlArr[i] + '=' + Opencast.Utils.parseURL()[urlArr[i]];
-                    } else if(urlArr[i] == 'quality')
-                    {
-                        str += l + urlArr[i] + "=" + videoQuality;
-                    } else if(urlArr[i] == 't')
-                    {
-                        str += l + urlArr[i] + "=" + seconds;
-                    }
-                }
-                
-                $('#oc-link-advanced-player').attr('href', windLoc.replace('embed', 'watch') + str);
+            {                
+                $('#oc-link-advanced-player').attr('href', getCleanedUrl(true, true) + str);
             }
         }
         currentTimeString = text;
@@ -1282,10 +1286,10 @@ Opencast.Player = (function ()
     function embedIFrame(width, height)
     {
         var iFrameText = '';
-        var advancedUrl = window.location.href;
-        var embedUrl = advancedUrl.replace(/watch.html/g, "embed.html");
+        var embedUrl = getCleanedUrl(true, false);
         $('#oc_embed-costum-width-textinput').val(width);
         $('#oc_embed-costum-height-textinput').val(height);
+        
         iFrameText = '<iframe src="' + embedUrl + '" style="border:0px #FFFFFF none;" name="Opencast Matterhorn - Media Player" scrolling="no" frameborder="0" marginheight="0px" marginwidth="0px" width="' + width + '" height="' + height + '"></iframe>';
         $('#oc_embed-textarea').val(iFrameText);
     }
