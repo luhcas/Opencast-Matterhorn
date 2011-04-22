@@ -328,19 +328,21 @@ Opencast.Utils = (function ()
     /**
      * @memberOf Opencast.Utils
      * @description Checks if URL parameters are duplicate and cleans it if appropriate and returns the cleaned URL afterwards
-     * @param embed true if watch.html should be replaced with embed.html, false else
+     * @param embed true if watch.html should be replaced with embed.html, false if embed.html should be replaced with watch.html
      * @param withTime true if adding the current Time, false else
      * @param videoQuality the videoQuality if available, false else
+     * @param okay true if play URL parameter sould be set to true, false else
      */
-    function getCleanedURLAdvanced(embed, withTime, videoQuality)
+    function getCleanedURLAdvanced(embed, withTime, videoQuality, play)
     {
         embed = embed||false;
         withTime = withTime||false;
         videoQuality = videoQuality||false;
+        play = (play == true) ? true : false;
         if(withTime)
         {
             // add time to link "open in advanced player"
-            var seconds = parseInt(Opencast.Utils.getTimeInMilliseconds(text)) / 1000;
+            var seconds = parseInt(getTimeInMilliseconds(Opencast.Player.getCurrentTime())) / 1000;
         }
         // parse URL string -- modified version of Opencast.Utils.parseURL-module
         var vars = [],
@@ -365,19 +367,21 @@ Opencast.Utils = (function ()
         {
             var l = (i == 0) ? '?' : '&';
             var parsedUrlAt = getURLParameter(urlArr[i]);
-            if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null) && (urlArr[i] != 't'))
+            if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null) && (urlArr[i] != 'quality') && (urlArr[i] != 't') && (urlArr[i] != 'play'))
             {
                 str += l + urlArr[i] + '=' + parseURL()[urlArr[i]];
-            } 
-            else if((videoQuality != false) && (urlArr[i] == 'quality'))
+            } else if((videoQuality != false) && (urlArr[i] == 'quality'))
             {
                 str += l + urlArr[i] + "=" + videoQuality;
+            } else if(urlArr[i] == 'play')
+            {
+                str += l + urlArr[i] + "=" + (play ? "true" : "false");
             } else if(withTime && (urlArr[i] == 't'))
             {
                 str += l + urlArr[i] + "=" + seconds;
             }
         }
-        return (embed ? windLoc.replace(/watch.html/g, 'embed.html') : windLoc) + str;
+        return (embed ? windLoc.replace(/watch.html/g, 'embed.html') : windLoc.replace(/embed.html/g, 'watch.html')) + str;
     }
     
     /**

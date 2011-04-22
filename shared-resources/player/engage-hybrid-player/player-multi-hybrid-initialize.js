@@ -753,7 +753,7 @@ Opencast.Initialize = (function ()
         {
             var videoQuality = $('#oc_video-quality-options').val();
             Opencast.Utils.log("Request to set video quality to " + videoQuality + ", changing the URL...");
-            newLoc = Opencast.Utils.getCleanedURLAdvanced(false, true, videoQuality);
+            newLoc = Opencast.Utils.getCleanedURLAdvanced(false, true, videoQuality, true);
             // change URL if new parameter
             if (loc != newLoc)
             {

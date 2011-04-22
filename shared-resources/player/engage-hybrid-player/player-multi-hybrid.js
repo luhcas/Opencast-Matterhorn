@@ -344,8 +344,8 @@ Opencast.Player = (function ()
             $("#scrubber").attr("aria-valuenow", text);
             
             if($('#oc-link-advanced-player'))
-            {                
-                $('#oc-link-advanced-player').attr('href', Opencast.Utils.getCleanedURLAdvanced(true, true, false) + str);
+            {
+                $('#oc-link-advanced-player').attr('href', Opencast.Utils.getCleanedURLAdvanced(false, true, false, true));
             }
         }
         currentTimeString = text;
@@ -1243,7 +1243,7 @@ Opencast.Player = (function ()
     function embedIFrame(width, height)
     {
         var iFrameText = '';
-        var embedUrl = Opencast.Utils.getCleanedURLAdvanced(true, false, false);
+        var embedUrl = Opencast.Utils.getCleanedURLAdvanced(true, false, false, false);
         $('#oc_embed-costum-width-textinput').val(width);
         $('#oc_embed-costum-height-textinput').val(height);
         
