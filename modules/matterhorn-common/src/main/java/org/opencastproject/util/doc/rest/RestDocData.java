@@ -242,7 +242,8 @@ public class RestDocData extends DocData {
    *          the path of this endpoint
    */
   public void addEndpoint(RestQuery restQuery, Produces produces, String httpMethodString, Path path) {
-    RestEndpointData endpoint = new RestEndpointData(restQuery.name(), httpMethodString, "/" + path.value(),
+    String pathValue = path.value().startsWith("/") ? path.value() : "/" + path.value();
+    RestEndpointData endpoint = new RestEndpointData(restQuery.name(), httpMethodString, pathValue,
             restQuery.description());
     // Add return description if needed
     if (!restQuery.returnDescription().isEmpty()) {
