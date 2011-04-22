@@ -747,6 +747,20 @@ Opencast.Initialize = (function ()
             Opencast.Series.doToggleSeriesDropdown()
         });
         $('#oc_video-player-controls').hide();
+        
+        // on change
+        $('#oc_video-quality-options').change(function()
+        {
+            var videoQuality = $('#oc_video-quality-options').val();
+            Opencast.Utils.log("Request to set video quality to " + videoQuality + ", changing the URL...");
+            newLoc = Opencast.Utils.getCleanedURLAdvanced(false, true, videoQuality);
+            // change URL if new parameter
+            if (loc != newLoc)
+            {
+                window.location = newLoc;
+            }
+        });
+        
         onPlayerReadyListener();
         var mediaPackageId = Opencast.Utils.getURLParameter('id');
         $.ajax(

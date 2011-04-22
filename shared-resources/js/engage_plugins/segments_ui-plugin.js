@@ -45,7 +45,7 @@ Opencast.segments_ui_Plugin = (function ()
     var templateMedia1 =     '{for t in track}' +
                                  '{if t.type == "presenter/delivery"}' +
                                      '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))}' +
+                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))&& (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                              '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
                                                  '${t.url}' +
                                              '</div>' +
@@ -77,7 +77,7 @@ Opencast.segments_ui_Plugin = (function ()
                                   
                                  '{if t.type == "presentation/delivery"}' +
                                      '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))}' +
+                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))&& (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                              '<div id="oc-video-presentation-delivery-x-flv-http" style="display: none">' +
                                                  '${t.url}' +
                                              '</div>' +
@@ -93,7 +93,7 @@ Opencast.segments_ui_Plugin = (function ()
          
                                   '{if t.type == "presenter/delivery"}' +
                                       '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                          '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming)}' +
+                                          '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                               '<div id="oc-video-presenter-delivery-x-flv-rtmp" style="display: none">' +
                                                   '${t.url}' +
                                               '</div>' +
@@ -109,7 +109,7 @@ Opencast.segments_ui_Plugin = (function ()
          
                                   '{if t.type == "presentation/delivery"}' +
                                       '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                          '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming)}' +
+                                          '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                               '<div id="oc-video-presentation-delivery-x-flv-rtmp" style="display: none">' +
                                                   '${t.url}' +
                                               '</div>' +
@@ -125,7 +125,7 @@ Opencast.segments_ui_Plugin = (function ()
           
                                   '{if t.type == "presenter/source"}' +
                                       '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))}' +
+                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming)) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                               '<div id="oc-video-presenter-source-x-flv-http" style="display: none">' +
                                                   '${t.url}' +
                                               '</div>' +
@@ -141,7 +141,7 @@ Opencast.segments_ui_Plugin = (function ()
           
                                   '{if t.type == "presentation/source"}' +
                                       '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))}' +
+                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming)) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                               '<div id="oc-video-presentation-source-x-flv-http" style="display: none">' +
                                                   '${t.url}' +
                                               '</div>' +
@@ -157,7 +157,7 @@ Opencast.segments_ui_Plugin = (function ()
          
                                  '{if t.type == "presenter/source"}' +
                                      '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                         '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming)}' +
+                                         '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                              '<div id="oc-video-presenter-source-x-flv-rtmp" style="display: none">' +
                                                  '${t.url}' +
                                              '</div>' +
@@ -173,7 +173,7 @@ Opencast.segments_ui_Plugin = (function ()
          
                                  '{if t.type == "presentation/source"}' +
                                      '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                         '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming)}' +
+                                         '{if (t.url.substring(0, 4) == "rtmp") && (rtmpAvailable && preferStreaming) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                              '<div id="oc-video-presentation-source-x-flv-rtmp" style="display: none">' +
                                                  '${t.url}' +
                                              '</div>' +

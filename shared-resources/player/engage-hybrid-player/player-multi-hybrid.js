@@ -324,49 +324,6 @@ Opencast.Player = (function ()
         }
     }
     
-    function getCleanedUrl(embed, withTime)
-    {
-        embed = embed||false;
-        withTime = withTime||false;
-        if(withTime)
-        {
-            // add time to link "open in advanced player"
-            var seconds = parseInt(Opencast.Utils.getTimeInMilliseconds(text)) / 1000;
-        }
-        // parse URL string -- modified version of Opencast.Utils.parseURL-module
-        var vars = [],
-            hash,
-            str = window.location.href + (withTime ? ("&t=" +  seconds) : '');
-        var hashes = str.slice(str.indexOf('?') + 1).split('&');
-        if ($.isArray(hashes))
-        {
-            for (var i = 0; i < hashes.length; i++)
-            {
-                hash = hashes[i].split('=');
-                vars.push(hash[0]);
-                vars[hash[0]] = hash[1];
-            }
-        }
-        var urlArr = Opencast.Utils.removeDuplicates(vars);
-        var windLoc = window.location.href;
-        windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
-        // URL parameter array to string
-        var str = '';
-        for (var i = 0; i < urlArr.length; ++i)
-        {
-            var l = (i == 0) ? '?' : '&';
-            var parsedUrlAt = Opencast.Utils.getURLParameter(urlArr[i]);
-            if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null) && (urlArr[i] != 't'))
-            {
-                str += l + urlArr[i] + '=' + Opencast.Utils.parseURL()[urlArr[i]];
-            } else if(withTime && (urlArr[i] == 't'))
-            {
-                str += l + urlArr[i] + "=" + seconds;
-            }
-        }
-        return (embed ? windLoc.replace(/watch.html/g, 'embed.html') : windLoc) + str;
-    }
-    
     /**
      @memberOf Opencast.Player
      @description Set the current time of the video.
@@ -388,7 +345,7 @@ Opencast.Player = (function ()
             
             if($('#oc-link-advanced-player'))
             {                
-                $('#oc-link-advanced-player').attr('href', getCleanedUrl(true, true) + str);
+                $('#oc-link-advanced-player').attr('href', Opencast.Utils.getCleanedURLAdvanced(true, true, false) + str);
             }
         }
         currentTimeString = text;
@@ -1286,7 +1243,7 @@ Opencast.Player = (function ()
     function embedIFrame(width, height)
     {
         var iFrameText = '';
-        var embedUrl = getCleanedUrl(true, false);
+        var embedUrl = Opencast.Utils.getCleanedURLAdvanced(true, false, false);
         $('#oc_embed-costum-width-textinput').val(width);
         $('#oc_embed-costum-height-textinput').val(height);
         

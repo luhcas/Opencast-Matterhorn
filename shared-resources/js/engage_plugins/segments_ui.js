@@ -341,8 +341,90 @@ Opencast.segments_ui = (function ()
                         // Check if the File is a Video
                         var isVideo = false;
                         var rtmpAvailable = false;
+                        
+                        // requested quality
+                        var lowQualReq = false;
+                        var medQualReq = false;
+                        var highQualReq = false;
+                        var hdQualReq = false;
+                        // available quality
+                        var lowQualAvail = false;
+                        var medQualAvail = false;
+                        var highQualAvail = false;
+                        var hdQualAvail = false;
+                        // final quality
+                        var lowQual = false;
+                        var medQual = false;
+                        var highQual = false;
+                        var hdQual = false;
+                        
+                        var checkForQualities = Opencast.Utils.getURLParameter('quality')||"medium";
+                        if(checkForQualities=="low")
+                        {
+                            lowQualReq = true;
+                        } else if(checkForQualities=="medium")
+                        {
+                            medQualReq = true;
+                        } else if(checkForQualities=="high")
+                        {
+                            highQualReq = true;
+                        } else if(checkForQualities=="hd")
+                        {
+                            hdQualReq = true;
+                        }
+                        if(lowQualReq || medQualReq || highQualReq || hdQualReq)
+                        {
+                            Opencast.Utils.log("Checking for qualities: " + checkForQualities + " quality requested");
+                            checkForQualities = true;
+                        } else
+                        {
+                            Opencast.Utils.log("Checking for qualities: No such quality available ('" + checkForQualities + "')");
+                            checkForQualities = false;
+                        }
+                        
                         $.each(data['search-results'].result.mediapackage.media.track, function (i, value)
                         {
+                            // check for qualities
+                            $.each(data['search-results'].result.mediapackage.media.track[i].tags.tag, function (j, value2)
+                            {
+                                if(value2 == 'low-quality')
+                                {
+                                    lowQualAvail = true;
+                                    if(lowQualReq)
+                                    {
+                                        lowQual = true;
+                                    }
+                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
+                                } else if(value2 == 'medium-quality')
+                                {
+                                    medQualAvail = true;
+                                    if(medQualReq)
+                                    {
+                                        medQual = true;
+                                    }
+                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
+                                } else if(value2 == 'high-quality')
+                                {
+                                    highQualAvail = true;
+                                    if(highQualReq)
+                                    {
+                                        highQual = true;
+                                    }
+                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
+                                } else if(value2 == 'hd-quality')
+                                {
+                                    hdQualAvail = true;
+                                    if(hdQualReq)
+                                    {
+                                        hdQual = true;
+                                    }
+                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
+                                }
+                            });
+                            if(data['search-results'].result.mediapackage.media.track[i].quality == undefined)
+                            {
+                                data['search-results'].result.mediapackage.media.track[i].quality = "";
+                            }
                             if (!isVideo && Opencast.Utils.startsWith(this.mimetype, 'video'))
                             {
                                 isVideo = true;
@@ -351,15 +433,91 @@ Opencast.segments_ui = (function ()
                             {
                                 rtmpAvailable = true;
                             }
-                            // If both Values have been set
-                            if (isVideo && rtmpAvailable)
-                            {
-                                // Jump out of $.each
-                                return false;
-                            }
                         });
+                        checkForQualities = checkForQualities &&
+                                            (lowQualAvail || medQualAvail || highQualAvail || hdQualAvail) &&
+                                            (lowQual || medQual || highQual || hdQual);
+                        
+                        // if different qualities are available
+                        if(lowQualAvail || medQualAvail || highQualAvail || hdQualAvail)
+                        {
+                            // change html selector
+                            if(lowQual)
+                            {
+                                $("#oc_video-view option[selected]").removeAttr("selected");
+                                $("#oc_video-view option[value='low']").attr("selected", "selected");
+                            } else if(medQual)
+                            {
+                                $("#oc_video-view option[selected]").removeAttr("selected");
+                                $("#oc_video-view option[value='medium']").attr("selected", "selected");
+                            } else if(highQual)
+                            {
+                                $("#oc_video-view option[selected]").removeAttr("selected");
+                                $("#oc_video-view option[value='high']").attr("selected", "selected");
+                            } else if(hdQual)
+                            {
+                                $("#oc_video-view option[selected]").removeAttr("selected");
+                                $("#oc_video-view option[value='hd']").attr("selected", "selected");
+                            } else
+                            {
+                                $("#oc_video-view option[selected]").removeAttr("selected");
+                                $("#oc_video-view option[value='medium']").attr("selected", "selected");
+                            }
+                            // remove quality selections that are not available
+                            if(!lowQualAvail)
+                            {
+                                $("select#oc_video-quality-options option[value='low']").remove(); 
+                            }
+                            if(!medQualAvail)
+                            {
+                                $("select#oc_video-quality-options option[value='medium']").remove(); 
+                            }
+                            if(!highQualAvail)
+                            {
+                                $("select#oc_video-quality-options option[value='high']").remove(); 
+                            }
+                            if(!hdQualAvail)
+                            {
+                                $("select#oc_video-quality-options option[value='hd']").remove(); 
+                            }
+                            // display a selector in the ui
+                            $('#oc_video-quality').show();
+                            Opencast.Utils.log("Different qualities are available.");
+                        } else
+                        {
+                            Opencast.Utils.log("Different qualities are not available.");
+                        }
+                        
+                        if(checkForQualities)
+                        {
+                            if(lowQualAvail && lowQual)
+                            {
+                                data['search-results'].result.mediapackage.media.quality = 'low-quality';
+                            } else if(medQualAvail && medQual)
+                            {
+                                data['search-results'].result.mediapackage.media.quality = 'medium-quality';
+                            } else if(highQualAvail && highQual)
+                            {
+                                data['search-results'].result.mediapackage.media.quality = 'high-quality';
+                            } else if(hdQualAvail && hdQual)
+                            {
+                                data['search-results'].result.mediapackage.media.quality = 'hd-quality';
+                            } else if(medQualAvail) // default: medium
+                            {
+                                data['search-results'].result.mediapackage.media.quality = 'medium-quality';
+                            } else
+                            {
+                                checkForQualities = false;
+                            }
+                        } else if(medQualAvail) // default: medium
+                        {
+                            checkForQualities = true;
+                            data['search-results'].result.mediapackage.media.quality = 'medium-quality';
+                        }
+                        data['search-results'].result.mediapackage.media.checkQuality = checkForQualities;
                         data['search-results'].result.mediapackage.media.isVideo = isVideo;
                         data['search-results'].result.mediapackage.media.rtmpAvailable = rtmpAvailable;
+                        Opencast.Utils.log(checkForQualities ? ("Quality set to '" + data['search-results'].result.mediapackage.media.quality + "'") : "No specific quality has been set");
                         Opencast.Utils.log(isVideo ? "Media is a Video" : "Media is not a Video");
                         Opencast.Utils.log(rtmpAvailable ? "Streaming (rtmp) is available" : "Streaming (rtmp) is not available");
                     } else

@@ -327,6 +327,61 @@ Opencast.Utils = (function ()
     
     /**
      * @memberOf Opencast.Utils
+     * @description Checks if URL parameters are duplicate and cleans it if appropriate and returns the cleaned URL afterwards
+     * @param embed true if watch.html should be replaced with embed.html, false else
+     * @param withTime true if adding the current Time, false else
+     * @param videoQuality the videoQuality if available, false else
+     */
+    function getCleanedURLAdvanced(embed, withTime, videoQuality)
+    {
+        embed = embed||false;
+        withTime = withTime||false;
+        videoQuality = videoQuality||false;
+        if(withTime)
+        {
+            // add time to link "open in advanced player"
+            var seconds = parseInt(Opencast.Utils.getTimeInMilliseconds(text)) / 1000;
+        }
+        // parse URL string -- modified version of Opencast.Utils.parseURL-module
+        var vars = [],
+            hash,
+            str = window.location.href + ((videoQuality != false) ? ("&quality=" + videoQuality) : '') + (withTime ? ("&t=" +  seconds) : '');
+        var hashes = str.slice(str.indexOf('?') + 1).split('&');
+        if ($.isArray(hashes))
+        {
+            for (var i = 0; i < hashes.length; i++)
+            {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+        }
+        var urlArr = removeDuplicates(vars);
+        var windLoc = window.location.href;
+        windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
+        // URL parameter array to string
+        var str = '';
+        for (var i = 0; i < urlArr.length; ++i)
+        {
+            var l = (i == 0) ? '?' : '&';
+            var parsedUrlAt = getURLParameter(urlArr[i]);
+            if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null) && (urlArr[i] != 't'))
+            {
+                str += l + urlArr[i] + '=' + parseURL()[urlArr[i]];
+            } 
+            else if((videoQuality != false) && (urlArr[i] == 'quality'))
+            {
+                str += l + urlArr[i] + "=" + videoQuality;
+            } else if(withTime && (urlArr[i] == 't'))
+            {
+                str += l + urlArr[i] + "=" + seconds;
+            }
+        }
+        return (embed ? windLoc.replace(/watch.html/g, 'embed.html') : windLoc) + str;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
      * @description Returns the value of URL-Parameter 'name'
      *              Current used URL Parameters:
      *                  - id:               the current media package id
@@ -347,8 +402,12 @@ Opencast.Utils = (function ()
      *                  - display:          the display alignment
      *                                          Valid Parameter:
      *                                              - invert
-     *                  - page
-     *                  - q
+     *                  - quality:          the video quality
+     *                                          Valid Parameters:
+     *                                              - low
+     *                                              - medium
+     *                                              - high
+     *                                              - hd
      * @return the value of URL-Parameter 'name' or null if not defined
      */
     function getURLParameter(name)
@@ -527,6 +586,7 @@ Opencast.Utils = (function ()
         urlArrayToString: urlArrayToString,
         getCleanedURL: getCleanedURL,
         gotoCleanedURL: gotoCleanedURL,
+        getCleanedURLAdvanced: getCleanedURLAdvanced,
         getDateString: getDateString,
         getTimeString: getTimeString,
         dateStringToDate: dateStringToDate,
