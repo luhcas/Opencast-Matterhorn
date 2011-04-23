@@ -15,8 +15,11 @@
  */
 package org.opencastproject.util;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.opencastproject.job.api.JaxbJob;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
 import javax.xml.bind.JAXBContext;
@@ -27,6 +30,6 @@ public class JaxbSchemaUtilTest {
   public void testSchemaGeneration() throws Exception {
     JAXBContext jaxbContext = JAXBContext.newInstance(JaxbJob.class);
     String generatedSchema = JaxbXmlSchemaGenerator.getXmlSchema(jaxbContext);
-    System.out.println(generatedSchema);
+    assertNotNull(StringUtils.trimToNull(generatedSchema.toString()));
   }
 }

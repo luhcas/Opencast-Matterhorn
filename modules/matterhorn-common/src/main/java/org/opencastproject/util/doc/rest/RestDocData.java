@@ -51,7 +51,7 @@ public class RestDocData extends DocData {
   /**
    * Regular expression used to validate a path.
    */
-  public static final String PATH_VALIDATION_REGEX = "^[\\w\\/{}\\.]+$";
+  public static final String PATH_VALIDATION_REGEX = "^[\\w\\/{}\\:\\.\\*]+$";
 
   /**
    * A slash character.
@@ -113,7 +113,10 @@ public class RestDocData extends DocData {
           // First, it makes sure that every path parameter is present in the endpoint's path.
           if (!endpoint.getPathParams().isEmpty()) {
             for (RestParamData param : endpoint.getPathParams()) {
-              if (!endpoint.getPath().contains("{" + param.getName() + "}")) {
+              // Some endpoints allow for arbitrary characters, including slashes, in their path parameters, so we
+              // must check for both {param} and {param:.*}.
+              if (!endpoint.getPath().contains("{" + param.getName() + "}")
+                      && !endpoint.getPath().contains("{" + param.getName() + ":.*}")) {
                 throw new IllegalStateException("Path (" + endpoint.getPath() + ") does not match path parameter ("
                         + param.getName() + ") for endpoint (" + endpoint.getName()
                         + "), the path must contain all path parameter names.");
@@ -268,8 +271,8 @@ public class RestDocData extends DocData {
     }
 
     // Add path parameter
-    for (RestParameter restParam : restQuery.pathParameters()) {
-      endpoint.addPathParam(new RestParamData(restParam));
+    for (RestParameter pathParam : restQuery.pathParameters()) {
+      endpoint.addPathParam(new RestParamData(pathParam));
     }
 
     // Add query parameter (required and optional)
