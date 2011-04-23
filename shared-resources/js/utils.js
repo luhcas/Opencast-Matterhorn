@@ -22,6 +22,8 @@ var Opencast = Opencast || {};
  */
 Opencast.Utils = (function ()
 {
+    var loggingEnabled = false;
+
     var asciiAlphabet;
     var asciiAlphabetCashed = false;
     
@@ -568,7 +570,7 @@ Opencast.Utils = (function ()
      */
     function log()
     {
-        if(window.console)
+        if(loggingEnabled && window.console)
         {
             try
             {

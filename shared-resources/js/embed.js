@@ -102,21 +102,6 @@ Opencast.Watch = (function ()
         mediaUrlTwo = Opencast.Utils.getURLParameter('videoUrl2');
         coverUrlOne = $('#oc-cover-presenter').html();
         coverUrlTwo = $('#oc-cover-presentation').html();
-        // If URL Parameter display exists and is set to revert
-        var display = Opencast.Utils.getURLParameter('display');
-        if ((display != null) && (display.toLowerCase() == 'invert'))
-        {
-            // Switch the displays and its covers
-            var tmpMediaURLOne = mediaUrlOne;
-            var tmpCoverURLOne = coverUrlOne;
-            var tmpMimetypeOne = mimetypeOne;
-            mediaUrlOne = mediaUrlTwo;
-            coverUrlOne = coverUrlTwo;
-            mimetypeOne = mimetypeTwo;
-            mediaUrlTwo = tmpMediaURLOne;
-            coverUrlTwo = tmpCoverURLOne;
-            mimetypeTwo = tmpMimetypeOne;
-        }
         if (coverUrlOne === null)
         {
             coverUrlOne = coverUrlTwo;
@@ -184,6 +169,27 @@ Opencast.Watch = (function ()
         mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
         mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
         mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
+        
+        // If URL Parameter display exists and is set to revert
+        var display = Opencast.Utils.getURLParameter('display');
+        if ((display != null) && (display.toLowerCase() == 'invert') && (mediaUrlTwo != ''))
+        {
+            Opencast.Utils.log("Inverting the displays and its covers");
+            // Invert the displays and its covers
+            var tmpMediaURLOne = mediaUrlOne;
+            var tmpCoverURLOne = coverUrlOne;
+            var tmpMimetypeOne = mimetypeOne;
+            var tmpMediaResolution = mediaResolutionOne;
+            mediaUrlOne = mediaUrlTwo;
+            coverUrlOne = coverUrlTwo;
+            mimetypeOne = mimetypeTwo;
+            mediaResolutionOne = mediaResolutionTwo;
+            mediaUrlTwo = tmpMediaURLOne;
+            coverUrlTwo = tmpCoverURLOne;
+            mimetypeTwo = tmpMimetypeOne;
+            mediaResolutionTwo = tmpMediaResolution;
+        }
+        
         if (mediaPackageIdAvailable)
         {
             // Initialize the Segements
