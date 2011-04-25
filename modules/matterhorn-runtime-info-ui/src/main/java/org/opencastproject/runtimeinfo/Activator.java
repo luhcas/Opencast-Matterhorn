@@ -36,7 +36,9 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -67,12 +69,28 @@ public class Activator extends HttpServlet implements BundleActivator {
   /** The registration for the documentation servlet. */
   protected ServiceRegistration docServletRegistration;
 
+  /** A map of global macro values for REST documentation. */
+  private Map<String, String> globalMacro;
+
   @Override
   public void start(BundleContext bundleContext) throws Exception {
     this.bundleContext = bundleContext;
     Dictionary<String, String> props = new Hashtable<String, String>();
     props.put("alias", "/docs.html");
+    prepareMacros();
     bundleContext.registerService(Servlet.class.getName(), this, props);
+  }
+
+  /**
+   * Add a list of global information, such as the server URL, to the globalMacro map.
+   */
+  private void prepareMacros() {
+    globalMacro = new HashMap<String, String>();
+    globalMacro.put("PING_BACK_URL", bundleContext.getProperty("org.opencastproject.anonymous.feedback.url"));
+    globalMacro.put("HOST_URL", bundleContext.getProperty("org.opencastproject.server.url"));
+    globalMacro.put("ADMIN_BASE_URL", bundleContext.getProperty("org.opencastproject.admin.ui.url"));
+    globalMacro.put("ENGAGE_BASE_URL", bundleContext.getProperty("org.opencastproject.engage.ui.url"));
+    globalMacro.put("LOCAL_STORAGE_DIRECTORY", bundleContext.getProperty("org.opencastproject.storage.dir"));
   }
 
   @Override
@@ -111,7 +129,8 @@ public class Activator extends HttpServlet implements BundleActivator {
 
       RestService rs = (RestService) endpointService.getClass().getAnnotation(RestService.class);
       if (rs != null) {
-        RestDocData data = new RestDocData(rs.name(), rs.title(), docPath, rs.notes());
+        globalMacro.put("SERVICE_CLASS_SIMPLE_NAME", endpointService.getClass().getSimpleName());
+        RestDocData data = new RestDocData(rs.name(), rs.title(), docPath, rs.notes(), endpointService, globalMacro);
         data.setAbstract(rs.abstractText());
 
         for (Method m : endpointService.getClass().getMethods()) {

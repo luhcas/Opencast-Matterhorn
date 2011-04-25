@@ -51,8 +51,9 @@ public final class RestParamData {
    * @param restParam
    *          the RestParameter annotation type that is to be transformed to RestParamData
    */
-  public RestParamData(RestParameter restParam) {
-    this(restParam.name(), Type.valueOf(restParam.type().name()), restParam.defaultValue(), restParam.description());
+  public RestParamData(RestParameter restParam, RestDocData restDocData) {
+    this(restDocData.processMacro(restParam.name()), Type.valueOf(restParam.type().name()), restDocData
+            .processMacro(restParam.defaultValue()), restDocData.processMacro(restParam.description()));
   }
 
   /**

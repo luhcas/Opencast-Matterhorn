@@ -135,9 +135,10 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
    * 
    * @return the new RestParamData object in case you want to set attributes
    */
-  public RestParamData addBodyParam(RestParameter restParam) {
+  public RestParamData addBodyParam(RestParameter restParam, RestDocData restDocData) {
     RestParamData.Type type = RestParamData.Type.valueOf(restParam.type().name());
-    RestParamData param = new RestParamData("BODY", type, restParam.defaultValue(), restParam.description());
+    RestParamData param = new RestParamData("BODY", type, restDocData.processMacro(restParam.defaultValue()),
+            restDocData.processMacro(restParam.description()));
     param.setRequired(true);
     bodyParam = param;
     return param;
@@ -223,11 +224,11 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
    * @param restResponse
    *          a RestResponse object containing the HTTP response code and description
    */
-  public void addStatus(RestResponse restResponse) {
+  public void addStatus(RestResponse restResponse, RestDocData restDocData) {
     if (statuses == null) {
       statuses = new Vector<StatusData>(3);
     }
-    statuses.add(new StatusData(restResponse));
+    statuses.add(new StatusData(restResponse, restDocData));
   }
 
   /**

@@ -69,7 +69,7 @@ public class DistributionDownloadRestEndpointTest {
 
   @Test
   public void testDocs() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/distribution/download/docs");
+    HttpGet get = new HttpGet(BASE_URL + "/docs.html?path=/distribution/download");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
