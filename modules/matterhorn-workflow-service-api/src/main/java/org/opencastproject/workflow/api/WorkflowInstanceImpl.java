@@ -21,6 +21,7 @@ import static org.opencastproject.workflow.api.WorkflowOperationInstance.Operati
 import static org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState.SUCCEEDED;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.security.api.User;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
 import java.util.ArrayList;
@@ -65,6 +66,9 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElement(name = "parent", nillable = true)
   private Long parentId;
 
+  @XmlElement(name = "creator")
+  private User creator;
+
   @XmlElement(name = "mediapackage")
   private MediaPackage mediaPackage;
 
@@ -99,16 +103,19 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    *          the mediapackage
    * @param parentWorkflowId
    *          the parent workflow ID
+   * @param creator
+   *          the user that created this workflow instance
    * @param properties
    *          the properties
    */
-  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, Long parentWorkflowId,
+  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, Long parentWorkflowId, User creator,
           Map<String, String> properties) {
     this.id = -1; // this should be set by the workflow service once the workflow is persisted
     this.title = def.getTitle();
     this.template = def.getId();
     this.description = def.getDescription();
     this.parentId = parentWorkflowId;
+    this.creator = creator;
     this.state = WorkflowState.INSTANTIATED;
     this.mediaPackage = mediaPackage;
     this.operations = new ArrayList<WorkflowOperationInstance>();
@@ -155,6 +162,21 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public void setTitle(String title) {
     this.title = title;
+  }
+
+  /**
+   * @return the creator
+   */
+  public User getCreator() {
+    return creator;
+  }
+
+  /**
+   * @param creator
+   *          the creator to set
+   */
+  public void setCreator(User creator) {
+    this.creator = creator;
   }
 
   /**
@@ -219,9 +241,9 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
     if (operations == null || operations.isEmpty())
       return null;
-    
+
     WorkflowOperationInstance currentOperation = null;
-    
+
     // Handle newly instantiated workflows
     if (INSTANTIATED.equals(operations.get(0).getState())) {
       currentOperation = operations.get(0);
@@ -257,7 +279,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
         previousState = operation.getState();
         position++;
       }
-      
+
       // If we are at the last operation and there is no more work to do, we're done
       if (operations.get(operations.size() - 1) == currentOperation) {
         switch (currentOperation.getState()) {
@@ -276,7 +298,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       }
 
     }
-    
+
     return currentOperation;
   }
 
@@ -290,9 +312,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       operations = new ArrayList<WorkflowOperationInstance>();
     if (!initialized)
       init();
-    
-    
-    
+
     return new ArrayList<WorkflowOperationInstance>(operations);
   }
 
@@ -418,7 +438,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       throw new IllegalStateException("Operations list must contain operations");
     if (!initialized)
       init();
-    
+
     WorkflowOperationInstance currentOperation = getCurrentOperation();
     if (currentOperation == null)
       throw new IllegalStateException("Can't call next on a finished workflow");
@@ -448,7 +468,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       return false;
     if (operations == null || operations.size() == 0)
       throw new IllegalStateException("operations list must contain operations");
-    
+
     WorkflowOperationInstance currentOperation = getCurrentOperation();
     if (currentOperation == null)
       return true;

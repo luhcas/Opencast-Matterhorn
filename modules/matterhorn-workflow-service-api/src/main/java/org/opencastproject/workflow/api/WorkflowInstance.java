@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.security.api.User;
 
 import java.util.List;
 
@@ -63,6 +64,11 @@ public interface WorkflowInstance extends Configurable {
    * The parent workflow instance ID, if any
    */
   Long getParentId();
+  
+  /**
+   * The user that created this workflow
+   */
+  User getCreator();
 
   /**
    * Returns a copy of the {@link WorkflowOperationInstance}s that make up this workflow. In order to modify the

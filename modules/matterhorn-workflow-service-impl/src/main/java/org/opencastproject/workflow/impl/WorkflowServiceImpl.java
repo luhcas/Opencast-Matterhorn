@@ -170,7 +170,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
-  
+
   /** The organization directory service */
   protected OrganizationDirectoryService organizationDirectoryService = null;
 
@@ -496,8 +496,9 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
     if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
       throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
 
+    User currentUser = securityService.getUser();
     WorkflowInstance workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, parentWorkflowId,
-            properties);
+            currentUser, properties);
     workflowInstance = updateConfiguration(workflowInstance, properties);
 
     populateMediaPackageMetadata(mediaPackage);
