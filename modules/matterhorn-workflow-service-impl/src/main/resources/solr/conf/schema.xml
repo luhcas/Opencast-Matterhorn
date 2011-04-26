@@ -50,6 +50,7 @@
     <field name="seriesid" type="string" indexed="true" stored="false" multiValued="false" />
     <field name="seriestitle" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
     <field name="title" type="text" indexed="true" stored="false" multiValued="false" />
+    <field name="org" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="license" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="language" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="contributor" type="text" indexed="true" stored="false" multiValued="false" />

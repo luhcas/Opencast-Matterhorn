@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -52,11 +53,14 @@ public class WorkflowServiceSolrIndexTest {
 
   @Before
   public void setup() throws Exception {
+    SecurityService securityService = new SecurityServiceStub();
+    
     // Create a job with a workflow as its payload
     List<Job> jobs = new ArrayList<Job>();
     JaxbJob job = new JaxbJob();
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
     workflow.setId(123);
+    workflow.setCreator(securityService.getUser());
     workflow.setState(WorkflowState.INSTANTIATED);
     workflow.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
     job.setPayload(WorkflowParser.toXml(workflow));
@@ -78,7 +82,7 @@ public class WorkflowServiceSolrIndexTest {
     dao.solrRoot = PathSupport.concat("target", Long.toString(System.currentTimeMillis()));
     dao.setServiceRegistry(serviceRegistry);
     dao.setAuthorizationService(authzService);
-    dao.setSecurityService(new SecurityServiceStub());
+    dao.setSecurityService(securityService);
     dao.activate();
 }
 

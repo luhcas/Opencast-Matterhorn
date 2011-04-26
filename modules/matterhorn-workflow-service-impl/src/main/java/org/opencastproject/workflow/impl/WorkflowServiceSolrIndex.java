@@ -85,7 +85,7 @@ import java.util.concurrent.Executors;
 public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceSolrIndex.class);
+  protected static final Logger logger = LoggerFactory.getLogger(WorkflowServiceSolrIndex.class);
 
   /** Configuration key for a remote solr server */
   public static final String CONFIG_SOLR_URL = "org.opencastproject.workflow.solr.url";
@@ -94,7 +94,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   public static final String CONFIG_SOLR_ROOT = "org.opencastproject.workflow.solr.dir";
 
   /** Connection to the solr server. Solr is used to search for workflows. The workflow data are stored as xml files. */
-  private SolrServer solrServer = null;
+  protected SolrServer solrServer = null;
 
   /** The root directory to use for solr config and data files */
   protected String solrRoot = null;
@@ -119,6 +119,9 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
 
   /** The key in solr documents representing the workflow's ID */
   protected static final String ID_KEY = "id";
+
+  /** The key in solr documents representing the organization that owns this workflow instance */
+  private static final String ORG_KEY = "org";
 
   /** The key in solr documents representing the workflow's current state */
   private static final String STATE_KEY = "state";
@@ -242,7 +245,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
                   instancesInServiceRegistry);
           for (Job job : serviceRegistry.getJobs(WorkflowService.JOB_TYPE, null)) {
             WorkflowInstance instance = WorkflowParser.parseWorkflowInstance(job.getPayload());
-            index(instance);
+              index(instance);
           }
           logger.info("Finished populating the workflow search index with {} workflows.", instancesInServiceRegistry);
         }
@@ -364,7 +367,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     doc.addField(ID_KEY, instance.getId());
     doc.addField(WORKFLOW_DEFINITION_KEY, instance.getTemplate());
     doc.addField(STATE_KEY, instance.getState().toString());
-
+    doc.addField(ORG_KEY, instance.getCreator().getOrganization());
     String xml = WorkflowParser.toXml(instance);
     doc.addField(XML_KEY, xml);
 
