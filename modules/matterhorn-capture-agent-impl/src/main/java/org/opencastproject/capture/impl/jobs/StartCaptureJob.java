@@ -97,7 +97,7 @@ public class StartCaptureJob implements Job {
       String recordingID = null;
       synchronized (trigger) {
         CronExpression endOfCaptureCronExpression = new CronExpression(trigger.getCronExpression());
-        if(endOfCaptureCronExpression.getNextValidTimeAfter(new Date()) == null) {
+        if (endOfCaptureCronExpression.getNextValidTimeAfter(new Date()) == null) {
           logger.warn("startCapture is trying to fire after endtime {}, canceling.", trigger);
           return;
         }

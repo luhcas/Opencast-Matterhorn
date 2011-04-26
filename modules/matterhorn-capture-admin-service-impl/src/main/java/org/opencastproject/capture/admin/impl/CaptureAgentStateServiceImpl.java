@@ -237,8 +237,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     Agent req = agents.get(agentName);
     // if the agent is known set the state
     if (req != null) {
-      Properties temp = agents.get(agentName).getCapabilities();
-      return temp;
+      return agents.get(agentName).getCapabilities();
     } else {
       return null;
     }

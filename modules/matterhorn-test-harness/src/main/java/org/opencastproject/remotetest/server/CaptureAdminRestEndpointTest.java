@@ -65,7 +65,7 @@ public class CaptureAdminRestEndpointTest {
   
   @Test
   public void testGetAgents() throws Exception {
-    HttpGet get = new HttpGet(BASE_URL + "/capture-admin/agents");
+    HttpGet get = new HttpGet(BASE_URL + "/capture-admin/agents.xml");
     String xmlResponse = EntityUtils.toString(httpClient.execute(get).getEntity());
     Main.returnClient(httpClient);
     
@@ -82,9 +82,9 @@ public class CaptureAdminRestEndpointTest {
       try {
         httpClient = Main.getClient();
         String agentName = ((Element) agentList.item(i)).getElementsByTagName("name").item(0).getTextContent();
-        HttpGet agentGet = new HttpGet(get.getURI() + "/" + agentName);
+        HttpGet agentGet = new HttpGet(BASE_URL + "/capture-admin/agents/" + agentName);
         int agentResponse = httpClient.execute(agentGet).getStatusLine().getStatusCode();
-        assertEquals(agentResponse, HttpStatus.SC_OK);
+        assertEquals(HttpStatus.SC_OK, agentResponse);
       } finally {
         Main.returnClient(httpClient);
       }

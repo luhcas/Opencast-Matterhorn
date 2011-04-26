@@ -13,11 +13,15 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.scheduler.endpoint;
+package org.opencastproject.util;
 
 import java.util.Map.Entry;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -25,17 +29,21 @@ import javax.xml.bind.annotation.XmlType;
  * now looks <item key="key"><value>value</value></item>
  * 
  */
-@XmlType(name = "MetadataEntry")
-public class MetadataEntry implements Entry<String, String> {
+@XmlType(name = "hash-entry", namespace = "http://util.opencastproject.org")
+@XmlRootElement(name = "hash-entry", namespace = "http://util.opencastproject.org")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class HashEntry implements Entry<String, String> {
+
   @XmlAttribute(name = "key")
   protected String key;
-  // I would like this to be XmlValue but the JaxB parser the throws an exception
+
+  @XmlElement
   protected String value;
 
-  public MetadataEntry() {
+  public HashEntry() {
   }
 
-  public MetadataEntry(String key, String value) {
+  public HashEntry(String key, String value) {
     this.key = key;
     this.value = value;
   }

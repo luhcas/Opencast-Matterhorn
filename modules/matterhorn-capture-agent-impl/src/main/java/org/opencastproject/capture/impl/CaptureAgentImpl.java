@@ -96,6 +96,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,7 +152,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /** Pipeline for confidence monitoring while agent is idle */
   private Pipeline confidencePipe = null;
 
-  /** Keeps the recordings which have not been succesfully ingested yet. **/
+  /** Keeps the recordings which have not been successfully ingested yet. **/
   private Map<String, AgentRecording> pendingRecordings = new ConcurrentHashMap<String, AgentRecording>();
 
   /** Keeps the recordings which have been successfully ingested. */
@@ -1146,7 +1147,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @see org.opencastproject.capture.api.StateService#getKnownRecordings()
    */
   public Map<String, AgentRecording> getKnownRecordings() {
-    return pendingRecordings;
+    HashMap<String, AgentRecording> complete = new HashMap<String, AgentRecording>();
+    complete.putAll(pendingRecordings);
+    complete.putAll(completedRecordings);
+    return complete;
   }
 
   /**

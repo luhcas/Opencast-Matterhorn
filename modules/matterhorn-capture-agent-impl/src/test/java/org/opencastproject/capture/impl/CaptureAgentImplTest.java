@@ -96,6 +96,9 @@ public class CaptureAgentImplTest {
     Assert.assertNull(agent.getAgentState());
     agent.activate(null);
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
+    p.clear();
+    //NB:  agent's .updated() function takes a Quartz properties file, *NOT* the agent's.  Hence the load here.
+    p = loadProperties("config/scheduler.properties");
     agent.updated(p);
     // setup testing properties
     properties = new Properties();
@@ -314,7 +317,8 @@ public class CaptureAgentImplTest {
     agent.getSchedulerImpl().stopScheduler();
     agent.loadRecordingsFromDisk();
 
-    Assert.assertEquals(10, agent.getKnownRecordings().size());
+    Assert.assertEquals(12, agent.getKnownRecordings().size());
+    Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.CAPTURE_ERROR));
     Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.CAPTURE_FINISHED));
     Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.CAPTURING));
     Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.MANIFEST));
@@ -324,10 +328,11 @@ public class CaptureAgentImplTest {
     Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.COMPRESSING_ERROR));
     Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.UPLOADING));
     Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.UPLOAD_ERROR));
-    Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.UPLOADING));
+    Assert.assertNotNull(agent.getKnownRecordings().get(id)); //This is the recording that was actually started
+    Assert.assertNotNull(agent.getKnownRecordings().get(id + "-" + RecordingState.UPLOAD_FINISHED));
 
     agent.loadRecordingsFromDisk();
-    Assert.assertEquals(10, agent.getKnownRecordings().size());
+    Assert.assertEquals(12, agent.getKnownRecordings().size());
   }
 
   @Test
@@ -353,7 +358,7 @@ public class CaptureAgentImplTest {
     });    
     Assert.assertFalse("The configuration manager is just created it shouldn't be updated yet.", agent.isRefreshed());
     Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
-    agent.updated(properties);
+    agent.updated(loadProperties("config/scheduler.properties"));
     waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override
@@ -421,7 +426,7 @@ public class CaptureAgentImplTest {
     });
     Assert.assertTrue("The config manager is now updated so refreshed should be true.", agent.isRefreshed());
     Assert.assertFalse("The agent should still not be updated.", agent.isUpdated());
-    agent.updated(properties);
+    agent.updated(loadProperties("config/scheduler.properties"));
     waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override
@@ -475,7 +480,7 @@ public class CaptureAgentImplTest {
     });
     Assert.assertTrue("The configuration manager is fully up, so it should refresh the agent.", agent.isRefreshed());
     Assert.assertFalse("The agent is just created it shouldn't be updated either", agent.isUpdated());
-    agent.updated(properties);
+    agent.updated(loadProperties("config/scheduler.properties"));
     waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override
@@ -500,7 +505,7 @@ public class CaptureAgentImplTest {
     // Create the configuration manager
     config = new ConfigurationManager();
     agent = new CaptureAgentImpl();
-    agent.updated(properties);
+    agent.updated(loadProperties("config/scheduler.properties"));
     waiter = new WaitForState();
     waiter.sleepWait(new CheckState() {
       @Override

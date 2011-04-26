@@ -37,14 +37,11 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -167,9 +164,9 @@ public class CaptureAgentStateRestService {
   }
 
   @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("agents")
-  public List<AgentStateUpdate> getKnownAgents() {
+  @Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
+  @Path("agents.{type}")
+  public Response getKnownAgents(@PathParam("type") String type) {
     logger.debug("Returning list of known agents...");
     LinkedList<AgentStateUpdate> update = new LinkedList<AgentStateUpdate>();
     if (service != null) {
@@ -177,28 +174,18 @@ public class CaptureAgentStateRestService {
       logger.debug("Agents: {}", data);
       // Run through and build a map of updates (rather than states)
       for (Entry<String, Agent> e : data.entrySet()) {
-        AgentStateUpdate updateItem = new AgentStateUpdate(e.getValue());
-        Properties props = service.getAgentCapabilities(updateItem.getName());
-        Iterator<String> propKeys = props.stringPropertyNames().iterator();
-        Set<String> devices = new HashSet<String>();
-        while (propKeys.hasNext()) {
-          String key = propKeys.next();
-          String[] parts = key.split("\\.");
-          if ((parts[1].equalsIgnoreCase("device")) && (!parts[2].equalsIgnoreCase("timezone"))) {
-            // FIXME not nice the whole thing here
-            devices.add(parts[2]);
-          }
-        }
-        Iterator<String> deviceIter = devices.iterator();
-        while (deviceIter.hasNext()) {
-          updateItem.addCapability(deviceIter.next());
-        }
-        update.add(updateItem);
+        update.add(new AgentStateUpdate(e.getValue()));
       }
     } else {
       logger.info("Service was null for getKnownAgents");
     }
-    return update;
+    if (type == null || "xml".equals(type)) {
+      return Response.ok(new AgentStateUpdateList(update)).type(MediaType.TEXT_XML).build();
+    } else if ("json".equals(type)) {
+      return Response.ok(new AgentStateUpdateList(update)).type(MediaType.APPLICATION_JSON).build();
+    } else {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
   }
 
   @GET

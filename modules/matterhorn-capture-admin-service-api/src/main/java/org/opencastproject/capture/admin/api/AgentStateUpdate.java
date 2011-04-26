@@ -15,13 +15,16 @@
  */
 package org.opencastproject.capture.admin.api;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.Properties;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import org.opencastproject.util.HashtableAdapter;
 
 /**
  * A representation of an agent which stores its name, state and time-since-last-update value.
@@ -59,8 +62,8 @@ public class AgentStateUpdate {
   @XmlElement(name = "time-since-last-update")
   private Long timeSinceLastUpdate;
 
-  @XmlElement(name = "capabilities")
-  private String capabilities;
+  @XmlJavaTypeAdapter(HashtableAdapter.class)
+  private Properties capabilities;
 
   /**
    * Required zero-arg. constructor. Do not use.
@@ -78,7 +81,7 @@ public class AgentStateUpdate {
     name = a.getName();
     state = a.getState();
     url = a.getUrl();
-    capabilities = "";
+    capabilities = a.getCapabilities();
     timeSinceLastUpdate = System.currentTimeMillis() - a.getLastHeardFrom();
   }
 
@@ -108,30 +111,13 @@ public class AgentStateUpdate {
   public String getState() {
     return state;
   }
-  
-  public void addCapability(String capability) {
-    if (StringUtils.isBlank(capability))
-      this.capabilities = capability;
-    else
-      StringUtils.join(new String[] {this.capabilities, capability}, ' ');
-  }
-
-  /**
-   * Sets the agent capabilities. If there is more than one capability, simply put spaces in between them.
-   * 
-   * @param capabilities
-   *          the capabilities to set
-   */
-  public void setCapabilities(String capabilities) {
-    this.capabilities = capabilities;
-  }
 
   /**
    * Returns the agent capabilities.
    * 
    * @return the capabilities
    */
-  public String getCapabilities() {
+  public Properties getCapabilities() {
     return capabilities;
   }
 

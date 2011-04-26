@@ -29,6 +29,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
@@ -316,5 +317,18 @@ public class CaptureRestService {
     } catch (Exception e) {
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("capabilities")
+  public Response getCapabilities() throws IOException {
+    if (service == null) {
+      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Capture Agent is unavailable, please wait...").build();
+    }
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    service.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + service.getAgentName());
+    return Response.ok(baos.toString()).build();
   }
 }
