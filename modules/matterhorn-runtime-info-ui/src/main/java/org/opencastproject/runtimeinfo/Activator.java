@@ -144,8 +144,9 @@ public class Activator extends HttpServlet implements BundleActivator {
           }
           Produces produces = (Produces) m.getAnnotation(Produces.class);
           Path path = (Path) m.getAnnotation(Path.class);
+          Class<?> returnType = m.getReturnType();
           if ((rq != null) && (httpMethodString != null) && (path != null)) {
-            data.addEndpoint(rq, produces, httpMethodString, path);
+            data.addEndpoint(rq, returnType, produces, httpMethodString, path);
           }
         }
         String template = DocUtil.loadTemplate("/ui/restdocs/template2.xhtml");

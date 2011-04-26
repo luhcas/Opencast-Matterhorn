@@ -20,6 +20,9 @@ import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.SchemaOutputResolver;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 
@@ -52,6 +55,26 @@ public final class JaxbXmlSchemaGenerator {
       }
     });
     return writer.toString();
+  }
+
+  /**
+   * Builds an xml schema. If the class is not XmlType or XmlRootElement annotated, return null;
+   * 
+   * @param clazz
+   *          the jaxb annotated class
+   * @return the xml as a string, or null if the class can not be transformed to a schema
+   */
+  public static String getXmlSchema(Class<?> clazz) {
+    if (clazz == null || (!clazz.isAnnotationPresent(XmlType.class) && !clazz.isAnnotationPresent(XmlRootElement.class)
+            && !clazz.isAnnotationPresent(XmlJavaTypeAdapter.class))) {
+      return null;
+    }
+    try {
+      JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
+      return getXmlSchema(jaxbContext);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
 }

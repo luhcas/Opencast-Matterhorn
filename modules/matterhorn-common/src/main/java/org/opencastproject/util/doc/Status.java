@@ -18,6 +18,7 @@ package org.opencastproject.util.doc;
 /**
  * Represents one possible status result for an endpoint
  */
+@Deprecated
 public class Status {
   /**
    * @param desc

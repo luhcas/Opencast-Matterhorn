@@ -18,6 +18,7 @@ package org.opencastproject.util.doc;
 import java.util.List;
 import java.util.Vector;
 
+@Deprecated
 public class RestEndpointHolder {
   private String name;
   private String title;

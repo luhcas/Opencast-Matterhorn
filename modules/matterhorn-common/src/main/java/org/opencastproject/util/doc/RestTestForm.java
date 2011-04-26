@@ -18,6 +18,7 @@ package org.opencastproject.util.doc;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class RestTestForm {
   /**
    * Create a form which indicates that the system should generate a test form using the current endpoint data

@@ -17,6 +17,7 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.endpoint.WorkflowRestService;
@@ -83,8 +84,7 @@ public class WorkflowRestEndpointTest {
       // expected
     }
 
-    Response xmlResponse = restService.getWorkflowAsXml(1);
-    Assert.assertEquals(200, xmlResponse.getStatus());
-    Assert.assertEquals(workflow, xmlResponse.getEntity());
+    WorkflowInstance xmlResponse = restService.getWorkflowAsXml(1);
+    Assert.assertNotNull(xmlResponse);
   }
 }

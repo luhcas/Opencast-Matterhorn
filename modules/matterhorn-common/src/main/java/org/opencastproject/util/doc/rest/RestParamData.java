@@ -15,6 +15,7 @@
  */
 package org.opencastproject.util.doc.rest;
 
+import org.opencastproject.util.JaxbXmlSchemaGenerator;
 import org.opencastproject.util.doc.DocData;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -34,6 +35,7 @@ public final class RestParamData {
   private String defaultValue;
   private String type;
   private String description;
+  private String xmlSchema;
   private boolean required = false;
   private boolean path = false; // This will be true for a path parameter.
 
@@ -53,7 +55,8 @@ public final class RestParamData {
    */
   public RestParamData(RestParameter restParam, RestDocData restDocData) {
     this(restDocData.processMacro(restParam.name()), Type.valueOf(restParam.type().name()), restDocData
-            .processMacro(restParam.defaultValue()), restDocData.processMacro(restParam.description()));
+            .processMacro(restParam.defaultValue()), restDocData.processMacro(restParam.description()),
+            JaxbXmlSchemaGenerator.getXmlSchema(restParam.jaxbClass()));
   }
 
   /**
@@ -67,10 +70,13 @@ public final class RestParamData {
    *          [optional] the default value which is used if this param is missing
    * @param description
    *          [optional] the description to display with this param
+   * @param xmlSchema
+   *          [optional] the XML schema to display for this param
    * @throws IllegalArgumentException
    *           when name is null or non-alphanumeric
    */
-  public RestParamData(String name, Type type, String defaultValue, String description) throws IllegalArgumentException {
+  public RestParamData(String name, Type type, String defaultValue, String description, String xmlSchema)
+          throws IllegalArgumentException {
     if (!DocData.isValidName(name)) {
       throw new IllegalArgumentException("Name must not be null and must be alphanumeric.");
     }
@@ -89,6 +95,7 @@ public final class RestParamData {
     } else {
       this.description = description;
     }
+    this.xmlSchema = xmlSchema;
   }
 
   /**
@@ -145,21 +152,19 @@ public final class RestParamData {
   }
 
   /**
-   * Return a HTML-escaped version of the default value of this parameter. If the length of the default value is longer
-   * than 20, it is replaced by a string "Hover to show value". When the mouse points to this string, the long default
-   * value is shown.
-   * 
-   * @return a HTML-escaped version of the default value of this parameter
+   * @return an HTML formatted version of the default value for display
    */
-  public String getDefaultValueHtml() {
-    if (defaultValue != null) {
-      if (defaultValue.length() > 20) {
-        return "<strong title=\"" + StringEscapeUtils.escapeHtml(defaultValue) + "\">Hover to show value</strong>";
-      }
-    }
+  public String getEscapedDefaultValue() {
     return StringEscapeUtils.escapeHtml(defaultValue);
   }
 
+  /**
+   * @return an HTML formatted version of the xml schema for display
+   */
+  public String getEscapedXmlSchema() {
+    return StringEscapeUtils.escapeXml(xmlSchema);
+  }
+  
   /**
    * Get the type of this parameter.
    * 
@@ -233,5 +238,20 @@ public final class RestParamData {
   @Override
   public String toString() {
     return "PAR:" + name + ":(" + type + "):" + defaultValue;
+  }
+
+  /**
+   * @return the xmlSchema
+   */
+  public String getXmlSchema() {
+    return xmlSchema;
+  }
+
+  /**
+   * @param xmlSchema
+   *          the xmlSchema to set
+   */
+  public void setXmlSchema(String xmlSchema) {
+    this.xmlSchema = xmlSchema;
   }
 }

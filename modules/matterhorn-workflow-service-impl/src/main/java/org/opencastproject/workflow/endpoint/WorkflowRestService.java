@@ -167,7 +167,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
     }
   }
 
-  protected String getSampleMediaPackage() {
+  public String getSampleMediaPackage() {
     String samplesUrl = serverUrl + "/workflow/samples";
 
     return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n"
@@ -213,7 +213,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
             + "  </metadata>\n" + "</ns2:mediapackage>";
   }
 
-  protected String getSampleWorkflowDefinition() throws IOException {
+  public String getSampleWorkflowDefinition() throws IOException {
     InputStream is = null;
     try {
       is = getClass().getResourceAsStream("/sample/compose-distribute-publish.xml");
@@ -243,20 +243,15 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @Produces(MediaType.TEXT_XML)
   @Path("/statistics.xml")
   @RestQuery(name = "statisticsasxml", description = "Returns the workflow statistics as XML", returnDescription = "An XML representation of the workflow statistics.", reponses = { @RestResponse(responseCode = SC_OK, description = "An XML representation of the workflow statistics.") })
-  public Response getStatisticsAsXml() {
-    try {
-      WorkflowStatistics statistics = service.getStatistics();
-      return Response.ok(statistics).build();
-    } catch (WorkflowDatabaseException e) {
-      throw new WebApplicationException(e);
-    }
+  public WorkflowStatistics getStatisticsAsXml() throws WorkflowDatabaseException {
+    return service.getStatistics();
   }
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/statistics.json")
   @RestQuery(name = "statisticsasjson", description = "Returns the workflow statistics as JSON", returnDescription = "A JSON representation of the workflow statistics.", reponses = { @RestResponse(responseCode = SC_OK, description = "A JSON representation of the workflow statistics.") })
-  public Response getStatisticsAsJson() {
+  public WorkflowStatistics getStatisticsAsJson() throws WorkflowDatabaseException {
     return getStatisticsAsXml();
   }
 
@@ -538,14 +533,9 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @RestQuery(name = "workflowasxml", description = "Get a specific workflow instance.", returnDescription = "An XML representation of a workflow instance", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "The workflow instance identifier", type = STRING) }, reponses = {
           @RestResponse(responseCode = SC_OK, description = "An XML representation of the workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No workflow instance with that identifier exists.") })
-  public Response getWorkflowAsXml(@PathParam("id") long id) throws NotFoundException {
-    WorkflowInstance instance;
-    try {
-      instance = service.getWorkflowById(id);
-      return Response.ok(instance).build();
-    } catch (WorkflowDatabaseException e) {
-      throw new WebApplicationException(e);
-    }
+  public WorkflowInstance getWorkflowAsXml(@PathParam("id") long id) throws WorkflowDatabaseException,
+          NotFoundException {
+    return service.getWorkflowById(id);
   }
 
   @GET
@@ -554,7 +544,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @RestQuery(name = "workflowasjson", description = "Get a specific workflow instance.", returnDescription = "A JSON representation of a workflow instance", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "The workflow instance identifier", type = STRING) }, reponses = {
           @RestResponse(responseCode = SC_OK, description = "A JSON representation of the workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No workflow instance with that identifier exists.") })
-  public Response getWorkflowAsJson(@PathParam("id") long id) throws NotFoundException {
+  public WorkflowInstance getWorkflowAsJson(@PathParam("id") long id) throws WorkflowDatabaseException,
+          NotFoundException {
     return getWorkflowAsXml(id);
   }
 
@@ -562,8 +553,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @Path("start")
   @Produces(MediaType.TEXT_XML)
   @RestQuery(name = "start", description = "Start a new workflow instance.", returnDescription = "An XML representation of the new workflow instance", restParameters = {
-          @RestParameter(name = "definition", isRequired = true, description = "The XML representation of a workflow definition", type = TEXT, defaultValue = "${this.sampleWorkflowDefinition}"),
-          @RestParameter(name = "mediapackage", isRequired = true, description = "The XML representation of a mediapackage", type = TEXT, defaultValue = "${this.sampleMediaPackage}"),
+          @RestParameter(name = "definition", isRequired = true, description = "The XML representation of a workflow definition", type = TEXT, defaultValue = "${this.sampleWorkflowDefinition}", jaxbClass = WorkflowDefinitionImpl.class),
+          @RestParameter(name = "mediapackage", isRequired = true, description = "The XML representation of a mediapackage", type = TEXT, defaultValue = "${this.sampleMediaPackage}", jaxbClass = MediaPackageImpl.class),
           @RestParameter(name = "parent", isRequired = false, description = "An optional parent workflow instance identifier", type = STRING),
           @RestParameter(name = "properties", isRequired = false, description = "An optional set of key=value\\n properties", type = TEXT) }, reponses = { @RestResponse(responseCode = SC_OK, description = "An XML representation of the new workflow instance.") })
   public WorkflowInstanceImpl start(@FormParam("definition") String workflowDefinitionXml,
@@ -607,13 +598,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @RestQuery(name = "stop", description = "Stops a workflow instance.", returnDescription = "An XML representation of the stopped workflow instance", restParameters = { @RestParameter(name = "id", isRequired = true, description = "The workflow instance identifier", type = STRING) }, reponses = {
           @RestResponse(responseCode = SC_OK, description = "An XML representation of the stopped workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No running workflow instance with that identifier exists.") })
-  public Response stop(@FormParam("id") long workflowInstanceId) throws NotFoundException {
-    try {
-      WorkflowInstance workflow = service.stop(workflowInstanceId);
-      return Response.ok(workflow).build();
-    } catch (WorkflowException e) {
-      throw new WebApplicationException(e);
-    }
+  public WorkflowInstance stop(@FormParam("id") long workflowInstanceId) throws WorkflowException, NotFoundException {
+    return service.stop(workflowInstanceId);
   }
 
   @POST

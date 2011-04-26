@@ -159,7 +159,7 @@
       <th class="method_important" scope="row">Required (form) params:</th>
       <td>
         <#list endpoint.requiredParams as param>
-        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValueHtml}</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
+        <tt>${param.name}<#if param.defaultValue??>=${param.defaultValueHtml}</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param.xmlSchema??>${param.xmlSchema}</#if><#if param_has_next> <br/></#if>
         </#list>
       </td>
     </tr>
@@ -206,6 +206,14 @@
         </#if>
       </td>
     </tr>
+
+    <#if (endpoint.returnTypeSchema??)>
+    <tr class="method">
+      <th scope="row">Schema:</th>
+      <td><pre>${endpoint.returnTypeSchema}</pre></td>
+    </tr>
+    </#if>
+    
     <#if (endpoint.notes?size > 0)>
     <tr class="method">
       <th scope="row">Notes:</th>

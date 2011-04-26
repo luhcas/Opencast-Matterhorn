@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Vector;
 import org.apache.commons.lang.StringEscapeUtils;
 
+@Deprecated
 public class RestEndpoint {
   
   public static enum Type {

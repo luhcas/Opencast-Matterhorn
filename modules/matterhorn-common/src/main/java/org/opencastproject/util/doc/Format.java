@@ -18,6 +18,7 @@ package org.opencastproject.util.doc;
 /**
  * Represents one possible output format for a REST endpoint
  */
+@Deprecated
 public final class Format {
   public static final String JSON = "json";
   public static final String XML = "xml";

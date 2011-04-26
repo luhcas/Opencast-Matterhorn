@@ -22,9 +22,25 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class StatusData {
 
+  /**
+   * The HTTP response code.
+   */
   private int code;
+
+  /**
+   * The name of this status.
+   */
   private String name;
+
+  /**
+   * The description for this HTTP response.
+   */
   private String description;
+
+  /**
+   * The XML schema for the response, if applicable.
+   */
+  private String xmlSchema;
 
   /**
    * A constructor that takes a RestResponse annotation type object and constructs a StatusData object.
@@ -36,6 +52,33 @@ public class StatusData {
    */
   public StatusData(RestResponse restResponse, RestDocData restDocData) throws IllegalArgumentException {
     this(restResponse.responseCode(), restDocData.processMacro(restResponse.description()));
+  }
+
+  /**
+   * A constructor that takes a HTTP response code and a description for this response, and an XML schema for the
+   * response and constructs a StatusData object. A reference of response code constants can be found in <a
+   * href="http://download.oracle.com/javaee/6/api/javax/servlet/http/HttpServletResponse.html"
+   * >javax.servlet.http.HttpServletResponse</a>.
+   * 
+   * @param code
+   *          a HTTP response code
+   * @param description
+   *          a description of the response
+   * @throws IllegalArgumentException
+   *           if code is out of range (e.g. <100 or > 1100)
+   */
+  public StatusData(int code, String description, String xmlSchema) throws IllegalArgumentException {
+    if (code < 100 || code > 1100) {
+      throw new IllegalArgumentException("Code (" + code + ") is outside of the valid range: 100-1100.");
+    }
+    this.code = code;
+    name = findName(code);
+    if (description.isEmpty()) {
+      this.description = null;
+    } else {
+      this.description = description;
+    }
+    this.xmlSchema = xmlSchema;
   }
 
   /**
@@ -52,16 +95,7 @@ public class StatusData {
    *           if code is out of range (e.g. <100 or > 1100)
    */
   public StatusData(int code, String description) throws IllegalArgumentException {
-    if (code < 100 || code > 1100) {
-      throw new IllegalArgumentException("Code (" + code + ") is outside of the valid range: 100-1100.");
-    }
-    this.code = code;
-    name = findName(code);
-    if (description.isEmpty()) {
-      this.description = null;
-    } else {
-      this.description = description;
-    }
+    this(code, description, null);
   }
 
   @Override
@@ -240,5 +274,21 @@ public class StatusData {
     }
     return result;
   }
+
   // CHECKSTYLE:ON
+
+  /**
+   * @return the xmlSchema
+   */
+  public String getXmlSchema() {
+    return xmlSchema;
+  }
+
+  /**
+   * @param xmlSchema
+   *          the xmlSchema to set
+   */
+  public void setXmlSchema(String xmlSchema) {
+    this.xmlSchema = xmlSchema;
+  }
 }

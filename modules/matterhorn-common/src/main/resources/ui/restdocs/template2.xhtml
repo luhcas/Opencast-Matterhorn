@@ -107,8 +107,8 @@
 </head>
 <body>
 <div style="margin-top: .5em">
-	<a href="../../../welcome.html">
-		<h1 style="color: rgb(246, 146, 30); font-size:138.5%;"><img src="../../../img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn" border=0>&nbsp;&nbsp;Opencast Matterhorn</h1>
+	<a href="/welcome.html">
+		<h1 style="color: rgb(246, 146, 30); font-size:138.5%;"><img src="/img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn" border=0>&nbsp;&nbsp;Opencast Matterhorn</h1>
 	</a>
 </div>
 
@@ -159,7 +159,18 @@
       <th class="method_important" scope="row">Required (form) params:</th>
       <td>
         <#list endpoint.requiredParams as param>
-        <tt>${param.name}<#if param.defaultValue??>&#40;Default value=${param.defaultValueHtml}&#41;</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
+        <tt>
+          ${param.name}: ${param.description!""}
+          <#if param.xmlSchema??>
+            <div>
+              <a href="#" class="show_form_link">XML Schema</a>
+              <div class="hidden_form hidden">
+                <#if param.escapedXmlSchema??><pre>${param.escapedXmlSchema}</pre></#if>
+              </div>
+              <a href="#" class="hide_form_link hidden">Hide</a>
+            </div>
+          </#if>
+        </tt><#if param_has_next> <br/></#if>
         </#list>
       </td>
     </tr>
@@ -206,6 +217,20 @@
         </#if>
       </td>
     </tr>
+    <#if (endpoint.returnTypeSchema??)>
+      <tr class="method">
+        <th scope="row">Returned Entity Schema:</th>
+        <td>
+          <div>
+            <a href="#" class="show_form_link">Click to view</a>
+            <div class="hidden_form hidden">
+              <#if endpoint.escapedReturnTypeSchema??><pre>${endpoint.escapedReturnTypeSchema}</pre></#if>
+            </div>
+            <a href="#" class="hide_form_link hidden">Hide</a>
+          </div>
+        </td>
+      </tr>
+    </#if>
     <#if (endpoint.notes?size > 0)>
     <tr class="method">
       <th scope="row">Notes:</th>

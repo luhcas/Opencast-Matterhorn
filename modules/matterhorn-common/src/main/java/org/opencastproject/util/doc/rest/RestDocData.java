@@ -293,6 +293,10 @@ public class RestDocData extends DocData {
    * 
    * @param restQuery
    *          the RestQuery annotation type storing information of an endpoint
+   * @param returnType
+   *          the return type for this endpoint. If this is {@link javax.xml.bind.annotation.XmlRootElement} or
+   *          {@link javax.xml.bind.annotation.XmlRootElement}, the XML schema for the class will be made available to
+   *          clients
    * @param produces
    *          the return type(s) of this endpoint, values should be constants from <a
    *          href="http://jackson.codehaus.org/javadoc/jax-rs/1.0/javax/ws/rs/core/MediaType.html"
@@ -303,10 +307,11 @@ public class RestDocData extends DocData {
    * @param path
    *          the path of this endpoint
    */
-  public void addEndpoint(RestQuery restQuery, Produces produces, String httpMethodString, Path path) {
+  public void addEndpoint(RestQuery restQuery, Class<?> returnType, Produces produces, String httpMethodString,
+          Path path) {
     String pathValue = path.value().startsWith("/") ? path.value() : "/" + path.value();
-    RestEndpointData endpoint = new RestEndpointData(processMacro(restQuery.name()), httpMethodString, pathValue,
-            processMacro(restQuery.description()));
+    RestEndpointData endpoint = new RestEndpointData(returnType, this.processMacro(restQuery.name()), httpMethodString,
+            pathValue, processMacro(restQuery.description()));
     // Add return description if needed
     if (!restQuery.returnDescription().isEmpty()) {
       endpoint.addNote("Return value description: " + processMacro(restQuery.returnDescription()));

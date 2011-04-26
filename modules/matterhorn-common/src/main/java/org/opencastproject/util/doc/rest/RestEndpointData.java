@@ -15,12 +15,14 @@
  */
 package org.opencastproject.util.doc.rest;
 
+import org.opencastproject.util.JaxbXmlSchemaGenerator;
 import org.opencastproject.util.doc.DocData;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-import org.apache.commons.lang.StringEscapeUtils;
 
 public class RestEndpointData implements Comparable<RestEndpointData> {
 
@@ -33,7 +35,7 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
   /**
    * The HTTP method used to invoke the endpoint.
    */
-  private String method;
+  private String httpMethod;
 
   /**
    * The path for this endpoint (e.g. /search OR /add/{id}).
@@ -85,10 +87,15 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
    */
   private RestFormData form;
 
+  /** The XML schema for data returned by this endpoint. */
+  private String returnTypeSchema = null;
+
   /**
    * Create a new basic endpoint, you should use the add methods to fill in the rest of the information about the
    * endpoint data
    * 
+   * @param returnType
+   *          the endpoint's return type
    * @param name
    *          the endpoint's name (this should be unique in the same type of endpoints)
    * @param method
@@ -100,18 +107,20 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
    * @throws IllegalArgumentException
    *           if name is null, name is not alphanumeric, method is null, path is null or path is not valid.
    */
-  public RestEndpointData(String name, String method, String path, String description) throws IllegalArgumentException {
+  public RestEndpointData(Class<?> returnType, String name, String httpMethod, String path, String description)
+          throws IllegalArgumentException {
     if (!DocData.isValidName(name)) {
       throw new IllegalArgumentException("Name must not be null and must be alphanumeric.");
     }
-    if ((method == null) || (method.isEmpty())) {
+    if ((httpMethod == null) || (httpMethod.isEmpty())) {
       throw new IllegalArgumentException("Method must not be null and must not be empty.");
     }
     if (!RestDocData.isValidPath(path)) {
       throw new IllegalArgumentException("Path must not be null and must look something like /a/b/{c}.");
     }
+    this.returnTypeSchema = JaxbXmlSchemaGenerator.getXmlSchema(returnType);
     this.name = name;
-    this.method = method.toUpperCase();
+    this.httpMethod = httpMethod.toUpperCase();
     this.path = path;
     this.description = description;
   }
@@ -123,8 +132,8 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
    */
   @Override
   public String toString() {
-    return "ENDP:" + name + ":" + method + " " + path + " :body=" + bodyParam + " :req=" + requiredParams + " :opt="
-            + optionalParams + " :formats=" + formats + " :status=" + statuses + " :form=" + form;
+    return "ENDP:" + name + ":" + httpMethod + " " + path + " :body=" + bodyParam + " :req=" + requiredParams
+            + " :opt=" + optionalParams + " :formats=" + formats + " :status=" + statuses + " :form=" + form;
   }
 
   /**
@@ -138,7 +147,7 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
   public RestParamData addBodyParam(RestParameter restParam, RestDocData restDocData) {
     RestParamData.Type type = RestParamData.Type.valueOf(restParam.type().name());
     RestParamData param = new RestParamData("BODY", type, restDocData.processMacro(restParam.defaultValue()),
-            restDocData.processMacro(restParam.description()));
+            restDocData.processMacro(restParam.description()), null);
     param.setRequired(true);
     bodyParam = param;
     return param;
@@ -265,7 +274,7 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
    * @return true if this endpoint method is GET, otherwise false
    */
   public boolean isGetMethod() {
-    return "GET".equals(method);
+    return "GET".equals(httpMethod);
   }
 
   /**
@@ -314,7 +323,7 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
    * @return the name of HTTP method used to invoke this endpoint
    */
   public String getMethod() {
-    return method;
+    return httpMethod;
   }
 
   /**
@@ -437,6 +446,17 @@ public class RestEndpointData implements Comparable<RestEndpointData> {
   @Override
   public int compareTo(RestEndpointData otherEndpoint) {
     return name.compareToIgnoreCase(otherEndpoint.name);
+  }
+
+  /**
+   * @return the XML schema for this endpoint's return type
+   */
+  public String getReturnTypeSchema() {
+    return returnTypeSchema;
+  }
+
+  public String getEscapedReturnTypeSchema() {
+    return StringEscapeUtils.escapeXml(returnTypeSchema);
   }
 
 }

@@ -147,7 +147,7 @@ public class RuntimeInfo {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("components.json")
-  @RestQuery(name = "services", description = "List the REST services and user interfaces running on this host", pathParameters = {}, restParameters = {}, reponses = { @RestResponse(description = "The components running on this host", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
+  @RestQuery(name = "services", description = "List the REST services and user interfaces running on this host", reponses = { @RestResponse(description = "The components running on this host", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   @SuppressWarnings("unchecked")
   public String getRuntimeInfo() {
     JSONObject json = new JSONObject();
@@ -161,7 +161,7 @@ public class RuntimeInfo {
   @GET
   @Path("me.json")
   @Produces(MediaType.APPLICATION_JSON)
-  @RestQuery(name = "me", description = "Information about the curent user", pathParameters = {}, restParameters = {}, reponses = { @RestResponse(description = "Returns information about the current user", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
+  @RestQuery(name = "me", description = "Information about the curent user", reponses = { @RestResponse(description = "Returns information about the current user", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   @SuppressWarnings("unchecked")
   public String getMyInfo() {
     JSONObject json = new JSONObject();

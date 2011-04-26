@@ -3,6 +3,11 @@ package org.opencastproject.util.doc.rest;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HttpMethod;
@@ -10,11 +15,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This test class tests the functionality of annotations used for documenting REST endpoints.
@@ -162,9 +162,9 @@ public class RestDocsAnnotationTest {
           }
         }
 
-        RestEndpointData endpoint = new RestEndpointData(restDocData.processMacro(restQueryAnnotation.name()),
-                httpMethodString, "/" + pathAnnotation.value(), restDocData.processMacro(restQueryAnnotation
-                        .description()));
+        RestEndpointData endpoint = new RestEndpointData(testMethod.getReturnType(),
+                restDocData.processMacro(restQueryAnnotation.name()), httpMethodString, "/" + pathAnnotation.value(),
+                restDocData.processMacro(restQueryAnnotation.description()));
         if (!restQueryAnnotation.returnDescription().isEmpty()) {
           endpoint.addNote("Return value description: "
                   + restDocData.processMacro(restQueryAnnotation.returnDescription()));
@@ -290,7 +290,6 @@ public class RestDocsAnnotationTest {
           "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed" }, abstractText = "This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.")
   public class TestServletSample {
 
-    @SuppressWarnings("unused")
     @POST
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -305,7 +304,6 @@ public class RestDocsAnnotationTest {
       return 0;
     }
 
-    @SuppressWarnings("unused")
     @POST
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.MULTIPART_FORM_DATA)

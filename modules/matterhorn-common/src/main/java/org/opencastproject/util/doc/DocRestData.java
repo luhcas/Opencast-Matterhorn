@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
  * This is the document model class which holds the data about a set of rest endpoints, build this one time and reuse it
  * whenever you need to generate rest documentation
  */
+@Deprecated
 public class DocRestData extends DocData {
 
   public static final String FORMAT_KEY = "{FORMAT}";

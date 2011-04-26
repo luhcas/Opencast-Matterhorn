@@ -25,6 +25,7 @@ import java.util.Vector;
 /**
  * Represents a single parameter for an endpoint (required or optional)
  */
+@Deprecated
 public final class Param {
   public static enum Type {
     TEXT, STRING, BOOLEAN, FILE, ENUM

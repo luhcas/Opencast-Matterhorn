@@ -52,6 +52,12 @@ public @interface RestParameter {
   Type type();
 
   /**
+   * @return the {@link javax.xml.bind.annotation.XmlType} or {@link javax.xml.bind.annotation.XmlRootElement} annotated
+   *         class that models this parameter.
+   */
+  Class<?> jaxbClass() default Object.class;
+
+  /**
    * @return a boolean indicating whether this parameter is required.
    */
   boolean isRequired();
