@@ -236,7 +236,7 @@
       id="compose"
       fail-on-error="false"
       exception-handler-workflow="error"
-      description="Encoding presentation (screen) to flash audio download">
+      description="Encoding presenter (screen) to flash audio download">
       <configurations>
         <configuration key="source-flavor">presenter/trimmed</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
