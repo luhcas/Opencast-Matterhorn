@@ -112,7 +112,7 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @Override
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     if (properties == null)
       return;

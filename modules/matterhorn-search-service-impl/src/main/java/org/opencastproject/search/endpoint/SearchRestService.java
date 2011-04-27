@@ -17,19 +17,14 @@ package org.opencastproject.search.endpoint;
 
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageImpl;
-import org.opencastproject.rest.RestConstants;
 import org.opencastproject.search.api.SearchException;
-import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.SearchQueryImpl;
-import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
@@ -39,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -54,6 +50,18 @@ import javax.ws.rs.core.Response;
  * The REST endpoint
  */
 @Path("/")
+@RestService(
+        name = "search",
+        title = "Search Service",
+        notes = { 
+                "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+                "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+                "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. " + 
+                "In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: " +
+                "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>"
+        },
+        abstractText = "This service indexes and queries available (distributed) episodes."
+)
 public class SearchRestService {
 
   private static final Logger logger = LoggerFactory.getLogger(SearchRestService.class);
@@ -66,118 +74,13 @@ public class SearchRestService {
    * @param cc
    *          OSGi component context
    */
+  
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(serviceUrl);
+    //String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
   }
 
   public void setSearchService(SearchService searchService) {
     this.searchService = searchService;
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public String getDocumentation() {
-    return docs;
-  }
-
-  protected String docs;
-  private String[] notes = {
-          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
-
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("Search", "Search Service", serviceUrl, notes);
-
-    // abstract
-    data.setAbstract("This service indexes and queries available (distributed) episodes.");
-    // episode
-    RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode{format}",
-            "Search for episodes matching the query parameters");
-    episodeEndpoint.addFormat(new Format("XML", null, null));
-    episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The search results"));
-    episodeEndpoint.addPathParam(new Param("format", Type.STRING, ".xml",
-            "The output format (.xml or .json).  Defaults to xml."));
-    episodeEndpoint.addOptionalParam(new Param("id", Type.STRING, null,
-            "The ID of the single episode to be returned, if it exists"));
-    episodeEndpoint
-            .addOptionalParam(new Param("q", Type.STRING, null, "Any episode that matches this free-text query"));
-    episodeEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
-            "The maximum number of items to return per page"));
-    episodeEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
-    episodeEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, episodeEndpoint);
-
-    // series
-    RestEndpoint seriesEndpoint = new RestEndpoint("series", RestEndpoint.Method.GET, "/series{format}",
-            "Search for series matching the query parameters");
-    seriesEndpoint.addFormat(new Format("XML", null, null));
-    seriesEndpoint.addFormat(new Format("JSON", null, null));
-    seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The search results"));
-    seriesEndpoint.addPathParam(new Param("format", Type.STRING, ".xml",
-            "The output format (.xml or .json).  Defaults to xml."));
-    seriesEndpoint
-            .addOptionalParam(new Param(
-                    "id",
-                    Type.STRING,
-                    null,
-                    "The series ID. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
-    seriesEndpoint
-            .addOptionalParam(new Param(
-                    "q",
-                    Type.STRING,
-                    null,
-                    "Any series that matches this free-text query. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
-    seriesEndpoint.addOptionalParam(new Param("episodes", Type.BOOLEAN, "false",
-            "Whether to include this series episodes.  This can be used in combination with id or q"));
-    seriesEndpoint.addOptionalParam(new Param("series", Type.BOOLEAN, "false",
-            "Whether to include this series information itself.  This can be used in combination with id or q"));
-    seriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
-            "The maximum number of items to return per page"));
-    seriesEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
-    seriesEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, seriesEndpoint);
-
-    // episode and series
-    RestEndpoint episodeAndSeriesEndpoint = new RestEndpoint("episodeAndSeries", RestEndpoint.Method.GET, "/",
-            "Search for episodes and series matching the query parameters");
-    episodeAndSeriesEndpoint.addFormat(new Format("XML", null, null));
-    episodeAndSeriesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The search results, expressed as xml"));
-    episodeAndSeriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null,
-            "Any episode or series that matches this free-text query."));
-    episodeAndSeriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
-            "The maximum number of items to return per page"));
-    episodeAndSeriesEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
-    episodeAndSeriesEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, episodeAndSeriesEndpoint);
-
-    // remove
-    RestEndpoint removeEndpoint = new RestEndpoint("remove", RestEndpoint.Method.DELETE, "/{id}",
-            "Removes a mediapackage from the search index");
-    removeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .noContent("The mediapackage was removed, no content to return"));
-    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.notFound("The mediapackage was not found"));
-    removeEndpoint
-            .addPathParam(new Param("id", Type.STRING, "", "The media package ID to remove from the search index"));
-    removeEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, removeEndpoint);
-
-    // add
-    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.POST, "/add",
-            "Adds a mediapackage to the search index");
-    addEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .noContent("The mediapackage was added, no content to return"));
-    addEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(),
-            "The media package to add to the search index"));
-    addEndpoint.addFormat(new Format("XML", null, null));
-    addEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);
-
-    logger.debug("generated documentation for {}", data);
-
-    return DocUtil.generate(data);
   }
 
   protected String generateMediaPackage() {
@@ -198,6 +101,26 @@ public class SearchRestService {
 
   @POST
   @Path("add")
+  @RestQuery(
+          name = "add",
+          description = "Adds a mediapackage to the search index.", 
+          pathParameters = {},
+          restParameters = { 
+                  @RestParameter(
+                          description = "The media package to add to the search index.", 
+                          isRequired = true,
+                          name = "mediapackage",
+                          type = RestParameter.Type.STRING
+                          ) 
+          },
+          reponses = { 
+                  @RestResponse(
+                          description = "The mediapackage was added, no content to return.",
+                          responseCode = HttpServletResponse.SC_NO_CONTENT
+                          )
+          }, 
+          returnDescription = "No content is returned."
+  )
   public Response add(@FormParam("mediapackage") MediaPackageImpl mediaPackage) throws SearchException {
     try {
       searchService.add(mediaPackage);
@@ -210,6 +133,26 @@ public class SearchRestService {
 
   @DELETE
   @Path("{id}")
+  @RestQuery(
+          name = "remove",
+          description = "Removes a mediapackage from the search index.", 
+          pathParameters = {
+                  @RestParameter(
+                          description = "The media package ID to remove from the search index.", 
+                          isRequired = true,
+                          name = "id",
+                          type = RestParameter.Type.STRING
+                  ) 
+          },
+          restParameters = {},
+          reponses = { 
+                  @RestResponse(
+                          description = "The mediapackage was removed, no content to return.",
+                          responseCode = HttpServletResponse.SC_NO_CONTENT
+                          )
+          }, 
+          returnDescription = "No content is returned."
+  )
   public Response remove(@PathParam("id") String mediaPackageId) throws SearchException, NotFoundException {
     try {
       if (searchService.delete(mediaPackageId))
@@ -222,20 +165,75 @@ public class SearchRestService {
   }
 
   @GET
-  @Path("series.json")
-  @Produces(MediaType.APPLICATION_JSON)
-  public SearchResultImpl getEpisodeAndSeriesByIdAsJson(@QueryParam("id") String id, @QueryParam("q") String text,
+  @Path("series.{format:xml|json}")
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  @RestQuery(
+          name = "series",
+          description = "Search for series matching the query parameters.", 
+          pathParameters = {
+                  @RestParameter(
+                          description = "The output format (json or xml) of the response body.", 
+                          isRequired = true,
+                          name = "format",
+                          type = RestParameter.Type.STRING
+                  ) 
+          },
+          restParameters = {
+                  @RestParameter(
+                          description = "The series ID. If the additional boolean parameter \"episodes\" is \"true\", " + 
+                          "the result set will include this series episodes.", 
+                          isRequired = false,
+                          name = "id",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          description = "Any series that matches this free-text query. If the additional boolean parameter \"episodes\" is \"true\", " + 
+                          "the result set will include this series episodes.",
+                          isRequired = false,
+                          name = "q",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "false",
+                          description = "Whether to include this series episodes. This can be used in combination with \"id\" or \"q\".", 
+                          isRequired = false,
+                          name = "episodes",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "false",
+                          description = "Whether to include this series information itself. This can be used in combination with \"id\" or \"q\".", 
+                          isRequired = false,
+                          name = "series",
+                          type = RestParameter.Type.STRING
+                  ), 
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The maximum number of items to return per page.", 
+                          isRequired = false,
+                          name = "limit",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The page number.", 
+                          isRequired = false,
+                          name = "offset",
+                          type = RestParameter.Type.STRING
+                  )      
+          },
+          reponses = { 
+                  @RestResponse(
+                          description = "The request was processed succesfully.",
+                          responseCode = HttpServletResponse.SC_OK
+                  )
+          }, 
+          returnDescription = "The search results, expressed as xml or json."
+  )
+  public Response getEpisodeAndSeriesById(@QueryParam("id") String id, @QueryParam("q") String text,
           @QueryParam("episodes") boolean includeEpisodes, @QueryParam("series") boolean includeSeries,
-          @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
-    return getEpisodeAndSeriesById(id, text, includeEpisodes, includeSeries, limit, offset);
-  }
-
-  @GET
-  @Path("series.xml")
-  @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getEpisodeAndSeriesById(@QueryParam("id") String id, @QueryParam("q") String text,
-          @QueryParam("episodes") boolean includeEpisodes, @QueryParam("series") boolean includeSeries,
-          @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
+          @QueryParam("limit") int limit, @QueryParam("offset") int offset, @PathParam("format") String format) {
+    
     SearchQueryImpl query = new SearchQueryImpl();
 
     // If id is specified, do a search based on id
@@ -257,24 +255,75 @@ public class SearchRestService {
     query.withPublicationDateSort(true);
     query.withLimit(limit);
     query.withOffset(offset);
-    return (SearchResultImpl) searchService.getByQuery(query);
+    
+    // Return the right format
+    if ("json".equals(format))
+      return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_JSON).build();
+    else
+      return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_XML).build();
   }
+  
 
   @GET
-  @Path("episode.json")
-  @Produces(MediaType.APPLICATION_JSON)
-  public SearchResultImpl getEpisodeAsJson(@QueryParam("id") String id, @QueryParam("q") String text,
+  @Path("episode.{format:xml|json}")
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  @RestQuery(
+          name = "episodes",
+          description = "Search for episodes matching the query parameters.", 
+          pathParameters = {
+                  @RestParameter(
+                          description = "The output format (json or xml) of the response body.", 
+                          isRequired = true,
+                          name = "format",
+                          type = RestParameter.Type.STRING
+                  ) 
+          },
+          restParameters = {
+                  @RestParameter(
+                          description = "The ID of the single episode to be returned, if it exists.",
+                          isRequired = false,
+                          name = "id",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          description = "Any episode that matches this free-text query.",
+                          isRequired = false,
+                          name = "q",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "false",
+                          description = "Whether to include this series episodes. This can be used in combination with \"id\" or \"q\".", 
+                          isRequired = false,
+                          name = "episodes",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The maximum number of items to return per page.", 
+                          isRequired = false,
+                          name = "limit",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The page number.", 
+                          isRequired = false,
+                          name = "offset",
+                          type = RestParameter.Type.STRING
+                  )      
+          },
+          reponses = { 
+                  @RestResponse(
+                          description = "The request was processed succesfully.",
+                          responseCode = HttpServletResponse.SC_OK
+                  )
+          }, 
+          returnDescription = "The search results, expressed as xml or json."
+  )
+  public Response getEpisode(@QueryParam("id") String id, @QueryParam("q") String text,
           @QueryParam("tag") String[] tags, @QueryParam("flavor") String[] flavors, @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset) {
-    return getEpisode(id, text, tags, flavors, limit, offset);
-  }
-
-  @GET
-  @Path("episode.xml")
-  @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getEpisode(@QueryParam("id") String id, @QueryParam("q") String text,
-          @QueryParam("tag") String[] tags, @QueryParam("flavor") String[] flavors, @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset) {
+          @QueryParam("offset") int offset, @PathParam("format") String format) {
 
     // Prepare the flavors
     List<MediaPackageElementFlavor> flavorSet = new ArrayList<MediaPackageElementFlavor>();
@@ -295,30 +344,134 @@ public class SearchRestService {
       search.withText(text);
     else
       search.withPublicationDateSort(true);
-    return (SearchResultImpl) searchService.getByQuery(search);
-  }
-
-  @GET
-  @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getEpisodesAndSeries(@QueryParam("q") String text, @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset) {
-    SearchQueryImpl query = new SearchQueryImpl();
-    query.includeEpisodes(true);
-    query.includeSeries(true);
-    query.withLimit(limit);
-    query.withOffset(offset);
-    if (!StringUtils.isBlank(text))
-      query.withText(text);
+    
+    // Return the results using the requested format
+    if ("json".equals(format))
+      return Response.ok(searchService.getByQuery(search)).type(MediaType.APPLICATION_JSON).build();
     else
-      query.withPublicationDateSort(true);
-    return (SearchResultImpl) searchService.getByQuery(query);
+      return Response.ok(searchService.getByQuery(search)).type(MediaType.APPLICATION_XML).build();
   }
 
+  
   @GET
-  @Path("lucene.xml")
-  @Produces(MediaType.APPLICATION_XML)
-  public SearchResultImpl getByLuceneQuery(@QueryParam("q") String q, @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset) {
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  @RestQuery(
+          name = "episodesAndSeries",
+          description = "Search for episodes and series matching the query parameters.", 
+          pathParameters = { },
+          restParameters = {
+                  @RestParameter(
+                          description = "The output format (json or xml) of the response body.", 
+                          isRequired = false,
+                          name = "format",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "",
+                          description = "Any episode or series that matches this free-text query.",
+                          isRequired = false,
+                          name = "q",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The maximum number of items to return per page.", 
+                          isRequired = false,
+                          name = "limit",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The page number.", 
+                          isRequired = false,
+                          name = "offset",
+                          type = RestParameter.Type.STRING
+                  )     
+          },
+          reponses = { 
+                  @RestResponse(
+                          description = "The request was processed succesfully.",
+                          responseCode = HttpServletResponse.SC_OK
+                  ),
+                  @RestResponse(
+                          description = "Wrong output format specified.",
+                          responseCode = HttpServletResponse.SC_NOT_ACCEPTABLE
+                  )
+          }, 
+          returnDescription = "The search results, expressed as xml or json."
+  )  
+  public Response getEpisodesAndSeries(@QueryParam("q") String text, @QueryParam("limit") int limit,
+          @QueryParam("offset") int offset, @QueryParam("format") String format) {
+    
+    // format may be null or empty (not specified), or 'json' or 'xml'
+    if ((format == null)||format.matches("(json|xml)?")) {
+      SearchQueryImpl query = new SearchQueryImpl();
+      query.includeEpisodes(true);
+      query.includeSeries(true);
+      query.withLimit(limit);
+      query.withOffset(offset);
+      if (!StringUtils.isBlank(text))
+        query.withText(text);
+      else
+        query.withPublicationDateSort(true);
+      
+      if ("json".equals(format))
+        return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_JSON).build();
+      else
+        return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_XML).build();
+    }
+
+    return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+  }
+
+  
+  @GET
+  @Path("lucene.{format:xml|json}")
+  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  @RestQuery(
+          name = "lucene",
+          description = "Search a lucene query.", 
+          pathParameters = {
+                  @RestParameter(
+                          description = "The output format (json or xml) of the response body.", 
+                          isRequired = true,
+                          name = "format",
+                          type = RestParameter.Type.STRING
+                  )
+          },
+          restParameters = {
+                  @RestParameter(
+                          defaultValue = "",
+                          description = "The lucene query.",
+                          isRequired = false,
+                          name = "q",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The maximum number of items to return per page.", 
+                          isRequired = false,
+                          name = "limit",
+                          type = RestParameter.Type.STRING
+                  ),
+                  @RestParameter(
+                          defaultValue = "0",
+                          description = "The page number.", 
+                          isRequired = false,
+                          name = "offset",
+                          type = RestParameter.Type.STRING
+                  )     
+          },
+          reponses = { 
+                  @RestResponse(
+                          description = "The request was processed succesfully.",
+                          responseCode = HttpServletResponse.SC_OK
+                  )
+          }, 
+          returnDescription = "The search results, expressed as xml or json"
+  )    
+  public Response getByLuceneQuery(@QueryParam("q") String q, @QueryParam("limit") int limit,
+          @QueryParam("offset") int offset, @PathParam("format") String format) {
     SearchQueryImpl query = new SearchQueryImpl();
     if (!StringUtils.isBlank(q))
       query.withQuery(q);
@@ -326,15 +479,10 @@ public class SearchRestService {
       query.withPublicationDateSort(true);
     query.withLimit(limit);
     query.withOffset(offset);
-    return (SearchResultImpl) searchService.getByQuery(query);
+    
+    if ("json".equals(format))
+      return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_JSON).build();
+    else
+      return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_XML).build();
   }
-
-  @GET
-  @Path("lucene.json")
-  @Produces(MediaType.APPLICATION_JSON)
-  public SearchResultImpl getByLuceneQueryAsJson(@QueryParam("q") String q, @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset) {
-    return getByLuceneQuery(q, limit, offset);
-  }
-
 }
