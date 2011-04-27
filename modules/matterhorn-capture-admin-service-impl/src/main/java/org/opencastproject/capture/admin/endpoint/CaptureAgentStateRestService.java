@@ -165,7 +165,7 @@ public class CaptureAgentStateRestService {
 
   @GET
   @Produces({ MediaType.TEXT_XML, MediaType.APPLICATION_JSON })
-  @Path("agents.{type}")
+  @Path("agents{type: \\.xml|\\.json|}")
   public Response getKnownAgents(@PathParam("type") String type) {
     logger.debug("Returning list of known agents...");
     LinkedList<AgentStateUpdate> update = new LinkedList<AgentStateUpdate>();
@@ -179,12 +179,11 @@ public class CaptureAgentStateRestService {
     } else {
       logger.info("Service was null for getKnownAgents");
     }
-    if (type == null || "xml".equals(type)) {
-      return Response.ok(new AgentStateUpdateList(update)).type(MediaType.TEXT_XML).build();
-    } else if ("json".equals(type)) {
+  
+    if (".json".equals(type)) {
       return Response.ok(new AgentStateUpdateList(update)).type(MediaType.APPLICATION_JSON).build();
     } else {
-      return Response.status(Response.Status.NOT_FOUND).build();
+      return Response.ok(new AgentStateUpdateList(update)).type(MediaType.TEXT_XML).build();
     }
   }
 
