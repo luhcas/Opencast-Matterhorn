@@ -33,6 +33,7 @@ public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPo
   public static final String REQUESTED_AUTH_HEADER = "X-Requested-Auth";
   public static final String DIGEST_AUTH = "Digest";
   public static final String OAUTH_SIGNATURE = "oauth_signature";
+  public static final String INITIAL_REQUEST_PATH = "initial_request_path";
 
   protected AuthenticationEntryPoint userEntryPoint;
   protected DigestAuthenticationEntryPoint digestAuthenticationEntryPoint;
@@ -49,6 +50,17 @@ public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPo
     if (DIGEST_AUTH.equals(request.getHeader(REQUESTED_AUTH_HEADER))) {
       digestAuthenticationEntryPoint.commence(request, response, authException);
     } else {
+      // if the user attempted to access a url other than /, store this in the session so we can forward the user there
+      // after a successful login
+      String requestUri = request.getRequestURI();
+      String queryString = request.getQueryString();
+      if (requestUri != null && !requestUri.isEmpty() & !"/".equals(requestUri)) {
+        if(queryString == null) {
+          request.getSession().setAttribute(INITIAL_REQUEST_PATH, requestUri);
+        } else {
+          request.getSession().setAttribute(INITIAL_REQUEST_PATH, requestUri + "?" + queryString);
+        }
+      }
       userEntryPoint.commence(request, response, authException);
     }
   }

@@ -45,7 +45,7 @@ public class RoleEndpoint {
   @GET
   @Path("list.json")
   @Produces(MediaType.APPLICATION_JSON)
-  @RestQuery(name = "roles", description = "Lists the roles as a json array", returnDescription = "The list of roles as a json array", pathParameters = {}, restParameters = {}, reponses = { @RestResponse(responseCode = 200, description = "OK, roles returned") })
+  @RestQuery(name = "roles", description = "Lists the roles as a json array", returnDescription = "The list of roles as a json array", reponses = { @RestResponse(responseCode = 200, description = "OK, roles returned") })
   @SuppressWarnings("unchecked")
   public String getRoles() {
     SortedSet<String> knownRoles = new TreeSet<String>();

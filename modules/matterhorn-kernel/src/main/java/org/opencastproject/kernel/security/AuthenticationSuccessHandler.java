@@ -40,10 +40,10 @@ public class AuthenticationSuccessHandler implements
   public static final String ROOT = "/";
 
   /** The security service */
-  SecurityService securityService = null;
+  private SecurityService securityService = null;
 
   /** The maps of roles to welcome pages */
-  Map<String, String> welcomePages = null;
+  private Map<String, String> welcomePages = null;
 
   /**
    * {@inheritDoc}
@@ -54,6 +54,15 @@ public class AuthenticationSuccessHandler implements
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
           Authentication authentication) throws IOException, ServletException {
+
+    // If the user originally attempted to access a specific URI other than /, but was forwarded to the login page,
+    // redirect the user back to that initial URI.
+    String initialRequestUri = (String) request.getSession().getAttribute(
+            DelegatingAuthenticationEntryPoint.INITIAL_REQUEST_PATH);
+    if (initialRequestUri != null) {
+      response.sendRedirect(initialRequestUri);
+      return;
+    }
 
     // If there are no configured welcome pages, send the user to /
     if (welcomePages == null || welcomePages.isEmpty()) {
