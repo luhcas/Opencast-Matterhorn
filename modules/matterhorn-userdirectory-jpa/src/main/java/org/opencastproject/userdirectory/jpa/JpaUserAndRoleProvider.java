@@ -105,7 +105,7 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
         return null;
       } else {
         Set<String> roles = user.getRoles();
-        return new User(userName, user.getOrganization(), roles.toArray(new String[roles.size()]));
+        return new User(userName, user.getPassword(), user.getOrganization(), roles.toArray(new String[roles.size()]));
       }
     } finally {
       em.close();

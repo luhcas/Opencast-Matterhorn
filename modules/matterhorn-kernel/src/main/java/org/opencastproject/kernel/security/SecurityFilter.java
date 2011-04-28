@@ -40,7 +40,7 @@ public final class SecurityFilter implements Filter {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
-  
+
   /** The filters for each organization */
   private Map<String, Filter> orgSecurityFilters = null;
 
@@ -49,7 +49,7 @@ public final class SecurityFilter implements Filter {
 
   /** The filter configuration provided by the servlet container */
   protected FilterConfig filterConfig = null;
-  
+
   /**
    * Construct a new security filter.
    * 
@@ -93,7 +93,7 @@ public final class SecurityFilter implements Filter {
 
   public void removeFilter(String orgId) {
     Filter filter = orgSecurityFilters.remove(orgId);
-    if(filter != null) {
+    if (filter != null) {
       filter.destroy();
     }
   }
