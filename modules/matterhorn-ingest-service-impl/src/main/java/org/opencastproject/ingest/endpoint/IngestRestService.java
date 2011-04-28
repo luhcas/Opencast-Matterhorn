@@ -16,10 +16,6 @@
 package org.opencastproject.ingest.endpoint;
 
 import org.opencastproject.ingest.api.IngestService;
-import org.opencastproject.util.doc.rest.RestQuery;
-import org.opencastproject.util.doc.rest.RestResponse;
-import org.opencastproject.util.doc.rest.RestService;
-import org.opencastproject.util.doc.rest.RestParameter;
 import org.opencastproject.mediapackage.EName;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
@@ -30,15 +26,11 @@ import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.rest.RestConstants;
-import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workspace.api.Workspace;
@@ -49,7 +41,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,19 +134,15 @@ public class IngestRestService {
   /**
    * Callback for activation of this component.
    */
-  public void activate(ComponentContext context) {
+  public void activate() {
     try {
       emf = persistenceProvider
               .createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
     } catch (Exception e) {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
     }
-    if (context != null) {
-      String serviceUrl = (String) context.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-      docs = generateDocs(serviceUrl);
-    }
   }
-  
+
   /**
    * Callback for deactivation of this component.
    */
@@ -168,7 +155,7 @@ public class IngestRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("createMediaPackage")
-  @RestQuery(name = "createMediaPackage", description = "Create an empty media package", pathParameters = { }, restParameters = { }, reponses = {
+  @RestQuery(name = "createMediaPackage", description = "Create an empty media package", pathParameters = {}, restParameters = {}, reponses = {
           @RestResponse(description = "Returns media package", responseCode = HttpServletResponse.SC_OK),
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response createMediaPackage() {
@@ -184,7 +171,7 @@ public class IngestRestService {
 
   @POST
   @Path("discardMediaPackage")
-  @RestQuery(name = "discardMediaPackage", description = "Discard a media package", pathParameters = { }, restParameters = { @RestParameter(defaultValue = "", description = "Given media package to be destroyed", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+  @RestQuery(name = "discardMediaPackage", description = "Discard a media package", pathParameters = {}, restParameters = { @RestParameter(defaultValue = "", description = "Given media package to be destroyed", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_OK),
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response discardMediaPackage(@FormParam("mediaPackage") String mpx) {
@@ -202,7 +189,7 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addTrack")
-  @RestQuery(name = "addTrackURL", description = "Add a media track to a given media package using an URL", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addTrackURL", description = "Add a media track to a given media package using an URL", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The location of the media", isRequired = true, name = "url", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The kind of media", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
@@ -224,7 +211,7 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addTrack")
-  @RestQuery(name = "addTrackInputStream", description = "Add a media track to a given media package using an input stream", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addTrackInputStream", description = "Add a media track to a given media package using an input stream", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The kind of media track", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, bodyParameter = @RestParameter(defaultValue = "", description = "The media track file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
           @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
@@ -237,7 +224,7 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addCatalog")
-  @RestQuery(name = "addCatalogURL", description = "Add a metadata catalog to a given media package using an URL", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addCatalogURL", description = "Add a metadata catalog to a given media package using an URL", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The location of the catalog", isRequired = true, name = "url", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The kind of catalog", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
@@ -260,7 +247,7 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addCatalog")
-  @RestQuery(name = "addCatalogInputStream", description = "Add a metadata catalog to a given media package using an input stream", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addCatalogInputStream", description = "Add a metadata catalog to a given media package using an input stream", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The kind of media catalog", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, bodyParameter = @RestParameter(defaultValue = "", description = "The metadata catalog file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
           @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
@@ -273,7 +260,7 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addAttachment")
-  @RestQuery(name = "addAttachmentURL", description = "Add an attachment to a given media package using an URL", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addAttachmentURL", description = "Add an attachment to a given media package using an URL", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The location of the attachment", isRequired = true, name = "url", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The kind of attachment", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
@@ -295,7 +282,7 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addAttachment")
-  @RestQuery(name = "addAttachmentInputStream", description = "Add an attachment to a given media package using an input stream", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addAttachmentInputStream", description = "Add an attachment to a given media package using an input stream", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The kind of attachment", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, bodyParameter = @RestParameter(defaultValue = "", description = "The attachment file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
           @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
@@ -363,7 +350,7 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage")
-  @RestQuery(name = "addMediaPackage", description = "Create media package from a media tracks and optional Dublin Core metadata fields", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addMediaPackage", description = "Create media package from a media tracks and optional Dublin Core metadata fields", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The kind of media track", isRequired = true, name = "flavor", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "abstract", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "Metadata value", isRequired = false, name = "accessRights", type = RestParameter.Type.STRING),
@@ -480,7 +467,7 @@ public class IngestRestService {
   @POST
   @Path("addZippedMediaPackage")
   @Produces(MediaType.TEXT_XML)
-  @RestQuery(name = "addZippedMediaPackage", description = "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addZippedMediaPackage", description = "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "full", description = "The workflow definition ID to run on this mediapackage", isRequired = true, name = WORKFLOW_DEFINITION_ID_PARAM, type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "", description = "The workflow instance ID to associate with this zipped mediapackage", isRequired = false, name = WORKFLOW_INSTANCE_ID_PARAM, type = RestParameter.Type.STRING) }, bodyParameter = @RestParameter(defaultValue = "", description = "The compressed (application/zip) media package file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_OK),
@@ -554,7 +541,7 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path("ingest")
-  @RestQuery(name = "ingest", description = "Ingest the completed media package into the system, retrieving all URL-referenced files", pathParameters = { }, restParameters = { @RestParameter(defaultValue = "", description = "The ID of the given media package", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
+  @RestQuery(name = "ingest", description = "Ingest the completed media package into the system, retrieving all URL-referenced files", pathParameters = {}, restParameters = { @RestParameter(defaultValue = "", description = "The ID of the given media package", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT) }, reponses = {
           @RestResponse(description = "Returns the media package", responseCode = HttpServletResponse.SC_OK),
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST) }, returnDescription = "")
   public Response ingest(@FormParam("mediaPackage") String mpx) {
@@ -793,7 +780,7 @@ public class IngestRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("addDCCatalog")
-  @RestQuery(name = "addDCCatalog", description = "Add a dublincore episode catalog to a given media package using an url", pathParameters = { }, restParameters = {
+  @RestQuery(name = "addDCCatalog", description = "Add a dublincore episode catalog to a given media package using an url", pathParameters = {}, restParameters = {
           @RestParameter(defaultValue = "", description = "The media package as XML", isRequired = true, name = "mediaPackage", type = RestParameter.Type.TEXT),
           @RestParameter(defaultValue = "", description = "DublinCore catalog as XML", isRequired = true, name = "dublinCore", type = RestParameter.Type.STRING), // TODO
                                                                                                                                                                   // should
@@ -860,338 +847,4 @@ public class IngestRestService {
     out.put("received", Long.toString(job.getBytesReceived()));
     return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
-
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public String getDocumentation() {
-    return docs;
-  }
-
-  protected String docs;
-  private String[] notes = {
-          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
-
-  // CHECKSTYLE:OFF
-  private String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("ingestservice", "Ingest Service", serviceUrl, notes);
-
-    // abstract
-    data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");
-
-    // createMediaPackage
-    RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET, "/createMediaPackage",
-            "Create an empty media package");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-
-    // get workflow instance
-    endpoint = new RestEndpoint("getWorkflowInstance", RestEndpoint.Method.GET, "/getWorkflowInstance/{id}.xml",
-            "Get un updated workflow instance");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addPathParam(new Param("id", Param.Type.STRING, null, "The ID of the given workflow instance"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns workflow instance"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-
-    // addTrack (URL)
-    endpoint = new RestEndpoint("addTrackURL", RestEndpoint.Method.POST, "/addTrack",
-            "Add a media track to a given media package using an URL");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null, "The location of the media"));
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addTrack (InputStream)
-    endpoint = new RestEndpoint("addTrackInputStream", RestEndpoint.Method.POST, "/addTrack",
-            "Add a media track to a given media package using an input stream");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addBodyParam(true, null, "The media track file");
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media track"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addCatalog (URL)
-    endpoint = new RestEndpoint("addCatalogURL", RestEndpoint.Method.POST, "/addCatalog",
-            "Add a metadata catalog to a given media package using an URL");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null, "The location of the catalog"));
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of catalog"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addCatalog (InputStream)
-    endpoint = new RestEndpoint("addCatalogInputStream", RestEndpoint.Method.POST, "/addCatalog",
-            "Add a metadata catalog to a given media package using an input stream");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addBodyParam(true, null, "The metadata catalog file");
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media catalog"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addDCCatalog (String)
-    endpoint = new RestEndpoint("addDCCatalog", RestEndpoint.Method.POST, "/addDCCatalog",
-            "Add a dublincore episode catalog to a given media package using an url");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addRequiredParam(new Param("dublinCore", Param.Type.STRING, null, "DublinCore catalog as XML"));
-    endpoint.addOptionalParam(new Param("flavor", Param.Type.STRING, "dublincore/episode", "DublinCore Flavor"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addAttachment (InputStream)
-    endpoint = new RestEndpoint("addAttachmentInputStream", RestEndpoint.Method.POST, "/addAttachment",
-            "Add an attachment to a given media package using an input stream");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addBodyParam(true, null, "The attachment file");
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of attachment"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addAttachment (URL)
-    endpoint = new RestEndpoint("addAttachmentURL", RestEndpoint.Method.POST, "/addAttachment",
-            "Add an attachment to a given media package using an URL");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("url", Param.Type.STRING, null, "The location of the attachment"));
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of attachment"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The media package as XML"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // ingest
-    endpoint = new RestEndpoint("ingest", RestEndpoint.Method.POST, "/ingest",
-            "Ingest the completed media package into the system, retrieving all URL-referenced files");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The ID of the given media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // ingest with workflow
-    endpoint = new RestEndpoint(
-            "ingest",
-            RestEndpoint.Method.POST,
-            "/ingest/{wdID}",
-            "Ingest the completed media package into the system, retrieving all URL-referenced files, and starting a specified workflow");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addPathParam(new Param("wdID", Param.Type.STRING, null, "Workflow definition id"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "The ID of the given media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns the media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // discardMediaPackage
-    endpoint = new RestEndpoint("discardMediaPackage", RestEndpoint.Method.POST, "/discardMediaPackage",
-            "Discard a media package");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.TEXT, null, "Given media package to be destroyed"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addMediaPackage
-    endpoint = new RestEndpoint("addMediaPackage", RestEndpoint.Method.POST, "/addMediaPackage",
-            "Create media package from a media tracks and optional Dublin Core metadata fields");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addBodyParam(true, null, "The media track file");
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media track"));
-    endpoint.addOptionalParam(new Param("abstract", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("accessRights", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("available", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("contributor", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("coverage", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("created", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("creator", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("date", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("description", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("extent", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("format", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("identifier", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("isPartOf", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("isReferencedBy", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("isReplacedBy", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("language", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("license", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("publisher", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("relation", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("replaces", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("rights", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("rightsHolder", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("source", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("spatial", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("subject", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addMediaPackage with workflow id
-    endpoint = new RestEndpoint("addMediaPackage", RestEndpoint.Method.POST, "/addMediaPackage/{wdID}",
-            "Create media package from a media tracks and optional Dublin Core metadata fields");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addBodyParam(true, null, "The media track file");
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The kind of media track"));
-    endpoint.addOptionalParam(new Param("abstract", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("accessRights", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("available", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("contributor", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("coverage", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("created", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("creator", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("date", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("description", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("extent", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("format", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("identifier", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("isPartOf", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("isReferencedBy", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("isReplacedBy", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("language", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("license", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("publisher", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("relation", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("replaces", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("rights", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("rightsHolder", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("source", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("spatial", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("subject", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("temporal", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("title", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addOptionalParam(new Param("type", Param.Type.STRING, null, "Metadata value"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns augmented media package"));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.addPathParam(new Param("wdID", Param.Type.STRING, null, "Workflow definition id"));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // addZippedMediaPackage
-    endpoint = new RestEndpoint(
-            "addZippedMediaPackage",
-            RestEndpoint.Method.POST,
-            "/addZippedMediaPackage",
-            "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addOptionalParam(new Param(WORKFLOW_INSTANCE_ID_PARAM, Type.STRING, null,
-            "The workflow instance ID to associate with this zipped mediapackage"));
-    endpoint.addRequiredParam(new Param(WORKFLOW_DEFINITION_ID_PARAM, Type.STRING, "full",
-            "The workflow definition ID to run on this mediapackage"));
-    endpoint.addBodyParam(true, null, "The compressed (application/zip) media package file");
-    endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.error(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-
-    // createUploadJobHtml
-    /* having '.html' in the URL yields Exception in Rest Docs Utility */
-    /*
-     * endpoint = new RestEndpoint( "createUploadJobHtml", RestEndpoint.Method.GET, "/filechooser-local.html",
-     * "Creates an upload job and returns an html form ready to submit the selected file to /addTrackMonitored with the newly created upload job Id."
-     * ); endpoint.addFormat(new Format("HTML", "HTML form for submitting the file with the newly created upload job",
-     * null)); endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-     * endpoint.addStatus(org.opencastproject.util.doc.Status.error(null)); endpoint.setTestForm(RestTestForm.auto());
-     * data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-     */
-
-    // addTrackMonitored
-    /*
-     * doc deactivated, MH-6634 endpoint = new RestEndpoint( "addTrackMonitored", RestEndpoint.Method.POST,
-     * "/addTrackMonitored/{jobId}",
-     * "Adds a track to the specified MediaPackage while counting the bytes received during the upload of the file. POSTs to this method must be of type multipart/form-data."
-     * ); endpoint.addFormat(new Format( "HTML",
-     * "HTML that triggers a javascript function in the parent site (upload form lives in an iframe) to indicate the POST to this method was successfully finished."
-     * , null)); endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id"));
-     * endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
-     * "Id of the MediaPackage to which the file should be added")); endpoint.addRequiredParam(new Param("flavor",
-     * Param.Type.STRING, null,
-     * "The flavor of the file in the MediaPackage (eg. presenter/source, presentation/source etc)"));
-     * endpoint.addBodyParam(false, "presenter/source", "flavor : "); endpoint.addBodyParam(true, null,
-     * "file : binary content of the uploaded file"); endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-     * endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-     * endpoint.addStatus(org.opencastproject.util.doc.Status.error(null)); endpoint.setTestForm(RestTestForm.auto());
-     * data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-     */
-
-    // getUploadProgress
-    /*
-     * doc deactivated, MH-6634 endpoint = new RestEndpoint("getUploadProgress", RestEndpoint.Method.GET,
-     * "/getUploadProgress/{jobId}",
-     * "Returns a JSON object reporting the status of the upload with the provided upload job id.");
-     * endpoint.addFormat(new Format("JSON",
-     * "JSON object reporting the status of the upload with the provided upload job id.", null));
-     * endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id."));
-     * endpoint.addStatus(org.opencastproject.util.doc.Status.ok(null));
-     * endpoint.addStatus(org.opencastproject.util.doc.Status.badRequest(null));
-     * endpoint.addStatus(org.opencastproject.util.doc.Status.error(null)); endpoint.setTestForm(RestTestForm.auto());
-     * data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-     */
-
-    // TODO: v v v --- check the documentation and implementation of the existing methods --- v v v
-
-    // // addTrackMonitored (InputStream)
-    // endpoint = new RestEndpoint(
-    // "addTrackMonitored",
-    // RestEndpoint.Method.POST,
-    // "/addTrackMonitored",
-    // "Asynchronously add a media track to a given media package using an input stream. Upload progress can be polled with /getUploadProgress");
-    // endpoint.addFormat(new Format("XML", null, null));
-    // endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null, "The media package as XML"));
-    // endpoint.addBodyParam(true, null, "The media track file");
-    // endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
-    // endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));
-    // endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
-    // endpoint.setTestForm(RestTestForm.auto());
-    // data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
-    //
-    // // getUploadProgress
-    // endpoint = new RestEndpoint("getUploadProgress", RestEndpoint.Method.GET, "/getUploadProgress/{mpId}/{filename}",
-    // "Get the progress of a file upload");
-    // endpoint.addFormat(new Format("JSON", null, null));
-    // endpoint.addPathParam(new Param("mpId", Param.Type.STRING, null, "The media package ID"));
-    // endpoint.addPathParam(new Param("filename", Param.Type.STRING, null, "The name of the file"));
-    // endpoint.addStatus(org.opencastproject.util.doc.Status
-    // .OK("Returns the total and currently received number of bytes"));
-    // endpoint.setTestForm(RestTestForm.auto());
-    // data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-
-    return DocUtil.generate(data);
-  }
-  // CHECKSTYLE:ON
 }
