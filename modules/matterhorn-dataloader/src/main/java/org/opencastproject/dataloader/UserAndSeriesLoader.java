@@ -28,6 +28,8 @@ import org.opencastproject.userdirectory.jpa.JpaUser;
 import org.opencastproject.userdirectory.jpa.JpaUserAndRoleProvider;
 import org.opencastproject.util.NotFoundException;
 
+import org.apache.commons.lang.StringUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +53,33 @@ public class UserAndSeriesLoader {
   /**
    * Callback on component activation.
    */
-  protected void activate() {
-    // Load 100 series, but don't block activation
-    new Loader().start();
+  protected void activate(ComponentContext cc) {
+
+    // Get properties from the bundle context
+    String adminUsername = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.security.demo.admin.user"));
+    String adminUserPass = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.security.demo.admin.pass"));
+    String adminUserRoles = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.security.demo.admin.roles"));
+    String loadUsers = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.security.demo.loadusers"));
+
+    // Load the admin user, if necessary
+    if (jpaUserProvider.loadUser(adminUsername) == null && StringUtils.isNotBlank(adminUsername)
+            && StringUtils.isNotBlank(adminUserPass) && StringUtils.isNotBlank(adminUserRoles)) {
+      String[] roleArray = StringUtils.split(adminUserRoles, ',');
+      Set<String> roles = new HashSet<String>();
+      for (int i = 0; i < roleArray.length; i++)
+        roles.add(StringUtils.trim(roleArray[i]));
+      jpaUserProvider.addUser(new JpaUser(adminUsername, adminUserPass, DEFAULT_ORGANIZATION_ID, roles));
+    }
+
+    // Load the other users, if necessary
+    if (Boolean.valueOf(loadUsers)) {
+      // Load 100 series and 1000 users, but don't block activation
+      new Loader().start();
+    }
   }
 
   protected class Loader extends Thread {
@@ -82,7 +108,7 @@ public class UserAndSeriesLoader {
       // Load 1000 users, all with ROLE_USER and a role in the series
       logger.info("Adding sample users...");
       for (int i = 0; i < 1000; i++) {
-        if(jpaUserProvider.loadUser("user" + i) == null) {
+        if (jpaUserProvider.loadUser("user" + i) == null) {
           Set<String> roleSet = new HashSet<String>();
           roleSet.add("ROLE_USER");
           roleSet.add("ROLE_SERIES_" + (i % 100));
@@ -98,7 +124,7 @@ public class UserAndSeriesLoader {
       logger.info("Finished loading sample series and users");
     }
   }
-  
+
   /**
    * @param jpaUserProvider
    *          the jpaUserProvider to set

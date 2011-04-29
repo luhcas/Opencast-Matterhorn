@@ -34,8 +34,7 @@ import java.util.Map;
 public class InMemoryUserAndRoleProvider implements UserProvider, RoleProvider {
 
   /** The roles associated with the matterhorn system account */
-  public static final String[] MH_SYSTEM_ROLES = new String[] { "ROLE_ADMIN", "ROLE_OAUTH_USER", "ROLE_USER",
-          DEFAULT_ORGANIZATION_ADMIN };
+  public static final String[] MH_SYSTEM_ROLES = new String[] { "ROLE_ADMIN", "ROLE_USER", DEFAULT_ORGANIZATION_ADMIN };
 
   /**
    * A collection of accounts internal to Matterhorn.
@@ -54,11 +53,6 @@ public class InMemoryUserAndRoleProvider implements UserProvider, RoleProvider {
     String digestUserPass = cc.getBundleContext().getProperty("org.opencastproject.security.digest.pass");
     User systemAccount = new User(digestUsername, digestUserPass, DEFAULT_ORGANIZATION_ID, MH_SYSTEM_ROLES);
     internalAccounts.put(digestUsername, systemAccount);
-
-    String adminUsername = cc.getBundleContext().getProperty("org.opencastproject.security.demo.admin.user");
-    String adminUserPass = cc.getBundleContext().getProperty("org.opencastproject.security.demo.admin.pass");
-    User administrator = new User(adminUsername, adminUserPass, DEFAULT_ORGANIZATION_ID, MH_SYSTEM_ROLES);
-    internalAccounts.put(adminUsername, administrator);
   }
 
   /**

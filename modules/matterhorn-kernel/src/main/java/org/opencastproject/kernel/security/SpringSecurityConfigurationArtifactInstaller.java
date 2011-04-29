@@ -115,7 +115,12 @@ public class SpringSecurityConfigurationArtifactInstaller implements ArtifactIns
     logger.info("registered {} for {}", springContext, orgId);
 
     // Refresh the spring application context
-    springContext.refresh();
+    try {
+      springContext.refresh();
+    } catch(Exception e) {
+      logger.error("Unable to refresh spring security configuration file {}: {}", artifact, e);
+      return;
+    }
 
     // Keep track of the app context so we can close it later
     appContexts.put(orgId, springContext);

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.kernel.security;
 
+import static org.opencastproject.kernel.security.DelegatingAuthenticationEntryPoint.INITIAL_REQUEST_PATH;
+
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 
@@ -26,6 +28,7 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Sends authenticated users to one of the configured welcome pages after login.
@@ -57,8 +60,9 @@ public class AuthenticationSuccessHandler implements
 
     // If the user originally attempted to access a specific URI other than /, but was forwarded to the login page,
     // redirect the user back to that initial URI.
-    String initialRequestUri = (String) request.getSession().getAttribute(
-            DelegatingAuthenticationEntryPoint.INITIAL_REQUEST_PATH);
+    HttpSession session = request.getSession();
+    String initialRequestUri = (String) session.getAttribute(INITIAL_REQUEST_PATH);
+    session.removeAttribute(INITIAL_REQUEST_PATH);
     if (initialRequestUri != null) {
       response.sendRedirect(initialRequestUri);
       return;

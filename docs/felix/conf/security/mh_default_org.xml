@@ -73,16 +73,9 @@
     <sec:logout />
   </sec:http>
 
-  <!-- Obtain services from the OSGI service registry -->
-  <osgi:reference id="userDetailsService" cardinality="1..1"
-    interface="org.springframework.security.core.userdetails.UserDetailsService" />
-
-  <osgi:reference id="securityService" cardinality="1..1"
-    interface="org.opencastproject.security.api.SecurityService" />
-
-  <sec:authentication-manager>
-    <sec:authentication-provider user-service-ref="oAuthConsumerDetailsService" />
-  </sec:authentication-manager>
+  <!-- ######################################## -->
+  <!-- # Authentication Entry and Exit Points # -->
+  <!-- ######################################## -->
 
   <!-- Differentiates between "normal" user requests and those requesting digest auth -->
   <bean id="matterhornEntryPoint" class="org.opencastproject.kernel.security.DelegatingAuthenticationEntryPoint">
@@ -95,17 +88,6 @@
     <property name="loginFormUrl" value="/login.html" />
   </bean>
 
-  <bean id="authSuccessHandler" class="org.opencastproject.kernel.security.AuthenticationSuccessHandler">
-    <property name="securityService" ref="securityService" />
-    <property name="welcomePages">
-      <map>
-        <entry key="ROLE_ADMIN" value="/welcome.html"/>
-        <entry key="ROLE_USER" value="/engage/ui/index.html"/>
-        <entry key="*" value="/engage/ui/index.html"/> <!-- Any role not listed explicitly will redirect here -->
-      </map>
-    </property>
-  </bean>
-
   <!-- Returns a 401 request for authentication via digest auth -->
   <bean id="digestEntryPoint" class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
     <property name="realmName" value="Opencast Matterhorn" />
@@ -113,19 +95,38 @@
     <property name="nonceValiditySeconds" value="10" />
   </bean>
 
+  <bean id="authSuccessHandler" class="org.opencastproject.kernel.security.AuthenticationSuccessHandler">
+    <property name="securityService" ref="securityService" />
+    <property name="welcomePages">
+      <map>
+        <entry key="ROLE_ADMIN" value="/welcome.html" />
+        <entry key="ROLE_USER" value="/engage/ui/index.html" />
+        <entry key="*" value="/engage/ui/index.html" /> <!-- Any role not listed explicitly will redirect here -->
+      </map>
+    </property>
+  </bean>
+
+
+  <!-- ################# -->
+  <!-- # Digest Filter # -->
+  <!-- ################# -->
+
   <!-- Handles the details of the digest authentication dance -->
   <bean id="digestFilter" class="org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+    <!--  Use only the in-memory users, as these have passwords that are not hashed -->
     <property name="userDetailsService" ref="userDetailsService" />
     <property name="authenticationEntryPoint" ref="digestEntryPoint" />
+    <property name="createAuthenticatedToken" value="true" />
     <property name="userCache">
       <bean class="org.springframework.security.core.userdetails.cache.NullUserCache" />
     </property>
   </bean>
 
-  <!-- Do not use a request cache -->
-  <bean id="requestCache" class="org.springframework.security.web.savedrequest.NullRequestCache" />
 
-  <!-- OAuth for supporting the LTI 'basic' profile -->
+  <!-- ####################### -->
+  <!-- # OAuth (LTI) Support # -->
+  <!-- ####################### -->
+
   <bean name="oAuthConsumerDetailsService" class="org.opencastproject.kernel.security.OAuthSingleConsumerDetailsService">
     <constructor-arg index="0" ref="userDetailsService" />
   </bean>
@@ -144,6 +145,31 @@
       </bean>
     </property>
   </bean>
+
+  <!-- #################### -->
+  <!-- # OSGI Integration # -->
+  <!-- #################### -->
+
+  <!-- Obtain services from the OSGI service registry -->
+  <osgi:reference id="userDetailsService" cardinality="1..1"
+    interface="org.springframework.security.core.userdetails.UserDetailsService" />
+
+  <osgi:reference id="securityService" cardinality="1..1" interface="org.opencastproject.security.api.SecurityService" />
+
+
+  <!-- ############################# -->
+  <!-- # Spring Security Internals # -->
+  <!-- ############################# -->
+
+  <!-- The JPA user directory stores md5 hashed, salted passwords, so we must use a username-salted md5 password encoder. -->
+  <sec:authentication-manager>
+    <sec:authentication-provider user-service-ref="userDetailsService">
+      <sec:password-encoder hash="md5"><sec:salt-source user-property="username" /></sec:password-encoder>
+    </sec:authentication-provider>
+  </sec:authentication-manager>
+
+  <!-- Do not use a request cache -->
+  <bean id="requestCache" class="org.springframework.security.web.savedrequest.NullRequestCache" />
 
   <!-- Uncomment to enable logging interceptors -->
   <!-- bean class="org.springframework.security.access.event.LoggerListener" / -->

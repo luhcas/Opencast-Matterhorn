@@ -20,6 +20,7 @@ import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserProvider;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +120,14 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
    *          the user object
    */
   public void addUser(JpaUser user) {
+
+    // First encode the password. This implementation mirrors spring security's hashing, so we can keep spring
+    // dependencies from proliferating into this module.
+    String clearTextPassword = user.getPassword();
+    String encodedPassword = DigestUtils.md5Hex(clearTextPassword + "{" + user.getUsername() + "}");
+    user = new JpaUser(user.getUsername(), encodedPassword, user.getOrganization(), user.getRoles());
+
+    // Then save the user
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
