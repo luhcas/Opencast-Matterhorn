@@ -22,7 +22,9 @@ import static org.opencastproject.security.api.SecurityConstants.MH_ADMIN;
 import org.opencastproject.security.api.RoleProvider;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserProvider;
+import org.opencastproject.util.PasswordEncoder;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 
 import java.util.HashMap;
@@ -49,10 +51,36 @@ public class InMemoryUserAndRoleProvider implements UserProvider, RoleProvider {
    */
   protected void activate(ComponentContext cc) {
     internalAccounts = new HashMap<String, User>();
+
+    // Create the digest auth user with a clear text password
     String digestUsername = cc.getBundleContext().getProperty("org.opencastproject.security.digest.user");
     String digestUserPass = cc.getBundleContext().getProperty("org.opencastproject.security.digest.pass");
     User systemAccount = new User(digestUsername, digestUserPass, DEFAULT_ORGANIZATION_ID, MH_SYSTEM_ROLES);
     internalAccounts.put(digestUsername, systemAccount);
+
+    // Create a demo user with an encoded password for use in the UI
+    String adminUsername = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.security.demo.admin.user"));
+    String adminUserPass = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.security.demo.admin.pass"));
+    String adminUserRoles = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.security.demo.admin.roles"));
+
+    // Load the admin user, if necessary
+    if (StringUtils.isNotBlank(adminUsername) && StringUtils.isNotBlank(adminUserPass)
+            && StringUtils.isNotBlank(adminUserRoles)) {
+
+      // Strip any whitespace from the roles
+      String[] roleArray = StringUtils.split(adminUserRoles, ',');
+      for (int i = 0; i < roleArray.length; i++)
+        roleArray[i] = StringUtils.trim(roleArray[i]);
+
+      // Encode the password
+      String encodedPass = PasswordEncoder.encode(adminUserPass, adminUsername);
+
+      // Add the user
+      internalAccounts.put(adminUsername, new User(adminUsername, encodedPass, DEFAULT_ORGANIZATION_ID, roleArray));
+    }
   }
 
   /**

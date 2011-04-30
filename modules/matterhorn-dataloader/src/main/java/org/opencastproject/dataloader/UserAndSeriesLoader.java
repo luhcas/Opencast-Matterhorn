@@ -55,27 +55,10 @@ public class UserAndSeriesLoader {
    */
   protected void activate(ComponentContext cc) {
 
-    // Get properties from the bundle context
-    String adminUsername = StringUtils.trimToNull(cc.getBundleContext().getProperty(
-            "org.opencastproject.security.demo.admin.user"));
-    String adminUserPass = StringUtils.trimToNull(cc.getBundleContext().getProperty(
-            "org.opencastproject.security.demo.admin.pass"));
-    String adminUserRoles = StringUtils.trimToNull(cc.getBundleContext().getProperty(
-            "org.opencastproject.security.demo.admin.roles"));
     String loadUsers = StringUtils.trimToNull(cc.getBundleContext().getProperty(
             "org.opencastproject.security.demo.loadusers"));
 
-    // Load the admin user, if necessary
-    if (jpaUserProvider.loadUser(adminUsername) == null && StringUtils.isNotBlank(adminUsername)
-            && StringUtils.isNotBlank(adminUserPass) && StringUtils.isNotBlank(adminUserRoles)) {
-      String[] roleArray = StringUtils.split(adminUserRoles, ',');
-      Set<String> roles = new HashSet<String>();
-      for (int i = 0; i < roleArray.length; i++)
-        roles.add(StringUtils.trim(roleArray[i]));
-      jpaUserProvider.addUser(new JpaUser(adminUsername, adminUserPass, DEFAULT_ORGANIZATION_ID, roles));
-    }
-
-    // Load the other users, if necessary
+    // Load the demo users, if necessary
     if (Boolean.valueOf(loadUsers)) {
       // Load 100 series and 1000 users, but don't block activation
       new Loader().start();
