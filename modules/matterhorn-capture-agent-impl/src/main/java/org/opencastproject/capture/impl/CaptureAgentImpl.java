@@ -28,7 +28,7 @@ import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.LoadRecordingsJob;
-import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.capture.pipeline.GStreamerPipeline;
 import org.opencastproject.capture.pipeline.bins.consumers.AudioMonitoring;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -64,7 +64,6 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.gstreamer.Bus;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
-import org.gstreamer.State;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
@@ -116,14 +115,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.gstreamer.message.EOSMessage;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines to store several tracks from a
  * certain recording.
  */
 public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService,
-        ConfigurationManagerListener {
+        ConfigurationManagerListener, CaptureFailureHandler {
   // The amount of time to wait until shutting down the pipeline manually. 
   private static final long DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT = 60000L;
 
@@ -135,19 +133,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /** The amount of time between the recording load task running, measured in seconds **/
   private static final int RECORDING_LOAD_TASK_DELAY = 60;
 
-  /**
-   * The number of nanoseconds in a second. This is a borrowed constant from gStreamer and is used in the pipeline
-   * initialisation routines
-   */
-  public static final long GST_SECOND = 1000000000L;
-
   /** The capture type for audio devices */
   public static final String CAPTURE_TYPE_AUDIO = "audio";
   /** The capture type for video devices */
   public static final String CAPTURE_TYPE_VIDEO = "video";
-
-  /** The agent's pipeline. **/
-  private Pipeline pipe = null;
 
   /** Pipeline for confidence monitoring while agent is idle */
   private Pipeline confidencePipe = null;
@@ -178,6 +167,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /** The http client used to communicate with the core */
   private TrustedHttpClient client = null;
+  
+  /** The capture framework to use to capture from the various devices. **/
+  private CaptureFramework captureFramework = null;
 
   /** Indicates the ID of the recording currently being recorded. **/
   private String currentRecID = null;
@@ -213,6 +205,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     configService.registerListener(this);
   }
 
+  /**
+   * Sets the capture framework which this capture agent should capture from.
+   * 
+   * @param cfg
+   *          The configuration service.
+   * @throws ConfigurationException
+   */
+  public void setCaptureFramework(CaptureFramework captureFramework) throws ConfigurationException {
+    this.captureFramework = captureFramework;
+    logger.debug("Setting Capture Framework to " + captureFramework.toString());
+  }
+  
   /**
    * Returns the configuration service form which this capture agent should draw its configuration data.
    * 
@@ -344,12 +348,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       return null;
     }
 
-    // Init the pipeline and break out if it fails
-    String recordingID = initPipeline(newRec);
-    if (recordingID == null) {
+    String recordingID = newRec.getID(); 
+    
+    try {
+      captureFramework.start(newRec, this);
+    } catch (UnableToStartCaptureException exception) {
+      logger.error(exception.getMessage());
       resetOnFailure(newRec.getID());
       return null;
     }
+
+    // Keep track of how long it has been since the capture started.
+    startTime = System.currentTimeMillis();
 
     // Great, capture is running. Set the agent state appropriately.
     setRecordingState(recordingID, RecordingState.CAPTURING);
@@ -364,6 +374,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     serializeRecording(recordingID);
     return recordingID;
+  }
+
+  private long getStopCaptureTimeout() {
+    // Get the timeout value to wait for a capture to start.
+    long timeout = GStreamerPipeline.DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT;
+    if (configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT) == null) {
+      logger.warn("Unable to find shutdown timeout value.  Assuming 1 minute.  Missing key is {}.",
+              CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT);
+    } else {
+      timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT)) * 1000L;
+    }
+    return timeout;
   }
 
   /**
@@ -401,93 +423,13 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * Creates the gStreamer pipeline and blocks until it starts successfully
-   * 
-   * @param newRec
-   *          The RecordingImpl of the capture we wish to perform.
-   * @return The recording ID (equal to newRec.getID()) or null in the case of an error
-   */
-  protected String initPipeline(RecordingImpl newRec) {
-    // Create the pipeline
-    try {
-      pipe = PipelineFactory.create(newRec.getProperties(), false, this);
-    } catch (UnsatisfiedLinkError e) {
-      logger.error(e.getMessage() + " : please add libjv4linfo.so to /usr/lib to correct this issue.");
-      return null;
-    }
-
-    // Check if the pipeline came up ok
-    if (pipe == null) {
-      logger.error("Capture {} could not start, pipeline was null!", newRec.getID());
-      resetOnFailure(newRec.getID());
-      return null;
-    }
-
-    logger.info("Initializing devices for capture.");
-
-    // Hook up the shutdown handlers
-    Bus bus = pipe.getBus();
-    bus.connect(new Bus.EOS() {
-      /**
-       * {@inheritDoc}
-       * 
-       * @see org.gstreamer.Bus.EOS#endOfStream(org.gstreamer.GstObject)
-       */
-      public void endOfStream(GstObject arg0) {
-        logger.debug("Pipeline received EOS.");
-        pipe.setState(State.NULL);
-        pipe = null;
-      }
-    });
-    bus.connect(new Bus.ERROR() {
-      /**
-       * {@inheritDoc}
-       * 
-       * @see org.gstreamer.Bus.ERROR#errorMessage(org.gstreamer.GstObject, int, java.lang.String)
-       */
-      public void errorMessage(GstObject obj, int retCode, String msg) {
-        logger.warn("{}: {}", obj.getName(), msg);
-      }
-    });
-    bus.connect(new Bus.WARNING() {
-      /**
-       * {@inheritDoc}
-       * 
-       * @see org.gstreamer.Bus.WARNING#warningMessage(org.gstreamer.GstObject, int, java.lang.String)
-       */
-      public void warningMessage(GstObject obj, int retCode, String msg) {
-        logger.warn("{}: {}", obj.getName(), msg);
-      }
-    });
-
-    // Grab time to wait for pipeline to start
-    int wait;
-    String waitProp = newRec.getProperty(CaptureParameters.CAPTURE_START_WAIT);
-    if (waitProp != null) {
-      wait = Integer.parseInt(waitProp);
-    } else {
-      wait = 5; // Default taken from gstreamer docs
-    }
-
-    // Try and start the pipline
-    pipe.play();
-    if (pipe.getState(wait * GST_SECOND) != State.PLAYING) {
-      logger.error("Unable to start pipeline after {} seconds.  Aborting!", wait);
-      return null;
-    }
-    logger.info("{} started.", pipe.getName());
-    startTime = System.currentTimeMillis();
-
-    return newRec.getID();
-  }
-
-  /**
    * Convenience method to reset an agent when a capture fails to start.
    * 
    * @param recordingID
    *          The recordingID of the capture which failed to start.
    */
-  protected void resetOnFailure(String recordingID) {
+  @Override
+  public void resetOnFailure(String recordingID) {
     setAgentState(AgentState.IDLE);
     setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     currentRecID = null;
@@ -538,12 +480,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     logger.debug("stopCapture() called.");
     setAgentState(AgentState.SHUTTING_DOWN);
     // If pipe is null and no mock capture is on
-    if (pipe == null) {
+    if (captureFramework.isMockCapture()) {
       logger.warn("Pipeline is null, this is normal if running a mock capture.");
       setAgentState(AgentState.IDLE);
     } else {
-      stopPipeline();
-
+      long timeout = getStopCaptureTimeout();
+      captureFramework.stop(timeout);
       // Checks there is a currentRecID defined --should always be
       if (currentRecID == null) {
         logger.warn("There is no currentRecID assigned, but the Pipeline was not null!");
@@ -581,38 +523,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     return true;
-  }
-
-  /**
-   * This method waits until the pipeline has had an opportunity to shutdown and if it surpasses the maximum timeout
-   * value it will be manually stopped.
-   */
-  private void stopPipeline() {
-    // We must stop the capture as soon as possible, then check whatever needed
-    pipe.getBus().post(new EOSMessage(pipe));
-    
-    long startWait = System.currentTimeMillis();
-    long timeout = DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT;
-    if (configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT) == null) {
-      logger.warn("Unable to find shutdown timeout value.  Assuming 1 minute.  Missing key is {}.",
-              CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT);
-    } else {
-      timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT)) * 1000L;
-    }
-    while (pipe != null) {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
-
-      // If we've timed out then force kill the pipeline
-      if (System.currentTimeMillis() - startWait >= timeout) {
-        if (pipe != null) {
-          pipe.setState(State.NULL);
-        }
-        pipe = null;
-      }
-    }
   }
 
   /**
@@ -992,7 +902,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
               continue;
             break;
           }
-          confidencePipe = PipelineFactory.create(configService.getAllProperties(), true, this);
+          // TODO Fix confidence monitoring
+          // confidencePipe = PipelineFactory.create(configService.getAllProperties(), true, this);
           Bus bus = confidencePipe.getBus();
           bus.connect(new Bus.EOS() {
 

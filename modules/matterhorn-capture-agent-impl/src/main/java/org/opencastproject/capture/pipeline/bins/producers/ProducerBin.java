@@ -29,11 +29,12 @@ import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecau
 import org.gstreamer.Element;
 import org.gstreamer.GhostPad;
 import org.gstreamer.Pad;
+import org.gstreamer.event.EOSEvent;
 
 import java.util.Properties;
 
 /**
- * TODO: Comment me!
+ * Producer Bin is the ancestor for every device or file supported but gstreamer capture. 
  */
 public abstract class ProducerBin extends PartialBin {
   
@@ -110,4 +111,15 @@ public abstract class ProducerBin extends PartialBin {
    *           Thrown if the ghost pads cannot be created
    */
   protected abstract Pad getSrcPad() throws UnableToCreateGhostPadsForBinException;
+  
+  /** Sends an EOS event to all of the sources within the Bin. **/
+  public void shutdown() {
+    /**
+     * Send an EOS to all of the source elements for this Bin.
+     **/
+    for (Element element : bin.getSources()) {
+      logger.info("Sending EOS to stop " + element.getName());
+      element.sendEvent(new EOSEvent());
+    }
+  }
 }

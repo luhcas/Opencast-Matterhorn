@@ -54,4 +54,7 @@ interface EpiphanVGA2USBV4LSubBin {
    * @return true, if bin is in specified state.
    */
   boolean setState(State state, long time);
+  
+  /** Sends an End of Stream signal to the source of this bin so that the media file can be closed properly. **/
+  void shutdown();
 }

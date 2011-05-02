@@ -27,6 +27,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -50,14 +52,28 @@ public class SchedulerImplTest {
   private Properties schedulerProperties = null;
   private CaptureAgentImpl captureAgentImpl = null;
   private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-
+  private String directory = "scheduler-restart-test";
+  private static final Logger logger = LoggerFactory.getLogger(SchedulerImplTest.class);
+  private WaitForState waiter;
+  
   @Before
   public void setUp() {
     Properties properties = setupCaptureProperties();
+    removeTestDirectory();
     setupConfigurationManager(properties);
     setupCaptureAgentImpl();
     setupSchedulerProperties();
     setupSchedulerImpl();
+  }
+
+  private void removeTestDirectory() {
+    File testDir = new File("./target", directory);
+    if (testDir.exists()) {
+      FileUtils.deleteQuietly(testDir);
+      logger.info("Removing  " + testDir.getAbsolutePath());
+    } else {
+      logger.info("Didn't Delete " + testDir.getAbsolutePath());
+    }
   }
 
   private Properties setupCaptureProperties() {
@@ -780,7 +796,6 @@ public class SchedulerImplTest {
   }
   
   public void setupFakeMediaPackageWithoutMediaFiles() {
-    String directory = "scheduler-restart-test";
     // Create the configuration manager
     configurationManager = new ConfigurationManager();
     // Setup the configuration manager with a tmp storage directory.

@@ -20,7 +20,7 @@ import org.junit.Assert;
 /** A class that waits until a condition is met or a timeout occurs. **/
 class WaitForState {
   private int sleepTime = 100;
-  private int maxSleepTime = 20000;
+  private int maxSleepTime = 40000;
   private int sleepAccumulator = 0;
   private boolean done = false;
 

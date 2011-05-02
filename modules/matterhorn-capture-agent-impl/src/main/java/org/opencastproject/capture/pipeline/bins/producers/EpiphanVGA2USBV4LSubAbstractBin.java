@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import org.opencastproject.capture.impl.CaptureAgentImpl;
+import org.opencastproject.capture.pipeline.GStreamerPipeline;
 
 import org.gstreamer.Bin;
 import org.gstreamer.State;
@@ -83,7 +83,7 @@ public abstract class EpiphanVGA2USBV4LSubAbstractBin implements EpiphanVGA2USBV
     if (time < 0) {
       return true;
     } else {
-      return bin.getState(time * CaptureAgentImpl.GST_SECOND) == state;
+      return bin.getState(time * GStreamerPipeline.GST_SECOND) == state;
     }
   }
 

@@ -32,7 +32,7 @@ import java.io.File;
 import java.util.Properties;
 
 /**
- * TODO: Comment me!
+ * This V4LProducer supports capturing from a v4l device. 
  */
 public class V4LProducer extends VideoProducer {
 

@@ -15,7 +15,6 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
@@ -95,7 +94,7 @@ public final class ProducerFactory {
    * @throws NoProducerFoundException
    *           If no Producer can be found for this particular ProducerType then this Exception will be thrown.
    **/
-  public ProducerBin getProducer(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
+  public ProducerBin getProducer(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException, NoProducerFoundException {

@@ -39,12 +39,12 @@ import java.util.Date;
 import java.util.Properties;
 
 public class StartCaptureJobTest {
-  CaptureAgentImpl captureAgentImpl = null;
-  MediaPackage mediaPackage = null;
-  Properties properties = null;
-  Scheduler scheduler = null;
-  JobExecutionContext ctx = null;
-  JobDataMap jobDataMap = null;
+  private CaptureAgentImpl captureAgentImpl = null;
+  private MediaPackage mediaPackage = null;
+  private Properties properties = null;
+  private Scheduler scheduler = null;
+  private JobExecutionContext ctx = null;
+  private JobDataMap jobDataMap = null;
   
   @Before
   public void init() {
@@ -53,7 +53,7 @@ public class StartCaptureJobTest {
     addNeededProperties();
   }
 
-  public void initNeededVariables(){
+  public void initNeededVariables() {
     properties = new Properties();
     mediaPackage = EasyMock.createMock(MediaPackage.class);
     captureAgentImpl = EasyMock.createMock(CaptureAgentImpl.class);
@@ -67,7 +67,7 @@ public class StartCaptureJobTest {
     jobDataMap = new JobDataMap();
   }
   
-  public void addNeededVariablesToJobDataMap(){
+  public void addNeededVariablesToJobDataMap() {
     jobDataMap.put(JobParameters.CAPTURE_AGENT, captureAgentImpl);
     jobDataMap.put(JobParameters.MEDIA_PACKAGE, mediaPackage);
     jobDataMap.put(JobParameters.CAPTURE_PROPS, properties);
@@ -79,10 +79,10 @@ public class StartCaptureJobTest {
   }
   
   @Test
-  public void startCaptureFailsToStartIfEndIsRightNow(){
+  public void startCaptureFailsToStartIfEndIsRightNow() {
     try {
       properties.put(CaptureParameters.RECORDING_END, SchedulerImpl.getCronString(new Date()).toString());
-    } catch(ParseException e) {
+    } catch (ParseException e) {
       Assert.fail("Could not create a cronjob " + e.getMessage());
     }
     
@@ -99,11 +99,11 @@ public class StartCaptureJobTest {
   }
   
   @Test
-  public void startCaptureFailsToStartIfAfterEnd(){
+  public void startCaptureFailsToStartIfAfterEnd() {
     try {
       Date end = new Date(System.currentTimeMillis() - 1000000);
       properties.put(CaptureParameters.RECORDING_END, SchedulerImpl.getCronString(end).toString());
-    } catch(ParseException e) {
+    } catch (ParseException e) {
       Assert.fail("Could not create a cronjob " + e.getMessage());
     }
     
@@ -120,11 +120,11 @@ public class StartCaptureJobTest {
   }
   
   @Test
-  public void startCaptureFiresIfEndIsAfterNow() throws SchedulerException{
+  public void startCaptureFiresIfEndIsAfterNow() throws SchedulerException {
     try {
       Date end = new Date(System.currentTimeMillis() + 1000000);
       properties.put(CaptureParameters.RECORDING_END, SchedulerImpl.getCronString(end).toString());
-    } catch(ParseException e) {
+    } catch (ParseException e) {
       Assert.fail("Could not create a cronjob " + e.getMessage());
     }
     

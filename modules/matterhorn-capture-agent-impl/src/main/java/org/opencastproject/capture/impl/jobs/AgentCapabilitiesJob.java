@@ -69,6 +69,12 @@ public class AgentCapabilitiesJob implements Job {
     CaptureAgent agent = (CaptureAgent) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
     TrustedHttpClient client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
 
+    if (client == null) {
+      logger
+              .error("TrustedHttpClient was null so we won't be able to update the agent capabilities until it is updated.");
+      return;
+    }
+    
     // Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {

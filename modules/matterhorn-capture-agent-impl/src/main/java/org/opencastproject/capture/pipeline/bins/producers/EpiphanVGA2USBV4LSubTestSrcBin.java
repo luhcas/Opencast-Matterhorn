@@ -27,12 +27,18 @@ import org.gstreamer.Element;
 import org.gstreamer.Pipeline;
 import org.gstreamer.elements.AppSink;
 
+import org.gstreamer.event.EOSEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Videotestsrc sub bin to use in {@link EpiphanVGA2USBV4LProducer}. Creates a bin with videotestsrc Element to grab
  * signal from and AppSink Element to connect with {@link EpiphanVGA2USBV4LProducer}.
  */
 public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstractBin {
-
+  
+  private static final Logger logger = LoggerFactory.getLogger(EpiphanVGA2USBV4LSubTestSrcBin.class);
+  
   /** CaptureDevice */
   private CaptureDevice captureDevice;
 
@@ -172,5 +178,15 @@ public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstract
   @Override
   public AppSink getSink() {
     return sink;
+  }
+  
+  /**
+   * @inheritDocs
+   * @see EpiphanVGA2USBV4LSubBin#shutdown()
+   */
+  @Override
+  public void shutdown() {
+    logger.info("Sending EOS to stop " + src.getName());
+    src.sendEvent(new EOSEvent());
   }
 }

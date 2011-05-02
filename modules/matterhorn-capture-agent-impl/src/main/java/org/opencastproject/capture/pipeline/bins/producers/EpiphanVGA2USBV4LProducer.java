@@ -78,7 +78,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
   private EpiphanVGA2USBV4LSubBin subBin;
 
   /** Thread poll permanently if vga signal was lost to restore it (when replugged the cable). */
-  private Thread epiphanPoll;
+  private EpiphanPoll epiphanPoll;
 
   /** Elements. */
   private Element identity;
@@ -339,7 +339,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
           if (buffer == null)
             throw new NullPointerException("Buffer is null");
         } catch (Exception ex) {
-          logger.debug(ex.getMessage());
+          //logger.debug(ex.getMessage());
           // epiphan pipeline is down, try to get buffer from testsrc pipeline
           sink = subBin.getSink();
           if (sink == null)
@@ -377,7 +377,7 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
 
           if (current == State.NULL) {
             // stop sub bins
-            epiphanPoll.interrupt();
+            epiphanPoll.stopPolling();
             subBin.stop();
             deviceBin.stop();
           }
@@ -386,6 +386,19 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     });
   }
 
+  /**
+   * Send an EOS to all of the source elements for this Bin.
+   **/
+  @Override
+  public void shutdown() {
+    // Send the EOS to our Epiphan Device bin
+    deviceBin.shutdown();
+    // Send the EOS to our backup source.
+    subBin.shutdown();
+    // Kill the polling thread.
+    epiphanPoll.stopPolling();
+  }
+  
   /** TODO - Make this part platform independent **/
   /**
    * When we have lost a VGA signal, this method can be continually executed to test for a new signal.
@@ -419,15 +432,23 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     /** Location of the Epiphan device */
     private String location;
 
+    /** Keeps track of when the thread should stop polling gracefully. **/
+    private boolean polling = true;
+    
     public EpiphanPoll(String location) {
       this.location = location;
+      polling = true;
+    }
+
+    public synchronized void stopPolling() {
+      polling = false;
     }
 
     public void run() {
 
       logger.debug("Start Epiphan VGA2USB polling thread!");
 
-      while (!interrupted()) {
+      while (!interrupted() && polling) {
         logger.debug("Thread not interrupted. Device: " + deviceBin.isBroken() + " Epiphan: " + checkEpiphan(location));
         if (deviceBin.isBroken() && checkEpiphan(location)) {
           logger.debug("Device broken, attempting to reconnect pipeline.");

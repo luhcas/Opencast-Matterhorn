@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import org.opencastproject.capture.impl.CaptureAgentImpl;
+import org.opencastproject.capture.pipeline.GStreamerPipeline;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 
 import org.gstreamer.Caps;
@@ -173,7 +173,7 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
     // start Bin
     epiphanBin.getBin().setState(State.PLAYING);
 
-    State state = epiphanBin.getBin().getState(15 * CaptureAgentImpl.GST_SECOND);
+    State state = epiphanBin.getBin().getState(15 * GStreamerPipeline.GST_SECOND);
     Assert.assertEquals(state, State.PLAYING);
 
     // state = epiphanBin.deviceBin.pipeline.getState();
@@ -185,7 +185,7 @@ public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
     // stop Bin
     epiphanBin.getBin().setState(State.NULL);
 
-    state = epiphanBin.getBin().getState(15 * CaptureAgentImpl.GST_SECOND);
+    state = epiphanBin.getBin().getState(15 * GStreamerPipeline.GST_SECOND);
     Assert.assertEquals(state, State.NULL);
 
     // state = epiphanBin.deviceBin.pipeline.getState();

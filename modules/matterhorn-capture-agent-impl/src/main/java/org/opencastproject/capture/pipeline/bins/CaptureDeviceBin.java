@@ -15,7 +15,6 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.pipeline.bins.consumers.ConsumerBin;
 import org.opencastproject.capture.pipeline.bins.consumers.ConsumerFactory;
 import org.opencastproject.capture.pipeline.bins.consumers.ConsumerType;
@@ -69,7 +68,7 @@ public class CaptureDeviceBin {
    *           Thrown if a GStreamer Element can't be created because the platform it is running on doesn't support it
    *           or the necessary GStreamer module is not installed.
    */
-  public CaptureDeviceBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
+  public CaptureDeviceBin(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
           UnableToSetElementPropertyBecauseElementWasNullException, NoConsumerFoundException,
           CaptureDeviceNullPointerException, UnableToCreateElementException, NoProducerFoundException {
@@ -84,7 +83,7 @@ public class CaptureDeviceBin {
       // mpeg encoding and don't do it in software.
       addFileBin(captureDevice, properties);
     } else {
-      createProducer(captureDevice, properties, captureAgent);
+      createProducer(captureDevice, properties);
       createConsumers(captureDevice, properties);
       linkProducerToConsumers();
     }
@@ -136,11 +135,11 @@ public class CaptureDeviceBin {
    * @throws NoProducerFoundException
    *           Thrown if the captureDevice.getName returns a ProducerType that unrecognized.
    * **/
-  private void createProducer(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
+  private void createProducer(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException, NoProducerFoundException {
-    producerBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, captureAgent);
+    producerBin = ProducerFactory.getInstance().getProducer(captureDevice, properties);
   }
 
   /**
@@ -307,6 +306,13 @@ public class CaptureDeviceBin {
       throw new UnableToLinkGStreamerElementsException(captureDevice, tee, queue);
     } else if (!Element.linkPads(queue, GStreamerProperties.SRC, consumerBin.getBin(), ConsumerBin.GHOST_PAD_NAME)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, queue, consumerBin.getBin());
+    }
+  }
+
+  /** Sends an EOS to each of its sources. **/
+  public void shutdown() {
+    if (producerBin != null) {
+      producerBin.shutdown();
     }
   }
 

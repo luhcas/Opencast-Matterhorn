@@ -115,7 +115,7 @@ public class CaptureDeviceBinTest {
   private CaptureDeviceBin createCaptureDevice() {
     CaptureDeviceBin captureDeviceBin = null;
     try {
-      captureDeviceBin = new CaptureDeviceBin(captureDevice, properties, captureAgentMock);
+      captureDeviceBin = new CaptureDeviceBin(captureDevice, properties);
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail();

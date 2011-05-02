@@ -148,7 +148,7 @@ public abstract class EpiphanVGA2USBV4LTest {
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException, NoProducerFoundException {
 
-    ProducerBin epiphanBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, null);
+    ProducerBin epiphanBin = ProducerFactory.getInstance().getProducer(captureDevice, properties);
     if (epiphanBin instanceof EpiphanVGA2USBV4LProducer)
       return (EpiphanVGA2USBV4LProducer) epiphanBin;
     else {

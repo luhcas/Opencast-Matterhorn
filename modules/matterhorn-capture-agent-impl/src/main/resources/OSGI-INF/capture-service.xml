@@ -17,4 +17,6 @@
     cardinality="1..1" policy="static" bind="setServiceRegistry" />
   <reference name="trustedClient" interface="org.opencastproject.security.api.TrustedHttpClient"
     cardinality="1..1" policy="dynamic" bind="setTrustedClient" />
+  <reference name="captureFramework" interface="org.opencastproject.capture.impl.CaptureFramework"
+    cardinality="1..1" policy="static" bind="setCaptureFramework" />
 </scr:component>
