@@ -284,6 +284,14 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
     if (caps == null || caps.isEmpty()) {
       try {
         V4LInfo v4linfo = JV4LInfo.getV4LInfo(captureDevice.getLocation());
+        
+        // test equality of min and max width (or height)
+        // new epiphan kernel module can get resolution information without vga cable pluged in
+        // so it returns possible min and max value of epiphan capture device
+        if (v4linfo.getVideoCapability().getMinwidth() != v4linfo.getVideoCapability().getMaxwidth()) {
+          throw new JV4LInfoException("No VGA-signal!");
+        }
+        
         int width = v4linfo.getVideoCapability().getMaxwidth();
         int height = v4linfo.getVideoCapability().getMaxheight();
         caps = GStreamerProperties.VIDEO_X_RAW_YUV + ", " + GStreamerProperties.WIDTH + "=" + width + ", "
