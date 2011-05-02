@@ -57,14 +57,10 @@ import javax.xml.parsers.DocumentBuilderFactory;
         name = "mediainspection",
         title = "Media Inspection Service",
         notes = { 
-                "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-                "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-                "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. " + 
-                "In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: " +
-                "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>", 
-                "Here is a sample video for testing: " + 
-                "<a href=\"./?url=http://source.opencastproject.org/svn/modules/opencast-media/trunk/src/test/resources/aonly.mov\">" +
-                "analyze sample video</a>"
+                "All paths are relative to the REST endpoint base (something like http://your.server/files)",
+                "If you notice that this service is not working as expected, there might be a bug! "+
+                "You should file an error report with your server logs from the time when the error occurred: " +
+                "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>"
         },
         abstractText = "This service extracts technical metadata from media files."
 )
@@ -139,6 +135,10 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
                           responseCode = HttpServletResponse.SC_NO_CONTENT
                   ),
                   @RestResponse(
+                          description = "Service unavailabe or not currently present",
+                          responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE
+                  ),
+                  @RestResponse(
                           description = "Problem retrieving media file or invalid media file or URL.",
                           responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
                   )
@@ -181,6 +181,10 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
                   @RestResponse(
                           description = "XML encoded receipt is returned.",
                           responseCode = HttpServletResponse.SC_NO_CONTENT
+                  ),
+                  @RestResponse(
+                          description = "Service unavailabe or not currently present",
+                          responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE
                   ),
                   @RestResponse(
                           description = "Problem retrieving media file or invalid media file or URL.",

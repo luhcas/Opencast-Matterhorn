@@ -54,10 +54,9 @@ import javax.ws.rs.core.Response;
         name = "search",
         title = "Search Service",
         notes = { 
-                "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-                "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-                "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. " + 
-                "In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: " +
+                "All paths are relative to the REST endpoint base (something like http://your.server/files)",
+                "If you notice that this service is not working as expected, there might be a bug! "+
+                "You should file an error report with your server logs from the time when the error occurred: " +
                 "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>"
         },
         abstractText = "This service indexes and queries available (distributed) episodes."
@@ -117,7 +116,11 @@ public class SearchRestService {
                   @RestResponse(
                           description = "The mediapackage was added, no content to return.",
                           responseCode = HttpServletResponse.SC_NO_CONTENT
-                          )
+                  ),
+                  @RestResponse(
+                          description = "There has been an internal error and the mediapackage could not be added",
+                          responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                  )
           }, 
           returnDescription = "No content is returned."
   )
@@ -149,7 +152,11 @@ public class SearchRestService {
                   @RestResponse(
                           description = "The mediapackage was removed, no content to return.",
                           responseCode = HttpServletResponse.SC_NO_CONTENT
-                          )
+                  ),
+                  @RestResponse(
+                          description = "There has been an internal error and the mediapackage could not be added",
+                          responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+                  )
           }, 
           returnDescription = "No content is returned."
   )
@@ -367,7 +374,6 @@ public class SearchRestService {
                           type = RestParameter.Type.STRING
                   ),
                   @RestParameter(
-                          defaultValue = "",
                           description = "Any episode or series that matches this free-text query.",
                           isRequired = false,
                           name = "q",
