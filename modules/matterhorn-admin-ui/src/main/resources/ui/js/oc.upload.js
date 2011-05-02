@@ -323,7 +323,7 @@ ocUpload.showProgressStage = function() {
     width: 450,
     height: 'auto',
     position: ['center', 'center'],
-    title: 'Ingesting Recording',
+    title: 'Uploading File',
     create: function (event, ui)
     {
       $('.ui-dialog-titlebar-close').hide();
