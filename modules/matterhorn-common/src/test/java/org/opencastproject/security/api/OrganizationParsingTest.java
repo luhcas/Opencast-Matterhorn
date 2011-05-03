@@ -37,7 +37,7 @@ public class OrganizationParsingTest {
     String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
             + "<ns2:organization id=\"mh_default_org\" xmlns:ns2=\"http://org.opencastproject.security\">"
             + "<name>Opencast Project</name><serverName>http://localhost:8080</serverName><serverPort>80</serverPort>"
-            + "<adminRole>admin</adminRole><anonymousRole>anonymous</anonymousRole><properties>"
+            + "<adminRole>ROLE_ADMIN</adminRole><anonymousRole>anonymous</anonymousRole><properties>"
             + "<property key=\"logo_small\">/img/OpencastLogo.png</property>"
             + "<property key=\"logo_large\">/img/MatterhornLogo_large.png</property>"
             + "</properties></ns2:organization>";

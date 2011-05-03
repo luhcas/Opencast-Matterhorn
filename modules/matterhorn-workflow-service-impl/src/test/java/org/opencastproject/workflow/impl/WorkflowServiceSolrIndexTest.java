@@ -100,7 +100,7 @@ public class WorkflowServiceSolrIndexTest {
   public void testBuildSimpleQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withMediaPackage("123").withSeriesId("series1");
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "mediapackageid:123 AND seriesid:series1 AND (oc_acl_read:admin)";
+    String expected = "mediapackageid:123 AND seriesid:series1 AND (oc_acl_read:ROLE_ADMIN)";
     assertEquals(expected, solrQuery);
   }
 
@@ -112,7 +112,7 @@ public class WorkflowServiceSolrIndexTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withState(WorkflowState.RUNNING)
             .withState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (state:running OR state:paused) AND (oc_acl_read:admin)";
+    String expected = "seriesid:series1 AND (state:running OR state:paused) AND (oc_acl_read:ROLE_ADMIN)";
     assertEquals(expected, solrQuery);
   }
 
@@ -124,7 +124,7 @@ public class WorkflowServiceSolrIndexTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING)
             .withoutState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:running AND -state:paused AND *:*) AND (oc_acl_read:admin)";
+    String expected = "seriesid:series1 AND (-state:running AND -state:paused AND *:*) AND (oc_acl_read:ROLE_ADMIN)";
     assertEquals(expected, solrQuery);
   }
 
@@ -135,7 +135,7 @@ public class WorkflowServiceSolrIndexTest {
   public void testBuildNegativeStateQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:running AND *:*) AND (oc_acl_read:admin)";
+    String expected = "seriesid:series1 AND (-state:running AND *:*) AND (oc_acl_read:ROLE_ADMIN)";
     assertEquals(expected, solrQuery);
   }
 

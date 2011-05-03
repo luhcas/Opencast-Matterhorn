@@ -33,7 +33,7 @@ public interface SecurityConstants {
   String DEFAULT_ORGANIZATION_NAME = "Opencast Project";
 
   /** Name of the default organization's local admin role */
-  String DEFAULT_ORGANIZATION_ADMIN = "admin";
+  String DEFAULT_ORGANIZATION_ADMIN = "ROLE_ADMIN";
 
   /** Name of the default organization's local anonymous role */
   String DEFAULT_ORGANIZATION_ANONYMOUS = "anonymous";
