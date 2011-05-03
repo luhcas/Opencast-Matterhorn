@@ -70,7 +70,7 @@ public class WorkflowRestEndpointTest {
   public void teardown() throws Exception {
     Main.returnClient(client);
   }
-    
+
   @Test
   public void testStartAndRetrieveWorkflowInstance() throws Exception {
     // Start a workflow instance via the rest endpoint
@@ -98,7 +98,15 @@ public class WorkflowRestEndpointTest {
     if(json == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
     JSONObject workflowAsJson = (JSONObject)json.get("workflow");
     Assert.assertEquals(id, workflowAsJson.get("id"));
-    
+
+    // Make sure we can retrieve it as part of a set of workflows as json
+    HttpGet getWorkflowsJson = new HttpGet(BASE_URL + "/workflow/instances.json");
+    String workflowsResponse = EntityUtils.toString(client.execute(getWorkflowsJson).getEntity());
+    JSONObject workflowsJson = (JSONObject) JSONValue.parse(workflowsResponse);
+    if(workflowsJson == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
+    JSONObject workflows = (JSONObject)workflowsJson.get("workflows");
+    Assert.assertTrue(Integer.parseInt((String)workflows.get("totalCount")) > 0);
+
     // Ensure that the workflow finishes successfully
     int attempts = 0;
     while(true) {
