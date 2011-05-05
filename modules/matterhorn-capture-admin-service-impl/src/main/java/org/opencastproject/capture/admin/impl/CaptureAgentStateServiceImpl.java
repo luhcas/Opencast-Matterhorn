@@ -63,7 +63,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   protected PersistenceProvider persistenceProvider;
 
   /** The persistence properties */
-  @SuppressWarnings({ "rawtypes" })
+  @SuppressWarnings("unchecked")
   protected Map persistenceProperties;
 
   /** The factory used to generate the entity manager */
@@ -97,7 +97,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
-  @SuppressWarnings({ "rawtypes" })
+  @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
@@ -453,7 +453,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     return ids;
   }
 
-  public void updated(@SuppressWarnings("rawtypes") Dictionary props) throws ConfigurationException {
+  @SuppressWarnings("unchecked")
+  public void updated(Dictionary props) throws ConfigurationException {
 
   }
 }

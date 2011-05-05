@@ -187,7 +187,7 @@ public class InboxScanner implements ArtifactInstaller, ManagedService {
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
 

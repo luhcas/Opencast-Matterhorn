@@ -59,7 +59,8 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
     this.workspace = workspace;
   }
 
-  public void activate(@SuppressWarnings("rawtypes") Map properties) {
+  @SuppressWarnings("unchecked") 
+  public void activate(Map properties) {
     logger.debug("activate()");
     if (properties != null) {
       String priorityString = (String) properties.get(PRIORITY_KEY);

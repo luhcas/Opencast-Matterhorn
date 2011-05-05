@@ -79,7 +79,7 @@ public class RestPublisher implements RestConstants {
   /** The 404 Error page */
   protected String fourOhFour = null;
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   protected List providers = null;
 
   static {

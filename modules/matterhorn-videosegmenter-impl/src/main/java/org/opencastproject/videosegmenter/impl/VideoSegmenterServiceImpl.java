@@ -168,7 +168,7 @@ public class VideoSegmenterServiceImpl extends AbstractJobProducer implements Vi
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     logger.debug("Configuring the videosegmenter");

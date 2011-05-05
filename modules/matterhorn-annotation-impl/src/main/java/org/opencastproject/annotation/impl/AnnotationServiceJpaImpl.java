@@ -41,7 +41,7 @@ import javax.persistence.spi.PersistenceProvider;
 public class AnnotationServiceJpaImpl implements AnnotationService {
 
   /** The persistence unit properties */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   protected Map persistenceProperties;
 
   /** The factory used to generate the entity manager */
@@ -67,7 +67,7 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }

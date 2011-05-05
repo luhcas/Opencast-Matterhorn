@@ -1611,7 +1611,8 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @Override
-  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+  @SuppressWarnings("unchecked")
+  public void updated(Dictionary properties) throws ConfigurationException {
     String maxConfiguration = StringUtils.trimToNull((String) properties.get(MAX_CONCURRENT_CONFIG_KEY));
     if (maxConfiguration != null) {
       try {

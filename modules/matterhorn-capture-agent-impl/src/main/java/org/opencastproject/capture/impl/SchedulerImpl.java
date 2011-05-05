@@ -149,7 +149,7 @@ public class SchedulerImpl {
    */
   private boolean locked = false;
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   public SchedulerImpl(Dictionary dictionary, ConfigurationManager configurationManager,
           CaptureAgentImpl captureAgentImpl) throws ConfigurationException {
     configService = configurationManager;
@@ -215,7 +215,7 @@ public class SchedulerImpl {
    * @see org.osgi.service.cm.ManagedService#updated(Dictionary)
    */
   //@Override
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings("unchecked")
   private void updated(Dictionary properties) throws ConfigurationException {
     log.debug("Scheduler updated.");
 

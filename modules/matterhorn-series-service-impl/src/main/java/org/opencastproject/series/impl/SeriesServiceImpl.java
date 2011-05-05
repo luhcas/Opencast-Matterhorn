@@ -116,7 +116,8 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @Override
-  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+  @SuppressWarnings("unchecked") 
+  public void updated(Dictionary properties) throws ConfigurationException {
   }
 
   /*

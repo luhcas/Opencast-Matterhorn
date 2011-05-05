@@ -122,7 +122,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
   /**
    * Properties that are updated by ManagedService updated method
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   protected Dictionary properties;
 
   /**
@@ -743,7 +743,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;

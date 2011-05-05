@@ -141,7 +141,8 @@ public class TesseractTextExtractor implements TextExtractor, ManagedService {
   }
 
   @Override
-  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+  @SuppressWarnings("unchecked")
+  public void updated(Dictionary properties) throws ConfigurationException {
     String path = (String) properties.get(TESSERACT_BINARY_CONFIG_KEY);
     if (path != null) {
       this.binary = path;

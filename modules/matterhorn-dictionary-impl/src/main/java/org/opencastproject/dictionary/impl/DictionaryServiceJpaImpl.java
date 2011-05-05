@@ -49,7 +49,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
   protected PersistenceProvider persistenceProvider;
 
   /** The properties used to generate an entity manager factory */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   protected Map persistenceProperties;
 
   /** The factory used to generate the entity manager */
@@ -71,7 +71,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }

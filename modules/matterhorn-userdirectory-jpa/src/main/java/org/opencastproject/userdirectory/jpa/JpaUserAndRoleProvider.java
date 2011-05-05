@@ -55,14 +55,14 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
     this.persistenceProvider = persistenceProvider;
   }
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   protected Map persistenceProperties;
 
   /**
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }

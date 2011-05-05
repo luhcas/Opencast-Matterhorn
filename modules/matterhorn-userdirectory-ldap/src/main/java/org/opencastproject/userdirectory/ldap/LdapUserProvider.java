@@ -102,7 +102,7 @@ public class LdapUserProvider implements UserProvider, ManagedService {
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @Override
-  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+  public void updated(@SuppressWarnings("unchecked") Dictionary properties) throws ConfigurationException {
     String searchBase = (String) properties.get(SEARCH_BASE_KEY);
     if (StringUtils.isBlank(searchBase))
       throw new ConfigurationException(SEARCH_BASE_KEY, "is not set");

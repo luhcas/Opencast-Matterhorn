@@ -82,7 +82,8 @@ public class StaticResource extends HttpServlet {
    * @param componentContext
    *          the DS component context
    */
-  public void activate(@SuppressWarnings("rawtypes") Map componentProperties) {
+  @SuppressWarnings("unchecked")
+  public void activate(Map componentProperties) {
     if (welcomeFile == null)
       welcomeFile = (String) componentProperties.get("welcome.file");
     boolean welcomeFileSpecified = true;

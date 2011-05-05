@@ -43,7 +43,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	private final InputStream m_requestData;
 	private final int length;
 	private String m_strContentType;
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings("unchecked")
   private Map m_headers = new java.util.HashMap();
 
 	/**
@@ -109,7 +109,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.http.HttpServletRequest#getHeaders(String)
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
   public Enumeration getHeaders(String arg0)
 	{
 		// todo - implement
@@ -119,7 +119,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.http.HttpServletRequest#getHeaderNames()
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
   public Enumeration getHeaderNames()
 	{
 		// todo - implement
@@ -290,7 +290,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getAttributeNames()
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
   public Enumeration getAttributeNames()
 	{
 		return null;
@@ -358,7 +358,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getParameterNames()
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
   public Enumeration getParameterNames()
 	{
 		return null;
@@ -375,7 +375,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getParameterMap()
 	 */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
 	public Map getParameterMap()
 	{
 		return null;
@@ -494,7 +494,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	/**
 	 * @see javax.servlet.ServletRequest#getLocales()
 	 */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
 	public Enumeration getLocales()
 	{
 		return null;

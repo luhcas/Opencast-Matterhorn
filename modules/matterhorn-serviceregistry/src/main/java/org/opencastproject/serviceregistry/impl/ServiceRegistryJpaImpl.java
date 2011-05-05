@@ -128,7 +128,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /** The organization directory service */
   protected OrganizationDirectoryService organizationDirectoryService = null;
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   protected Map persistenceProperties;
 
   /**
@@ -154,7 +154,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
@@ -983,7 +983,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     try {
       Query query = em.createNamedQuery("ServiceRegistration.statistics");
       Map<ServiceRegistration, JaxbServiceStatistics> statsMap = new HashMap<ServiceRegistration, JaxbServiceStatistics>();
-      @SuppressWarnings("rawtypes")
+      @SuppressWarnings("unchecked")
       List queryResults = query.getResultList();
       for (Object result : queryResults) {
         Object[] oa = (Object[]) result;
