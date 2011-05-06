@@ -23,6 +23,12 @@ import org.apache.commons.codec.digest.DigestUtils;
 public final class PasswordEncoder {
 
   /**
+   * Private constructor to disallow construction of this utility class.
+   */
+  private PasswordEncoder() {
+  }
+
+  /**
    * Encode a clear text password.
    * 
    * @param clearText

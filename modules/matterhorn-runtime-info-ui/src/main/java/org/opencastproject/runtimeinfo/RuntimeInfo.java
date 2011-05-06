@@ -57,7 +57,7 @@ import javax.ws.rs.core.MediaType;
  * opencast project with the contents of the {@link #getRuntimeInfo()} json feed.
  */
 @Path("/")
-@RestService(name = "RuntimeInfo", title = "Runtime Information", notes = {}, abstractText = "This service provides information about the runtime environment, including the servives that are deployed and the current user context.")
+@RestService(name = "RuntimeInfo", title = "Runtime Information", notes = "", abstractText = "This service provides information about the runtime environment, including the servives that are deployed and the current user context.")
 public class RuntimeInfo {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(RuntimeInfo.class);

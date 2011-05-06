@@ -57,7 +57,7 @@ public class Activator implements BundleActivator {
   protected ComboPooledDataSource pooledDataSource;
   protected BundleContext bundleContext;
   protected BundleListener jpaClientBundleListener;
-  
+
   public Activator() {
   }
 
@@ -74,7 +74,7 @@ public class Activator implements BundleActivator {
   @Override
   public void start(BundleContext bundleContext) throws Exception {
     this.bundleContext = bundleContext;
-    
+
     // Use the configured storage directory
     rootDir = bundleContext.getProperty("org.opencastproject.storage.dir") + File.separator + "db";
 
@@ -157,10 +157,10 @@ public class Activator implements BundleActivator {
       if (event.getType() != BundleEvent.UPDATED)
         return;
       Bundle updatedBundle = event.getBundle();
-      if(updatedBundle.getEntry("/META-INF/persistence.xml") == null)
+      if (updatedBundle.getEntry("/META-INF/persistence.xml") == null)
         return;
       ServiceReference jpaProviderRef = bundleContext.getServiceReference("javax.persistence.spi.PersistenceProvider");
-      if(jpaProviderRef != null) {
+      if (jpaProviderRef != null) {
         Bundle jpaBundle = jpaProviderRef.getBundle();
         try {
           jpaBundle.update();

@@ -53,17 +53,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
  * A service endpoint to expose the {@link MediaInspectionService} via REST.
  */
 @Path("/")
-@RestService(
-        name = "mediainspection",
-        title = "Media Inspection Service",
-        notes = { 
-                "All paths are relative to the REST endpoint base (something like http://your.server/files)",
-                "If you notice that this service is not working as expected, there might be a bug! "+
-                "You should file an error report with your server logs from the time when the error occurred: " +
-                "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>"
-        },
-        abstractText = "This service extracts technical metadata from media files."
-)
+@RestService(name = "mediainspection", title = "Media Inspection Service", notes = {
+        "All paths are relative to the REST endpoint base (something like http://your.server/files)",
+        "If you notice that this service is not working as expected, there might be a bug! "
+                + "You should file an error report with your server logs from the time when the error occurred: "
+                + "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>" }, abstractText = "This service extracts technical metadata from media files.")
 public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
 
   /** The logger */
@@ -111,40 +105,16 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    //String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
+    // String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
   }
 
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("inspect")
-  @RestQuery(
-          name = "inspect",
-          description = "Analyze a given media file, returning a receipt to check on the status and outcome of the job", 
-          pathParameters = {},
-          restParameters = { 
-                  @RestParameter(
-                          description = "Location of the media file.", 
-                          isRequired = true,
-                          name = "uri",
-                          type = RestParameter.Type.STRING
-                  ) 
-          },
-          reponses = { 
-                  @RestResponse(
-                          description = "XML encoded receipt is returned.",
-                          responseCode = HttpServletResponse.SC_NO_CONTENT
-                  ),
-                  @RestResponse(
-                          description = "Service unavailabe or not currently present",
-                          responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE
-                  ),
-                  @RestResponse(
-                          description = "Problem retrieving media file or invalid media file or URL.",
-                          responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-                  )
-          }, 
-          returnDescription = ""
-  )
+  @RestQuery(name = "inspect", description = "Analyze a given media file, returning a receipt to check on the status and outcome of the job", restParameters = { @RestParameter(description = "Location of the media file.", isRequired = true, name = "uri", type = RestParameter.Type.STRING) }, reponses = {
+          @RestResponse(description = "XML encoded receipt is returned.", responseCode = HttpServletResponse.SC_NO_CONTENT),
+          @RestResponse(description = "Service unavailabe or not currently present", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE),
+          @RestResponse(description = "Problem retrieving media file or invalid media file or URL.", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response inspectTrack(@QueryParam("uri") URI uri) {
     checkNotNull(service);
     try {
@@ -159,40 +129,12 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("enrich")
-  @RestQuery(
-          name = "enrich",
-          description = "Analyze and add missing metadata of a given media file, returning a receipt to check on the status and outcome of the job.", 
-          pathParameters = {},
-          restParameters = { 
-                  @RestParameter(
-                          description = "MediaPackage Element, that should be enriched with metadata ", 
-                          isRequired = true,
-                          name = "mediaPackageElement",
-                          type = RestParameter.Type.TEXT
-                  ),
-                  @RestParameter(
-                          description = "Should the existing metadata values remain", 
-                          isRequired = true,
-                          name = "override",
-                          type = RestParameter.Type.BOOLEAN
-                  ) 
-          },
-          reponses = { 
-                  @RestResponse(
-                          description = "XML encoded receipt is returned.",
-                          responseCode = HttpServletResponse.SC_NO_CONTENT
-                  ),
-                  @RestResponse(
-                          description = "Service unavailabe or not currently present",
-                          responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE
-                  ),
-                  @RestResponse(
-                          description = "Problem retrieving media file or invalid media file or URL.",
-                          responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-                  )
-          }, 
-          returnDescription = ""
-  )  
+  @RestQuery(name = "enrich", description = "Analyze and add missing metadata of a given media file, returning a receipt to check on the status and outcome of the job.", restParameters = {
+          @RestParameter(description = "MediaPackage Element, that should be enriched with metadata ", isRequired = true, name = "mediaPackageElement", type = RestParameter.Type.TEXT),
+          @RestParameter(description = "Should the existing metadata values remain", isRequired = true, name = "override", type = RestParameter.Type.BOOLEAN) }, reponses = {
+          @RestResponse(description = "XML encoded receipt is returned.", responseCode = HttpServletResponse.SC_NO_CONTENT),
+          @RestResponse(description = "Service unavailabe or not currently present", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE),
+          @RestResponse(description = "Problem retrieving media file or invalid media file or URL.", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
   public Response enrichTrack(@FormParam("mediaPackageElement") String mediaPackageElement,
           @FormParam("override") boolean override) {
     checkNotNull(service);

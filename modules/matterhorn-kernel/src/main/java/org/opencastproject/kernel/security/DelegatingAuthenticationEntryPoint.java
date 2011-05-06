@@ -55,7 +55,7 @@ public class DelegatingAuthenticationEntryPoint implements AuthenticationEntryPo
       String requestUri = request.getRequestURI();
       String queryString = request.getQueryString();
       if (requestUri != null && !requestUri.isEmpty() & !"/".equals(requestUri)) {
-        if(queryString == null) {
+        if (queryString == null) {
           request.getSession().setAttribute(INITIAL_REQUEST_PATH, requestUri);
         } else {
           request.getSession().setAttribute(INITIAL_REQUEST_PATH, requestUri + "?" + queryString);

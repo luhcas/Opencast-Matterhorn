@@ -30,10 +30,16 @@ import java.util.Set;
 /**
  * Parses a text dump of components.json reports
  */
-public class ComponentsJsonParser {
+public final class ComponentsJsonParser {
 
   /** Matches IPv4 addresses */
   public static final String IP_REGEX = "(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+
+  /**
+   * Private constructor to disallow construction of this utility class.
+   */
+  private ComponentsJsonParser() {
+  }
 
   /**
    * Main method
