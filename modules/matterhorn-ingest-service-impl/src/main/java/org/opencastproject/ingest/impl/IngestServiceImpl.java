@@ -20,6 +20,7 @@ import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.job.api.AbstractJobProducer;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -30,6 +31,7 @@ import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.identifier.HandleException;
+import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.OrganizationDirectoryService;
@@ -480,7 +482,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       response = httpClient.execute(getDc);
       in = response.getEntity().getContent();
       DublinCoreCatalog dc = dublinCoreService.load(in);
-      String id = dc.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER);
+      String id = dc.getFirst(DublinCore.PROPERTY_IDENTIFIER);
       if (id == null) {
         logger.warn("Series dublin core document contains no identifier");
       } else {
@@ -668,6 +670,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
                   workflow.getId());
           workflow = null;
         }
+
       } catch (NotFoundException e) {
         logger.warn("Failed to find a workflow with id '{}'", workflowId);
       } catch (WorkflowDatabaseException e) {
@@ -680,16 +683,38 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
         WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(workflowDefinitionID);
         return workflowService.start(workflowDef, mp, properties);
       } else {
+        // Ensure that we're in one of the pre-processing operations
         WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(workflowDefinitionID);
 
-        // if we are not in the last operation of the preprocessing workflow (due to the capture agent not reporting
-        // on its recording status), we need to advance the workflow.
+        // The pre-processing workflow contains three operations: schedule, capture, and ingest. If we are not in the
+        // last operation of the preprocessing workflow (due to the capture agent not reporting on its recording
+        // status), we need to advance the workflow.
         WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
+        if (currentOperation == null) {
+          throw new IllegalStateException(workflow
+                  + " has no current operation, so can not be resumed with a new mediapackage");
+        }
         int currentPosition = workflow.getOperations().indexOf(currentOperation);
+        if (currentPosition > 2) {
+          throw new IllegalStateException(workflow + " is already in operation #" + currentPosition
+                  + ", so we can not ingest");
+        }
+
         int preProcessingOperations = workflow.getOperations().size();
 
-        // Replace the current mediapackage with the new one
-        workflow.setMediaPackage(mp);
+        // Merge the current mediapackage with the new one
+        MediaPackage existingMediaPackage = workflow.getMediaPackage();
+        for (MediaPackageElement element : mp.getElements()) {
+          if (element instanceof Catalog) {
+            // if the existing mediapackage contains a catalog of the same flavor, keep the server-side catalog, since
+            // it is more likely to be up-to-date
+            MediaPackageElement[] existingCatalogs = existingMediaPackage.getCatalogs(element.getFlavor());
+            if (existingCatalogs != null && existingCatalogs.length > 0) {
+              continue;
+            }
+          }
+          existingMediaPackage.add(element);
+        }
 
         // Extend the workflow operations
         workflow.extend(workflowDef);
