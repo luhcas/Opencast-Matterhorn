@@ -21,11 +21,6 @@ import org.opencastproject.rest.RestConstants;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.rest.RestQuery;
 import org.opencastproject.util.doc.rest.RestResponse;
 import org.opencastproject.util.doc.rest.RestService;
@@ -76,7 +71,6 @@ public class RuntimeInfo {
   private String serverUrl;
   private String engageBaseUrl;
   private String adminBaseUrl;
-  private String docs;
 
   protected void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
@@ -100,48 +94,10 @@ public class RuntimeInfo {
     if (engageBaseUrl == null)
       engageBaseUrl = serverUrl;
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
-
-    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(serviceUrl);
   }
 
   public void deactivate() {
     // Nothing to do
-  }
-
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("RuntimeInfo", "Runtime Information", serviceUrl, null);
-
-    // abstract
-    data.setAbstract("This service provides information about the runtime environment, including the servives that are"
-            + "deployed and the current user context.");
-
-    // services
-    RestEndpoint servicesEndpoint = new RestEndpoint("services", RestEndpoint.Method.GET, "/components.json", "List "
-            + "the REST services and user interfaces running on this host");
-    servicesEndpoint.addFormat(new Format("JSON", null, null));
-    servicesEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("The components running on this host"));
-    servicesEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, servicesEndpoint);
-
-    // me
-    RestEndpoint meEndpoint = new RestEndpoint("me", RestEndpoint.Method.GET, "/me.json",
-            "Information about the curent user");
-    meEndpoint.addFormat(new Format("JSON", null, null));
-    meEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("Returns information about the current user"));
-    meEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, meEndpoint);
-
-    logger.debug("generated documentation for {}", data);
-
-    return DocUtil.generate(data);
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public String getDocumentation() {
-    return docs;
   }
 
   @GET
