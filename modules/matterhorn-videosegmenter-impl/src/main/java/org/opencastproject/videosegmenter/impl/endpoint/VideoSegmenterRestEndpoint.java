@@ -22,19 +22,17 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.AbstractJobProducerEndpoint;
-import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 import org.opencastproject.videosegmenter.api.VideoSegmenterService;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -47,6 +45,10 @@ import javax.ws.rs.core.Response;
  * The REST endpoint for the {@link VideoSegmenterService} service
  */
 @Path("")
+@RestService(name = "videosegmentation", title = "Video Segmentation Service", notes = {
+        "If you notice that this service is not working as expected, there might be a bug! "
+        + "You should file an error report with your server logs from the time when the error occurred: "
+        + "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>" }, abstractText = "This service performs segmentation of media files.")
 public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
 
   /** The rest docs */
@@ -65,8 +67,8 @@ public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(serviceUrl);
+    //String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
+    //docs = generateDocs(serviceUrl);
   }
 
   /**
@@ -99,6 +101,13 @@ public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
   @POST
   @Path("")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "segment", description = "Submit a track for segmentation.", restParameters = {
+          @RestParameter(description = "The track to segment.", isRequired = true, name = "track", type = RestParameter.Type.FILE)},
+          reponses = { 
+          @RestResponse(description = "The job ID to use when polling for the resulting mpeg7 catalog.", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "The \"segment\" is NULL or not a valid track type.", responseCode = HttpServletResponse.SC_BAD_REQUEST),
+          @RestResponse(description = "The underlying service could not segment the video.", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+          }, returnDescription = "The job ID to use when polling for the resulting mpeg7 catalog.")
   public Response segment(@FormParam("track") String trackAsXml) throws Exception {
     // Ensure that the POST parameters are present
     if (StringUtils.isBlank(trackAsXml)) {
@@ -125,20 +134,6 @@ public class VideoSegmenterRestEndpoint extends AbstractJobProducerEndpoint {
     return docs;
   }
 
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("videoSegmenter", "Video Segmentation Service", serviceUrl,
-            new String[] { "$Rev$" });
-    // analyze
-    RestEndpoint analyzeEndpoint = new RestEndpoint("segment", RestEndpoint.Method.POST, "/",
-            "Submit a track for segmentation");
-    analyzeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("The job ID to use when polling for the resulting mpeg7 catalog"));
-    analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "", "The track to segment."));
-    analyzeEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, analyzeEndpoint);
-
-    return DocUtil.generate(data);
-  }
 
   /**
    * {@inheritDoc}
