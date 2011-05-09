@@ -187,7 +187,7 @@ Opencast.segments_ui = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: '../../search/episode.json',
+            url: Opencast.Watch.getSegmentsUIURL(),
             data: 'id=' + mediaPackageId,
             dataType: 'jsonp',
             jsonp: 'jsonp',
@@ -385,42 +385,45 @@ Opencast.segments_ui = (function ()
                         $.each(data['search-results'].result.mediapackage.media.track, function (i, value)
                         {
                             // check for qualities
-                            $.each(data['search-results'].result.mediapackage.media.track[i].tags.tag, function (j, value2)
+                            if(data['search-results'].result.mediapackage.media.track[i].tags != undefined)
                             {
-                                if(value2 == 'low-quality')
+                                $.each(data['search-results'].result.mediapackage.media.track[i].tags.tag, function (j, value2)
                                 {
-                                    lowQualAvail = true;
-                                    if(lowQualReq)
+                                    if(value2 == 'low-quality')
                                     {
-                                        lowQual = true;
-                                    }
-                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
-                                } else if(value2 == 'medium-quality')
-                                {
-                                    medQualAvail = true;
-                                    if(medQualReq)
+                                        lowQualAvail = true;
+                                        if(lowQualReq)
+                                        {
+                                            lowQual = true;
+                                        }
+                                        data['search-results'].result.mediapackage.media.track[i].quality = value2;
+                                    } else if(value2 == 'medium-quality')
                                     {
-                                        medQual = true;
-                                    }
-                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
-                                } else if(value2 == 'high-quality')
-                                {
-                                    highQualAvail = true;
-                                    if(highQualReq)
+                                        medQualAvail = true;
+                                        if(medQualReq)
+                                        {
+                                            medQual = true;
+                                        }
+                                        data['search-results'].result.mediapackage.media.track[i].quality = value2;
+                                    } else if(value2 == 'high-quality')
                                     {
-                                        highQual = true;
-                                    }
-                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
-                                } else if(value2 == 'hd-quality')
-                                {
-                                    hdQualAvail = true;
-                                    if(hdQualReq)
+                                        highQualAvail = true;
+                                        if(highQualReq)
+                                        {
+                                            highQual = true;
+                                        }
+                                        data['search-results'].result.mediapackage.media.track[i].quality = value2;
+                                    } else if(value2 == 'hd-quality')
                                     {
-                                        hdQual = true;
+                                        hdQualAvail = true;
+                                        if(hdQualReq)
+                                        {
+                                            hdQual = true;
+                                        }
+                                        data['search-results'].result.mediapackage.media.track[i].quality = value2;
                                     }
-                                    data['search-results'].result.mediapackage.media.track[i].quality = value2;
-                                }
-                            });
+                                });
+                            }
                             if(data['search-results'].result.mediapackage.media.track[i].quality == undefined)
                             {
                                 data['search-results'].result.mediapackage.media.track[i].quality = "";

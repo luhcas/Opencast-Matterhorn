@@ -26,7 +26,6 @@ Opencast.Annotation_Chapter = (function ()
     var ANNOTATION_CHAPTER = "Annotation",
         ANNOTATION_CHAPTERHIDE = "Annotation off";
     var annotationType = "chapter";
-    var annotationDataURL = '../../annotation/annotations.json'; // Test-Data can be found: "js/engage_plugins/demodata/annotation_demo.json"
     
     /**
      * @memberOf Opencast.Annotation_Chapter
@@ -38,7 +37,7 @@ Opencast.Annotation_Chapter = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: annotationDataURL,
+            url: Opencast.Watch.getAnnotationURL(),
             data: 'episode=' + mediaPackageId + '&type=' + annotationType,
             dataType: 'json',
             jsonp: 'jsonp',
@@ -78,7 +77,7 @@ Opencast.Annotation_Chapter = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: annotationDataURL,
+            url: Opencast.Watch.getAnnotationURL(),
             data: 'id=' + mediaPackageId,
             dataType: 'json',
             jsonp: 'jsonp',

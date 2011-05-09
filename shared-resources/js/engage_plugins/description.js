@@ -61,7 +61,7 @@ Opencast.Description = (function ()
             // Request JSONP data
             $.ajax(
             {
-                url: '../../search/episode.json',
+                url: Opencast.Watch.getDescriptionEpisodeURL(),
                 data: 'id=' + mediaPackageId,
                 dataType: 'jsonp',
                 jsonp: 'jsonp',
@@ -91,7 +91,7 @@ Opencast.Description = (function ()
                     // Request JSONP data (Stats)
                     $.ajax(
                     {
-                        url: '../../usertracking/stats.json',
+                        url: Opencast.Watch.getDescriptionStatsURL(),
                         data: 'id=' + mediaPackageId,
                         dataType: 'jsonp',
                         jsonp: 'jsonp',

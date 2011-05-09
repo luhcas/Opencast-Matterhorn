@@ -53,7 +53,8 @@ Opencast.Series = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=' + (page - 1) * 20 + '&jsonp=?',
+            url: Opencast.Watch.getSeriesSeriesURL(),
+            data: 'id=' + series_id + '&episodes=true&limit=20&offset=' + ((page - 1) * 20),
             dataType: 'jsonp',
             jsonp: 'jsonp',
             success: function (data)
@@ -95,7 +96,8 @@ Opencast.Series = (function ()
     {
         $.ajax(
         {
-            url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
+            url: Opencast.Watch.getSeriesSeriesURL(),
+            data: 'id=' + series_id + '&episodes=true&limit=20&offset=0',
             dataType: 'jsonp',
             jsonp: 'jsonp',
             success: function (data)
@@ -184,7 +186,8 @@ Opencast.Series = (function ()
         mediaPackageId = id;
         $.ajax(
         {
-            url: '../../search/episode.json?id=' + mediaPackageId + '&jsonp=?',
+            url: Opencast.Watch.getSeriesEpisodeURL(),
+            data: 'id=' + mediaPackageId,
             dataType: 'jsonp',
             jsonp: 'jsonp',
             success: function (data)
@@ -198,7 +201,8 @@ Opencast.Series = (function ()
                     {
                         $.ajax(
                         {
-                            url: '../../search/series.json?id=' + series_id + '&episodes=true&limit=20&offset=0&jsonp=?',
+                            url: Opencast.Watch.getSeriesSeriesURL(),
+                            data: 'id=' + series_id + '&episodes=true&limit=20&offset=0',
                             dataType: 'jsonp',
                             jsonp: 'jsonp',
                             success: function (data)

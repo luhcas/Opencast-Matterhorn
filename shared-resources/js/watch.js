@@ -26,10 +26,10 @@ Opencast.Watch = (function ()
         SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
         AUDIOPLAYER = "Audioplayer",
         PLAYERSTYLE = "advancedPlayer",
-        mediaResolutionOne = "",
-        mediaResolutionTwo = "",
         mediaUrlOne = "",
         mediaUrlTwo = "",
+        mediaResolutionOne = "",
+        mediaResolutionTwo = "",
         mimetypeOne = "",
         mimetypeTwo = "",
         coverUrlOne = "",
@@ -37,8 +37,120 @@ Opencast.Watch = (function ()
         slideLength = 0,
         timeoutTime = 400,
         duration = 0,
-        durationSetSuccessfully = false;
-
+        durationSetSuccessfully = false,
+        mediaPackageId;
+        
+    var analyticsURL = "",
+        annotationURL = "",
+        descriptionEpisodeURL = "",
+        descriptionStatsURL = "",
+        searchURL = "",
+        segmentsTextURL = "",
+        segmentsUIURL = "",
+        segmentsURL = "",
+        seriesSeriesURL = "",
+        seriesEpisodeURL = "";
+      
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getAnalyticsURL()
+    {
+        return analyticsURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getAnnotationURL()
+    {
+        return annotationURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getDescriptionEpisodeURL()
+    {
+        return descriptionEpisodeURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getDescriptionStatsURL()
+    {
+        return descriptionStatsURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getSearchURL()
+    {
+        return searchURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getSegmentsTextURL()
+    {
+        return segmentsTextURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getSegmentsUIURL()
+    {
+        return segmentsUIURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getSegmentsURL()
+    {
+        return segmentsURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getSeriesSeriesURL()
+    {
+        return seriesSeriesURL;
+    }
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Returns a plugin URL
+     * @return a plugin URL
+     */
+    function getSeriesEpisodeURL()
+    {
+        return seriesEpisodeURL;
+    }
+ 
     /**
      * @memberOf Opencast.Watch
      * @description Parses a query string
@@ -71,26 +183,70 @@ Opencast.Watch = (function ()
     function onPlayerReady()
     {
         Opencast.Utils.log("Player ready");
-        // Hide Screen Settings until clicked 'play'
-        $("#oc_btn-dropdown").css("display", 'none');
-        $("#oc_player_video-dropdown").css("display", 'none');
-        var mediaPackageId = Opencast.Utils.getURLParameter('id');
-        var userId = Opencast.Utils.getURLParameter('user');
-        var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
-        Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
-        Opencast.Player.setUserId(userId);
-        // Set MediaPackage ID's in the Plugins
-        Opencast.Player.setMediaPackageId(mediaPackageId);
-        Opencast.Annotation_Chapter.setMediaPackageId(mediaPackageId);
-        Opencast.Analytics.setMediaPackageId(mediaPackageId);
-        Opencast.Series.setMediaPackageId(mediaPackageId);
-        Opencast.Description.setMediaPackageId(mediaPackageId);
-        Opencast.segments_ui.setMediaPackageId(mediaPackageId);
-        Opencast.segments.setMediaPackageId(mediaPackageId);
-        Opencast.segments_text.setMediaPackageId(mediaPackageId);
-        Opencast.search.setMediaPackageId(mediaPackageId);
-        // Initialize Segments UI
-        Opencast.segments_ui.initialize();
+         
+        // Parse the plugin URLs
+        $.getJSON('js/data.json', function(data)
+        {
+            analyticsURL = data.plugin_urls.analytics;
+            annotationURL = data.plugin_urls.annotation;
+            descriptionEpisodeURL = data.plugin_urls.description.episode;
+            descriptionStatsURL = data.plugin_urls.description.stats;
+            searchURL = data.plugin_urls.search;
+            segmentsTextURL = data.plugin_urls.segments_text;
+            segmentsUIURL = data.plugin_urls.segments_ui;
+            segmentsURL = data.plugin_urls.segments;
+            seriesSeriesURL = data.plugin_urls.series.series;
+            seriesEpisodeURL = data.plugin_urls.series.episode;
+            
+            Opencast.Utils.log("Plugin URLs");
+            Opencast.Utils.log("Analytics URL: " + analyticsURL);
+            Opencast.Utils.log("Annotation URL: " + annotationURL);
+            Opencast.Utils.log("Description (Episode) URL: " + descriptionEpisodeURL);
+            Opencast.Utils.log("Description (Stats) URL: " + descriptionStatsURL);
+            Opencast.Utils.log("Search URL: " + searchURL);
+            Opencast.Utils.log("Segments (Text) URL: " + segmentsTextURL);
+            Opencast.Utils.log("Segments (UI) URL: " + segmentsUIURL);
+            Opencast.Utils.log("Segments URL: " + segmentsURL);
+            Opencast.Utils.log("Series (Series) URL: " + seriesSeriesURL);
+            Opencast.Utils.log("Series (Episode) URL: " + seriesEpisodeURL);
+            
+            mediaPackageId = (data.mediaDebugInfo.mediaPackageId == "") ? Opencast.Utils.getURLParameter('id') : data.mediaDebugInfo.mediaPackageId;
+            mediaUrlOne = (data.mediaDebugInfo.mediaUrlOne == "") ? null : data.mediaDebugInfo.mediaUrlOne;
+            mediaUrlTwo = (data.mediaDebugInfo.mediaUrlTwo == "") ? null : data.mediaDebugInfo.mediaUrlTwo;
+            mediaResolutionOne = (data.mediaDebugInfo.mediaResolutionOne == "") ? null : data.mediaDebugInfo.mediaResolutionOne;
+            mediaResolutionTwo = (data.mediaDebugInfo.mediaResolutionTwo == "") ? null : data.mediaDebugInfo.mediaResolutionTwo;
+            mimetypeOne = (data.mediaDebugInfo.mimetypeOne == "") ? null : data.mediaDebugInfo.mimetypeOne;
+            mimetypeTwo = (data.mediaDebugInfo.mimetypeTwo == "") ? null : data.mediaDebugInfo.mimetypeTwo;
+            
+            Opencast.Utils.log("Media Debug Info");
+            Opencast.Utils.log("Mediapackage ID: " + mediaPackageId);
+            Opencast.Utils.log("Media URL 1: " + mediaUrlOne);
+            Opencast.Utils.log("Media URL 2: " + mediaUrlTwo);
+            Opencast.Utils.log("Media resolution 1: " + mediaResolutionOne);
+            Opencast.Utils.log("Media resolution 1: " + mediaResolutionTwo);
+            Opencast.Utils.log("Mimetype 1: " + mimetypeOne);
+            Opencast.Utils.log("Mimetype 2: " + mimetypeTwo);
+            
+            // Hide Screen Settings until clicked 'play'
+            $("#oc_btn-dropdown").css("display", 'none');
+            $("#oc_player_video-dropdown").css("display", 'none');
+            var userId = Opencast.Utils.getURLParameter('user');
+            var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
+            Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
+            Opencast.Player.setUserId(userId);
+            // Set MediaPackage ID's in the Plugins
+            Opencast.Player.setMediaPackageId(mediaPackageId);
+            Opencast.Annotation_Chapter.setMediaPackageId(mediaPackageId);
+            Opencast.Analytics.setMediaPackageId(mediaPackageId);
+            Opencast.Series.setMediaPackageId(mediaPackageId);
+            Opencast.Description.setMediaPackageId(mediaPackageId);
+            Opencast.segments_ui.setMediaPackageId(mediaPackageId);
+            Opencast.segments.setMediaPackageId(mediaPackageId);
+            Opencast.segments_text.setMediaPackageId(mediaPackageId);
+            Opencast.search.setMediaPackageId(mediaPackageId);
+            // Initialize Segments UI
+            Opencast.segments_ui.initialize();
+        });
     }
     
     /**
@@ -124,13 +280,31 @@ Opencast.Watch = (function ()
         $('#oc_segment-table').html($('#oc-segments').html());
         $('#oc-segments').html("");
         // set the media URLs
-        mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
-        mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
-        mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-rtmp').html();
-        mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-rtmp').html();
+        if(mediaUrlOne === null)
+        {
+            mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
+        }
+        if(mediaUrlTwo === null)
+        {
+            mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
+        }
+        if(mediaResolutionOne === null)
+        {
+            mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-rtmp').html();
+        }
+        if(mediaResolutionTwo === null)
+        {
+            mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-rtmp').html();
+        }
         // set default mimetypes
-        mimetypeOne = "video/x-flv";
-        mimetypeTwo = "video/x-flv";
+        if(mimetypeOne === null)
+        {
+            mimetypeOne = "video/x-flv";
+        }
+        if(mimetypeTwo === null)
+        {
+            mimetypeTwo = "video/x-flv";
+        }
         // mimetypeOne = "audio/x-flv";
         // mimetypeTwo = "audio/x-flv";
         coverUrlOne = $('#oc-cover-presenter').html();
@@ -193,6 +367,15 @@ Opencast.Watch = (function ()
         mimetypeTwo = mimetypeTwo === null ? '' : mimetypeTwo;
         mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
         mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
+        
+        Opencast.Utils.log("Final Mediadata");
+        Opencast.Utils.log("Mediapackage ID: " + mediaPackageId);
+        Opencast.Utils.log("Media URL 1: " + mediaUrlOne);
+        Opencast.Utils.log("Media URL 2: " + mediaUrlTwo);
+        Opencast.Utils.log("Media resolution 1: " + mediaResolutionOne);
+        Opencast.Utils.log("Media resolution 1: " + mediaResolutionTwo);
+        Opencast.Utils.log("Mimetype 1: " + mimetypeOne);
+        Opencast.Utils.log("Mimetype 2: " + mimetypeTwo);
         
         // If URL Parameter display exists and is set to revert
         var display = Opencast.Utils.getURLParameter('display');
@@ -442,6 +625,16 @@ Opencast.Watch = (function ()
     }
     
     return {
+        getAnalyticsURL: getAnalyticsURL,
+        getAnnotationURL: getAnnotationURL,
+        getDescriptionEpisodeURL: getDescriptionEpisodeURL,
+        getDescriptionStatsURL: getDescriptionStatsURL,
+        getSearchURL: getSearchURL,
+        getSegmentsTextURL:getSegmentsTextURL,
+        getSegmentsUIURL: getSegmentsUIURL,
+        getSegmentsURL: getSegmentsURL,
+        getSeriesSeriesURL: getSeriesSeriesURL,
+        getSeriesEpisodeURL: getSeriesEpisodeURL,
         onPlayerReady: onPlayerReady,
         seekSegment: seekSegment,
         continueProcessing: continueProcessing,

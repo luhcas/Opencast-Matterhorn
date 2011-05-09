@@ -239,7 +239,7 @@ Opencast.search = (function ()
         // Request JSONP data
         $.ajax(
         {
-            url: "../../search/episode.json",
+            url: Opencast.Watch.getSearchURL(),
             data: "id=" + mediaPackageId + "&q=" + escape(searchValue),
             dataType: 'jsonp',
             jsonp: 'jsonp',

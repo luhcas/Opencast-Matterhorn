@@ -73,7 +73,7 @@ Opencast.segments_text = (function ()
             // Request JSONP data
             $.ajax(
             {
-                url: '../../search/episode.json',
+                url: Opencast.Watch.getSegmentsTextURL(),
                 data: 'id=' + mediaPackageId,
                 dataType: 'jsonp',
                 jsonp: 'jsonp',

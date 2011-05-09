@@ -394,7 +394,7 @@ Opencast.segments = (function ()
             // Request JSONP data -- senseless but otherwise weirdly no correct css parsing?!
             $.ajax(
             {
-                url: '../../search/episode.json',
+                url: Opencast.Watch.getSegmentsURL(),
                 data: 'id=' + mediaPackageId,
                 dataType: 'jsonp',
                 jsonp: 'jsonp',
@@ -425,7 +425,7 @@ Opencast.segments = (function ()
             // Request JSONP data // TODO: Remove Ajax, we're getting the data from segments_ui -- senseless but otherwise weirdly no correct css parsing?!
             $.ajax(
             {
-                url: '../../search/episode.json',
+                url: Opencast.Watch.getSegmentsURL(),
                 data: 'id=' + mediaPackageId,
                 dataType: 'jsonp',
                 jsonp: 'jsonp',

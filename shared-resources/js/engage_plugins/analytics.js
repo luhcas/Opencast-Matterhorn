@@ -51,7 +51,7 @@ Opencast.Analytics = (function ()
         {
             type: 'GET',
             contentType: 'text/xml',
-            url: "../../usertracking/footprint.xml",
+            url: Opencast.Watch.getAnalyticsURL(),
             data: "id=" + mediaPackageId,
             dataType: 'xml',
             success: function (xml)
@@ -99,7 +99,7 @@ Opencast.Analytics = (function ()
         {
             type: 'GET',
             contentType: 'text/xml',
-            url: "../../usertracking/footprint.xml",
+            url: Opencast.Watch.getAnalyticsURL(),
             data: "id=" + mediaPackageId,
             dataType: 'xml',
             success: function (xml)
