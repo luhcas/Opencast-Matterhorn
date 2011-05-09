@@ -26,16 +26,12 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.rest.AbstractJobProducerEndpoint;
-import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Status;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
@@ -48,8 +44,8 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -67,6 +63,10 @@ import javax.xml.transform.stream.StreamResult;
  * Rest endpoint for {@link CaptionService}.
  */
 @Path("/")
+@RestService(name = "caption", title = "Caption Service", notes = {
+        "If you notice that this service is not working as expected, there might be a bug! "
+        + "You should file an error report with your server logs from the time when the error occurred: "
+        + "<a href=\"http://opencast.jira.com\">Opencast Issue Tracker</a>" }, abstractText = "This service enables conversion from one caption format to another.")
 public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
 
   /** The logger */
@@ -74,9 +74,6 @@ public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
 
   /** The caption service */
   protected CaptionService service;
-
-  /** The rest documentation */
-  protected String docs;
   
   /** The default server URL */
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
@@ -94,8 +91,7 @@ public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(serviceUrl);
+    //String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
   }
 
   /**
@@ -144,6 +140,14 @@ public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
   @POST
   @Path("convert")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "convert", description = "Convert captions from one format to another.", restParameters = {
+          @RestParameter(description = "Captions to be converted.", isRequired = true, name = "captions", type = RestParameter.Type.TEXT),
+          @RestParameter(description = "Caption input format (for example: dfxp, subrip,...).", isRequired = false, defaultValue = "dfxp", name = "input", type = RestParameter.Type.STRING),
+          @RestParameter(description = "Caption output format (for example: dfxp, subrip,...).", isRequired = false, defaultValue = "subrip", name = "output", type = RestParameter.Type.STRING),
+          @RestParameter(description = "Caption language (for those formats that store such information).", isRequired = false, defaultValue = "en", name = "language", type = RestParameter.Type.STRING),
+          },
+          reponses = {
+          @RestResponse(description = "OK, Conversion successfully completed.", responseCode = HttpServletResponse.SC_OK)}, returnDescription = "The converted captions file")
   public Response convert(@FormParam("input") String inputType, @FormParam("output") String outputType,
           @FormParam("captions") String catalogAsXml, @FormParam("language") String lang) {
     try {
@@ -173,6 +177,10 @@ public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
   @POST
   @Path("languages")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "languages", description = "Get information about languages in caption catalog (if such information is available).", restParameters = {
+          @RestParameter(description = "Captions to be examined.", isRequired = true, name = "captions", type = RestParameter.Type.TEXT),
+          @RestParameter(description = "Caption input format (for example: dfxp, subrip,...).", isRequired = false, defaultValue = "dfxp", name = "input", type = RestParameter.Type.STRING)},
+          reponses = { @RestResponse(description = "OK, information was extracted and retrieved", responseCode = HttpServletResponse.SC_OK)}, returnDescription = "Returned information about languages present in captions.")
   public Response languages(@FormParam("input") String inputType, @FormParam("captions") String catalogAsXml) {
     try {
       MediaPackageElement element = toMediaPackageElement(catalogAsXml);
@@ -206,53 +214,6 @@ public class CaptionServiceRestEndpoint extends AbstractJobProducerEndpoint {
       logger.error(e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
-  }
-
-  /**
-   * Generates docs.
-   * 
-   * @return Doc string
-   */
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("Caption", "Caption Service", serviceUrl, null);
-    data.setAbstract("This service enables conversion from one caption format to another.");
-
-    // convert
-    RestEndpoint convertEndpoint = new RestEndpoint("convert", RestEndpoint.Method.POST, "/convert",
-            "Convert captions from one format to another");
-    convertEndpoint.addFormat(Format.xml());
-    convertEndpoint.addStatus(Status.ok("Conversion successfully completed."));
-    convertEndpoint.addRequiredParam(new Param("captions", Param.Type.TEXT, generateCatalog(),
-            "Captions to be converted."));
-    convertEndpoint.addRequiredParam(new Param("input", Param.Type.STRING, "dfxp",
-            "Caption input format (for example: dfxp, subrip,...)."));
-    convertEndpoint.addRequiredParam(new Param("output", Param.Type.STRING, "subrip",
-            "Caption output format (for example: dfxp, subrip,...)."));
-    convertEndpoint.addRequiredParam(new Param("language", Param.Type.STRING, "en",
-            "Caption language (for those formats that store such information)"));
-    convertEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, convertEndpoint);
-
-    // get language information
-    RestEndpoint languageEndpoint = new RestEndpoint("languages", RestEndpoint.Method.POST, "/languages",
-            "Get information about languages in caption catalog (if such information is available).");
-    languageEndpoint.addFormat(Format.xml());
-    languageEndpoint.addStatus(Status.ok("Returned information about languages present in captions"));
-    languageEndpoint.addRequiredParam(new Param("captions", Param.Type.TEXT, generateCatalog(),
-            "Captions to be examined."));
-    languageEndpoint.addRequiredParam(new Param("input", Param.Type.STRING, "dfxp",
-            "Captions format (for example: dfxp, subrip,...)."));
-    languageEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, languageEndpoint);
-
-    return DocUtil.generate(data);
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public String getDocumentation() {
-    return docs;
   }
 
   /**
