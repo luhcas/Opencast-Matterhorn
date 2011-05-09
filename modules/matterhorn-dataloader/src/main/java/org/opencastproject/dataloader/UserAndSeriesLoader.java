@@ -41,6 +41,39 @@ import java.util.Set;
  */
 public class UserAndSeriesLoader {
 
+  /** The number of series to load */
+  public static final int NUM_SERIES = 10;
+
+  /** The number of students per series to load */
+  public static final int STUDENTS_PER_SERIES = 20;
+
+  /** The number of instructors per series to load */
+  public static final int INSTRUCTORS_PER_SERIES = 2;
+
+  /** The number of admins per series to load */
+  public static final int ADMINS_PER_SERIES = 1;
+
+  /** The series prefix */
+  public static final String SERIES_PREFIX = "SERIES_";
+
+  /** The user role */
+  public static final String USER_ROLE = "ROLE_USER";
+
+  /** The student role suffix */
+  public static final String STUDENT = "STUDENT";
+
+  /** The instructor role suffix */
+  public static final String INSTRUCTOR = "INSTRUCTOR";
+
+  /** The departmental admin (not the super admin) role suffix */
+  public static final String ADMIN = "ADMIN";
+
+  /** The read permission */
+  public static final String READ = "read";
+
+  /** The write permission */
+  public static final String WRITE = "write";
+
   /** The logger */
   protected static final Logger logger = LoggerFactory.getLogger(UserAndSeriesLoader.class);
 
@@ -69,10 +102,19 @@ public class UserAndSeriesLoader {
     @Override
     public void run() {
       logger.info("Adding sample series...");
-      for (int i = 0; i < 100; i++) {
-        String seriesId = "series_" + i;
+      for (int i = 1; i <= NUM_SERIES; i++) {
+        String seriesId = SERIES_PREFIX + i;
         DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
-        AccessControlList acl = new AccessControlList(new AccessControlEntry("ROLE_SERIES_" + i, "read", true));
+        AccessControlList acl = new AccessControlList();
+
+        // Add read permissions for viewing the series content in engage
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + STUDENT, READ, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR, READ, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN, READ, true));
+
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR, WRITE, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN, WRITE, true));
+
         try {
           dc.set(DublinCore.PROPERTY_IDENTIFIER, seriesId);
           dc.set(DublinCore.PROPERTY_TITLE, "Series #" + i);
@@ -88,23 +130,42 @@ public class UserAndSeriesLoader {
         }
       }
 
-      // Load 1000 users, all with ROLE_USER and a role in the series
-      logger.info("Adding sample users...");
-      for (int i = 0; i < 1000; i++) {
-        if (jpaUserProvider.loadUser("user" + i) == null) {
-          Set<String> roleSet = new HashSet<String>();
-          roleSet.add("ROLE_USER");
-          roleSet.add("ROLE_SERIES_" + (i % 100));
-          JpaUser user = new JpaUser("user" + i, "pass" + i, DEFAULT_ORGANIZATION_ID, roleSet);
-          try {
-            jpaUserProvider.addUser(user);
-            logger.debug("Added {}", user);
-          } catch (Exception e) {
-            logger.warn("Can not add {}: {}", user, e);
-          }
+      load(STUDENT, 20);
+      load(INSTRUCTOR, 2);
+      load(ADMIN, 1);
+
+      logger.info("Finished loading sample series and users");
+    }
+  }
+
+  /**
+   * Loads demo users into persistence.
+   * 
+   * @param prefix
+   *          the role prefix
+   * @param numPerSeries
+   *          the number of users to load per series
+   */
+  protected void load(String prefix, int numPerSeries) {
+    String lowerCasePrefix = prefix.toLowerCase();
+    int totalUsers = numPerSeries * NUM_SERIES;
+
+    logger.info("Adding sample {}s, usernames and passwords are {}1/{}1... {}{}/{}{}", new Object[] { lowerCasePrefix,
+            lowerCasePrefix, lowerCasePrefix, lowerCasePrefix, totalUsers, lowerCasePrefix, totalUsers });
+
+    for (int i = 1; i <= totalUsers; i++) {
+      if (jpaUserProvider.loadUser(lowerCasePrefix + i) == null) {
+        Set<String> roleSet = new HashSet<String>();
+        roleSet.add(USER_ROLE);
+        roleSet.add(SERIES_PREFIX + (((i - 1) % NUM_SERIES) + 1) + "_" + prefix);
+        JpaUser user = new JpaUser(lowerCasePrefix + i, lowerCasePrefix + i, DEFAULT_ORGANIZATION_ID, roleSet);
+        try {
+          jpaUserProvider.addUser(user);
+          logger.debug("Added {}", user);
+        } catch (Exception e) {
+          logger.warn("Can not add {}: {}", user, e);
         }
       }
-      logger.info("Finished loading sample series and users");
     }
   }
 
