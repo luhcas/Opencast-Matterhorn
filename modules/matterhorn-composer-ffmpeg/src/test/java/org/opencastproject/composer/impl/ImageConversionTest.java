@@ -110,8 +110,7 @@ public class ImageConversionTest {
     File sourceFile = new File(workingDirectory, "image.jpg");
     FileUtils.copyURLToFile(sourceUrl, sourceFile);
     EncodingProfile imageConversionProfile = profiles.get("image-conversion.http");
-    engine.encode(sourceFile, imageConversionProfile, null);
-    File convertedImage = new File(workingDirectory, "image.tif");
+    File convertedImage = engine.encode(sourceFile, imageConversionProfile, null);
 
     // These are weak assertions, but anything else would require either integration with another 3rd party tool
     // or manual parsing of ffmpeg output. Instead, we keep this test generic (but weak).
