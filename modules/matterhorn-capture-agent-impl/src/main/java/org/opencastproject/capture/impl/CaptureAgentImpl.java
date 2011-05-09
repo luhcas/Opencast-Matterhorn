@@ -123,7 +123,7 @@ import javax.xml.transform.stream.StreamResult;
 public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService,
         ConfigurationManagerListener, CaptureFailureHandler {
   // The amount of time to wait until shutting down the pipeline manually. 
-  private static final long DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT = 60000L;
+  //private static final long DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT = 60000L;
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
@@ -1139,7 +1139,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     if (properties != null) {

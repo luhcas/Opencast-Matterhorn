@@ -105,7 +105,7 @@ public class RestPublisher implements RestConstants {
   protected Map<String, ServiceRegistration> servletRegistrationMap;
 
   /** Activates this rest publisher */
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings("unchecked")
   protected void activate(ComponentContext componentContext) {
     logger.debug("activate()");
     this.baseServerUri = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");

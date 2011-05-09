@@ -106,7 +106,6 @@ public class Activator implements BundleActivator {
     }
 
     // Register the persistence properties
-    @SuppressWarnings("rawtypes")
     Dictionary props = new Hashtable();
     props.put("type", "persistence");
     props.put("javax.persistence.nonJtaDataSource", pooledDataSource);

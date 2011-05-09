@@ -37,7 +37,7 @@ public class WildcardQueryParserPlugin extends QParserPlugin {
    * 
    * @see org.apache.solr.util.plugin.NamedListInitializedPlugin#init(org.apache.solr.common.util.NamedList)
    */
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings("unchecked")
   @Override
   public void init(NamedList args) {
   }

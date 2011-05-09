@@ -67,7 +67,7 @@ public class IngestServiceImplTest {
 
   private static long workflowInstanceID = 1L;
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings("unchecked")
   @Before
   public void setup() throws Exception {
     urlTrack = IngestServiceImplTest.class.getResource("/av.mov").toURI();
