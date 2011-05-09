@@ -25,7 +25,7 @@ cd "${dir}-mac/tessdata"
 [ $? -ne 0 ] && exit 1
 cp "../../$pkg2" .
 [ $? -ne 0 ] && exit 1
-gzip -d "$pkg2"
+gzip -df "$pkg2"
 [ $? -ne 0 ] && exit 1
 cd ..
 [ $? -ne 0 ] && exit 1

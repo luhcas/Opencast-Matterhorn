@@ -30,7 +30,7 @@ cp "../../$pkg2" .
 [ $? -ne 0 ] && exit 1
 chmod 644 "$pkg2"
 [ $? -ne 0 ] && exit 1
-gzip -d "$pkg2"
+gzip -df "$pkg2"
 [ $? -ne 0 ] && exit 1
 cd ..
 [ $? -ne 0 ] && exit 1

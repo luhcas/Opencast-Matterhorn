@@ -1,5 +1,6 @@
 #!/bin/bash
 set -x
+[ -z "$HOME3P" ] && export HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
 source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #

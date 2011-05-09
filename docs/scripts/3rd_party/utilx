@@ -14,6 +14,7 @@ case `uname` in
 esac
 export CENTOS_MIRROR=http://mirrors.kernel.org
 export EPEL_MIRROR=http://mirror.switch.ch/ftp/mirror
+export RPMFORGE_MIRROR=http://apt.sw.be/redhat/el5/en
 export MACPORTS_SVN=http://svn.macports.org/repository/macports/trunk/dports
 export MINGW32=i686-pc-mingw32
 export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw
