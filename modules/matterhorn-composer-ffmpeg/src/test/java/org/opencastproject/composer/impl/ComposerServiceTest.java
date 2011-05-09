@@ -32,16 +32,21 @@ import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
+import org.opencastproject.util.IoSupport;
+import org.opencastproject.util.StreamHelper;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
@@ -51,7 +56,6 @@ import java.util.List;
 /**
  * Tests the {@link ComposerServiceImpl}.
  */
-@Ignore("See http://opencast.jira.com/browse/MH-7673")
 public class ComposerServiceTest {
   /** The source file to test with */
   File source = null;
@@ -62,17 +66,50 @@ public class ComposerServiceTest {
   /** The service registry for job dispatching */
   ServiceRegistry serviceRegistry = null;
 
+  /** FFmpeg binary location */
+  private static final String FFMPEG_BINARY = "ffmpeg";
+
+  /** True to run the tests */
+  private static boolean ffmpegInstalled = true;
+
+  /** Logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(ComposerServiceTest.class);
+
+  @BeforeClass
+  public static void testForFFmpeg() {
+    StreamHelper stdout = null;
+    StreamHelper stderr = null;
+    Process p = null;
+    try {
+      p = new ProcessBuilder(FFMPEG_BINARY, "-version").start();
+      stdout = new StreamHelper(p.getInputStream());
+      stderr = new StreamHelper(p.getErrorStream());
+      if (p.waitFor() != 0)
+        throw new IllegalStateException();
+    } catch (Throwable t) {
+      logger.warn("Skipping image composer service tests due to unsatisifed or erroneus ffmpeg installation");
+      ffmpegInstalled = false;
+    } finally {
+      IoSupport.closeQuietly(stdout);
+      IoSupport.closeQuietly(stderr);
+      IoSupport.closeQuietly(p);
+    }
+  }
+
   @Before
   public void setup() throws Exception {
+    if (!ffmpegInstalled)
+      return;
+
     // Copy an existing media file to a temp file
     File f = new File("src/test/resources/slidechanges.mov");
-    source = File.createTempFile(f.getName(), ".mov");
+    source = File.createTempFile(FilenameUtils.getBaseName(f.getName()), ".mov");
     FileUtils.copyFile(f, source);
     f = null;
 
     // create the needed mocks
     BundleContext bc = EasyMock.createNiceMock(BundleContext.class);
-    EasyMock.expect(bc.getProperty((String) EasyMock.anyObject())).andReturn("/opt/local/bin/ffmpeg");
+    EasyMock.expect(bc.getProperty((String) EasyMock.anyObject())).andReturn(FFMPEG_BINARY);
 
     ComponentContext cc = EasyMock.createNiceMock(ComponentContext.class);
     EasyMock.expect(cc.getBundleContext()).andReturn(bc).anyTimes();
@@ -124,8 +161,10 @@ public class ComposerServiceTest {
 
   @Test
   public void testConcurrentExecutionWithSameSource() throws Exception {
-    assertTrue(source.isFile());
+    if (!ffmpegInstalled)
+      return;
 
+    assertTrue(source.isFile());
     String sourceTrackXml = "<track id=\"track-1\" type=\"presentation/source\"><mimetype>video/quicktime</mimetype>"
             + "<url>http://localhost:8080/workflow/samples/camera.mpg</url>"
             + "<checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum><duration>14546</duration>"

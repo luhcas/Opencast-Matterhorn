@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -212,10 +213,9 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       if (params.containsKey("time")) {
         outFileName += "_" + properties.get("time");
       }
-      
-      if (new File(outDir, outFileName + outSuffix).exists()) {
-        outFileName += "_reencode";
-      }
+
+      // generate random name if multiple jobs are producing file with identical name (MH-7673)
+      outFileName += "_" + UUID.randomUUID().toString();
 
       params.put("out.dir", outDir);
       params.put("out.name", outFileName);
