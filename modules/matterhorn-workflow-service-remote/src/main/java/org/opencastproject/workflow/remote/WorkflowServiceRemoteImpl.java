@@ -15,17 +15,21 @@
  */
 package org.opencastproject.workflow.remote;
 
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
+import static org.apache.http.HttpStatus.SC_NO_CONTENT;
+import static org.apache.http.HttpStatus.SC_OK;
+
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.serviceregistry.api.RemoteBase;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.SolrUtils;
-import org.opencastproject.workflow.api.WorkflowListener;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowListener;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowQuery.QueryTerm;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -33,7 +37,6 @@ import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -75,11 +78,11 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   @Override
   public WorkflowDefinition getWorkflowDefinitionById(String id) throws WorkflowDatabaseException, NotFoundException {
     HttpGet get = new HttpGet("/definition/" + id + ".xml");
-    HttpResponse response = getResponse(get, HttpStatus.SC_NOT_FOUND, HttpStatus.SC_OK);
+    HttpResponse response = getResponse(get, SC_NOT_FOUND, SC_OK);
     if (response == null) {
       throw new WorkflowDatabaseException("Unable to connect to a remote workflow service");
     }
-    if (HttpStatus.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
+    if (SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
       throw new NotFoundException("Workflow definition " + id + " does not exist.");
     } else {
       try {
@@ -98,11 +101,11 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   @Override
   public WorkflowInstance getWorkflowById(long id) throws WorkflowDatabaseException, NotFoundException {
     HttpGet get = new HttpGet("/instance/" + id + ".xml");
-    HttpResponse response = getResponse(get, HttpStatus.SC_NOT_FOUND, HttpStatus.SC_OK);
+    HttpResponse response = getResponse(get, SC_NOT_FOUND, SC_OK);
     if (response == null) {
       throw new WorkflowDatabaseException("Unable to connect to a remote workflow service");
     }
-    if (HttpStatus.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
+    if (SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
       throw new NotFoundException("Workflow instance " + id + " does not exist.");
     } else {
       try {
@@ -213,7 +216,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   @Override
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
     HttpGet get = new HttpGet("/statistics");
-    HttpResponse response = getResponse(get, HttpStatus.SC_OK);
+    HttpResponse response = getResponse(get, SC_OK);
     if (response == null) {
       throw new WorkflowDatabaseException("Unable to connect to a remote workflow service");
     }
@@ -289,7 +292,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     } catch (Exception e) {
       throw new IllegalStateException("Unable to assemble a remote workflow request", e);
     }
-    HttpResponse response = getResponse(post, HttpStatus.SC_NOT_FOUND, HttpStatus.SC_OK);
+    HttpResponse response = getResponse(post, SC_NOT_FOUND, SC_OK);
     if (response == null) {
       throw new WorkflowDatabaseException("Unable to start a remote workflow. The http response code was unexpected.");
     } else {
@@ -382,10 +385,10 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Unable to assemble a remote workflow service request", e);
     }
-    HttpResponse response = getResponse(post, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
+    HttpResponse response = getResponse(post, SC_OK, SC_NOT_FOUND);
     if (response == null) {
       throw new WorkflowDatabaseException("Unexpected HTTP response code");
-    } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+    } else if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
       throw new NotFoundException("Workflow instance with id='" + workflowInstanceId + "' not found");
     } else {
       logger.info("Workflow '{}' stopped", workflowInstanceId);
@@ -414,10 +417,10 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Unable to assemble a remote workflow service request", e);
     }
-    HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT, HttpStatus.SC_NOT_FOUND);
+    HttpResponse response = getResponse(post, SC_NO_CONTENT, SC_NOT_FOUND);
     if (response == null) {
       throw new WorkflowDatabaseException("Unexpected HTTP response code");
-    } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+    } else if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
       throw new NotFoundException("Workflow instance with id='" + workflowInstanceId + "' not found");
     } else {
       logger.info("Workflow '{}' suspended", workflowInstanceId);
@@ -458,10 +461,10 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Unable to assemble a remote workflow service request", e);
     }
-    HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT, HttpStatus.SC_NOT_FOUND);
+    HttpResponse response = getResponse(post, SC_OK, SC_NO_CONTENT, SC_NOT_FOUND);
     if (response == null) {
       throw new WorkflowDatabaseException("Unexpected HTTP response code");
-    } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+    } else if (response.getStatusLine().getStatusCode() == SC_NOT_FOUND) {
       throw new NotFoundException("Workflow instance with id='" + workflowInstanceId + "' not found");
     } else {
       logger.info("Workflow '{}' resumed", workflowInstanceId);
@@ -496,7 +499,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Unable to assemble a remote workflow service request", e);
     }
-    HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT);
+    HttpResponse response = getResponse(post, SC_NO_CONTENT);
     if (response == null) {
       throw new WorkflowDatabaseException("Unexpected HTTP response code");
     } // otherwise, our work is done
@@ -544,7 +547,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Unable to assemble a remote workflow service request", e);
     }
-    HttpResponse response = getResponse(put, HttpStatus.SC_NO_CONTENT);
+    HttpResponse response = getResponse(put, SC_NO_CONTENT);
     if (response == null) {
       throw new WorkflowDatabaseException("Unexpected HTTP response code");
     } // otherwise, our work is done
@@ -559,7 +562,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   public void unregisterWorkflowDefinition(String workflowDefinitionId) throws NotFoundException,
           WorkflowDatabaseException {
     HttpDelete delete = new HttpDelete("/definition/" + workflowDefinitionId);
-    HttpResponse response = getResponse(delete, HttpStatus.SC_NO_CONTENT);
+    HttpResponse response = getResponse(delete, SC_NO_CONTENT);
     if (response == null) {
       throw new WorkflowDatabaseException("Unable to delete workflow definition '" + workflowDefinitionId + "'");
     }
