@@ -112,8 +112,7 @@ public class TrimmingTest {
     File sourceFile = new File(workingDirectory, "slidechanges.mov");
     FileUtils.copyURLToFile(sourceUrl, sourceFile);
     EncodingProfile trimProfile = profiles.get("trim.work");
-    engine.trim(sourceFile, trimProfile, 5000, 10000, null);
-    File trimmedMovie = new File(workingDirectory, "slidechanges-trimmed.mov");
+    File trimmedMovie = engine.trim(sourceFile, trimProfile, 5000, 10000, null);
 
     // These are weak assertions, but anything else would require either integration with another 3rd party tool
     // or manual parsing of ffmpeg output. Instead, we keep this test generic (but weak).
