@@ -708,8 +708,10 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
           if (element instanceof Catalog) {
             // if the existing mediapackage contains a catalog of the same flavor, keep the server-side catalog, since
             // it is more likely to be up-to-date
-            MediaPackageElement[] existingCatalogs = existingMediaPackage.getCatalogs(element.getFlavor());
+            MediaPackageElementFlavor catalogFlavor = element.getFlavor();
+            MediaPackageElement[] existingCatalogs = existingMediaPackage.getCatalogs(catalogFlavor);
             if (existingCatalogs != null && existingCatalogs.length > 0) {
+              logger.info("Mediapackage {} already contains a catalog with flavor {}.  Skipping the conflicting ingested catalog", existingMediaPackage, catalogFlavor);
               continue;
             }
           }
