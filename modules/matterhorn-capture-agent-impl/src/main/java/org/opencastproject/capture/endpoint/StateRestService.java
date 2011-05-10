@@ -18,13 +18,9 @@ package org.opencastproject.capture.endpoint;
 import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.StateService;
-import org.opencastproject.rest.RestConstants;
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Status;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.osgi.service.component.ComponentContext;
 
@@ -32,6 +28,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -43,6 +40,10 @@ import javax.ws.rs.core.Response;
  * The REST endpoint for the state service on the capture device
  */
 @Path("/")
+@RestService(name = "stateservice", title = "State Service", notes = {
+        "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+        "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+        "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>" }, abstractText = "This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.")
 public class StateRestService {
 
   private StateService service;
@@ -54,8 +55,6 @@ public class StateRestService {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(serviceUrl);
   }
 
   /**
@@ -87,6 +86,7 @@ public class StateRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("state")
+  @RestQuery(name = "state", description = "Returns the state of the capture agent", pathParameters = { } , restParameters = { } , reponses = { @RestResponse(description = "Returns the state of the capture agent.", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public String getState() {
     if (service != null) {
       return this.service.getAgentState();
@@ -103,6 +103,7 @@ public class StateRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings")
+  @RestQuery(name = "recordings", description = "Return a list of the capture agent's recordings", pathParameters = { } , restParameters = { } , reponses = { @RestResponse(description = "Return a list of the capture agent's recordings", responseCode = HttpServletResponse.SC_OK), @RestResponse(description = "State Service is unavailable", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE) }, returnDescription = "")
   public LinkedList<RecordingStateUpdate> getRecordings() {
     if (service == null) {
       Response r = Response.status(Response.Status.SERVICE_UNAVAILABLE)
@@ -118,51 +119,6 @@ public class StateRestService {
     }
 
     return update;
-  }
-
-  /**
-   * Gets the documentation for the service.
-   * 
-   * @return Response The method outputs the list to the response's output stream
-   */
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public Response getDocumentation() {
-    return Response.ok(docs).build();
-  }
-
-  protected String docs;
-  private String[] notes = {
-          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service"
-                  + " is not working and is either restarting or has failed",
-          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated."
-                  + " In other words, there is a bug! You should file an error report with your server logs from the "
-                  + " time when the error occurred: "
-                  + "<a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
-
-  private String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("stateservice", "State Service", serviceUrl, notes);
-
-    // getState
-    RestEndpoint endpoint = new RestEndpoint("state", RestEndpoint.Method.GET, "/state",
-            "Return the state of the capture agent");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.ok(null));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-
-    // getRecordings
-    endpoint = new RestEndpoint("recordings", RestEndpoint.Method.GET, "/recordings",
-            "Return a list of the capture agent's recordings");
-    endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addStatus(Status.ok(null));
-    endpoint.addStatus(Status.serviceUnavailable("State Service is unavailable"));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-
-    return DocUtil.generate(data);
   }
 
   public StateRestService() {

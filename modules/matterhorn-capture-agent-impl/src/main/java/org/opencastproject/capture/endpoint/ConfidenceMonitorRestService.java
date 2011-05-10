@@ -16,14 +16,10 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.ConfidenceMonitor;
-import org.opencastproject.rest.RestConstants;
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -36,6 +32,7 @@ import org.w3c.dom.Node;
 import java.io.StringWriter;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -54,6 +51,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 @Path("/")
+@RestService(name = "confidence", title = "Confidence Monitoring Service", notes = {
+        "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+        "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+        "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>" }, abstractText = "This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.")
 public class ConfidenceMonitorRestService {
 
   private static final Logger logger = LoggerFactory.getLogger(ConfidenceMonitorRestService.class);
@@ -69,56 +70,9 @@ public class ConfidenceMonitorRestService {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(serviceUrl);
   }
 
-  // CHECKSTYLE:OFF
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("ConfidenceMonitor", "Confidence Monitor", serviceUrl, null);
-
-    // grabFrame Endpoint
-    RestEndpoint grabFrameEndpoint = new RestEndpoint("grabFrame", RestEndpoint.Method.GET, "/{name}",
-            "Loads a JPEG image from the device specified");
-    grabFrameEndpoint.addFormat(new Format("jpeg", "The image of the device", null));
-    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("OK, valid request, results returned"));
-    grabFrameEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .error("Couldn't grab a frame from specified device"));
-    Param device = new Param("name", Type.STRING, null, "The device to grab a frame from");
-    grabFrameEndpoint.addPathParam(device);
-    grabFrameEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, grabFrameEndpoint);
-
-    // list devices endpoint
-    RestEndpoint getDevices = new RestEndpoint("getDevices", RestEndpoint.Method.GET, "/devices",
-            "Lists devices accessible on capture agent");
-    getDevices.addFormat(new Format("XML", "Devices that support confidence monitoring", null));
-    getDevices.addStatus(org.opencastproject.util.doc.Status.ok("OK, valid request, results returned"));
-    getDevices.addStatus(org.opencastproject.util.doc.Status.error("Couldn't list devices"));
-    getDevices.addStatus(org.opencastproject.util.doc.Status.serviceUnavailable("Confidence monitor unavailable"));
-    getDevices.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getDevices);
-
-    // audio rms endpoint
-    RestEndpoint getRMSValues = new RestEndpoint("getRMSValues", RestEndpoint.Method.GET, "/audio/{name}/{timestamp}",
-            "Retrieve all RMS data for device {name} after Unix time {timestamp}");
-    getRMSValues.addStatus(org.opencastproject.util.doc.Status.ok(("NONE")));
-    getRMSValues.addStatus(org.opencastproject.util.doc.Status.error("Couldn't grab RMS values"));
-    getRMSValues.addFormat(new Format("JSON",
-            "start:Unix time to start getting values, interval: time between samples (ns), samples:list of RMS values",
-            null));
-    Param audioDevice = new Param("name", Type.STRING, null, "The device to get RMS values from");
-    Param timestamp = new Param("timestamp", Type.STRING, null, "The timestamp to start getting RMS values from");
-    getRMSValues.addPathParam(audioDevice);
-    getRMSValues.addPathParam(timestamp);
-    getRMSValues.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getRMSValues);
-
-    return DocUtil.generate(data);
-  }
-
-  // CHECKSTYLE:ON
-
+  
   /**
    * OSGI activate method. Will be called on service activation.
    */
@@ -156,6 +110,7 @@ public class ConfidenceMonitorRestService {
   @GET
   @Produces("image/jpeg")
   @Path("{name}")
+  @RestQuery(name = "grabFrame", description = "Loads a JPEG image from the device specified", pathParameters = { @RestParameter(description = "The device to grab a frame from", isRequired = true, name = "name", type = RestParameter.Type.STRING) } , restParameters = { } , reponses = { @RestResponse(description = "OK, valid request, results returned", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response grabFrame(@PathParam("name") String device) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
@@ -180,6 +135,9 @@ public class ConfidenceMonitorRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("devices")
+  @RestQuery(name = "getDevices", description = "Lists devices accessible on capture agent", pathParameters = { }, restParameters = { }, reponses = {
+          @RestResponse(description = "OK, valid request, results returned", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "Confidence monitor unavailable", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE) }, returnDescription = "")
   public Response getDevices() {
 
     if (service == null) {
@@ -233,6 +191,9 @@ public class ConfidenceMonitorRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("audio/{name}/{timestamp}")
+  @RestQuery(name = "getRMSValues", description = "Retrieve all RMS data for device {name} after Unix time {timestamp}", pathParameters = {
+          @RestParameter(description = "The device to get RMS values from", isRequired = true, name = "name", type = RestParameter.Type.STRING),
+          @RestParameter(description = "The timestamp to start getting RMS values from", isRequired = true, name = "timestamp", type = RestParameter.Type.STRING) }, restParameters = { }, reponses = { @RestResponse(description = "OK, valid request, results returned", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response getRMSValues(@PathParam("name") String device, @PathParam("timestamp") double timestamp) {
     JSONObject jsonOutput = new JSONObject();
     if (service == null) {

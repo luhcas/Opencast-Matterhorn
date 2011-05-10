@@ -34,16 +34,14 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.AbstractJobProducerEndpoint;
-import org.opencastproject.rest.RestConstants;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestParameter.Type;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -60,6 +58,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -76,11 +75,20 @@ import javax.xml.parsers.ParserConfigurationException;
  * A REST endpoint delegating functionality to the {@link ComposerService}
  */
 @Path("/")
+@RestService(name = "composer", title = "Composer", notes = {
+        "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+        "If the service is down or not working it will return a status 503, this means the the underlying service is not working and "
+            + "is either restarting or has failed",
+        "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! " 
+            + "You should file an error report with your server logs from the time when the error occurred: " 
+            + "<a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>" }, 
+        abstractText = "This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and "
+            + "attachments.")
 public class ComposerRestService extends AbstractJobProducerEndpoint {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ComposerRestService.class);
-
+  
   /** The rest documentation */
   protected String docs;
 
@@ -124,8 +132,6 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-      String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-      docs = generateDocs(serviceUrl);
     }
   }
 
@@ -142,6 +148,9 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("encode")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "encode", description = "Starts an encoding process, based on the specified encoding profile ID and the track", pathParameters = {}, restParameters = {
+          @RestParameter(description = "The track containing the stream", isRequired = true, name = "sourceTrack", type = Type.TEXT, defaultValue = "${this.videoTrackDefault}"),
+          @RestParameter(description = "The encoding profile to use", isRequired = true, name = "profileId", type = Type.STRING, defaultValue = "flash.http") }, reponses = { @RestResponse(description = "Results in an xml document containing the job for the encoding task", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response encode(@FormParam("sourceTrack") String sourceTrackAsXml, @FormParam("profileId") String profileId)
           throws Exception {
     // Ensure that the POST parameters are present
@@ -179,6 +188,14 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("trim")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "trim", description = "Starts a trimming process, based on the specified track, start time and duration in ms", pathParameters = {}, restParameters = {
+          @RestParameter(description = "The track containing the stream", isRequired = true, name = "sourceTrack", type = Type.TEXT, defaultValue = "${this.videoTrackDefault}"),
+          @RestParameter(description = "The encoding profile to use for trimming", isRequired = true, name = "profileId", type = Type.STRING, defaultValue = "trim.work"),
+          @RestParameter(description = "The start time in milisecond", isRequired = true, name = "start", type = Type.STRING, defaultValue = "0"),
+          @RestParameter(description = "The duration in milisecond", isRequired = true, name = "duration", type = Type.STRING, defaultValue = "10000") }, reponses = {
+          @RestResponse(description = "Results in an xml document containing the job for the trimming task", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "If the start time is negative or exceeds the track duration", responseCode = HttpServletResponse.SC_BAD_REQUEST),
+          @RestResponse(description = "if the duration is negative or, including the new start time, exceeds the track duration", responseCode = HttpServletResponse.SC_BAD_REQUEST) }, returnDescription = "")
   public Response trim(@FormParam("sourceTrack") String sourceTrackAsXml, @FormParam("profileId") String profileId,
           @FormParam("start") long start, @FormParam("duration") long duration) throws Exception {
     // Ensure that the POST parameters are present
@@ -224,6 +241,10 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("mux")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "mux", description = "Starts an encoding process, which will mux the two tracks using the given encoding profile", pathParameters = {}, restParameters = {
+          @RestParameter(description = "The track containing the audio stream", isRequired = true, name = "sourceAudioTrack", type = Type.TEXT, defaultValue = "${this.audioTrackDefault}"),
+          @RestParameter(description = "The track containing the video stream", isRequired = true, name = "sourceVideoTrack", type = Type.TEXT, defaultValue = "${this.videoTrackDefault}"),
+          @RestParameter(description = "The encoding profile to use", isRequired = true, name = "profileId", type = Type.STRING, defaultValue = "flash.http") }, reponses = { @RestResponse(description = "Results in an xml document containing the job for the encoding task", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response mux(@FormParam("audioSourceTrack") String audioSourceTrackXml,
           @FormParam("videoSourceTrack") String videoSourceTrackXml, @FormParam("profileId") String profileId)
           throws Exception {
@@ -267,6 +288,10 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("image")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "image", description = "Starts an image extraction process, based on the specified encoding profile ID and the source track", pathParameters = {}, restParameters = {
+          @RestParameter(description = "The number of seconds (many numbers can be specified, separated by comma) into the video to extract the image", isRequired = true, name = "time", type = Type.STRING, defaultValue = "1"),
+          @RestParameter(description = "The track containing the video stream", isRequired = true, name = "sourceTrack", type = Type.TEXT, defaultValue = "${this.videoTrackDefault}"),
+          @RestParameter(description = "The encoding profile to use", isRequired = true, name = "profileId", type = Type.STRING, defaultValue = "player-preview.http") }, reponses = { @RestResponse(description = "Results in an xml document containing the image attachment", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response image(@FormParam("sourceTrack") String sourceTrackXml, @FormParam("profileId") String profileId,
           @FormParam("time") String times) throws Exception {
     // Ensure that the POST parameters are present
@@ -310,6 +335,9 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("convertimage")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "convertimage", description = "Starts an image conversion process, based on the specified encoding profile ID and the source image", pathParameters = {}, restParameters = {
+          @RestParameter(description = "The original image", isRequired = true, name = "sourceImage", type = Type.TEXT, defaultValue = "${this.imageAttachmentDefault}"),
+          @RestParameter(description = "The encoding profile to use", isRequired = true, name = "profileId", type = Type.STRING, defaultValue = "image-conversion.http") }, reponses = { @RestResponse(description = "Results in an xml document containing the image attachment", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response convertImage(@FormParam("sourceImage") String sourceImageXml, @FormParam("profileId") String profileId)
           throws Exception {
     // Ensure that the POST parameters are present
@@ -347,6 +375,9 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("captions")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "captions", description = "Starts caption embedding process, based on the specified source track and captions", pathParameters = {}, restParameters = {
+          @RestParameter(description = "QuickTime file containg video stream", isRequired = true, name = "mediaTrack", type = Type.TEXT, defaultValue = "${this.mediaTrackDefault}"),
+          @RestParameter(description = "Catalog(s) containing captions in SRT format", isRequired = true, name = "captions", type = Type.TEXT, defaultValue = "${this.captionsCatalogsDefault}") }, reponses = { @RestResponse(description = "Result in an xml document containing resulting media file.", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response captions(@FormParam("mediaTrack") String sourceTrackXml, @FormParam("captions") String captionsAsXml,
           @FormParam("language") String language) throws Exception {
     if (sourceTrackXml == null || captionsAsXml == null) {
@@ -383,6 +414,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
   @GET
   @Path("profiles.xml")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "profiles", description = "Retrieve the encoding profiles", pathParameters = {}, restParameters = {}, reponses = { @RestResponse(description = "Results in an xml document describing the available encoding profiles", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public EncodingProfileList listProfiles() {
     List<EncodingProfileImpl> list = new ArrayList<EncodingProfileImpl>();
     for (EncodingProfile p : composerService.listProfiles()) {
@@ -390,126 +422,16 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     }
     return new EncodingProfileList(list);
   }
-
+  
   @GET
   @Path("profile/{id}.xml")
   @Produces(MediaType.TEXT_XML)
+  @RestQuery(name = "profilesID", description = "Retrieve an encoding profile", pathParameters = { @RestParameter(name = "id", description = "the profile ID", isRequired = false, type = RestParameter.Type.STRING) }, restParameters = {}, reponses = { @RestResponse(description = "Results in an xml document describing the requested encoding profile", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "")
   public Response getProfile(@PathParam("id") String profileId) throws NotFoundException {
     EncodingProfileImpl profile = (EncodingProfileImpl) composerService.getProfile(profileId);
     if (profile == null)
       throw new NotFoundException();
     return Response.ok(profile).build();
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public String getDocumentation() {
-    return docs;
-  }
-
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("Composer", "Composer Service", serviceUrl, new String[] { "$Rev$" });
-    // profiles
-    RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles.xml",
-            "Retrieve the encoding profiles");
-    profilesEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document describing the available encoding profiles"));
-    profilesEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, profilesEndpoint);
-
-    RestEndpoint profileEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profile/{id}.xml",
-            "Retrieve an encoding profile");
-    profileEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document describing the requested encoding profile"));
-    profileEndpoint.addPathParam(new Param("id", Param.Type.STRING, "mov-low.http", "the profile ID"));
-    profileEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, profileEndpoint);
-
-    // encode
-    RestEndpoint encodeEndpoint = new RestEndpoint("encode", RestEndpoint.Method.POST, "/encode",
-            "Starts an encoding process, based on the specified encoding profile ID and the track");
-    encodeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document containing the job for the encoding task"));
-    encodeEndpoint.addRequiredParam(new Param("sourceTrack", Type.TEXT, generateVideoTrack(),
-            "The track containing the stream"));
-    encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
-    encodeEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, encodeEndpoint);
-
-    // @FormParam("sourceTrack") String sourceTrackAsXml, @FormParam("profileId") String profileId,
-    // @FormParam("start") long start, @FormParam("duration") long duration
-    // trim
-    RestEndpoint trimEndpoint = new RestEndpoint("trim", RestEndpoint.Method.POST, "/trim",
-            "Starts a trimming process, based on the specified track, start time and duration in ms");
-    trimEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document containing the job for the trimming task"));
-    trimEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("if the start time is negative or exceeds the track duration"));
-    trimEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("if the duration is negative or, including the new start time, exceeds the track duration"));
-    trimEndpoint.addRequiredParam(new Param("sourceTrack", Type.TEXT, generateVideoTrack(),
-            "The track containing the stream"));
-    trimEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "trim.work",
-            "The encoding profile to use for trimming"));
-    trimEndpoint.addRequiredParam(new Param("start", Type.STRING, "0", "The start time in milisecond"));
-    trimEndpoint.addRequiredParam(new Param("duration", Type.STRING, "10000", "The duration in milisecond"));
-    trimEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, trimEndpoint);
-
-    // mux
-    RestEndpoint muxEndpoint = new RestEndpoint("mux", RestEndpoint.Method.POST, "/mux",
-            "Starts an encoding process, which will mux the two tracks using the given encoding profile");
-    muxEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document containing the job for the encoding task"));
-    muxEndpoint.addRequiredParam(new Param("sourceAudioTrack", Type.TEXT, generateAudioTrack(),
-            "The track containing the audio stream"));
-    muxEndpoint.addRequiredParam(new Param("sourceVideoTrack", Type.TEXT, generateVideoTrack(),
-            "The track containing the video stream"));
-    muxEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
-    muxEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, muxEndpoint);
-
-    // image
-    RestEndpoint imageEndpoint = new RestEndpoint("image", RestEndpoint.Method.POST, "/image",
-            "Starts an image extraction process, based on the specified encoding profile ID and the source track");
-    imageEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document containing the image attachment"));
-    imageEndpoint
-            .addRequiredParam(new Param("time", Type.STRING, "1",
-                    "The number of seconds (many numbers can be specified, separated by comma) into the video to extract the image"));
-    imageEndpoint.addRequiredParam(new Param("sourceTrack", Type.TEXT, generateVideoTrack(),
-            "The track containing the video stream"));
-    imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "player-preview.http",
-            "The encoding profile to use"));
-    imageEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, imageEndpoint);
-
-    // convert image
-    RestEndpoint imageConversionEndpoint = new RestEndpoint("convertimage", RestEndpoint.Method.POST, "/convertimage",
-            "Starts an image conversion process, based on the specified encoding profile ID and the source image");
-    imageConversionEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Results in an xml document containing the image attachment"));
-    imageConversionEndpoint.addRequiredParam(new Param("sourceImage", Type.TEXT, generateImageAttachment(),
-            "The original image"));
-    imageConversionEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "image-conversion.http",
-            "The encoding profile to use"));
-    imageConversionEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, imageConversionEndpoint);
-
-    // captions
-    RestEndpoint captionsEndpoint = new RestEndpoint("captions", RestEndpoint.Method.POST, "/captions",
-            "Starts caption embedding process, based on the specified source track and captions");
-    captionsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Result in an xml document containing resulting media file."));
-    captionsEndpoint.addRequiredParam(new Param("mediaTrack", Type.TEXT, generateMediaTrack(),
-            "QuickTime file containg video stream"));
-    captionsEndpoint.addRequiredParam(new Param("captions", Type.TEXT, generateCaptionsCatalogs(),
-            "Catalog(s) containing captions in SRT format"));
-    captionsEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, captionsEndpoint);
-
-    return DocUtil.generate(data);
   }
 
   /**
@@ -580,7 +502,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
     return timeArray;
   }
 
-  protected String generateVideoTrack() {
+  protected String getVideoTrackDefault() {
     return "<track id=\"track-1\" type=\"presentation/source\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
             + "  <url>" + serverUrl + "/workflow/samples/camera.mpg</url>\n"
             + "  <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"
@@ -591,7 +513,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             + "    <bitrate>540520</bitrate>\n" + "    <frameRate>2</frameRate>\n" + "  </video>\n" + "</track>";
   }
 
-  protected String generateAudioTrack() {
+  protected String getAudioTrackDefault() {
     return "<track id=\"track-2\" type=\"presentation/source\">\n" + "  <mimetype>audio/mp3</mimetype>\n"
             + "  <url>serverUrl/workflow/samples/audio.mp3</url>\n"
             + "  <checksum type=\"md5\">950f9fa49caa8f1c5bbc36892f6fd062</checksum>\n"
@@ -600,7 +522,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             + "    <samplingrate>44100</samplingrate>\n" + "  </audio>\n" + "</track>";
   }
 
-  protected String generateMediaTrack() {
+  protected String getMediaTrackDefault() {
     return "<track id=\"track-3\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
             + "  <url>serverUrl/workflow/samples/slidechanges.mov</url>\n"
             + "  <checksum type=\"md5\">4cbcc9223c0425a54c3f253823487d5f</checksum>\n"
@@ -608,7 +530,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             + "  </video>\n" + "</track>";
   }
 
-  protected String generateCaptionsCatalogs() {
+  protected String getCaptionsCatalogsDefault() {
     return "<captions>\n" + "  <catalog id=\"catalog-1\">\n" + "    <mimetype>application/x-subrip</mimetype>\n"
             + "    <url>serverUrl/workflow/samples/captions_test_eng.srt</url>\n"
             + "    <checksum type=\"md5\">55d70b062896aa685e2efc4226b32980</checksum>\n" + "    <tags>\n"
@@ -619,7 +541,7 @@ public class ComposerRestService extends AbstractJobProducerEndpoint {
             + "      <tag>lang:fr</tag>\n" + "    </tags>\n" + "  </catalog>\n" + "</captions>\n";
   }
 
-  protected String generateImageAttachment() {
+  protected String getImageAttachmentDefault() {
     return "<attachment id=\"track-3\">\n" + "  <mimetype>image/jpeg</mimetype>\n"
             + "  <url>serverUrl/workflow/samples/image.jpg</url>\n" + "</attachment>";
   }

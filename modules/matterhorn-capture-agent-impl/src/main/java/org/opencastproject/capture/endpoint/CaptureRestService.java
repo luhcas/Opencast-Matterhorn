@@ -16,14 +16,10 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.rest.RestConstants;
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter.Type;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -34,6 +30,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -42,13 +39,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+import org.opencastproject.util.doc.rest.RestParameter;
 
 /**
  * The REST endpoint for the capture agent service on the capture device
  */
 @Path("/")
+@RestService(name = "captureagent", title = "Capture Agent", notes = {
+        "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+        "If the service is down or not working it will return a status 503, this means the the underlying service is not working and "
+            + "is either restarting or has failed",
+        "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! "             
+            + "You should file an error report with your server logs from the time when the error occurred: "
+            + "<a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>" }, 
+        abstractText = "This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and "
+        		+ "attachments.")
 public class CaptureRestService {
-
   private static final Logger logger = LoggerFactory.getLogger(CaptureRestService.class);
 
   private CaptureAgent service;
@@ -62,99 +68,7 @@ public class CaptureRestService {
    *          OSGi component context
    */
   public void activate(ComponentContext cc) {
-    String serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(serviceUrl);
   }
-
-  // CHECKSTYLE:OFF
-  // Checkstyle disable because it's a pain with these doc generation functions
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("CaptureAgent", "Capture Agent", serviceUrl, null);
-    // // startCapture signatures
-    // startCapture()
-    RestEndpoint startNoParamEndpoint = new RestEndpoint("startNP", RestEndpoint.Method.GET, "/startCapture",
-            "Starts a capture with the default parameters");
-    startNoParamEndpoint.addFormat(new Format("String", "The recording ID for the capture started", null));
-    startNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("valid request, results returned"));
-    startNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .error("couldn't start capture with default parameters"));
-    startNoParamEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, startNoParamEndpoint);
-    // startCapture(Properties)
-    RestEndpoint startPropEndpoint = new RestEndpoint("startMP", RestEndpoint.Method.POST, "/startCapture",
-            "Starts a capture with the default properties and a provided MediaPackage");
-    startPropEndpoint
-            .addFormat(new Format(
-                    "String",
-                    "The recording ID for the capture started",
-                    "http://opencast.jira.com/svn/MH/trunk/docs/felix/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties"));
-    startPropEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("valid request, results returned"));
-    startPropEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .error("couldn't start capture with provided parameters"));
-    // This is to get the default value for capture.properties from source.opencastproject.org
-    Param config = new Param(
-            "config",
-            Type.STRING,
-            null,
-            "The properties to set for this recording. "
-                    + "Those are specified in key-value pairs as described in "
-                    + "<a href=\"http://java.sun.com/javase/6/docs/api/java/util/Properties.html#load(java.io.Reader)\"> "
-                    + "this JavaDoc</a>. The current default properties can be found at "
-                    + "<a href=\"http://opencast.jira.com/svn/MH/trunk/docs/felix/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties\"> "
-                    + "this location</a>");
-    startPropEndpoint.addRequiredParam(config);
-    startPropEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, startPropEndpoint);
-
-    // // stopCapture signatures
-    // stopCapture()
-    RestEndpoint stopNoParamEndpoint = new RestEndpoint("stopNP", RestEndpoint.Method.GET, "/stopCapture",
-            "Stops the current capture");
-    stopNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("recording properly stopped"));
-    stopNoParamEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .error("failed to stop the capture, or no current active capture"));
-    stopNoParamEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, stopNoParamEndpoint);
-    // stopCapture(recordingID)
-    RestEndpoint stopIDEndpoint = new RestEndpoint("stopID", RestEndpoint.Method.POST, "/stopCapture",
-            "Stops the current capture if its ID matches the argument");
-    stopIDEndpoint.addRequiredParam(new Param("recordingID", Type.STRING, null, "The ID for the recording to stop"));
-    stopIDEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("current capture with the specified ID stopped succesfully"));
-    // TODO: check if this can be returned
-    // stopIDEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
-    stopIDEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .error("failed to stop the capture, no current active capture, or no matching ID"));
-    stopIDEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, stopIDEndpoint);
-
-    // // configuration()
-    RestEndpoint configEndpoint = new RestEndpoint(
-            "config",
-            RestEndpoint.Method.GET,
-            "/configuration",
-            "Returns a list with the default agent configuration properties.  This is in the same format as the startCapture endpoint.");
-    configEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("the configuration values are returned"));
-    configEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .error("the configuration properties could not be retrieved"));
-    configEndpoint.addStatus(org.opencastproject.util.doc.Status.serviceUnavailable("Capture Agent is unavailable"));
-    configEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, configEndpoint);
-
-    // // configuration()
-    RestEndpoint scheduleEndpoint = new RestEndpoint("schedule", RestEndpoint.Method.GET, "/schedule",
-            "Returns an XML formatted list of the capture agent's current schedule");
-    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("the agent's schedule is returned"));
-    scheduleEndpoint
-            .addStatus(org.opencastproject.util.doc.Status.error("the agent's schedule could not be retrieved"));
-    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.serviceUnavailable("Capture Agent is unavailable"));
-    scheduleEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, scheduleEndpoint);
-
-    return DocUtil.generate(data);
-  }
-
-  // CHECKSTYLE:ON
 
   /**
    * Set {@link org.opencastproject.capture.api.CaptureAgent} service.
@@ -179,6 +93,9 @@ public class CaptureRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
+  @RestQuery(name = "startNP", description = "Starts a capture with the default parameters", pathParameters = { }, restParameters = { }, reponses = {
+          @RestResponse(description = "valid request, results returned", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "couldn't start capture with default parameters", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "The recording ID for the capture started")
   public Response startCapture() {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
@@ -199,10 +116,18 @@ public class CaptureRestService {
               .entity("Exception while trying to start capture: " + e.getMessage() + ".").build();
     }
   }
-
+  
   @POST
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
+  @RestQuery(name = "startMP", description = "Starts a capture with the default properties and a provided MediaPackage", pathParameters = { }, restParameters = { @RestParameter(description = "The properties to set for this recording. "
+          + "Those are specified in key-value pairs as described in "
+          + "<a href=\"http://java.sun.com/javase/6/docs/api/java/util/Properties.html#load(java.io.Reader)\"> "
+          + "this JavaDoc</a>. The current default properties can be found at "
+          + "<a href=\"http://opencast.jira.com/svn/MH/trunk/docs/felix/conf/"
+          + "services/org.opencastproject.capture.impl.ConfigurationManager.properties\"> " + "this location</a>", isRequired = true, name = "config", type = Type.STRING) }, reponses = {
+          @RestResponse(description = "valid request, results returned", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "couldn't start capture with default parameters", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "The recording ID for the capture started")
   public Response startCapture(@FormParam("config") String config) {
     logger.debug("Capture configuration received:");
     logger.debug("{}.", config);
@@ -231,17 +156,13 @@ public class CaptureRestService {
               .entity("Exception while trying to start capture: " + e.getMessage() + ".").build();
     }
   }
-
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public Response getDocumentation() {
-    return Response.ok(docs).build();
-  }
-
+  
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("stopCapture")
+  @RestQuery(name = "stopNP", description = "Stops the current capture", pathParameters = { }, restParameters = { }, reponses = {
+          @RestResponse(description = "recording properly stopped", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "failed to stop the capture, or no current active capture", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "The recording ID for the capture started")
   public Response stopCapture() {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
@@ -261,10 +182,16 @@ public class CaptureRestService {
               .entity("Exception while trying to stop capture: " + e.getMessage() + ".").build();
     }
   }
-
+  
   @POST
   @Produces(MediaType.TEXT_PLAIN)
   @Path("stopCapture")
+  @RestQuery(name = "stopID", description = "Stops the current capture if its ID matches the argument", pathParameters = { }, restParameters = { @RestParameter(description = "The ID for the recording to stop", isRequired = true, name = "recordingID", type = Type.STRING) }, reponses = {
+          @RestResponse(description = "current capture with the specified ID stopped succesfully", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "couldn't start capture with default parameters", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
+  // TODO: check if this can be returned
+  // stopIDEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
+  }, returnDescription = "The recording ID for the capture started")
   public Response stopCapture(@FormParam("recordingID") String recordingID) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
@@ -284,16 +211,20 @@ public class CaptureRestService {
               .entity("Exception while trying to stop capture: " + e.getMessage() + ".").build();
     }
   }
-
+  
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("configuration")
+  @RestQuery(name = "config", description = "Returns a list with the default agent configuration properties.  This is in the same format as the startCapture endpoint.", pathParameters = { }, restParameters = { }, reponses = {
+          @RestResponse(description = "the configuration values are returned", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "the configuration properties could not be retrieved", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
+          @RestResponse(description = "Capture Agent is unavailable", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE) }, returnDescription = "")
   public Response getConfiguration() {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
               .entity("Capture Agent is unavailable, please wait...").build();
     }
-
+    
     try {
       return Response.ok(service.getDefaultAgentPropertiesAsString()).build();
     } catch (Exception e) {
@@ -301,10 +232,14 @@ public class CaptureRestService {
               .entity("Exception while trying to obtain metadata: " + e.getMessage() + ".").build();
     }
   }
-
+  
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("schedule")
+  @RestQuery(name = "schedule", description = "Returns an XML formatted list of the capture agent's current schedule", pathParameters = { }, restParameters = { }, reponses = {
+          @RestResponse(description = "the agent's schedule is returned", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "the agent's schedule could not be retrieved", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
+          @RestResponse(description = "Capture Agent is unavailable", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE) }, returnDescription = "")
   public Response getSchedule() throws JAXBException {
     if (service == null) {
       return Response.status(Response.Status.SERVICE_UNAVAILABLE)
@@ -322,6 +257,10 @@ public class CaptureRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("capabilities")
+  @RestQuery(name = "capabilities", description = "Returns the capture capabilities of the agent.", pathParameters = { }, restParameters = { }, reponses = {
+          @RestResponse(description = "the agent's capabilities are returned", responseCode = HttpServletResponse.SC_OK),
+          @RestResponse(description = "the agent's capabilities could not be retrieved", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
+          @RestResponse(description = "Capture Agent is unavailable", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE) }, returnDescription = "")
   public Response getCapabilities() throws IOException {
     if (service == null) {
       return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Capture Agent is unavailable, please wait...").build();
