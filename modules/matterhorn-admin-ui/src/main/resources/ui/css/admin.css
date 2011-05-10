@@ -125,6 +125,7 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 #i18n_additional, .fold_icon_text { padding-top: 2px; float: left; }
 .oc-ui-collapsible-widget .form-box-head { cursor: pointer; }
 .ui-datepicker-trigger { vertical-align: middle; }
+#hold-ul li { padding-left: 175px; }
 
 /* Error */
 
