@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline;
 
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureFailureHandler;
 import org.opencastproject.capture.impl.RecordingImpl;
 import org.opencastproject.capture.impl.UnableToStartCaptureException;

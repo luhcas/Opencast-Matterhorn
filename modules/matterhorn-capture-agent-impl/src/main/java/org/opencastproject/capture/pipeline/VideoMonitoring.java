@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline;
 
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 
 import com.sun.jna.Pointer;

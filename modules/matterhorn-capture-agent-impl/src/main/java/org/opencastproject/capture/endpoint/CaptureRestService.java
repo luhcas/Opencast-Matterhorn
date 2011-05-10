@@ -213,7 +213,7 @@ public class CaptureRestService {
   }
   
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_XML)
   @Path("configuration")
   @RestQuery(name = "config", description = "Returns a list with the default agent configuration properties.  This is in the same format as the startCapture endpoint.", pathParameters = { }, restParameters = { }, reponses = {
           @RestResponse(description = "the configuration values are returned", responseCode = HttpServletResponse.SC_OK),
@@ -226,7 +226,9 @@ public class CaptureRestService {
     }
     
     try {
-      return Response.ok(service.getDefaultAgentPropertiesAsString()).build();
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      service.getDefaultAgentProperties().storeToXML(baos, "Configuration for the agent " + service.getAgentName());
+      return Response.ok(baos.toString()).build();
     } catch (Exception e) {
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
               .entity("Exception while trying to obtain metadata: " + e.getMessage() + ".").build();

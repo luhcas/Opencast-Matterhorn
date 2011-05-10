@@ -15,16 +15,16 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ConfidenceMonitor;
 import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
+import org.opencastproject.capture.impl.jobs.AgentConfigurationJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.LoadRecordingsJob;
@@ -91,7 +91,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -102,7 +101,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -1071,21 +1069,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   public Properties getAgentCapabilities() {
     if (configService != null) {
-      Properties p = configService.getCapabilities();
-      if (p != null) {
-        Calendar cal = Calendar.getInstance();
-        p.setProperty(
-                "capture.device.timezone.offset",
-                Long.toString((cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET))
-                        / (1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS)));
-        p.setProperty("capture.device.timezone", TimeZone.getDefault().getID());
-      } else {
-        logger.warn("Returning null capabilities from capture agent...");
-      }
-      return p;
-    } else {
-      return null;
+      return configService.getCapabilities();
     }
+    return null;
   }
 
   /**
@@ -1094,7 +1080,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @see org.opencastproject.capture.api.CaptureAgent#getDefaultAgentProperties()
    */
   public Properties getDefaultAgentProperties() {
-    return configService.getAllProperties();
+    if (configService != null) {
+      return configService.getAllProperties();
+    }
+    return null;
   }
 
   /**
@@ -1489,7 +1478,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
               .getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * CaptureParameters.MILLISECONDS;
 
       // Setup the push job
-      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", AgentCapabilitiesJob.class);
+      JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", AgentConfigurationJob.class);
       capbsJob.setGroup(JobParameters.RECURRING_TYPE);
 
       capbsJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);

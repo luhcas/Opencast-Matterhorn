@@ -15,7 +15,7 @@ CREATE TABLE `ANNOTATION` (
 CREATE TABLE `CAPTURE_AGENT_STATE` (
   `NAME` varchar(255) collate utf8_unicode_ci NOT NULL,
   `STATE` varchar(255) collate utf8_unicode_ci NOT NULL,
-  `CAPABILITIES` text,
+  `CONFIGURATION` text,
   `LAST_HEARD_FROM` bigint(20) NOT NULL,
   `URL` varchar(255) collate utf8_unicode_ci default NULL,
   PRIMARY KEY  (`NAME`)

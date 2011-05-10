@@ -14,7 +14,7 @@ CREATE TABLE annotation (
 CREATE TABLE capture_agent_state (
     name character varying(255) NOT NULL,
     state character varying(255) NOT NULL,
-    capabilities text,
+    configuration text,
     last_heard_from bigint NOT NULL,
     url character varying(255)
 );

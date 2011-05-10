@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 
 import java.io.File;
 import java.util.Properties;

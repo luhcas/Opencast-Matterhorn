@@ -16,6 +16,7 @@
 
 package org.opencastproject.capture.admin.impl;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.Recording;
@@ -50,9 +51,10 @@ public class CaptureAgentStateServiceImplTest {
     setupService();
 
     capabilities = new Properties();
-    capabilities.setProperty("CAMERA", "/dev/video0");
-    capabilities.setProperty("SCREEN", "/dev/video1");
-    capabilities.setProperty("AUDIO", "hw:0");
+    capabilities.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "CAMERA", "/dev/video0");
+    capabilities.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "SCREEN", "/dev/video1");
+    capabilities.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + "AUDIO", "hw:0");
+    capabilities.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, "CAMERA,SCREEN,AUDIO");
   }
 
   private void setupService() throws Exception {
@@ -111,9 +113,9 @@ public class CaptureAgentStateServiceImplTest {
 
   @Test
   public void badAgentCapabilities() {
-    service.setAgentCapabilities(null, capabilities);
+    service.setAgentConfiguration(null, capabilities);
     Assert.assertEquals(0, service.getKnownAgents().size());
-    service.setAgentCapabilities("", capabilities);
+    service.setAgentConfiguration("", capabilities);
     Assert.assertEquals(0, service.getKnownAgents().size());
     service.setAgentState("something", null);
     Assert.assertEquals(0, service.getKnownAgents().size());
@@ -147,7 +149,7 @@ public class CaptureAgentStateServiceImplTest {
 
   @Test
   public void oneAgentCapabilities() {
-    service.setAgentCapabilities("agent1", capabilities);
+    service.setAgentConfiguration("agent1", capabilities);
     Assert.assertEquals(1, service.getKnownAgents().size());
 
     verifyAgent("notAgent1", null, null);
@@ -159,7 +161,7 @@ public class CaptureAgentStateServiceImplTest {
     verifyAgent("notAgent1", null, null);
     verifyAgent("agent1", AgentState.IDLE, capabilities);
 
-    service.setAgentCapabilities("agent1", new Properties());
+    service.setAgentConfiguration("agent1", new Properties());
     Assert.assertEquals(1, service.getKnownAgents().size());
 
     verifyAgent("notAnAgent", null, null);
@@ -168,9 +170,9 @@ public class CaptureAgentStateServiceImplTest {
 
   @Test
   public void removeAgent() {
-    service.setAgentCapabilities("agent1", capabilities);
+    service.setAgentConfiguration("agent1", capabilities);
     Assert.assertEquals(1, service.getKnownAgents().size());
-    service.setAgentCapabilities("agent2", capabilities);
+    service.setAgentConfiguration("agent2", capabilities);
     service.setAgentState("agent2", AgentState.UPLOADING);
 
     verifyAgent("notAnAgent", null, capabilities);
@@ -194,7 +196,7 @@ public class CaptureAgentStateServiceImplTest {
   public void agentCapabilities() {
     Assert.assertNull(service.getAgentCapabilities("agent"));
     Assert.assertNull(service.getAgentCapabilities("NotAgent"));
-    service.setAgentCapabilities("agent", capabilities);
+    service.setAgentConfiguration("agent", capabilities);
     Assert.assertEquals(service.getAgentCapabilities("agent"), capabilities);
     Assert.assertNull(service.getAgentCapabilities("NotAgent"));
   }
@@ -204,19 +206,22 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertEquals(0, service.getKnownAgents().size());
 
     Properties cap1 = new Properties();
-    cap1.put("key", "value");
+    cap1.put(CaptureParameters.CAPTURE_DEVICE_PREFIX + "key", "value");
+    cap1.put(CaptureParameters.CAPTURE_DEVICE_NAMES, "key");
     Properties cap2 = new Properties();
-    cap2.put("foo", "bar");
+    cap2.put(CaptureParameters.CAPTURE_DEVICE_PREFIX+"foo", "bar");
+    cap2.put(CaptureParameters.CAPTURE_DEVICE_NAMES, "foo");
     Properties cap3 = new Properties();
-    cap3.put("bam", "bam");
+    cap3.put(CaptureParameters.CAPTURE_DEVICE_PREFIX+"bam", "bam");
+    cap3.put(CaptureParameters.CAPTURE_DEVICE_NAMES, "bam");
 
     // Setup the two agents and persist them
     service.setAgentState("sticky1", AgentState.IDLE);
-    service.setAgentCapabilities("sticky1", cap1);
+    service.setAgentConfiguration("sticky1", cap1);
     service.setAgentState("sticky2", AgentState.CAPTURING);
-    service.setAgentCapabilities("sticky2", cap2);
+    service.setAgentConfiguration("sticky2", cap2);
     service.setAgentState("sticky3", AgentState.UPLOADING);
-    service.setAgentCapabilities("sticky3", cap3);
+    service.setAgentConfiguration("sticky3", cap3);
 
     // Make sure they're set right
     Assert.assertEquals(cap1, service.getAgentCapabilities("sticky1"));

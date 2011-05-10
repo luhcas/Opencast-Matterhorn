@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -32,11 +32,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Calendar;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -108,6 +110,13 @@ public class ConfigurationManager implements ManagedService {
         properties.put(key, value);
       }
     }
+
+    Calendar cal = Calendar.getInstance();
+    properties.setProperty(
+            "capture.device.timezone.offset",
+            Long.toString((cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET))
+                    / (1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS)));
+    properties.setProperty("capture.device.timezone", TimeZone.getDefault().getID());
 
     // Attempt to parse the location of the configuration server
     try {
@@ -299,7 +308,7 @@ public class ConfigurationManager implements ManagedService {
    * CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL
    * 
    * @return The properties (if any) fetched from the server
-   * @see org.opencastproject.capture.api.CaptureParameters#CAPTURE_CONFIG_REMOTE_ENDPOINT_URL
+   * @see org.opencastproject.capture.CaptureParameters#CAPTURE_CONFIG_REMOTE_ENDPOINT_URL
    */
   Properties retrieveConfigFromServer() {
     if (url == null) {
@@ -326,7 +335,7 @@ public class ConfigurationManager implements ManagedService {
   /**
    * Stores a local copy of the properties on disk.
    * 
-   * @see org.opencastproject.capture.api.CaptureParameters#CAPTURE_CONFIG_CACHE_URL
+   * @see org.opencastproject.capture.CaptureParameters#CAPTURE_CONFIG_CACHE_URL
    */
   void writeConfigFileToDisk() {
     File cachedConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
@@ -373,6 +382,7 @@ public class ConfigurationManager implements ManagedService {
       logger.error("Null friendly name list.  Capabilities filtering aborted.");
       return null;
     }
+    capabilities.put(CaptureParameters.CAPTURE_DEVICE_NAMES, names);
     // Get the names and setup a hash map of them
     String[] friendlyNames = names.split(",");
     HashMap<String, Integer> propertyCounts = new HashMap<String, Integer>();

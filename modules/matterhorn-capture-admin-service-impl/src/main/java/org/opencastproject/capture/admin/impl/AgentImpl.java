@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.admin.impl;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.admin.api.Agent;
 
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.Properties;
 
 import javax.persistence.Column;
@@ -75,13 +77,17 @@ public class AgentImpl implements Agent {
    * The capabilities the agent has Capabilities are the devices this agent can record from, with a friendly name
    * associated to determine their nature (e.g. PRESENTER --> dev/video0)
    */
-  @Column(name = "CAPABILITIES", nullable = true, length = 65535)
+  @Column(name = "CONFIGURATION", nullable = true, length = 65535)
   @Lob
-  protected String capabilitiesString;
+  protected String configurationString;
 
   //Private var to store the caps as a properties object.
   @Transient
   private Properties capabilitiesProperties;
+
+  //Private var to store the configuration as a properties object.
+  @Transient
+  private Properties configurationProperties;
 
   /**
    * Required 0-arg constructor for JAXB, creates a blank agent.
@@ -96,13 +102,15 @@ public class AgentImpl implements Agent {
    *          The name of the agent.
    * @param agentState
    *          The state of the agent. This should be defined from the constants in AgentState
+   * @param configuration
+   *          The configuration of the agent.
    */
-  public AgentImpl(String agentName, String agentState, String agentUrl, Properties capabilities) {
+  public AgentImpl(String agentName, String agentState, String agentUrl, Properties configuration) {
     name = agentName;
     this.setState(agentState);
     this.setUrl(agentUrl);
     // Agents with no capabilities are allowed. These can/will be updated after the agent is built if necessary.
-    setCapabilities(capabilities);
+    setConfiguration(configuration);
   }
 
   /**
@@ -181,20 +189,66 @@ public class AgentImpl implements Agent {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.admin.api.Agent#setCapabilities(java.util.Properties)
+   * @see org.opencastproject.capture.admin.api.Agent#getConfiguration()
    */
-  public void setCapabilities(Properties capabilities) {
-    if (capabilities == null) {
+  public Properties getConfiguration() {
+    return configurationProperties;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.capture.admin.api.Agent#setConfiguration(java.util.Properties)
+   */
+  public void setConfiguration(Properties configuration) {
+    if (configuration == null) {
       return;
     }
 
-    capabilitiesProperties = capabilities;
+    //Set the configuration variables
+    configurationProperties = configuration;
     try {
       StringWriter sw = new StringWriter();
-      capabilities.store(sw, "");
-      this.capabilitiesString = sw.toString();
+      configuration.store(sw, "");
+      this.configurationString = sw.toString();
     } catch (IOException e) {
       log.warn("Unable to store agent " + "'s capabilities to the database, IO exception occurred.", e);
+    }
+
+    //Figure out the capabiltiies variables
+
+    capabilitiesProperties = new Properties();
+
+    String names = configuration.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
+    if (names == null) {
+      log.warn("Null friendly name list for agent " + name + ".  Capabilities filtering aborted.");
+      return;
+    }
+    capabilitiesProperties.put(CaptureParameters.CAPTURE_DEVICE_NAMES, names);
+    // Get the names and setup a hash map of them
+    String[] friendlyNames = names.split(",");
+    HashMap<String, Integer> propertyCounts = new HashMap<String, Integer>();
+    for (String name : friendlyNames) {
+      propertyCounts.put(name, 0);
+    }
+
+    // For each key
+    for (String key : configuration.stringPropertyNames()) {
+      // For each device
+      for (String name : friendlyNames) {
+        String check = CaptureParameters.CAPTURE_DEVICE_PREFIX + name;
+        // If the key looks like a device prefix + the name, copy it
+        if (key.contains(check)) {
+          String property = configuration.getProperty(key);
+          if (property == null) {
+            log.error("Unable to expand variable in value for key {}, returning null!", key);
+            capabilitiesProperties = null;
+            return;
+          }
+          capabilitiesProperties.setProperty(key, property);
+          propertyCounts.put(name, propertyCounts.get(name) + 1);
+        }
+      }
     }
   }
 
@@ -204,9 +258,10 @@ public class AgentImpl implements Agent {
   @SuppressWarnings("unused")
   @PostLoad
   private void loadCaps() {
-    capabilitiesProperties = new Properties();
+    configurationProperties = new Properties();
     try {
-      capabilitiesProperties.load(new StringReader(this.capabilitiesString));
+      configurationProperties.load(new StringReader(this.configurationString));
+      this.setConfiguration(configurationProperties);
     } catch (IOException e) {
       log.warn("Unable to load agent " + name + "'s capabilities, IO exception occurred.", e);
     }

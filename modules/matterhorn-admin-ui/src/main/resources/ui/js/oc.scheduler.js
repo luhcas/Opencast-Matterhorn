@@ -305,12 +305,15 @@ ocScheduler.HandleAgentChange = function(elm){
   $(ocScheduler.inputList).empty();
   ocScheduler.additionalMetadataComponents.agentTimeZone = new ocAdmin.Component(['agentTimeZone']);
   if(agent){
-    $.get('/capture-admin/agents/' + agent + '/capabilities',
+    $.get('/capture-admin/agents/' + agent + '/configuration',
       function(doc){
+        var devNames = [];
         var capabilities = [];
         $.each($('entry', doc), function(a, i){
           var s = $(i).attr('key');
-          if(s.indexOf('.src') != -1){
+          if(s === 'capture.device.names'){
+            devNames = $(i).text().split(',');
+          } else if(s.indexOf('.src') != -1) {
             var name = s.split('.');
             capabilities.push(name[2]);
           } else if(s == 'capture.device.timezone.offset') {
@@ -324,6 +327,9 @@ ocScheduler.HandleAgentChange = function(elm){
             ocScheduler.additionalMetadataComponents.agentTimeZone.setValue($(i).text());
           }
         });
+        if(devNames.length > 0) {
+          capabilities = devNames;
+        }
         if(capabilities.length){
           ocScheduler.DisplayCapabilities(capabilities);
         }else{

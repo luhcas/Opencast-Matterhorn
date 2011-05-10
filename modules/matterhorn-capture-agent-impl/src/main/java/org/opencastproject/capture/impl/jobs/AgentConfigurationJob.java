@@ -16,14 +16,16 @@
 package org.opencastproject.capture.impl.jobs;
 
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.security.api.TrustedHttpClientException;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -34,11 +36,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class is responsible for pushing the agent's state to the remote state service.
  */
-public class AgentCapabilitiesJob implements Job {
+public class AgentConfigurationJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
   private static int globalCapabilityPushCount = 0;
@@ -84,9 +88,9 @@ public class AgentCapabilitiesJob implements Job {
     }
     try {
       if (url.charAt(url.length() - 1) == '/') {
-        url += config.getItem(CaptureParameters.AGENT_NAME) + "/capabilities";
+        url += config.getItem(CaptureParameters.AGENT_NAME) + "/configuration";
       } else {
-        url += "/" + config.getItem(CaptureParameters.AGENT_NAME) + "/capabilities";
+        url += "/" + config.getItem(CaptureParameters.AGENT_NAME) + "/configuration";
       }
     } catch (StringIndexOutOfBoundsException e) {
       logger.warn("#" + uniqueID + " - Unable to build valid capabilities endpoint for agents.");
@@ -97,14 +101,16 @@ public class AgentCapabilitiesJob implements Job {
 
     HttpResponse resp = null;
     try {
-      agent.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + agent.getAgentName());
+      agent.getDefaultAgentProperties().storeToXML(baos, "Capabilities for the agent " + agent.getAgentName());
     } catch (IOException e) {
       logger.warn("#" + uniqueID + " - Unable to serialize agent capabilities!");
       return;
     }
     HttpPost remoteServer = new HttpPost(url);
     try {
-      remoteServer.setEntity(new StringEntity(baos.toString()));
+      List<NameValuePair> formParams = new LinkedList<NameValuePair>();
+      formParams.add(new BasicNameValuePair("configuration", baos.toString()));
+      remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
     } catch (UnsupportedEncodingException e) {
       logger.warn("#" + uniqueID + " - Unable to send agent capapbillities because correct encoding scheme is not supported!");
       return;

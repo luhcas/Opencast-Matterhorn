@@ -83,13 +83,20 @@ public interface CaptureAgentStateService {
   Properties getAgentCapabilities(String agentName);
 
   /**
+   * Returns the list of known agent configurations.
+   * 
+   * @return A {@link java.util.Properties} of name-value configuration pairs.
+   */
+  Properties getAgentConfiguration(String agentName);
+
+  /**
    * Sets the capabilities for the specified agent
    * 
    * @param agentName
    * @param capabilities
    * @return One of the constants defined in this class
    */
-  int setAgentCapabilities(String agentName, Properties capabilities);
+  int setAgentConfiguration(String agentName, Properties capabilities);
 
   /**
    * Gets the state of a recording, if it exists.

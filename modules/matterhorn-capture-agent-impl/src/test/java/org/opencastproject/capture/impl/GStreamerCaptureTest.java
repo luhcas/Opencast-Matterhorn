@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.pipeline.GStreamerPipeline;
 
 import org.easymock.classextension.EasyMock;

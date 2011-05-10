@@ -16,7 +16,7 @@
 package org.opencastproject.capture.impl.jobs;
 
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
 
 import org.quartz.CronTrigger;

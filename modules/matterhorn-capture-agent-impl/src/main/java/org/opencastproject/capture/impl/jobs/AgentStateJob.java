@@ -16,7 +16,7 @@
 package org.opencastproject.capture.impl.jobs;
 
 import org.opencastproject.capture.api.AgentRecording;
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.security.api.TrustedHttpClient;
@@ -187,7 +187,7 @@ public class AgentStateJob implements Job {
 
       resp = client.execute(remoteServer);
       if (resp.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logger.debug("#" + statePushCount + " - State push to " + toString() + " to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+        logger.info("#" + statePushCount + " - State push to " + toString() + " to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
       }
       else {
         logger.debug("#" + statePushCount + " - State push {} to {} was successful.", toString(), url);

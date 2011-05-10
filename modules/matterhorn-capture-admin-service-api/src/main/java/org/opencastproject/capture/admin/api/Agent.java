@@ -87,10 +87,17 @@ public interface Agent {
   Properties getCapabilities();
 
   /**
-   * Sets the capture agent's capability list.
+   * Gets the capture agent's full configuration list.
    * 
-   * @param capabilities
-   *          The agent's capabilities.
+   * @return The agent's configuration, or null if there is an error.
    */
-  void setCapabilities(Properties capabilities);
+  Properties getConfiguration();
+
+  /**
+   * Sets the capture agent's configuration list.
+   * 
+   * @param configuration
+   *          The agent's configuration.
+   */
+  void setConfiguration(Properties configuration);
 }

@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
-import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.util.ConfigurationException;
 

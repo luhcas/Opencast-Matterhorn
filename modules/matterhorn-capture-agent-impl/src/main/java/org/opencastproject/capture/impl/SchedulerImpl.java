@@ -15,8 +15,8 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.ScheduledEventImpl;
 import org.opencastproject.capture.impl.jobs.CleanCaptureJob;

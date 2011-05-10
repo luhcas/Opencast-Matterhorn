@@ -28,7 +28,7 @@ public interface StateService {
    * Gets the agent's name
    * 
    * @return The name of the agent as defined in the properties file with the appropriate key
-   * @see org.opencastproject.capture.api.CaptureParameters#AGENT_NAME
+   * @see org.opencastproject.capture.CaptureParameters#AGENT_NAME
    */
   String getAgentName();
 

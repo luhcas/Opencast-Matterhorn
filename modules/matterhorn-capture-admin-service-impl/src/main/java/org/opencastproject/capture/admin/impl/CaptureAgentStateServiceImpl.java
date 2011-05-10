@@ -235,7 +235,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   public Properties getAgentCapabilities(String agentName) {
 
     Agent req = agents.get(agentName);
-    // if the agent is known set the state
+
     if (req != null) {
       return agents.get(agentName).getCapabilities();
     } else {
@@ -246,13 +246,29 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setAgentCapabilities
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentConfiguration(java.lang.String)
    */
-  public int setAgentCapabilities(String agentName, Properties capabilities) {
+  public Properties getAgentConfiguration(String agentName) {
+
+    Agent req = agents.get(agentName);
+
+    if (req != null) {
+      return agents.get(agentName).getConfiguration();
+    } else {
+      return null;
+    }
+  }  
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setAgentConfiguration
+   */
+  public int setAgentConfiguration(String agentName, Properties configuration) {
     Agent req = agents.get(agentName);
     if (req != null) {
       logger.debug("Setting Agent {}'s capabilities", agentName);
-      req.setCapabilities(capabilities);
+      req.setConfiguration(configuration);
       updateAgentInDatabase(req);
     } else {
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
@@ -262,7 +278,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       }
 
       logger.debug("Creating Agent {} with state {}.", agentName, AgentState.UNKNOWN);
-      Agent a = new AgentImpl(agentName, AgentState.UNKNOWN, "", capabilities);
+      Agent a = new AgentImpl(agentName, AgentState.UNKNOWN, "", configuration);
       agents.put(agentName, a);
       updateAgentInDatabase(a);
     }
@@ -284,7 +300,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       tx.begin();
       Agent existing = em.find(AgentImpl.class, a.getName());
       if (existing != null) {
-        existing.setCapabilities(a.getCapabilities());
+        existing.setConfiguration(a.getCapabilities());
         existing.setLastHeardFrom(a.getLastHeardFrom());
         existing.setState(a.getState());
         em.merge(existing);
