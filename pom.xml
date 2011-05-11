@@ -46,6 +46,7 @@
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
+        <module>modules/matterhorn-metadata</module>
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-scheduler-api</module>
