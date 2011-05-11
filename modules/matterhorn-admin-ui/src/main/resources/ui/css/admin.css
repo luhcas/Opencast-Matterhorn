@@ -7,7 +7,8 @@ ul,li {list-style: none;}
 input:focus, button:focus { outline: 1px #999 solid; }
 table tr td { background: white!important; color: black!important; }
 table tr:hover td { background: silver!important; color: black!important; }
-table tr:hover a { color: black!important; text-decoration: underline!important; }
+table tr:hover a { color: black!important; font-weight: bold!important; }
+table tr:hover a:hover { text-decoration: underline!important; }
 
 .layout-centered { margin-left: auto; margin-right: auto}
 .layout-inline { display: inline-block; }

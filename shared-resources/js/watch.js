@@ -475,7 +475,6 @@ Opencast.Watch = (function ()
             $('#oc_slidetext').addClass('scroll');
         }
         // Show video controls and data
-        $('#oc_player_video-dropdown').show();
         $('#data').show();
         $('#oc_player-head-right').show();
         $('#oc_ui_tabs').show();
@@ -500,6 +499,8 @@ Opencast.Watch = (function ()
         {
             Opencast.Watch.durationSet();
         }, 1000);
+
+        $('#oc_player_video-dropdown').hide();
     }
     
     /**

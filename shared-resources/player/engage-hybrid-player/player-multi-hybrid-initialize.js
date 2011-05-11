@@ -57,7 +57,8 @@ Opencast.Initialize = (function ()
         segmentBackwardClickedCounter = 0,
         timeout = 200,
         closetimer = 0,
-        ddmenuitem = 0;
+        ddmenuitem = 0,
+        dropdownActive = false;
         
     /**
      @memberOf Opencast.Initialize
@@ -185,9 +186,9 @@ Opencast.Initialize = (function ()
      */
     function dropdown_close()
     {
-        if (ddmenuitem)
+        if (ddmenuitem && !dropdownActive)
         {
-            ddmenuitem.css('visibility', 'hidden');
+            ddmenuitem.hide();
         }
     }
     
@@ -198,6 +199,7 @@ Opencast.Initialize = (function ()
     function dropdown_timer()
     {
         closetimer = window.setTimeout(dropdown_close, timeout);
+        dropdownActive = false;
     }
     
     /**
@@ -210,7 +212,7 @@ Opencast.Initialize = (function ()
         {
             window.clearTimeout(closetimer);
             closetimer = null;
-        }
+        } 
     }
     
     /**
@@ -219,20 +221,15 @@ Opencast.Initialize = (function ()
      */
     function dropdown_open()
     {
+        dropdownActive = true;
         if (getDivId() === VIDEOSIZE)
         {
-            $('#oc_video-size-dropdown-div').css('width', '20%');
-            $('#oc_player_video-dropdown').css('left', $('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
-            $('#oc_player_video-dropdown').css('visibility', 'visible');
-            $('#oc_volume-menue').css('visibility', 'hidden');
             ddmenuitem = $('#oc_player_video-dropdown');
+            ddmenuitem.css('left', $('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
+            ddmenuitem.show();
+            
         }
-        else
-        {
-            $('#oc_volume-menue').css('visibility', 'visible');
-            $('#oc_player_video-dropdown').css('visibility', 'hidden');
-            ddmenuitem = $('#oc_volume-menue');
-        }
+
         dropdown_canceltimer();
         setDivId('');
     }
@@ -271,12 +268,13 @@ Opencast.Initialize = (function ()
      */
     function bindVidSize()
     {
-        $('#oc_video-size-controls').bind('mouseover', dropdownVideo_open);
-        $('#oc_video-size-controls').bind('mouseout', dropdown_timer);
+        $('#oc_btn-dropdown, #oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
+        $('#oc_btn-dropdown, #oc_player_video-dropdown').bind('mouseout', dropdown_timer);
     }
     
     $(document).ready(function ()
     {
+
         keyboardListener();
         $('#wysiwyg').wysiwyg(
         {
@@ -355,13 +353,10 @@ Opencast.Initialize = (function ()
                 }
             }
         });
-        $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
-        $('#oc_player_video-dropdown').bind('mouseout', dropdown_timer);
         // Handler focus
         $('#oc_btn-dropdown').focus(function ()
         {
-            setDivId(VIDEOSIZE);
-            dropdown_open();
+            dropdownVideo_open();
         });
         // Handler blur
         $('#oc_btn-dropdown').blur(function ()
