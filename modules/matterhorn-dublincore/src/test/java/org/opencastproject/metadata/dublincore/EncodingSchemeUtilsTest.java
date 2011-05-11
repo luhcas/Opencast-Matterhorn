@@ -18,11 +18,15 @@ package org.opencastproject.metadata.dublincore;
 
 import static org.junit.Assert.assertNotNull;
 
+import static org.junit.Assert.assertSame;
 import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.opencastproject.metadata.dublincore.TestUtil.createDate;
+import static org.opencastproject.metadata.dublincore.TestUtil.precisionDay;
+import static org.opencastproject.metadata.dublincore.TestUtil.precisionSecond;
 
 import org.junit.Test;
 
@@ -32,7 +36,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 /**
- * Test cases for {@link org.org.opencastproject.metadata.dublincore.EncodingSchemeUtils} .
+ * Test cases for {@link org.opencastproject.metadata.dublincore.EncodingSchemeUtils}.
  */
 public class EncodingSchemeUtilsTest {
 
@@ -120,14 +124,47 @@ public class EncodingSchemeUtilsTest {
 
   @Test
   public void testDecodeTemporal() {
-    assertTrue(decodeTemporal(new DublinCoreValue("start=2008-10-01; end=2009-01-01;")) instanceof PeriodTemporal);
-    assertTrue(decodeTemporal(new DublinCoreValue("2008-10-01")) instanceof InstantTemporal);
-    assertTrue(decodeTemporal(new DublinCoreValue("2008-10-01T10:30:05Z")) instanceof InstantTemporal);
-    assertTrue(decodeTemporal(new DublinCoreValue("start=2008-10-01T10:20Z; end=2009-01-01; scheme=W3C-DTF")) instanceof PeriodTemporal);
-    assertTrue(decodeTemporal(new DublinCoreValue("PT10H5M")) instanceof DurationTemporal);
-    assertEquals(10L * 60 * 60 * 1000 + 5 * 60 * 1000, decodeTemporal(new DublinCoreValue("PT10H5M")).getTemporal());
-    assertEquals(10L * 60 * 60 * 1000 + 5 * 60 * 1000 + 28 * 1000, decodeTemporal(new DublinCoreValue("PT10H5M28S"))
-            .getTemporal());
+    Temporal.Match<Integer> match = new Temporal.Match<Integer>() {
+      @Override
+      public Integer period(DCMIPeriod period) {
+        return 1;
+  }
+
+      @Override
+      public Integer instant(Date instant) {
+        return 2;
+      }
+
+      @Override
+      public Integer duration(long duration) {
+        return 3;
+      }
+    };
+    Temporal.Match<Long> durationMatch = new Temporal.Match<Long>() {
+      @Override
+      public Long period(DCMIPeriod period) {
+        throw new RuntimeException();
+      }
+
+      @Override
+      public Long instant(Date instant) {
+        throw new RuntimeException();
+      }
+
+      @Override
+      public Long duration(long duration) {
+        return duration;
+      }
+    };
+    assertSame(1, decodeTemporal(new DublinCoreValue("start=2008-10-01; end=2009-01-01;")).fold(match));
+    assertSame(2, decodeTemporal(new DublinCoreValue("2008-10-01")).fold(match));
+    assertSame(2, decodeTemporal(new DublinCoreValue("2008-10-01T10:30:05Z")).fold(match));
+    assertSame(1, decodeTemporal(new DublinCoreValue("start=2008-10-01T10:20Z; end=2009-01-01; scheme=W3C-DTF")).fold(match));
+    assertSame(3, decodeTemporal(new DublinCoreValue("PT10H5M")).fold(match));
+    assertEquals(10L * 60 * 60 * 1000 + 5 * 60 * 1000,
+            (long) decodeTemporal(new DublinCoreValue("PT10H5M")).fold(durationMatch));
+    assertEquals(10L * 60 * 60 * 1000 + 5 * 60 * 1000 + 28 * 1000,
+            (long) decodeTemporal(new DublinCoreValue("PT10H5M28S")).fold(durationMatch));
   }
 
   @Test
@@ -145,47 +182,6 @@ public class EncodingSchemeUtilsTest {
     assertNull(decodeDuration(new DublinCoreValue("bla")));
     assertNull(decodeDuration(new DublinCoreValue(encodeDuration(d1).getValue(), DublinCore.LANGUAGE_UNDEFINED,
             DublinCore.ENC_SCHEME_BOX)));
-  }
-
-  public static Date createDate(int year, int month, int day, int hour, int minute, int second) {
-    Calendar c = Calendar.getInstance();
-    c.set(year, month - 1, day, hour, minute, second);
-    c.set(Calendar.MILLISECOND, 0);
-    return c.getTime();
-  }
-
-  public static Date createDate(int year, int month, int day, int hour, int minute, int second, String tz) {
-    Calendar c = Calendar.getInstance(TimeZone.getTimeZone(tz));
-    c.set(year, month - 1, day, hour, minute, second);
-    c.set(Calendar.MILLISECOND, 0);
-    return c.getTime();
-  }
-
-  public static Date setTenOClock(Date date) {
-    Calendar c = Calendar.getInstance();
-    c.setTime(date);
-    c.set(Calendar.HOUR_OF_DAY, 10);
-    c.set(Calendar.MINUTE, 0);
-    c.set(Calendar.SECOND, 0);
-    c.set(Calendar.MILLISECOND, 0);
-    return c.getTime();
-  }
-
-  public static Date precisionSecond(Date date) {
-    Calendar c = Calendar.getInstance();
-    c.setTime(date);
-    c.set(Calendar.MILLISECOND, 0);
-    return c.getTime();
-  }
-
-  public static Date precisionDay(Date date) {
-    Calendar c = Calendar.getInstance();
-    c.setTime(date);
-    c.set(Calendar.HOUR_OF_DAY, 0);
-    c.set(Calendar.MINUTE, 0);
-    c.set(Calendar.SECOND, 0);
-    c.set(Calendar.MILLISECOND, 0);
-    return c.getTime();
   }
 
 }

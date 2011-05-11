@@ -15,36 +15,8 @@
  */
 package org.opencastproject.metadata.api;
 
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageMetadata;
-
 /**
- * A MediaPackageMetadataService can read the contents of a mediapackage and extract common metadata. 
+ * A MediaPackageMetadataService extracts the basic metadata of a mediapackage.
  */
-public interface MediaPackageMetadataService {
-
-  /** The static constant used when configuring the priority */
-  String PRIORITY_KEY = "priority";
-
-  /**
-   * The priority of this MediaPackageMetadataService compared to others when more than one is registered in the system.
-   * 
-   * When more than one MediaPackageMetadataService is registered, the {@link #getMetadata(MediaPackage)} method may be
-   * called on each service in order of priority.  MediaPackageMetadata objects returned by higher priority
-   * MediaPackageMetadataServices should override those returned by lower priority services.
-   * 
-   * The lowest number is the highest priority (i.e. 1 is a higher priority than 2).
-   * 
-   * @return The priority
-   */
-  int getPriority();
-  
-  /**
-   * Gets the {@link MediaPackageMetadata} for a {@link MediaPackage} if possible.  If no metadata can be extracted
-   * from the catalogs in the {@link MediaPackage}, this returns null;
-   * 
-   * @param mediaPackage The mediapackage to inspect for catalogs
-   * @return The {@link MediaPackageMetadata} extracted from the media package
-   */
-  MediaPackageMetadata getMetadata(MediaPackage mediaPackage);
+public interface MediaPackageMetadataService extends MetadataService<MediaPackageMetadata> {
 }

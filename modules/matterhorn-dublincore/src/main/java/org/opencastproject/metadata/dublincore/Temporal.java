@@ -16,29 +16,85 @@
 
 package org.opencastproject.metadata.dublincore;
 
+import java.util.Date;
+
 /**
- * A temporal is either an instant, a duration or a period.
+ * A time related algebraic data type.
  */
-public abstract class Temporal<T> {
+public abstract class Temporal {
 
-  enum Type {
-    Instant, Duration, Period
+  // prohibit inheritance from outside this class
+  private Temporal() {
   }
 
-  private T temporal;
-  private Type type;
+  /**
+   * An instant in time.
+   */
+  public static Temporal instant(final Date instant) {
+    if (instant == null)
+      throw new IllegalArgumentException("instant must not be null");
+    return new Temporal() {
+      public Date getInstant() {
+        return instant;
+      }
 
-  public Temporal(T temporal, Type type) {
-    this.temporal = temporal;
-    this.type = type;
+      @Override
+      public <A> A fold(Match<A> v) {
+        return v.instant(instant);
+      }
+    };
   }
 
-  public T getTemporal() {
-    return temporal;
+  /**
+   * A period in time limited by at least one instant.
+   */
+  public static Temporal period(final DCMIPeriod period) {
+    if (period == null)
+      throw new IllegalArgumentException("period must not be null");
+    return new Temporal() {
+      public DCMIPeriod getPeriod() {
+        return period;
+      }
+
+      @Override
+      public <A> A fold(Match<A> v) {
+        return v.period(period);
+      }
+    };
   }
 
-  public Type getType() {
-    return type;
+  /**
+   * A time span measured in milliseconds.
+   */
+  public static Temporal duration(final long duration) {
+    if (duration < 0)
+      throw new IllegalArgumentException("duration must be positive or zero");
+    return new Temporal() {
+      public long getDuration() {
+        return duration;
+      }
+
+      @Override
+      public <A> A fold(Match<A> v) {
+        return v.duration(duration);
+      }
+    };
   }
 
-}
+  /**
+   * Safe decomposition.
+   */
+  public abstract <A> A fold(Match<A> v);
+
+  /**
+   * Safe temporal decomposition.
+   */
+  public interface Match<A> {
+    A period(DCMIPeriod period);
+
+    A instant(Date instant);
+
+    A duration(long duration);
+  }
+
+  }

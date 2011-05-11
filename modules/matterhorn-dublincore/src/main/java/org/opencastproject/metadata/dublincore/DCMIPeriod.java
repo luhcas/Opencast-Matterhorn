@@ -24,16 +24,23 @@ import java.util.Date;
  * For further information on DCMI periods please refer to <a
  * href="http://dublincore.org/documents/dcmi-period/">http://dublincore.org/documents/dcmi-period/</a>.
  */
-public class DCMIPeriod {
+public final class DCMIPeriod {
 
-  private Date start;
-  private Date end;
-  private String name;
+  private final Date start;
+  private final Date end;
+  private final String name;
 
   /**
    * Create a new period. To create an open interval you may set one of the boundaries null.
    */
   public DCMIPeriod(Date start, Date end) {
+    this(start, end, null);
+  }
+
+  /**
+   * Create a new period with an optional name. To create an open interval you may set one of the bounbaries null.
+   */
+  public DCMIPeriod(Date start, Date end, String name) {
     if (start == null && end == null)
       throw new IllegalStateException("A period must be bounded at least at one end");
     if (start != null && end != null && end.before(start))
@@ -41,14 +48,6 @@ public class DCMIPeriod {
 
     this.start = start;
     this.end = end;
-  }
-
-  /**
-   * Create a new period with an optional name. To create an open interval you may set one of the bounbaries null.
-   */
-  public DCMIPeriod(Date start, Date end, String name) {
-    this(start, end);
-
     this.name = name;
   }
 
@@ -73,16 +72,6 @@ public class DCMIPeriod {
    */
   public String getName() {
     return name;
-  }
-
-  /**
-   * Sets the name of the period.
-   * 
-   * @param name
-   *          the name or null, to delete it
-   */
-  void setName(String name) {
-    this.name = name;
   }
 
   /**

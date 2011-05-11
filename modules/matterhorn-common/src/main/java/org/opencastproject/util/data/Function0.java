@@ -14,31 +14,11 @@
  *
  */
 
-package org.opencastproject.search.impl.solr;
-
-import org.apache.solr.common.SolrInputDocument;
+package org.opencastproject.util.data;
 
 /**
- * Solr input document which adds not existing fields.
+ * Function of arity 0, i.e. a function that does not take any arguments.
  */
-public class SolrUpdateableInputDocument extends SolrInputDocument {
-
-  /** Serieal version id */
-  private static final long serialVersionUID = -1984560839468950690L;
-
-  /**
-   * Update or add solr field.
-   * 
-   * @param name
-   *          The field name.
-   * @param value
-   *          The value.
-   */
-  public void addField(String name, Object value) {
-    if (!getFieldNames().contains(name))
-      super.addField(name, value);
-    else
-      super.setField(name, value);
-  }
-
+public interface Function0<A> {
+  A apply();
 }

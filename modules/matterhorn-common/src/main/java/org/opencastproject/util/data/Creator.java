@@ -14,15 +14,15 @@
  *
  */
 
-package org.opencastproject.metadata.dublincore;
+package org.opencastproject.util.data;
 
 /**
- * A duration measured in milliseconds.
+ * Element factory.
+ *
+ * @param <A>
+ *         the type of the element
  */
-public class DurationTemporal extends Temporal<Long> {
-
-  public DurationTemporal(Long temporal) {
-    super(temporal, Type.Duration);
-  }
-
+public interface Creator<A> {
+  A create();
 }
+

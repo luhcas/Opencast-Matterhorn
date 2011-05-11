@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.mediapackage;
+package org.opencastproject.metadata.api;
 
 import java.util.Date;
 

@@ -19,8 +19,8 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageMetadata;
-import org.opencastproject.mediapackage.MediapackageMetadataImpl;
+import org.opencastproject.metadata.api.MediaPackageMetadata;
+import org.opencastproject.metadata.api.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.workspace.api.Workspace;
@@ -45,10 +45,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 /**
- * Parses {@link DublinCoreCatalog}s from serialized DC representations
- * 
+ * Parses {@link DublinCoreCatalog}s from serialized DC representations.
  */
-public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalog>, MediaPackageMetadataService {
+public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalog>,
+        MediaPackageMetadataService {
+
   private static final Logger logger = LoggerFactory.getLogger(DublinCoreCatalogService.class);
 
   protected int priority = 0;
@@ -59,8 +60,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
     this.workspace = workspace;
   }
 
-  @SuppressWarnings("unchecked") 
-  public void activate(Map properties) {
+  public void activate(@SuppressWarnings("unchecked") Map properties) {
     logger.debug("activate()");
     if (properties != null) {
       String priorityString = (String) properties.get(PRIORITY_KEY);
@@ -96,7 +96,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.api.MediaPackageMetadataService#getMetadata(org.opencastproject.mediapackage.MediaPackage)
+   * @see org.opencastproject.metadata.api.MetadataService#getMetadata(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public MediaPackageMetadata getMetadata(MediaPackage mp) {
@@ -211,7 +211,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
    * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.api.MediaPackageMetadataService#getPriority()
+   * @see org.opencastproject.metadata.api.MetadataService#getPriority()
    */
   @Override
   public int getPriority() {

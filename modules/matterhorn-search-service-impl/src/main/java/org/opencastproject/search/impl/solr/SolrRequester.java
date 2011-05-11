@@ -16,25 +16,6 @@
 
 package org.opencastproject.search.impl.solr;
 
-import static org.opencastproject.search.api.SearchService.READ_PERMISSION;
-import static org.opencastproject.search.api.SearchService.WRITE_PERMISSION;
-import static org.opencastproject.search.impl.solr.SolrFields.OC_PERMISSION_PREFIX;
-
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilder;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.search.api.MediaSegment;
-import org.opencastproject.search.api.MediaSegmentImpl;
-import org.opencastproject.search.api.SearchQuery;
-import org.opencastproject.search.api.SearchResult;
-import org.opencastproject.search.api.SearchResultImpl;
-import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
-import org.opencastproject.search.api.SearchResultItemImpl;
-import org.opencastproject.search.impl.SearchQueryImpl;
-import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.security.api.User;
-import org.opencastproject.util.SolrUtils;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -42,6 +23,23 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilder;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.search.api.MediaSegmentImpl;
+import org.opencastproject.search.api.SearchQuery;
+import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
+import org.opencastproject.search.api.SearchResultItemROImpl;
+import org.opencastproject.search.api.SearchResultROImpl;
+import org.opencastproject.search.impl.SearchQueryImpl;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
+import org.opencastproject.util.SolrUtils;
+import org.opencastproject.util.data.CollectionUtil;
+import org.opencastproject.util.data.Function;
+import org.opencastproject.util.data.Function0;
+import org.opencastproject.util.data.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,25 +53,34 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.opencastproject.search.api.SearchService.READ_PERMISSION;
+import static org.opencastproject.search.api.SearchService.WRITE_PERMISSION;
+
 /**
  * Class implementing <code>LookupRequester</code> to provide connection to solr indexing facility.
  */
 public class SolrRequester {
 
-  /** Logging facility */
+  /**
+   * Logging facility
+   */
   private static Logger logger = LoggerFactory.getLogger(SolrRequester.class);
 
-  /** The connection to the solr database */
+  /**
+   * The connection to the solr database
+   */
   private SolrServer solrServer = null;
 
-  /** The security service */
+  /**
+   * The security service
+   */
   private SecurityService securityService;
 
   /**
    * Creates a new requester for solr that will be using the given connection object to query the search index.
-   * 
+   *
    * @param connection
-   *          the solr connection
+   *         the solr connection
    */
   public SolrRequester(SolrServer connection, SecurityService securityService) {
     if (connection == null)
@@ -84,13 +91,13 @@ public class SolrRequester {
 
   /**
    * Returns the search results for a solr query string with read access for the current user.
-   * 
+   *
    * @param q
-   *          the query
+   *         the query
    * @param limit
-   *          the limit
+   *         the limit
    * @param offset
-   *          the offset
+   *         the offset
    * @return the search results
    * @throws SolrServerException
    */
@@ -102,107 +109,216 @@ public class SolrRequester {
 
   /**
    * Creates a search result from a given solr response.
-   * 
-   * @param solrResponse
-   *          The solr response.
+   *
+   * @param query
+   *         The solr query.
    * @return The search result.
    * @throws SolrServerException
-   *           if the solr server is not working as expected
+   *         if the solr server is not working as expected
    */
-  private SearchResult createSearchResult(SolrQuery query) throws SolrServerException {
+  private SearchResult createSearchResult(final SolrQuery query) throws SolrServerException {
 
     // Execute the query and try to get hold of a query response
     QueryResponse solrResponse = null;
     try {
       solrResponse = solrServer.query(query);
-    } catch (Exception e1) {
-      throw new SolrServerException(e1);
+    } catch (Exception e) {
+      throw new SolrServerException(e);
     }
 
     // Create and configure the query result
-    SearchResultImpl result = new SearchResultImpl(query.getQuery());
+    final SearchResultROImpl result = new SearchResultROImpl(query.getQuery());
     result.setSearchTime(solrResponse.getQTime());
     result.setOffset(solrResponse.getResults().getStart());
     result.setLimit(solrResponse.getResults().size());
     result.setTotal(solrResponse.getResults().getNumFound());
 
     // Walk through response and create new items with title, creator, etc:
-    for (SolrDocument doc : solrResponse.getResults()) {
+    for (final SolrDocument doc : solrResponse.getResults()) {
+      final SearchResultItemROImpl item = new SearchResultItemROImpl() {
+        private final String dfltString = null;
 
-      SearchResultItemImpl item = new SearchResultItemImpl();
-      item.setId(doc.getFieldValue(SolrFields.ID).toString());
-
-      // the common dc fields (for series and episodes)
-      item.setDcTitle(toString(doc.getFieldValue(SolrFields.DC_TITLE)));
-      item.setDcSubject(toString(doc.getFieldValue(SolrFields.DC_SUBJECT)));
-      item.setDcCreator(toString(doc.getFieldValue(SolrFields.DC_CREATOR)));
-      item.setDcPublisher(toString(doc.getFieldValue(SolrFields.DC_PUBLISHER)));
-      item.setDcContributor(toString(doc.getFieldValue(SolrFields.DC_CONTRIBUTOR)));
-      item.setDcAbstract(toString(doc.getFieldValue(SolrFields.DC_ABSTRACT)));
-      item.setDcDescription(toString(doc.getFieldValue(SolrFields.DC_DESCRIPTION)));
-      item.setDcCreated((Date) (doc.getFieldValue(SolrFields.DC_CREATED)));
-      item.setDcAvailableFrom((Date) (doc.getFieldValue(SolrFields.DC_AVAILABLE_FROM)));
-      item.setDcAvailableTo((Date) (doc.getFieldValue(SolrFields.DC_AVAILABLE_TO)));
-      item.setDcLanguage(toString(doc.getFieldValue(SolrFields.DC_LANGUAGE)));
-      item.setDcRightsHolder(toString(doc.getFieldValue(SolrFields.DC_RIGHTS_HOLDER)));
-      item.setDcSpatial(toString(doc.getFieldValue(SolrFields.DC_SPATIAL)));
-      item.setDcTemporal(toString(doc.getFieldValue(SolrFields.DC_TEMPORAL)));
-      item.setDcIsPartOf(toString(doc.getFieldValue(SolrFields.DC_IS_PART_OF)));
-      item.setDcReplaces(toString(doc.getFieldValue(SolrFields.DC_REPLACES)));
-      item.setDcType(toString(doc.getFieldValue(SolrFields.DC_TYPE)));
-      item.setDcAccessRights(toString(doc.getFieldValue(SolrFields.DC_ACCESS_RIGHTS)));
-      item.setDcLicense(toString(doc.getFieldValue(SolrFields.DC_LICENSE)));
-
-      // the media package
-      MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-      Object mediaPackageFieldValue = doc.getFirstValue(SolrFields.OC_MEDIAPACKAGE);
-      if (mediaPackageFieldValue != null) {
-        try {
-          MediaPackage mediaPackage = null;
-          mediaPackage = builder.loadFromXml(mediaPackageFieldValue.toString());
-          item.setMediaPackage(mediaPackage);
-        } catch (Exception e) {
-          logger.warn("Unable to read media package from search result", e);
+        @Override
+        public String getId() {
+          return Schema.getId(doc);
         }
-      }
 
-      // the media type
-      item.setMediaType(SearchResultItemType.valueOf(doc.getFieldValue(SolrFields.OC_MEDIATYPE).toString()));
-
-      // the cover image
-      item.setCover(toString(doc.getFieldValue(SolrFields.OC_COVER)));
-
-      // the solr ranking score
-      item.setScore(Double.parseDouble(toString(doc.getFieldValue(SolrFields.SCORE))));
-
-      // the last modified datetime
-      item.setModified((Date) doc.getFieldValue(SolrFields.OC_MODIFIED));
-
-      // if it is a video or audio episode
-      if (item.getType().equals(SearchResultItemType.AudioVisual)) {
-        if (doc.getFieldValue(SolrFields.DC_EXTENT) != null) {
-          try {
-            // the video duration
-            item.setDcExtent(Long.parseLong(toString(doc.getFieldValue(SolrFields.DC_EXTENT))));
-          } catch (NumberFormatException e) {
-            item.setDcExtent(-1);
-            logger.warn("Cannot parse duration from solr response document. Setting duration to -1.");
+        @Override
+        public MediaPackage getMediaPackage() {
+          MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+          String mediaPackageFieldValue = Schema.getOcMediapackage(doc);
+          if (mediaPackageFieldValue != null) {
+            try {
+              return builder.loadFromXml(mediaPackageFieldValue);
+            } catch (Exception e) {
+              logger.warn("Unable to read media package from search result", e);
+            }
           }
+          return null;
         }
 
-        // Add the list of most important keywords
-        String[] kw = toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)).split(" ");
-        logger.trace(toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)));
-        for (String keyword : kw) {
-          item.addKeyword(keyword);
+        @Override
+        public long getDcExtent() {
+          if (getType().equals(SearchResultItemType.AudioVisual)) {
+            Long extent = Schema.getDcExtent(doc);
+            if (extent != null)
+              return extent;
+          }
+          return -1;
         }
 
-        // Loop over the segments
-        for (MediaSegment segment : createSearchResultSegments(doc, query)) {
-          item.addSegment(segment);
+        @Override
+        public String getDcTitle() {
+          final List<DField<String>> titles = Schema.getDcTitle(doc);
+          // try to return the first title without any language information first...
+          return CollectionUtil
+                  .head(CollectionUtil.filter(titles, new Predicate<DField<String>>() {
+                    @Override
+                    public Boolean apply(DField<String> f) {
+                      return f.getSuffix().equals(Schema.LANGUAGE_UNDEFINED);
+                    }
+                  }))
+                  .map(new Function<DField<String>, String>() {
+                    @Override
+                    public String apply(DField<String> f) {
+                      return f.getValue();
+                    }
+                  })
+                  .getOrElse(new Function0<String>() {
+                    @Override
+                    public String apply() {
+                      // ... since none is present return the first arbitrary title
+                      return Schema.getFirst(titles, dfltString);
+                    }
+                  });
         }
 
-      }
+        @Override
+        public String getDcSubject() {
+          return Schema.getFirst(Schema.getDcSubject(doc), dfltString);
+        }
+
+        @Override
+        public String getDcDescription() {
+          return Schema.getFirst(Schema.getDcDescription(doc), dfltString);
+        }
+
+        @Override
+        public String getDcCreator() {
+          return Schema.getFirst(Schema.getDcCreator(doc), dfltString);
+        }
+
+        @Override
+        public String getDcPublisher() {
+          return Schema.getFirst(Schema.getDcPublisher(doc), dfltString);
+        }
+
+        @Override
+        public String getDcContributor() {
+          return Schema.getFirst(Schema.getDcContributor(doc), dfltString);
+        }
+
+        @Override
+        public String getDcAbstract() {
+          return null;
+        }
+
+        @Override
+        public Date getDcCreated() {
+          return Schema.getDcCreated(doc);
+        }
+
+        @Override
+        public Date getDcAvailableFrom() {
+          return Schema.getDcAvailableFrom(doc);
+        }
+
+        @Override
+        public Date getDcAvailableTo() {
+          return Schema.getDcAvailableTo(doc);
+        }
+
+        @Override
+        public String getDcLanguage() {
+          return Schema.getDcLanguage(doc);
+        }
+
+        @Override
+        public String getDcRightsHolder() {
+          return Schema.getFirst(Schema.getDcRightsHolder(doc), dfltString);
+        }
+
+        @Override
+        public String getDcSpatial() {
+          return Schema.getFirst(Schema.getDcSpatial(doc), dfltString);
+        }
+
+        @Override
+        public String getDcTemporal() {
+          return null;
+        }
+
+        @Override
+        public String getDcIsPartOf() {
+          return Schema.getDcIsPartOf(doc);
+        }
+
+        @Override
+        public String getDcReplaces() {
+          return Schema.getDcReplaces(doc);
+        }
+
+        @Override
+        public String getDcType() {
+          return Schema.getDcType(doc);
+        }
+
+        @Override
+        public String getDcAccessRights() {
+          return Schema.getFirst(Schema.getDcAccessRights(doc), dfltString);
+        }
+
+        @Override
+        public String getDcLicense() {
+          return Schema.getFirst(Schema.getDcLicense(doc), dfltString);
+        }
+
+        @Override
+        public SearchResultItemType getType() {
+          return SearchResultItemType.valueOf(Schema.getOcMediatype(doc));
+        }
+
+        @Override
+        public String[] getKeywords() {
+          if (getType().equals(SearchResultItemType.AudioVisual))
+            return Schema.getOcKeywords(doc).split(" ");
+          else
+            return new String[0];
+        }
+
+        @Override
+        public String getCover() {
+          return Schema.getOcCover(doc);
+        }
+
+        @Override
+        public Date getModified() {
+          return Schema.getOcModified(doc);
+        }
+
+        @Override
+        public double getScore() {
+          return Schema.getScore(doc);
+        }
+
+        @Override
+        public MediaSegmentImpl[] getMediaSegments() {
+          if (getType().equals(SearchResultItemType.AudioVisual))
+            return createSearchResultSegments(doc, query).toArray(new MediaSegmentImpl[0]);
+          else
+            return new MediaSegmentImpl[0];
+        }
+      };
 
       // Add the item to the result set
       result.addItem(item);
@@ -213,11 +329,11 @@ public class SolrRequester {
 
   /**
    * Creates a list of <code>MediaSegment</code>s from the given result document.
-   * 
+   *
    * @param doc
-   *          the result document
+   *         the result document
    * @param query
-   *          the original query
+   *         the original query
    */
   private List<MediaSegmentImpl> createSearchResultSegments(SolrDocument doc, SolrQuery query) {
     List<MediaSegmentImpl> segments = new ArrayList<MediaSegmentImpl>();
@@ -227,18 +343,18 @@ public class SolrRequester {
 
     // Loop over every segment
     for (String fieldName : doc.getFieldNames()) {
-      if (!fieldName.startsWith(SolrFields.SEGMENT_TEXT))
+      if (!fieldName.startsWith(Schema.SEGMENT_TEXT_PREFIX))
         continue;
 
       // Ceate a new segment
-      int segmentId = Integer.parseInt(fieldName.substring(SolrFields.SEGMENT_TEXT.length()));
+      int segmentId = Integer.parseInt(fieldName.substring(Schema.SEGMENT_TEXT_PREFIX.length()));
       MediaSegmentImpl segment = new MediaSegmentImpl(segmentId);
-      segment.setText(toString(doc.getFieldValue(fieldName)));
+      segment.setText(mkString(doc.getFieldValue(fieldName)));
 
       // Read the hints for this segment
       Properties segmentHints = new Properties();
       try {
-        String hintFieldName = SolrFields.SEGMENT_HINTS + segment.getIndex();
+        String hintFieldName = Schema.SEGMENT_HINT_PREFIX + segment.getIndex();
         Object hintFieldValue = doc.getFieldValue(hintFieldName);
         segmentHints.load(new ByteArrayInputStream(hintFieldValue.toString().getBytes()));
       } catch (IOException e) {
@@ -308,9 +424,9 @@ public class SolrRequester {
 
   /**
    * Modifies the query such that certain fields are being boosted (meaning they gain some weight).
-   * 
+   *
    * @param query
-   *          The user query.
+   *         The user query.
    * @return The boosted query
    */
   public StringBuffer boost(String query) {
@@ -319,56 +435,56 @@ public class SolrRequester {
 
     sb.append("(");
 
-    sb.append(SolrFields.DC_TITLE);
+    sb.append(Schema.DC_TITLE_PREFIX);
     sb.append(":(");
     sb.append(uq);
     sb.append(")^");
-    sb.append(SolrFields.DC_TITLE_BOOST);
+    sb.append(Schema.DC_TITLE_BOOST);
     sb.append(" ");
 
-    sb.append(SolrFields.DC_CREATOR);
+    sb.append(Schema.DC_CREATOR_PREFIX);
     sb.append(":(");
     sb.append(uq);
     sb.append(")^");
-    sb.append(SolrFields.DC_CREATOR_BOOST);
+    sb.append(Schema.DC_CREATOR_BOOST);
     sb.append(" ");
 
-    sb.append(SolrFields.DC_SUBJECT);
+    sb.append(Schema.DC_SUBJECT_PREFIX);
     sb.append(":(");
     sb.append(uq);
     sb.append(")^");
-    sb.append(SolrFields.DC_SUBJECT_BOOST);
+    sb.append(Schema.DC_SUBJECT_BOOST);
     sb.append(" ");
 
-    sb.append(SolrFields.DC_PUBLISHER);
+    sb.append(Schema.DC_PUBLISHER_PREFIX);
     sb.append(":(");
     sb.append(uq);
     sb.append(")^");
-    sb.append(SolrFields.DC_PUBLISHER_BOOST);
+    sb.append(Schema.DC_PUBLISHER_BOOST);
     sb.append(" ");
 
-    sb.append(SolrFields.DC_CONTRIBUTOR);
+    sb.append(Schema.DC_CONTRIBUTOR_PREFIX);
     sb.append(":(");
     sb.append(uq);
     sb.append(")^");
-    sb.append(SolrFields.DC_CONTRIBUTOR_BOOST);
+    sb.append(Schema.DC_CONTRIBUTOR_BOOST);
     sb.append(" ");
 
-    sb.append(SolrFields.DC_ABSTRACT);
+    sb.append(Schema.DC_ABSTRACT_PREFIX);
     sb.append(":(");
     sb.append(uq);
     sb.append(")^");
-    sb.append(SolrFields.DC_ABSTRACT_BOOST);
+    sb.append(Schema.DC_ABSTRACT_BOOST);
     sb.append(" ");
 
-    sb.append(SolrFields.DC_DESCRIPTION);
+    sb.append(Schema.DC_DESCRIPTION_PREFIX);
     sb.append(":(");
     sb.append(uq);
     sb.append(")^");
-    sb.append(SolrFields.DC_DESCRIPTION_BOOST);
+    sb.append(Schema.DC_DESCRIPTION_BOOST);
     sb.append(" ");
 
-    sb.append(SolrFields.FULLTEXT);
+    sb.append(Schema.FULLTEXT);
     sb.append(":(");
     sb.append(uq);
     sb.append(") ");
@@ -380,12 +496,12 @@ public class SolrRequester {
 
   /**
    * Simple helper method to avoid null strings.
-   * 
-   * @param An
-   *          object which implements <code>toString()</code> method.
+   *
+   * @param f
+   *         object which implements <code>toString()</code> method.
    * @return The input object or empty string.
    */
-  private String toString(Object f) {
+  private static String mkString(Object f) {
     if (f != null)
       return f.toString();
     else
@@ -394,11 +510,11 @@ public class SolrRequester {
 
   /**
    * Converts the query object into a solr query and returns the results.
-   * 
+   *
    * @param q
-   *          the query
+   *         the query
    * @param action
-   *          one of {@link org.opencastproject.search.api.SearchService#READ_PERMISSION}, {@link org.opencastproject.search.api.SearchService#WRITE_PERMISSION}
+   *         one of {@link org.opencastproject.search.api.SearchService#READ_PERMISSION}, {@link org.opencastproject.search.api.SearchService#WRITE_PERMISSION}
    * @return the search results
    */
   private SolrQuery getForAction(SearchQuery q, String action) throws SolrServerException {
@@ -415,12 +531,12 @@ public class SolrRequester {
       if (sb.length() > 0)
         sb.append(" AND ");
       sb.append("(");
-      sb.append(SolrFields.ID);
+      sb.append(Schema.ID);
       sb.append(":");
       sb.append(cleanSolrIdRequest);
       if (q.isIncludeEpisodes()) {
         sb.append(" OR ");
-        sb.append(SolrFields.DC_IS_PART_OF);
+        sb.append(Schema.DC_IS_PART_OF);
         sb.append(":");
         sb.append(cleanSolrIdRequest);
       }
@@ -451,7 +567,7 @@ public class SolrRequester {
         } else {
           tagBuilder.append(" OR ");
         }
-        tagBuilder.append(SolrFields.OC_ELEMENTTAGS);
+        tagBuilder.append(Schema.OC_ELEMENTTAGS);
         tagBuilder.append(":");
         tagBuilder.append(tag);
       }
@@ -474,7 +590,7 @@ public class SolrRequester {
         } else {
           flavorBuilder.append(" OR ");
         }
-        flavorBuilder.append(SolrFields.OC_ELEMENTFLAVORS);
+        flavorBuilder.append(Schema.OC_ELEMENTFLAVORS);
         flavorBuilder.append(":");
         flavorBuilder.append(flavor);
       }
@@ -487,7 +603,7 @@ public class SolrRequester {
     if (q.getDeletedDate() != null) {
       if (sb.length() > 0)
         sb.append(" AND ");
-      sb.append(SolrFields.OC_DELETED + ":" + SolrUtils.serializeDateRange(q.getDeletedDate(), new Date()));
+      sb.append(Schema.OC_DELETED + ":" + SolrUtils.serializeDateRange(q.getDeletedDate(), null));
     }
 
     if (sb.length() == 0)
@@ -501,7 +617,7 @@ public class SolrRequester {
       for (String role : roles) {
         if (roleList.length() > 0)
           roleList.append(" OR ");
-        roleList.append(OC_PERMISSION_PREFIX).append(action).append(":").append(role);
+        roleList.append(Schema.OC_ACL_PREFIX).append(action).append(":").append(role);
       }
       sb.append(roleList.toString());
       sb.append(")");
@@ -510,15 +626,15 @@ public class SolrRequester {
     SolrQuery query = new SolrQuery(sb.toString());
 
     if (q.isIncludeSeries() && !q.isIncludeEpisodes()) {
-      query.addFilterQuery(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
+      query.addFilterQuery(Schema.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
     }
 
     if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
-      query.addFilterQuery(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
+      query.addFilterQuery(Schema.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     }
 
     if (q.getDeletedDate() == null) {
-      query.addFilterQuery("-" + SolrFields.OC_DELETED + ":[* TO *]");
+      query.addFilterQuery("-" + Schema.OC_DELETED + ":[* TO *]");
     }
 
     if (q.getLimit() > 0)
@@ -528,11 +644,11 @@ public class SolrRequester {
       query.setStart(q.getOffset());
 
     if (q.isSortByPublicationDate()) {
-      query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
+      query.addSortField(Schema.OC_MODIFIED, ORDER.desc);
     } else if (q.isSortByCreationDate()) {
-      query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
+      query.addSortField(Schema.DC_CREATED, ORDER.desc);
       // If the dublin core field dc:created has not been filled in...
-      query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
+      query.addSortField(Schema.OC_MODIFIED, ORDER.desc);
     }
 
     query.setFields("* score");
@@ -541,9 +657,9 @@ public class SolrRequester {
 
   /**
    * Returns the search results that are accessible for read by the current user.
-   * 
+   *
    * @param q
-   *          the search query
+   *         the search query
    * @return the readable search result
    * @throws SolrServerException
    */
@@ -554,9 +670,9 @@ public class SolrRequester {
 
   /**
    * Returns the search results that are accessible for write by the current user.
-   * 
+   *
    * @param q
-   *          the search query
+   *         the search query
    * @return the writable search result
    * @throws SolrServerException
    */
@@ -567,9 +683,9 @@ public class SolrRequester {
 
   /**
    * Sets the security service.
-   * 
+   *
    * @param securityService
-   *          the securityService to set
+   *         the securityService to set
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;

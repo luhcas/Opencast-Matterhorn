@@ -14,15 +14,11 @@
  *
  */
 
-package org.opencastproject.metadata.dublincore;
+package org.opencastproject.util.data;
 
 /**
- * A period as {@link DCMIPeriod}.
+ * Function of arity 1.
  */
-public class PeriodTemporal extends Temporal<DCMIPeriod> {
-
-  public PeriodTemporal(DCMIPeriod temporal) {
-    super(temporal, Type.Period);
-  }
-
+public interface Function<A, B> {
+  B apply(A a);
 }

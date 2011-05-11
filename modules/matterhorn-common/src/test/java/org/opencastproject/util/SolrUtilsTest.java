@@ -23,6 +23,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Test case for {@link SolrUtils}.
@@ -33,7 +34,7 @@ public class SolrUtilsTest {
   protected final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
   /**
-   * Test method for {@link ch.o2it.weblounge.contentrepository.impl.index.solr.SolrUtils#clean(java.lang.String)}.
+   * Test method for {@link org.opencastproject.util.SolrUtils#clean(java.lang.String)}.
    */
   @Test
   public void testClean() {
@@ -43,12 +44,13 @@ public class SolrUtilsTest {
   }
 
   /**
-   * Test method for {@link ch.o2it.weblounge.contentrepository.impl.index.solr.SolrUtils#serializeDate(java.util.Date)}
+   * Test method for {@link org.opencastproject.util.SolrUtils#serializeDate(java.util.Date)}
    * .
    */
   @Test
   public void testSerializeDate() {
     Calendar d = Calendar.getInstance();
+    d.setTimeZone(TimeZone.getTimeZone("UTC"));
     d.set(Calendar.DAY_OF_MONTH, 2);
     d.set(Calendar.HOUR, 5);
     d.set(Calendar.HOUR_OF_DAY, 5);
@@ -62,11 +64,12 @@ public class SolrUtilsTest {
 
   /**
    * Test method for
-   * {@link ch.o2it.weblounge.contentrepository.impl.index.solr.SolrUtils#serializeDateRange(Date, Date)}.
+   * {@link org.opencastproject.util.SolrUtils#serializeDateRange(Date, Date)}.
    */
   @Test
   public void testSerializeDateRange() {
     Calendar d = Calendar.getInstance();
+    d.setTimeZone(TimeZone.getTimeZone("UTC"));
     d.set(Calendar.MILLISECOND, 0);
     d.set(Calendar.SECOND, 0);
     d.set(Calendar.MINUTE, 0);
@@ -83,7 +86,7 @@ public class SolrUtilsTest {
   }
 
   /**
-   * Test method for {@link ch.o2it.weblounge.contentrepository.impl.index.solr.SolrUtils#selectDay(java.util.Date)}.
+   * Test method for {@link org.opencastproject.util.SolrUtils#selectDay(java.util.Date)}.
    */
   @Test
   public void testSelectDay() {

@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Utility class for the solr database.
@@ -30,15 +31,6 @@ public final class SolrUtils {
   /** Disallow construction of this utility class */
   private SolrUtils() {
   }
-
-  /** The solr date format string tag. */
-  public static final String SOLR_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-  /** The solr supported date format. **/
-  protected static DateFormat dateFormat = new SimpleDateFormat(SOLR_DATE_FORMAT);
-
-  /** The solr supported date format for days **/
-  protected static DateFormat dayFormat = new SimpleDateFormat("yyyy-MM-dd");
 
   /** The regular filter expression for single characters */
   private static final String charCleanerRegex = "([\\+\\-\\!\\(\\)\\{\\}\\[\\]\\\\^\"\\~\\*\\?\\:])";
@@ -67,7 +59,7 @@ public final class SolrUtils {
   public static String serializeDate(Date date) {
     if (date == null)
       return null;
-    return dateFormat.format(date);
+    return newSolrDateFormat().format(date);
   }
 
   /**
@@ -82,27 +74,30 @@ public final class SolrUtils {
   public static Date parseDate(String date) throws ParseException {
     if (StringUtils.isBlank(date))
       return null;
-    return dateFormat.parse(date);
+    return newSolrDateFormat().parse(date);
   }
 
   /**
    * Returns an expression to search for any date that lies in between <code>startDate</date> and <code>endDate</date>.
    * 
    * @param startDate
-   *          the start date
+   *          the start date or null for an infinite left endpoint, "*" in solr query syntax
    * @param endDate
-   *          the end date
+   *          the end date or null for an infinite right endpoint, "*" in solr query syntax
    * @return the serialized search expression
    */
   public static String serializeDateRange(Date startDate, Date endDate) {
-    if (startDate == null)
-      throw new IllegalArgumentException("Start date cannot be null");
-    if (endDate == null)
-      throw new IllegalArgumentException("End date cannot be null");
     StringBuffer buf = new StringBuffer("[");
-    buf.append(dateFormat.format(startDate));
+    DateFormat f = newSolrDateFormat();
+    if (startDate != null)
+      buf.append(f.format(startDate));
+    else
+      buf.append("*");
     buf.append(" TO ");
-    buf.append(dateFormat.format(endDate));
+    if (endDate != null)
+      buf.append(f.format(endDate));
+    else
+      buf.append("*");
     buf.append("]");
     return buf.toString();
   }
@@ -118,11 +113,22 @@ public final class SolrUtils {
     if (date == null)
       return null;
     StringBuffer buf = new StringBuffer("[");
-    buf.append(dayFormat.format(date)).append("T00:00:00Z");
+    DateFormat f = newSolrDayFormat();
+    buf.append(f.format(date)).append("T00:00:00Z");
     buf.append(" TO ");
-    buf.append(dayFormat.format(date)).append("T23:59:59Z");
+    buf.append(f.format(date)).append("T23:59:59Z");
     buf.append("]");
     return buf.toString();
+  }
+
+  public static DateFormat newSolrDateFormat() {
+    SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    f.setTimeZone(TimeZone.getTimeZone("UTC"));
+    return f;
+  }
+
+  public static DateFormat newSolrDayFormat() {
+    return new SimpleDateFormat("yyyy-MM-dd");
   }
 
 }

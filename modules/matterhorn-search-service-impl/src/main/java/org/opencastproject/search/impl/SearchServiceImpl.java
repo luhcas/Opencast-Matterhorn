@@ -16,9 +16,15 @@
 
 package org.opencastproject.search.impl;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.api.StaticMetadataService;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
@@ -31,17 +37,10 @@ import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.security.api.User;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +51,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Solr-based {@link SearchService} implementation.
  */
-public class SearchServiceImpl implements SearchService {
+public final class SearchServiceImpl implements SearchService {
 
   /** Log facility */
   private static final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
@@ -67,24 +68,21 @@ public class SearchServiceImpl implements SearchService {
   /** Configuration key for an embedded solr configuration and data directory */
   public static final String CONFIG_SOLR_ROOT = "org.opencastproject.search.solr.dir";
 
-  /** Connection to the solr database */
-  private SolrServer solrServer = null;
+  /** Solr server */
+  private SolrServer solrServer;
 
-  /** Solr query execution */
-  private SolrRequester solrRequester = null;
+  private SolrRequester solrRequester;
 
-  /** Manager for the solr search index */
-  private SolrIndexManager solrIndexManager = null;
+  private SolrIndexManager indexManager;
 
-  private DublinCoreCatalogService dcService;
+  private List<StaticMetadataService> mdServices = new ArrayList<StaticMetadataService>();
 
-  private Mpeg7CatalogService mpeg7Service;
+  private Mpeg7CatalogService mpeg7CatalogService;
+
+  private SeriesService seriesService;
 
   /** The local workspace */
   private Workspace workspace;
-
-  /** The registry of remote services */
-  protected ServiceRegistry serviceRegistry;
 
   /** The security service */
   private SecurityService securityService;
@@ -92,40 +90,44 @@ public class SearchServiceImpl implements SearchService {
   /** The authorization service */
   private AuthorizationService authorizationService;
 
+  /** Dynamic reference. */
+  public void setStaticMetadataService(StaticMetadataService mdService) {
+    this.mdServices.add(mdService);
+    if (indexManager != null)
+      indexManager.setStaticMetadataServices(mdServices);
+  }
+
+  public void unsetStaticMetadataService(StaticMetadataService mdService) {
+    this.mdServices.remove(mdService);
+    if (indexManager != null)
+      indexManager.setStaticMetadataServices(mdServices);
+  }
+
+  public void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
+    this.mpeg7CatalogService = mpeg7CatalogService;
+  }
+
+  public void setSeriesService(SeriesService seriesService) {
+    this.seriesService = seriesService;
+  }
+
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
-    if (solrRequester != null) {
-      solrRequester.setSecurityService(securityService);
-    }
-    if (solrIndexManager != null) {
-      solrIndexManager.setSecurityService(securityService);
-    }
   }
 
   public void setAuthorizationService(AuthorizationService authorizationService) {
     this.authorizationService = authorizationService;
   }
 
-  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
-    this.serviceRegistry = serviceRegistry;
-  }
-
-  public void setDublincoreService(DublinCoreCatalogService dcService) {
-    this.dcService = dcService;
-    if (solrIndexManager != null)
-      solrIndexManager.setDcService(dcService); // In case the dc service is updated
-  }
-
-  public void setMpeg7Service(Mpeg7CatalogService mpeg7Service) {
-    this.mpeg7Service = mpeg7Service;
-    if (solrIndexManager != null)
-      solrIndexManager.setMpeg7Service(mpeg7Service); // In case the dc service is updated
-  }
-
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
-    if (solrIndexManager != null)
-      solrIndexManager.setWorkspace(workspace); // In case the workspace is updated
+  /** For testing purposes only! */
+  void testSetup(SolrServer server, SolrRequester requester, SolrIndexManager manager) {
+    this.solrServer = server;
+    this.solrRequester = requester;
+    this.indexManager = manager;
   }
 
   /**
@@ -135,36 +137,54 @@ public class SearchServiceImpl implements SearchService {
    * @param cc
    *          the component context
    */
-  public void activate(ComponentContext cc) throws IllegalStateException {
-    String solrRoot = null;
-    String solrServerUrlConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(CONFIG_SOLR_URL));
-    URL solrServerUrl = null;
+  public void activate(final ComponentContext cc) throws IllegalStateException {
+    final String solrServerUrlConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(CONFIG_SOLR_URL));
 
-    if (solrServerUrlConfig != null) {
-      try {
-        solrServerUrl = new URL(solrServerUrlConfig);
-      } catch (MalformedURLException e) {
-        throw new IllegalStateException("Unable to connect to solr at " + solrServerUrlConfig, e);
+    solrServer = new Object() {
+      SolrServer create() {
+        if (solrServerUrlConfig != null) {
+          try {
+            URL solrServerUrl = new URL(solrServerUrlConfig);
+            return setupSolr(solrServerUrl);
+          } catch (MalformedURLException e) {
+            throw connectError(solrServerUrlConfig, e);
+          } catch (SolrServerException e) {
+            throw connectError(solrServerUrlConfig, e);
+          } catch (IOException e) {
+            throw connectError(solrServerUrlConfig, e);
+          }
+        } else if (cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT) != null) {
+          String solrRoot = cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT);
+          try {
+            return setupSolr(new File(solrRoot));
+          } catch (IOException e) {
+            throw connectError(solrServerUrlConfig, e);
+          } catch (SolrServerException e) {
+            throw connectError(solrServerUrlConfig, e);
+          }
+        } else {
+          String storageDir = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
+          if (storageDir == null)
+            throw new IllegalStateException("Storage dir must be set (org.opencastproject.storage.dir)");
+          String solrRoot = PathSupport.concat(storageDir, "searchindex");
+          try {
+            return setupSolr(new File(solrRoot));
+          } catch (IOException e) {
+            throw connectError(solrServerUrlConfig, e);
+          } catch (SolrServerException e) {
+            throw connectError(solrServerUrlConfig, e);
+          }
+        }
       }
-    } else if (cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT) != null) {
-      solrRoot = cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT);
-    } else {
-      String storageDir = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
-      if (storageDir == null)
-        throw new IllegalStateException("Storage dir must be set (org.opencastproject.storage.dir)");
-      solrRoot = PathSupport.concat(storageDir, "searchindex");
-    }
 
-    try {
-      if (solrServerUrlConfig != null)
-        setupSolr(solrServerUrl);
-      else
-        setupSolr(new File(solrRoot));
-    } catch (IOException e) {
-      throw new IllegalStateException("Unable to connect to solr at " + solrRoot, e);
-    } catch (SolrServerException e) {
-      throw new IllegalStateException("Unable to connect to solr at " + solrRoot, e);
-    }
+      IllegalStateException connectError(String target, Exception e) {
+        return new IllegalStateException("Unable to connect to solr at " + target, e);
+      }
+    }.create();
+
+    solrRequester = new SolrRequester(solrServer, securityService);
+    indexManager = new SolrIndexManager(
+            solrServer, workspace, mdServices, seriesService, mpeg7CatalogService, securityService);
   }
 
   /**
@@ -180,7 +200,7 @@ public class SearchServiceImpl implements SearchService {
    * @param solrRoot
    *          the solr root directory
    */
-  protected void setupSolr(File solrRoot) throws IOException, SolrServerException {
+  static SolrServer setupSolr(File solrRoot) throws IOException, SolrServerException {
     logger.info("Setting up solr search index at {}", solrRoot);
     File solrConfigDir = new File(solrRoot, "conf");
 
@@ -213,26 +233,22 @@ public class SearchServiceImpl implements SearchService {
       FileUtils.deleteDirectory(solrIndexDir);
     }
 
-    solrServer = SolrServerFactory.newEmbeddedInstance(solrRoot, solrDataDir);
-    solrRequester = new SolrRequester(solrServer, securityService);
-    solrIndexManager = new SolrIndexManager(solrServer, workspace, dcService, mpeg7Service, securityService);
+    return SolrServerFactory.newEmbeddedInstance(solrRoot, solrDataDir);
   }
 
   /**
-   * Connects to a remote solr server.
+   * Prepares the embedded solr environment.
    * 
    * @param url
    *          the url of the remote solr server
    */
-  protected void setupSolr(URL url) throws IOException, SolrServerException {
+  static SolrServer setupSolr(URL url) throws IOException, SolrServerException {
     logger.info("Connecting to solr search index at {}", url);
-    solrServer = SolrServerFactory.newRemoteInstance(url);
-    solrRequester = new SolrRequester(solrServer, securityService);
-    solrIndexManager = new SolrIndexManager(solrServer, workspace, dcService, mpeg7Service, securityService);
+    return SolrServerFactory.newRemoteInstance(url);
   }
 
   // TODO: generalize this method
-  private void copyClasspathResourceToFile(String classpath, File dir) {
+  static void copyClasspathResourceToFile(String classpath, File dir) {
     InputStream in = null;
     FileOutputStream fos = null;
     try {
@@ -281,7 +297,7 @@ public class SearchServiceImpl implements SearchService {
     try {
       logger.debug("Attempting to add mediapackage {} to search index", mediaPackage.getIdentifier());
       AccessControlList acl = authorizationService.getAccessControlList(mediaPackage);
-      if (solrIndexManager.add(mediaPackage, acl)) {
+      if (indexManager.add(mediaPackage, acl)) {
         logger.info("Added mediapackage {} to the search index", mediaPackage.getIdentifier());
       } else {
         logger.warn("Failed to add mediapackage {} to the search index", mediaPackage.getIdentifier());
@@ -307,7 +323,7 @@ public class SearchServiceImpl implements SearchService {
         return false;
       }
       logger.info("Removing mediapackage {} from search index", mediaPackageId);
-      return solrIndexManager.delete(mediaPackageId);
+      return indexManager.delete(mediaPackageId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }
@@ -322,7 +338,7 @@ public class SearchServiceImpl implements SearchService {
   public void clear() throws SearchException {
     try {
       logger.info("Clearing the search index");
-      solrIndexManager.clear();
+      indexManager.clear();
     } catch (SolrServerException e) {
       throw new SearchException(e);
     }

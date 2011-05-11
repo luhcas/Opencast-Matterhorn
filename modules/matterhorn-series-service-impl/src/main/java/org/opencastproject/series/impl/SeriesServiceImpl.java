@@ -25,6 +25,7 @@ import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
 
 import org.apache.commons.lang.StringUtils;
+import org.opencastproject.util.RequireUtil;
 import org.osgi.framework.ServiceException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -116,8 +117,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @Override
-  @SuppressWarnings("unchecked") 
-  public void updated(Dictionary properties) throws ConfigurationException {
+  public void updated(@SuppressWarnings("unchecked") Dictionary properties) throws ConfigurationException {
   }
 
   /*
@@ -234,7 +234,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public DublinCoreCatalog getSeries(String seriesID) throws SeriesException, NotFoundException {
     try {
-      return this.index.getDublinCore(seriesID);
+      return this.index.getDublinCore(RequireUtil.notNull(seriesID, "seriesID"));
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Exception occured while retrieving series {}: {}", seriesID, e.getMessage());
       throw new SeriesException(e);
@@ -249,7 +249,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public AccessControlList getSeriesAccessControl(String seriesID) throws NotFoundException, SeriesException {
     try {
-      return index.getAccessControl(seriesID);
+      return index.getAccessControl(RequireUtil.notNull(seriesID, "seriesID"));
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Exception occurred while retrieving access control rules for series {}: {}", seriesID,
               e.getMessage());

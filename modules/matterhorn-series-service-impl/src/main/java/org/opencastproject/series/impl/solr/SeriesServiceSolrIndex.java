@@ -21,8 +21,6 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
-import org.opencastproject.metadata.dublincore.InstantTemporal;
-import org.opencastproject.metadata.dublincore.PeriodTemporal;
 import org.opencastproject.metadata.dublincore.Temporal;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AccessControlParser;
@@ -376,7 +374,7 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    * @return {@link SolrInputDocument} created out of Dublin core
    */
   protected SolrInputDocument createDocument(DublinCoreCatalog dc) {
-    SolrInputDocument doc = new SolrInputDocument();
+    final SolrInputDocument doc = new SolrInputDocument();
 
     doc.addField(SolrFields.ID_KEY, dc.getFirst(DublinCore.PROPERTY_IDENTIFIER));
     try {
@@ -390,30 +388,51 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
       doc.addField(SolrFields.TITLE_KEY, dc.getFirst(DublinCore.PROPERTY_TITLE));
     }
     if (dc.hasValue(DublinCore.PROPERTY_CREATED)) {
-      Temporal<?> temporal = EncodingSchemeUtils.decodeTemporal(dc.get(DublinCore.PROPERTY_CREATED).get(0));
-      if (temporal instanceof InstantTemporal) {
-        doc.addField(SolrFields.CREATED_KEY, ((InstantTemporal) temporal).getTemporal());
-      } else if (temporal instanceof PeriodTemporal) {
-        doc.addField(SolrFields.CREATED_KEY, ((PeriodTemporal) temporal).getTemporal().getStart());
-      } else {
-        throw new IllegalArgumentException("Dublin core dc:created is neither a date nor a period");
-      }
+      final Temporal temporal = EncodingSchemeUtils.decodeTemporal(dc.get(DublinCore.PROPERTY_CREATED).get(0));
+      temporal.fold(new Temporal.Match<Void>() {
+        @Override
+        public Void period(DCMIPeriod period) {
+          doc.addField(SolrFields.CREATED_KEY, period.getStart());
+          return null;
+        }
+
+        @Override
+        public Void instant(Date instant) {
+          doc.addField(SolrFields.CREATED_KEY, instant);
+          return null;
+        }
+
+        @Override
+        public Void duration(long duration) {
+          throw new IllegalArgumentException("Dublin core dc:created is neither a date nor a period");
+        }
+      });
     }
     if (dc.hasValue(DublinCore.PROPERTY_AVAILABLE)) {
-      Temporal<?> temporal = EncodingSchemeUtils.decodeTemporal(dc.get(DublinCore.PROPERTY_AVAILABLE).get(0));
-      if (temporal instanceof InstantTemporal) {
-        doc.addField(SolrFields.AVAILABLE_FROM_KEY, ((InstantTemporal) temporal).getTemporal());
-      } else if (temporal instanceof PeriodTemporal) {
-        DCMIPeriod period = ((PeriodTemporal) temporal).getTemporal();
-        if (period.hasStart()) {
-          doc.addField(SolrFields.AVAILABLE_FROM_KEY, period.getStart());
+      Temporal temporal = EncodingSchemeUtils.decodeTemporal(dc.get(DublinCore.PROPERTY_AVAILABLE).get(0));
+      temporal.fold(new Temporal.Match<Void>() {
+        @Override
+        public Void period(DCMIPeriod period) {
+          if (period.hasStart()) {
+            doc.addField(SolrFields.AVAILABLE_FROM_KEY, period.getStart());
+          }
+          if (period.hasEnd()) {
+            doc.addField(SolrFields.AVAILABLE_TO_KEY, period.getEnd());
+          }
+          return null;
         }
-        if (period.hasEnd()) {
-          doc.addField(SolrFields.AVAILABLE_TO_KEY, period.getEnd());
+
+        @Override
+        public Void instant(Date instant) {
+          doc.addField(SolrFields.AVAILABLE_FROM_KEY, instant);
+          return null;
         }
-      } else {
-        throw new IllegalArgumentException("Dublin core field dc:available is neither a date nor a period");
-      }
+
+        @Override
+        public Void duration(long duration) {
+          throw new IllegalArgumentException("Dublin core field dc:available is neither a date nor a period");
+        }
+      });
     }
 
     // multivalued fields

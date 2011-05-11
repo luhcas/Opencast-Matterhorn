@@ -119,7 +119,7 @@ public class SearchResultImpl implements SearchResult {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.SearchResult#getItems()
+   * @see org.opencastproject.search.api.SearchResult#getItems()
    */
   public SearchResultItem[] getItems() {
     return resultSet.toArray(new SearchResultItem[resultSet.size()]);
@@ -140,7 +140,7 @@ public class SearchResultImpl implements SearchResult {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.SearchResult#getQuery()
+   * @see org.opencastproject.search.api.SearchResult#getQuery()
    */
   public String getQuery() {
     return query;
@@ -149,7 +149,7 @@ public class SearchResultImpl implements SearchResult {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.SearchResult#size()
+   * @see org.opencastproject.search.api.SearchResult#size()
    */
   public long size() {
     return resultSet != null ? resultSet.size() : 0;
@@ -158,7 +158,7 @@ public class SearchResultImpl implements SearchResult {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.SearchResult#getOffset()
+   * @see org.opencastproject.search.api.SearchResult#getOffset()
    */
   public long getOffset() {
     return offset;
@@ -177,7 +177,7 @@ public class SearchResultImpl implements SearchResult {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.SearchResult#getLimit()
+   * @see org.opencastproject.search.api.SearchResult#getLimit()
    */
   public long getLimit() {
     return limit;
@@ -196,7 +196,7 @@ public class SearchResultImpl implements SearchResult {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.SearchResult#getSearchTime()
+   * @see org.opencastproject.search.api.SearchResult#getSearchTime()
    */
   public long getSearchTime() {
     return searchTime;
@@ -234,7 +234,7 @@ public class SearchResultImpl implements SearchResult {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.impl.SearchResult#getPage()
+   * @see org.opencastproject.search.api.SearchResult#getPage()
    */
   public long getPage() {
     if (limit != 0)

@@ -34,9 +34,9 @@ public class DublinCoreValue implements Serializable {
    */
   private static final long serialVersionUID = 1L;
 
-  private String value;
-  private String language;
-  private EName encodingScheme;
+  private final String value;
+  private final String language;
+  private final EName encodingScheme;
 
   /**
    * Creates a new Dublin Core value.
@@ -76,7 +76,7 @@ public class DublinCoreValue implements Serializable {
    * 
    * @param value
    *          the value
-   * @see org.opencastproject.mediapackage.dublincore.DublinCore#LANGUAGE_UNDEFINED
+   * @see org.opencastproject.metadata.dublincore.DublinCore#LANGUAGE_UNDEFINED
    */
   public DublinCoreValue(String value) {
     this(value, DublinCore.LANGUAGE_UNDEFINED, null);

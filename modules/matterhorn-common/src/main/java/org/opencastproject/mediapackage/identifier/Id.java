@@ -52,4 +52,10 @@ public interface Id {
       return id;
     }
   }
+
+  /**
+   * Return a string representation of the identifier from which an object of type Id should
+   * be reconstructable.
+   */
+  String toString();
 }

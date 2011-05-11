@@ -19,7 +19,7 @@ package org.opencastproject.feed.impl;
 import org.opencastproject.feed.api.Feed.Type;
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.search.api.SearchResult;
-import org.opencastproject.search.impl.solr.SolrFields;
+import org.opencastproject.search.impl.solr.Schema;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -85,7 +85,7 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
 
     // Create the solr query for the series
     StringBuffer q = new StringBuffer();
-    q.append(SolrFields.DC_IS_PART_OF);
+    q.append(Schema.DC_IS_PART_OF);
     q.append(":(");
     for (String s : series) {
       q.append(s).append(" ");

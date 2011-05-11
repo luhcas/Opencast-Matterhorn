@@ -350,17 +350,17 @@ public final class EncodingSchemeUtils {
    *          the value to decode
    * @return a temporal object of the said types or null if decoding fails
    */
-  public static Temporal<?> decodeTemporal(DublinCoreValue value) {
+  public static Temporal decodeTemporal(DublinCoreValue value) {
     // First try Date
     Date instant = decodeDate(value);
     if (instant != null)
-      return new InstantTemporal(instant);
+      return Temporal.instant(instant);
     DCMIPeriod period = decodePeriod(value);
     if (period != null)
-      return new PeriodTemporal(period);
+      return Temporal.period(period);
     Long duration = decodeDuration(value);
     if (duration != null)
-      return new DurationTemporal(duration);
+      return Temporal.duration(duration);
     return null;
   }
 
@@ -372,8 +372,8 @@ public final class EncodingSchemeUtils {
    * @throws IllegalArgumentException
    *           if the value cannot be decoded
    */
-  public static Temporal<?> decodeMandatoryTemporal(DublinCoreValue value) {
-    Temporal<?> temporal = decodeTemporal(value);
+  public static Temporal decodeMandatoryTemporal(DublinCoreValue value) {
+    Temporal temporal = decodeTemporal(value);
     if (value == null)
       throw new IllegalArgumentException("Cannot decode to either Date or DCMIPeriod: " + value);
 

@@ -38,7 +38,7 @@ import org.opencastproject.mediapackage.EName;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageMetadata;
+import org.opencastproject.metadata.api.MediaPackageMetadata;
 import org.opencastproject.mediapackage.NamespaceBindingException;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.UnknownFileTypeException;
@@ -112,7 +112,7 @@ public class DublinCoreTest {
   }
 
   /**
-   * @throws java.io.File.IOException
+   * @throws java.io.IOException
    */
   @After
   public void tearDown() throws Exception {
@@ -121,7 +121,7 @@ public class DublinCoreTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#fromFile(java.io.File)} .
+   * Test method for {@link org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl#fromFile(java.io.File)} .
    */
   @Test
   public void testFromFile() throws Exception {
@@ -132,7 +132,7 @@ public class DublinCoreTest {
 
     // Check if the fields are available
     assertEquals("ETH Zurich, Switzerland", dc.getFirst(PROPERTY_PUBLISHER, LANGUAGE_UNDEFINED));
-    assertEquals("Land and Vegetation: Key players on the Climate Scene", dc.getFirst(PROPERTY_TITLE, "en"));
+    assertEquals("Land and Vegetation: Key players on the Climate Scene", dc.getFirst(PROPERTY_TITLE, DublinCore.LANGUAGE_UNDEFINED));
     assertNotNull(dc.getFirst(PROPERTY_TITLE));
     assertNull(dc.getFirst(PROPERTY_TITLE, "fr"));
     // Test custom metadata element
@@ -167,7 +167,7 @@ public class DublinCoreTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#save()} .
+   * Test method for saving the catalog.
    */
   @Test
   public void testNewInstance() {
@@ -184,7 +184,7 @@ public class DublinCoreTest {
 
       // Add the required fields
       dcNew.add(PROPERTY_IDENTIFIER, dcSample.getFirst(PROPERTY_IDENTIFIER));
-      dcNew.add(PROPERTY_TITLE, dcSample.getFirst(PROPERTY_TITLE, "en"), "en");
+      dcNew.add(PROPERTY_TITLE, dcSample.getFirst(PROPERTY_TITLE, DublinCore.LANGUAGE_UNDEFINED), DublinCore.LANGUAGE_UNDEFINED);
 
       // Add an additional field
       dcNew.add(PROPERTY_PUBLISHER, dcSample.getFirst(PROPERTY_PUBLISHER));
@@ -237,7 +237,7 @@ public class DublinCoreTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#save()} .
+   * Test method for {@link org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl#save()} .
    */
   @Test(expected = IllegalStateException.class)
   public void testRequiredFields() {

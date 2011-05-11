@@ -14,17 +14,16 @@
  *
  */
 
-package org.opencastproject.metadata.dublincore;
-
-import java.util.Date;
+package org.opencastproject.metadata.api;
 
 /**
- * An instant in time as a {@link java.util.Date}.
+ * Constant values for {@link MetadataValue}.
  */
-public class InstantTemporal extends Temporal<Date> {
+public final class MetadataValues {
 
-  public InstantTemporal(Date temporal) {
-    super(temporal, Type.Instant);
+  private MetadataValues() {
   }
+
+  public static final String LANGUAGE_UNDEFINED = "__";
 
 }
