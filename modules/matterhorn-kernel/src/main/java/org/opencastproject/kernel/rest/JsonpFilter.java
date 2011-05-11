@@ -15,6 +15,8 @@
  */
 package org.opencastproject.kernel.rest;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Adds padding to json responses when the 'jsonp' parameter is specified.
@@ -42,6 +43,9 @@ import javax.ws.rs.core.MediaType;
 public class JsonpFilter implements Filter {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(JsonpFilter.class);
+
+  /** The content type HTTP header name */
+  public static final String CONTENT_TYPE_HEADER = "Content-Type";
 
   /** The querystring parameter that indicates the response should be padded */
   public static final String CALLBACK_PARAM = "jsonp";
@@ -94,13 +98,12 @@ public class JsonpFilter implements Filter {
 
     // Cast the request and response to HTTP versions
     HttpServletRequest request = (HttpServletRequest) req;
-    HttpServletResponse originalResponse = (HttpServletResponse) resp;
 
     // Determine whether the response must be wrapped
     String callbackValue = request.getParameter(CALLBACK_PARAM);
     if (callbackValue == null || callbackValue.isEmpty()) {
       logger.debug("No json padding requested from {}", request);
-      chain.doFilter(request, originalResponse);
+      chain.doFilter(request, resp);
     } else {
       logger.debug("Json padding '{}' requested from {}", callbackValue, request);
 
@@ -110,6 +113,7 @@ public class JsonpFilter implements Filter {
       }
 
       // Write the padded response
+      HttpServletResponse originalResponse = (HttpServletResponse) resp;
       HttpServletResponseContentWrapper wrapper = new HttpServletResponseContentWrapper(originalResponse, callbackValue);
       chain.doFilter(request, wrapper);
       wrapper.flushWrapper();
@@ -127,12 +131,25 @@ public class JsonpFilter implements Filter {
     protected boolean enableWrapping = false;
     protected String preWrapper;
 
+    /**
+     * Construct a response wrapper.
+     * 
+     * @param response
+     *          the response
+     * @param callbackValue
+     *          the jsonp callback value
+     */
     public HttpServletResponseContentWrapper(HttpServletResponse response, String callbackValue) {
       super(response);
       this.preWrapper = callbackValue + OPEN_PARENS;
       this.buffer = new ByteArrayServletOutputStream();
     }
 
+    /**
+     * Flush the buffer for this response wrapper.
+     * 
+     * @throws IOException
+     */
     public void flushWrapper() throws IOException {
       if (enableWrapping) {
         if (bufferWriter != null)
@@ -151,6 +168,45 @@ public class JsonpFilter implements Filter {
       }
     }
 
+    /**
+     * If we set a {@link javax.ws.rs.core.MediaType#APPLICATION_JSON} {@link JsonpFilter#CONTENT_TYPE_HEADER} header,
+     * enable padding.
+     * 
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.http.HttpServletResponseWrapper#setHeader(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void setHeader(String name, String value) {
+      if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name) && APPLICATION_JSON.equals(value)) {
+        enableWrapping = true;
+      }
+      super.setHeader(name, value);
+    }
+
+    /**
+     * If we add a {@link javax.ws.rs.core.MediaType#APPLICATION_JSON} {@link JsonpFilter#CONTENT_TYPE_HEADER} header,
+     * enable padding.
+     * 
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.http.HttpServletResponseWrapper#addHeader(java.lang.String, java.lang.String)
+     */
+    @Override
+    public void addHeader(String name, String value) {
+      if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name) && APPLICATION_JSON.equals(value)) {
+        enableWrapping = true;
+      }
+      super.addHeader(name, value);
+    }
+
+    /**
+     * Returns the content type. If we are wrapping json with padding, return {@link JsonpFilter#JS_CONTENT_TYPE}.
+     * 
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#getContentType()
+     */
     @Override
     public String getContentType() {
       return enableWrapping ? JS_CONTENT_TYPE : getResponse().getContentType();
@@ -165,14 +221,29 @@ public class JsonpFilter implements Filter {
      */
     @Override
     public void setContentType(String type) {
-      enableWrapping = MediaType.APPLICATION_JSON.equals(type);
+      enableWrapping = APPLICATION_JSON.equals(type);
+      super.setContentType(type);
     }
 
+    /**
+     * If we are wrapping json with padding, , return the wrapped buffer. Otherwise, return the original outputstream.
+     * 
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#getOutputStream()
+     */
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
       return enableWrapping ? buffer : getResponse().getOutputStream();
     }
 
+    /**
+     * If we are wrapping json with padding, , return the wrapped writer. Otherwise, return the original writer.
+     * 
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#getWriter()
+     */
     @Override
     public PrintWriter getWriter() throws IOException {
       if (enableWrapping) {
@@ -185,6 +256,11 @@ public class JsonpFilter implements Filter {
       }
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#setBufferSize(int)
+     */
     @Override
     public void setBufferSize(int size) {
       if (enableWrapping) {
@@ -194,28 +270,53 @@ public class JsonpFilter implements Filter {
       }
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#getBufferSize()
+     */
     @Override
     public int getBufferSize() {
       return enableWrapping ? buffer.size() : getResponse().getBufferSize();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#flushBuffer()
+     */
     @Override
     public void flushBuffer() throws IOException {
       if (!enableWrapping)
         getResponse().flushBuffer();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#isCommitted()
+     */
     @Override
     public boolean isCommitted() {
       return enableWrapping ? committed : getResponse().isCommitted();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#reset()
+     */
     @Override
     public void reset() {
       getResponse().reset();
       buffer.reset();
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#resetBuffer()
+     */
     @Override
     public void resetBuffer() {
       getResponse().resetBuffer();
@@ -223,16 +324,30 @@ public class JsonpFilter implements Filter {
     }
   }
 
+  /**
+   * A buffered output stream for jsonp padding.
+   */
   static class ByteArrayServletOutputStream extends ServletOutputStream {
 
+    /** The buffer */
     protected byte[] buf;
 
+    /** The current write count */
     protected int count;
 
+    /**
+     * Creates a new buffered stream with the default size (32).
+     */
     public ByteArrayServletOutputStream() {
       this(32);
     }
 
+    /**
+     * Creates a new buffered stream with the specified size.
+     * 
+     * @param size
+     *          the buffer size
+     */
     public ByteArrayServletOutputStream(int size) {
       if (size < 0) {
         throw new IllegalArgumentException("Negative initial size: " + size);
@@ -240,24 +355,48 @@ public class JsonpFilter implements Filter {
       buf = new byte[size];
     }
 
+    /**
+     * Returns a copy of the buffer as an array.
+     * 
+     * @return the buffer as a byte array
+     */
     public synchronized byte toByteArray()[] {
       return Arrays.copyOf(buf, count);
     }
 
+    /**
+     * Resets the stream.
+     */
     public synchronized void reset() {
       count = 0;
     }
 
+    /**
+     * Gets the size of the stream
+     * 
+     * @return the stream size
+     */
     public synchronized int size() {
       return count;
     }
 
+    /**
+     * Expands the size of the stream.
+     * 
+     * @param size
+     *          the new size of the buffer
+     */
     public void enlarge(int size) {
       if (size > buf.length) {
         buf = Arrays.copyOf(buf, Math.max(buf.length << 1, size));
       }
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.io.OutputStream#write(int)
+     */
     @Override
     public synchronized void write(int b) throws IOException {
       int newcount = count + 1;
