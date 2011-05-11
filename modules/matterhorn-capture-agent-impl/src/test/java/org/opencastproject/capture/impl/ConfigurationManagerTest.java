@@ -28,6 +28,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,6 +47,8 @@ public class ConfigurationManagerTest {
   /** the singleton object to test with */
   private ConfigurationManager configManager;
 
+  private static final Logger logger = LoggerFactory.getLogger(ConfigurationManagerTest.class);
+  
   @Before
   public void setUp() throws ConfigurationException, IOException, URISyntaxException {
     configManager = new ConfigurationManager();
@@ -282,4 +286,28 @@ public class ConfigurationManagerTest {
     Thread.sleep(100);
     verify(registersAfter);
   }
+  
+  @Test
+  public void testPropertiesAreStripped() {
+    configManager = new ConfigurationManager();
+    Properties properties = new Properties();
+    String blanks = "blanks";
+    String leadingAndTrailing = " spaces ";
+    String withoutLeadingAndTrailing = "spaces";
+    properties.put(blanks, "                   ");
+    properties.put(withoutLeadingAndTrailing, leadingAndTrailing);
+    try {
+      configManager.updated(properties);
+    } catch (ConfigurationException e) {
+      logger.error(e.getMessage());
+      Assert.fail("ConfigurationException cccured before the test could complete. ");
+    }
+    
+    Properties returnedProperties = configManager.getAllProperties();
+    Assert.assertTrue("Configuration Manager doesn't trim blank entries properly. ",
+            returnedProperties.getProperty(blanks).equalsIgnoreCase(""));
+    Assert.assertTrue("Configuration Manager doesn't trim ntries with spaces properly. ", returnedProperties
+            .getProperty(withoutLeadingAndTrailing).equalsIgnoreCase(withoutLeadingAndTrailing));
+  }
+  
 }

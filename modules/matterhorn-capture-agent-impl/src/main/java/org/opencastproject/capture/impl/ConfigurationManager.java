@@ -107,7 +107,8 @@ public class ConfigurationManager implements ManagedService {
       Object key = keys.nextElement();
       Object value = props.get(key);
       if (String.class.isInstance(key) && String.class.isInstance(value)) {
-        properties.put(key, value);
+        // Trim the value before we allow it to end up in the properties. 
+        properties.put(key, ((String)value).trim());
       }
     }
 

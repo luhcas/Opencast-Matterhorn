@@ -573,5 +573,4 @@ public class CaptureAgentImplTest {
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
     return p;
   }
-  
 }
