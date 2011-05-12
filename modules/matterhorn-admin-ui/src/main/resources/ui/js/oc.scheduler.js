@@ -309,7 +309,7 @@ ocScheduler.HandleAgentChange = function(elm){
       function(doc){
         var devNames = [];
         var capabilities = [];
-        $.each($('entry', doc), function(a, i){
+        $.each($('item', doc), function(a, i){
           var s = $(i).attr('key');
           if(s === 'capture.device.names'){
             devNames = $(i).text().split(',');
