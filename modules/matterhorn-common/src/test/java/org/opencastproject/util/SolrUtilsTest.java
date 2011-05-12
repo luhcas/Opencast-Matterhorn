@@ -30,8 +30,23 @@ import java.util.TimeZone;
  */
 public class SolrUtilsTest {
 
-  /** The date format */
-  protected final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+  private static DateFormat dateFormatUTC() {
+    DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    df.setTimeZone(TimeZone.getTimeZone("UTC"));
+    return df;
+  }
+
+  private static Date newDate(int year, int month, int day, int hour, int minute, int second) {
+    Calendar c = Calendar.getInstance();
+    c.set(Calendar.YEAR, year);
+    c.set(Calendar.MONTH, month - 1);
+    c.set(Calendar.DAY_OF_MONTH, day);
+    c.set(Calendar.HOUR_OF_DAY, hour);
+    c.set(Calendar.MINUTE, minute);
+    c.set(Calendar.SECOND, second);
+    c.set(Calendar.MILLISECOND, 0);
+    return c.getTime();
+  }
 
   /**
    * Test method for {@link org.opencastproject.util.SolrUtils#clean(java.lang.String)}.
@@ -49,16 +64,8 @@ public class SolrUtilsTest {
    */
   @Test
   public void testSerializeDate() {
-    Calendar d = Calendar.getInstance();
-    d.setTimeZone(TimeZone.getTimeZone("UTC"));
-    d.set(Calendar.DAY_OF_MONTH, 2);
-    d.set(Calendar.HOUR, 5);
-    d.set(Calendar.HOUR_OF_DAY, 5);
-    d.set(Calendar.MINUTE, 59);
-    d.set(Calendar.SECOND, 13);
-    d.set(Calendar.MILLISECOND, 0);
-    Date date = d.getTime();
-    String serializedDate = df.format(date) + "T05:59:13Z";
+    Date date = newDate(2011, 5, 12, 5, 13, 0);
+    String serializedDate = dateFormatUTC().format(date);
     assertEquals(serializedDate, SolrUtils.serializeDate(date));
   }
 
@@ -68,34 +75,14 @@ public class SolrUtilsTest {
    */
   @Test
   public void testSerializeDateRange() {
-    Calendar d = Calendar.getInstance();
-    d.setTimeZone(TimeZone.getTimeZone("UTC"));
-    d.set(Calendar.MILLISECOND, 0);
-    d.set(Calendar.SECOND, 0);
-    d.set(Calendar.MINUTE, 0);
-    d.set(Calendar.HOUR_OF_DAY, 0);
-    Date startDate = d.getTime();
-    d.add(Calendar.DAY_OF_MONTH, 2);
-    d.set(Calendar.HOUR_OF_DAY, 5);
-    d.set(Calendar.MINUTE, 59);
-    Date endDate = d.getTime();
-    String serializedStartDate = df.format(startDate) + "T00:00:00Z";
-    String serializedEndDate = df.format(endDate) + "T05:59:00Z";
+    Date startDate = newDate(1999, 3, 21, 14, 0, 0);
+    Date endDate = newDate(1999, 3, 21, 14, 30, 10);
+    String serializedStartDate = dateFormatUTC().format(startDate);
+    String serializedEndDate = dateFormatUTC().format(endDate);
     String day = "[" + serializedStartDate + " TO " + serializedEndDate + "]";
     assertEquals(day, SolrUtils.serializeDateRange(startDate, endDate));
-  }
-
-  /**
-   * Test method for {@link org.opencastproject.util.SolrUtils#selectDay(java.util.Date)}.
-   */
-  @Test
-  public void testSelectDay() {
-    Date date = new Date();
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-    String dayStart = df.format(date) + "T00:00:00Z";
-    String dayEnd = df.format(date) + "T23:59:59Z";
-    String day = "[" + dayStart + " TO " + dayEnd + "]";
-    assertEquals(day, SolrUtils.selectDay(date));
+    assertEquals("[* TO " + serializedEndDate + "]", SolrUtils.serializeDateRange(null, endDate));
+    assertEquals("[" + serializedStartDate + " TO *]", SolrUtils.serializeDateRange(startDate, null));
   }
 
 }

@@ -66,7 +66,7 @@ public final class SolrUtils {
    * Returns the date or <code>null</code> if <code>null</code> was passed in for the date.
    * 
    * @param date
-   *          the serialized date
+   *          the serialized date in UTC format yyyy-MM-dd'T'HH:mm:ss'Z'
    * @return the date
    * @throws ParseException
    *           if parsing the date fails
@@ -103,32 +103,13 @@ public final class SolrUtils {
   }
 
   /**
-   * Returns an expression to search for the given day.
-   * 
-   * @param date
-   *          the date
-   * @return the serialized search expression
+   * Return a date format suitable for solr. Format a date as UTC with a granularity of seconds.
+   * <code>yyyy-MM-dd'T'HH:mm:ss'Z'</code>
    */
-  public static String selectDay(Date date) {
-    if (date == null)
-      return null;
-    StringBuffer buf = new StringBuffer("[");
-    DateFormat f = newSolrDayFormat();
-    buf.append(f.format(date)).append("T00:00:00Z");
-    buf.append(" TO ");
-    buf.append(f.format(date)).append("T23:59:59Z");
-    buf.append("]");
-    return buf.toString();
-  }
-
   public static DateFormat newSolrDateFormat() {
     SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
     f.setTimeZone(TimeZone.getTimeZone("UTC"));
     return f;
-  }
-
-  public static DateFormat newSolrDayFormat() {
-    return new SimpleDateFormat("yyyy-MM-dd");
   }
 
 }
