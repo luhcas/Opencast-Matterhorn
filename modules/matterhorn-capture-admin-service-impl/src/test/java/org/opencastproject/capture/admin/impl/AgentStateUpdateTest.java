@@ -31,7 +31,7 @@ public class AgentStateUpdateTest {
   private AgentStateUpdate asu = null;
 
   @Before
-  public void setup() throws InterruptedException {
+  public void setUp() throws InterruptedException {
     agent = new AgentImpl("test", AgentState.IDLE, "", null);
     Assert.assertNotNull(agent);
     Thread.sleep(5);
@@ -40,7 +40,7 @@ public class AgentStateUpdateTest {
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     agent = null;
     asu = null;
   }

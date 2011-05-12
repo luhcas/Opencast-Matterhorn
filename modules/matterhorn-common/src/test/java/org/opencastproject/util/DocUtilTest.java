@@ -34,12 +34,12 @@ import static org.junit.Assert.*;
 public class DocUtilTest {
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     DocUtil.reset();
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
   }
 
   @Test

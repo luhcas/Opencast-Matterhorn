@@ -43,7 +43,7 @@ public class WorkingFileRepositoryTest {
   private WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl();
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     repo.rootDirectory = "target" + File.separator + "repotest";
     repo.serverUrl = UrlSupport.DEFAULT_BASE_URL;
     repo.serviceUrl = new URI(UrlSupport.concat(UrlSupport.DEFAULT_BASE_URL, WorkingFileRepositoryImpl.URI_PREFIX));

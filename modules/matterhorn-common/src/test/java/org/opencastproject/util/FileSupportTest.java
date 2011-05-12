@@ -18,7 +18,7 @@ public class FileSupportTest {
   private File fileSupportTestsDestinationDirectory;
 
   @Before
-  public void setup() throws IOException{
+  public void setUp() throws IOException{
     fileSupportTestsDirectory = new File(System.getProperty("java.io.tmpdir"), "fileSupportTestsDirectory");
     fileSupportTestsDestinationDirectory = new File(System.getProperty("java.io.tmpdir"),
             "fileSupportTestsDestinationDirectory");

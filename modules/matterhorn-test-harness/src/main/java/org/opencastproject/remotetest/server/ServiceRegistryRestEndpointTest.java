@@ -67,14 +67,14 @@ public class ServiceRegistryRestEndpointTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     remoteHost = URLEncoder.encode(BASE_URL, "UTF-8");
     serviceUrl = BASE_URL + "/services";
     client = Main.getClient();
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     Main.returnClient(client);
   }
 

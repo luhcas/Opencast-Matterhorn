@@ -67,7 +67,7 @@ public class UploadTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     Main.returnClient(client);
   }
 

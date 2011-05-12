@@ -47,7 +47,7 @@ public class UserAndRoleDirectoryServiceImplTest {
   Organization org = null;
   
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     org = new DefaultOrganization();
     userName = "sampleUser";
     

@@ -88,7 +88,7 @@ public class MediaInspectionServiceImplTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     uriTrack = MediaInspectionServiceImpl.class.getResource("/av.mov").toURI();
     File f = new File(uriTrack);
     // set up services and mock objects

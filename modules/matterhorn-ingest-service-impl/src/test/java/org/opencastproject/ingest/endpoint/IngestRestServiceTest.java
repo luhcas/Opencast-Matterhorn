@@ -47,7 +47,7 @@ public class IngestRestServiceTest {
   private ComboPooledDataSource pooledDataSource = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
     pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis());
@@ -93,7 +93,7 @@ public class IngestRestServiceTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     pooledDataSource.close();
   }
 

@@ -64,7 +64,7 @@ public class EngageModuleTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     client = Main.getClient();
     domFactory = DocumentBuilderFactory.newInstance();
     domFactory.setNamespaceAware(false); // don't forget this!

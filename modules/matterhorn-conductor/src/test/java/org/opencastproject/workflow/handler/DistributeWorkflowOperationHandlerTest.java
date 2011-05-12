@@ -66,7 +66,7 @@ public class DistributeWorkflowOperationHandlerTest {
   private MediaPackage mp;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     uriMP = InspectWorkflowOperationHandler.class.getResource("/distribute_mediapackage.xml").toURI();
     mp = builder.loadFromXml(uriMP.toURL().openStream());

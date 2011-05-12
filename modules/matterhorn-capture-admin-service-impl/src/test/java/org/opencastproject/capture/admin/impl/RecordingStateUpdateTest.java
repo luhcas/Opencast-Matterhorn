@@ -30,7 +30,7 @@ public class RecordingStateUpdateTest {
   private RecordingStateUpdate rsu = null;
 
   @Before
-  public void setup() throws InterruptedException {
+  public void setUp() throws InterruptedException {
     recording = new RecordingImpl("test", RecordingState.CAPTURING);
     Assert.assertNotNull(recording);
     Thread.sleep(5);
@@ -39,7 +39,7 @@ public class RecordingStateUpdateTest {
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     recording = null;
     rsu = null;
   }

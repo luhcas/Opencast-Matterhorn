@@ -56,7 +56,7 @@ public class DownloadDistributionServiceImplTest {
   private ServiceRegistry serviceRegistry = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     File mediaPackageRoot = new File("./target/test-classes");
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     builder.setSerializer(new DefaultMediaPackageSerializerImpl(mediaPackageRoot));
@@ -106,7 +106,7 @@ public class DownloadDistributionServiceImplTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     FileUtils.deleteDirectory(distributionRoot);
     ((ServiceRegistryInMemoryImpl) serviceRegistry).dispose();
   }

@@ -51,7 +51,7 @@ public class CaptureRestEndpointTest {
   private ArrayList<NameValuePair> stopParams = new ArrayList<NameValuePair>();
   
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     httpClient = Main.getClient();
     String time = String.valueOf(System.currentTimeMillis());
 

@@ -87,7 +87,7 @@ public class WorkflowOperationSkippingTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     sRoot = new File(getStorageRoot());
     try {
       FileUtils.forceMkdir(sRoot);
@@ -176,7 +176,7 @@ public class WorkflowOperationSkippingTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     dao.deactivate();
   }
 

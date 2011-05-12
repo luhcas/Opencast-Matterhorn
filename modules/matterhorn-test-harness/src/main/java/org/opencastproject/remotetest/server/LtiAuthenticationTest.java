@@ -76,7 +76,7 @@ public class LtiAuthenticationTest {
   }
   
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     httpClient = new DefaultHttpClient();
     oauthClient = new OAuthClient(new HttpClient4());
   }

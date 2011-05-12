@@ -80,7 +80,7 @@ public class InspectWorkflowOperationHandlerTest {
   private static final String NEW_DC_URL = "http://www.url.org";
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
 
     // test resources

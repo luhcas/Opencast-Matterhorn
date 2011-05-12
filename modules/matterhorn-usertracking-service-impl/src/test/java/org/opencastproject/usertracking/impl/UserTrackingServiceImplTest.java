@@ -32,7 +32,7 @@ public class UserTrackingServiceImplTest {
   private UserTrackingServiceImpl service = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // Set up the database
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
@@ -54,7 +54,7 @@ public class UserTrackingServiceImplTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     service = null;
   }
 

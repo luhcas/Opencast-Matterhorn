@@ -29,14 +29,14 @@ public class AgentTest {
   private Long time = 0L;
 
   @Before
-  public void setup() {
+  public void setUp() {
     agent = new AgentImpl("test", AgentState.IDLE, "http://localhost/", null);
     Assert.assertNotNull(agent);
     time = agent.getLastHeardFrom();
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     agent = null;
     time = 0L;
   }

@@ -76,7 +76,7 @@ public class ZipUtilTest {
   // private static final long WINDOWS_ZIP_SIZE = 870533;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // Set up the source and destination directories
     Assert.assertTrue(baseDir.isDirectory() || baseDir.mkdirs());
 
@@ -94,7 +94,7 @@ public class ZipUtilTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     FileUtils.forceDelete(baseDir);
   }
 

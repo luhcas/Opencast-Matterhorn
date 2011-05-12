@@ -41,7 +41,7 @@ public class AnnotationServiceJpaImplTest {
   private AnnotationServiceJpaImpl annotationService = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // Set up the database
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
@@ -70,7 +70,7 @@ public class AnnotationServiceJpaImplTest {
   }
   
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     annotationService.deactivate();
   }
   

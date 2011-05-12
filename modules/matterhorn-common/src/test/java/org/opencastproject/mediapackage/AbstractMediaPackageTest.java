@@ -16,11 +16,6 @@
 
 package org.opencastproject.mediapackage;
 
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilder;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.identifier.Handle;
 import org.opencastproject.mediapackage.identifier.HandleBuilder;
 import org.opencastproject.mediapackage.identifier.HandleBuilderFactory;
@@ -31,8 +26,6 @@ import org.junit.Before;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 /**
  * Base class for media package tests.
@@ -99,7 +92,7 @@ public abstract class AbstractMediaPackageTest {
    * @throws java.lang.Exception
    */
   @Before
-  public void setUp() throws IOException, MediaPackageException, URISyntaxException {
+  public void setUp() throws Exception {
 
     // Create a media package builder
     MediaPackageBuilderFactory builderFactory = MediaPackageBuilderFactory.newInstance();

@@ -38,7 +38,7 @@ public class MetadataExtractionTest {
   private static final String SERIES = "series";
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // set up service
     service = new WorkflowServiceImpl();
 

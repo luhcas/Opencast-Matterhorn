@@ -77,13 +77,13 @@ public class FailingPreProcessingWorkflowTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     client = Main.getClient();
     WorkflowUtils.registerWorkflowDefinition(getSampleWorkflowDefinition());
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     Main.returnClient(client);
     WorkflowUtils.unregisterWorkflowDefinition(WORKFLOW_DEFINITION_ID);
   }

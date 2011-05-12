@@ -71,7 +71,7 @@ public class PauseFinalOperationTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // always start with a fresh solr root directory
     sRoot = new File(getStorageRoot());
     try {
@@ -144,7 +144,7 @@ public class PauseFinalOperationTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     dao.deactivate();
   }
 

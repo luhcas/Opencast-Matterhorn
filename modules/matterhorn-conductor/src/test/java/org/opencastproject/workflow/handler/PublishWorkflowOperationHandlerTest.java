@@ -43,7 +43,7 @@ public class PublishWorkflowOperationHandlerTest {
   private WorkflowInstanceImpl workflowInstance;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
 
     // test resources

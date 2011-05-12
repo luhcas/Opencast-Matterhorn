@@ -52,7 +52,7 @@ public class WorkflowServiceSolrIndexTest {
   private AccessControlList acl = new AccessControlList();
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     SecurityService securityService = new SecurityServiceStub();
     
     // Create a job with a workflow as its payload
@@ -87,7 +87,7 @@ public class WorkflowServiceSolrIndexTest {
 }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     dao.deactivate();
     FileUtils.deleteDirectory(new File(dao.solrRoot));
     dao = null;

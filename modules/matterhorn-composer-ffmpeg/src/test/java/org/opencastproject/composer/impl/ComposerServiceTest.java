@@ -97,7 +97,7 @@ public class ComposerServiceTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     if (!ffmpegInstalled)
       return;
 
@@ -155,7 +155,7 @@ public class ComposerServiceTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     FileUtils.deleteQuietly(source);
   }
 

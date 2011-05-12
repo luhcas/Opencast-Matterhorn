@@ -125,7 +125,7 @@ public class SearchServiceImplTest {
 
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     final File dcFile = new File(getClass().getResource("/dublincore.xml").toURI());
     final File dcSeriesFile = new File(getClass().getResource("/series-dublincore.xml").toURI());
     Assert.assertNotNull(dcFile);
@@ -197,7 +197,7 @@ public class SearchServiceImplTest {
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     service.deactivate();
     try {
       FileUtils.deleteDirectory(new File(solrRoot));

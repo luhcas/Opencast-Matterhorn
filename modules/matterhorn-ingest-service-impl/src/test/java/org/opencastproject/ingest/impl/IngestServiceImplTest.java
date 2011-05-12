@@ -69,7 +69,7 @@ public class IngestServiceImplTest {
 
   @SuppressWarnings("unchecked")
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     urlTrack = IngestServiceImplTest.class.getResource("/av.mov").toURI();
     urlTrack1 = IngestServiceImplTest.class.getResource("/vonly.mov").toURI();
     urlTrack2 = IngestServiceImplTest.class.getResource("/aonly.mov").toURI();

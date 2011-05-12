@@ -17,12 +17,12 @@ import java.util.List;
 public class FeedImplTest {
 
   @Before
-  public void setup() {
+  public void setUp() {
 
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
 
   }
 

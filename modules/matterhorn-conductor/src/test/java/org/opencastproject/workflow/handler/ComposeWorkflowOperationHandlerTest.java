@@ -68,7 +68,7 @@ public class ComposeWorkflowOperationHandlerTest {
   private static final String ENCODED_TRACK_ID = "compose-workflow-operation-test-encode-track-id";
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
 
     // test resources

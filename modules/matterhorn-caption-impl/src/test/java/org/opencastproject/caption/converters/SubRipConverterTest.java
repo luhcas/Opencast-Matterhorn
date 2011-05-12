@@ -49,7 +49,7 @@ public class SubRipConverterTest {
   		"1. line.";
   
   @Before
-  public void setup() throws IOException{
+  public void setUp() throws IOException{
     format = new SubRipCaptionConverter();
     inputStream = SubRipConverterTest.class.getResourceAsStream("/sample.srt");
     outputStream = new ByteArrayOutputStream();

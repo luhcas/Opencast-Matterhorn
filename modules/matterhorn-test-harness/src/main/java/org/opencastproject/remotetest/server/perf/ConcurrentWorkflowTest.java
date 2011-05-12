@@ -65,7 +65,7 @@ public class ConcurrentWorkflowTest {
   protected static Set<File> tempFiles = new HashSet<File>();
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     client = Main.getClient();
   }
 

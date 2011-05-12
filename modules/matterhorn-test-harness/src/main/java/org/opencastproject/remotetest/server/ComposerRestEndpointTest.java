@@ -63,7 +63,7 @@ public class ComposerRestEndpointTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     client = Main.getClient();
   }
 

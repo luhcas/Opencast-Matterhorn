@@ -113,7 +113,7 @@ public class SchedulerServiceImplTest {
 
   @SuppressWarnings("unchecked")
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // Clean up database
     logger.info("----- Setting up tests -----");
     try {
@@ -256,7 +256,7 @@ public class SchedulerServiceImplTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     service.destroy();
     service = null;
   }

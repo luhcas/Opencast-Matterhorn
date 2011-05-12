@@ -52,7 +52,7 @@ public class ComposerRestServiceTest {
   ComposerRestService restService;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     // Set up our arguments and return values
     audioTrack = (Track) builder.newElement(Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);

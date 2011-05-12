@@ -46,7 +46,7 @@ public class CaptureAgentStateServiceImplTest {
   private long timestamp = -1L;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     timestamp = System.currentTimeMillis();
     setupService();
 
@@ -85,7 +85,7 @@ public class CaptureAgentStateServiceImplTest {
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     service = null;
     pooledDataSource.close();
   }

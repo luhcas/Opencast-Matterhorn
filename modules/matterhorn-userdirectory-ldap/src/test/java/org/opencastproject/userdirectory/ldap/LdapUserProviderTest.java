@@ -32,7 +32,7 @@ public class LdapUserProviderTest {
   protected LdapUserProvider service = null;
   
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     Dictionary<String, String> props = new Hashtable<String, String>();
     props.put("org.opencastproject.userdirectory.ldap.searchbase", "ou=people,dc=berkeley,dc=edu");
     props.put("org.opencastproject.userdirectory.ldap.searchfilter", "(uid={0})");

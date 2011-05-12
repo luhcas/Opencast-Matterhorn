@@ -70,7 +70,7 @@ public class XacmlSecurityTest {
   XACMLAuthorizationService authzService = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     workspace = new WorkspaceStub();
     securityService = new SecurityService() {
       @Override
@@ -99,7 +99,7 @@ public class XacmlSecurityTest {
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     workspace.file.delete();
   }
 

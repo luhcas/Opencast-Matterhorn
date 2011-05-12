@@ -38,7 +38,7 @@ public class WorkflowRestEndpointTest {
   WorkflowInstanceImpl workflow;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // Create a workflow for the service to return
     workflow = new WorkflowInstanceImpl();
     workflow.setTitle("a workflow instance");

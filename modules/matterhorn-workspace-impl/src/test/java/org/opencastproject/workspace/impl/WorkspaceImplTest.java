@@ -47,7 +47,7 @@ public class WorkspaceImplTest {
   private static final String repoRoot = "." + File.separator + "target" + File.separator + "junit-repo-rootdir";
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     workspace = new WorkspaceImpl(workspaceRoot);
     workspace.activate(null);
   }

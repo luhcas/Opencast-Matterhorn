@@ -19,11 +19,6 @@ package org.opencastproject.mediapackage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.mediapackage.MediaPackageSerializer;
-import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.util.ConfigurationException;
 
 import org.junit.Before;
@@ -61,7 +56,8 @@ public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
   URI windowsURI = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
+    super.setUp();
     webURI = new URI("http://www.opencastproject.org/dc.xml");
     linuxRootURI = new URI("file:///Users/John+Doe/My+Mediapackage");
     linuxURI = new URI("file:///Users/John+Doe/My+Mediapackage/dc.xml");

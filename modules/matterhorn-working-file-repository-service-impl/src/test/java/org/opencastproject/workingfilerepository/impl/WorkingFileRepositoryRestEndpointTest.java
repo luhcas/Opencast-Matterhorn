@@ -39,7 +39,7 @@ public class WorkingFileRepositoryRestEndpointTest {
   WorkingFileRepositoryRestEndpoint endpoint = null;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     endpoint = new WorkingFileRepositoryRestEndpoint();
     endpoint.rootDirectory = "target/endpointroot";
     FileUtils.forceMkdir(new File(endpoint.rootDirectory));

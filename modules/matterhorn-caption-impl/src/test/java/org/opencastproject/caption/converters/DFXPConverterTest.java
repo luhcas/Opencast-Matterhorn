@@ -46,7 +46,7 @@ public class DFXPConverterTest {
   private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\"";
 
   @Before
-  public void setup() throws IOException {
+  public void setUp() throws IOException {
     dfxpConverter = new DFXPCaptionConverter();
     inputStream = DFXPConverterTest.class.getResourceAsStream("/sample.dfxp.xml");
     outputStream = new ByteArrayOutputStream();

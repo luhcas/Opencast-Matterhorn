@@ -29,14 +29,14 @@ public class RecordingTest {
   private Long time = 0L;
 
   @Before
-  public void setup() {
+  public void setUp() {
     recording = new RecordingImpl("test", RecordingState.CAPTURING);
     Assert.assertNotNull(recording);
     time = recording.getLastCheckinTime();
   }
 
   @After
-  public void teardown() {
+  public void tearDown() {
     recording = null;
     time = 0L;
   }

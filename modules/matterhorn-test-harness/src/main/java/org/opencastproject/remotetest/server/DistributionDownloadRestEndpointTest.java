@@ -58,12 +58,12 @@ public class DistributionDownloadRestEndpointTest {
   }
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     client = Main.getClient();
   }
 
   @After
-  public void teardown() throws Exception {
+  public void tearDown() throws Exception {
     Main.returnClient(client);
   }
 

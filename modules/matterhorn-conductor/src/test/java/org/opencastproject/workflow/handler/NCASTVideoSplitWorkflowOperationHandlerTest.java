@@ -67,7 +67,7 @@ public class NCASTVideoSplitWorkflowOperationHandlerTest {
   private ServiceRegistry serviceRegistry;
 
   @Before
-  public void setup() throws Exception {
+  public void setUp() throws Exception {
     // test resources
     File testFile = new File("src/test/resources/split.mp4");
     Dictionary<String, String> componentProperties = new Hashtable<String, String>();
