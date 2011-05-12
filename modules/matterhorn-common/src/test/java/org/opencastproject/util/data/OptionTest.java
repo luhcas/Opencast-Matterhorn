@@ -16,15 +16,15 @@
 
 package org.opencastproject.util.data;
 
-import com.sun.xml.internal.messaging.saaj.soap.ver1_1.Fault1_1Impl;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.opencastproject.util.data.Option.Match;
 import static org.opencastproject.util.data.Option.none;
 import static org.opencastproject.util.data.Option.some;
+
+import org.opencastproject.util.data.Option.Match;
+
+import org.junit.Test;
 
 public class OptionTest {
 
