@@ -147,7 +147,7 @@
       <td>
         <#if (endpoint.pathParams?size > 0)>
         <#list endpoint.pathParams as param>
-        <tt>${param.name}<#if param.defaultValue??>&#40;Default value=${param.defaultValueHtml}&#41;</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
+        <tt>${param.name}<#if param.defaultValue??>&#40;Default value=${param.escapedDefaultValue}&#41;</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
         </#list>
         <#else>
         <em>NONE</em>
@@ -179,7 +179,7 @@
     <tr class="method">
       <th class="method_important" scope="row">Body (upload) param:</th>
       <td>
-        <#if endpoint.bodyParam.defaultValue??><tt>&#40;Default value=${endpoint.bodyParam.defaultValueHtml}&#41;</tt>: </#if>${endpoint.bodyParam.description!"<em>NONE</em>"}
+        <#if endpoint.bodyParam.defaultValue??><tt>&#40;Default value=${endpoint.bodyParam.escapedDefaultValue}&#41;</tt>: </#if>${endpoint.bodyParam.description!"<em>NONE</em>"}
       </td>
     </tr>
     </#if>
@@ -188,7 +188,7 @@
       <td>
         <#if (endpoint.optionalParams?size > 0)>
         <#list endpoint.optionalParams as param>
-        <tt>${param.name}<#if param.defaultValue??>&#40;Default value=${param.defaultValueHtml}&#41;</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
+        <tt>${param.name}<#if param.defaultValue??>&#40;Default value=${param.escapedDefaultValue}&#41;</#if></tt>: ${param.description!"<em>NONE</em>"}<#if param_has_next> <br/></#if>
         </#list>
         <#else>
         <em>NONE</em>

@@ -231,6 +231,9 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
 
     String tempPath = PathSupport.concat(tempFolder, UUID.randomUUID().toString());
 
+    // Keep track of the zip file we use to store the zip stream
+    File zipFile = null;
+    
     try {
 
       // We don't need anybody to do the dispatching for us. Therefore we need to make sure that the job is never in
@@ -242,7 +245,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       // locally unpack the mediaPackage
       // save inputStream to file
       File tempDir = createDirectory(tempPath);
-      File zipFile = new File(tempPath, job.getId() + ".zip");
+      zipFile = new File(tempPath, job.getId() + ".zip");
       OutputStream out = new FileOutputStream(zipFile);
       logger.info("Ingesting zipped media package to {}", zipFile);
 
@@ -331,11 +334,8 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       job.setStatus(Job.Status.FAILED);
       throw e;
     } finally {
-      try {
-        removeDirectory(tempPath);
-      } catch (Exception e) {
-        logger.warn("Unable to remove temporary ingest directory {}", tempPath);
-      }
+      FileUtils.deleteQuietly(zipFile);
+      FileUtils.deleteQuietly(new File(tempPath));
       try {
         serviceRegistry.updateJob(job);
       } catch (Exception e) {
@@ -853,13 +853,6 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       FileUtils.forceMkdir(f);
     }
     return f;
-  }
-
-  private void removeDirectory(String dir) throws IOException {
-    File f = new File(dir);
-    if (f.isDirectory()) {
-      FileUtils.deleteDirectory(f);
-    }
   }
 
   // ---------------------------------------------
