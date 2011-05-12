@@ -27,6 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.easymock.EasyMock;
 import org.junit.After;
@@ -38,6 +39,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class WorkspaceImplTest {
   WorkspaceImpl workspace;
@@ -73,10 +76,12 @@ public class WorkspaceImplTest {
     TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);
     HttpEntity entity = EasyMock.createNiceMock(HttpEntity.class);
     EasyMock.expect(entity.getContent()).andReturn(new FileInputStream(source));
-    EasyMock.replay(entity);
+    StatusLine statusLine = EasyMock.createNiceMock(StatusLine.class);
+    EasyMock.expect(statusLine.getStatusCode()).andReturn(HttpServletResponse.SC_OK);
     HttpResponse response = EasyMock.createNiceMock(HttpResponse.class);
     EasyMock.expect(response.getEntity()).andReturn(entity);
-    EasyMock.replay(response);
+    EasyMock.expect(response.getStatusLine()).andReturn(statusLine).anyTimes();
+    EasyMock.replay(response, entity, statusLine);
     EasyMock.expect(httpClient.execute((HttpUriRequest) EasyMock.anyObject())).andReturn(response);
     EasyMock.replay(httpClient);
     workspace.trustedHttpClient = httpClient;
