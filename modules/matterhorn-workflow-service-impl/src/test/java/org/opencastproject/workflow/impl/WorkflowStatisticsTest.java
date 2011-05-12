@@ -217,7 +217,8 @@ public class WorkflowStatisticsTest {
   }
 
   class IndividualWorkflowListener implements WorkflowListener {
-    long id = -1;
+    
+    private long id = -1;
 
     IndividualWorkflowListener(long id) {
       this.id = id;

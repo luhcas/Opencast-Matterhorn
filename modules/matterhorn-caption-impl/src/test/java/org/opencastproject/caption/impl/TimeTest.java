@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.caption.impl;
 
 import org.opencastproject.caption.api.IllegalTimeFormatException;
@@ -142,7 +143,7 @@ public class TimeTest {
     try {
       Assert.assertEquals("00:00:00,001", TimeUtil.exportToSrt(TimeUtil.importSrt("00:00:00,001")));
       Assert.assertEquals("0:00:00.001", TimeUtil.exportToDFXP(TimeUtil.importDFXP("0:00:00.001")));
-    } catch (IllegalTimeFormatException e){
+    } catch (IllegalTimeFormatException e) {
       Assert.fail(e.getMessage());
     }
   }

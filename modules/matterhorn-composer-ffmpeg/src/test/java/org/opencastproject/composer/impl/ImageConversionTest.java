@@ -20,7 +20,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.util.FileSupport;
@@ -99,7 +98,7 @@ public class ImageConversionTest {
   }
 
   /**
-   * Test method for {@link ComposerService#convertImage(org.opencastproject.mediapackage.Attachment, String)}
+   * Test method for {@link org.opencastproject.composer.impl.ComposerServiceImpl#convertImage(org.opencastproject.mediapackage.Attachment, String)}
    */
   @Test
   public void testConvert() throws Exception {

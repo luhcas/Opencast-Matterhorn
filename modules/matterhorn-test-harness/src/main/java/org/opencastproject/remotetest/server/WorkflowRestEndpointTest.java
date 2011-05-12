@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.remotetest.server;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
@@ -52,9 +53,10 @@ import javax.xml.xpath.XPathFactory;
  * Tests the functionality of a remote workflow service rest endpoint
  */
 public class WorkflowRestEndpointTest {
-  TrustedHttpClient client;
 
   private static final Logger logger = LoggerFactory.getLogger(WorkflowRestEndpointTest.class);
+
+  private TrustedHttpClient client;
 
   @BeforeClass
   public static void setupClass() throws Exception {
@@ -145,4 +147,5 @@ public class WorkflowRestEndpointTest {
   protected String getSampleWorkflowDefinition() throws Exception {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream("workflow-definition-1.xml"), "UTF-8");
   }
+
 }

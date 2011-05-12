@@ -252,7 +252,8 @@ public class WorkflowOperationSkippingTest {
   }
 
   class SucceedingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
-    MediaPackage mp;
+    
+    private MediaPackage mp;
 
     SucceedingWorkflowOperationHandler(MediaPackage mp) {
       this.mp = mp;

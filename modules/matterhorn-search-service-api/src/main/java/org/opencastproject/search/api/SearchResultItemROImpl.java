@@ -151,7 +151,7 @@ public abstract class SearchResultItemROImpl implements SearchResultItem {
    */
   @XmlElementWrapper(name = "segments")
   @XmlElement(name = "segment")
-  public synchronized final SortedSet<MediaSegmentImpl> _getSegments() {
+  public final synchronized SortedSet<MediaSegmentImpl> _getSegments() {
     if (mediaSegments == null) {
       mediaSegments = new TreeSet<MediaSegmentImpl>();
       for (MediaSegmentImpl s : getMediaSegments()) {

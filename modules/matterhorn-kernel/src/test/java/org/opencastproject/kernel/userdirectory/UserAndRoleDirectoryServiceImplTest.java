@@ -38,13 +38,13 @@ import java.util.List;
 public class UserAndRoleDirectoryServiceImplTest {
 
   /** The user and role directory */
-  UserAndRoleDirectoryServiceImpl directory = null;
+  private UserAndRoleDirectoryServiceImpl directory = null;
   
   /** A username */
-  String userName = null;
+  private String userName = null;
   
   /** An organization */
-  Organization org = null;
+  private Organization org = null;
   
   @Before
   public void setUp() throws Exception {

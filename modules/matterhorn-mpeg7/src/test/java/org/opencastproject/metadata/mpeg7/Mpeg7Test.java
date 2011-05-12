@@ -42,7 +42,7 @@ import java.net.URI;
 public class Mpeg7Test {
 
   /** The catalog name */
-  public static String catalogName = "/mpeg7.xml";
+  private String catalogName = "/mpeg7.xml";
 
   /** The test catalog */
   private File catalogFile = null;

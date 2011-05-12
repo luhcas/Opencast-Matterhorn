@@ -91,8 +91,7 @@ public class SeriesServiceSolrTest {
     Assert.assertTrue("Index should contain one instance", index.count() == 1);
 
     DublinCoreCatalog returnedCatalog = index.getDublinCore(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
-    Assert.assertTrue("Unexpected Dublin Core", returnedCatalog.getFirst(DublinCore.PROPERTY_TITLE)
-            .equals("Test Title"));
+    Assert.assertTrue("Unexpected Dublin Core", "Test Title".equals(returnedCatalog.getFirst(DublinCore.PROPERTY_TITLE)));
   }
 
   @Test

@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.caption.converters;
 
 import org.opencastproject.caption.api.CaptionCollection;

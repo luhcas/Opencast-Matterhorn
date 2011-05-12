@@ -290,8 +290,8 @@ public class SchedulerServiceImplTest {
     eventModified.getMetadataList().add(
             (Metadata) new MetadataImpl(eventModified, "stupid.unused.key", "no matter what"));
     for (int i = 0; i < eventModified.getMetadataList().size(); i++) {
-      if (eventModified.getMetadataList().get(i).getKey().equals("creator")
-              || eventModified.getMetadataList().get(i).getKey().equals("seriesId"))
+      if ("creator".equals(eventModified.getMetadataList().get(i).getKey())
+              || "seriesId".equals(eventModified.getMetadataList().get(i).getKey()))
         eventModified.getMetadataList().remove(i);
     }
 
@@ -334,11 +334,11 @@ public class SchedulerServiceImplTest {
           String attached = ((Property) attachments.get(j)).getValue();
           String filename = ((Property) attachments.get(j)).getParameter("X-APPLE-FILENAME").getValue();
           attached = new String(Base64.decodeBase64(attached));
-          if (filename.equals("agent.properties")) {
+          if ("agent.properties".equals(filename)) {
             Assert.assertTrue(attached.contains("capture.device.id=" + event.getDevice()));
             Assert.assertTrue(attached.contains("event.title=" + event.getTitle()));
           }
-          if (filename.equals("metadata.xml")) {
+          if ("metadata.xml".equals(filename)) {
             Assert.assertTrue(attached.contains(event.getTitle()));
           }
           logger.info("iCal attachment checked: {}", filename);
@@ -450,10 +450,10 @@ public class SchedulerServiceImplTest {
     Properties p = new Properties();
     try {
       p.load(new StringReader(ca));
-      Assert.assertTrue(p.get("event.title").equals("new recording"));
-      Assert.assertTrue(p.get("event.series").equals(seriesID));
-      Assert.assertTrue(p.get("event.source").equals("unittest"));
-      Assert.assertTrue(p.get("capture.device.location").equals("testlocation"));
+      Assert.assertTrue("new recording".equals(p.get("event.title")));
+      Assert.assertTrue(seriesID.equals(p.get("event.series")));
+      Assert.assertTrue("unittest".equals(p.get("event.source")));
+      Assert.assertTrue("testlocation".equals(p.get("capture.device.location")));
     } catch (IOException e) {
       Assert.fail();
     }

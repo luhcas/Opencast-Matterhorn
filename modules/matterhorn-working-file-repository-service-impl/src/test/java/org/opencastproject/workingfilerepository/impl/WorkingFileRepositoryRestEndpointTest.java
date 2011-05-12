@@ -36,7 +36,7 @@ import javax.ws.rs.core.Response;
 
 public class WorkingFileRepositoryRestEndpointTest {
 
-  WorkingFileRepositoryRestEndpoint endpoint = null;
+  private WorkingFileRepositoryRestEndpoint endpoint = null;
 
   @Before
   public void setUp() throws Exception {

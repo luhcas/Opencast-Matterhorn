@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
 package org.opencastproject.kernel.rest.docs;
 
 import org.opencastproject.util.doc.rest.RestParameter;
@@ -19,8 +35,7 @@ public class RestDocsAnnotationTest {
     Method testMethod;
     try {
       testMethod = TestServletSample.class.getMethod("methodA");
-      if (testMethod != null)
-      {
+      if (testMethod != null) {
         RestQuery annotation = (RestQuery) testMethod.getAnnotation(RestQuery.class);
         
         Assert.assertEquals("Starts a capture using the default devices as appropriate.", annotation.description());      
@@ -54,15 +69,15 @@ public class RestDocsAnnotationTest {
   /**
    * This sample class simulates a annotated REST service class.
    */
-  private class TestServletSample{
+  private class TestServletSample {
    
     @SuppressWarnings("unused")
     @RestQuery(
-            name="something",
+            name = "something",
             description = "Starts a capture using the default devices as appropriate.",
             returnDescription = "A list of capture agent things",
-            pathParameters = { @RestParameter(name = "location", description = "The room of the capture agent", isRequired = false, type=Type.STRING, defaultValue="") }, 
-            restParameters = { @RestParameter(name = "id", description = "The ID of the capture to start", isRequired = true, type=Type.STRING, defaultValue="") }, 
+            pathParameters = { @RestParameter(name = "location", description = "The room of the capture agent", isRequired = false, type = Type.STRING, defaultValue = "") },
+            restParameters = { @RestParameter(name = "id", description = "The ID of the capture to start", isRequired = true, type = Type.STRING, defaultValue = "") },
             reponses = { @RestResponse(responseCode = 200, description = "When the capture started correctly"),
                          @RestResponse(responseCode = 400, description = "When there are no media devices") }
             )            

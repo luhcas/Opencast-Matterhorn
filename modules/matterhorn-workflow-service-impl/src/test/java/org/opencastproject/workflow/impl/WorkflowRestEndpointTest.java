@@ -1,5 +1,5 @@
 /**
- *  Copyright 2010 The Regents of the University of California
+ *  Copyright 2009, 2010 The Regents of the University of California
  *  Licensed under the Educational Community License, Version 2.0
  *  (the "License"); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.util.NotFoundException;
@@ -34,8 +35,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class WorkflowRestEndpointTest {
-  WorkflowRestService restService;
-  WorkflowInstanceImpl workflow;
+
+  private WorkflowRestService restService;
+  private WorkflowInstanceImpl workflow;
 
   @Before
   public void setUp() throws Exception {
@@ -73,14 +75,14 @@ public class WorkflowRestEndpointTest {
     try {
       restService.getWorkflowAsJson(-1);
       Assert.fail("This should have thrown a not found exception");
-    } catch(NotFoundException e) {
+    } catch (NotFoundException e) {
       // expected
     }
 
     try {
       restService.getWorkflowAsXml(-1);
       Assert.fail("This should have thrown a not found exception");
-    } catch(NotFoundException e) {
+    } catch (NotFoundException e) {
       // expected
     }
 

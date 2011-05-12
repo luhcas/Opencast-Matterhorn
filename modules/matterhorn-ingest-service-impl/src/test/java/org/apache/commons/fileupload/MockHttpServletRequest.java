@@ -1,19 +1,19 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.osedu.org/licenses/ECL-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
  */
+
 package org.apache.commons.fileupload;
 
 import java.io.BufferedReader;
@@ -40,11 +40,11 @@ import javax.servlet.http.HttpSession;
 public class MockHttpServletRequest implements HttpServletRequest
 {
 
-	private final InputStream m_requestData;
+	private final InputStream mRequestData;
 	private final int length;
-	private String m_strContentType;
+	private String mStrContentType;
 	@SuppressWarnings("unchecked")
-  private Map m_headers = new java.util.HashMap();
+  private Map mHeaders = new java.util.HashMap();
 
 	/**
 	 * Creates a new instance with the given request data
@@ -68,10 +68,10 @@ public class MockHttpServletRequest implements HttpServletRequest
 			final int requestLength,
 			final String strContentType)
 	{
-		m_requestData = requestData;
+		mRequestData = requestData;
 		length = requestLength;
-		m_strContentType = strContentType;
-		m_headers.put(FileUploadBase.CONTENT_TYPE, strContentType);
+		mStrContentType = strContentType;
+		mHeaders.put(FileUploadBase.CONTENT_TYPE, strContentType);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	 */
 	public String getHeader(String headerName)
 	{
-		return (String) m_headers.get(headerName);
+		return (String) mHeaders.get(headerName);
 	}
 
 	/**
@@ -319,7 +319,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	{
 		int iLength = 0;
 
-		if (null == m_requestData)
+		if (null == mRequestData)
 		{
 			iLength = -1;
 		}
@@ -335,7 +335,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	 */
 	public String getContentType()
 	{
-		return m_strContentType;
+		return mStrContentType;
 	}
 
 	/**
@@ -343,7 +343,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 	 */
 	public ServletInputStream getInputStream() throws IOException
 	{
-		ServletInputStream sis = new MyServletInputStream(m_requestData);
+		ServletInputStream sis = new MyServletInputStream(mRequestData);
 		return sis;
 	}
 
@@ -550,7 +550,7 @@ public class MockHttpServletRequest implements HttpServletRequest
 			return in.read();
 		}
 
-		public int read(byte b[], int off, int len) throws IOException 
+		public int read(byte[] b, int off, int len) throws IOException
 		{
 		    return in.read(b, off, len);
 		}

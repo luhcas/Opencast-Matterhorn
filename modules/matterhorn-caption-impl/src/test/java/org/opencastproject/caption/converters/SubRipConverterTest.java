@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.caption.converters;
 
 import org.opencastproject.caption.api.CaptionCollection;
@@ -42,21 +43,20 @@ public class SubRipConverterTest {
   // output stream
   private ByteArrayOutputStream outputStream;
   // expected output
-  private String expectedOutput =
-      "1\r\n" +
-  		"00:00:49,520 --> 00:00:52,961\r\n" +
-  		"This is caption testing.\r\n" +
-  		"1. line.";
+  private String expectedOutput = "1\r\n"
+  		+ "00:00:49,520 --> 00:00:52,961\r\n"
+  		+ "This is caption testing.\r\n"
+  		+ "1. line.";
   
   @Before
-  public void setUp() throws IOException{
+  public void setUp() throws IOException {
     format = new SubRipCaptionConverter();
     inputStream = SubRipConverterTest.class.getResourceAsStream("/sample.srt");
     outputStream = new ByteArrayOutputStream();
   }
   
   @Test
-  public void testImportAndExport(){
+  public void testImportAndExport() {
     try {
       // verify parsing and exporting without exceptions
       CaptionCollection collection = format.importCaption(inputStream, null);
@@ -69,7 +69,7 @@ public class SubRipConverterTest {
   }
   
   @After
-  public void tear() throws IOException{
+  public void tear() throws IOException {
     IOUtils.closeQuietly(inputStream);
     IOUtils.closeQuietly(outputStream);
   }

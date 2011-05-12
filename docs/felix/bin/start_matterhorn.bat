@@ -87,6 +87,7 @@ SET MAVEN_ARG=-DM2_REPO^^="%M2_REPO%"
 SET FELIX_FILEINSTALL_OPTS=-Dfelix.fileinstall.dir^^="%FELIX_HOME%\load"
 SET PAX_CONFMAN_OPTS=-Dbundles.configuration.location^^="%FELIX_HOME%\conf"
 SET PAX_LOGGING_OPTS=-Dorg.ops4j.pax.logging.DefaultServiceLog.level^^=WARN -Dopencast.logdir^^="%OPENCAST_LOGDIR%"
+SET ECLIPSELINK_LOGGING_OPTS=-Declipselink.logging.level=SEVERE
 SET UTIL_LOGGING_OPTS=-Djava.util.logging.config.file^^="%FELIX_HOME%\conf\services\java.util.logging.properties"
 SET FELIX_CACHE=%FELIX_HOME%\felix-cache
 SET GRAPHICS_OPTS=-Djava.awt.headless^^=true -Dawt.toolkit^^=sun.awt.HeadlessToolkit
@@ -100,7 +101,7 @@ if exist "%FELIX_CACHE%" (
 REM # Finally start felix
 
 pushd "%FELIX_HOME%"
-java %DEBUG_OPTS% %GRAPHICS_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar "%FELIX_HOME%\bin\felix.jar" "%FELIX_CACHE%"
+java %DEBUG_OPTS% %GRAPHICS_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %ECLIPSELINK_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar "%FELIX_HOME%\bin\felix.jar" "%FELIX_CACHE%"
 popd
 
 ENDLOCAL

@@ -13,17 +13,16 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.mediapackage;
-
-import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTATION_SOURCE;
-import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTER_SOURCE;
-
-import static org.junit.Assert.assertEquals;
-
-import org.opencastproject.mediapackage.selector.TrackSelector;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.mediapackage.selector.TrackSelector;
+
+import static org.junit.Assert.assertEquals;
+import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTATION_SOURCE;
+import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTER_SOURCE;
 
 /**
  * Test case for {@link TrackSelector}.

@@ -16,12 +16,6 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import org.junit.Test;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -37,15 +31,25 @@ import static org.opencastproject.metadata.dublincore.TestUtil.createDate;
 import static org.opencastproject.metadata.dublincore.TestUtil.precisionDay;
 import static org.opencastproject.metadata.dublincore.TestUtil.precisionSecond;
 
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  * Test cases for {@link org.opencastproject.metadata.dublincore.EncodingSchemeUtils}.
  */
 public class EncodingSchemeUtilsTest {
+  
+  private Logger logger = LoggerFactory.getLogger(EncodingSchemeUtilsTest.class);
 
   @Test
   public void printTimeZone() {
     // Not a test case...
-    System.out.println("Time zone = " + TimeZone.getDefault());
+    logger.info("Time zone = " + TimeZone.getDefault());
   }
 
   @Test
@@ -68,8 +72,8 @@ public class EncodingSchemeUtilsTest {
             .getValue());
     assertEquals("1999-03-21", encodeDate(createDate(1999, 3, 21, 18, 30, 25), Precision.Day).getValue());
     //
-    System.out.println(encodeDate(now, Precision.Day).getValue());
-    System.out.println(encodeDate(now, Precision.Second).getValue());
+    logger.info(encodeDate(now, Precision.Day).getValue());
+    logger.info(encodeDate(now, Precision.Second).getValue());
   }
 
   @Test
@@ -99,9 +103,9 @@ public class EncodingSchemeUtilsTest {
     assertEquals(createDate(1999, 3, 21, 14, 30, 0, "UTC"), decodeDate(new DublinCoreValue("1999-03-21T14:30:00Z")));
     assertEquals(createDate(1999, 3, 21, 14, 30, 15, "UTC"), decodeDate(new DublinCoreValue("1999-03-21T14:30:15Z")));
     assertEquals(createDate(2001, 9, 11, 0, 0, 0), decodeDate(new DublinCoreValue("2001-09-11")));
-    System.out.println(decodeDate(new DublinCoreValue("2009-03-31")));
-    System.out.println(decodeDate(new DublinCoreValue("2009-09-11")));
-    System.out.println(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(decodeDate(new DublinCoreValue(
+    logger.info(decodeDate(new DublinCoreValue("2009-03-31")).toString());
+    logger.info(decodeDate(new DublinCoreValue("2009-09-11")).toString());
+    logger.info(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(decodeDate(new DublinCoreValue(
             "2009-03-31"))));
   }
 

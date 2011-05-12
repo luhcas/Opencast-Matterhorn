@@ -403,7 +403,20 @@
   </profiles>
 
   <build>
-    <defaultGoal>install</defaultGoal>
+    <defaultGoal>install</defaultGoal> 
+    <testResources>
+      <!-- Add a log4j configuration file to the test resources -->
+      <testResource>
+        <directory>${matterhorn.basedir}/docs/log4j</directory>
+        <includes>
+          <include>log4j.properties</include>
+        </includes>
+      </testResource>
+      <!-- Re-add the test resources as defined by the project -->
+      <testResource>
+        <directory>${project.basedir}/src/test/resources</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <!-- Require Java 6 or higher for building -->
       <plugin>
@@ -463,6 +476,8 @@
             <M2_REPO>${settings.localRepository}</M2_REPO>
             <file.encoding>UTF-8</file.encoding>
             <java.awt.headless>true</java.awt.headless>
+            <eclipselink.logging.level>SEVERE</eclipselink.logging.level>
+            <java.util.logging.config.file>${basedir}/conf/services/java.util.logging.properties</java.util.logging.config.file>
           </systemPropertyVariables>
         </configuration>
       </plugin>
@@ -474,6 +489,7 @@
           <skip>${checkstyle.skip}</skip>
           <configLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-checkstyle.xml</configLocation>
           <headerLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-header.txt</headerLocation>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
           <consoleOutput>true</consoleOutput>
           <logViolationsToConsole>true</logViolationsToConsole>
           <excludes>**/package-info.java</excludes>
@@ -961,10 +977,17 @@
 
       <dependency>
         <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
+        <artifactId>slf4j-log4j12</artifactId>
         <version>1.5.8</version>
       </dependency>
-
+      
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.16</version>
+        <scope>test</scope>
+      </dependency>
+      
       <!-- apache commons syncing -->
       <dependency>
         <groupId>commons-codec</groupId>

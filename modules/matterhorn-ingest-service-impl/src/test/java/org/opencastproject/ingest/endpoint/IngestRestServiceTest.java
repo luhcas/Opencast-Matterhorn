@@ -165,7 +165,7 @@ public class IngestRestServiceTest {
     try {
       restService.getProgress("This ID does not exist");
       Assert.fail("The rest service should throw");
-    } catch(NotFoundException e) {
+    } catch (NotFoundException e) {
       // expected
     }
   }

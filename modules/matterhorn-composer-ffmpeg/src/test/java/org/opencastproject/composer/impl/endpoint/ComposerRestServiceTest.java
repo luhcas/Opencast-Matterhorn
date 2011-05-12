@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.composer.impl.endpoint;
 
 import org.opencastproject.composer.api.ComposerService;
@@ -43,13 +44,13 @@ import javax.ws.rs.core.Response.Status;
  */
 public class ComposerRestServiceTest {
 
-  JaxbJob job;
-  EncodingProfileImpl profile;
-  EncodingProfileList profileList;
-  Track audioTrack;
-  Track videoTrack;
-  String profileId;
-  ComposerRestService restService;
+  private JaxbJob job;
+  private EncodingProfileImpl profile;
+  private EncodingProfileList profileList;
+  private Track audioTrack;
+  private Track videoTrack;
+  private String profileId;
+  private ComposerRestService restService;
 
   @Before
   public void setUp() throws Exception {
@@ -128,7 +129,7 @@ public class ComposerRestServiceTest {
     try {
       restService.getProfile("some other ID");
       Assert.fail("This ID should cause the rest endpoint to throw");
-    } catch(NotFoundException e) {
+    } catch (NotFoundException e) {
       // expected
     }
 
