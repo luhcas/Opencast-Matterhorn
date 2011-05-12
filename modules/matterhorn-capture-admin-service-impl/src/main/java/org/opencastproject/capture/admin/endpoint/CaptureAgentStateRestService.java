@@ -21,6 +21,7 @@ import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PropertiesResponse;
 import org.opencastproject.util.doc.rest.RestParameter;
 import org.opencastproject.util.doc.rest.RestParameter.Type;
 import org.opencastproject.util.doc.rest.RestQuery;
@@ -32,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -219,20 +219,13 @@ public class CaptureAgentStateRestService {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
 
-    Properties props = service.getAgentCapabilities(agentName);
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
     try {
-      props.storeToXML(os, "Capabilities for the agent " + agentName);
-      logger.debug("Returning capabilities for the agent {}", agentName);
-
+      PropertiesResponse r = new PropertiesResponse(service.getAgentCapabilities(agentName));
       if (".json".equals(type)) {
-        return Response.ok(os.toString()).type(MediaType.APPLICATION_JSON).build();
+        return Response.ok(r).type(MediaType.APPLICATION_JSON).build();
       } else {
-        return Response.ok(os.toString()).type(MediaType.TEXT_XML).build();
+        return Response.ok(r).type(MediaType.TEXT_XML).build();
       }
-    } catch (IOException e) {
-      logger.error("An IOException occurred when serializing the agent capabilities");
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (NullPointerException e) {
       logger.debug("The agent {} is not registered in the system", agentName);
       throw new NotFoundException();
@@ -247,20 +240,15 @@ public class CaptureAgentStateRestService {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
 
-    Properties props = service.getAgentConfiguration(agentName);
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PropertiesResponse r = new PropertiesResponse(service.getAgentConfiguration(agentName));
     try {
-      props.storeToXML(os, "Configuration for the agent " + agentName);
       logger.debug("Returning configuration for the agent {}", agentName);
 
       if (".json".equals(type)) {
-        return Response.ok(os.toString()).type(MediaType.APPLICATION_JSON).build();
+        return Response.ok(r).type(MediaType.APPLICATION_JSON).build();
       } else {
-        return Response.ok(os.toString()).type(MediaType.TEXT_XML).build();
+        return Response.ok(r).type(MediaType.TEXT_XML).build();
       }
-    } catch (IOException e) {
-      logger.error("An IOException occurred when serializing the agent configuration");
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     } catch (NullPointerException e) {
       logger.debug("The agent {} is not registered in the system", agentName);
       throw new NotFoundException();
@@ -291,13 +279,12 @@ public class CaptureAgentStateRestService {
       int result = service.setAgentConfiguration(agentName, caps);
 
       // Prepares the value to return
-      ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-      caps.storeToXML(buffer, "Configuration for the agent " + agentName);
+      PropertiesResponse r = new PropertiesResponse(caps);
 
       switch (result) {
       case CaptureAgentStateService.OK:
         logger.debug("{}'s configuration updated", agentName);
-        return Response.ok(buffer.toString()).build();
+        return Response.ok(r).build();
       case CaptureAgentStateService.BAD_PARAMETER:
         logger.debug("The agent name cannot be blank or null");
         return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();

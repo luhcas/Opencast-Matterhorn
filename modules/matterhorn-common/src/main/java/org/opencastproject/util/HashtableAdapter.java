@@ -20,7 +20,7 @@ import java.util.Hashtable;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * Adapter class for JaxB to represent a Hashtable for the Metadata
+ * Adapter class for JaxB to represent a Hashtable
  * 
  */
 public class HashtableAdapter extends XmlAdapter<HashEntry[], Hashtable<String, String>> {

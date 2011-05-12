@@ -16,6 +16,8 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.util.PropertiesResponse;
+import org.opencastproject.util.doc.rest.RestParameter;
 import org.opencastproject.util.doc.rest.RestParameter.Type;
 import org.opencastproject.util.doc.rest.RestQuery;
 import org.opencastproject.util.doc.rest.RestResponse;
@@ -25,7 +27,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
@@ -39,7 +40,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-import org.opencastproject.util.doc.rest.RestParameter;
 
 /**
  * The REST endpoint for the capture agent service on the capture device
@@ -226,9 +226,7 @@ public class CaptureRestService {
     }
     
     try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      service.getDefaultAgentProperties().storeToXML(baos, "Configuration for the agent " + service.getAgentName());
-      return Response.ok(baos.toString()).build();
+      return Response.ok(new PropertiesResponse(service.getDefaultAgentProperties())).build();
     } catch (Exception e) {
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
               .entity("Exception while trying to obtain metadata: " + e.getMessage() + ".").build();
@@ -268,8 +266,6 @@ public class CaptureRestService {
       return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Capture Agent is unavailable, please wait...").build();
     }
 
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    service.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + service.getAgentName());
-    return Response.ok(baos.toString()).build();
+    return Response.ok(new PropertiesResponse(service.getAgentCapabilities())).build();
   }
 }
