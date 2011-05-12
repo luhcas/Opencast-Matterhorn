@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -95,7 +94,7 @@ public final class StaticMetadataServiceDublinCoreImplTest {
     EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andAnswer(new IAnswer<File>() {
       @Override
       public File answer() throws Throwable {
-        return EasyMock.getCurrentArguments()[0].toString().contains("-defect") ? dcFileDefect: dcFile;
+        return EasyMock.getCurrentArguments()[0].toString().contains("-defect") ? dcFileDefect : dcFile;
       }
     }).anyTimes();
     // put into replay mode

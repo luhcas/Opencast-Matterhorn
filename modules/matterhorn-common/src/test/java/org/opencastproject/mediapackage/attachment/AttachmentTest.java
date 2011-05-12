@@ -15,22 +15,19 @@
  */
 package org.opencastproject.mediapackage.attachment;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
+import org.junit.Before;
+import org.junit.Test;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackageBuilderTest;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.UnsupportedElementException;
-import org.opencastproject.mediapackage.attachment.AttachmentImpl;
-
-import org.junit.Before;
-import org.junit.Test;
 
 import java.io.File;
-import java.net.URI;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test case for the {@link AttachmentImpl} attachment implementation.

@@ -34,7 +34,7 @@ import org.junit.Test;
 public class EpisodeEncoderEngineTest {
 
   /** Instance of the episode encoder engine */
-  EpisodeEncoderEngine episodeEngine = null;
+  private EpisodeEncoderEngine episodeEngine = null;
 
   /**
    * @throws java.lang.Exception

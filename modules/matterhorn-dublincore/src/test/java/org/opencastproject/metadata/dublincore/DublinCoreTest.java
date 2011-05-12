@@ -83,7 +83,7 @@ public class DublinCoreTest {
   /**
    * The catalog name
    */
-  public static String catalogName = "/dublincore.xml";
+  private static final String catalogName = "/dublincore.xml";
 
   /**
    * The test catalog

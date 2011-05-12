@@ -52,7 +52,7 @@ public class HandleBuilderTest {
   private static final String namingAuthority = "10.0000";
 
   /** List of created handles */
-  List<Handle> newHandles = new ArrayList<Handle>();
+  private List<Handle> newHandles = new ArrayList<Handle>();
 
   /**
    * @throws java.lang.Exception

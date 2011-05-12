@@ -16,26 +16,12 @@
 
 package org.opencastproject.mediapackage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilder;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.mediapackage.MediaPackageSupport;
-import org.opencastproject.mediapackage.MediaPackageSupport.MergeMode;
-import org.opencastproject.util.FileSupport;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.mediapackage.MediaPackageSupport.MergeMode;
+import org.opencastproject.util.FileSupport;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,26 +31,31 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 /**
  * Test case to make sure media package support works as expected.
  */
 public class MediaPackageMergeTest {
 
   /** tmp directory */
-  protected File tmpDir = null;
+  private File tmpDir = null;
 
   /** Media package directories */
-  protected File packageDir1 = null;
-  protected File packageDir2 = null;
+  private File packageDir1 = null;
+  private File packageDir2 = null;
 
   /** The media package builder */
-  protected MediaPackageBuilder mediaPackageBuilder = null;
+  private MediaPackageBuilder mediaPackageBuilder = null;
 
   /** The source media package directory for merge tests */
-  MediaPackage sourcePackage = null;
+  private MediaPackage sourcePackage = null;
 
   /** The target media package directory for merge tests */
-  MediaPackage targetPackage = null;
+  private MediaPackage targetPackage = null;
 
   @Before
   public void setUp() throws Exception {

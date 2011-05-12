@@ -58,13 +58,13 @@ import java.util.List;
  */
 public class ComposerServiceTest {
   /** The source file to test with */
-  File source = null;
+  private File source = null;
 
   /** The composer service to test */
-  ComposerServiceImpl composerService = null;
+  private ComposerServiceImpl composerService = null;
 
   /** The service registry for job dispatching */
-  ServiceRegistry serviceRegistry = null;
+  private ServiceRegistry serviceRegistry = null;
 
   /** FFmpeg binary location */
   private static final String FFMPEG_BINARY = "ffmpeg";

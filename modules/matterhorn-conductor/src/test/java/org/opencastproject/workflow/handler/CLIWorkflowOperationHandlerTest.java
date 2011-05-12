@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.mediapackage.MediaPackage;
@@ -45,7 +46,7 @@ import java.util.Map;
 public class CLIWorkflowOperationHandlerTest {
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(CLIWorkflowOperationHandlerTest.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(CLIWorkflowOperationHandlerTest.class.getName());
 
   /** True if the environment provides the tools needed for the test suite */
   private static boolean isSane = true;
@@ -54,12 +55,12 @@ public class CLIWorkflowOperationHandlerTest {
   private final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 
   /** Represents a tuple of handler and instance, useful for return types */
-  protected class InstanceAndHandler {
+  private static final class InstanceAndHandler {
 
-    public WorkflowInstanceImpl workflowInstance;
-    public WorkflowOperationHandler workflowHandler;
+    private WorkflowInstanceImpl workflowInstance;
+    private WorkflowOperationHandler workflowHandler;
 
-    InstanceAndHandler(WorkflowInstanceImpl i, WorkflowOperationHandler h) {
+    private InstanceAndHandler(WorkflowInstanceImpl i, WorkflowOperationHandler h) {
       this.workflowInstance = i;
       this.workflowHandler = h;
     }
@@ -130,7 +131,7 @@ public class CLIWorkflowOperationHandlerTest {
     // test the case where the whole work is a string replacement
     try {
       String s = handler.substituteVariables("#{//mediapackage/@id}", mp);
-      Assert.assertTrue(s.equals("blah"));
+      Assert.assertTrue("blah".equals(s));
     } catch (Exception e) {
       Assert.fail("Simple parameter that is a single replacement values failed");
     }
@@ -138,7 +139,7 @@ public class CLIWorkflowOperationHandlerTest {
     // test the case where the replacement string has the right characters but is not formed (should just return params
     try {
       String s = handler.substituteVariables("-r /bob/#44/{123-123}", mp);
-      Assert.assertTrue(s.equals("-r /bob/#44/{123-123}"));
+      Assert.assertTrue("-r /bob/#44/{123-123}".equals(s));
     } catch (Exception e) {
       Assert.fail("String without replacement variables failed ");
     }
@@ -147,7 +148,7 @@ public class CLIWorkflowOperationHandlerTest {
     // this should not throw and exception
     try {
       String result = handler.substituteVariables("/backups/#{//mediapackage/@id}", mp);
-      Assert.assertTrue(result.equals("/backups/blah"));
+      Assert.assertTrue("/backups/blah".equals(result));
     } catch (Exception e) {
       Assert.fail("String with replacement variables failed ");
     }
@@ -157,7 +158,7 @@ public class CLIWorkflowOperationHandlerTest {
     try {
       String result = handler.substituteVariables("/backups/#{//mediapackage/@id}/1 /backups/#{//mediapackage/@id}/2",
               mp);
-      Assert.assertTrue(result.equals("/backups/blah/1 /backups/blah/2"));
+      Assert.assertTrue("/backups/blah/1 /backups/blah/2".equals(result));
     } catch (Exception e) {
       Assert.fail("String with 2 replacement variables failed ");
     }
@@ -166,14 +167,14 @@ public class CLIWorkflowOperationHandlerTest {
     try {
       String result = handler.substituteVariables(
               "/backups/#{//mediapackage/@id}/1 /backups/#{//mediapackage/@id}/2 /backups/#{//mediapackage/@id}/3", mp);
-      Assert.assertTrue(result.equals("/backups/blah/1 /backups/blah/2 /backups/blah/3"));
+      Assert.assertTrue("/backups/blah/1 /backups/blah/2 /backups/blah/3".equals(result));
     } catch (Exception e) {
       Assert.fail("String with 3 replacement variables failed ");
     }
     // test substitution with more than one node returned
     try {
       String result = handler.substituteVariables("#{//contributor}", mp);
-      Assert.assertTrue(result.equals("chris,greg"));
+      Assert.assertTrue("chris,greg".equals(result));
     } catch (Exception e) {
       Assert.fail("String with multiple nodes in nodeset failed");
     }
@@ -199,11 +200,11 @@ public class CLIWorkflowOperationHandlerTest {
       output.write(MediaPackageParser.getAsXml(mp));
       output.close();
 
-      MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
-      if (returned_mp == null) {
+      MediaPackage returnedMp = tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
+      if (returnedMp == null) {
         Assert.fail("A media package was not returned from external process");
       }
-      if (!returned_mp.getIdentifier().toString().equals(mp.getIdentifier().toString())) {
+      if (!returnedMp.getIdentifier().toString().equals(mp.getIdentifier().toString())) {
         Assert.fail("A valid (identical) media package was not returned");
       }
     } finally {
@@ -234,11 +235,11 @@ public class CLIWorkflowOperationHandlerTest {
       output.write(MediaPackageParser.getAsXml(mp));
       output.close();
 
-      MediaPackage returned_mp = tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
-      if (returned_mp == null) {
+      MediaPackage returnedMp = tuple.workflowHandler.start(tuple.workflowInstance, null).getMediaPackage();
+      if (returnedMp == null) {
         Assert.fail("A media package was not returned from external process");
       }
-      if (!returned_mp.getIdentifier().toString().equals(mp.getIdentifier().toString())) {
+      if (!returnedMp.getIdentifier().toString().equals(mp.getIdentifier().toString())) {
         Assert.fail("A valid (identical) media package was not returned");
       }
     } finally {
@@ -316,7 +317,7 @@ public class CLIWorkflowOperationHandlerTest {
     InstanceAndHandler tuple = createCLIWorkflow("touch", "me and you");
     CLIWorkflowOperationHandler handler = (CLIWorkflowOperationHandler) tuple.workflowHandler;
     Assert.assertTrue(handler.splitParameters("one two three").size() == 3);
-    Assert.assertTrue(handler.splitParameters("\"one \'two\' three\"").get(0).equals("one \'two\' three"));
+    Assert.assertTrue("one \'two\' three".equals(handler.splitParameters("\"one \'two\' three\"").get(0)));
     Assert.assertTrue(handler.splitParameters("one\\ two three").size() == 2);
   }
 

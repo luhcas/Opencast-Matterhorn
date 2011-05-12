@@ -47,7 +47,7 @@ public abstract class AbstractMediaPackageElementSelector<T extends MediaPackage
    * 
    * @see org.opencastproject.mediapackage.MediaPackageElementSelector#select(org.opencastproject.mediapackage.MediaPackage)
    */
-  @SuppressWarnings( "unchecked" )
+  @SuppressWarnings("unchecked")
   public Collection<T> select(MediaPackage mediaPackage) {
     Set<T> result = new HashSet<T>();
     Class type = getParametrizedType(result);

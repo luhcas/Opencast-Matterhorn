@@ -13,6 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
+
 package org.opencastproject.util;
 
 import junit.framework.Assert;
@@ -37,7 +38,9 @@ import java.net.URL;
  */
 public class IoSupportTest {
 
-  private static File baseDir, spacesDir, spacesFile;
+  private static File baseDir;
+  private static File spacesDir;
+  private static File spacesFile;
   private static URL spacesFileURL;
   private static final String sampleText = "En un lugar de la Mancha, de cuyo nombre no quiero acordarme,\n"
           + "no ha mucho que vivia un hidalgo de los de lanza en astillero,\n"

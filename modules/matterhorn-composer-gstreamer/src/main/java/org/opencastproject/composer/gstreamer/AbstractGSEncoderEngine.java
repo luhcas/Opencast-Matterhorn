@@ -440,7 +440,7 @@ public abstract class AbstractGSEncoderEngine implements EncoderEngine {
       
       if (new File(output).exists()) {
         String outputFile = FilenameUtils.removeExtension(output);
-        String extension= FilenameUtils.getExtension(output);
+        String extension = FilenameUtils.getExtension(output);
         output = outputFile + "_reencode." + extension;
       }
       

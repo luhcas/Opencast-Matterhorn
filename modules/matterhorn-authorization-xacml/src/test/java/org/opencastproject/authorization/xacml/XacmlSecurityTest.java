@@ -53,21 +53,21 @@ public class XacmlSecurityTest {
   private static final Logger logger = LoggerFactory.getLogger(XacmlSecurityTest.class);
 
   /** The stub workspace to store xacml files */
-  WorkspaceStub workspace = null;
+  private WorkspaceStub workspace = null;
 
   /** The username to use with the security service */
-  final String currentUser = "me";
+  private final String currentUser = "me";
 
   /** The organization to use */
-  final Organization organization = new DefaultOrganization();
+  private final Organization organization = new DefaultOrganization();
 
   /** The roles to use with the security service */
-  final List<String> currentRoles = new ArrayList<String>();
+  private final List<String> currentRoles = new ArrayList<String>();
 
   // Override the behavior of the security service to use the current user and roles defined here
-  SecurityService securityService = null;
+  private SecurityService securityService = null;
 
-  XACMLAuthorizationService authzService = null;
+  private XACMLAuthorizationService authzService = null;
 
   @Before
   public void setUp() throws Exception {
@@ -152,7 +152,7 @@ public class XacmlSecurityTest {
   }
 
   static class WorkspaceStub implements Workspace {
-    File file = null;
+    private File file = null;
 
     public WorkspaceStub() throws IOException {
       this.file = File.createTempFile("xacml", "xml");

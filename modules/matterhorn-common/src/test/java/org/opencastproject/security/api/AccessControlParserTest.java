@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+
 /**
  * Tests JAXB un/marshalling of acces control lists
  */
@@ -42,11 +43,11 @@ public class AccessControlParserTest {
     
     // Now convert back to an acl and confirm that the roles, etc are as expected
     AccessControlList aclAfterMarshaling = AccessControlParser.parseAcl(xml);
-    for(AccessControlEntry entry : aclAfterMarshaling.getEntries()) {
+    for (AccessControlEntry entry : aclAfterMarshaling.getEntries()) {
       int role = Integer.parseInt(entry.getRole());
       int action = Integer.parseInt(entry.getAction());
       boolean allowed = entry.isAllow();
-      Assert.assertEquals(allowed, role+action %2 == 0);
+      Assert.assertEquals(allowed, role + action % 2 == 0);
     }
   }
 }

@@ -16,20 +16,15 @@
 
 package org.opencastproject.mediapackage;
 
+import org.junit.Test;
+import org.opencastproject.util.ConfigurationException;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.util.ConfigurationException;
-
-import org.junit.Test;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 /**
  * Test case used to make sure the media package builder works as expected.
@@ -38,7 +33,7 @@ public class MediaPackageBuilderTest extends AbstractMediaPackageTest {
 
   /**
    * Test method for
-   * {@link org.opencastproject.mediapackage.MediaPackageBuilderImpl#createNew(org.opencastproject.mediapackagee.Handle)}
+   * {@link org.opencastproject.mediapackage.MediaPackageBuilderImpl#createNew(org.opencastproject.mediapackage.identifier.Id)}
    * .
    */
   @Test
@@ -53,7 +48,7 @@ public class MediaPackageBuilderTest extends AbstractMediaPackageTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.MediaPackageBuilderImpl#loadFromXml(File)}.
+   * Test method for {@link org.opencastproject.mediapackage.MediaPackageBuilderImpl#loadFromXml(java.io.InputStream)}.
    */
   @Test
   public void testLoadFromManifest() {

@@ -41,19 +41,19 @@ import javax.xml.xpath.XPathFactory;
 public class MediaPackageSerializerTest extends AbstractMediaPackageTest {
 
   /** a uri pointing to a web resource */
-  URI webURI = null;
+  private URI webURI = null;
 
   /** a uri pointing to a linux file system resource */
-  URI linuxRootURI = null;
+  private URI linuxRootURI = null;
 
   /** a uri pointing to a linux file system resource */
-  URI linuxURI = null;
+  private URI linuxURI = null;
 
   /** a uri pointing to a windows file system resource */
-  URI windowsRootURI = null;
+  private URI windowsRootURI = null;
 
   /** a uri pointing to a windows file system resource */
-  URI windowsURI = null;
+  private URI windowsURI = null;
 
   @Before
   public void setUp() throws Exception {

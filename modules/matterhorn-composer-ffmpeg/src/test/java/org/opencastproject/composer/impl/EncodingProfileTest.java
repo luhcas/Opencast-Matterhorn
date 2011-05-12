@@ -40,13 +40,13 @@ import java.util.Map;
 public class EncodingProfileTest {
 
   /** Map with encoding profiles */
-  Map<String, EncodingProfile> profiles = null;
+  private Map<String, EncodingProfile> profiles = null;
 
   /** Name of the h264 profile */
-  String h264ProfileId = "h264.rtsp";
+  private String h264ProfileId = "h264.rtsp";
 
   /** Name of the cover ui profile */
-  String CoverProfileId = "cover-ui.http";
+  private String coverProfileId = "cover-ui.http";
 
   /**
    * @throws java.lang.Exception
@@ -162,7 +162,7 @@ public class EncodingProfileTest {
     assertNull(profile.getExtension("test"));
 
     // Test profile with existing extension
-    profile = profiles.get(CoverProfileId);
+    profile = profiles.get(coverProfileId);
     String commandline = "-i #{in.path} -y -r 1 -t 1 -f image2 -s 160x120 #{out.dir}/#{in.name}#{out.suffix}";
     assertEquals(commandline, profile.getExtension("ffmpeg.command"));
   }
@@ -177,7 +177,7 @@ public class EncodingProfileTest {
     assertEquals(Collections.emptyMap(), profile.getExtensions());
 
     // Test profile with existing extension
-    profile = profiles.get(CoverProfileId);
+    profile = profiles.get(coverProfileId);
     assertEquals(1, profile.getExtensions().size());
   }
 
@@ -190,7 +190,7 @@ public class EncodingProfileTest {
     assertFalse(profile.hasExtensions());
 
     // Test profile with existing extension
-    profile = profiles.get(CoverProfileId);
+    profile = profiles.get(coverProfileId);
     assertTrue(profile.hasExtensions());
   }
 

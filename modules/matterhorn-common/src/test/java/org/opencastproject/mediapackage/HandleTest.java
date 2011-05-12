@@ -43,19 +43,19 @@ public class HandleTest {
   private HandleBuilder handleBuilder = null;
 
   /** The handle */
-  Handle handle = null;
+  private Handle handle = null;
 
   /** List of created handles */
-  List<Handle> newHandles = new ArrayList<Handle>();
+  private List<Handle> newHandles = new ArrayList<Handle>();
 
   /** The url */
-  URL url = null;
+  private URL url = null;
 
   /** Handle local name */
-  String defaultHandle = "10.0000/1";
+  private String defaultHandle = "10.0000/1";
 
   /** The handle value */
-  String handleValue = "http://www.opencastproject.org";
+  private String handleValue = "http://www.opencastproject.org";
 
   /**
    * @throws java.lang.Exception

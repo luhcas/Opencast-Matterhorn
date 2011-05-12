@@ -15,10 +15,7 @@
  */
 package org.opencastproject.mediapackage.identifier;
 
-import org.opencastproject.mediapackage.identifier.IdImpl;
-
 import junit.framework.Assert;
-
 import org.junit.Test;
 
 /**

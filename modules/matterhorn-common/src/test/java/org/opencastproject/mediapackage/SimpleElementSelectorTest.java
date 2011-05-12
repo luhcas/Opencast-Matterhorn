@@ -15,30 +15,20 @@
  */
 package org.opencastproject.mediapackage;
 
-import static org.opencastproject.mediapackage.MediaPackageElements.AUDIENCE_SOURCE;
-import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTATION_SOURCE;
-import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTER_SOURCE;
-
-import static org.junit.Assert.assertEquals;
-
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.mediapackage.Track;
+import org.junit.Before;
+import org.junit.Test;
 import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector;
 import org.opencastproject.mediapackage.selector.SimpleElementSelector;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.opencastproject.mediapackage.MediaPackageElements.AUDIENCE_SOURCE;
+import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTATION_SOURCE;
+import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTER_SOURCE;
 
 /**
  * Test case for {@link SimpleElementSelector}.

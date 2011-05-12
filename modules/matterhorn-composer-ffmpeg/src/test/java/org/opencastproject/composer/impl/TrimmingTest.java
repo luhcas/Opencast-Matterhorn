@@ -42,13 +42,13 @@ import java.util.Map;
 public class TrimmingTest {
 
   /** the encoding engine */
-  FFmpegEncoderEngine engine;
+  private FFmpegEncoderEngine engine;
 
   /** The temporary directory to store media files */
-  File workingDirectory = null;
+  private File workingDirectory = null;
 
   /** Encoding profiles **/
-  Map<String, EncodingProfile> profiles;
+  private Map<String, EncodingProfile> profiles;
 
   /** True to run the tests */
   private static boolean ffmpegInstalled = true;

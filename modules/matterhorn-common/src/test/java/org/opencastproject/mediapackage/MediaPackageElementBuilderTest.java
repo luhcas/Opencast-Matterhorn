@@ -16,21 +16,17 @@
 
 package org.opencastproject.mediapackage;
 
-import static org.junit.Assert.assertTrue;
-
-import static org.junit.Assert.assertNotNull;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import org.opencastproject.mediapackage.MediaPackageElement.Type;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.mediapackage.MediaPackageElement.Type;
 
-import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test ccase for the {@link MediaPackageElementBuilderImpl}.
@@ -38,7 +34,7 @@ import java.net.URISyntaxException;
 public class MediaPackageElementBuilderTest {
 
   /** The media package builder */
-  MediaPackageElementBuilder mediaPackageElementBuilder = null;
+  private MediaPackageElementBuilder mediaPackageElementBuilder = null;
 
   /** The test catalog */
   private URI catalogFile = null;
@@ -52,7 +48,7 @@ public class MediaPackageElementBuilderTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.MediaPackageElementBuilderImpl#elementFromFile(File file)}.
+   * Test method for {@link org.opencastproject.mediapackage.MediaPackageElementBuilderImpl#elementFromURI(java.net.URI, org.opencastproject.mediapackage.MediaPackageElement.Type, MediaPackageElementFlavor)}.
    */
   @Test
   public void testElementFromFile() {

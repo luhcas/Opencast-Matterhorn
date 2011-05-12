@@ -33,7 +33,7 @@ import java.util.Map;
 public class DictionaryServiceJpaImplTest {
   private ComboPooledDataSource pooledDataSource = null;
 
-  DictionaryServiceJpaImpl service = null;
+  private DictionaryServiceJpaImpl service = null;
 
   @Before
   public void setUp() throws Exception {

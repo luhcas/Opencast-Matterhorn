@@ -209,10 +209,10 @@ public class CaptureAgentStateServiceImplTest {
     cap1.put(CaptureParameters.CAPTURE_DEVICE_PREFIX + "key", "value");
     cap1.put(CaptureParameters.CAPTURE_DEVICE_NAMES, "key");
     Properties cap2 = new Properties();
-    cap2.put(CaptureParameters.CAPTURE_DEVICE_PREFIX+"foo", "bar");
+    cap2.put(CaptureParameters.CAPTURE_DEVICE_PREFIX + "foo", "bar");
     cap2.put(CaptureParameters.CAPTURE_DEVICE_NAMES, "foo");
     Properties cap3 = new Properties();
-    cap3.put(CaptureParameters.CAPTURE_DEVICE_PREFIX+"bam", "bam");
+    cap3.put(CaptureParameters.CAPTURE_DEVICE_PREFIX + "bam", "bam");
     cap3.put(CaptureParameters.CAPTURE_DEVICE_NAMES, "bam");
 
     // Setup the two agents and persist them

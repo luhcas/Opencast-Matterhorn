@@ -16,24 +16,26 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import static org.junit.Assert.assertNotNull;
-
-import static org.junit.Assert.assertSame;
-import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.opencastproject.metadata.dublincore.TestUtil.createDate;
-import static org.opencastproject.metadata.dublincore.TestUtil.precisionDay;
-import static org.opencastproject.metadata.dublincore.TestUtil.precisionSecond;
-
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.decodeDate;
+import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.decodeDuration;
+import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.decodePeriod;
+import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.decodeTemporal;
+import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.encodeDate;
+import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.encodeDuration;
+import static org.opencastproject.metadata.dublincore.EncodingSchemeUtils.encodePeriod;
+import static org.opencastproject.metadata.dublincore.TestUtil.createDate;
+import static org.opencastproject.metadata.dublincore.TestUtil.precisionDay;
+import static org.opencastproject.metadata.dublincore.TestUtil.precisionSecond;
 
 /**
  * Test cases for {@link org.opencastproject.metadata.dublincore.EncodingSchemeUtils}.

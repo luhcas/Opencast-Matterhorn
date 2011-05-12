@@ -15,20 +15,17 @@
  */
 package org.opencastproject.composer.impl;
 
-import static org.junit.Assert.assertTrue;
-
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.IoSupport;
 import org.opencastproject.util.StreamHelper;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,19 +33,21 @@ import java.io.File;
 import java.net.URL;
 import java.util.Map;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Test trimming using ffmpeg.
  */
 public class ImageConversionTest {
 
   /** the encoding engine */
-  FFmpegEncoderEngine engine;
+  private FFmpegEncoderEngine engine;
 
   /** The temporary directory to store media files */
-  File workingDirectory = null;
+  private File workingDirectory = null;
 
   /** Encoding profiles **/
-  Map<String, EncodingProfile> profiles;
+  private Map<String, EncodingProfile> profiles;
 
   /** True to run the tests */
   private static boolean ffmpegInstalled = true;

@@ -55,7 +55,7 @@ public class ComposeWorkflowOperationHandlerTest {
   private MediaPackage mpEncode;
   private Job job;
   private Track[] encodedTracks;
-  EncodingProfile[] profileList;
+  private EncodingProfile[] profileList;
 
   // mock services and objects
   private EncodingProfile profile = null;

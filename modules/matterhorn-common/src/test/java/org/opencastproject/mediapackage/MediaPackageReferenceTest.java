@@ -16,21 +16,16 @@
 
 package org.opencastproject.mediapackage;
 
+import org.junit.Test;
+import org.opencastproject.util.ConfigurationException;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageReference;
-import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.mediapackage.UnsupportedElementException;
-import org.opencastproject.util.ConfigurationException;
-
-import org.junit.Test;
-
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Test case for media package references.
@@ -61,7 +56,7 @@ public class MediaPackageReferenceTest extends AbstractMediaPackageTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.MediaPackageImpl#save()}.
+   * Test method for {@link org.opencastproject.mediapackage.MediaPackageImpl#add(java.net.URI)}.
    */
   @Test
   public void testMediaPackageReference() {
