@@ -14,9 +14,18 @@
  *
  */
 
-package org.opencastproject.util.doc.rest;
+package org.opencastproject.runtimeinfo.rest;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
+
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
@@ -45,18 +54,18 @@ public class RestDocsAnnotationTest {
     RestService restServiceAnnotation = TestServletSample.class.getAnnotation(RestService.class);
 
     // name, title and abstract text
-    Assert.assertEquals("ingestservice", restServiceAnnotation.name());
-    Assert.assertEquals("Ingest Service", restServiceAnnotation.title());
-    Assert.assertEquals(
+    assertEquals("ingestservice", restServiceAnnotation.name());
+    assertEquals("Ingest Service", restServiceAnnotation.title());
+    assertEquals(
             "This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.",
             restServiceAnnotation.abstractText());
 
     // notes
-    Assert.assertEquals(2, restServiceAnnotation.notes().length);
-    Assert.assertEquals(
+    assertEquals(2, restServiceAnnotation.notes().length);
+    assertEquals(
             "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
             restServiceAnnotation.notes()[0]);
-    Assert.assertEquals(
+    assertEquals(
             "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
             restServiceAnnotation.notes()[1]);
 
@@ -77,77 +86,77 @@ public class RestDocsAnnotationTest {
         Produces producesAnnotation = (Produces) testMethod.getAnnotation(Produces.class);
         Consumes consumesAnnotation = (Consumes) testMethod.getAnnotation(Consumes.class);
 
-        Assert.assertEquals(1, producesAnnotation.value().length);
-        Assert.assertEquals(MediaType.TEXT_XML, producesAnnotation.value()[0]);
+        assertEquals(1, producesAnnotation.value().length);
+        assertEquals(MediaType.TEXT_XML, producesAnnotation.value()[0]);
 
-        Assert.assertEquals(1, consumesAnnotation.value().length);
-        Assert.assertEquals(MediaType.MULTIPART_FORM_DATA, consumesAnnotation.value()[0]);
+        assertEquals(1, consumesAnnotation.value().length);
+        assertEquals(MediaType.MULTIPART_FORM_DATA, consumesAnnotation.value()[0]);
 
-        Assert.assertEquals("addTrack", pathAnnotation.value());
+        assertEquals("addTrack", pathAnnotation.value());
 
         // we cannot hard code the GET.class or POST.class because we don't know which one is used.
         for (Annotation a : testMethod.getAnnotations()) {
           HttpMethod method = (HttpMethod) a.annotationType().getAnnotation(HttpMethod.class);
           if (method != null) {
-            Assert.assertEquals("POST", a.annotationType().getSimpleName());
-            Assert.assertEquals("POST", method.value());
+            assertEquals("POST", a.annotationType().getSimpleName());
+            assertEquals("POST", method.value());
           }
         }
 
         // name, description and return description
-        Assert.assertEquals("addTrackInputStream", restQueryAnnotation.name());
-        Assert.assertEquals("Add a media track to a given media package using an input stream",
+        assertEquals("addTrackInputStream", restQueryAnnotation.name());
+        assertEquals("Add a media track to a given media package using an input stream",
                 restQueryAnnotation.description());
-        Assert.assertEquals("augmented media package", restQueryAnnotation.returnDescription());
+        assertEquals("augmented media package", restQueryAnnotation.returnDescription());
 
         // path parameter
-        Assert.assertTrue(restQueryAnnotation.pathParameters().length == 1);
-        Assert.assertEquals("wdID", restQueryAnnotation.pathParameters()[0].name());
-        Assert.assertEquals("Workflow definition id", restQueryAnnotation.pathParameters()[0].description());
-        Assert.assertTrue(restQueryAnnotation.pathParameters()[0].isRequired());
-        Assert.assertEquals("", restQueryAnnotation.pathParameters()[0].defaultValue());
-        Assert.assertEquals(RestParameter.Type.STRING, restQueryAnnotation.pathParameters()[0].type());
+        assertTrue(restQueryAnnotation.pathParameters().length == 1);
+        assertEquals("wdID", restQueryAnnotation.pathParameters()[0].name());
+        assertEquals("Workflow definition id", restQueryAnnotation.pathParameters()[0].description());
+        assertTrue(restQueryAnnotation.pathParameters()[0].isRequired());
+        assertEquals("", restQueryAnnotation.pathParameters()[0].defaultValue());
+        assertEquals(RestParameter.Type.STRING, restQueryAnnotation.pathParameters()[0].type());
 
         // query parameters
-        Assert.assertTrue(restQueryAnnotation.restParameters().length == 2);
+        assertTrue(restQueryAnnotation.restParameters().length == 2);
         // #1
-        Assert.assertEquals("flavor", restQueryAnnotation.restParameters()[0].name());
-        Assert.assertEquals("The kind of media track", restQueryAnnotation.restParameters()[0].description());
-        Assert.assertTrue(restQueryAnnotation.restParameters()[0].isRequired());
-        Assert.assertEquals("Default", restQueryAnnotation.restParameters()[0].defaultValue());
-        Assert.assertEquals(RestParameter.Type.STRING, restQueryAnnotation.restParameters()[0].type());
+        assertEquals("flavor", restQueryAnnotation.restParameters()[0].name());
+        assertEquals("The kind of media track", restQueryAnnotation.restParameters()[0].description());
+        assertTrue(restQueryAnnotation.restParameters()[0].isRequired());
+        assertEquals("Default", restQueryAnnotation.restParameters()[0].defaultValue());
+        assertEquals(RestParameter.Type.STRING, restQueryAnnotation.restParameters()[0].type());
         // #2
-        Assert.assertEquals("mediaPackage", restQueryAnnotation.restParameters()[1].name());
-        Assert.assertEquals("The media package as XML", restQueryAnnotation.restParameters()[1].description());
-        Assert.assertFalse(restQueryAnnotation.restParameters()[1].isRequired());
-        Assert.assertEquals("", restQueryAnnotation.restParameters()[1].defaultValue());
-        Assert.assertEquals(RestParameter.Type.TEXT, restQueryAnnotation.restParameters()[1].type());
+        assertEquals("mediaPackage", restQueryAnnotation.restParameters()[1].name());
+        assertEquals("The media package as XML", restQueryAnnotation.restParameters()[1].description());
+        assertFalse(restQueryAnnotation.restParameters()[1].isRequired());
+        assertEquals("", restQueryAnnotation.restParameters()[1].defaultValue());
+        assertEquals(RestParameter.Type.TEXT, restQueryAnnotation.restParameters()[1].type());
 
         // body parameter
-        Assert.assertEquals("BODY", restQueryAnnotation.bodyParameter().name());
-        Assert.assertEquals("The media track file", restQueryAnnotation.bodyParameter().description());
-        Assert.assertTrue(restQueryAnnotation.bodyParameter().isRequired());
-        Assert.assertEquals("", restQueryAnnotation.bodyParameter().defaultValue());
-        Assert.assertEquals(RestParameter.Type.FILE, restQueryAnnotation.bodyParameter().type());
+        assertEquals("BODY", restQueryAnnotation.bodyParameter().name());
+        assertEquals("The media track file", restQueryAnnotation.bodyParameter().description());
+        assertTrue(restQueryAnnotation.bodyParameter().isRequired());
+        assertEquals("", restQueryAnnotation.bodyParameter().defaultValue());
+        assertEquals(RestParameter.Type.FILE, restQueryAnnotation.bodyParameter().type());
 
         // responses
-        Assert.assertTrue(restQueryAnnotation.reponses().length == 3);
+        assertTrue(restQueryAnnotation.reponses().length == 3);
 
-        Assert.assertEquals(HttpServletResponse.SC_OK, restQueryAnnotation.reponses()[0].responseCode());
-        Assert.assertEquals("Returns augmented media package", restQueryAnnotation.reponses()[0].description());
+        assertEquals(HttpServletResponse.SC_OK, restQueryAnnotation.reponses()[0].responseCode());
+        assertEquals("Returns augmented media package", restQueryAnnotation.reponses()[0].description());
 
-        Assert.assertEquals(HttpServletResponse.SC_BAD_REQUEST, restQueryAnnotation.reponses()[1].responseCode());
-        Assert.assertEquals("", restQueryAnnotation.reponses()[1].description());
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, restQueryAnnotation.reponses()[1].responseCode());
+        assertEquals("", restQueryAnnotation.reponses()[1].description());
 
-        Assert.assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+        assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 restQueryAnnotation.reponses()[2].responseCode());
-        Assert.assertEquals("", restQueryAnnotation.reponses()[2].description());
+        assertEquals("", restQueryAnnotation.reponses()[2].description());
 
       }
     } catch (SecurityException e) {
-      Assert.fail();
+      fail();
     } catch (NoSuchMethodException e) {
-      Assert.fail();
+      fail();
     }
   }
 
@@ -187,15 +196,15 @@ public class RestDocsAnnotationTest {
         }
 
         // name, description and return description
-        Assert.assertEquals("addTrackInputStream", endpoint.getName());
-        Assert.assertEquals("Add a media track to a given media package using an input stream",
+        assertEquals("addTrackInputStream", endpoint.getName());
+        assertEquals("Add a media track to a given media package using an input stream",
                 endpoint.getDescription());
-        Assert.assertEquals(1, endpoint.getNotes().size());
-        Assert.assertEquals("Return value description: augmented media package", endpoint.getNotes().get(0));
+        assertEquals(1, endpoint.getNotes().size());
+        assertEquals("Return value description: augmented media package", endpoint.getNotes().get(0));
 
         // HTTP method
-        Assert.assertEquals("POST", endpoint.getMethod());
-        Assert.assertEquals("/addTrack", endpoint.getPath());
+        assertEquals("POST", endpoint.getMethod());
+        assertEquals("/addTrack", endpoint.getPath());
 
         // @Produces
         if (producesAnnotation != null) {
@@ -203,45 +212,45 @@ public class RestDocsAnnotationTest {
             endpoint.addFormat(new RestFormatData(format));
           }
         }
-        Assert.assertEquals(1, endpoint.getFormats().size());
-        Assert.assertEquals(MediaType.TEXT_XML, endpoint.getFormats().get(0).getName());
+        assertEquals(1, endpoint.getFormats().size());
+        assertEquals(MediaType.TEXT_XML, endpoint.getFormats().get(0).getName());
 
         // responses
         for (RestResponse restResp : restQueryAnnotation.reponses()) {
           endpoint.addStatus(restResp, restDocData);
         }
-        Assert.assertEquals(3, endpoint.getStatuses().size());
+        assertEquals(3, endpoint.getStatuses().size());
 
-        Assert.assertEquals(HttpServletResponse.SC_OK, endpoint.getStatuses().get(0).getCode());
-        Assert.assertEquals("Returns augmented media package", endpoint.getStatuses().get(0).getDescription());
+        assertEquals(HttpServletResponse.SC_OK, endpoint.getStatuses().get(0).getCode());
+        assertEquals("Returns augmented media package", endpoint.getStatuses().get(0).getDescription());
 
-        Assert.assertEquals(HttpServletResponse.SC_BAD_REQUEST, endpoint.getStatuses().get(1).getCode());
-        Assert.assertEquals(null, endpoint.getStatuses().get(1).getDescription());
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, endpoint.getStatuses().get(1).getCode());
+        assertEquals(null, endpoint.getStatuses().get(1).getDescription());
 
-        Assert.assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, endpoint.getStatuses().get(2).getCode());
-        Assert.assertEquals(null, endpoint.getStatuses().get(2).getDescription());
+        assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, endpoint.getStatuses().get(2).getCode());
+        assertEquals(null, endpoint.getStatuses().get(2).getDescription());
 
         // body parameter
         if (restQueryAnnotation.bodyParameter().type() != RestParameter.Type.NO_PARAMETER) {
           endpoint.addBodyParam(restQueryAnnotation.bodyParameter(), restDocData);
         }
-        Assert.assertEquals("BODY", endpoint.getBodyParam().getName());
-        Assert.assertEquals("The media track file", endpoint.getBodyParam().getDescription());
-        Assert.assertTrue(endpoint.getBodyParam().isRequired());
-        Assert.assertEquals(null, endpoint.getBodyParam().getDefaultValue());
-        Assert.assertTrue("FILE".equalsIgnoreCase(endpoint.getBodyParam().getType()));
+        assertEquals("BODY", endpoint.getBodyParam().getName());
+        assertEquals("The media track file", endpoint.getBodyParam().getDescription());
+        assertTrue(endpoint.getBodyParam().isRequired());
+        assertEquals(null, endpoint.getBodyParam().getDefaultValue());
+        assertTrue("FILE".equalsIgnoreCase(endpoint.getBodyParam().getType()));
 
         // path parameter
         for (RestParameter restParam : restQueryAnnotation.pathParameters()) {
           endpoint.addPathParam(new RestParamData(restParam, restDocData));
         }
-        Assert.assertEquals(1, endpoint.getPathParams().size());
-        Assert.assertEquals("wdID", endpoint.getPathParams().get(0).getName());
-        Assert.assertEquals("Workflow definition id", endpoint.getPathParams().get(0).getDescription());
-        Assert.assertTrue(endpoint.getPathParams().get(0).isRequired());
-        Assert.assertTrue(endpoint.getPathParams().get(0).isPath());
-        Assert.assertEquals(null, endpoint.getPathParams().get(0).getDefaultValue());
-        Assert.assertTrue("STRING".equalsIgnoreCase(endpoint.getPathParams().get(0).getType()));
+        assertEquals(1, endpoint.getPathParams().size());
+        assertEquals("wdID", endpoint.getPathParams().get(0).getName());
+        assertEquals("Workflow definition id", endpoint.getPathParams().get(0).getDescription());
+        assertTrue(endpoint.getPathParams().get(0).isRequired());
+        assertTrue(endpoint.getPathParams().get(0).isPath());
+        assertEquals(null, endpoint.getPathParams().get(0).getDefaultValue());
+        assertTrue("STRING".equalsIgnoreCase(endpoint.getPathParams().get(0).getType()));
 
         // query parameters
         for (RestParameter restParam : restQueryAnnotation.restParameters()) {
@@ -252,26 +261,26 @@ public class RestDocsAnnotationTest {
           }
         }
         // #1
-        Assert.assertEquals(1, endpoint.getRequiredParams().size());
-        Assert.assertEquals("flavor", endpoint.getRequiredParams().get(0).getName());
-        Assert.assertEquals("The kind of media track", endpoint.getRequiredParams().get(0).getDescription());
-        Assert.assertTrue(endpoint.getRequiredParams().get(0).isRequired());
-        Assert.assertEquals("Default", endpoint.getRequiredParams().get(0).getDefaultValue());
-        Assert.assertTrue("STRING".equalsIgnoreCase(endpoint.getRequiredParams().get(0).getType()));
+        assertEquals(1, endpoint.getRequiredParams().size());
+        assertEquals("flavor", endpoint.getRequiredParams().get(0).getName());
+        assertEquals("The kind of media track", endpoint.getRequiredParams().get(0).getDescription());
+        assertTrue(endpoint.getRequiredParams().get(0).isRequired());
+        assertEquals("Default", endpoint.getRequiredParams().get(0).getDefaultValue());
+        assertTrue("STRING".equalsIgnoreCase(endpoint.getRequiredParams().get(0).getType()));
 
         // #2
-        Assert.assertEquals(1, endpoint.getOptionalParams().size());
-        Assert.assertEquals("mediaPackage", endpoint.getOptionalParams().get(0).getName());
-        Assert.assertEquals("The media package as XML", endpoint.getOptionalParams().get(0).getDescription());
-        Assert.assertFalse(endpoint.getOptionalParams().get(0).isRequired());
-        Assert.assertEquals(null, endpoint.getOptionalParams().get(0).getDefaultValue());
-        Assert.assertTrue("TEXT".equalsIgnoreCase(endpoint.getOptionalParams().get(0).getType()));
+        assertEquals(1, endpoint.getOptionalParams().size());
+        assertEquals("mediaPackage", endpoint.getOptionalParams().get(0).getName());
+        assertEquals("The media package as XML", endpoint.getOptionalParams().get(0).getDescription());
+        assertFalse(endpoint.getOptionalParams().get(0).isRequired());
+        assertEquals(null, endpoint.getOptionalParams().get(0).getDefaultValue());
+        assertTrue("TEXT".equalsIgnoreCase(endpoint.getOptionalParams().get(0).getType()));
 
       }
     } catch (SecurityException e) {
-      Assert.fail();
+      fail();
     } catch (NoSuchMethodException e) {
-      Assert.fail();
+      fail();
     }
   }
 
@@ -287,15 +296,20 @@ public class RestDocsAnnotationTest {
         RestQuery restQueryAnnotation = (RestQuery) testMethod.getAnnotation(RestQuery.class);
         RestDocData restDocData = new RestDocData("NAME", "TITLE", "URL", null, new TestServletSample(), map);
 
-        Assert.assertEquals(restDocData.processMacro(restQueryAnnotation.restParameters()[1].defaultValue()),
+        assertEquals(restDocData.processMacro(restQueryAnnotation.restParameters()[1].defaultValue()),
                 "ADCD THIS IS SCHEMA XUHZSUFH the value of something else UGGUH the value of another thing AIHID");
       }
     } catch (SecurityException e) {
-      Assert.fail();
+      fail();
     } catch (NoSuchMethodException e) {
       e.printStackTrace();
-      Assert.fail();
+      fail();
     }
+  }
+  
+  @Test
+  public void testPathPatternMatching() throws Exception {
+    assertTrue("/{seriesID:.+}".matches(RestDocData.PATH_VALIDATION_REGEX));
   }
 
   /**

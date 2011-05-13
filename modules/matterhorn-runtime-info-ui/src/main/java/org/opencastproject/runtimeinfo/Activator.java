@@ -15,10 +15,10 @@
  */
 package org.opencastproject.runtimeinfo;
 
+import org.opencastproject.runtimeinfo.rest.DocUtil;
+import org.opencastproject.runtimeinfo.rest.RestDocData;
 import org.opencastproject.util.doc.rest.RestQuery;
 import org.opencastproject.util.doc.rest.RestService;
-import org.opencastproject.util.doc.rest.RestDocData;
-import org.opencastproject.util.DocUtil;
 
 import static org.opencastproject.rest.RestConstants.SERVICES_FILTER;
 import static org.opencastproject.rest.RestConstants.SERVICE_PATH_PROPERTY;
@@ -149,7 +149,7 @@ public class Activator extends HttpServlet implements BundleActivator {
             data.addEndpoint(rq, returnType, produces, httpMethodString, path);
           }
         }
-        String template = DocUtil.loadTemplate("/ui/restdocs/template2.xhtml");
+        String template = DocUtil.loadTemplate("/ui/restdocs/template.xhtml");
         docs.append(DocUtil.generate(data, template));
       } else {
         docs.append("No documentation has been found for " + endpointService.getClass().getSimpleName());

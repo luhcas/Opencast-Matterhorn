@@ -16,11 +16,11 @@
     <checkstyle.skip>false</checkstyle.skip>
   </properties>
   <dependencies>
+  
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
@@ -30,12 +30,15 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.freemarker</groupId>
+      <artifactId>freemarker</artifactId>
+      <version>2.3.15</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
@@ -44,13 +47,29 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <scope>provided</scope>
     </dependency>
+    
+    <!-- Testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
   <build>
     <plugins>
@@ -166,22 +185,25 @@
             <Bundle-Activator>org.opencastproject.runtimeinfo.Activator</Bundle-Activator>
             <Import-Package>
                 org.opencastproject.rest,
-                org.opencastproject.util.doc.rest,
                 javax.servlet,
                 javax.servlet.http,
                 javax.ws.rs,
                 org.apache.commons.lang,
                 org.opencastproject.security.api,
                 org.opencastproject.util,
-                org.opencastproject.util.doc,
+                org.opencastproject.util.doc.rest,
                 org.osgi.framework,
                 org.osgi.service.component,
                 org.slf4j,
                 org.json.simple,
-                org.json.simple.parser
+                org.json.simple.parser,
+                *;resolution:=optional
             </Import-Package>
+            <Embed-Dependency>
+              freemarker;inline=true
+            </Embed-Dependency>
             <Private-Package>
-              ui.*
+              freemarker.core, freemarker.template, org.opencastproject.runtimeinfo.rest, ui.*
             </Private-Package>
             <Export-Package>org.opencastproject.runtimeinfo</Export-Package>
             <Service-Component>

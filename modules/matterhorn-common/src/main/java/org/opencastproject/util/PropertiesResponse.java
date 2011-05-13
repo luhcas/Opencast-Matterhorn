@@ -34,7 +34,8 @@ public class PropertiesResponse {
   @XmlJavaTypeAdapter(HashtableAdapter.class)
   private Properties properties;
 
-  public PropertiesResponse() {}
+  public PropertiesResponse() {
+  }
 
   public PropertiesResponse(Properties properties) {
     this.properties = properties;

@@ -13,9 +13,8 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util;
+package org.opencastproject.runtimeinfo.rest;
 
-import org.opencastproject.util.doc.DocData;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,7 +39,7 @@ import freemarker.template.TemplateException;
  * could be used for other things as well
  * 
  * @see DocData
- * @see org.opencastproject.util.doc.DocRestData
+ * @see org.opencastproject.runtimeinfo.rest.DocRestData
  */
 public final class DocUtil {
 
@@ -140,7 +139,7 @@ public final class DocUtil {
    * @throws IllegalArgumentException
    *           if the input data is invalid in some way
    * @see DocData
-   * @see org.opencastproject.util.doc.DocRestData
+   * @see org.opencastproject.runtimeinfo.rest.DocRestData
    */
   public static String generate(DocData data) {
     String template = loadTemplate(data.getDefaultTemplatePath());
@@ -159,7 +158,7 @@ public final class DocUtil {
    * @throws IllegalArgumentException
    *           if the input data is invalid in some way
    * @see DocData
-   * @see org.opencastproject.util.doc.DocRestData
+   * @see org.opencastproject.runtimeinfo.rest.DocRestData
    */
   public static String generate(DocData data, String template) {
     if (template == null) {

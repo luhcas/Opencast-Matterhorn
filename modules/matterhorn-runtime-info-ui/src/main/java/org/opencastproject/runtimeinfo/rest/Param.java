@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util.doc;
+package org.opencastproject.runtimeinfo.rest;
 
 import org.apache.commons.lang.StringEscapeUtils;
 

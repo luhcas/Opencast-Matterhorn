@@ -13,9 +13,11 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util.doc.rest;
+package org.opencastproject.runtimeinfo.rest;
 
-import org.opencastproject.util.doc.DocData;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -58,7 +60,7 @@ public class RestDocData extends DocData {
   /**
    * Regular expression used to validate a path.
    */
-  public static final String PATH_VALIDATION_REGEX = "^[\\w\\/{}|\\:\\.\\*]+$";
+  public static final String PATH_VALIDATION_REGEX = "^[\\w\\/{}|\\:\\.\\*\\+]+$";
 
   /**
    * A slash character.

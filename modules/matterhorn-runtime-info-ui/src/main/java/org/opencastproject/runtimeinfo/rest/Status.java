@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util.doc;
+package org.opencastproject.runtimeinfo.rest;
 
 /**
  * Represents one possible status result for an endpoint

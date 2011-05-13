@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util.doc;
+package org.opencastproject.runtimeinfo.rest;
 
 import java.util.List;
 import java.util.Vector;

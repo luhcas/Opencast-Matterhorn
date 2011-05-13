@@ -13,10 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util.doc.rest;
+package org.opencastproject.runtimeinfo.rest;
 
 import org.opencastproject.util.JaxbXmlSchemaGenerator;
-import org.opencastproject.util.doc.DocData;
+import org.opencastproject.util.doc.rest.RestParameter;
 
 import org.apache.commons.lang.StringEscapeUtils;
 

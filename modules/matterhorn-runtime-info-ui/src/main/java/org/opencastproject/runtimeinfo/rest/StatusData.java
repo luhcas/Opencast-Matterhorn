@@ -13,7 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.util.doc.rest;
+package org.opencastproject.runtimeinfo.rest;
+
+import org.opencastproject.util.doc.rest.RestResponse;
 
 import javax.servlet.http.HttpServletResponse;
 

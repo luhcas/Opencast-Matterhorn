@@ -31,13 +31,6 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
     </dependency>
-
-    <!-- FIXME: Is this really needed in common? kernel would be a better place for it. -->
-    <dependency>
-      <groupId>org.freemarker</groupId>
-      <artifactId>freemarker</artifactId>
-      <version>2.3.15</version>
-    </dependency>
     
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -139,7 +132,6 @@
               *;resolution:=optional
             </Import-Package>
             <Embed-Dependency>
-              freemarker;inline=true,
               truezip;inline=true
             </Embed-Dependency>
             <Export-Package>
