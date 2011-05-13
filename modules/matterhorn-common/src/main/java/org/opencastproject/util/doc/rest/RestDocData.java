@@ -58,7 +58,7 @@ public class RestDocData extends DocData {
   /**
    * Regular expression used to validate a path.
    */
-  public static final String PATH_VALIDATION_REGEX = "^[\\w\\/{}\\:\\.\\*]+$";
+  public static final String PATH_VALIDATION_REGEX = "^[\\w\\/{}|\\:\\.\\*]+$";
 
   /**
    * A slash character.
@@ -136,7 +136,7 @@ public class RestDocData extends DocData {
               // Some endpoints allow for arbitrary characters, including slashes, in their path parameters, so we
               // must check for both {param} and {param:.*}.
               if (!endpoint.getPath().contains("{" + param.getName() + "}")
-                      && !endpoint.getPath().contains("{" + param.getName() + ":.*}")) {
+                      && !endpoint.getPath().contains("{" + param.getName() + ":")) {
                 throw new IllegalStateException("Path (" + endpoint.getPath() + ") does not match path parameter ("
                         + param.getName() + ") for endpoint (" + endpoint.getName()
                         + "), the path must contain all path parameter names.");
