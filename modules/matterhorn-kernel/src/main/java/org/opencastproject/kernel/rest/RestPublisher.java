@@ -21,8 +21,11 @@ import org.opencastproject.util.NotFoundException;
 
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
+import org.apache.cxf.jaxrs.ext.RequestHandler;
 import org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider;
+import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.jaxrs.provider.JSONProvider;
+import org.apache.cxf.message.Message;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.codehaus.jettison.mapped.Configuration;
 import org.codehaus.jettison.mapped.MappedNamespaceConvention;
@@ -57,6 +60,7 @@ import javax.servlet.ServletException;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -124,6 +128,7 @@ public class RestPublisher implements RestConstants {
         return Response.status(404).entity(fourOhFour).type(MediaType.TEXT_PLAIN).build();
       }
     });
+    providers.add(new RestDocRedirector());
 
     try {
       jaxRsTracker = new JaxRsServiceTracker();
@@ -385,6 +390,25 @@ public class RestPublisher implements RestConstants {
     public void init(ServletConfig servletConfig) throws ServletException {
       super.init(servletConfig);
       initialized = true;
+    }
+  }
+
+  public class RestDocRedirector implements RequestHandler {
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.apache.cxf.jaxrs.ext.RequestHandler#handleRequest(org.apache.cxf.message.Message,
+     *      org.apache.cxf.jaxrs.model.ClassResourceInfo)
+     */
+    @Override
+    public Response handleRequest(Message m, ClassResourceInfo resourceClass) {
+      String uri = (String) m.get(Message.REQUEST_URI);
+      if (uri.endsWith("/docs")) {
+        String[] pathSegments = uri.split("/");
+        return Response.status(Status.MOVED_PERMANENTLY)
+                .header("Location", "/docs.html?path=/" + pathSegments[pathSegments.length - 2]).build();
+      }
+      return null;
     }
   }
 }
