@@ -35,7 +35,12 @@
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-dublincore</artifactId>
       <version>${project.version}</version>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-solr</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -168,7 +173,9 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package>
               org.opencastproject.scheduler.impl;version=${project.version},
-              org.opencastproject.scheduler.endpoint;version=${project.version},
+              org.opencastproject.scheduler.impl.solr;version=${project.version},
+              org.opencastproject.scheduler.impl.persistence;version=${project.version},
+              org.opencastproject.scheduler.endpoint;version=${project.version}
             </Export-Package>
             <Import-Package>
               org.opencastproject.rest;version=${project.version},
@@ -180,11 +187,13 @@
               net.fortuna.ical4j.*;-split-package:=merge-last
             </Private-Package>
             <Service-Component>
+              OSGI-INF/scheduler-service-index.xml,
+              OSGI-INF/scheduler-service-persistence.xml,
               OSGI-INF/scheduler-service.xml,
               OSGI-INF/scheduler-service-rest.xml
             </Service-Component>
             <JPA-PersistenceUnits>
-              org.opencastproject.scheduler.impl
+              org.opencastproject.scheduler.impl.persistence
             </JPA-PersistenceUnits>            
           </instructions>
         </configuration>

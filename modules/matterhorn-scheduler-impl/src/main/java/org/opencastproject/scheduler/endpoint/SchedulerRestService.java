@@ -15,38 +15,40 @@
  */
 package org.opencastproject.scheduler.endpoint;
 
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.rest.RestConstants;
-import org.opencastproject.scheduler.api.Event;
-import org.opencastproject.scheduler.api.Metadata;
-import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.impl.EventImpl;
-import org.opencastproject.scheduler.impl.EventListImpl;
-import org.opencastproject.scheduler.impl.MetadataImpl;
-import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
-import org.opencastproject.util.DocUtil;
+import org.opencastproject.scheduler.api.SchedulerException;
+import org.opencastproject.scheduler.api.SchedulerQuery;
+import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.SolrUtils;
 import org.opencastproject.util.UrlSupport;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestParameter.Type;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -56,6 +58,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -66,10 +69,14 @@ import javax.ws.rs.core.Response.Status;
  * REST Endpoint for Scheduler Service
  */
 @Path("/")
+@RestService(name = "schedulerservice", title = "Scheduler Service", abstractText = "This service creates, edits and retrieves and helps managing scheduled capture events.", notes = {
+        "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+        "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+        "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>" })
 public class SchedulerRestService {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerRestService.class);
-  private static final long ONE_HOUR_IN_MILLIS = 1000 * 60 * 60;
-  private SchedulerServiceImpl service;
+  private SchedulerService service;
+  private DublinCoreCatalogService dcService;
 
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   protected String serviceUrl = null;
@@ -79,8 +86,21 @@ public class SchedulerRestService {
    * 
    * @param service
    */
-  public void setService(SchedulerServiceImpl service) {
+  public void setService(SchedulerService service) {
     this.service = service;
+  }
+
+  /**
+   * Method to unset the service this REST endpoint uses
+   * 
+   * @param service
+   */
+  public void unsetService(SchedulerService service) {
+    this.service = null;
+  }
+
+  public void setDublinCoreService(DublinCoreCatalogService dcService) {
+    this.dcService = dcService;
   }
 
   /**
@@ -102,44 +122,7 @@ public class SchedulerRestService {
         serverUrl = ccServerUrl;
       }
       serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
-      docs = generateDocs(serviceUrl);
     }
-  }
-
-  /**
-   * Get a specific scheduled event.
-   * 
-   * @param eventID
-   *          The unique ID of the event.
-   * @return event XML with the data of the event
-   */
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("{eventID}.xml")
-  public Response getEventXml(@PathParam("eventID") Long eventId) throws NotFoundException {
-    return getEvent(eventId);
-  }
-
-  /**
-   * Get a specific scheduled event.
-   * 
-   * @param eventID
-   *          The unique ID of the event.
-   * @return event XML with the data of the event
-   */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("{eventID}.json")
-  public Response getEventJson(@PathParam("eventID") Long eventId) throws NotFoundException {
-    return getEvent(eventId);
-  }
-
-  private Response getEvent(Long eventId) throws NotFoundException {
-    if (eventId == null) {
-      return Response.status(Status.BAD_REQUEST).build();
-    }
-    Event e = service.getEvent(eventId);
-    return Response.ok(e).build();
   }
 
   /**
@@ -151,12 +134,48 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("{eventId}/dublincore")
-  public Response getDublinCoreMetadata(@PathParam("eventId") Long eventId) throws NotFoundException {
-    if (eventId == null)
-      return Response.status(Status.BAD_REQUEST).build();
-    String result = service.getDublinCoreMetadata(eventId);
-    return Response.ok(result).build();
+  @Path("recordings/{id}.xml")
+  @RestQuery(name = "recordingsasxml", description = "Retrieves DublinCore for specified event", returnDescription = "DublinCore in XML", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "ID of event for which DublinCore will be retrieved", type = Type.STRING) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "DublinCore of event is in the body of response"),
+          @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
+  public Response getDublinCoreMetadataXml(@PathParam("id") long eventId) {
+    try {
+      DublinCoreCatalog result = service.getEventDublinCore(eventId);
+      String dcXML = serializeDublinCore(result);
+      return Response.ok(dcXML).build();
+    } catch (NotFoundException e) {
+      logger.warn("Event with id '{}' does not exist.", eventId);
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (Exception e) {
+      logger.warn("Unable to retrieve event with id '{}': {}", eventId, e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Gets a Dublin Core metadata for the specified event as JSON.
+   * 
+   * @param eventID
+   *          The unique ID of the event.
+   * @return Dublin Core JSON for the event
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("recordings/{id}.json")
+  @RestQuery(name = "recordingsasjson", description = "Retrieves DublinCore for specified event", returnDescription = "DublinCore in JSON", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "ID of event for which DublinCore will be retrieved", type = Type.STRING) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "DublinCore of event is in the body of response"),
+          @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
+  public Response getDublinCoreMetadataJSON(@PathParam("id") long eventId) {
+    try {
+      DublinCoreCatalog result = service.getEventDublinCore(eventId);
+      return Response.ok(result.toJson()).build();
+    } catch (NotFoundException e) {
+      logger.warn("Event with id '{}' does not exist.", eventId);
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (Exception e) {
+      logger.warn("Unable to retrieve event with id '{}': {}", eventId, e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+    }
   }
 
   /**
@@ -168,51 +187,122 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("{eventId}/captureAgentMetadata")
-  public Response getCaptureAgentMetadata(@PathParam("eventId") Long eventId) throws NotFoundException {
-    if (eventId == null) {
-      return Response.status(Status.BAD_REQUEST).build();
+  @Path("recordings/{id}/agent.properties")
+  @RestQuery(name = "recordingsagentproperties", description = "Retrieves Capture Agent properties for specified event", returnDescription = "Capture Agent properties in the form of key, value pairs", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "ID of event for which agent properties will be retrieved", type = Type.STRING) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Capture Agent properties of event is in the body of response"),
+          @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
+  public Response getCaptureAgentMetadata(@PathParam("id") long eventId) {
+    try {
+      Properties result = service.getEventCaptureAgentConfiguration(eventId);
+      String serializedProperties = serializeProperties(result);
+      return Response.ok(serializedProperties).build();
+    } catch (NotFoundException e) {
+      logger.warn("Event with id '{}' does not exist.", eventId);
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (Exception e) {
+      logger.warn("Unable to retrieve event with id '{}': {}", eventId, e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
-    String result = service.getCaptureAgentMetadata(eventId);
-    return Response.ok(result).build();
   }
 
   /**
-   * Stores a new event in the database. As a result the event will be returned, but some fields especially the event-id
-   * may have been updated. Within the metadata section it is possible to add any additional metadata as a key-value
-   * pair. The information will be stored even if the key is yet unknown.
+   * Creates new event(s) based on parameters. ALl times and dates are in milliseconds.
    * 
-   * @param e
-   *          The SchedulerEvent that should be stored.
-   * @return The same event with some updated fields.
+   * @param event
+   *          serialized Dublin Core for event
+   * @param properties
+   *          Capture agent properties (optional)
+   * @param recurrence
+   *          recurrence pattern (optionally)
+   * @param start
+   *          start of event, used if recurrence is specified (if null is sent, current time will be asumed)
+   * @param end
+   *          end of event, required for recurrent events
+   * @param duration
+   *          duration of each event, required for recurrent events
+   * @param agentTimeZone
+   *          time zone of the agent if it's different than scheduler's
+   * @return
    */
-  @PUT
-  @Path("/")
-  @Produces(MediaType.TEXT_XML)
-  public Response addEvent(@FormParam("event") EventImpl event) throws NotFoundException {
-    logger.debug("addEvent(e): {}", event);
+  @POST
+  @Path("/recordings")
+  @RestQuery(name = "newrecordings", description = "Creates new event or group of event with specified parameters", returnDescription = "If events were successfully generated, status CREATED is returned, otherwise BAD REQUEST", restParameters = {
+          @RestParameter(name = "event", isRequired = true, type = Type.TEXT, description = "Dublin Core describing event", defaultValue = "${this.sampleDublinCore}"),
+          @RestParameter(name = "caproperties", isRequired = true, type = Type.TEXT, description = "Capture agent properties for event", defaultValue = "${this.sampleCAProperties}"),
+          @RestParameter(name = "recurrence", isRequired = false, type = Type.STRING, description = "Recurrence pattern if event is recurrent"),
+          @RestParameter(name = "start", isRequired = false, type = Type.STRING, description = "Start date of recurrent event"),
+          @RestParameter(name = "end", isRequired = false, type = Type.STRING, description = "End date of recurrent event"),
+          @RestParameter(name = "duration", isRequired = false, type = Type.STRING, description = "Duration of each event if it recurrent"),
+          @RestParameter(name = "timezone", isRequired = false, type = Type.STRING, description = "Capture agent time zone if it is different than scheduler's") }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_CREATED, description = "Event or events were successfully created"),
+          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid information for this request") })
+  public Response addEvent(@FormParam("event") String event, @FormParam("caproperties") String properties,
+          @FormParam("recurrence") String recurrence, @FormParam("start") String start, @FormParam("end") String end,
+          @FormParam("duration") String duration, @FormParam("timezone") String agentTimeZone) {
+    if (StringUtils.isEmpty(event)) {
+      logger.warn("No event dublin core specified.");
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    Long startAsLong = null;
+    Long endAsLong = null;
+    Long durationAsLong = null;
+    if (StringUtils.isNotEmpty(recurrence)) {
+      if (end == null || duration == null) {
+        logger.warn("For creating recurrent event end date and duration of each event must be specified.");
+        return Response.status(Status.BAD_REQUEST).build();
+      }
+      try {
+        if (start == null) {
+          startAsLong = System.currentTimeMillis();
+        } else {
+          startAsLong = Long.parseLong(start);
+        }
+        endAsLong = Long.parseLong(end);
+        durationAsLong = Long.parseLong(duration);
+      } catch (NumberFormatException e) {
+        logger.warn("Expected time in milliseconds for start, end and duration: {}", e.getMessage());
+        return Response.status(Status.BAD_REQUEST).build();
+      }
+    }
+
+    DublinCoreCatalog eventCatalog;
     try {
-      if (StringUtils.isNotEmpty(event.getRecurrencePattern())) {
+      eventCatalog = parseDublinCore(event);
+    } catch (Exception e) {
+      logger.warn("Could not parse Dublin core: {}", event);
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    Properties caProperties = null;
+    if (properties != null) {
+      try {
+        caProperties = parseProperties(properties);
+      } catch (Exception e) {
+        logger.warn("Could not parse capture agent properties: {}", properties);
+        return Response.status(Status.BAD_REQUEST).build();
+      }
+    }
+
+    try {
+      if (StringUtils.isNotEmpty(recurrence)) {
         // try to create event and it's recurrences
-        service.addRecurringEvent(event);
+        Long[] createdIDs = service.addReccuringEvent(eventCatalog, recurrence, new Date(startAsLong), new Date(
+                endAsLong), durationAsLong, agentTimeZone);
+        if (caProperties != null) {
+          service.updateCaptureAgentMetadata(caProperties, createdIDs);
+        }
         return Response.status(Status.CREATED).build();
       } else {
-        Event result = service.addEvent(event);
-        if (result != null) { // TODO: addEvent never returns null. When it's updated to throw EntityExistsException
-                              // Handle it though...
-          return Response
-                  .status(Status.CREATED)
-                  .header("Location",
-                          PathSupport.concat(new String[] { this.serverUrl, this.serviceUrl,
-                                  result.getEventId() + ".xml" })).entity(result).build();
-        } else {
-          logger.error("Event that should be added is null");
-          return Response.status(Status.NOT_FOUND).build();
+        Long id = service.addEvent(eventCatalog);
+        if (caProperties != null) {
+          service.updateCaptureAgentMetadata(caProperties, id);
         }
+        return Response.status(Status.CREATED)
+                .header("Location", PathSupport.concat(new String[] { this.serverUrl, this.serviceUrl, id + ".xml" }))
+                .build();
       }
     } catch (Exception e) {
-      logger.warn("Unable to create new event", e);
-      return Response.serverError().build();
+      logger.warn("Unable to create new event", e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -225,619 +315,642 @@ public class SchedulerRestService {
    * @return true if the event was found and could be deleted.
    */
   @DELETE
-  @Path("{eventId}")
-  public Response deleteEvent(@PathParam("eventId") Long eventId) throws NotFoundException {
-    if (eventId == null) {
-      return Response.status(Status.BAD_REQUEST).build();
-    } else {
-      try {
-        service.removeEvent(eventId);
-        return Response.noContent().type("").build(); // remove content-type, no message-body.
-      } catch (Exception e) {
-        logger.warn("Unable to delete event with id '{}': {}", eventId, e);
-        return Response.serverError().build();
-      }
+  @Path("recordings/{id}")
+  @RestQuery(name = "deleterecordings", description = "Removes scheduled event with specified ID.", returnDescription = "OK if event were successfully removed or NOT FOUND if event with specified ID does not exist", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "Event ID", type = Type.STRING) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Event was successfully removed"),
+          @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
+  public Response deleteEvent(@PathParam("id") long eventId) {
+    try {
+      service.removeEvent(eventId);
+      return Response.ok().build();
+    } catch (NotFoundException e) {
+      logger.warn("Event with id '{}' does not exist.", eventId);
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (Exception e) {
+      logger.warn("Unable to delete event with id '{}': {}", eventId, e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
   }
 
   /**
-   * Updates an existing event in the database. The event-id has to be stored in the database already. Will return true,
+   * Updates an existing event in the database. The event-id has to be stored in the database already. Will return OK,
    * if the event was found and could be updated.
    * 
-   * @param e
-   *          The SchedulerEvent that should be updated
-   * @return true if the event was found and could be updated.
+   * @param eventID
+   *          id of event to be updated
+   * 
+   * @param event
+   *          serialized DC representing event
+   * @return
    */
-  @POST
-  @Path("{eventId}")
-  public Response updateEvent(@PathParam("eventId") String eventId, @FormParam("event") EventImpl event)
-          throws NotFoundException {
-    if (!eventId.isEmpty() && event != null) {
-      try {
-        event.setEventId(Long.parseLong(eventId));
-        service.updateEvent(event, true, true);
-        return Response.noContent().type("").build(); // remove content-type, no message-body.
-      } catch (Exception e) {
-        logger.warn("Unable to update event with id '{}': {}", eventId, e);
-        return Response.serverError().build();
-      }
-    } else {
+  @PUT
+  @Path("recordings/{id}")
+  @RestQuery(name = "updaterecordings", description = "Updates Dublin Core of specified event", returnDescription = "Status OK is returned if event was successfully updated, NOT FOUND if specified event does not exist or BAD REQUEST if data is missing or invalid", pathParameters = { @RestParameter(name = "id", description = "ID of event to be updated", isRequired = true, type = Type.STRING) }, restParameters = {
+          @RestParameter(name = "event", isRequired = false, description = "Updated Dublin Core for event", type = Type.TEXT),
+          @RestParameter(name = "agentproperties", isRequired = false, description = "Updated Capture Agent properties", type = Type.TEXT) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Event was successfully updated"),
+          @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist"),
+          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Data is missing or invalid") })
+  public Response updateEvent(@PathParam("id") String eventID, @FormParam("event") String event,
+          @FormParam("agentproperties") String agentProperties) {
+    if (StringUtils.isEmpty(event) && StringUtils.isEmpty(agentProperties)) {
+      logger.warn("Dublin Core or Capture Agent properties for event must be specified when updating event");
       return Response.status(Status.BAD_REQUEST).build();
     }
-  }
 
-  /**
-   * Updates a list of existing event in the database. The event-id has to be stored in the database already.
-   * 
-   * @param e
-   *          The SchedulerEvent that should be updated
-   * @param eventIdList
-   *          A JSON array of event ids.
-   * @return true if the event was found and could be updated.
-   */
-  @SuppressWarnings("unchecked")
-  @POST
-  @Path("")
-  public Response updateEvent(@FormParam("event") EventImpl event, @FormParam("idList") String idList)
-          throws NotFoundException {
-    JSONParser parser = new JSONParser();
-    JSONArray ids = new JSONArray();
+    Long id;
     try {
-      if (idList != null && !idList.isEmpty()) {
-        ids = (JSONArray) parser.parse(idList);
-      }
-    } catch (ParseException e) {
-      logger.warn("Unable to parse json id list: {}", e);
+      id = Long.parseLong(eventID);
+    } catch (Exception e) {
+      logger.warn("Invalid eventID (non-numerical): {}", eventID);
       return Response.status(Status.BAD_REQUEST).build();
     }
-    if (!ids.isEmpty() && event != null) {
-      try {
-        service.updateEvents(ids, event);
-        return Response.noContent().type("").build(); // remove content-type, no message-body.
-      } catch (Exception e) {
-        logger.warn("Unable to update event with id '{}': {}", ids, e);
-        return Response.serverError().build();
-      }
-    } else {
-      return Response.status(Status.BAD_REQUEST).build();
-    }
-  }
 
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("filter")
-  // CHECKSTYLE:OFF
-  public Response filterEventsDefault(@QueryParam("contributor") String contributor,
-          @QueryParam("creator") String creator, @QueryParam("device") String device,
-          @QueryParam("series") String series, @QueryParam("start") Long startDate, @QueryParam("end") Long endDate,
-          @QueryParam("title") String title, @QueryParam("order") boolean isAsc) {
-    // CHECKSTYLE:ON
-    return filterEvents(contributor, creator, device, series, startDate, endDate, title, isAsc);
+    DublinCoreCatalog eventCatalog = null;
+    if (!StringUtils.isEmpty(event)) {
+      try {
+        eventCatalog = parseDublinCore(event);
+        eventCatalog.set(DublinCore.PROPERTY_IDENTIFIER, eventID);
+      } catch (Exception e) {
+        logger.warn("Could not parse Dublin core: {}", event);
+        return Response.status(Status.BAD_REQUEST).build();
+      }
+    }
+
+    Properties caProperties = null;
+    try {
+      caProperties = parseProperties(agentProperties);
+    } catch (Exception e) {
+      logger.warn("Could not parse capture agent properties: {}", agentProperties);
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+
+    try {
+      if (eventCatalog != null) {
+        service.updateEvent(eventCatalog);
+      }
+      if (caProperties != null) {
+        service.updateCaptureAgentMetadata(caProperties, id);
+      }
+      return Response.ok().build();
+    } catch (NotFoundException e) {
+      logger.warn("Event with id '{}' does not exist.", id);
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (Exception e) {
+      logger.warn("Unable to update event with id '{}': {}", id, e);
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+    }
   }
 
   /**
-   * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included
-   * will not be filtered. Possible values for order by are
-   * title,creator,series,time-asc,time-desc,contributor,channel,location,device
+   * Returns Dublin Core list as XML based on search parameters.
    * 
-   * @param filter
-   *          exact id to search for pattern to search for pattern to search for A short description of the content of
-   *          the lecture begin of the period of valid events end of the period of valid events pattern to search for ID
-   *          of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern
-   *          to search for pattern to search for
-   *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
-   * @return List of SchedulerEvents as XML
+   * @param text
+   *          full test search
+   * @param eventId
+   *          by event id
+   * @param eventTitle
+   *          by event title
+   * @param seriesId
+   *          by series id
+   * @param creator
+   *          by creator
+   * @param contributor
+   *          by contributor
+   * @param publisher
+   *          by publisher
+   * @param rightsHolder
+   *          by right's holder
+   * @param createdFrom
+   *          by created from
+   * @param createdTo
+   *          by created to
+   * @param startsFrom
+   *          by starts from
+   * @param startsTo
+   *          by starts to
+   * @param endsFrom
+   *          by ends from
+   * @param endsTo
+   *          by ends to
+   * @param language
+   *          by language
+   * @param license
+   *          by license
+   * @param subject
+   *          by subject
+   * @param eventAbstract
+   *          by event's abstract
+   * @param description
+   *          by description
+   * @param device
+   *          by device
+   * @param sort
+   *          sort parameter
+   * @return
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("filter.xml")
+  @Path("recordings/recordings.xml")
+  @RestQuery(name = "recordingsasxml", description = "Searches recordings and returns result as XML", returnDescription = "XML formated results", restParameters = {
+          @RestParameter(name = "q", description = "Free text search", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "eventid", description = "Search by event ID", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "eventtitle", description = "Search by event title", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "seriesid", description = "Search by series ID", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "creator", description = "Search by creator", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "contributor", description = "Search by contributor", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "publisher", description = "Search by publisher", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "createdfrom", description = "Search by when was event created", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "createdto", description = "Search by when was event created", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "startsfrom", description = "Search by when does event start", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "startsto", description = "Search by when does event start", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "endsfrom", description = "Search by when does event finish", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "endsto", description = "Search by when does event finish", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "language", description = "Search by language", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "license", description = "Search by license", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "subject", description = "Search by subject", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "abstract", description = "Search by abstract", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "description", description = "Search by description", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "spatial", description = "Search by device", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "sort", description = "The sort order.  May include any of the following: TITLE, SUBJECT, CREATOR, PUBLISHER, CONTRIBUTOR, ABSTRACT, DESCRIPTION, CREATED, AVAILABLE_FROM, AVAILABLE_TO, LANGUAGE, RIGHTS_HOLDER, SPATIAL, IS_PART_OF, REPLACES, TYPE, ACCESS, LICENCE, EVENT_START.  Add '_DESC' to reverse the sort order (e.g. TITLE_DESC).", isRequired = false, type = Type.STRING) }, reponses = { @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Search completed, results returned in body") })
   // CHECKSTYLE:OFF
-  public Response filterEventsXml(@QueryParam("contributor") String contributor, @QueryParam("creator") String creator,
-          @QueryParam("device") String device, @QueryParam("series") String series,
-          @QueryParam("start") Long startDate, @QueryParam("end") Long endDate, @QueryParam("title") String title,
-          @QueryParam("order") boolean isAsc) {
+  public Response getEventsAsXml(@QueryParam("q") String text, @QueryParam("eventid") String eventId,
+          @QueryParam("eventtitle") String eventTitle, @QueryParam("seriesid") String seriesId,
+          @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
+          @QueryParam("publisher") String publisher, @QueryParam("rightsholder") String rightsHolder,
+          @QueryParam("createdfrom") String createdFrom, @QueryParam("createdto") String createdTo,
+          @QueryParam("startsfrom") String startsFrom, @QueryParam("startsto") String startsTo,
+          @QueryParam("endsfrom") String endsFrom, @QueryParam("endsto") String endsTo,
+          @QueryParam("language") String language, @QueryParam("license") String license,
+          @QueryParam("subject") String subject, @QueryParam("abstract") String eventAbstract,
+          @QueryParam("description") String description, @QueryParam("spatial") String device,
+          @QueryParam("sort") String sort) {
     // CHECKSTYLE:ON
-    return filterEvents(contributor, creator, device, series, startDate, endDate, title, isAsc);
+    try {
+      DublinCoreCatalogList result = getEvents(text, eventId, eventTitle, seriesId, creator, contributor, publisher,
+              rightsHolder, createdFrom, createdTo, startsFrom, startsTo, endsFrom, endsTo, language, license, subject,
+              eventAbstract, description, device, sort);
+      return Response.ok(result.getResultsAsXML()).build();
+    } catch (Exception e) {
+      logger.error("Unable to perform search: {}", e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+    }
   }
 
   /**
-   * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included
-   * will not be filtered. Possible values for order by are
-   * title,creator,series,time-asc,time-desc,contributor,channel,location,device
+   * Returns Dublin Core list as JSON based on search parameters.
    * 
-   * @param filter
-   *          exact id to search for pattern to search for pattern to search for A short description of the content of
-   *          the lecture begin of the period of valid events end of the period of valid events pattern to search for ID
-   *          of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern
-   *          to search for pattern to search for
-   *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
-   * @return List of SchedulerEvents as JSON
+   * @param text
+   *          full test search
+   * @param eventId
+   *          by event id
+   * @param eventTitle
+   *          by event title
+   * @param seriesId
+   *          by series id
+   * @param creator
+   *          by creator
+   * @param contributor
+   *          by contributor
+   * @param publisher
+   *          by publisher
+   * @param rightsHolder
+   *          by right's holder
+   * @param createdFrom
+   *          by created from
+   * @param createdTo
+   *          by created to
+   * @param startsFrom
+   *          by starts from
+   * @param startsTo
+   *          by starts to
+   * @param endsFrom
+   *          by ends from
+   * @param endsTo
+   *          by ends to
+   * @param language
+   *          by language
+   * @param license
+   *          by license
+   * @param subject
+   *          by subject
+   * @param eventAbstract
+   *          by event's abstract
+   * @param description
+   *          by description
+   * @param device
+   *          by device
+   * @param sort
+   *          sort parameter
+   * @return
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("filter.json")
+  @Path("recordings/recordings.json")
+  @RestQuery(name = "recordingsasxml", description = "Searches recordings and returns result as JSON", returnDescription = "JSON formated results", restParameters = {
+          @RestParameter(name = "q", description = "Free text search", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "eventid", description = "Search by event ID", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "eventtitle", description = "Search by event title", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "seriesid", description = "Search by series ID", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "creator", description = "Search by creator", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "contributor", description = "Search by contributor", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "publisher", description = "Search by publisher", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "createdfrom", description = "Search by when was event created", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "createdto", description = "Search by when was event created", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "startsfrom", description = "Search by when does event start", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "startsto", description = "Search by when does event start", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "endsfrom", description = "Search by when does event finish", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "endsto", description = "Search by when does event finish", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "language", description = "Search by language", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "license", description = "Search by license", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "subject", description = "Search by subject", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "abstract", description = "Search by abstract", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "description", description = "Search by description", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "spatial", description = "Search by device", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "sort", description = "The sort order.  May include any of the following: TITLE, SUBJECT, CREATOR, PUBLISHER, CONTRIBUTOR, ABSTRACT, DESCRIPTION, CREATED, AVAILABLE_FROM, AVAILABLE_TO, LANGUAGE, RIGHTS_HOLDER, SPATIAL, IS_PART_OF, REPLACES, TYPE, ACCESS, LICENCE, EVENT_START.  Add '_DESC' to reverse the sort order (e.g. TITLE_DESC).", isRequired = false, type = Type.STRING) }, reponses = { @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Search completed, results returned in body") })
   // CHECKSTYLE:OFF
-  public Response filterEventsJson(@QueryParam("contributor") String contributor,
-          @QueryParam("creator") String creator, @QueryParam("device") String device,
-          @QueryParam("series") String series, @QueryParam("start") Long startDate, @QueryParam("end") Long endDate,
-          @QueryParam("title") String title, @QueryParam("order") boolean isAsc) {
+  public Response getEventsAsJson(@QueryParam("q") String text, @QueryParam("eventid") String eventId,
+          @QueryParam("eventtitle") String eventTitle, @QueryParam("seriesid") String seriesId,
+          @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
+          @QueryParam("publisher") String publisher, @QueryParam("rightsholder") String rightsHolder,
+          @QueryParam("createdfrom") String createdFrom, @QueryParam("createdto") String createdTo,
+          @QueryParam("startsfrom") String startsFrom, @QueryParam("startsto") String startsTo,
+          @QueryParam("endsfrom") String endsFrom, @QueryParam("endsto") String endsTo,
+          @QueryParam("language") String language, @QueryParam("license") String license,
+          @QueryParam("subject") String subject, @QueryParam("abstract") String eventAbstract,
+          @QueryParam("description") String description, @QueryParam("spatial") String device,
+          @QueryParam("sort") String sort) {
     // CHECKSTYLE:ON
-    return filterEvents(contributor, creator, device, series, startDate, endDate, title, isAsc);
+    try {
+      DublinCoreCatalogList result = getEvents(text, eventId, eventTitle, seriesId, creator, contributor, publisher,
+              rightsHolder, createdFrom, createdTo, startsFrom, startsTo, endsFrom, endsTo, language, license, subject,
+              eventAbstract, description, device, sort);
+      return Response.ok(result.getResultsAsJson()).build();
+    } catch (Exception e) {
+      logger.error("Unable to perform search: {}", e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+    }
   }
 
+  /**
+   * Returns Dublin Core list based on search parameters.
+   * 
+   * @param text
+   *          full test search
+   * @param eventId
+   *          by event id
+   * @param eventTitle
+   *          by event title
+   * @param seriesId
+   *          by series id
+   * @param creator
+   *          by creator
+   * @param contributor
+   *          by contributor
+   * @param publisher
+   *          by publisher
+   * @param rightsHolder
+   *          by right's holder
+   * @param createdFrom
+   *          by created from
+   * @param createdTo
+   *          by created to
+   * @param startsFrom
+   *          by starts from
+   * @param startsTo
+   *          by starts to
+   * @param endsFrom
+   *          by ends from
+   * @param endsTo
+   *          by ends to
+   * @param language
+   *          by language
+   * @param license
+   *          by license
+   * @param subject
+   *          by subject
+   * @param eventAbstract
+   *          by event's abstract
+   * @param description
+   *          by description
+   * @param device
+   *          by device
+   * @param sort
+   *          sort parameter
+   * @return
+   */
   // CHECKSTYLE:OFF
-  private Response filterEvents(String contributor, String creator, String device, String series, Long startDate,
-          Long endDate, String title, boolean isAsc) {
+  private DublinCoreCatalogList getEvents(String text, String eventId, String eventTitle, String seriesId,
+          String creator, String contributor, String publisher, String rightsHolder, String createdFrom,
+          String createdTo, String startsFrom, String startsTo, String endsFrom, String endsTo, String language,
+          String license, String subject, String eventAbstract, String description, String device, String sort)
+          throws SchedulerException {
     // CHECKSTYLE:ON
-    SchedulerFilter filter = new SchedulerFilter().withCreatorFilter(creator).withDeviceFilter(device)
-            .withSeriesFilter(series).withTitleFilter(title).withContributorFilter(contributor)
-            .withOrderAscending("title", isAsc);
-
-    if (startDate != null && endDate != null) {
-      filter.between(new Date(startDate), new Date(endDate));
-    } else if (startDate != null) {
-      filter.withStart(new Date(startDate));
-    } else if (endDate != null) {
-      filter.withStop(new Date(endDate));
-    }
-
+    SchedulerQuery q = new SchedulerQuery();
+    q.setText(text);
+    q.setIdentifier(eventId);
+    q.setIdentifier(eventTitle);
+    q.setSeriesId(seriesId);
+    q.setCreator(creator);
+    q.setContributor(contributor);
+    q.setLanguage(language);
+    q.setLicense(license);
+    q.setSubject(subject);
+    q.setPublisher(publisher);
+    q.setEventAbstract(eventAbstract);
+    q.setDescription(description);
+    q.setRightsHolder(rightsHolder);
+    q.setSpatial(device);
     try {
-      List<Event> events = service.getEvents(filter);
-      EventListImpl eventList = new EventListImpl(events);
-      return Response.ok(eventList).build();
-    } catch (Exception e) {
-      logger.error("Exception while filtering events: ", e);
-      return Response.serverError().build();
+      q.setCreatedFrom(SolrUtils.parseDate(createdFrom));
+      q.setCreatedTo(SolrUtils.parseDate(createdTo));
+      q.setStartsFrom(SolrUtils.parseDate(startsFrom));
+      q.setStartsTo(SolrUtils.parseDate(startsTo));
+      q.setEndsFrom(SolrUtils.parseDate(endsFrom));
+      q.setEndsTo(SolrUtils.parseDate(endsTo));
+    } catch (java.text.ParseException e1) {
+      logger.warn("Could not parse date parameter: {}", e1);
     }
+
+    if (StringUtils.isNotBlank(sort)) {
+      SchedulerQuery.Sort sortField = null;
+      if (sort.endsWith("_DESC")) {
+        String enumKey = sort.substring(0, sort.length() - "_DESC".length()).toUpperCase();
+        try {
+          sortField = SchedulerQuery.Sort.valueOf(enumKey);
+          q.withSort(sortField, false);
+        } catch (IllegalArgumentException e) {
+          logger.warn("No sort enum matches '{}'", enumKey);
+        }
+      } else {
+        try {
+          sortField = SchedulerQuery.Sort.valueOf(sort);
+          q.withSort(sortField);
+        } catch (IllegalArgumentException e) {
+          logger.warn("No sort enum matches '{}'", sort);
+        }
+      }
+    }
+
+    return service.search(q);
   }
 
   /**
    * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
    * 
-   * @param e
-   *          The event that should be checked for conflicts
+   * @param device
+   *          device that will be checked for conflicts
+   * @param startDate
+   *          start date of conflict
+   * @param endDate
+   *          end date of conflict
+   * @param duration
+   *          duration of conflict (only used if recurrence rule is specified, otherwise duration is determined from
+   *          start and end date)
+   * @param rrule
+   *          recurrence rule for conflict
    * @return An XML with the list of conflicting events
    */
-  @POST
+  @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("conflict.xml")
-  public Response getConflictingEventsXml(@FormParam("device") String device, @FormParam("start") Long startDate,
-          @FormParam("end") Long endDate, @FormParam("duration") Long duration, @FormParam("rrule") String rrule) {
-    return getConflictingEvents(device, new Date(startDate), new Date(endDate), duration, rrule);
+  @Path("recordings/conflicts.xml")
+  @RestQuery(name = "conflictingrecordingsasxml", description = "Searches for conflicting recordings based on parameters", returnDescription = "Returns NO CONTENT if no recordings are in conflict within specified period or list of conflicting recordings in XML", restParameters = {
+          @RestParameter(name = "device", description = "Device identifier for which conflicts will be searched", isRequired = false, type = Type.TEXT),
+          @RestParameter(name = "start", description = "Start time of conflicting period", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "end", description = "End time of conflicting period", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "duration", description = "If recurrence rule is specified duration of each conflicting period", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "rrule", description = "Rule for recurrent conflicting period", isRequired = false, type = Type.STRING) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_NO_CONTENT, description = "No conflicting events found"),
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Found conflicting events, returned in body of response"),
+          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid parameters") })
+  public Response getConflictingEventsXml(@QueryParam("device") String device, @QueryParam("start") String startDate,
+          @QueryParam("end") String endDate, @QueryParam("duration") String duration, @QueryParam("rrule") String rrule) {
+    if (StringUtils.isEmpty(device) || startDate == null || endDate == null || duration == null) {
+      logger.warn("Either device, start date, end date or duration were not specified");
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    Long startDateAsLong;
+    Long endDateAsLong;
+    Long durationAsLong;
+    try {
+      startDateAsLong = Long.parseLong(startDate);
+      endDateAsLong = Long.parseLong(endDate);
+      durationAsLong = Long.parseLong(duration);
+    } catch (NumberFormatException e) {
+      logger.warn("Invalid number parameter: {}", e.getMessage());
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+
+    try {
+      DublinCoreCatalogList events = null;
+      if (StringUtils.isNotEmpty(rrule)) {
+        events = service.findConflictingEvents(device, rrule, new Date(startDateAsLong), new Date(endDateAsLong),
+                durationAsLong);
+      } else {
+        events = service.findConflictingEvents(device, new Date(startDateAsLong), new Date(endDateAsLong));
+      }
+      if (!events.getCatalogList().isEmpty()) {
+        return Response.ok(events.getResultsAsXML()).build();
+      } else {
+        return Response.noContent().type("").build();
+      }
+    } catch (Exception e) {
+      logger.error(
+              "Unable to find conflicting events for " + device + ", " + startDate.toString() + ", "
+                      + endDate.toString() + ", " + String.valueOf(duration) + ":", e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+    }
   }
 
   /**
    * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
    * 
-   * @param e
-   *          The event that should be checked for conflicts
-   * @return An JSON with the list of conflicting events
+   * @param device
+   *          device that will be checked for conflicts
+   * @param startDate
+   *          start date of conflict
+   * @param endDate
+   *          end date of conflict
+   * @param duration
+   *          duration of conflict (only used if recurrence rule is specified, otherwise duration is determined from
+   *          start and end date)
+   * @param rrule
+   *          recurrence rule for conflict
+   * @return An XML with the list of conflicting events
    */
-  @POST
+  @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("conflict.json")
-  public Response getConflictingEventsJson(@FormParam("device") String device, @FormParam("start") Long startDate,
-          @FormParam("end") Long endDate, @FormParam("duration") Long duration, @FormParam("rrule") String rrule) {
-    logger.debug("Checking for conflicts");
-    return getConflictingEvents(device, new Date(startDate), new Date(endDate), duration, rrule);
-  }
-
-  private Response getConflictingEvents(String device, Date startDate, Date endDate, Long duration, String rrule) {
-    if (StringUtils.isNotEmpty(device) && startDate != null && endDate != null && duration > 0) {
-      try {
-        List<Event> events = null;
-        if (StringUtils.isNotEmpty(rrule)) {
-          events = service.findConflictingEvents(device, rrule, startDate, endDate, duration);
-        } else {
-          events = service.findConflictingEvents(device, startDate, endDate);
-        }
-        if (!events.isEmpty()) {
-          EventListImpl eventList = new EventListImpl(events);
-          return Response.ok(eventList).build();
-        } else {
-          return Response.noContent().type("").build();
-        }
-      } catch (Exception e) {
-        logger.error(
-                "Unable to find conflicting events for " + device + ", " + startDate.toString() + ", "
-                        + endDate.toString() + ", " + String.valueOf(duration) + ":", e);
-        return Response.serverError().build();
-      }
-    } else {
+  @Path("recordings/conflicts.json")
+  @RestQuery(name = "conflictingrecordingsasxml", description = "Searches for conflicting recordings based on parameters", returnDescription = "Returns NO CONTENT if no recordings are in conflict within specified period or list of conflicting recordings in JSON", restParameters = {
+          @RestParameter(name = "device", description = "Device identifier for which conflicts will be searched", isRequired = false, type = Type.TEXT),
+          @RestParameter(name = "start", description = "Start time of conflicting period", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "end", description = "End time of conflicting period", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "duration", description = "If recurrence rule is specified duration of each conflicting period", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "rrule", description = "Rule for recurrent conflicting period", isRequired = false, type = Type.STRING) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_NO_CONTENT, description = "No conflicting events found"),
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Found conflicting events, returned in body of response"),
+          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid parameters") })
+  public Response getConflictingEventsJSON(@QueryParam("device") String device, @QueryParam("start") String startDate,
+          @QueryParam("end") String endDate, @QueryParam("duration") String duration, @QueryParam("rrule") String rrule) {
+    if (StringUtils.isEmpty(device) || startDate == null || endDate == null || duration == null) {
+      logger.warn("Either device, start date, end date or duration were not specified");
       return Response.status(Status.BAD_REQUEST).build();
     }
-  }
-
-  /**
-   * Lists all events in the database, without any filter
-   * 
-   * @return XML with all events
-   */
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("all/events.xml")
-  public Response getAllEventsXml() {
-    return getAllEvents();
-  }
-
-  /**
-   * Lists all events in the database, without any filter
-   * 
-   * @return JSON with all events
-   */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("all/events.json")
-  public Response getAllEventsJson() {
-    return getAllEvents();
-  }
-
-  private Response getAllEvents() {
+    Long startDateAsLong;
+    Long endDateAsLong;
+    Long durationAsLong;
     try {
-      EventListImpl eventList = new EventListImpl(service.getEvents(null));
-      return Response.ok(eventList).build();
+      startDateAsLong = Long.parseLong(startDate);
+      endDateAsLong = Long.parseLong(endDate);
+      durationAsLong = Long.parseLong(duration);
+    } catch (NumberFormatException e) {
+      logger.warn("Invalid number parameter: {}", e.getMessage());
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+
+    try {
+      DublinCoreCatalogList events = null;
+      if (StringUtils.isNotEmpty(rrule)) {
+        events = service.findConflictingEvents(device, rrule, new Date(startDateAsLong), new Date(endDateAsLong),
+                durationAsLong);
+      } else {
+        events = service.findConflictingEvents(device, new Date(startDateAsLong), new Date(endDateAsLong));
+      }
+      if (!events.getCatalogList().isEmpty()) {
+        return Response.ok(events.getResultsAsJson()).build();
+      } else {
+        return Response.noContent().type("").build();
+      }
     } catch (Exception e) {
-      logger.error("Unable to return all events: {}", e);
-      return Response.serverError().build();
+      logger.error(
+              "Unable to find conflicting events for " + device + ", " + startDate.toString() + ", "
+                      + endDate.toString() + ", " + String.valueOf(duration) + ":", e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
   }
 
   /**
-   * Lists all future events in the database, without any filter
-   * 
-   * @return XML with all events
-   */
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("upcoming.xml")
-  public Response getUpcomingEventsXml() {
-    return getUpcomingEvents();
-  }
-
-  /**
-   * Lists all future events in the database, without any filter
-   * 
-   * @return JSON with all events
-   */
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("upcoming.json")
-  public Response getUpcomingEventsJson() {
-    return getUpcomingEvents();
-  }
-
-  private Response getUpcomingEvents() {
-    SchedulerFilter filter = new SchedulerFilter();
-    filter.withStart(new Date(System.currentTimeMillis()));
-    try {
-      EventListImpl eventList = new EventListImpl(service.getEvents(filter));
-      return Response.ok(eventList).build();
-    } catch (Exception e) {
-      logger.error("Unable to return upcoming events: {}", e);
-      return Response.serverError().build();
-    }
-  }
-
-  /**
-   * Gets the iCalendar with all (even old) events for the specified capture agent id.
+   * Gets the iCalendar with all (even old) events for the specified filter.
    * 
    * @param captureAgentID
    *          The ID that specifies the capture agent.
+   * @param seriesId
+   *          The ID that specifies series.
+   * 
    * @return an iCalendar
    */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("{captureAgentID}/calendar")
-  public Response getCalendarForCaptureAgent(@PathParam("captureAgentID") String captureAgentId,
-          @Context HttpServletRequest request) throws NotFoundException {
-    if (captureAgentId.isEmpty()) {
-      return Response.status(Status.BAD_REQUEST).build();
-    } else {
-      try {
-        // If the etag matches the if-not-modified header, return a 304
-        Date lastModified = service.getScheduleLastModified(captureAgentId);
-        if (lastModified == null) {
-          lastModified = new Date();
-        }
-        String ifNoneMatch = request.getHeader(HttpHeaders.IF_NONE_MATCH);
-        if (StringUtils.isNotBlank(ifNoneMatch) && ifNoneMatch.equals("mod" + Long.toString(lastModified.getTime()))) {
-          return Response.notModified("mod" + Long.toString(lastModified.getTime())).expires(null).build();
-        }
-        String result = service.getCalendarForCaptureAgent(captureAgentId);
-        if (!result.isEmpty()) {
-          return Response.ok(result).header(HttpHeaders.ETAG, "mod" + Long.toString(lastModified.getTime())).build();
-        } else {
-          throw new NotFoundException();
-        }
-      } catch (Exception e) {
-        logger.error("Unable to get calendar for capture agent '{}': {}", captureAgentId, e);
-        return Response.serverError().build();
+  @Path("recordings/calendars")
+  @RestQuery(name = "getcalendar", description = "Returns iCalendar for specified set of events", returnDescription = "ICalendar for events", restParameters = {
+          @RestParameter(name = "agentid", description = "Filter events by capture agent", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "seriesid", description = "Filter events by series", isRequired = false, type = Type.STRING) }, reponses = {
+          @RestResponse(responseCode = HttpServletResponse.SC_NOT_MODIFIED, description = "Events were not modified since last request"),
+          @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Events were modified, new calendar is in the body") })
+  public Response getCalendar(@QueryParam("agentid") String captureAgentId, @QueryParam("seriesid") String seriesId,
+          @Context HttpServletRequest request) {
+    SchedulerQuery filter = new SchedulerQuery().setSpatial(captureAgentId).setSeriesId(seriesId);
+    try { // If the etag matches the if-not-modified header,return a 304
+      Date lastModified = service.getScheduleLastModified(filter);
+      if (lastModified == null) {
+        lastModified = new Date();
       }
+      String ifNoneMatch = request.getHeader(HttpHeaders.IF_NONE_MATCH);
+      if (StringUtils.isNotBlank(ifNoneMatch) && ifNoneMatch.equals("mod" + Long.toString(lastModified.getTime()))) {
+        return Response.notModified("mod" + Long.toString(lastModified.getTime())).expires(null).build();
+      }
+      String result = service.getCalendar(filter);
+      if (!result.isEmpty()) {
+        return Response.ok(result).header(HttpHeaders.ETAG, "mod" + Long.toString(lastModified.getTime())).build();
+      } else {
+        throw new NotFoundException();
+      }
+    } catch (Exception e) {
+      logger.error("Unable to get calendar for capture agent '{}': {}", captureAgentId, e.getMessage());
+      throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
   }
 
   /**
-   * returns the REST documentation
+   * Generates event Dublin Core without identifier set.
    * 
-   * @return the REST documentation, if available
+   * @return
    */
-  @GET
-  @Produces(MediaType.TEXT_HTML)
-  @Path("docs")
-  public String getDocumentation() {
-    return docs;
-  }
-
-  protected String docs;
-  private String[] notes = {
-          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
-
-  /**
-   * Generates the REST documentation
-   * 
-   * @return The HTML with the documentation
-   */
-  protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("Scheduler", "Scheduler Service", serviceUrl, notes);
-
-    // abstract
-    data.setAbstract("This service creates, edits and retrieves and helps manage scheduled capture events.");
-
-    // Scheduler addEvent
-    RestEndpoint addEventEndpoint = new RestEndpoint("addEvent", RestEndpoint.Method.PUT, "/",
-            "Stores a new event in the database.");
-    addEventEndpoint.addStatus(org.opencastproject.util.doc.Status.created("Event was successfully created."));
-    addEventEndpoint
-            .addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be stored."));
-    addEventEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, addEventEndpoint);
-
-    // Scheduler updateEvent
-    RestEndpoint updateEventEndpoint = new RestEndpoint("updateEvent", RestEndpoint.Method.POST, "/{eventId}",
-            "Updates an existing event in the database. The event-id has to be stored in the database already.");
-    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.noContent("Event successfully updated."));
-    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied eventId or Event are incorrect or missing."));
-    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .notFound("An event matching the supplied eventId was not found."));
-    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    updateEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "", "The UUID of the event to update."));
-    updateEventEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(),
-            "The Event that should be updated."));
-    updateEventEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, updateEventEndpoint);
-
-    // Scheduler removeEvent
-    RestEndpoint removeEventEndpoint = new RestEndpoint("removeEvent", RestEndpoint.Method.DELETE, "/{eventId}",
-            "Removes the specified event from the database.");
-    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.noContent("Event successfully deleted."));
-    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied eventId is incorrect or missing."));
-    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .notFound("An Event matching the supplied eventId was not found."));
-    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    removeEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "EventId", "The UUID of the event."));
-    removeEventEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, removeEventEndpoint);
-
-    // Scheduler getEvent
-    RestEndpoint getEventEndpoint = new RestEndpoint("getEvent", RestEndpoint.Method.GET, "/{eventId}.{format}",
-            "Get a specific scheduled event.");
-    getEventEndpoint.addFormat(Format.xml("XML representation of the event."));
-    getEventEndpoint.addFormat(Format.json("JSON representation of the event."));
-    // getEventEndpoint.setAutoPathFormat(true);
-    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ok("XML or JSON representation of the Event."));
-    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied eventId is incorrect or missing."));
-    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .notFound("An Event matching the supplied eventId was not found."));
-    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    getEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2",
-            "The UUID of the event."));
-    getEventEndpoint.addPathParam(new Param("format", Type.STRING, "json",
-            "The data format of the response, xml or json."));
-    getEventEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getEventEndpoint);
-
-    // Scheduler filterEventsEndpoint
-    RestEndpoint filterEventsEndpoint = new RestEndpoint("filterEvents", RestEndpoint.Method.GET, "/filter.{format}",
-            "returns scheduled events, that pass the filter. All string fields are case-sensative.");
-    filterEventsEndpoint.addFormat(Format
-            .xml("XML representation of a list of the events conforming to the supplied filter."));
-    filterEventsEndpoint.addFormat(Format
-            .json("JSON representation of a list of the event conforming to the supplied filter."));
-    // filterEventsEndpoint.setAutoPathFormat(true);
-    filterEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("XML or JSON representation of a list of events belonging to a recurring event."));
-    filterEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied filter is incorrect or missing."));
-    // contributor, creator, device, series, startDate, endDate, title, isAsc
-    filterEventsEndpoint.addPathParam(new Param("format", Type.STRING, "xml",
-            "The data format of the response, xml or json."));
-    filterEventsEndpoint.addOptionalParam(new Param("contributor", Type.STRING, "Joe Shmoe",
-            "Pattern to search for in contributor"));
-    filterEventsEndpoint.addOptionalParam(new Param("creator", Type.STRING, "Joe Shmoe",
-            "Pattern to search for in creator"));
-    filterEventsEndpoint.addOptionalParam(new Param("device", Type.STRING, "demo_capture_agent",
-            "Pattern to search for in the device name"));
-    filterEventsEndpoint.addOptionalParam(new Param("series", Type.STRING, "A Series",
-            "Pattern to search for in the series"));
-    filterEventsEndpoint.addOptionalParam(new Param("title", Type.STRING, "Katsudon",
-            "Pattern to search for in the title"));
-    filterEventsEndpoint.addOptionalParam(new Param("start", Type.STRING, String.valueOf(System.currentTimeMillis()),
-            "Start date prior to which events will be filtered"));
-    filterEventsEndpoint
-            .addOptionalParam(new Param("end", Type.STRING,
-                    String.valueOf(System.currentTimeMillis() + 60 * 60 * 1000),
-                    "End date after which events will be filtered"));
-    filterEventsEndpoint.addOptionalParam(new Param("order", Type.STRING, "true",
-            "Sort events by title ascending (true) or decending (false)"));
-    filterEventsEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, filterEventsEndpoint);
-
-    // Scheduler getEvents
-    RestEndpoint getAllEventsEndpoint = new RestEndpoint("allEvents", RestEndpoint.Method.GET, "/all/events",
-            "returns all scheduled events");
-    getAllEventsEndpoint.addFormat(Format.xml("XML representation of a list of all events."));
-    getAllEventsEndpoint.addFormat(Format.json("JSON representation of a list of all events."));
-    getAllEventsEndpoint.setAutoPathFormat(true);
-    getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("XML or JSON representation of a list of all events."));
-    getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    getAllEventsEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getAllEventsEndpoint);
-
-    // Scheduler getUpcomingEvents
-    RestEndpoint getUpcomingEventsEndpoint = new RestEndpoint("upcomingEvents", RestEndpoint.Method.GET, "/upcoming",
-            "returns all upcoming events. Returns true if the event was found and could be removed.");
-    getUpcomingEventsEndpoint.addFormat(Format.xml("XML representation of a list of all events."));
-    getUpcomingEventsEndpoint.addFormat(Format.json("JSON representation of a list of all events."));
-    getUpcomingEventsEndpoint.setAutoPathFormat(true);
-    getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("XML or JSON representation of a list of all upcoming events."));
-    getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    getUpcomingEventsEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getUpcomingEventsEndpoint);
-
-    // Scheduler findConflictingEvents
-    // RestEndpoint findConflictingEventsEndpoint = new RestEndpoint("findConflictingEvents", RestEndpoint.Method.POST,
-    // "/conflict.{format}",
-    // "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
-    // findConflictingEventsEndpoint.addFormat(Format
-    // .xml("XML representation of a list of all events that conflict with supplied event."));
-    // findConflictingEventsEndpoint.addFormat(Format
-    // .json("JSON representation of a list of all events that conflict with supplied event."));
-    // //findConflictingEventsEndpoint.setAutoPathFormat(true);
-    // findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-    // .ok("XML or JSON representation of a list of all upcoming events."));
-    // findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-    // .badRequest("Supplied Event is invalid or missing."));
-    // findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    // findConflictingEventsEndpoint.addPathParam(new Param("format", Type.STRING, "xml",
-    // "The data format of the response, xml or json."));
-    // findConflictingEventsEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(),
-    // "The Event that should be checked for conflicts."));
-    // findConflictingEventsEndpoint.setTestForm(RestTestForm.auto());
-    // data.addEndpoint(RestEndpoint.Type.READ, findConflictingEventsEndpoint);
-
-    // Scheduler findConflictingREvents
-    RestEndpoint findConflictingREventsEndpoint = new RestEndpoint("findConflictingRecurringEvents",
-            RestEndpoint.Method.POST, "/conflict.{format}",
-            "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
-    findConflictingREventsEndpoint.addFormat(Format
-            .xml("XML representation of a list of all events that conflict with supplied recurring event."));
-    findConflictingREventsEndpoint.addFormat(Format
-            .json("JSON representation of a list of all events that conflict with supplied recurring event."));
-    // findConflictingREventsEndpoint.setAutoPathFormat(true);
-    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("XML or JSON representation of a list of all upcoming events."));
-    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied RecurringEvent is invalid or missing."));
-    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    findConflictingREventsEndpoint.addPathParam(new Param("format", Type.STRING, "xml",
-            "The data format of the response, xml or json."));
-    // findConflictingREventsEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateEvent(),
-    // "The RecurringEvent that should be checked for conflicts. "));
-    findConflictingREventsEndpoint
-            .addRequiredParam(new Param("device", Type.STRING, "", "The device that is scheduled"));
-    findConflictingREventsEndpoint.addRequiredParam(new Param("start", Type.STRING, "",
-            "The start of the recurrence period"));
-    findConflictingREventsEndpoint.addRequiredParam(new Param("end", Type.STRING, "",
-            "The end of the recurrence period"));
-    findConflictingREventsEndpoint.addRequiredParam(new Param("duration", Type.STRING, "",
-            "The duration of the single event"));
-    findConflictingREventsEndpoint.addRequiredParam(new Param("rrule", Type.STRING, "", "The recurrence rule"));
-    findConflictingREventsEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, findConflictingREventsEndpoint);
-
-    // Scheduler getDublinCoreMetadata
-    RestEndpoint getDublinCoreMetadataEndpoint = new RestEndpoint("getDublinCoreMetadata", RestEndpoint.Method.GET,
-            "/{eventId}/dublincore", "Gets a XML with the Dublin Core metadata for the specified event. ");
-    getDublinCoreMetadataEndpoint.addFormat(Format.xml("Dublincore metadata for the supplied eventId."));
-    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Dublinecore XML document containing the event's metadata."));
-    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied eventId is invalid or missing."));
-    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .notFound("No Event matching the supplied eventId was found."));
-    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    getDublinCoreMetadataEndpoint.addPathParam(new Param("eventId", Type.STRING,
-            "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
-    getDublinCoreMetadataEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getDublinCoreMetadataEndpoint);
-
-    // Scheduler getCaptureAgentMetadata
-    RestEndpoint getCaptureAgentMetadataEndpoint = new RestEndpoint("getCaptureAgentMetadata", RestEndpoint.Method.GET,
-            "/{eventId}/captureAgentMetadata",
-            "Gets java Properties file with technical metadata for the specified event. ");
-    getCaptureAgentMetadataEndpoint.addFormat(new Format("properties",
-            "Java Properties files that is needed by the capture agent.", null));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("Java Properties file for the event."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied eventId is invalid or missing."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .notFound("No Event matching the supplied eventId was found."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    getCaptureAgentMetadataEndpoint.addPathParam(new Param("eventId", Type.STRING,
-            "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
-    getCaptureAgentMetadataEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getCaptureAgentMetadataEndpoint);
-
-    // Scheduler getCalendarForCaptureAgent
-    RestEndpoint getCalendarForCaptureAgentEndpoint = new RestEndpoint("getCalendarForCaptureAgent",
-            RestEndpoint.Method.GET, "/{captureAgentId}/calendar",
-            "Gets the iCalendar with all upcoming events for the specified capture agent id. ");
-    getCalendarForCaptureAgentEndpoint.addFormat(new Format("ics", "iCalendar", "http://tools.ietf.org/html/rfc2445"));
-    getCalendarForCaptureAgentEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .ok("iCalendar file containing the scheduled Events for the capture agent."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .badRequest("Supplied captureAgentId is invalid or missing."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .notFound("No capture agent matching the supplied catureAgentId was found."));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.error("A server error occured."));
-    getCalendarForCaptureAgentEndpoint.addPathParam(new Param("captureAgentId", Type.STRING, "recorder",
-            "The ID that specifies the capture agent."));
-    getCalendarForCaptureAgentEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getCalendarForCaptureAgentEndpoint);
-
-    return DocUtil.generate(data);
+  public String getSampleDublinCore() {
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><dublincore xmlns=\"http://www.opencastproject.org/xsd/1.0/dublincore/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dcterms:creator>demo</dcterms:creator><dcterms:contributor>demo</dcterms:contributor><dcterms:created xsi:type=\"dcterms:W3CDTF\">2011-04-06T08:03Z</dcterms:created><dcterms:temporal xsi:type=\"dcterms:Period\">start=2011-04-06T08:03:45Z; end=2011-04-06T08:13:45Z; scheme=W3C-DTF;</dcterms:temporal><dcterms:description>demo</dcterms:description><dcterms:subject>demo</dcterms:subject><dcterms:language>demo</dcterms:language><dcterms:spatial>recorder</dcterms:spatial><dcterms:title>Demo event</dcterms:title></dublincore>";
   }
 
   /**
-   * Creates an example XML of an Event for the documentation.
+   * Generates event capture agent properties.
    * 
-   * @return A XML with a Event
+   * @return
    */
-  private String generateEvent() {
-    Event e = new EventImpl();
-    e.setStartDate(new Date(System.currentTimeMillis() + ONE_HOUR_IN_MILLIS));
-    e.setEndDate(new Date(e.getStartDate().getTime() + ONE_HOUR_IN_MILLIS));
-    e.setContributor("demo contributor");
-    e.setCreator("demo creator");
-    e.setDescription("demo description");
-    e.setDevice("demo");
-    e.setLanguage("en");
-    e.setLicense("creative commons");
-    e.setSeriesId("demo series");
-    e.setResources("vga, audio");
-    e.setTitle("demo title");
-    LinkedList<Metadata> metadata = new LinkedList<Metadata>();
-    metadata.add(new MetadataImpl(e, "location", "demo location"));
-    metadata.add(new MetadataImpl(e, "abstract", "demo abstract"));
-    e.setMetadataList(metadata);
+  public String getSampleCAProperties() {
+    return "#Capture Agent specific data\n" + "#Wed Apr 06 10:16:19 CEST 2011\n" + "event.title=Demotitle\n"
+            + "event.location=testdevice\n" + "capture.device.id=testdevice\n" + "";
+  }
 
-    SchedulerBuilder builder = SchedulerBuilder.getInstance();
-    try {
+  /**
+   * Serializes Dublin core and returns serialized string.
+   * 
+   * @param dc
+   *          {@link DublinCoreCatalog} to be serialized
+   * 
+   * @return String representation of serialized Dublin core
+   * 
+   * @throws IOException
+   *           if serialization fails
+   */
+  private String serializeDublinCore(DublinCoreCatalog dc) throws IOException {
+    InputStream in = dcService.serialize(dc);
 
-      String result = builder.marshallEvent((EventImpl) e);
-      logger.debug("Event: " + result);
-      return result;
-    } catch (Exception e1) {
-      logger.warn("Could not marshall example event: {}", e1.getMessage());
-      return null;
-    }
+    StringWriter writer = new StringWriter();
+    IOUtils.copy(in, writer, "UTF-8");
+
+    return writer.toString();
+  }
+
+  /**
+   * Parses Dublin core stored as string.
+   * 
+   * @param dcXML
+   *          string representation of Dublin core
+   * @return parsed {@link DublinCoreCatalog}
+   * @throws IOException
+   *           if parsing fails
+   */
+  private DublinCoreCatalog parseDublinCore(String dcXML) throws IOException {
+    DublinCoreCatalog dc = dcService.load(new ByteArrayInputStream(dcXML.getBytes("UTF-8")));
+    return dc;
+  }
+
+  /**
+   * Serializes Properties to String.
+   * 
+   * @param caProperties
+   *          Properties to be serialized
+   * @return serialized properties
+   * @throws IOException
+   *           if serialization fails
+   */
+  private String serializeProperties(Properties caProperties) throws IOException {
+    StringWriter writer = new StringWriter();
+    caProperties.store(writer, "Capture Agent specific data");
+    return writer.toString();
+  }
+
+  /**
+   * Parses Properties represented as String.
+   * 
+   * @param serializedProperties
+   *          properties to be parsed.
+   * @return parsed properties
+   * @throws IOException
+   *           if parsing fails
+   */
+  private Properties parseProperties(String serializedProperties) throws IOException {
+    Properties caProperties = new Properties();
+    caProperties.load(new StringReader(serializedProperties));
+    return caProperties;
   }
 }

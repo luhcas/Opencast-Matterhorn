@@ -17,13 +17,8 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-workflow-service-api</artifactId>
+      <artifactId>matterhorn-dublincore</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>net.fortuna.ical4j</groupId>
-      <artifactId>ical4j</artifactId>
-      <version>1.0-rc2-patched</version>
     </dependency>
   </dependencies>
   <build>
@@ -37,9 +32,6 @@
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.scheduler.api;version=${project.version} </Export-Package>
-            <Embed-Dependency>
-              ical4j;inline=true
-            </Embed-Dependency>
           </instructions>
         </configuration>
       </plugin>

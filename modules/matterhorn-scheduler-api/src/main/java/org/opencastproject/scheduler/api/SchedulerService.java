@@ -15,233 +15,207 @@
  */
 package org.opencastproject.scheduler.api;
 
-import net.fortuna.ical4j.model.ValidationException;
-
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.WorkflowDefinition;
 
-import java.text.ParseException;
 import java.util.Date;
-import java.util.List;
+import java.util.Properties;
 
+/**
+ * Scheduler service manages events (creates new, updates already existing and removes events). It enables searches over
+ * existing events, retrieving DublinCore or capture agent properties for specific event, search for conflicting events
+ * and generating calendar for capture agent.
+ */
 public interface SchedulerService {
 
-  /** The metadata key used to store the workflow identifier in an event's metadata */
-  String WORKFLOW_INSTANCE_ID_KEY = "org.opencastproject.workflow.id";
-
-  /** The metadata key used to store the workflow definition in an event's metadata */
-  String WORKFLOW_DEFINITION_ID_KEY = "org.opencastproject.workflow.definition";
-
-  /** The schedule workflow operation identifier */
-  String SCHEDULE_OPERATION_ID = "schedule";
-
-  /** The workflow operation property that stores the event start time, as milliseconds since 1970 */
-  String WORKFLOW_OPERATION_KEY_SCHEDULE_START = "schedule.start";
-
-  /** The workflow operation property that stores the event stop time, as milliseconds since 1970 */
-  String WORKFLOW_OPERATION_KEY_SCHEDULE_STOP = "schedule.stop";
-
-  /** The workflow operation property that stores the event location */
-  String WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION = "schedule.location";
-
-  WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException;
-
   /**
-   * Persist an event
+   * Creates new event using specified DublinCore. Default capture agent properties are created from DublinCore.
+   * Following values are generated:
+   * <ul>
+   * <li>event.title (mapped from dc:title)</li>
+   * <li>event.series (mapped from dc:is_part_of)</li>
+   * <li>event.location (mapped from dc:spatial)</li>
+   * </ul>
    * 
-   * @param event
-   *          the event to add
-   * 
-   * @return The event that has been persisted
-   */
-  Event addEvent(Event event) throws SchedulerException;
-
-  /**
-   * Persist a recurring event
-   * 
-   * @param RecurringEvent
-   *          e
-   * @return The recurring event that has been persisted
-   */
-  void addRecurringEvent(Event recurrence) throws SchedulerException;
-
-  /**
-   * Gets an event by its identifier
-   * 
-   * @param eventId
-   *          the event identifier
-   * @return An event that matches eventId
-   * @throws IllegalArgumentException
-   *           if the eventId is null
-   * @throws IllegalStateException
-   *           if the entity manager factory is not available
-   * @throws NotFoundException
-   *           if no event with this identifier exists
-   */
-  Event getEvent(Long eventId) throws NotFoundException;
-
-  /**
-   * @param filter
-   * @return List of events that match the supplied filter, or all events if no filter is supplied
-   */
-  List<Event> getEvents(SchedulerFilter filter);
-
-  /**
-   * @return A list of all events
-   */
-  List<Event> getAllEvents();
-
-  /**
-   * @return List of all events that start after the current time.
-   */
-  List<Event> getUpcomingEvents();
-
-  /**
-   * @param list
-   * @return The list of events in a list of events that occur after the current time.
-   */
-  List<Event> getUpcomingEvents(List<Event> list);
-
-  /**
-   * @param Long
-   *          the eventId of the event to be removed.
-   * @throws NotFoundException
-   *           If the eventId cannot be found.
-   */
-  void removeEvent(Long eventID) throws NotFoundException;
-
-  /**
-   * Updates an event.
-   * 
-   * @param e
-   *          The event
-   * @throws NotFoundException
-   *           if the event hasn't previously been saved
+   * @param eventCatalog
+   *          {@link DublinCoreCatalog} used for creating event
+   * @return ID of created event
    * @throws SchedulerException
-   *           if the event's persistent representation can not be updated
+   *           if creating new events failed
    */
-  void updateEvent(Event e) throws NotFoundException, SchedulerException;
+  Long addEvent(DublinCoreCatalog eventCatalog) throws SchedulerException;
 
   /**
-   * Updates an event.
+   * Creates series of events using DublinCore as template and recurrence pattern. For each event default capture agent
+   * properties are created from DublinCore. Following values are generated:
+   * <ul>
+   * <li>event.title (mapped from dc:title)</li>
+   * <li>event.series (mapped from dc:is_part_of)</li>
+   * <li>event.location (mapped from dc:spatial)</li>
+   * </ul>
    * 
-   * @param e
-   *          The event
-   * @param updateWorkflow
-   *          Whether to also update the associated workflow for this event
-   * @throws SchedulerException
-   *           if the scheduled event can not be persisted
-   * @throws NotFoundException
-   *           if this event hasn't previously been saved
-   */
-  void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException;
-
-  /**
-   * Updates an event.
-   * 
-   * @param e
-   *          The event
-   * @param updateWorkflow
-   *          Whether to also update the associated workflow for this event
-   * @param updateWithEmptyValues
-   *          Overwrite stored event's fields with null if provided event's fields are null
-   * @throws SchedulerException
-   *           if the scheduled event can not be persisted
-   * @throws NotFoundException
-   *           if this event hasn't previously been saved
-   */
-  void updateEvent(Event e, boolean updateWorkflow, boolean updateWithEmptyValues) throws NotFoundException,
-          SchedulerException;
-
-  /**
-   * Updates each event with an id in the list with the passed event.
-   * 
-   * @param eventIdList
-   *          List of event ids.
-   * @param e
-   *          Event containing metadata to be updated.
-   */
-  void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException;
-
-  /**
-   * Updates each event in the list with the passed event.
-   * 
-   * @param eventList
-   *          List of event ids.
-   * @param e
-   *          Event containing metadata to be updated.
-   * @param updateWithEmptyValues
-   *          if the passed event contains empty values, overwrite the existing event with them.
-   */
-  void updateEvents(List<Event> eventList, Event e, boolean updateWithEmptyValues) throws NotFoundException,
-          SchedulerException;
-
-  /**
-   * @param device
-   * @param startDate
-   * @param endDate
-   * @return A list of events that conflict with the start, or end dates of provided event.
-   */
-  List<Event> findConflictingEvents(String device, Date startDate, Date endDate);
-
-  /**
-   * @param device
-   * @param rrule
+   * @param eventCatalog
+   *          template {@link DublinCoreCatalog} used to create events
+   * @param recPattern
+   *          pattern of recurrence
+   * @param beginning
+   *          start date of event series
+   * @param end
+   *          end date of event series
    * @param duration
-   * @return A list of events that conflict with the start, or end dates of provided event.
-   */
-  List<Event> findConflictingEvents(String device, String rrule, Date startDate, Date endDate, Long duration)
-          throws ParseException, ValidationException;
-
-  /**
-   * 
-   * @param captureAgentID
-   *          The name of the capture agent
-   * @return An iCalendar containing all of the events for the specified capture agent.
-   */
-
-  String getCalendarForCaptureAgent(String captureAgentID);
-
-  /**
-   * 
-   * @param eventID
-   * @return The DublinCore metadata document of an event
-   * @throws NotFoundException
-   */
-  String getDublinCoreMetadata(Long eventID) throws NotFoundException;
-
-  /**
-   * 
-   * @param eventID
-   * @return
-   * @throws NotFoundException
-   */
-  String getCaptureAgentMetadata(Long eventID) throws NotFoundException;
-
-  /**
-   * @return An empty Event
-   */
-  Event getNewEvent();
-
-  /**
-   * resolves the appropriate Filter for the Capture Agent
-   * 
-   * @param captureAgentID
-   *          The ID as provided by the capture agent
-   * @return the Filter for this capture Agent.
-   */
-  SchedulerFilter getFilterForCaptureAgent(String captureAgentID);
-
-  /**
-   * Gets the last modified date for a capture agent's calendar. If no events exist for this capture agent, this method
-   * returns null.
-   * 
-   * @param captureAgentId
-   *          the identifier for a capture agent. this maps to the {@link Event#getDevice()} method.
-   * @return the date the schedule for this capture agent was last changed, or null if there is no capture agent with
-   *         this id, or there are no events for this capture agent.
+   *          duration of each event in milliseconds
+   * @param timeZone
+   *          time zone in which event will take place or null if local time zone should be used
+   * @return array of events IDs that were created
    * @throws SchedulerException
-   *           if the scheduling database is unavailable
+   *           if events cannot be created
    */
-  Date getScheduleLastModified(String captureAgentId) throws SchedulerException;
+  Long[] addReccuringEvent(DublinCoreCatalog eventCatalog, String recPattern, Date beginning, Date end, long duration,
+          String timeZone) throws SchedulerException;
+
+  /**
+   * Updates existing events with capture agent metadata. Configuration will be updated from event's DublinCore:
+   * <ul>
+   * <li>event.title (mapped from dc:title)</li>
+   * <li>event.series (mapped from dc:is_part_of)</li>
+   * <li>event.location (mapped from dc:spatial)</li>
+   * </ul>
+   * 
+   * @param eventIDs
+   *          array of events that should be updated
+   * @param configuration
+   *          Properties for capture agent
+   * @throws NotFoundException
+   *           there is event that does not exist
+   * @throws SchedulerException
+   *           if update fails
+   */
+  void updateCaptureAgentMetadata(Properties configuration, Long... eventIDs) throws NotFoundException,
+          SchedulerException;
+
+  /**
+   * Update event's DublinCore. Capture agent metadata will also be updated:
+   * <ul>
+   * <li>event.title (mapped from dc:title)</li>
+   * <li>event.series (mapped from dc:is_part_of)</li>
+   * <li>event.location (mapped from dc:spatial)</li>
+   * </ul>
+   * 
+   * @param eventCatalog
+   *          updated {@link DublinCoreCatalog}
+   * @throws NotFoundException
+   *           if events with specified DublinCore ID cannot be found
+   * @throws SchedulerException
+   *           if update fails
+   */
+  void updateEvent(DublinCoreCatalog eventCatalog) throws NotFoundException, SchedulerException;
+
+  /**
+   * Removes event with specified ID.
+   * 
+   * @param eventID
+   *          event to be removed
+   * @throws SchedulerException
+   *           if exception occurred
+   * @throws NotFoundException
+   *           if event with specified ID cannot be found
+   */
+  void removeEvent(long eventID) throws SchedulerException, NotFoundException;
+
+  /**
+   * Retrieves DublinCore associated with specified event ID.
+   * 
+   * @param eventID
+   *          ID of event for which DublinCore will be retrieved
+   * @return {@link DublinCoreCatalog} for specified event
+   * @throws NotFoundException
+   *           if event with specified ID cannot be found
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  DublinCoreCatalog getEventDublinCore(long eventID) throws NotFoundException, SchedulerException;
+
+  /**
+   * Retrieves capture agent configuration for specified event.
+   * 
+   * @param eventID
+   *          ID of event for which capture agent configuration should be retrieved
+   * @return Properties for capture agent
+   * @throws NotFoundException
+   *           if event with specified ID cannot be found
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  Properties getEventCaptureAgentConfiguration(long eventID) throws NotFoundException, SchedulerException;
+
+  /**
+   * Retrieves all events matching given query object.
+   * 
+   * @param query
+   *          {@link SchedulerQuery} representing query
+   * @return {@link DublinCoreCatalogList} with results matching given query
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  DublinCoreCatalogList search(SchedulerQuery query) throws SchedulerException;
+
+  /**
+   * Returns list of all conflicting events, i.e. all events that ends after start date and begins before end date.
+   * 
+   * @param captureDeviceID
+   *          capture device ID for which conflicting events are searched for
+   * @param startDate
+   *          start date of of conflicting period
+   * @param endDate
+   *          end date of conflicting period
+   * @return list of events that are in conflict with specified period
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  DublinCoreCatalogList findConflictingEvents(String captureDeviceID, Date startDate, Date endDate)
+          throws SchedulerException;
+
+  /**
+   * Returns list of all conflicting events. Conflicting periods are calculated based on recurrence rule, start date,
+   * end date and duration of each conflicting period.
+   * 
+   * @param captureDeviceID
+   *          capture device ID for which conflicting events are searched for
+   * @param rrule
+   *          recurrence rule
+   * @param startDate
+   *          beginning of period
+   * @param endDate
+   *          ending of period
+   * @param duration
+   *          duration of each period
+   * @return list of all conflicting events
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  DublinCoreCatalogList findConflictingEvents(String captureDeviceID, String rrule, Date startDate, Date endDate,
+          long duration) throws SchedulerException;
+
+  /**
+   * Generates calendar for specified capture agent.
+   * 
+   * @param filter
+   *          filter on which calendar will be generated
+   * @return generated calendar
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  String getCalendar(SchedulerQuery filter) throws SchedulerException;
+
+  /**
+   * Returns date of last modification of event belonging to specified capture agent.
+   * 
+   * @param filter
+   *          filter for events to be checked
+   * @return last modification date
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  Date getScheduleLastModified(SchedulerQuery filter) throws SchedulerException;
 }

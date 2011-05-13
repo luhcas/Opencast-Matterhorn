@@ -13,19 +13,30 @@
  *  permissions and limitations under the License.
  *
  */
-
 package org.opencastproject.scheduler.impl;
 
-public class IncompleteDataException extends Exception {
+/**
+ * General exception representing failure in indexing or storing events, either to persistent storage or Solr index.
+ * 
+ */
+public class SchedulerServiceDatabaseException extends Exception {
 
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 7368335174562660234L;
 
-  public IncompleteDataException() {
+  public SchedulerServiceDatabaseException() {
     super();
   }
 
-  public IncompleteDataException(String message) {
+  public SchedulerServiceDatabaseException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public SchedulerServiceDatabaseException(String message) {
     super(message);
+  }
+
+  public SchedulerServiceDatabaseException(Throwable cause) {
+    super(cause);
   }
 
 }

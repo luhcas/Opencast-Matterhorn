@@ -15,8 +15,11 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.metadata.dublincore.DCMIPeriod;
+import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
@@ -47,7 +50,7 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Date;
+import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
@@ -59,33 +62,29 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 /**
- * Create an iCalendar from the provided SchedulerEvents
+ * Create an iCalendar from the provided {@link Event}s.
  * 
  */
 public class CalendarGenerator {
+  /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(CalendarGenerator.class);
 
+  /** iCalendar */
   protected Calendar cal;
-  protected DublinCoreGenerator dcGenerator;
-  protected CaptureAgentMetadataGenerator caGenerator;
+  /** Series service for Series DC retrieval */
   protected SeriesService seriesService;
 
   /**
-   * default constructor that creates a CalendarGenerator object
+   * Default constructor that creates a CalendarGenerator object
    * 
-   * @param dcGenerator
-   *          A DublinCoreGenerator is needed but cannot be constructed in this object
-   * @param caGenerator
-   *          A CaptureAgentMetadataGenerator is needed but cannot be constructed in this object
+   * @param seriesService
+   *          Series service for retrieving series Dublin Core (if event has one)
    */
-  public CalendarGenerator(DublinCoreGenerator dcGenerator, CaptureAgentMetadataGenerator caGenerator,
-          SeriesService seriesService) {
+  public CalendarGenerator(SeriesService seriesService) {
     cal = new Calendar();
     cal.getProperties().add(new ProdId("Opencast Matterhorn Calendar File 0.5"));
     cal.getProperties().add(Version.VERSION_2_0);
     cal.getProperties().add(CalScale.GREGORIAN);
-    this.dcGenerator = dcGenerator;
-    this.caGenerator = caGenerator;
     this.seriesService = seriesService;
   }
 
@@ -109,48 +108,57 @@ public class CalendarGenerator {
   }
 
   /**
-   * adds an SchedulerEvent as a new entry to this iCalendar
+   * Adds an SchedulerEvent as a new entry to this iCalendar
    * 
-   * @param e
-   *          the event to add
+   * @param catalog
+   *          {@link DublinCoreCatalog} of event
+   * @param captureAgentMetadata
+   *          properties for capture agent metadata
+   * 
    * @return true if the event could be added.
    */
-  public boolean addEvent(Event e) {
-    logger.debug("creating iCal VEvent from SchedulerEvent: {}", e.toString());
-    Date start = e.getStartDate();
-    Date end = e.getEndDate();
-    if (start == null) {
+  public boolean addEvent(DublinCoreCatalog catalog, Properties captureAgentMetadata) {
+    logger.debug("Creating iCal VEvent from SchedulerEvent: {}", catalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+
+    DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod(catalog.getFirst(DublinCore.PROPERTY_TEMPORAL));
+    if (!period.hasStart()) {
       logger.debug("Couldn't get startdate from event!");
       return false;
     }
-    if (end == null) {
+    if (!period.hasEnd()) {
       logger.debug("Couldn't get enddate from event!");
       return false;
     }
-    DateTime startDate = new DateTime(start);
-    DateTime endDate = new DateTime(end);
+
+    DateTime startDate = new DateTime(period.getStart());
+    DateTime endDate = new DateTime(period.getEnd());
     startDate.setUtc(true);
     endDate.setUtc(true);
     String seriesID = null;
 
-    VEvent event = new VEvent(startDate, endDate, e.getTitle());
+    VEvent event = new VEvent(startDate, endDate, catalog.getFirst(DublinCore.PROPERTY_TITLE));
     try {
       ParameterList pl = new ParameterList();
-      pl.add(new Cn(e.getCreator()));
-      event.getProperties().add(new Uid(Long.toString(e.getEventId())));
+      for (DublinCoreValue creator : catalog.get(DublinCore.PROPERTY_CREATOR)) {
+        pl.add(new Cn(creator.getValue()));
+      }
+      event.getProperties().add(new Uid(catalog.getFirst(DublinCore.PROPERTY_IDENTIFIER)));
 
       // TODO Organizer should be URI (email-address?) created fake address
-      if (StringUtils.isNotEmpty(e.getCreator())) {
-        event.getProperties().add(new Organizer(pl, e.getCreator().replace(" ", "_") + "@matterhorn.opencast"));
+      if (StringUtils.isNotEmpty(catalog.getFirst(DublinCore.PROPERTY_CREATOR))) {
+        event.getProperties().add(
+                new Organizer(pl, catalog.getFirst(DublinCore.PROPERTY_CREATOR).replace(" ", "_")
+                        + "@matterhorn.opencast"));
       }
-      if (StringUtils.isNotEmpty(e.getDescription())) {
-        event.getProperties().add(new Description(e.getDescription()));
+      if (StringUtils.isNotEmpty(catalog.getFirst(DublinCore.PROPERTY_DESCRIPTION))) {
+        event.getProperties().add(new Description(catalog.getFirst(DublinCore.PROPERTY_DESCRIPTION)));
       }
-      if (e.containsKey("location") && StringUtils.isNotEmpty(e.getMetadataValueByKey("location"))) {
-        event.getProperties().add(new Location(e.getMetadataValueByKey("location")));
+      // location corresponds to spatial? or is location part of CA configuration?
+      if (StringUtils.isNotEmpty(catalog.getFirst(DublinCore.PROPERTY_SPATIAL))) {
+        event.getProperties().add(new Location(catalog.getFirst(DublinCore.PROPERTY_SPATIAL)));
       }
-      if (StringUtils.isNotEmpty(e.getSeriesId())) {
-        seriesID = e.getSeriesId();
+      if (StringUtils.isNotEmpty(catalog.getFirst(DublinCore.PROPERTY_IS_PART_OF))) {
+        seriesID = catalog.getFirst(DublinCore.PROPERTY_IS_PART_OF);
         event.getProperties().add(new RelatedTo(seriesID));
       }
 
@@ -159,12 +167,13 @@ public class CalendarGenerator {
       dcParameters.add(Value.BINARY);
       dcParameters.add(Encoding.BASE64);
       dcParameters.add(new XParameter("X-APPLE-FILENAME", "episode.xml"));
-      Attach metadataAttachment = new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes("UTF-8"));
+      Attach metadataAttachment = new Attach(dcParameters, getDublinCoreAsString(catalog).getBytes("UTF-8"));
       event.getProperties().add(metadataAttachment);
 
-      String seriesDC = getSeriesDublinCoreString(seriesID);
+      String seriesDC = getSeriesDublinCoreAsString(seriesID);
       if (seriesDC != null) {
-        logger.debug("Attaching series {} information to event {}", seriesID, e.getEventId());
+        logger.debug("Attaching series {} information to event {}", seriesID,
+                catalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
         ParameterList sDcParameters = new ParameterList();
         sDcParameters.add(new FmtType("application/xml"));
         sDcParameters.add(Value.BINARY);
@@ -173,7 +182,7 @@ public class CalendarGenerator {
         Attach seriesAttachment = new Attach(sDcParameters, seriesDC.getBytes("UTF-8"));
         event.getProperties().add(seriesAttachment);
       } else {
-        logger.debug("No series provided for event {}.", e.getEventId());
+        logger.debug("No series provided for event {}.", catalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
       }
 
       ParameterList caParameters = new ParameterList();
@@ -181,11 +190,13 @@ public class CalendarGenerator {
       caParameters.add(Value.BINARY);
       caParameters.add(Encoding.BASE64);
       caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));
-      Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
+      Attach agentsAttachment = new Attach(caParameters, getCaptureAgentPropertiesAsString(captureAgentMetadata)
+              .getBytes("UTF-8"));
       event.getProperties().add(agentsAttachment);
 
     } catch (Exception e1) {
-      logger.error("could not create Calendar entry for Event {}. Reason : {} ", e.toString(), e1);
+      logger.error("could not create Calendar entry for Event {}. Reason : {} ",
+              catalog.getFirst(DublinCore.PROPERTY_IDENTIFIER), e1);
       return false;
     }
     cal.getComponents().add(event);
@@ -194,17 +205,16 @@ public class CalendarGenerator {
     return true;
   }
 
-  private String getSeriesDublinCoreString(String seriesID) {
-    if (seriesID == null || seriesID.length() == 0)
-      return null;
-    if (seriesService == null) {
-      logger.warn("No SeriesService available");
-      return null;
-    }
-
+  /**
+   * Returns provided Dublin Core as String or null of serialization fails.
+   * 
+   * @param catalog
+   *          {@link DublinCoreCatalog} to be serialized
+   * @return string representation of DC
+   */
+  private String getDublinCoreAsString(DublinCoreCatalog catalog) {
     try {
-      DublinCoreCatalog seriesDC = seriesService.getSeries(seriesID);
-      Document doc = seriesDC.toXml();
+      Document doc = catalog.toXml();
 
       Source source = new DOMSource(doc);
       StringWriter stringWriter = new StringWriter();
@@ -214,16 +224,59 @@ public class CalendarGenerator {
       transformer.transform(source, result);
 
       return stringWriter.getBuffer().toString().trim();
-    } catch (NotFoundException e) {
-      logger.warn("Could not find series '" + seriesID + "': {}", e);
     } catch (ParserConfigurationException e) {
       logger.error("Could not parse DublinCoreCatalog for Series: {}", e.getMessage());
     } catch (IOException e) {
       logger.error("Could not open DublinCoreCatalog for Series to parse it: {}", e.getMessage());
     } catch (TransformerException e) {
       logger.error("Could not transform DublinCoreCatalog for Series: {}", e.getMessage());
+    }
+    return null;
+  }
+
+  /**
+   * Returns series DC associated with this event or null if {@link SeriesService} is not available or does not contain
+   * entry for series with specified ID.
+   * 
+   * @param seriesID
+   *          {@link DublinCoreCatalog} to be retrieved
+   * @return DC serialized to string or null
+   */
+  private String getSeriesDublinCoreAsString(String seriesID) {
+    if (StringUtils.isBlank(seriesID))
+      return null;
+    if (seriesService == null) {
+      logger.warn("No SeriesService available");
+      return null;
+    }
+
+    DublinCoreCatalog seriesDC;
+    try {
+      seriesDC = seriesService.getSeries(seriesID);
     } catch (SeriesException e) {
       logger.error("Error loading DublinCoreCatalog for Series: {}", e.getMessage());
+      return null;
+    } catch (NotFoundException e) {
+      logger.warn("Could not find series '" + seriesID + "': {}", e);
+      return null;
+    }
+    return getDublinCoreAsString(seriesDC);
+  }
+
+  /**
+   * Returns capture agent properties as string.
+   * 
+   * @param properties
+   *          CA properties to be serialized to string
+   * @return string representation of properties
+   */
+  private String getCaptureAgentPropertiesAsString(Properties properties) {
+    StringWriter writer = new StringWriter();
+    try {
+      properties.store(writer, "Capture Agent specific data");
+      return writer.toString();
+    } catch (IOException e) {
+      logger.error("Could not convert Capture Agent Data to String");
     }
     return null;
   }

@@ -11,12 +11,8 @@
  * Capture agent specific technical metadata is included as Base64 encoded files.
  * 
  * This implementation stores the events in a database that is provided to the scheduler service as an javax.sql.DataSource 
- * object that should be available over the OSGI server.
- * 
- * Nearly any metadata key-value pairs will be stored in the scheduler database. So the UI can adopt indepentend of the service 
- * on the metadata-fields that schould be used.
- * How the metadata will be mapped on the exported formats (Dublin Pore and properties for the capture agent) can be defined in  
- * the two properties files under src/main/resources/config. 
+ * object that should be available over the OSGI server and index them Solr index. Each event consist of DublinCoreDocument
+ * describing event and optionally Properties which contains configurations for capture agent.
  * 
  * There is the possibility to define other ingest endpoints that the capture agent might use. This is defined in the 
  * felix confing with the key "capture.ingest.enpoint.url". If this is missing, the value will be constructed from the 
@@ -26,3 +22,4 @@
 package org.opencastproject.scheduler.impl;
 
 import javax.xml.bind.annotation.XmlNsForm;
+

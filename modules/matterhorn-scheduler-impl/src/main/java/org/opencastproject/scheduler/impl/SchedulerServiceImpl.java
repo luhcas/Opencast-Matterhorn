@@ -18,10 +18,16 @@ package org.opencastproject.scheduler.impl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.scheduler.api.Event;
-import org.opencastproject.scheduler.api.IncompleteDataException;
+import org.opencastproject.metadata.dublincore.DCMIPeriod;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.scheduler.api.SchedulerException;
-import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.scheduler.api.SchedulerQuery;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
@@ -41,16 +47,14 @@ import net.fortuna.ical4j.model.property.RRule;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.osgi.framework.ServiceException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,17 +63,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.persistence.spi.PersistenceProvider;
+import java.util.Properties;
+import java.util.TimeZone;
 
 /**
- * An implementation of the Scheduler service based on JPA. This version knows about series too.
+ * Implementation of {@link SchedulerService}.
  * 
  */
 public class SchedulerServiceImpl implements SchedulerService, ManagedService {
@@ -95,545 +93,180 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
   /** The workflow operation property that stores the event location */
   public static final String WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION = "schedule.location";
 
-  /** The JPA persistence provider */
-  protected PersistenceProvider persistenceProvider;
-
-  /** The JPA persistence properties */
-  protected Map<String, Object> persistenceProperties;
-
-  /** JPA entity manager factory */
-  protected EntityManagerFactory emf = null;
-
-  /** The component context that is passed when activate is called */
-  protected ComponentContext componentContext;
-
-  /** The dublin core generator */
-  protected DublinCoreGenerator dcGenerator;
-
-  /** The metadata generator to feed the capture agents */
-  protected CaptureAgentMetadataGenerator caGenerator;
-
   /** The series service */
   protected SeriesService seriesService;
 
   /** The workflow service */
   protected WorkflowService workflowService;
 
+  /** Persistent storage for events */
+  protected SchedulerServiceDatabase persistence;
+
+  /** Solr index for events */
+  protected SchedulerServiceIndex index;
+
   /**
    * Properties that are updated by ManagedService updated method
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   protected Dictionary properties;
 
+  /** Preprocessing workflow definition for scheduler */
+  protected WorkflowDefinition preprocessingWorkflowDefinition;
+
   /**
-   * This method will be called, when the bundle gets loaded from OSGI
+   * OSGi callback for setting Series Service.
    * 
-   * @param componentContext
-   *          The ComponetnContext of the OSGI bundle
+   * @param seriesService
    */
-  public void activate(ComponentContext componentContext) {
-    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.scheduler.impl", persistenceProperties);
-    logger.info("SchedulerService activating.");
-
-    if (componentContext == null) {
-      logger.warn("Could not activate because of missing ComponentContext");
-      return;
-    }
-    this.componentContext = componentContext;
-    URL dcMappingURL = componentContext.getBundleContext().getBundle()
-            .getResource("config/dublincoremapping.properties");
-    logger.debug("Using Dublin Core Mapping from {}.", dcMappingURL);
-    InputStream is = null;
-    try {
-      if (dcMappingURL != null) {
-        URLConnection con = dcMappingURL.openConnection();
-        is = con.getInputStream();
-        dcGenerator = new DublinCoreGenerator(is);
-      }
-    } catch (IOException e) {
-      logger.error("Could not open URL connection to Dublin Core Mapping File after activation");
-    } finally {
-      IOUtils.closeQuietly(is);
-    }
-
-    URL caMappingURL = componentContext.getBundleContext().getBundle()
-            .getResource("config/captureagentmetadatamapping.properties");
-    logger.debug("Using Capture Agent Metadata Mapping from {}.", caMappingURL);
-    try {
-      if (caMappingURL != null) {
-        URLConnection con = caMappingURL.openConnection();
-        is = con.getInputStream();
-        caGenerator = new CaptureAgentMetadataGenerator(is);
-      }
-    } catch (IOException e) {
-      logger.error("Could not open URL connection to Capture Agent Metadata Mapping File after activation");
-    } finally {
-      IOUtils.closeQuietly(is);
-    }
+  public void setSeriesService(SeriesService seriesService) {
+    this.seriesService = seriesService;
   }
 
-  public WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException {
-    InputStream in = null;
+  /**
+   * OSGi callback for setting Workflow Service.
+   * 
+   * @param workflowService
+   */
+  public void setWorkflowService(WorkflowService workflowService) {
+    this.workflowService = workflowService;
+  }
+
+  /**
+   * OSGi callback to set Persistence Service.
+   * 
+   * @param persistence
+   */
+  public void setPersistence(SchedulerServiceDatabase persistence) {
+    this.persistence = persistence;
+  }
+
+  /**
+   * OSGi callback to set indexer.
+   * 
+   * @param index
+   */
+  public void setIndex(SchedulerServiceIndex index) {
+    this.index = index;
+  }
+
+  /**
+   * Activates Scheduler Service. Checks whether we are using synchronous or asynchronous indexing. If asynchronous is
+   * used, Executor service is set. If index is empty, persistent storage is queried if it contains any series. If that
+   * is the case, events are retrieved and indexed.
+   * 
+   * @param cc
+   *          ComponentContext
+   * @throws Exception
+   */
+  public void activate(ComponentContext cc) throws Exception {
+    logger.info("Activating Scheduler Service");
+
+    long instancesInSolr = 0L;
     try {
-      in = getClass().getResourceAsStream("/scheduler-workflow-definition.xml");
-      return WorkflowParser.parseWorkflowDefinition(in);
+      instancesInSolr = this.index.count();
     } catch (Exception e) {
-      throw new IllegalStateException("Unable to load the preprocessing workflow definition", e);
-    } finally {
-      IOUtils.closeQuietly(in);
+      throw new IllegalStateException(e);
     }
-  }
-
-  public Map<String, Object> getPersistenceProperties() {
-    return persistenceProperties;
-  }
-
-  public void setPersistenceProperties(Map<String, Object> persistenceProperties) {
-    this.persistenceProperties = persistenceProperties;
-  }
-
-  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
-    this.persistenceProvider = persistenceProvider;
-  }
-
-  public PersistenceProvider getPersistenceProvider() {
-    return persistenceProvider;
-  }
-
-  /**
-   * Sets a DublinCoreGenerator
-   * 
-   * @param dcGenerator
-   *          The DublinCoreGenerator that should be used
-   */
-  public void setDublinCoreGenerator(DublinCoreGenerator dcGenerator) {
-    this.dcGenerator = dcGenerator;
-  }
-
-  /**
-   * Sets the CaptureAgentMetadataGenerator
-   * 
-   * @param caGenerator
-   *          The CaptureAgentMetadataGenerator that should be used
-   */
-  public void setCaptureAgentMetadataGenerator(CaptureAgentMetadataGenerator caGenerator) {
-    this.caGenerator = caGenerator;
-  }
-
-  /**
-   * Persist an event
-   * 
-   * @param event
-   *          the event to add
-   * 
-   * @return The event that has been persisted
-   */
-  public Event addEvent(Event event) throws SchedulerException {
-    EntityManager em = null;
-    EntityTransaction tx = null;
-
-    // Start a workflow so we have an event id that we can associate the event with
-    WorkflowInstance workflow = null;
-    try {
-      workflow = startWorkflowInstance(event);
-    } catch (WorkflowException workflowException) {
-      throw new SchedulerException(workflowException);
-    } catch (MediaPackageException mediaPackageException) {
-      throw new SchedulerException(mediaPackageException);
-    }
-
-    try {
-      event.setEventId(workflow.getId());
-      event.setMetadataList(event.getMetadataList());
-      event.setLastModified(new Date());
-      em = emf.createEntityManager();
-      tx = em.getTransaction();
-      event = (EventImpl) event;
-      tx.begin();
-      em.persist(event);
-      tx.commit();
-    } catch (Exception ex) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw new SchedulerException("Unable to add event: {}", ex);
-    } finally {
-      if (em != null) {
-        em.close();
+    if (instancesInSolr == 0L) {
+      try {
+        DublinCoreCatalog[] events = persistence.getAllEvents();
+        if (events.length != 0) {
+          logger.info("The event index is empty. Populating it now with {} events", Integer.valueOf(events.length));
+          for (DublinCoreCatalog event : events) {
+            index.index(event);
+            String id = event.getFirst(DublinCore.PROPERTY_IDENTIFIER);
+            Properties properties = persistence.getEventMetadata(Long.parseLong(id));
+            if (properties != null) {
+              index.index(id, properties);
+            }
+          }
+          logger.info("Finished populating event search index");
+        }
+      } catch (Exception e) {
+        logger.warn("Unable to index event instances: {}", e.getMessage());
+        throw new ServiceException(e.getMessage());
       }
     }
-    return event;
   }
 
   /**
-   * Starts a workflow to track this scheduled event.
+   * Returns WorkflowDefinition for executing when event is created.
+   * 
+   * @return {@link WorkflowDefinition}
+   * @throws IllegalStateException
+   *           if definition cannot be loaded
+   */
+  protected WorkflowDefinition getPreprocessingWorkflowDefinition() throws IllegalStateException {
+    if (preprocessingWorkflowDefinition == null) {
+      InputStream in = null;
+      try {
+        in = SchedulerServiceImpl.class.getResourceAsStream("/scheduler-workflow-definition.xml");
+        preprocessingWorkflowDefinition = WorkflowParser.parseWorkflowDefinition(in);
+      } catch (Exception e) {
+        throw new IllegalStateException("Unable to load the preprocessing workflow definition", e);
+      } finally {
+        IOUtils.closeQuietly(in);
+      }
+    }
+    return preprocessingWorkflowDefinition;
+  }
+
+  /**
+   * Starts workflow for new event. Creates {@link MediaPackage} and populates it with values from
+   * {@link DublinCoreCatalog}.
    * 
    * @param event
-   *          the scheduled event
-   * @return the workflow instance
+   *          {@link DublinCoreCatalog} associated with event
+   * @param startDate
+   *          start date of event
+   * @param endDate
+   *          end date of event
+   * @return {@link WorkflowInstance} of started worflow
    * @throws WorkflowException
-   *           if the workflow can not be created
+   *           if exception occurred while starting worflow
    * @throws MediaPackageException
-   *           if the mediapackage can not be created
+   *           if media package cannot be created
    */
-  public WorkflowInstance startWorkflowInstance(Event event) throws WorkflowException, MediaPackageException {
+  protected WorkflowInstance startWorkflowInstance(DublinCoreCatalog event, Date startDate, Date endDate)
+          throws WorkflowException, MediaPackageException {
     // Build a mediapackage using the event metadata
     MediaPackage mediapackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    mediapackage.setTitle(event.getTitle());
-    mediapackage.setLanguage(event.getLanguage());
-    mediapackage.setLicense(event.getMetadataValueByKey("license"));
-    mediapackage.setSeries(event.getSeriesId());
-    mediapackage.setSeriesTitle(event.getSeries());
-    mediapackage.setDate(event.getStartDate());
-    mediapackage.addCreator(event.getCreator());
-    mediapackage.setDuration(event.getDuration());
+    populateMediapackageWithStandardDCFields(mediapackage, event);
+
+    mediapackage.setDate(startDate);
+    mediapackage.setDuration(endDate.getTime() - startDate.getTime());
 
     // Build a properties set for this event
     Map<String, String> properties = new HashMap<String, String>();
-    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_START, Long.toString(event.getStartDate().getTime()));
-    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_STOP, Long.toString(event.getEndDate().getTime()));
-    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION, event.getDevice());
-
-    // Add the operations from the chosen workflow
+    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_START, Long.toString(startDate.getTime()));
+    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_STOP, Long.toString(endDate.getTime()));
+    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION, event.getFirst(DublinCore.PROPERTY_SPATIAL));
 
     // Start the workflow
-    return workflowService.start(getPreProcessingWorkflowDefinition(), mediapackage, properties);
+    return workflowService.start(getPreprocessingWorkflowDefinition(), mediapackage, properties);
   }
 
   /**
-   * Removes the workflow associated with a scheduled event that is being removed.
+   * Updates workflow for event, which values where updated.
    * 
    * @param event
-   *          the scheduled event
-   * @throws NotFoundException
-   *           if the workflow associated with this scheduled event can not be found
-   * @throws WorkflowDatabaseException
-   *           if the workflow can not be stopped
-   */
-  public void stopWorkflowInstance(Event event) throws NotFoundException {
-    try {
-      workflowService.stop(event.getEventId());
-    } catch (WorkflowException e) {
-      logger.warn("can not stop workflow {}, {}", event.getEventId(), e);
-    }
-  }
-
-  /**
-   * Persist a recurring event
-   * 
-   * @param RecurringEvent
-   *          e
+   *          {@link DublinCoreCatalog} of updated event
+   * @param startDate
+   *          start date of event
+   * @param endDate
+   *          end date of event
    * @throws SchedulerException
-   *           if a workflow
-   * @return The recurring event that has been persisted
-   */
-  public void addRecurringEvent(Event recurrence) throws SchedulerException {
-    EntityManager em = emf.createEntityManager();
-    EntityTransaction tx = em.getTransaction();
-    try {
-      tx.begin();
-      for (Event event : recurrence.createEventsFromRecurrence()) {
-        logger.debug("Adding recurring event {}", event.getEventId());
-
-        // Start a workflow so we have an event id that we can associate the event with
-        WorkflowInstance workflow = null;
-        try {
-          workflow = startWorkflowInstance(event);
-        } catch (WorkflowException workflowException) {
-          throw new SchedulerException(workflowException);
-        } catch (MediaPackageException mediaPackageException) {
-          throw new SchedulerException(mediaPackageException);
-        }
-
-        try {
-          event.setEventId(workflow.getId());
-          event.setMetadataList(event.getMetadataList());
-          event.setLastModified(new Date());
-          em.persist((EventImpl)event);
-        } catch (Exception ex) {
-          if (tx.isActive()) {
-            tx.rollback();
-          }
-          throw new SchedulerException("Unable to add event: {}", ex);
-        }
-      }
-      tx.commit();
-    } catch (ParseException pEx) {
-      throw new SchedulerException("Unable to parse recurrence rule: {}", pEx);
-    } catch (IncompleteDataException iDEx) {
-      throw new SchedulerException("Recurring event is missing data: {}", iDEx);
-    } finally {
-      if (em != null) {
-        em.close();
-      }
-    }
-  }
-
-  /**
-   * Gets an event by its identifier
-   * 
-   * @param eventId
-   *          the event identifier
-   * @return An event that matches eventId
-   * @throws IllegalArgumentException
-   *           if the eventId is null
-   * @throws IllegalStateException
-   *           if the entity manager factory is not available
+   *           if workflow is not in paused state or current operation is no longer 'schedule'
    * @throws NotFoundException
-   *           if no event with this identifier exists
+   *           if workflow with ID from DublinCore cannot be found
+   * @throws WorkflowException
+   *           if update fails
    */
-  public Event getEvent(Long eventId) throws NotFoundException {
-    if (eventId == null) {
-      throw new IllegalArgumentException("eventId must not be null");
-    }
-    if (emf == null) {
-      throw new IllegalStateException("entity manager factory is missing");
-    }
-    EntityManager em = emf.createEntityManager();
-    EventImpl e = null;
-    try {
-      e = em.find(EventImpl.class, eventId);
-    } catch (Exception ex) {
-      logger.debug("Could not find event {}: {}", eventId, ex);
-    } finally {
-      em.close();
-    }
-    if (e == null) {
-      throw new NotFoundException("No event found for " + eventId);
-    }
-    return e;
-  }
-
-  /**
-   * @param filter
-   * @return List of events that match the supplied filter, or all events if no filter is supplied
-   */
-  public List<Event> getEvents(SchedulerFilter filter) {
-    if (filter == null) {
-      logger.debug("returning all events");
-      return getAllEvents();
-    }
-    StringBuilder queryBase = new StringBuilder("SELECT e FROM Event e");
-    ArrayList<String> where = new ArrayList<String>();
-    EntityManager em = emf.createEntityManager();
-
-    if (StringUtils.isNotEmpty(filter.getCreatorFilter())) {
-      where.add("LOWER(e.creator) LIKE :creatorParam");
-    }
-
-    if (StringUtils.isNotEmpty(filter.getDeviceFilter())) {
-      where.add("LOWER(e.device) LIKE :deviceParam");
-    }
-
-    if (StringUtils.isNotEmpty(filter.getTitleFilter())) {
-      where.add("LOWER(e.title) LIKE :titleParam");
-    }
-
-    if (StringUtils.isNotEmpty(filter.getSeriesFilter())) {
-      where.add("LOWER(e.series) LIKE :seriesParam");
-    }
-
-    if (filter.getSeriesId() != null) {
-      where.add("LOWER(e.seriesId) = :seriesIdParam");
-    }
-
-    if (filter.getStart() != null && filter.getStop() != null) { // Events intersecting start and stop
-      where.add("e.startDate < :stopParam AND e.endDate > :startParam");
-    } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
-      where.add("e.startDate > :startParam");
-    } else if (filter.getStart() == null && filter.getStop() != null) { // All events with dates before end
-      where.add("e.startDate < :stopParam");
-    }
-
-    if (filter.getCurrentAndUpcoming()) {
-      where.add("e.endDate > :now");
-    }
-
-    if (where.size() > 0) {
-      queryBase.append(" WHERE " + StringUtils.join(where, " AND "));
-    }
-
-    if (filter.getOrder() != null) {
-      if (filter.isOrderAscending()) {
-        queryBase.append(" ORDER BY e.title ASC");
-      } else {
-        queryBase.append(" ORDER BY e.title DESC");
-      }
-    }
-
-    TypedQuery<EventImpl> eventQuery = em.createQuery(queryBase.toString(), EventImpl.class);
-
-    if (StringUtils.isNotEmpty(filter.getCreatorFilter())) {
-      eventQuery.setParameter("creatorParam", "%" + filter.getCreatorFilter().toLowerCase() + "%");
-    }
-    if (StringUtils.isNotEmpty(filter.getDeviceFilter())) {
-      eventQuery.setParameter("deviceParam", "%" + filter.getDeviceFilter().toLowerCase() + "%");
-    }
-    if (StringUtils.isNotEmpty(filter.getTitleFilter())) {
-      eventQuery.setParameter("titleParam", "%" + filter.getTitleFilter().toLowerCase() + "%");
-    }
-    if (StringUtils.isNotEmpty(filter.getSeriesFilter())) {
-      eventQuery.setParameter("seriesParam", "%" + filter.getSeriesFilter().toLowerCase() + "%");
-    }
-    if (filter.getSeriesId() != null) {
-      eventQuery.setParameter("seriesIdParam", filter.getSeriesId());
-    }
-    if (filter.getStart() != null) {
-      eventQuery.setParameter("startParam", filter.getStart());
-    }
-    if (filter.getStop() != null) {
-      eventQuery.setParameter("stopParam", filter.getStop());
-    }
-    if (filter.getCurrentAndUpcoming()) {
-      eventQuery.setParameter("now", new Date(System.currentTimeMillis()));
-    }
-
-    List<EventImpl> results = new ArrayList<EventImpl>();
-    try {
-      results = eventQuery.getResultList();
-    } finally {
-      em.close();
-    }
-
-    List<Event> returnList = new ArrayList<Event>();
-    for (EventImpl event : results) {
-      returnList.add((Event) event);
-    }
-
-    return returnList;
-  }
-
-  /**
-   * @return A list of all events
-   */
-  @SuppressWarnings("unchecked")
-  public List<Event> getAllEvents() {
-    EntityManager em = emf.createEntityManager();
-    Query query = em.createNamedQuery("Event.getAll");
-    try {
-      return query.getResultList();
-    } finally {
-      em.close();
-    }
-  }
-
-  /**
-   * @return List of all events that start after the current time.
-   */
-  public List<Event> getUpcomingEvents() {
-    SchedulerFilter upcoming = new SchedulerFilter();
-    upcoming.withStart(new Date(System.currentTimeMillis()));
-    List<Event> events = getEvents(upcoming);
-    return events;
-  }
-
-  /**
-   * @param list
-   * @return The list of events in a list of events that occur after the current time.
-   */
-  public List<Event> getUpcomingEvents(List<Event> list) {
-    Date now = new Date(System.currentTimeMillis());
-    for (Event e : list) {
-      Date enddate = e.getEndDate();
-      if (!(enddate == null) && !enddate.after(now)) {
-        list.remove(e);
-      }
-    }
-    return list;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.impl.SchedulerServiceImpl#removeEvent(java.lang.String)
-   */
-  public void removeEvent(Long eventID) throws NotFoundException {
-    logger.info("Removing event with the ID {}", eventID);
-    Event event;
-    EntityManager em = emf.createEntityManager();
-    try {
-      em.getTransaction().begin();
-      event = em.find(EventImpl.class, eventID);
-      if (event == null)
-        throw new NotFoundException("Event " + eventID + " does not exist");
-      stopWorkflowInstance(event);
-      em.remove(event);
-
-      em.getTransaction().commit();
-    } finally {
-      em.close();
-    }
-  }
-
-  /**
-   * Updates an event.
-   * 
-   * @param e
-   *          The event
-   * @throws NotFoundException
-   *           if the event hasn't previously been saved
-   * @throws SchedulerException
-   *           if the event's persistent representation can not be updated
-   */
-  public void updateEvent(Event e) throws NotFoundException, SchedulerException {
-    updateEvent(e, true); // true, since we want to update the workflow instance too
-  }
-
-  /**
-   * Updates an event.
-   * 
-   * @param e
-   *          The event
-   * @param updateWorkflow
-   *          Whether to also update the associated workflow for this event
-   * @throws SchedulerException
-   *           if the scheduled event can not be persisted
-   * @throws NotFoundException
-   *           if this event hasn't previously been saved
-   */
-  public void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException {
-    updateEvent(e, updateWorkflow, false);
-  }
-
-  /**
-   * Updates an event.
-   * 
-   * @param e
-   *          The event
-   * @param updateWorkflow
-   *          Whether to also update the associated workflow for this event
-   * @param updateWithEmptyValues
-   *          Overwrite stored event's fields with null if provided event's fields are null
-   * @throws SchedulerException
-   *           if the scheduled event can not be persisted
-   * @throws NotFoundException
-   *           if this event hasn't previously been saved
-   */
-  public void updateEvent(Event e, boolean updateWorkflow, boolean updateWithEmptyValues) throws NotFoundException,
-          SchedulerException {
-    EntityManager em = null;
-    EntityTransaction tx = null;
-    Event storedEvent = getEvent(e.getEventId());
-    try {
-      em = emf.createEntityManager();
-      tx = em.getTransaction();
-      tx.begin();
-      storedEvent.update(e, updateWithEmptyValues);
-      storedEvent.setLastModified(new Date());
-      em.merge(storedEvent);
-      tx.commit();
-      if (updateWorkflow) {
-        updateWorkflow(storedEvent);
-      }
-    } catch (Exception ex) {
-      throw new SchedulerException(ex);
-    } finally {
-      em.close();
-    }
-  }
-
-  public void updateWorkflow(Event event) throws NotFoundException, WorkflowException, SchedulerException {
-    WorkflowInstance workflow = workflowService.getWorkflowById(event.getEventId());
+  protected void updateWorkflow(DublinCoreCatalog event, Date startDate, Date endDate) throws SchedulerException,
+          NotFoundException, WorkflowException {
+    WorkflowInstance workflow = workflowService.getWorkflowById(Long.parseLong(event
+            .getFirst(DublinCore.PROPERTY_IDENTIFIER)));
     WorkflowOperationInstance scheduleOperation = workflow.getCurrentOperation();
 
     // if the workflow is not in the hold state with 'schedule' as the current operation, we can't update the event
@@ -641,217 +274,627 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       throw new SchedulerException("The workflow is not in the paused state, so it can not be updated");
     }
     if (!SCHEDULE_OPERATION_ID.equals(scheduleOperation.getTemplate())) {
-      throw new SchedulerException("The workflow is not in the paused state, so it can not be updated");
+      throw new SchedulerException("The current worflow operation is not 'schedule', so it can not be updated");
     }
     MediaPackage mediapackage = workflow.getMediaPackage();
 
-    // update the mediapackage
-    mediapackage.setTitle(event.getTitle());
-    mediapackage.setLanguage(event.getLanguage());
-    mediapackage.setLicense(event.getMetadataValueByKey("license"));
-    mediapackage.setSeries(event.getSeriesId());
-    mediapackage.setSeriesTitle(event.getSeries());
-    mediapackage.setDate(event.getStartDate());
-    mediapackage.setDuration(event.getDuration());
-    // mediapackage supports multiple creators, interface does not. replace them all with this one
-    // We really should handle this better
+    // removes old values
     for (String creator : mediapackage.getCreators()) {
       mediapackage.removeCreator(creator);
     }
-    mediapackage.addCreator(event.getCreator());
+    for (String contributor : mediapackage.getContributors()) {
+      mediapackage.removeContributor(contributor);
+    }
+    for (String subject : mediapackage.getSubjects()) {
+      mediapackage.removeSubject(subject);
+    }
+
+    // set new values
+    populateMediapackageWithStandardDCFields(mediapackage, event);
+
+    mediapackage.setDate(startDate);
+    mediapackage.setDuration(endDate.getTime() - startDate.getTime());
 
     // Update the properties
-    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_START,
-            Long.toString(event.getStartDate().getTime()));
-    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_STOP,
-            Long.toString(event.getEndDate().getTime()));
-    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION, event.getDevice());
+    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_START, Long.toString(startDate.getTime()));
+    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_STOP, Long.toString(endDate.getTime()));
+    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION,
+            event.getFirst(DublinCore.PROPERTY_SPATIAL));
 
     // update the workflow
     workflowService.update(workflow);
   }
 
   /**
-   * Updates each event with an id in the list with the passed event.
+   * Populates MediaPackage with standard values from DublinCore such as: title, language, license, series id, creators,
+   * contributors and subjects.
    * 
-   * @param eventIdList
-   *          List of event ids.
-   * @param e
-   *          Event containing metadata to be updated.
+   * @param mediapackage
+   *          {@link MediaPackage} to be updated
+   * @param catalog
+   *          {@link DublinCoreCatalog} for event
    */
-  public void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException {
-    List<Event> eventList = new LinkedList<Event>();
-    for (Long id : eventIdList) {
-      eventList.add(getEvent(id));
+  private void populateMediapackageWithStandardDCFields(MediaPackage mediapackage, DublinCoreCatalog catalog) {
+    mediapackage.setTitle(catalog.getFirst(DublinCore.PROPERTY_TITLE));
+    mediapackage.setLanguage(catalog.getFirst(DublinCore.PROPERTY_LANGUAGE));
+    mediapackage.setLicense(catalog.getFirst(DublinCore.PROPERTY_LICENSE));
+    mediapackage.setSeries(catalog.getFirst(DublinCore.PROPERTY_IS_PART_OF));
+    for (DublinCoreValue value : catalog.get(DublinCore.PROPERTY_CREATOR)) {
+      mediapackage.addCreator(value.getValue());
     }
-    updateEvents(eventList, e, false);
-  }
-
-  public void updateEvents(List<Event> eventList, Event e, boolean updateWithEmptyValues) throws NotFoundException,
-          SchedulerException {
-    int sequence = 1;
-    String title = e.getTitle();
-    for (Event event : eventList) {
-      e.setEventId(event.getEventId());
-      if (eventList.size() > 1 && StringUtils.isNotEmpty(e.getTitle())) {
-        e.setTitle(title + " " + String.valueOf(sequence));
-      }
-      updateEvent(e, true, updateWithEmptyValues);
-      sequence++;
+    for (DublinCoreValue value : catalog.get(DublinCore.PROPERTY_CONTRIBUTOR)) {
+      mediapackage.addContributor(value.getValue());
+    }
+    for (DublinCoreValue value : catalog.get(DublinCore.PROPERTY_SUBJECT)) {
+      mediapackage.addSubject(value.getValue());
     }
   }
 
   /**
-   * @param e
-   * @return A list of events that conflict with the start, or end dates of provided event.
+   * Stops workflow with specified ID.
+   * 
+   * @param eventID
+   *          workflow to be stopped
+   * @throws NotFoundException
+   *           if there is no workflow with specified ID
    */
-  public List<Event> findConflictingEvents(String device, Date startDate, Date endDate) {
-    SchedulerFilter filter = new SchedulerFilter();
-    filter.withDeviceFilter(device).withStart(startDate).withStop(endDate);
-    return getEvents(filter);
+  protected void stopWorkflowInstance(long eventID) throws NotFoundException {
+    try {
+      workflowService.stop(eventID);
+    } catch (WorkflowException e) {
+      logger.warn("Can not stop workflow {}: {}", eventID, e.getMessage());
+    }
   }
 
-  public List<Event> findConflictingEvents(String device, String rrule, Date startDate, Date endDate, Long duration)
-          throws ParseException, ValidationException {
-    RRule rule = new RRule(rrule);
-    rule.validate();
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  @Override
+  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+    this.properties = properties;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * org.opencastproject.scheduler.api.SchedulerService#addEvent(org.opencastproject.metadata.dublincore.DublinCoreCatalog
+   * , java.lang.String)
+   */
+  @Override
+  public Long addEvent(final DublinCoreCatalog eventCatalog) throws SchedulerException {
+    DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod(eventCatalog.getFirst(DublinCore.PROPERTY_TEMPORAL));
+    if (!period.hasEnd() || !period.hasStart()) {
+      throw new IllegalArgumentException(
+              "Dublin core field dc:temporal does not contain information about start and end of event");
+    }
+    Date startDate = period.getStart();
+    Date endDate = period.getEnd();
+
+    final WorkflowInstance workflow;
+    try {
+      workflow = startWorkflowInstance(eventCatalog, startDate, endDate);
+    } catch (WorkflowException e) {
+      logger.error("Could not start workflow: {}", e.getMessage());
+      throw new SchedulerException(e);
+    } catch (MediaPackageException e) {
+      logger.error("Could not create media package: {}", e.getMessage());
+      throw new SchedulerException(e);
+    }
+
+    eventCatalog.set(DublinCore.PROPERTY_IDENTIFIER, Long.toString(workflow.getId()));
+
+    // store event asociated
+    try {
+      persistence.storeEvents(eventCatalog);
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not store event to persistent storage: {}", e);
+      logger.info("Canceling workflow associated with event");
+      try {
+        stopWorkflowInstance(workflow.getId());
+      } catch (NotFoundException e1) {
+        // should not happen
+      }
+      throw new SchedulerException(e);
+    }
+
+    try {
+      index.index(eventCatalog);
+    } catch (Exception e) {
+      logger.warn("Unable to index event with ID '{}': {}", workflow.getId(), e.getMessage());
+      throw new SchedulerException(e);
+    }
+
+    // update with default CA properties
+    Properties caProperties = new Properties();
+    updateCAProperties(caProperties, eventCatalog);
+    try {
+      updateCaptureAgentMetadata(workflow.getId(), caProperties);
+    } catch (NotFoundException e) {
+      // should not happen
+      throw new IllegalStateException(e);
+    }
+
+    return workflow.getId();
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#addReccuringEvent(org.opencastproject.metadata.dublincore.
+   * DublinCoreCatalog, java.lang.String, java.util.Date, java.util.Date, long)
+   */
+  @Override
+  public Long[] addReccuringEvent(DublinCoreCatalog templateCatalog, String recPattern, Date beginning, Date end,
+          long duration, String timeZone) throws SchedulerException {
+    final List<DublinCoreCatalog> eventList;
+    try {
+      eventList = createEventCatalogsFromReccurence(templateCatalog, recPattern, beginning, end, duration, timeZone);
+    } catch (Exception e) {
+      logger.error("Could not create Dublin Cores for events from template: {}", e.getMessage());
+      throw new SchedulerException(e);
+    }
+    List<Long> eventsIDs = new ArrayList<Long>();
+
+    for (DublinCoreCatalog event : eventList) {
+      DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod(templateCatalog
+              .getFirst(DublinCore.PROPERTY_TEMPORAL));
+      if (!period.hasEnd() || !period.hasStart()) {
+        throw new IllegalArgumentException(
+                "Dublin core field dc:temporal does not contain information about start and end of event");
+      }
+      Date startDate = period.getStart();
+      Date endDate = period.getEnd();
+
+      WorkflowInstance instance;
+      try {
+        instance = startWorkflowInstance(event, startDate, endDate);
+      } catch (Exception e) {
+        logger.error("Failed to start workflow for event: {}", e.getMessage());
+        if (!eventsIDs.isEmpty()) {
+          logger.info("Stoping workflows that were already started...");
+          for (long id : eventsIDs) {
+            try {
+              stopWorkflowInstance(id);
+            } catch (NotFoundException e1) {
+              // should not happen
+              throw new IllegalStateException(e1);
+            }
+          }
+        }
+        throw new SchedulerException(e);
+      }
+      event.set(DublinCore.PROPERTY_IDENTIFIER, Long.toString(instance.getId()));
+      eventsIDs.add(instance.getId());
+    }
+
+    try {
+      persistence.storeEvents(eventList.toArray(new DublinCoreCatalog[eventList.size()]));
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not persist events: {}", e.getMessage());
+      if (!eventsIDs.isEmpty()) {
+        logger.info("Stopping workflows associated with events...");
+        for (long id : eventsIDs) {
+          try {
+            stopWorkflowInstance(id);
+          } catch (NotFoundException e1) {
+            // should not happen
+          }
+        }
+      }
+    }
+
+    // index events
+
+    for (DublinCoreCatalog event : eventList) {
+      try {
+        index.index(event);
+      } catch (Exception e) {
+        logger.warn("Unable to index event {}: {}", event.getFirst(DublinCore.PROPERTY_IDENTIFIER), e.getMessage());
+        throw new SchedulerException(e);
+      }
+    }
+
+    // update with CA properties with defaults
+    for (DublinCoreCatalog event : eventList) {
+      Properties caProperties = new Properties();
+      updateCAProperties(caProperties, event);
+      try {
+        updateCaptureAgentMetadata(Long.parseLong(event.getFirst(DublinCore.PROPERTY_IDENTIFIER)), caProperties);
+      } catch (NotFoundException e) {
+        // should not happen
+        throw new IllegalStateException(e);
+      }
+    }
+
+    return eventsIDs.toArray(new Long[eventsIDs.size()]);
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#updateCaptureAgentMetadata(java.lang.Long[],
+   * java.util.Properties)
+   */
+  @Override
+  public void updateCaptureAgentMetadata(final Properties configuration, Long... eventIDs) throws NotFoundException,
+          SchedulerException {
+    for (long eventID : eventIDs) {
+      // create clone and update with matching values from DC
+      Properties properties = (Properties) configuration.clone();
+      DublinCoreCatalog catalog = getEventDublinCore(eventID);
+      updateCAProperties(properties, catalog);
+      // store
+      updateCaptureAgentMetadata(eventID, properties);
+    }
+  }
+
+  /**
+   * Stores capture agent properties.
+   * 
+   * @param id
+   *          of event for which properties should be stored
+   * @param properties
+   *          CA properties
+   * @throws NotFoundException
+   *           if event with given index does not exist
+   * @throws SchedulerException
+   *           if exception occurred
+   */
+  protected void updateCaptureAgentMetadata(long id, Properties properties) throws NotFoundException,
+          SchedulerException {
+    try {
+      persistence.updateEventWithMetadata(id, properties);
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Failed to update capture agent configuration for event '{}': {}", id, e.getMessage());
+      throw new SchedulerException(e);
+    }
+
+    try {
+      index.index(Long.toString(id), properties);
+    } catch (Exception e) {
+      logger.warn("Unable to update capture agent properties for event with ID '{}': {}", id, e.getMessage());
+      throw new SchedulerException(e);
+    }
+  }
+
+  /**
+   * Updates CA properties so that they match values from DC. Values that are updated this way are:
+   * <ul>
+   * <li>event.title (mapped from dc:title)</li>
+   * <li>event.series (mapped from dc:is_part_of)</li>
+   * <li>event.location (mapped from dc:spatial)</li>
+   * </ul>
+   * 
+   * @param properties
+   *          properties to be updated
+   * @param catalog
+   *          matching {@link DublinCoreCatalog}
+   */
+  protected void updateCAProperties(Properties properties, DublinCoreCatalog catalog) {
+    properties.put("event.title", catalog.getFirst(DublinCore.PROPERTY_TITLE));
+    if (StringUtils.isNotBlank(catalog.getFirst(DublinCore.PROPERTY_IS_PART_OF))) {
+      properties.put("event.series", catalog.getFirst(DublinCore.PROPERTY_IS_PART_OF));
+    }
+    if (StringUtils.isNotBlank(catalog.getFirst(DublinCore.PROPERTY_SPATIAL))) {
+      properties.put("event.location", catalog.getFirst(DublinCore.PROPERTY_SPATIAL));
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#updateEvent(org.opencastproject.metadata.dublincore.
+   * DublinCoreCatalog)
+   */
+  @Override
+  public void updateEvent(final DublinCoreCatalog eventCatalog) throws NotFoundException, SchedulerException {
+    if (eventCatalog == null) {
+      logger.warn("Cannot update <null> event.");
+      return;
+    }
+
+    if (StringUtils.isBlank(eventCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER))) {
+      logger.error("Dublin core does not contain identifier, so event update is not possible.");
+      throw new SchedulerException("Missing event identifier");
+    }
+
+    final long eventID = Long.parseLong(eventCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+
+    DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod(eventCatalog.getFirst(DublinCore.PROPERTY_TEMPORAL));
+    if (!period.hasEnd() || !period.hasStart()) {
+      throw new IllegalArgumentException(
+              "Dublin core field dc:temporal does not contain information about start and end of event");
+    }
+    Date startDate = period.getStart();
+    Date endDate = period.getEnd();
+
+    try {
+      persistence.updateEvent(eventCatalog);
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not update event {} in persistent storage: {}", eventID, e.getMessage());
+      throw new SchedulerException(e);
+    }
+
+    try {
+      index.index(eventCatalog);
+    } catch (Exception e) {
+      logger.warn("Unable to index event with ID '{}': {}", eventID, e.getMessage());
+      throw new SchedulerException(e);
+    }
+
+    // update workflow
+    try {
+      updateWorkflow(eventCatalog, startDate, endDate);
+    } catch (WorkflowException e) {
+      logger.error("Could not update workflow for event with ID '{}': {}", eventID, e.getMessage());
+      throw new SchedulerException(e);
+    }
+  }
+
+  /**
+   * Given recurrence pattern and template DublinCore, DublinCores for multiple events are generated. Each event will
+   * have template's title plus sequential number. Spatial property of DublinCore is set to represent time period in
+   * which event will take place.
+   * 
+   * @param template
+   *          {@link DublinCoreCatalog} used as template
+   * @param rrule
+   *          recurrence pattern
+   * @param start
+   *          date when series of event will start
+   * @param end
+   *          date when series of event will end
+   * @param duration
+   *          duration of each even in milliseconds
+   * @param timeZone
+   *          time zone in which event will take place
+   * @return list of {@link DublinCoreCatalog}s
+   * @throws ParseException
+   *           if recurrence pattern cannot be parsed
+   */
+  protected List<DublinCoreCatalog> createEventCatalogsFromReccurence(DublinCoreCatalog template, String rrule,
+          Date start, Date end, long duration, String timeZone) throws ParseException {
+    if (StringUtils.isEmpty(rrule)) {
+      throw new IllegalArgumentException("Event has no recurrence pattern.");
+    }
+    TimeZone tz = null; // Create timezone based on CA's reported TZ.
+    if (StringUtils.isNotEmpty(timeZone)) {
+      tz = TimeZone.getTimeZone(timeZone);
+    } else { // No timezone was present, assume the serve's local timezone.
+      tz = TimeZone.getDefault();
+    }
+    Recur recur = new RRule(rrule).getRecur();
+    if (start == null) {
+      start = new Date(System.currentTimeMillis());
+    }
+    if (end == null) {
+      throw new IllegalArgumentException("Event has no end date.");
+    }
+    DateTime seed = new DateTime(true);
+    DateTime period = new DateTime(true);
+    if (tz.inDaylightTime(start) && !tz.inDaylightTime(end)) {
+      seed.setTime(start.getTime() + 3600000);
+      period.setTime(end.getTime());
+    } else if (!tz.inDaylightTime(start) && tz.inDaylightTime(end)) {
+      seed.setTime(start.getTime());
+      period.setTime(end.getTime() + 3600000);
+    } else {
+      seed.setTime(start.getTime());
+      period.setTime(end.getTime());
+    }
+    DateList dates = recur.getDates(seed, period, Value.DATE_TIME);
+    logger.debug("DateList: {}", dates);
+    List<DublinCoreCatalog> events = new LinkedList<DublinCoreCatalog>();
+    int i = 1;
+    for (Object date : dates) {
+      Date d = (Date) date;
+      // Adjust for DST, if start of event
+      if (tz.inDaylightTime(seed)) { // Event starts in DST
+        if (!tz.inDaylightTime(d)) { // Date not in DST?
+          d.setTime(d.getTime() + tz.getDSTSavings()); // Ajust for Fall back one hour
+        }
+      } else { // Event doesn't start in DST
+        if (tz.inDaylightTime(d)) {
+          d.setTime(d.getTime() - tz.getDSTSavings()); // Adjust for Spring forward one hour
+        }
+      }
+      DublinCoreCatalog event = (DublinCoreCatalog) ((DublinCoreCatalogImpl) template).clone();
+      event.set(DublinCore.PROPERTY_TITLE, template.getFirst(DublinCore.PROPERTY_TITLE) + " " + i);
+
+      DublinCoreValue eventTime = EncodingSchemeUtils.encodePeriod(new DCMIPeriod(d, new Date(d.getTime() + duration)),
+              Precision.Second);
+      event.set(DublinCore.PROPERTY_TEMPORAL, eventTime);
+      events.add(event);
+    }
+    return events;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#removeEvent(long)
+   */
+  @Override
+  public void removeEvent(final long eventID) throws SchedulerException, NotFoundException {
+    try {
+      persistence.deleteEvent(eventID);
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not remove event '{}' from persistent storage: {}", eventID, e);
+      throw new SchedulerException(e);
+    }
+
+    try {
+      index.delete(Long.toString(eventID));
+    } catch (Exception e) {
+      logger.warn("Unable to delete event '{}' from index: {}", eventID, e);
+      throw new SchedulerException(e);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#getEventDublinCore(long)
+   */
+  @Override
+  public DublinCoreCatalog getEventDublinCore(long eventID) throws NotFoundException, SchedulerException {
+    try {
+      return index.getDublinCore(Long.toString(eventID));
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not retrieve Dublin Core for event with ID {}", eventID);
+      throw new SchedulerException(e);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#getEventCaptureAgentConfiguration(long)
+   */
+  @Override
+  public Properties getEventCaptureAgentConfiguration(long eventID) throws NotFoundException, SchedulerException {
+    try {
+      return index.getCaptureAgentProperties(Long.toString(eventID));
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not retrieve Capture Agent properties for event with ID {}", eventID);
+      throw new SchedulerException(e);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#search(org.opencastproject.scheduler.api.SchedulerQuery)
+   */
+  @Override
+  public DublinCoreCatalogList search(SchedulerQuery query) throws SchedulerException {
+    try {
+      List<DublinCoreCatalog> resultList = index.search(query);
+      DublinCoreCatalogList dcList = new DublinCoreCatalogList();
+      dcList.setCatalogList(resultList);
+      return dcList;
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not execute query: {}", e.getMessage());
+      throw new SchedulerException(e);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#findConflictingEvents(java.lang.String, java.util.Date,
+   * java.util.Date)
+   */
+  @Override
+  public DublinCoreCatalogList findConflictingEvents(String captureDeviceID, Date startDate, Date endDate)
+          throws SchedulerException {
+    SchedulerQuery q = new SchedulerQuery().setSpatial(captureDeviceID).setEndsFrom(startDate).setStartsTo(endDate);
+    try {
+      List<DublinCoreCatalog> result = index.search(q);
+      DublinCoreCatalogList dcList = new DublinCoreCatalogList();
+      dcList.setCatalogList(result);
+      return dcList;
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Could not complete search after conflicting events for device '{}': {}", captureDeviceID,
+              e.getMessage());
+      throw new SchedulerException(e);
+    }
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see org.opencastproject.scheduler.api.SchedulerService#findConflictingEvents(java.lang.String, java.lang.String,
+   * java.util.Date, java.util.Date, long)
+   */
+  @Override
+  public DublinCoreCatalogList findConflictingEvents(String captureDeviceID, String rrule, Date startDate,
+          Date endDate, long duration) throws SchedulerException {
+    RRule rule;
+    try {
+      rule = new RRule(rrule);
+      rule.validate();
+    } catch (Exception e) {
+      logger.error("Could not create rule for finding conflicting events: {}", e.getMessage());
+      throw new SchedulerException(e);
+    }
     Recur recur = rule.getRecur();
     DateTime start = new DateTime(startDate.getTime());
     start.setUtc(true);
     DateTime end = new DateTime(endDate.getTime());
     end.setUtc(true);
     DateList dates = recur.getDates(start, end, Value.DATE_TIME);
-    List<Event> events = new ArrayList<Event>();
+    List<DublinCoreCatalog> events = new ArrayList<DublinCoreCatalog>();
 
     for (Object d : dates) {
       Date filterStart = (Date) d;
-      SchedulerFilter filter = new SchedulerFilter().withDeviceFilter(device).withStart(filterStart)
-              .withStop(new Date(filterStart.getTime() + duration));
-      List<Event> filterEvents = getEvents(filter);
+      // TODO optimize: create only one query and execute it
+      List<DublinCoreCatalog> filterEvents = findConflictingEvents(captureDeviceID, filterStart,
+              new Date(filterStart.getTime() + duration)).getCatalogList();
       events.addAll(filterEvents);
     }
 
-    return events;
+    DublinCoreCatalogList dcList = new DublinCoreCatalogList();
+    dcList.setCatalogList(events);
+    return dcList;
   }
 
-  public void destroy() {
-    emf.close();
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public void updated(Dictionary properties) throws ConfigurationException {
-    this.properties = properties;
-  }
-
-  /**
-   * {@inheritDoc}
+  /*
+   * (non-Javadoc)
    * 
    * @see org.opencastproject.scheduler.api.SchedulerService#getCalendarForCaptureAgent(java.lang.String)
    */
-  public String getCalendarForCaptureAgent(String captureAgentID) {
-    SchedulerFilter filter = getFilterForCaptureAgent(captureAgentID);
-    CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator, seriesService);
-    List<Event> events = getEvents(filter);
-    logger.debug("Events with CA '{}': {}", captureAgentID, events);
-    for (Event event : events) {
-      cal.addEvent(event);
+  @Override
+  public String getCalendar(SchedulerQuery filter) throws SchedulerException {
+
+    List<DublinCoreCatalog> eventList;
+    try {
+      eventList = index.search(filter);
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Failed to retrieve events for capture agent '{}'", filter);
+      throw new SchedulerException(e);
     }
+
+    CalendarGenerator cal = new CalendarGenerator(seriesService);
+    for (DublinCoreCatalog event : eventList) {
+      String id = event.getFirst(DublinCore.PROPERTY_IDENTIFIER);
+      Properties prop;
+      try {
+        prop = getEventCaptureAgentConfiguration(Long.parseLong(id));
+      } catch (NotFoundException e) {
+        // should not happen
+        throw new IllegalStateException(e);
+      }
+      cal.addEvent(event, prop);
+    }
+
     // Only validate calendars with events. Without any events, the icalendar won't validate
-    if (events.size() > 0) {
+    if (eventList.size() > 0) {
       try {
         cal.getCalendar().validate();
       } catch (ValidationException e1) {
         logger.warn("Could not validate Calendar: {}", e1.getMessage());
       }
     }
+
     return cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
   }
 
-  /**
-   * {@inheritDoc}
+  /*
+   * (non-Javadoc)
    * 
-   * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
+   * @see org.opencastproject.scheduler.api.SchedulerService#getScheduleLastModified(java.lang.String)
    */
-  public String getDublinCoreMetadata(Long eventID) throws NotFoundException {
-    Event event = getEvent(eventID);
-    if (dcGenerator == null) {
-      logger.error("Dublin Core generator not initialized");
-      return null;
-    }
-    return dcGenerator.generateAsString(event);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
-   */
-  public String getCaptureAgentMetadata(Long eventID) throws NotFoundException {
-    Event event = getEvent(eventID);
-    if (caGenerator == null) {
-      logger.error("Capture Agent Metadata generator not initialized");
-      return null;
-    }
-    return caGenerator.generateAsString(event);
-  }
-
-  /**
-   * Sets the series service
-   * 
-   * @param s
-   */
-  public void setSeriesService(SeriesService s) {
-    seriesService = s;
-  }
-
-  /**
-   * Sets the workflow service
-   * 
-   * @param workflowService
-   *          the workflowService to set
-   */
-  public void setWorkflowService(WorkflowService workflowService) {
-    this.workflowService = workflowService;
-  }
-
-  /**
-   * @return An empty Event
-   */
-  public Event getNewEvent() {
-    return new EventImpl();
-  }
-
-  /**
-   * resolves the appropriate Filter for the Capture Agent
-   * 
-   * @param captureAgentID
-   *          The ID as provided by the capture agent
-   * @return the Filter for this capture Agent.
-   */
-  public SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
-    SchedulerFilter filter = new SchedulerFilter();
-    filter.withDeviceFilter(captureAgentID).withCurrentAndUpcoming().withOrder("startDate");
-    return filter;
-  }
-
-  public Date getScheduleLastModified(String captureAgentId) throws SchedulerException {
-    EntityManager em = emf.createEntityManager();
+  @Override
+  public Date getScheduleLastModified(SchedulerQuery filter) throws SchedulerException {
     try {
-      Query q = em.createNamedQuery("Event.getLastUpdated").setParameter("device", captureAgentId);
-      return (Date) q.getSingleResult();
-    } catch (NoResultException e) {
-      logger.debug("No events scheduled for {}", captureAgentId);
-    } catch (Exception e) {
+      return index.getLastModifiedDate(filter);
+    } catch (SchedulerServiceDatabaseException e) {
+      logger.error("Failed to retrieve last modified for CA {}: {}", filter, e.getMessage());
       throw new SchedulerException(e);
-    } finally {
-      em.close();
     }
-    return null;
   }
 }

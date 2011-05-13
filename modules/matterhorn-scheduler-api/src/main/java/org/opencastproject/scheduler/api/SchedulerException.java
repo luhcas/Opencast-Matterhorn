@@ -46,7 +46,7 @@ public class SchedulerException extends Exception {
   }
 
   /**
-   * Build a new scheduler exception wuth a message
+   * Build a new scheduler exception with a message
    * 
    * @param message
    *          the error message
