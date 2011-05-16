@@ -161,7 +161,7 @@ Opencast.Watch = (function ()
         Opencast.Utils.log("Player ready");
         
         // Parse the plugin URLs
-        $.getJSON('js/data.json', function(data)
+        $.getJSON('js/servicedata.json', function(data)
         {
             analyticsURL = data.plugin_urls.analytics;
             annotationURL = data.plugin_urls.annotation;
