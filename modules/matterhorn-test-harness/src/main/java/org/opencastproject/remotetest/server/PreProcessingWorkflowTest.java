@@ -23,7 +23,6 @@ import static org.opencastproject.remotetest.Main.BASE_URL;
 import org.opencastproject.remotetest.Main;
 import org.opencastproject.remotetest.util.CaptureUtils;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
-import org.opencastproject.remotetest.util.Utils;
 import org.opencastproject.remotetest.util.WorkflowUtils;
 
 import org.apache.commons.io.IOUtils;
@@ -32,9 +31,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -43,13 +41,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-
-import javax.xml.xpath.XPathConstants;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This test case simulates adding a recording event, waiting for the capture agent to pick it up, do the recording and
@@ -214,36 +214,45 @@ public class PreProcessingWorkflowTest {
    * @return the event identifier
    */
   private String scheduleEvent(Date start, Date end) throws Exception {
-    HttpPut request = new HttpPut(BASE_URL + "/scheduler");
+    HttpPost request = new HttpPost(BASE_URL + "/scheduler/recordings");
 
     // Create the request body
-    Calendar c = Calendar.getInstance();
-    c.roll(Calendar.MINUTE, 1);
-    long startTime = c.getTimeInMillis();
-    c.roll(Calendar.MINUTE, 1);
-    long endTime = c.getTimeInMillis();
-    String eventXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><event>"
-            + "<contributor>demo contributor</contributor><creator>demo creator</creator>"
-            + "<startDate>{start}</startDate><endDate>{stop}</endDate><device>{device}</device>"
-            + "<language>en</language><license>creative commons</license>"
-            + "<title>demo title</title><additionalMetadata><metadata id=\"0\"><key>location</key>"
-            + "<value>demo location</value></metadata><metadata id=\"0\"><key>org.opencastproject.workflow.definition</key>"
-            + "<value>" + WORKFLOW_DEFINITION_ID + "</value></metadata></additionalMetadata></event>";
-    eventXml = eventXml.replace("{device}", CAPTURE_AGENT_ID).replace("{start}", Long.toString(startTime))
-            .replace("{stop}", Long.toString(endTime));
+    SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    f.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+    String dublinCoreXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+            + "<dublincore xmlns=\"http://www.opencastproject.org/xsd/1.0/dublincore/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" "
+            + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><dcterms:creator>demo creator</dcterms:creator>"
+            + "<dcterms:contributor>demo contributor</dcterms:contributor>"
+            + "<dcterms:temporal xsi:type=\"dcterms:Period\">start={startTime}; end={endTime}; scheme=W3C-DTF;</dcterms:temporal>"
+            + "<dcterms:language>en</dcterms:language><dcterms:spatial>{device}</dcterms:spatial><dcterms:title>demo title</dcterms:title>"
+            + "<dcterms:license>creative commons</dcterms:license></dublincore>";
+    dublinCoreXml = dublinCoreXml.replace("{device}", CAPTURE_AGENT_ID).replace("{startTime}", f.format(start))
+            .replace("{endTime}", f.format(end));
+
+    String captureAgentMetadata = "event.location=testdevice\norg.opencastproject.workflow.definition="
+            + WORKFLOW_DEFINITION_ID + "\n";
 
     // Prepare the request
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("event", eventXml));
+    formParams.add(new BasicNameValuePair("event", dublinCoreXml));
+    formParams.add(new BasicNameValuePair("caproperties", captureAgentMetadata));
     request.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
     // Submit and check the response
     HttpResponse response = client.execute(request);
     assertEquals(HttpStatus.SC_CREATED, response.getStatusLine().getStatusCode());
-    String responseBody = StringUtils.trimToNull(EntityUtils.toString(response.getEntity()));
-    assertNotNull(responseBody);
-    String eventId = StringUtils.trimToNull((String) Utils.xpath(responseBody, "/event/@id", XPathConstants.STRING));
-    assertNotNull("No event id found", eventId);
+    String responseHeader = StringUtils.trimToNull(response.getFirstHeader("Location").getValue());
+    assertNotNull(responseHeader);
+    Pattern p = Pattern.compile(".*?(\\d+)\\.xml");
+    Matcher m = p.matcher(responseHeader);
+    String eventId = null;
+    if (m.find()) {
+      eventId = m.group(1);
+      assertNotNull("No event id found", eventId);
+    } else {
+      fail("Unknown location returned");
+    }
     return eventId;
   }
 

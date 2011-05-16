@@ -296,8 +296,10 @@ public class SchedulerRestService {
         if (caProperties != null) {
           service.updateCaptureAgentMetadata(caProperties, id);
         }
-        return Response.status(Status.CREATED)
-                .header("Location", PathSupport.concat(new String[] { this.serverUrl, this.serviceUrl, id + ".xml" }))
+        return Response
+                .status(Status.CREATED)
+                .header("Location",
+                        PathSupport.concat(new String[] { this.serverUrl, this.serviceUrl, "recordings", id + ".xml" }))
                 .build();
       }
     } catch (Exception e) {
