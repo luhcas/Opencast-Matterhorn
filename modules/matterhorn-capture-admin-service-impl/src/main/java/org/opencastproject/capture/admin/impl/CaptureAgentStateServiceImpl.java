@@ -300,7 +300,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       tx.begin();
       Agent existing = em.find(AgentImpl.class, a.getName());
       if (existing != null) {
-        existing.setConfiguration(a.getCapabilities());
+        existing.setConfiguration(a.getConfiguration());
         existing.setLastHeardFrom(a.getLastHeardFrom());
         existing.setState(a.getState());
         em.merge(existing);

@@ -39,6 +39,7 @@ import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.security.api.TrustedHttpClientException;
 import org.opencastproject.util.IoSupport;
+import org.opencastproject.util.QueryStringBuilder;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -92,6 +93,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.UUID;
+
+import javax.ws.rs.core.Response;
 
 /**
  * Scheduler implementation class. This class is responsible for retrieving iCal and then scheduling captures from the
@@ -531,13 +534,14 @@ public class SchedulerImpl {
       } else {
         HttpResponse response = null;
         try {
-          HttpGet get = new HttpGet(uri);
+          QueryStringBuilder qsb = new QueryStringBuilder(url.toString());
+          qsb.add("agentid", configService.getItem(CaptureParameters.AGENT_NAME));
+          HttpGet get = new HttpGet(qsb.toString());
           Header[] requestHeaders = lastCalendarEtag == null ? null : new Header[] { new BasicHeader("If-None-Match",
                   lastCalendarEtag) };
           get.setHeaders(requestHeaders);
           response = trustedClient.execute(get);
-          if (response.getStatusLine().getStatusCode() == 304) { // didn't find constants without bringing in more
-                                                                 // dependencies
+          if (Response.Status.NOT_MODIFIED.equals(response.getStatusLine().getStatusCode())) {
             log.debug("Calendar has not changed");
             return null;
           } else if (response.getStatusLine().getStatusCode() == 200) {
