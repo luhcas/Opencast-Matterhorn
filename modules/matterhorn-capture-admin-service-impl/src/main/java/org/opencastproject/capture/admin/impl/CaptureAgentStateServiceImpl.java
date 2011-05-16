@@ -289,23 +289,23 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   /**
    * Updates or adds an agent to the database.
    * 
-   * @param a
+   * @param agent
    *          The Agent you wish to modify or add in the database.
    */
-  private synchronized void updateAgentInDatabase(Agent a) {
+  private synchronized void updateAgentInDatabase(Agent agent) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
       tx = em.getTransaction();
       tx.begin();
-      Agent existing = em.find(AgentImpl.class, a.getName());
+      Agent existing = em.find(AgentImpl.class, agent.getName());
       if (existing != null) {
-        existing.setConfiguration(a.getConfiguration());
-        existing.setLastHeardFrom(a.getLastHeardFrom());
-        existing.setState(a.getState());
+        existing.setConfiguration(agent.getConfiguration());
+        existing.setLastHeardFrom(agent.getLastHeardFrom());
+        existing.setState(agent.getState());
         em.merge(existing);
       } else {
-        em.persist(a);
+        em.persist(agent);
       }
       tx.commit();
     } catch (RollbackException e) {

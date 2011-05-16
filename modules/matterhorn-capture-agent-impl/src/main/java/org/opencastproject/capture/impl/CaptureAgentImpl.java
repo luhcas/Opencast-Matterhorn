@@ -1587,4 +1587,16 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       return state.equals(AgentState.IDLE);
     }
   }
+
+  /**
+   * 
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.capture.api.CaptureAgent#updateCalendar()
+   */
+  public void updateSchedule() {
+    if (scheduler != null) {
+      scheduler.updateCalendar();
+    }
+  }
 }

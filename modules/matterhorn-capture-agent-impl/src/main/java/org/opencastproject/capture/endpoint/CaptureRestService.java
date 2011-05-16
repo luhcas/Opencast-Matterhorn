@@ -268,4 +268,19 @@ public class CaptureRestService {
 
     return Response.ok(new PropertiesResponse(service.getAgentCapabilities())).build();
   }
+
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("update")
+  @RestQuery(name = "update", description = "Triggers a schedule data update from the agent.", pathParameters = { }, restParameters = { }, reponses = {
+    @RestResponse(description = "the request was sent", responseCode = HttpServletResponse.SC_OK),
+    @RestResponse(description = "Capture Agent is unavailable", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE) }, returnDescription = "")
+  public Response updateCalendar() {
+    if (service == null) {
+      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Capture Agent is unavailable, please wait...").build();
+    }
+
+    service.updateSchedule();
+    return Response.ok("Calendar update commencing.").build();
+  }
 }

@@ -118,5 +118,10 @@ public interface CaptureAgent {
    * @return The current schedule in a {@code List} of {@code ScheduledEvent}s or null in the case of an error.
    */
   List<ScheduledEvent> getAgentSchedule();
+
+  /**
+   * Forces an update of the schedule data
+   */
+  void updateSchedule();
 }
 
