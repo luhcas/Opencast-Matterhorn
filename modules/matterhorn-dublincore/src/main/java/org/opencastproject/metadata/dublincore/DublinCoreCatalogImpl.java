@@ -27,9 +27,11 @@ import org.apache.commons.collections.Closure;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.Transformer;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -181,11 +183,31 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    * Loads the dublin core catalog.
    */
   private void loadCatalogData(InputStream in) throws IllegalStateException {
-    DublinCoreParser parser = new DublinCoreParser(this);
+    // Read the stream into a string so we can choose the correct format.
+    // TODO: we should provide separate methods for json and xml to avoid needing to buffer the xml
+    String inAsString;
     try {
-      parser.parse(in);
-    } catch (Exception e) {
-      throw new IllegalStateException("Unable to load dc catalog data:" + e.getMessage(), e);
+      inAsString = IOUtils.toString(in, "UTF-8");
+    } catch (IOException e) {
+      throw new IllegalStateException("Unable to read dublin core stream", e);
+    }
+
+    if (inAsString.startsWith("{")) {
+      JSONObject json;
+      try {
+        json = (JSONObject) new JSONParser().parse(inAsString);
+        this.readFromJsonObject(json);
+      } catch (Exception e) {
+        throw new IllegalStateException("Unable to load dublin core catalog, json parsing failed.", e);
+      }
+    } else {
+      DublinCoreParser parser = new DublinCoreParser(this);
+      try {
+        parser.parse(IOUtils.toInputStream(inAsString, "UTF-8"));
+        return; // if this doesn't throw, we're done
+      } catch (Exception e) {
+        throw new IllegalStateException("Unable to load dublin core catalog, xml parsing failed.", e);
+      }
     }
   }
 
@@ -540,12 +562,56 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   }
 
   /**
+   * Reads values from a JSON object
+   * 
+   * @param json
+   *          the json object representing the dublin core catalog
+   * @return the dublin core catalog
+   */
+  @SuppressWarnings("unchecked")
+  protected void readFromJsonObject(JSONObject json) {
+    Set<Entry<String, JSONObject>> namespaceEntrySet = json.entrySet();
+    for (Entry<String, JSONObject> namespaceEntry : namespaceEntrySet) { // e.g. http://purl.org/dc/terms/
+      String namespace = namespaceEntry.getKey();
+      String prefix = bindings.lookupPrefix(namespace);
+      JSONObject namespaceObj = namespaceEntry.getValue();
+      Set<Entry<String, JSONArray>> entrySet = namespaceObj.entrySet();
+      for (Entry<String, JSONArray> entry : entrySet) { // e.g. title
+        String key = entry.getKey();
+        JSONArray values = entry.getValue();
+        for (Object valueObject : values) {
+          JSONObject value = (JSONObject) valueObject; // e.g. English title
+
+          // the value
+          String valueString = (String) value.get("value");
+
+          // the language
+          String lang = (String) value.get("lang");
+          if (lang == null) {
+            lang = LANGUAGE_UNDEFINED;
+          }
+
+          // the encoding scheme
+          String encodingSchemeString = (String) value.get("type");
+          EName encodingScheme = null;
+          if (encodingSchemeString != null) {
+            encodingScheme = this.toEName(encodingSchemeString);
+          }
+
+          // add the new value to this DC document
+          this.add(new EName(namespace, key), valueString, lang, encodingScheme);
+        }
+      }
+    }
+  }
+
+  /**
    * Converts the catalog to JSON object.
    * 
    * @return JSON object
    */
   @SuppressWarnings("unchecked")
-  JSONObject toJsonObject() {
+  protected JSONObject toJsonObject() {
     // The top-level json object
     JSONObject json = new JSONObject();
 

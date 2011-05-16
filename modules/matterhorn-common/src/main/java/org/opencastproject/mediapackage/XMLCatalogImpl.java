@@ -578,7 +578,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
       throw new IllegalArgumentException("Local name must not contain ':'");
     if (parts.length == 2)
       return parts;
-    return new String[] { XMLConstants.DEFAULT_NS_PREFIX, parts[1] };
+    return new String[] { XMLConstants.DEFAULT_NS_PREFIX, parts[0] };
   }
 
   /**

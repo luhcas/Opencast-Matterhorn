@@ -16,6 +16,8 @@
 
 package org.opencastproject.metadata.dublincore;
 
+import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_CREATED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,10 +29,13 @@ import static org.opencastproject.metadata.dublincore.DublinCore.LANGUAGE_ANY;
 import static org.opencastproject.metadata.dublincore.DublinCore.LANGUAGE_UNDEFINED;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_CONTRIBUTOR;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_CREATOR;
+import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_FORMAT;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_IDENTIFIER;
+import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_LANGUAGE;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_LICENSE;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_PUBLISHER;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_TITLE;
+import static org.opencastproject.metadata.dublincore.DublinCore.TERMS_NS_URI;
 import static org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl.PROPERTY_PROMOTED;
 
 import org.opencastproject.mediapackage.Catalog;
@@ -38,8 +43,8 @@ import org.opencastproject.mediapackage.EName;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.metadata.api.MediaPackageMetadata;
 import org.opencastproject.mediapackage.NamespaceBindingException;
+import org.opencastproject.metadata.api.MediaPackageMetadata;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.UnknownFileTypeException;
 import org.opencastproject.workspace.api.Workspace;
@@ -132,7 +137,8 @@ public class DublinCoreTest {
 
     // Check if the fields are available
     assertEquals("ETH Zurich, Switzerland", dc.getFirst(PROPERTY_PUBLISHER, LANGUAGE_UNDEFINED));
-    assertEquals("Land and Vegetation: Key players on the Climate Scene", dc.getFirst(PROPERTY_TITLE, DublinCore.LANGUAGE_UNDEFINED));
+    assertEquals("Land and Vegetation: Key players on the Climate Scene",
+            dc.getFirst(PROPERTY_TITLE, DublinCore.LANGUAGE_UNDEFINED));
     assertNotNull(dc.getFirst(PROPERTY_TITLE));
     assertNull(dc.getFirst(PROPERTY_TITLE, "fr"));
     // Test custom metadata element
@@ -143,7 +149,7 @@ public class DublinCoreTest {
    * Test method for {@link DublinCoreCatalogImpl#toJson()} .
    */
   @Test
-  public void testToJson() throws Exception {
+  public void testJson() throws Exception {
     DublinCoreCatalog dc = null;
     FileInputStream in = new FileInputStream(catalogFile);
     dc = new DublinCoreCatalogImpl(in);
@@ -151,12 +157,10 @@ public class DublinCoreTest {
 
     String jsonString = dc.toJson();
 
-    logger.info(jsonString);
-
     JSONParser parser = new JSONParser();
     JSONObject jsonObject = (JSONObject) parser.parse(jsonString);
 
-    JSONObject dcTerms = (JSONObject) jsonObject.get(DublinCore.TERMS_NS_URI);
+    JSONObject dcTerms = (JSONObject) jsonObject.get(TERMS_NS_URI);
     assertNotNull(dcTerms);
 
     JSONArray titleArray = (JSONArray) dcTerms.get("title");
@@ -164,6 +168,16 @@ public class DublinCoreTest {
 
     JSONArray subjectArray = (JSONArray) dcTerms.get("subject");
     assertEquals("The subject should be present", 1, subjectArray.size());
+
+    DublinCoreCatalog fromJson = new DublinCoreCatalogImpl(IOUtils.toInputStream(jsonString));
+    assertEquals(2, fromJson.getLanguages(PROPERTY_TITLE).size());
+    assertEquals("video/x-dv", fromJson.getFirst(PROPERTY_FORMAT));
+    assertEquals("eng", fromJson.getFirst(PROPERTY_LANGUAGE));
+    assertEquals("2007-12-05", fromJson.getFirst(PROPERTY_CREATED));
+
+    // Serialize again, and we should get the same json
+    String jsonRoundtrip = fromJson.toJson();
+    assertEquals(jsonString, jsonRoundtrip);
   }
 
   /**
@@ -184,7 +198,8 @@ public class DublinCoreTest {
 
       // Add the required fields
       dcNew.add(PROPERTY_IDENTIFIER, dcSample.getFirst(PROPERTY_IDENTIFIER));
-      dcNew.add(PROPERTY_TITLE, dcSample.getFirst(PROPERTY_TITLE, DublinCore.LANGUAGE_UNDEFINED), DublinCore.LANGUAGE_UNDEFINED);
+      dcNew.add(PROPERTY_TITLE, dcSample.getFirst(PROPERTY_TITLE, DublinCore.LANGUAGE_UNDEFINED),
+              DublinCore.LANGUAGE_UNDEFINED);
 
       // Add an additional field
       dcNew.add(PROPERTY_PUBLISHER, dcSample.getFirst(PROPERTY_PUBLISHER));
