@@ -180,7 +180,7 @@ public final class SearchServiceImpl implements SearchService {
       IllegalStateException connectError(String target, Exception e) {
         return new IllegalStateException("Unable to connect to solr at " + target, e);
       }
-    }.create();
+    } .create();
 
     solrRequester = new SolrRequester(solrServer, securityService);
     indexManager = new SolrIndexManager(

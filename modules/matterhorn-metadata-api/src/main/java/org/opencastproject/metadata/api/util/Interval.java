@@ -18,91 +18,114 @@ package org.opencastproject.metadata.api.util;
 
 import java.util.Date;
 
+/**
+ * An interval in time, possibly unbounded on one end.
+ * The interval is described by its bounds which are absolutely placed instants in time with a precision
+ * defined by {@link java.util.Date}.
+ */
 public abstract class Interval {
 
   private Interval() {
   }
 
   /**
-   * Constructor function.
+   * Constructor function for a bounded interval.
    */
-  public static Interval closedInterval(final Date leftBound, final Date rightBound) {
+  public static Interval boundedInterval(final Date leftBound, final Date rightBound) {
     return new Interval() {
       @Override
-      public boolean isLeftOpen() {
+      public boolean isLeftInfinite() {
         return false;
       }
 
       @Override
-      public boolean isRightOpen() {
+      public boolean isRightInfinite() {
         return false;
       }
 
       @Override
       public <A> A fold(Match<A> visitor) {
-        return visitor.closed(leftBound, rightBound);
+        return visitor.bounded(leftBound, rightBound);
       }
     };
   }
 
   /**
-   * Constructor function.
+   * Constructor function for a right bounded interval, i.e. an interval with an infinite left endpoint.
    */
-  public static Interval leftOpenInterval(final Date rightBound) {
+  public static Interval rightBoundedInterval(final Date rightBound) {
     return new Interval() {
       @Override
-      public boolean isLeftOpen() {
+      public boolean isLeftInfinite() {
         return true;
       }
 
       @Override
-      public boolean isRightOpen() {
+      public boolean isRightInfinite() {
         return false;
       }
 
       @Override
       public <A> A fold(Match<A> visitor) {
-        return visitor.leftOpen(rightBound);
+        return visitor.leftInfinite(rightBound);
       }
     };
   }
 
-  public static Interval rightOpenInterval(final Date leftBound) {
+  /**
+   * Constructor function for a left bounded interval, i.e. an interval with an infinite right endpoint.
+   */
+  public static Interval leftBoundedInterval(final Date leftBound) {
     return new Interval() {
       @Override
-      public boolean isLeftOpen() {
+      public boolean isLeftInfinite() {
         return false;
       }
 
       @Override
-      public boolean isRightOpen() {
+      public boolean isRightInfinite() {
         return true;
       }
 
       @Override
       public <A> A fold(Match<A> visitor) {
-        return visitor.rightOpen(leftBound);
+        return visitor.rightInfinite(leftBound);
       }
     };
   }
 
+  /**
+   * Create an interval from two dates. One of the dates may be null to indicate an infinite endpoint.
+   *
+   * @throws IllegalArgumentException
+   *            if boths bounds are null
+   */
   public static Interval fromValues(final Date leftBound, final Date rightBound) {
     if (leftBound != null && rightBound != null)
-      return closedInterval(leftBound, rightBound);
+      return boundedInterval(leftBound, rightBound);
     if (leftBound != null)
-      return rightOpenInterval(leftBound);
+      return leftBoundedInterval(leftBound);
     if (rightBound != null)
-      return leftOpenInterval(rightBound);
+      return rightBoundedInterval(rightBound);
     throw new IllegalArgumentException("Please give at least one bound");
   }
 
-  public boolean isClosed() {
-    return !(isLeftOpen() || isRightOpen());
+  /**
+   * Test if both endpoints are not infinite.
+   */
+  public boolean isBounded() {
+    return !(isLeftInfinite() || isRightInfinite());
   }
 
-  public abstract boolean isLeftOpen();
+  /**
+   * Test if the right endpoint is infinite.
+   */
+  public abstract boolean isLeftInfinite();
 
-  public abstract boolean isRightOpen();
+  /**
+   * Test if the left endpoint is infinite.
+   */
+  public abstract boolean isRightInfinite();
 
   /**
    * Safe decomposition.
@@ -110,11 +133,11 @@ public abstract class Interval {
   public abstract <A> A fold(Match<A> visitor);
 
   public interface Match<A> {
-    A closed(Date leftBound, Date rightBound);
+    A bounded(Date leftBound, Date rightBound);
 
-    A leftOpen(Date rightBound);
+    A leftInfinite(Date rightBound);
 
-    A rightOpen(Date leftBound);
+    A rightInfinite(Date leftBound);
   }
 
 }

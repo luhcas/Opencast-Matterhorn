@@ -324,7 +324,7 @@ public class TextAnalyzerServiceImpl extends AbstractJobProducer implements Text
           text = new TextualImpl(cleanLine.toString(), language);
         }
       } else {
-        logger.info("No languages installed.  For better results, please install at least one language pack");
+        logger.debug("No languages installed.  For better results, please install at least one language pack");
         text = new TextualImpl(line.getText());
       }
       videoText.setText(text);

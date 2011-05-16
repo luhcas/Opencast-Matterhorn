@@ -273,7 +273,8 @@ public final class Schema {
   }
 
   public static Long getDcExtent(SolrDocument doc) {
-    return (Long) doc.get(DC_EXTENT);
+    Integer extent = (Integer) doc.get(DC_EXTENT);
+    return extent != null ? extent.longValue() : null;
   }
 
   public static void setDcExtent(SolrInputDocument doc, Long extent) {
@@ -526,6 +527,7 @@ public final class Schema {
     return v != null ? (Date) v : null;
   }
 
+  @SuppressWarnings("unchecked")
   private static List<DField<String>> getDynamicStringValues(SolrDocument doc, String fieldPrefix) {
     List<DField<String>> r = new ArrayList<DField<String>>();
     for (String f : doc.getFieldNames()) {

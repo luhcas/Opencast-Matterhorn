@@ -646,4 +646,40 @@ public class SearchResultItemImpl implements SearchResultItem {
     mediaSegments.add((MediaSegmentImpl) segment); // TODO: assuming this
   }
 
+  /**
+   * Build a result item from an anonymously implemented interface to ensure you don't miss any fields.
+   */
+  public static SearchResultItemImpl fill(SearchResultItemImpl item, SearchResultItem from) {
+    item.setId(from.getId());
+    item.setMediaPackage(from.getMediaPackage());
+    item.setDcExtent(from.getDcExtent());
+    item.setDcTitle(from.getDcTitle());
+    item.setDcSubject(from.getDcSubject());
+    item.setDcDescription(from.getDcDescription());
+    item.setDcCreator(from.getDcCreator());
+    item.setDcPublisher(from.getDcPublisher());
+    item.setDcContributor(from.getDcContributor());
+    item.setDcAbstract(from.getDcAbstract());
+    item.setDcCreated(from.getDcCreated());
+    item.setDcAvailableFrom(from.getDcAvailableFrom());
+    item.setDcAvailableTo(from.getDcAvailableTo());
+    item.setDcLanguage(from.getDcLanguage());
+    item.setDcRightsHolder(from.getDcRightsHolder());
+    item.setDcSpatial(from.getDcSpatial());
+    item.setDcTemporal(from.getDcTemporal());
+    item.setDcIsPartOf(from.getDcIsPartOf());
+    item.setDcReplaces(from.getDcReplaces());
+    item.setDcType(from.getDcType());
+    item.setDcAccessRights(from.getDcAccessRights());
+    item.setDcLicense(from.getDcLicense());
+    item.setMediaType(from.getType());
+    for (String k : from.getKeywords())
+      item.addKeyword(k);
+    item.setCover(from.getCover());
+    item.setModified(from.getModified());
+    item.setScore(from.getScore());
+    for (MediaSegment s : from.getSegments())
+      item.addSegment(s);
+    return item;
+  }
 }

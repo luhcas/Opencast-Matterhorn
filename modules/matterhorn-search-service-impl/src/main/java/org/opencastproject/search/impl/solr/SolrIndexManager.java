@@ -405,17 +405,17 @@ public class SolrIndexManager {
           public Option<Date> apply(Interval interval) {
             return interval.fold(new Interval.Match<Option<Date>>() {
               @Override
-              public Option<Date> closed(Date leftBound, Date rightBound) {
+              public Option<Date> bounded(Date leftBound, Date rightBound) {
                 return Option.some(leftBound);
               }
 
               @Override
-              public Option<Date> leftOpen(Date rightBound) {
+              public Option<Date> leftInfinite(Date rightBound) {
                 return Option.none();
               }
 
               @Override
-              public Option<Date> rightOpen(Date leftBound) {
+              public Option<Date> rightInfinite(Date leftBound) {
                 return Option.some(leftBound);
               }
             });
@@ -430,17 +430,17 @@ public class SolrIndexManager {
           public Option<Date> apply(Interval interval) {
             return interval.fold(new Interval.Match<Option<Date>>() {
               @Override
-              public Option<Date> closed(Date leftBound, Date rightBound) {
+              public Option<Date> bounded(Date leftBound, Date rightBound) {
                 return Option.some(rightBound);
               }
 
               @Override
-              public Option<Date> leftOpen(Date rightBound) {
+              public Option<Date> leftInfinite(Date rightBound) {
                 return Option.some(rightBound);
               }
 
               @Override
-              public Option<Date> rightOpen(Date leftBound) {
+              public Option<Date> rightInfinite(Date leftBound) {
                 return Option.none();
               }
             });

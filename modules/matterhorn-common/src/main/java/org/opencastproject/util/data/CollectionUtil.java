@@ -22,6 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This class provides functions to ease and secure the handling of collections by supporting a type safe
+ * -- at least to the extent Java's type system allows -- immutable and more functional style. You'll
+ * find some of the usual suspects from FP here like <code>map</code>, <code>flatMap</code> and <code>filter</code>
+ * but also simple helpers like <code>asSet</code>.
+ */
 public final class CollectionUtil {
 
   private CollectionUtil() {
@@ -36,7 +42,9 @@ public final class CollectionUtil {
   }
 
   /**
-   * Gets a value from a map, creating a new one, if there is no such value, i.e. it is null.
+   * Get a value from a map, creating and adding a new one, if the value is missing, i.e. it is null.
+   * @param c
+   *          creates the missing value
    */
   public static <K, V> V getOrCreate(Map<K, V> map, K key, Creator<V> c) {
     V v = map.get(key);
@@ -134,7 +142,7 @@ public final class CollectionUtil {
   }
 
   /**
-   * Return the head of list <code>as</code> or none.
+   * Return the head of list <code>as</code> or <code>none</code>.
    */
   public static <A> Option<A> head(List<A> as) {
     if (!as.isEmpty())

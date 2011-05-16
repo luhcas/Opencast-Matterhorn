@@ -26,12 +26,14 @@ import org.apache.solr.common.SolrDocument;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.search.api.MediaSegment;
 import org.opencastproject.search.api.MediaSegmentImpl;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
+import org.opencastproject.search.api.SearchResultImpl;
+import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
-import org.opencastproject.search.api.SearchResultItemROImpl;
-import org.opencastproject.search.api.SearchResultROImpl;
+import org.opencastproject.search.api.SearchResultItemImpl;
 import org.opencastproject.search.impl.SearchQueryImpl;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
@@ -127,7 +129,7 @@ public class SolrRequester {
     }
 
     // Create and configure the query result
-    final SearchResultROImpl result = new SearchResultROImpl(query.getQuery());
+    final SearchResultImpl result = new SearchResultImpl(query.getQuery());
     result.setSearchTime(solrResponse.getQTime());
     result.setOffset(solrResponse.getResults().getStart());
     result.setLimit(solrResponse.getResults().size());
@@ -135,7 +137,7 @@ public class SolrRequester {
 
     // Walk through response and create new items with title, creator, etc:
     for (final SolrDocument doc : solrResponse.getResults()) {
-      final SearchResultItemROImpl item = new SearchResultItemROImpl() {
+      final SearchResultItemImpl item = SearchResultItemImpl.fill(new SearchResultItemImpl(), new SearchResultItem() {
         private final String dfltString = null;
 
         @Override
@@ -312,13 +314,13 @@ public class SolrRequester {
         }
 
         @Override
-        public MediaSegmentImpl[] getMediaSegments() {
+        public MediaSegment[] getSegments() {
           if (getType().equals(SearchResultItemType.AudioVisual))
             return createSearchResultSegments(doc, query).toArray(new MediaSegmentImpl[0]);
           else
             return new MediaSegmentImpl[0];
         }
-      };
+      });
 
       // Add the item to the result set
       result.addItem(item);

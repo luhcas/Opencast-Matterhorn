@@ -24,44 +24,44 @@ import java.util.Date;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.opencastproject.metadata.api.util.Interval.closedInterval;
-import static org.opencastproject.metadata.api.util.Interval.leftOpenInterval;
-import static org.opencastproject.metadata.api.util.Interval.rightOpenInterval;
+import static org.opencastproject.metadata.api.util.Interval.boundedInterval;
+import static org.opencastproject.metadata.api.util.Interval.rightBoundedInterval;
+import static org.opencastproject.metadata.api.util.Interval.leftBoundedInterval;
 
 public class IntervalTest {
 
   @Test
   public void testInterval() {
-    Interval closed = closedInterval(new Date(), new Date());
-    assertTrue(closed.isClosed());
-    assertFalse(closed.isLeftOpen());
-    assertFalse(closed.isRightOpen());
+    Interval closed = boundedInterval(new Date(), new Date());
+    assertTrue(closed.isBounded());
+    assertFalse(closed.isLeftInfinite());
+    assertFalse(closed.isRightInfinite());
     Interval.Match<Integer> visitor = new Interval.Match<Integer>() {
       @Override
-      public Integer closed(Date leftBound, Date rightBound) {
+      public Integer bounded(Date leftBound, Date rightBound) {
         return 1;
       }
 
       @Override
-      public Integer leftOpen(Date rightBound) {
+      public Integer leftInfinite(Date rightBound) {
         return 2;
       }
 
       @Override
-      public Integer rightOpen(Date leftBound) {
+      public Integer rightInfinite(Date leftBound) {
         return 3;
       }
     };
     assertSame(1, closed.fold(visitor));
-    Interval leftOpen = leftOpenInterval(new Date());
-    assertFalse(leftOpen.isClosed());
-    assertTrue(leftOpen.isLeftOpen());
-    assertFalse(leftOpen.isRightOpen());
+    Interval leftOpen = rightBoundedInterval(new Date());
+    assertFalse(leftOpen.isBounded());
+    assertTrue(leftOpen.isLeftInfinite());
+    assertFalse(leftOpen.isRightInfinite());
     assertSame(2, leftOpen.fold(visitor));
-    Interval rightOpen = rightOpenInterval(new Date());
-    assertFalse(rightOpen.isClosed());
-    assertFalse(rightOpen.isLeftOpen());
-    assertTrue(rightOpen.isRightOpen());
+    Interval rightOpen = leftBoundedInterval(new Date());
+    assertFalse(rightOpen.isBounded());
+    assertFalse(rightOpen.isLeftInfinite());
+    assertTrue(rightOpen.isRightInfinite());
     assertSame(3, rightOpen.fold(visitor));
   }
 }
