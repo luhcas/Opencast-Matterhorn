@@ -28,6 +28,7 @@ import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
 
 import junit.framework.Assert;
 
@@ -108,6 +109,20 @@ public class SeriesServiceImplTest {
     }
   }
   
+  /**
+   * @throws java.lang.Exception
+   */
+  @After
+  public void tearDown() throws Exception {
+    seriesDatabase.deactivate(null);
+    DataSources.destroy(pooledDataSource);
+    FileUtils.deleteQuietly(new File(storage));
+    seriesDatabase = null;
+    index.deactivate();
+    FileUtils.deleteQuietly(new File(root));
+    index = null;
+  }
+
   @Test
   public void testSeriesManagemnt() throws Exception {
     testCatalog.set(DublinCore.PROPERTY_TITLE, "Some title");
@@ -183,20 +198,6 @@ public class SeriesServiceImplTest {
     acl = retrievedACL.getEntries();
     Assert.assertEquals(acl.size(), 1);
     Assert.assertEquals("student", acl.get(0).getRole());
-  }
-
-  /**
-   * @throws java.lang.Exception
-   */
-  @After
-  public void tearDown() throws Exception {
-    seriesDatabase.deactivate(null);
-    pooledDataSource.close();
-    FileUtils.forceDelete(new File(storage));
-    seriesDatabase = null;
-    index.deactivate();
-    FileUtils.deleteDirectory(new File(root));
-    index = null;
   }
 
 }
