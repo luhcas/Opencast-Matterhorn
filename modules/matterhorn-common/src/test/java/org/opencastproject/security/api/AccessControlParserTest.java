@@ -17,6 +17,8 @@ package org.opencastproject.security.api;
 
 import junit.framework.Assert;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -27,17 +29,28 @@ import java.util.List;
  */
 public class AccessControlParserTest {
 
-  @Test
-  public void testAclParsing() throws Exception {
+  /**  The acl to test */
+  private AccessControlList acl = null;
+
+  @Before
+  public void setUp() throws Exception {
     // Construct an ACL with 100 entries
-    AccessControlList acl = new AccessControlList();
+    acl = new AccessControlList();
     List<AccessControlEntry> entries = acl.getEntries();
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
         entries.add(new AccessControlEntry(Integer.toString(i), Integer.toString(j), (i + j % 2 == 0)));
       }
     }
-    
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    acl = null;
+  }
+  
+  @Test
+  public void testXmlParsing() throws Exception {
     // Get the acl as an xml string
     String xml = AccessControlParser.toXml(acl);
     
@@ -50,4 +63,21 @@ public class AccessControlParserTest {
       Assert.assertEquals(allowed, role + action % 2 == 0);
     }
   }
+  
+  @Test
+  public void testJsonParsing() throws Exception {
+    // Get the acl as a JSON string
+    String json = AccessControlParser.toJson(acl);
+    
+    // Now convert back to an acl and confirm that the roles, etc are as expected
+    // Now convert back to an acl and confirm that the roles, etc are as expected
+    AccessControlList aclAfterMarshaling = AccessControlParser.parseAcl(json);
+    for (AccessControlEntry entry : aclAfterMarshaling.getEntries()) {
+      int role = Integer.parseInt(entry.getRole());
+      int action = Integer.parseInt(entry.getAction());
+      boolean allowed = entry.isAllow();
+      Assert.assertEquals(allowed, role + action % 2 == 0);
+    }
+  }
+
 }
