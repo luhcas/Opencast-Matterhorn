@@ -68,8 +68,8 @@ ocSeries.init = function(){
 
     var privilegeRow = '<tr>';
     privilegeRow += '<td><input type="text" class="role_search oc-ui-form-field"/></td>'
-    privilegeRow += '<td class="privilege_edit"><input type="checkbox" class="privilege_edit" /></td>'
-    privilegeRow += '<td class="privilege_edit"><input type="checkbox" class="privilege_edit" /></td>'
+    privilegeRow += '<td class="privilege_edit"><input type="checkbox" name="priv_view"' + (ocSeries.mode == CREATE_MODE ? 'checked="checked"' : '') + ' class="privilege_edit" /></td>'
+    privilegeRow += '<td class="privilege_edit"><input type="checkbox" name="priv_edit" class="privilege_edit" /></td>'
     privilegeRow += '<td class="privilege_edit"><img src="/img/icons/delete.png" alt="delete" title="Delete Role"></td>'
     privilegeRow += '</tr>'
 
@@ -117,19 +117,23 @@ ocSeries.Internationalize = function(){
 }
 
 ocSeries.loadSeries = function(data) {
-  $("#id").val(data.series.id);
-  ocSeries.components['description'].setValue(data.series.description);
-  if($.isArray(data.series.additionalMetadata.metadata)) {
-    mdlist = data.series.additionalMetadata.metadata;
-  } else {
-    mdlist = [data.series.additionalMetadata.metadata];
+  data = data['http://purl.org/dc/terms/']
+  $("#id").val(data['identifier'][0].value);
+  for(var key in data) {
+    $('#' + key).attr('value', data[key][0].value);
   }
-  for(m in mdlist){
-    var metadata = mdlist[m];
-    if(ocSeries.additionalComponents[metadata.key]){
-      ocSeries.additionalComponents[metadata.key].setValue(metadata.value);
-    }
-  }
+//  //ocSeries.components['description'].setValue(data['description'][0].value);
+//  if($.isArray(data.series.additionalMetadata.metadata)) {
+//    mdlist = data.series.additionalMetadata.metadata;
+//  } else {
+//    mdlist = [data.series.additionalMetadata.metadata];
+//  }
+//  for(m in mdlist){
+//    var metadata = mdlist[m];
+//    if(ocSeries.additionalComponents[metadata.key]){
+//      ocSeries.additionalComponents[metadata.key].setValue(metadata.value);
+//    }
+//  }
 }
 
 ocSeries.RegisterComponents = function(){
@@ -208,46 +212,45 @@ ocSeries.createDublinCoreDocument = function() {
   $('.dc-metadata-field').each(function() {
     $field = $(this);
     var $newElm = $(dcDoc.createElement('dcterms:' + $field.attr('id')));
-    $newElm.text($field.val() + ($field.attr('id') == 'identifier' ? new Date().getTime() : ''));
+    $newElm.text($field.val());
     $(dcDoc.documentElement).append($newElm);
   });
+  if($('#id').val() != "") {
+    var $newElm = $(dcDoc.createElement('dcterms:identifier'));
+    $newElm.text($('#id').val());
+    $(dcDoc.documentElement).append($newElm);
+  }
   var out = ocUtils.xmlToString(dcDoc);
   return out;
 }
 
 ocSeries.createACLDocument = function() {
-  var aclDoc = ocUtils.createDoc('xml', '');
-  $(aclDoc.rootElement).attr('version', '1.0');
-  $(aclDoc.rootElement).attr('encoding', 'UTF.8');
-  $(aclDoc.rootElement).attr('standalone', 'yes');
+  var aclDoc = ocUtils.createDoc('ns2:acl', 'org.opencastproject.security');
   $(aclDoc.documentElement).attr('xmlns:ns2', 'org.opencastproject.security');
-  var $elem = $(aclDoc.createElement('ns2:acl'));
-  $('.role_search').each(function() {
+  var out = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ns2:acl xmlns:ns2="org.opencastproject.security">';
+  $('.role_search').each(function () {
     var $field = $(this);
-    var $ace = $(aclDoc.createElement('ace'));
-    var $role = $(aclDoc.createElement('role'));
-    $role.text = $field.attr('value');
-    var $action = $(aclDoc.createElement('action'));
-    $action.text = "view";
-    var $allow = $(aclDoc.createElement('allow'));
-    $allow.text = "false";
-    $ace.append($role);
-    $ace.append($action);
-    $ace.append($allow);
-    $(aclDoc.documentElement).append($ace)
+    if ($field.attr('value') != "") {
+      out += '<ace>';
+      out += '<role>' + $field.attr('value') + '</role>';
+      out += '<action>view</action>';
+      out += '<allow>' + $field.parent().parent().children().find('[name|="priv_view"]').attr('checked') + '</allow>';
+      out += '</ace>';
+      out += '<ace>';
+      out += '<role>' + $field.attr('value') + '</role>';
+      out += '<action>edit</action>';
+      out += '<allow>' + $field.parent().parent().children().find('[name|="priv_edit"]').attr('checked') + '</allow>';
+      out += '</ace>';
+    }
   });
-  $(aclDoc.documentElement).append($elem);
-  var out = ocUtils.xmlToString(aclDoc)
-  ocUtils.log(out)
+  out += '</ns2:acl>';
   return out;
 }
 
 ocSeries.SubmitForm = function(){
-  var seriesXml = ocSeries.FormManager.serialize();
   var dcDoc = ocSeries.createDublinCoreDocument();
-  var acl = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ns2:acl xmlns:ns2="org.opencastproject.security"><ace><role>admin</role><action>delete</action><allow>true</allow></ace></ns2:acl>';
-  var acl2 = ocSeries.createACLDocument();
-  if(seriesXml && ocSeries.additionalComponents.title.validate()){
+  var acl = ocSeries.createACLDocument();
+  if(dcDoc && ocSeries.additionalComponents.title.validate()){
     if(ocSeries.mode === CREATE_MODE) {
       $.ajax({
         type: 'POST',
@@ -261,9 +264,10 @@ ocSeries.SubmitForm = function(){
     } else {
       $.ajax({
         type: 'POST',
-        url: SERIES_SERVICE_URL + '/' + $('#id').val(),
+        url: SERIES_SERVICE_URL + '/',
         data: {
-          series: seriesXml
+          series: dcDoc,
+          acl: acl
         },
         complete: ocSeries.SeriesSubmitComplete
       });
@@ -272,7 +276,7 @@ ocSeries.SubmitForm = function(){
 }
 
 ocSeries.SeriesSubmitComplete = function(xhr, status){
-  if(status == "success"){
+  if(xhr.status == 201 || xhr.status == 204){
     document.location = SERIES_LIST_URL;
   }
 /*for(var k in ocSeries.components){

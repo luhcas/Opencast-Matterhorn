@@ -33,7 +33,6 @@ ocSeriesList.buildSeriesView = function(data) {
     var s = ocSeriesList.views.seriesView[data[i]['http://purl.org/dc/terms/']['identifier'][0].value] = {};
     s.id = data[i]['http://purl.org/dc/terms/']['identifier'][0].value;
     for(var key in data[i]['http://purl.org/dc/terms/']) {
-      //ocUtils.log(key + "=>" + data[i]['http://purl.org/dc/terms/'][key][0].value)
       if(key === 'title'){
         s.title = data[i]['http://purl.org/dc/terms/'][key][0].value
       } else if(key === 'creator') {
