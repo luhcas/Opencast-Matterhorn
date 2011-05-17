@@ -59,6 +59,16 @@ public class SchedulerServiceSolrIndexTest {
     index.activate(null);
   }
 
+  /**
+   * @throws java.lang.Exception
+   */
+  @After
+  public void tearDown() throws Exception {
+    index.deactivate();
+    FileUtils.deleteQuietly(new File(index.solrRoot));
+    index = null;
+  }
+
   @Test
   public void testInsertingAndDelition() throws Exception {
     DublinCoreCatalog catalog = dcService.newInstance();
@@ -223,13 +233,4 @@ public class SchedulerServiceSolrIndexTest {
     Assert.assertTrue("Incorrect number of conflicting events: " + result.size(), result.size() == 2);
   }
 
-  /**
-   * @throws java.lang.Exception
-   */
-  @After
-  public void tearDown() throws Exception {
-    index.deactivate();
-    FileUtils.deleteDirectory(new File(index.solrRoot));
-    index = null;
-  }
 }
