@@ -32,12 +32,14 @@ import static org.opencastproject.util.doc.rest.RestParameter.Type.TEXT;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.rest.RestConstants;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AccessControlParser;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesQuery;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.SolrUtils;
 import org.opencastproject.util.doc.rest.RestParameter;
 import org.opencastproject.util.doc.rest.RestQuery;
@@ -89,6 +91,9 @@ public class SeriesRestService {
   /** Default server URL */
   protected String serverUrl = "http://localhost:8080";
 
+  /** Service url */
+  protected String serviceUrl = null;
+
   /** Default number of items on page */
   private static final int DEFAULT_LIMIT = 20;
 
@@ -134,6 +139,7 @@ public class SeriesRestService {
         this.serverUrl = ccServerUrl;
       }
     }
+    serviceUrl = (String) cc.getProperties().get(RestConstants.SERVICE_PATH_PROPERTY);
   }
 
   @GET
@@ -264,16 +270,21 @@ public class SeriesRestService {
       return Response.status(BAD_REQUEST).build();
     }
     try {
-      boolean updated = seriesService.updateSeries(dc);
+      DublinCoreCatalog newSeries = seriesService.updateSeries(dc);
       if (accessControl != null) {
         seriesService.updateAccessControl(dc.getFirst(PROPERTY_IDENTIFIER), acl);
       }
-      if (updated) {
-        logger.debug("Added series {} ", dc.getFirst(PROPERTY_IDENTIFIER));
+      if (newSeries == null) {
+        logger.debug("Updated series {} ", dc.getFirst(PROPERTY_IDENTIFIER));
         return Response.status(NO_CONTENT).build();
       }
-      logger.debug("Created series {} ", dc.getFirst(PROPERTY_IDENTIFIER));
-      return Response.status(CREATED).build();
+      String id = newSeries.getFirst(PROPERTY_IDENTIFIER);
+      String serializedSeries = serializeDublinCore(newSeries);
+      logger.debug("Created series {} ", id);
+      return Response.status(CREATED)
+              .header("Location", PathSupport.concat(new String[] { this.serverUrl, this.serviceUrl, id + ".xml" }))
+              .header("Location", PathSupport.concat(new String[] { this.serverUrl, this.serviceUrl, id + ".json" }))
+              .entity(serializedSeries).build();
     } catch (Exception e) {
       logger.warn("Could not add/update series: {}", e.getMessage());
     }

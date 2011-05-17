@@ -144,6 +144,15 @@ public class SeriesServiceImplTest {
   }
   
   @Test
+  public void testAddingSeriesWithoutID() throws Exception {
+    testCatalog.remove(DublinCore.PROPERTY_IDENTIFIER);
+    DublinCoreCatalog newSeries = seriesService.updateSeries(testCatalog);
+    Assert.assertNotNull("New series DC should be returned", newSeries);
+    String id = newSeries.getFirst(DublinCore.PROPERTY_IDENTIFIER);
+    Assert.assertNotNull("New series should have id set", id);
+  }
+  
+  @Test
   public void testACLManagment() throws Exception {
     // sample access control list
     AccessControlList accessControlList = new AccessControlList();

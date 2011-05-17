@@ -30,11 +30,11 @@ public interface SeriesServiceDatabase {
    * 
    * @param dc
    *          {@link DublinCoreCatalog} representing series
-   * @return true if existing series were updated or false if new series were created
+   * @return Dublin Core catalog representing newly created series or null if series Dublin Core was updated
    * @throws SeriesServiceDatabaseException
    *           if exception occurs
    */
-  boolean storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException;
+  DublinCoreCatalog storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException;
 
   /**
    * Store access control associated with specified series. IllegalArgumentException is thrown if accessControl

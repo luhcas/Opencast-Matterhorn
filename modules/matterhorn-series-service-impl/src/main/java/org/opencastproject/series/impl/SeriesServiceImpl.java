@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Implements {@link SeriesService}. Uses {@link SeriesServiceDatabase} for permanent storage and
@@ -128,14 +129,21 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * )
    */
   @Override
-  public boolean updateSeries(final DublinCoreCatalog dc) throws SeriesException {
+  public DublinCoreCatalog updateSeries(final DublinCoreCatalog dc) throws SeriesException {
     if (dc == null) {
       throw new IllegalArgumentException("DC argument for updating series must not be null");
     }
 
-    boolean updated;
+    String identifier = dc.getFirst(DublinCore.PROPERTY_IDENTIFIER);
+    if (identifier == null) {
+      logger.info("Series Dublin Core does not contain Identifier, generating one");
+      identifier = UUID.randomUUID().toString();
+      dc.set(DublinCore.PROPERTY_IDENTIFIER, identifier);
+    }
+
+    DublinCoreCatalog newSeries;
     try {
-      updated = persistence.storeSeries(dc);
+      newSeries = persistence.storeSeries(dc);
     } catch (SeriesServiceDatabaseException e1) {
       logger.error("Could not store series {}: {}", dc, e1);
       throw new SeriesException(e1);
@@ -148,7 +156,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       throw new SeriesException(e);
     }
 
-    return updated;
+    return newSeries;
   }
 
   /*

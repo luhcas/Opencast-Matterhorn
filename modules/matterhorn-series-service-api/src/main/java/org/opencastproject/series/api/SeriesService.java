@@ -31,11 +31,11 @@ public interface SeriesService {
    * 
    * @param dc
    *          {@link DublinCoreCatalog} representing series
-   * @return true if existing series were updated or false it new series were created
+   * @return Dublin Core catalog of newly created series or null if series Dublin Core was just updated
    * @throws SeriesException
    *           if adding or updating fails
    */
-  boolean updateSeries(DublinCoreCatalog dc) throws SeriesException;
+  DublinCoreCatalog updateSeries(DublinCoreCatalog dc) throws SeriesException;
 
   /**
    * Updates access control rules for specified series. Not specifying series ID or trying to update series with null

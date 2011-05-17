@@ -202,9 +202,10 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     }
     return seriesList.toArray(new DublinCoreCatalog[seriesList.size()]);
   }
-  
+
   /*
    * (non-Javadoc)
+   * 
    * @see org.opencastproject.series.impl.SeriesServiceDatabase#getAccessControlList(java.lang.String)
    */
   @Override
@@ -238,7 +239,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    * DublinCoreCatalog)
    */
   @Override
-  public boolean storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException {
+  public DublinCoreCatalog storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException {
     if (dc == null) {
       throw new SeriesServiceDatabaseException("Invalid value for Dublin core catalog: null");
     }
@@ -251,7 +252,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       throw new SeriesServiceDatabaseException(e1);
     }
     EntityManager em = emf.createEntityManager();
-    boolean updated = false;
+    DublinCoreCatalog newSeries = null;
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
@@ -262,13 +263,13 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
         entity.setSeriesId(seriesId);
         entity.setSeries(seriesXML);
         em.persist(entity);
+        newSeries = dc;
       } else {
-        updated = true;
         entity.setSeries(seriesXML);
         em.merge(entity);
       }
       tx.commit();
-      return updated;
+      return newSeries;
     } catch (Exception e) {
       logger.error("Could not update series: {}", e.getMessage());
       throw new SeriesServiceDatabaseException(e);
