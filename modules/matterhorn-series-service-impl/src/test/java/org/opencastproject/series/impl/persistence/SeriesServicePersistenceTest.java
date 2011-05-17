@@ -24,6 +24,7 @@ import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
 
 import junit.framework.Assert;
 
@@ -49,7 +50,7 @@ public class SeriesServicePersistenceTest {
   private ComboPooledDataSource pooledDataSource;
   private SeriesServiceDatabaseImpl seriesDatabase;
   private String storage;
-  
+
   private DublinCoreCatalog testCatalog;
 
   /**
@@ -57,10 +58,10 @@ public class SeriesServicePersistenceTest {
    */
   @Before
   public void setUp() throws Exception {
-    
+
     long currentTime = System.currentTimeMillis();
     storage = PathSupport.concat("target", "db" + currentTime + ".h2.db");
-    
+
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
     pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + currentTime);
@@ -79,65 +80,13 @@ public class SeriesServicePersistenceTest {
     DublinCoreCatalogService dcService = new DublinCoreCatalogService();
     seriesDatabase.setDublinCoreService(dcService);
     seriesDatabase.activate(null);
-    
+
     InputStream in = null;
     try {
       in = getClass().getResourceAsStream("/dublincore.xml");
       testCatalog = dcService.load(in);
     } finally {
       IOUtils.closeQuietly(in);
-    }
-  }
-  
-  @Test
-  public void testAdding() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
-  }
-  
-  @Test
-  public void testMerging() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
-    seriesDatabase.storeSeries(testCatalog);
-  }
-  
-  @Test
-  public void testDeleting() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
-    seriesDatabase.deleteSeries(testCatalog.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
-  }
-  
-  @Test
-  public void testRetrieving() throws Exception {
-    seriesDatabase.storeSeries(testCatalog);
-    DublinCoreCatalog[] series = seriesDatabase.getAllSeries();
-    Assert.assertTrue("Exactly one series should be returned", series.length == 1);
-    seriesDatabase.deleteSeries(testCatalog.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
-    series = seriesDatabase.getAllSeries();
-    Assert.assertTrue("Exactly zero series should be returned", series.length == 0);
-  }
-  
-  @Test
-  public void testAccessControlManagment() throws Exception {
-    // sample access control list
-    AccessControlList accessControlList = new AccessControlList();
-    List<AccessControlEntry> acl = accessControlList.getEntries();
-    acl.add(new AccessControlEntry("admin", "delete", true));
-    
-    seriesDatabase.storeSeries(testCatalog);
-    String seriesID = testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER);
-    seriesDatabase.storeSeriesAccessControl(seriesID, accessControlList);
-    
-    AccessControlList retrievedACL = seriesDatabase.getAccessControlList(seriesID);
-    Assert.assertNotNull(retrievedACL);
-    acl = retrievedACL.getEntries();
-    Assert.assertEquals(acl.size(), 1);
-    Assert.assertEquals(acl.get(0).getRole(), "admin");
-    
-    try {
-      seriesDatabase.storeSeriesAccessControl("failid", accessControlList);
-      Assert.fail("Should fail when adding ACL to nonexistent series");
-    } catch (NotFoundException e) {
-      // expected
     }
   }
 
@@ -147,8 +96,60 @@ public class SeriesServicePersistenceTest {
   @After
   public void tearDown() throws Exception {
     seriesDatabase.deactivate(null);
-    pooledDataSource.close();
-    FileUtils.forceDelete(new File(storage));
+    DataSources.destroy(pooledDataSource);
+    FileUtils.deleteQuietly(new File(storage));
+  }
+
+  @Test
+  public void testAdding() throws Exception {
+    seriesDatabase.storeSeries(testCatalog);
+  }
+
+  @Test
+  public void testMerging() throws Exception {
+    seriesDatabase.storeSeries(testCatalog);
+    seriesDatabase.storeSeries(testCatalog);
+  }
+
+  @Test
+  public void testDeleting() throws Exception {
+    seriesDatabase.storeSeries(testCatalog);
+    seriesDatabase.deleteSeries(testCatalog.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
+  }
+
+  @Test
+  public void testRetrieving() throws Exception {
+    seriesDatabase.storeSeries(testCatalog);
+    DublinCoreCatalog[] series = seriesDatabase.getAllSeries();
+    Assert.assertTrue("Exactly one series should be returned", series.length == 1);
+    seriesDatabase.deleteSeries(testCatalog.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
+    series = seriesDatabase.getAllSeries();
+    Assert.assertTrue("Exactly zero series should be returned", series.length == 0);
+  }
+
+  @Test
+  public void testAccessControlManagment() throws Exception {
+    // sample access control list
+    AccessControlList accessControlList = new AccessControlList();
+    List<AccessControlEntry> acl = accessControlList.getEntries();
+    acl.add(new AccessControlEntry("admin", "delete", true));
+
+    seriesDatabase.storeSeries(testCatalog);
+    String seriesID = testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER);
+    seriesDatabase.storeSeriesAccessControl(seriesID, accessControlList);
+
+    AccessControlList retrievedACL = seriesDatabase.getAccessControlList(seriesID);
+    Assert.assertNotNull(retrievedACL);
+    acl = retrievedACL.getEntries();
+    Assert.assertEquals(acl.size(), 1);
+    Assert.assertEquals(acl.get(0).getRole(), "admin");
+
+    try {
+      seriesDatabase.storeSeriesAccessControl("failid", accessControlList);
+      Assert.fail("Should fail when adding ACL to nonexistent series");
+    } catch (NotFoundException e) {
+      // expected
+    }
   }
 
 }
