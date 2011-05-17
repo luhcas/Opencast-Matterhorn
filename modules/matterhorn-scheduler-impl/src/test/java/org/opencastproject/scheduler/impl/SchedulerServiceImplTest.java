@@ -180,12 +180,12 @@ public class SchedulerServiceImplTest {
     schedulerService = null;
     index.deactivate();
     index = null;
-    FileUtils.forceDelete(new File(indexStorage));
+    FileUtils.deleteQuietly(new File(indexStorage));
     schedulerDatabase.deactivate(null);
     pooledDataSource.close();
     schedulerDatabase = null;
     pooledDataSource = null;
-    FileUtils.forceDelete(new File(persistenceStorage));
+    FileUtils.deleteQuietly(new File(persistenceStorage));
   }
 
   protected WorkflowInstance getSampleWorkflowInstance() throws Exception {
