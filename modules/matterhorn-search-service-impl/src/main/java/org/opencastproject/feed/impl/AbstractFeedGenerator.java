@@ -763,14 +763,14 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     Set<String> tags = new HashSet<String>();
 
     switch (feed.getType()) {
-    case Atom:
-      flavors.addAll(atomTrackFlavors);
-      tags.addAll(atomTags);
-      break;
-    default:
-      flavors.addAll(rssTrackFlavors);
-      tags.addAll(rssTags);
-      break;
+      case Atom:
+        flavors.addAll(atomTrackFlavors);
+        tags.addAll(atomTags);
+        break;
+      default:
+        flavors.addAll(rssTrackFlavors);
+        tags.addAll(rssTags);
+        break;
     }
 
     // Collect track id's by flavor
@@ -796,7 +796,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
                   break selectElements;
                 }
               }
-              if ("audio".equals(mediaType) && track.hasAudio() && track.hasVideo()) {
+              if ("audio".equals(mediaType) && track.hasAudio()) {
                 if (element.containsTag(tags)) {
                   candidateElements.add(element);
                   break selectElements;
@@ -879,22 +879,24 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
   public int hashCode() {
     return uri.hashCode();
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof FeedGenerator))
       return false;
-    FeedGenerator generator = (FeedGenerator)o;
+    FeedGenerator generator = (FeedGenerator) o;
     return getIdentifier().equals(generator.getIdentifier());
   }
 
