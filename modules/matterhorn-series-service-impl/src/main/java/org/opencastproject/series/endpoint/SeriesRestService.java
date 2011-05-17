@@ -371,7 +371,7 @@ public class SeriesRestService {
           @QueryParam("createdto") String createdTo, @QueryParam("language") String language,
           @QueryParam("license") String license, @QueryParam("subject") String subject,
           @QueryParam("abstract") String seriesAbstract, @QueryParam("description") String description,
-          @QueryParam("sort") String sort, @QueryParam("startPage") int startPage, @QueryParam("count") int count) {
+          @QueryParam("sort") String sort, @QueryParam("startPage") String startPage, @QueryParam("count") String count) {
     // CHECKSTYLE:ON
     try {
       DublinCoreCatalogList result = getSeries(text, seriesId, seriesTitle, creator, contributor, publisher,
@@ -413,7 +413,7 @@ public class SeriesRestService {
           @QueryParam("createdto") String createdTo, @QueryParam("language") String language,
           @QueryParam("license") String license, @QueryParam("subject") String subject,
           @QueryParam("abstract") String seriesAbstract, @QueryParam("description") String description,
-          @QueryParam("sort") String sort, @QueryParam("startPage") int startPage, @QueryParam("count") int count) {
+          @QueryParam("sort") String sort, @QueryParam("startPage") String startPage, @QueryParam("count") String count) {
     // CHECKSTYLE:ON
     try {
       DublinCoreCatalogList result = getSeries(text, seriesId, seriesTitle, creator, contributor, publisher,
@@ -430,59 +430,76 @@ public class SeriesRestService {
   private DublinCoreCatalogList getSeries(String text, String seriesId, String seriesTitle, String creator,
           String contributor, String publisher, String rightsHolder, String createdFrom, String createdTo,
           String language, String license, String subject, String seriesAbstract, String description, String sort,
-          int startPage, int count) throws SeriesException {
+          String startPageString, String countString) throws SeriesException {
     // CHECKSTYLE:ON
-    if ((count < 1) || (count > MAX_LIMIT)) {
-      count = DEFAULT_LIMIT;
+    int startPage = 0;
+    if (StringUtils.isNotEmpty(startPageString)) {
+      try {
+        startPage = Integer.parseInt(startPageString);
+      } catch (NumberFormatException e) {
+        logger.warn("Bad start page parameter");
+      }
+      if (startPage < 0) {
+        startPage = 0;
+      }
     }
-    if (startPage < 0) {
-      startPage = 0;
+
+    int count = DEFAULT_LIMIT;
+    if (StringUtils.isNotEmpty(countString)) {
+      try {
+        count = Integer.parseInt(countString);
+      } catch (NumberFormatException e) {
+        logger.warn("Bad count parameter");
+      }
+      if ((count < 1) || (count > MAX_LIMIT)) {
+        count = DEFAULT_LIMIT;
+      }
     }
 
     SeriesQuery q = new SeriesQuery();
     q.setCount(count);
     q.setStartPage(startPage);
-    if (text != null) {
+    if (StringUtils.isNotEmpty(text)) {
       q.setText(text.toLowerCase());
     }
-    if (seriesId != null) {
+    if (StringUtils.isNotEmpty(seriesId)) {
       q.setSeriesId(seriesId.toLowerCase());
     }
-    if (seriesTitle != null) {
+    if (StringUtils.isNotEmpty(seriesTitle)) {
       q.setSeriesTitle(seriesTitle.toLowerCase());
     }
-    if (creator != null) {
+    if (StringUtils.isNotEmpty(creator)) {
       q.setCreator(creator.toLowerCase());
     }
-    if (contributor != null) {
+    if (StringUtils.isNotEmpty(contributor)) {
       q.setContributor(contributor.toLowerCase());
     }
-    if (language != null) {
+    if (StringUtils.isNotEmpty(language)) {
       q.setLanguage(language.toLowerCase());
     }
-    if (license != null) {
+    if (StringUtils.isNotEmpty(license)) {
       q.setLicense(license.toLowerCase());
     }
-    if (subject != null) {
+    if (StringUtils.isNotEmpty(subject)) {
       q.setSubject(subject.toLowerCase());
     }
-    if (publisher != null) {
+    if (StringUtils.isNotEmpty(publisher)) {
       q.setPublisher(publisher.toLowerCase());
     }
-    if (seriesAbstract != null) {
+    if (StringUtils.isNotEmpty(seriesAbstract)) {
       q.setSeriesAbstract(seriesAbstract.toLowerCase());
     }
-    if (description != null) {
+    if (StringUtils.isNotEmpty(description)) {
       q.setDescription(description.toLowerCase());
     }
-    if (rightsHolder != null) {
+    if (StringUtils.isNotEmpty(rightsHolder)) {
       q.setRightsHolder(rightsHolder.toLowerCase());
     }
     try {
-      if (createdFrom != null) {
+      if (StringUtils.isNotEmpty(createdFrom)) {
         q.setCreatedFrom(SolrUtils.parseDate(createdFrom));
       }
-      if (createdTo != null) {
+      if (StringUtils.isNotEmpty(createdTo)) {
         q.setCreatedTo(SolrUtils.parseDate(createdTo));
       }
     } catch (ParseException e1) {
