@@ -780,6 +780,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
         if (feed.getType().equals(Feed.Type.RSS)) {
           for (String mediaType : rssMediaTypes) {
             for (MediaPackageElement element : elements) {
+              if (candidateElements.contains(element))
+                continue;
               if (mediaType.equals(PROP_RSS_MEDIA_TYPE_DEFAULT)) {
                 if (element.containsTag(tags)) {
                   candidateElements.add(element);
