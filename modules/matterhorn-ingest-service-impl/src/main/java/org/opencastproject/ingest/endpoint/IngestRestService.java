@@ -40,7 +40,9 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,11 +91,17 @@ public class IngestRestService {
   /** The collection name used for temporarily storing uploaded zip files */
   private static final String COLLECTION_ID = "ingest-temp";
 
+  /** Key for the default workflow definition in config.properties */
+  private static final String DEFAULT_WORKFLOW_DEFINITION = "org.opencastproject.workflow.default.definition";
+  
   /** The http request parameter used to provide the workflow instance id */
   private static final String WORKFLOW_INSTANCE_ID_PARAM = "workflowInstanceId";
 
   /** The http request parameter used to provide the workflow definition id */
   private static final String WORKFLOW_DEFINITION_ID_PARAM = "workflowDefinitionId";
+
+  /** The default workflow definition */
+  private String defaultWorkflowDefinitionId = null;
 
   private MediaPackageBuilderFactory factory = null;
   private IngestService ingestService = null;
@@ -104,7 +112,7 @@ public class IngestRestService {
   protected EntityManagerFactory emf = null;
   // For the progress bar -1 bug workaround, keeping UploadJobs in memory rather than saving them using JPA
   private HashMap<String, UploadJob> jobs;
-
+  
   public IngestRestService() {
     factory = MediaPackageBuilderFactory.newInstance();
     jobs = new HashMap<String, UploadJob>();
@@ -134,12 +142,17 @@ public class IngestRestService {
   /**
    * Callback for activation of this component.
    */
-  public void activate() {
+  public void activate(ComponentContext cc) {
     try {
       emf = persistenceProvider
               .createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
     } catch (Exception e) {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
+    }
+    if (cc != null) {
+      defaultWorkflowDefinitionId = StringUtils.trimToNull((String) cc.getBundleContext().getProperty(DEFAULT_WORKFLOW_DEFINITION));
+      if (defaultWorkflowDefinitionId == null)
+        throw new IllegalStateException("Default workflow definition is null: " + DEFAULT_WORKFLOW_DEFINITION);
     }
   }
 
@@ -468,7 +481,7 @@ public class IngestRestService {
   @Path("addZippedMediaPackage")
   @Produces(MediaType.TEXT_XML)
   @RestQuery(name = "addZippedMediaPackage", description = "Create media package from a compressed file containing a manifest.xml document and all media tracks, metadata catalogs and attachments", restParameters = {
-          @RestParameter(defaultValue = "full", description = "The workflow definition ID to run on this mediapackage", isRequired = true, name = WORKFLOW_DEFINITION_ID_PARAM, type = RestParameter.Type.STRING),
+          @RestParameter(description = "The workflow definition ID to run on this mediapackage", isRequired = false, name = WORKFLOW_DEFINITION_ID_PARAM, type = RestParameter.Type.STRING),
           @RestParameter(description = "The workflow instance ID to associate with this zipped mediapackage", isRequired = false, name = WORKFLOW_INSTANCE_ID_PARAM, type = RestParameter.Type.STRING) }, bodyParameter = @RestParameter(description = "The compressed (application/zip) media package file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_OK),
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST) }, returnDescription = "")
@@ -478,7 +491,7 @@ public class IngestRestService {
     String zipFileName = UUID.randomUUID().toString() + ".zip";
     URI zipFileUri = null;
     try {
-      String workflowDefinitionId = null;
+      String workflowDefinitionId = defaultWorkflowDefinitionId;
       Long workflowInstanceIdAsLong = null;
       Map<String, String> workflowConfig = new HashMap<String, String>();
       if (ServletFileUpload.isMultipartContent(request)) {
@@ -494,6 +507,8 @@ public class IngestRestService {
               }
             } else if (WORKFLOW_DEFINITION_ID_PARAM.equals(item.getFieldName())) {
               workflowDefinitionId = IOUtils.toString(item.openStream(), "UTF-8");
+              if (StringUtils.isBlank(workflowDefinitionId))
+                workflowDefinitionId = defaultWorkflowDefinitionId;
             } else {
               logger.debug("Processing form field: " + item.getFieldName());
               workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream(), "UTF-8"));

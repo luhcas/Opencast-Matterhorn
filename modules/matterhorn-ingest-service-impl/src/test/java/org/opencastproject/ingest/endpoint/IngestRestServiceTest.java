@@ -89,7 +89,7 @@ public class IngestRestServiceTest {
 
     // Set the service, and activate the rest endpoint
     restService.setIngestService(ingestService);
-    restService.activate();
+    restService.activate(null);
   }
 
   @After
