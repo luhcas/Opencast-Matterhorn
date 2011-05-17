@@ -31,6 +31,9 @@
     <sec:intercept-url pattern='/usertracking/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
     <sec:intercept-url pattern='/static/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
 
+    <!-- Enable anonymous access to the rss and atom feeds -->
+    <sec:intercept-url pattern='/feeds/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
+
     <!-- Secure the management URLs for admins only -->
     <sec:intercept-url pattern='/services/*' access='ROLE_ADMIN' />
     <sec:intercept-url pattern='/system/**' access='ROLE_ADMIN' />
