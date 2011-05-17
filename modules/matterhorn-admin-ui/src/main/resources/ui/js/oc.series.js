@@ -65,22 +65,44 @@ ocSeries.init = function(){
   }
 
   if (ocSeries.mode == CREATE_MODE) {
-    ocSecurity.loadRoles(function(roles) {
-      $(roles).each(function(index, role) {
-        ocSeries.rolePrivileges.push(new ocSecurity.Role(role));
-      });
-    });
-    var rolesTable = TrimPath.processDOMTemplate('rolesTableTemplate', {roles: ocSeries.rolePrivileges});
-    $('#rolesTableContainer').append(rolesTable);
 
-    //
-    // to update the privileges from values in the UI do
-    //
-    // ocSecurity.updatePrivileges(ocSeries.rolePrivileges);
+    var privilegeRow = '<tr>';
+    privilegeRow += '<td><input type="text" class="role_search oc-ui-form-field"/></td>'
+    privilegeRow += '<td class="privilege_edit"><input type="checkbox" class="privilege_edit" /></td>'
+    privilegeRow += '<td class="privilege_edit"><input type="checkbox" class="privilege_edit" /></td>'
+    privilegeRow += '<td class="privilege_edit"><img src="/img/icons/delete.png" alt="delete" title="Delete Role"></td>'
+    privilegeRow += '</tr>'
+
+    $('#rolePrivilegeTable > tbody').append(privilegeRow);
+
+    var append = function (event, ui) {
+      $('#rolePrivilegeTable > tbody').append(privilegeRow);
+      $('.role_search').autocomplete({
+        source: ocSecurity.loadRoles(),
+        select: append
+      });
+    }
+
+    $('.role_search').autocomplete({
+      source: ocSecurity.loadRoles(),
+      select: append
+    });
+  //    ocSecurity.loadRoles(function(roles) {
+  //      $(roles).each(function(index, role) {
+  //        ocSeries.rolePrivileges.push(new ocSecurity.Role(role));
+  //      });
+  //    });
+  //    var rolesTable = TrimPath.processDOMTemplate('rolesTableTemplate', {roles: ocSeries.rolePrivileges});
+  //$('#rolesTableContainer').append(rolesTable);
+
+  //
+  // to update the privileges from values in the UI do
+  //
+  // ocSecurity.updatePrivileges(ocSeries.rolePrivileges);
 
   } else if (ocSeries.mode == EDIT_MODE) {
-    // TODO get privileges from series and populate UI accordingly
-  }
+// TODO get privileges from series and populate UI accordingly
+}
 }
 
 ocSeries.Internationalize = function(){
@@ -114,41 +136,56 @@ ocSeries.RegisterComponents = function(){
   //Core Metadata
   ocSeries.additionalComponents.title = new ocAdmin.Component(
     ['title'],
-    {label:'seriesLabel',required:true}
-  );
+    {
+      label:'seriesLabel',
+      required:true
+    }
+    );
   
   ocSeries.additionalComponents.contributor = new ocAdmin.Component(
     ['contributor'],
-    {label:'contributorLabel'}
-  );
+    {
+      label:'contributorLabel'
+    }
+    );
   
   ocSeries.additionalComponents.creator = new ocAdmin.Component(
     ['creator'],
-    {label: 'creatorLabel'}
-  );
+    {
+      label: 'creatorLabel'
+    }
+    );
   
   //Additional Metadata
   ocSeries.additionalComponents.subject = new ocAdmin.Component(
     ['subject'],
-    {label: 'subjectLabel'}
-  )
+    {
+      label: 'subjectLabel'
+    }
+    )
   
   ocSeries.additionalComponents.language = new ocAdmin.Component(
     ['language'],
-    {label: 'languageLabel'}
-  )
+    {
+      label: 'languageLabel'
+    }
+    )
   
   ocSeries.additionalComponents.license = new ocAdmin.Component(
     ['license'],
-    {label: 'licenseLabel'}
-  )
+    {
+      label: 'licenseLabel'
+    }
+    )
   
   ocSeries.components.description = new ocAdmin.Component(
     ['description'],
-    {label: 'descriptionLabel'}
-  )
+    {
+      label: 'descriptionLabel'
+    }
+    )
   
-  /*
+/*
   //Extended Metadata
   ocAdmin.additionalComponents.type
   //ocAdmin.additionalComponents.subtype
@@ -163,21 +200,71 @@ ocSeries.RegisterComponents = function(){
   */
 }
 
+ocSeries.createDublinCoreDocument = function() {
+  dcDoc = ocUtils.createDoc('dublincore', 'http://www.opencastproject.org/xsd/1.0/dublincore/');
+  $(dcDoc.documentElement).attr('xmlns:dcterms', 'http://purl.org/dc/terms/');
+  $(dcDoc.documentElement).attr('xmlns:dc', 'http://purl.org/dc/elements/1.1/');
+  $(dcDoc.documentElement).attr('xmlns:oc', 'http://www.opencastproject.org/matterhorn');
+  $('.dc-metadata-field').each(function() {
+    $field = $(this);
+    var $newElm = $(dcDoc.createElement('dcterms:' + $field.attr('id')));
+    $newElm.text($field.val() + ($field.attr('id') == 'identifier' ? new Date().getTime() : ''));
+    $(dcDoc.documentElement).append($newElm);
+  });
+  var out = ocUtils.xmlToString(dcDoc);
+  return out;
+}
+
+ocSeries.createACLDocument = function() {
+  var aclDoc = ocUtils.createDoc('xml', '');
+  $(aclDoc.rootElement).attr('version', '1.0');
+  $(aclDoc.rootElement).attr('encoding', 'UTF.8');
+  $(aclDoc.rootElement).attr('standalone', 'yes');
+  $(aclDoc.documentElement).attr('xmlns:ns2', 'org.opencastproject.security');
+  var $elem = $(aclDoc.createElement('ns2:acl'));
+  $('.role_search').each(function() {
+    var $field = $(this);
+    var $ace = $(aclDoc.createElement('ace'));
+    var $role = $(aclDoc.createElement('role'));
+    $role.text = $field.attr('value');
+    var $action = $(aclDoc.createElement('action'));
+    $action.text = "view";
+    var $allow = $(aclDoc.createElement('allow'));
+    $allow.text = "false";
+    $ace.append($role);
+    $ace.append($action);
+    $ace.append($allow);
+    $(aclDoc.documentElement).append($ace)
+  });
+  $(aclDoc.documentElement).append($elem);
+  var out = ocUtils.xmlToString(aclDoc)
+  ocUtils.log(out)
+  return out;
+}
+
 ocSeries.SubmitForm = function(){
   var seriesXml = ocSeries.FormManager.serialize();
+  var dcDoc = ocSeries.createDublinCoreDocument();
+  var acl = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ns2:acl xmlns:ns2="org.opencastproject.security"><ace><role>admin</role><action>delete</action><allow>true</allow></ace></ns2:acl>';
+  var acl2 = ocSeries.createACLDocument();
   if(seriesXml && ocSeries.additionalComponents.title.validate()){
     if(ocSeries.mode === CREATE_MODE) {
       $.ajax({
-        type: 'PUT',
+        type: 'POST',
         url: SERIES_SERVICE_URL + '/',
-        data: { series: seriesXml },
+        data: {
+          series: dcDoc,
+          acl: acl
+        },
         complete: ocSeries.SeriesSubmitComplete
       });
     } else {
       $.ajax({
         type: 'POST',
         url: SERIES_SERVICE_URL + '/' + $('#id').val(),
-        data: { series: seriesXml },
+        data: {
+          series: seriesXml
+        },
         complete: ocSeries.SeriesSubmitComplete
       });
     }
@@ -188,7 +275,7 @@ ocSeries.SeriesSubmitComplete = function(xhr, status){
   if(status == "success"){
     document.location = SERIES_LIST_URL;
   }
-  /*for(var k in ocSeries.components){
+/*for(var k in ocSeries.components){
     if(i18n[k]){
       $("#data-" + k).show();
       $("#data-" + k + " > .data-label").text(i18n[k].label + ":");

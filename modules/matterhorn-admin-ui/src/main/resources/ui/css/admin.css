@@ -149,9 +149,21 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 #controlsTopStatistic { float: left; margin: 10px 0; }
 
 /* Role Privileges */
-.rolePrivilegeTable {margin-left: auto; margin-right: auto; margin-top:16px; margin-bottom: 16px;}
+#rolesTableContainer p {margin-left: 50px;}
+#rolePrivilegeTable {margin: 10px auto;}
+#rolePrivilegeTable th {text-align: left; min-width: 30px;}
+#rolePrivilegeTable th, td {padding: 5px;}
+
+#rolePrivilegeTable img {}
+#rolePrivilegeTable img:hover {border: 1px solid gray; opacity: 0.5;}
+
+.privilege_edit {vertical-align: middle; text-align: center; width: 30px;}
+
+
+
+/*.rolePrivilegeTable {margin-left: auto; margin-right: auto; margin-top:16px; margin-bottom: 16px;}
 .rolePrivilegeTable tr {border-top:1px solid silver; border-bottom:1px solid silver;}
 .rolePrivilegeTable td {margin-left:1px; margin-right:1px; padding:2px;}
-.rolePrivilegeTable .roleName {padding-right:20px;}
+.rolePrivilegeTable .roleName {padding-right:20px;}*/
 
 .informationText {font-size: 90%; color:grey; margin: 5px 10px 5px 10px;}

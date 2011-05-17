@@ -112,15 +112,15 @@
               <ul class="oc-ui-form-list">
                 <li>
                   <label for="title"><span id="i18n_title">Series Title</span>:</label>
-                  <input type="text" class="oc-ui-form-field" id="title" />
+                  <input type="text" class="oc-ui-form-field dc-metadata-field" id="title" />
                 </li>
                 <li>
                   <label for="creator"><span id="i18n_creator">Organizer</span>:</label>
-                  <input type="text" class="oc-ui-form-field" id="creator" />
+                  <input type="text" class="oc-ui-form-field dc-metadata-field" id="creator" />
                 </li>
                 <li>
                   <label for="contributor"><span id="i18n_contributor">Contributor</span>:</label>
-                  <input type="text" class="oc-ui-form-field" id="contributor" />
+                  <input type="text" class="oc-ui-form-field dc-metadata-field" id="contributor" />
                 </li>
               </ul>
             </div>
@@ -140,19 +140,20 @@
                   <ul class="oc-ui-form-list">
                     <li>
                       <label for="subject"><span id="i18n_subject">Subject</span>:</label>
-                      <input type="text" class="oc-ui-form-field" id="subject" />
+                      <input type="text" class="oc-ui-form-field dc-metadata-field" id="subject" />
                     </li>
                     <li>
                       <label for="language"><span id="i18n_langauge">Language</span>:</label>
-                      <input type="text" class="oc-ui-form-field" id="language" />
+                      <input type="text" class="oc-ui-form-field dc-metadata-field" id="language" />
                     </li>
                     <li>
                       <label for="license"><span id="i18n_license">License</span>:</label>
-                      <input type="text" class="oc-ui-form-field" id="license" />
+                      <input type="text" class="oc-ui-form-field dc-metadata-field" id="license" />
                     </li>
                     <li>
                       <label for="description"><span id="i18n_description">Description</span>:</label>
-                      <textarea class="oc-ui-form-field" id="description"></textarea>
+                      <textarea class="oc-ui-form-field dc-metadata-field" id="description"></textarea>
+                      <input type="hidden" class="dc-metadata-field" id="identifier" value="SERIES_"/>
                     </li>
                   </ul>
                 </div>
@@ -167,6 +168,30 @@
               <div id="i18n_content_descriptors" class="fold-icon-text">Privileges</div>
             </div>
             <div id="rolesTableContainer" class="ui-widget-content ui-corner-bottom">
+              <p>
+                Specify roles for which users can access Recordings in this Series,
+                and indicate what level of access they should have.<br />
+                Hint: Roles are typically in the format Department_CourseNumber<i>TermRole</i>
+                e.g. English_222_F2011_Instructor
+              </p>
+              <table id="rolePrivilegeTable" border="1">
+                <thead>
+                  <tr>
+                    <th>Role</th>
+                    <th>View</th>
+                    <th>Edit</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Public (no authorization required)</td>
+                    <td class="privilege_edit"><input type="checkbox" /></td>
+                    <td class="privilege_edit"><input type="checkbox" disabled="disabled" /></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
           <div class="form-box layout-centered ui-widget">

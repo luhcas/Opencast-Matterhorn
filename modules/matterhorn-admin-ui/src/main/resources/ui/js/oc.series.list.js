@@ -18,36 +18,55 @@ ocSeriesList.views = {} || ocSeriesList.views;
 ocSeriesList.views.seriesView = {} || ocSeriesList.seriesView;
 
 ocSeriesList.init = function(){
-  $("#addSeriesButton").button({icons:{primary:"ui-icon-circle-plus"}});
-  var result = TrimPath.processDOMTemplate("seriesTemplate", ocSeriesList.views);
+  $("#addSeriesButton").button({
+    icons:{
+      primary:"ui-icon-circle-plus"
+    }
+  });
+var result = TrimPath.processDOMTemplate("seriesTemplate", ocSeriesList.views);
   $('#seriesTableContainer').html(result);
 }
 
 ocSeriesList.buildSeriesView = function(data) {
-  if(typeof data.seriesList === 'object'){
-    if(!$.isArray(data.seriesList.series)){
-      data.seriesList.series = [data.seriesList.series]
-    }
-    $.each(data.seriesList.series, function(i,series){
-      var s = ocSeriesList.views.seriesView[series.id] = {};
-      s.id = series.id;
-      if(typeof series.additionalMetadata === 'object') {
-        if(!$.isArray(series.additionalMetadata.metadata)){
-          series.additionalMetadata.metadata = [series.additionalMetadata.metadata];
-        }
-        for(var j=0; j < series.additionalMetadata.metadata.length; j++){
-          var metadata = series.additionalMetadata.metadata[j];
-          if(metadata.key === 'title'){
-            s.title = metadata.value;
-          } else if(metadata.key === 'creator') {
-            s.creator = metadata.value;
-          } else if(metadata.key  === 'contributor') {
-            s.contributor = metadata.value;
-          }
-        }
+  ocUtils.log($.isArray(data));
+  for(var i = 0; i < data.length; i++) {
+    var s = ocSeriesList.views.seriesView[data[i]['http://purl.org/dc/terms/']['identifier'][0].value] = {};
+    s.id = data[i]['http://purl.org/dc/terms/']['identifier'][0].value;
+    for(var key in data[i]['http://purl.org/dc/terms/']) {
+      //ocUtils.log(key + "=>" + data[i]['http://purl.org/dc/terms/'][key][0].value)
+      if(key === 'title'){
+        s.title = data[i]['http://purl.org/dc/terms/'][key][0].value
+      } else if(key === 'creator') {
+        s.creator = data[i]['http://purl.org/dc/terms/'][key][0].value
+      } else if(key  === 'contributor') {
+        s.contributor = data[i]['http://purl.org/dc/terms/'][key][0].value
       }
-    });
+    }
   }
+//  if(typeof data.seriesList === 'object'){
+//    if(!$.isArray(data.seriesList.series)){
+//      data.seriesList.series = [data.seriesList.series]
+//    }
+//    $.each(data.seriesList.series, function(i,series){
+//      var s = ocSeriesList.views.seriesView[series.id] = {};
+//      s.id = series.id;
+//      if(typeof series.additionalMetadata === 'object') {
+//        if(!$.isArray(series.additionalMetadata.metadata)){
+//          series.additionalMetadata.metadata = [series.additionalMetadata.metadata];
+//        }
+//        for(var j=0; j < series.additionalMetadata.metadata.length; j++){
+//          var metadata = series.additionalMetadata.metadata[j];
+//          if(metadata.key === 'title'){
+//            s.title = metadata.value;
+//          } else if(metadata.key === 'creator') {
+//            s.creator = metadata.value;
+//          } else if(metadata.key  === 'contributor') {
+//            s.contributor = metadata.value;
+//          }
+//        }
+//      }
+//    });
+//  }
 }
 
 ocSeriesList.deleteSeries = function(seriesId, title) {
