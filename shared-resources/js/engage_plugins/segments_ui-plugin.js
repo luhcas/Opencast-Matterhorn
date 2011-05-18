@@ -191,32 +191,16 @@ Opencast.segments_ui_Plugin = (function ()
                              '{/for}';
                                  
     var templateData1 =      '<div id="oc-title" style="display: none">' +
-                                 '{if (dcTitle != undefined) && (dcTitle != "")}' +
-                                     '${dcTitle}' +
-                                 '{else}' +
-                                     'No Title' +
-                                 '{/if}' +
+                                'NoNo' +
                              '</div>' +
                              '<div id="dc-extent" style="display: none">' +
-                                 '{if dcExtent != undefined}' +
-                                     '${dcExtent}' +
-                                 '{else}' +
-                                     '0' +
-                                 '{/if}' +
+                                '0'
                              '</div>' +
                              '<div id="oc-creator" style="display: none">' +
-                                 '{if dcCreator != undefined}' +
-                                     '${dcCreator}' +
-                                 '{else}' +
-                                     'No Creator' +
-                                 '{/if}' +
+                               'No creator'+
                              '</div>' +
                              '<div id="oc-date" style="display: none">' +
-                                 '{if dcCreated != undefined}' +
-                                     '${dcCreated}' +
-                                 '{else}' +
-                                     '' +
-                                 '{/if}' +
+                                 '0' +
                              '</div>';
         
     var templateMPAttach1 =     '{for a in attachment}' +
@@ -235,32 +219,16 @@ Opencast.segments_ui_Plugin = (function ()
                                 '{/for}';
         
     var templateData2 =      '<div id="dc-subject" style="display: none">' +
-                                 '{if (dcSubject != undefined) && (dcSubject != "")}' +
-                                     '${dcTitle}' +
-                                 '{else}' +
-                                     'No Subject' +
-                                 '{/if}' +
+                                 'subject' +
                              '</div>' +
                              '<div id="dc-contributor" style="display: none">' +
-                                 '{if (dcContributor != undefined) && (dcContributor != "")}' +
-                                     '${dcContributor}' +
-                                 '{else}' +
                                      'No Department information' +
-                                 '{/if}' +
                              '</div>' +
                              '<div id="dc-description" style="display: none">' +
-                                 '{if (dcDescription != undefined) && (dcDescription != "")}' +
-                                     '${dcDescription}' +
-                                 '{else}' +
-                                     'No Description' +
-                                 '{/if}' +
+                                 'description' +
                              '</div>' +
                              '<div id="dc-language" style="display: none">' +
-                                 '{if (dcLanguage != undefined) && (dcLanguage != "")}' +
-                                     '${dcLanguage}' +
-                                 '{else}' +
-                                     'No Language' +
-                                 '{/if}' +
+                               'language' +
                              '</div>';
         
     var templateMPCatalog1 =    '{for c in catalog}' +
