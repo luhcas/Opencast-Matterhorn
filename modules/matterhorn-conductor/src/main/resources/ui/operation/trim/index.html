@@ -2,7 +2,7 @@
   <head>
     <title>Hold for review</title>
     <link rel="stylesheet" type="text/css" href="/admin/css/jquery-ui-1.8.6.custom.css" />
-    <link rel="stylesheet" type="text/css" href="/admin/css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css" />
+    <link rel="stylesheet" type="text/css" href="/admin/css/jquery-ui-opencast-admin/jquery-ui-opencast-admin.css" />   
     <link rel="stylesheet" type="text/css" href="/admin/css/admin.css">
     <style type="text/css">
       #player-container {
@@ -52,12 +52,11 @@
     </style>
 
     <script type="text/javascript" src="/admin/jquery/jquery-1.4.4.min.js"></script>
-    <script type="text/javascript" src="/admin/jquery/jquery-ui-1.8.9.custom.min.js"></script>
+    <script type="text/javascript" src="/admin/jquery/jquery-ui-1.8.9.custom.min.js"></script>    
     <script type="text/javascript" src="/admin/js/oc.utils.js"></script>
     <script type="text/javascript">
             
       var PLAYER_URL = '/admin/embed.html';
-      var DEFAULT_SERIES_CATALOG_ID = 'seriesCatalog';
             
       var postData = {
         'id': parent.document.getElementById("holdWorkflowId").value
@@ -81,9 +80,22 @@
       // Timeout of the Intervall Timer
       var timerTimeout = 1500;
       var timerSet = false; // -> temporary solution. clearInterval(timer) does not work properly
+       		    		             
       $(document).ready(function(){
-        var id = postData.id;
+      var id = postData.id;             
 
+      var recordDate = null;
+      $('#recordDate').datepicker({
+    		showOn: 'both',
+    		buttonImage: '/admin/img/icons/calendar.gif',
+    		buttonImageOnly: true,
+    		dateFormat: 'yy-mm-dd'
+  		});  		
+
+        $('.oc-ui-form-field').change(function() {
+          metadataChanged = true;
+        });
+                
         // Set default Values for In point and Out point
         $('#player-container').load(function(){
           $('#inPoint').val("00:00:00");
@@ -244,7 +256,7 @@
             $(mediapackage.documentElement).attr('start',$(clone).attr('start'));
             $(mediapackage.documentElement).attr('duration',$(clone).attr('duration'));
 
-            // populate series field if information present
+	    // populate series field if information present
             var seriesid =  $(data.documentElement).find("mediapackage > series").text();
             if (seriesid != '') {
               $('#ispartof').val(seriesid);
@@ -264,11 +276,16 @@
                 $(data.documentElement).children().each(function(index, elm){
                   var tagName = elm.tagName.split(/:/)[1];
                   if ($(elm).text() != '') {
-                    $('#meta-' + tagName).val($(elm).text());
-                  }
+                    $('#meta-' + tagName).val($(elm).text());                    
+                    if ( tagName === "created" ) {            
+                        $('#recordDate').datepicker('setDate',$(elm).text());
+			$('#startTimeHour').val((new Date($(elm).text())).getHours()); 
+  			$('#startTimeMin').val((new Date($(elm).text())).getMinutes()); 
+                    }
+                  }                  
                 });
 
-                // save information that some metadata changed
+		// save information that some metadata changed
                 $('.dcMetaField').change(function() {
                   metadataChanged = true;
                 });
@@ -276,7 +293,8 @@
                 parent.ocRecordings.adjustHoldActionPanelHeight();
               }
             });
-            // get neccessary data to call the preview player
+            
+ 	    // get neccessary data to call the preview player
             //var previewTag = $(data.documentElement).find("mediapackage > media > track > tags > tag:contains('engage')").first();
             /*if (previewTag != null) {
                      var videoUrl = $(previewTag).parent().parent().find('url').text();
@@ -287,6 +305,7 @@
                      } else {
                      $('#player-container').text('No preview encoded track found in MediaPackage');
                      }*/
+
             var previewFiles = new Array();
                         
             $(data.documentElement).find("mediapackage > media > track").each(function(index, elm){
@@ -339,7 +358,7 @@
           parent.ocRecordings.adjustHoldActionPanelHeight();
         });
 
-        // try to obtain URL of series service endpoint from service registry
+ 	// try to obtain URL of series service endpoint from service registry
         // on success enable series input field / init autocomplete on it
         // TODO: use JSONP here so we can call services provieded by other hosts in a distributed deployment
         var thisHost = window.location.protocol + '//' + window.location.host;
@@ -372,7 +391,8 @@
 
         parent.ocRecordings.adjustHoldActionPanelHeight();
       });
-            
+
+     
       /**
        * Returns the Input Time in Milliseconds
        * @param data Data in the Format ab:cd:ef
@@ -528,7 +548,7 @@
           }
         }
 
-        if (seriesChanged) {
+if (seriesChanged) {
           if ($('#series').val() == '') {
             // remove series from mediapackage
             ocUtils.log('Removing Series');
@@ -641,12 +661,20 @@
         parent.ocRecordings.hideHoldActionUI();
       }
 
+
       function updateDCMetadata() {
         ocUtils.log("Updating DC metadata");
-        
+
         $('.dcMetaField').each(function(){
           var $field = $(this);
           var fieldname = $field.attr('name');
+	  if (fieldname==='created') {
+		recordDate = $('#recordDate').datepicker('getDate').getTime() / 1000;  	// Get date in milliseconds, convert to seconds.      
+     		recordDate += $('#startTimeHour').val() * 3600; // convert hour to seconds, add to date.      
+	   	recordDate += $('#startTimeMin').val() * 60; //convert minutes to seconds, add to date.		
+	  	recordDate = recordDate * 1000; //back to milliseconds
+		ocUtils.toISODate(recordDate); // = (new Date(recordDate)).format("isoUTCdateTime");
+	  }
           if ($field.val() != '') {
             var $dcelm = false;    //$(DCmetadata.documentElement).find('dcterms\\:' + $field.attr('name'));
             $(DCmetadata.documentElement).children().each(function(index, elm) {
@@ -656,39 +684,50 @@
             });
             if ($dcelm !== false) {
               ocUtils.log("updating " + $field.attr('name') + " to: " + $field.val());
-              $dcelm.text($field.val());
+              $field.attr('name')==="created" ? $dcelm.text(recordDate) : $dcelm.text($field.val());
             } else {
               ocUtils.log("creating " + $field.attr('name') + " with value: " + $field.val());
-              $(DCmetadata.createElement('dcterms:' + $field.attr('name'))).text($field.val()).appendTo(DCmetadata.documentElement);
+              $field.attr('name')==="created" ?  $('<dcterms:' + $field.attr('name') + '>').text(recordDate).appendTo(DCmetadata.documentElement) : $('<dcterms:' + $field.attr('name') + '>').text($field.val()).appendTo(DCmetadata.documentElement);
             }
           }
         });
-      }
-
+      }	
+		
       // Update the MediaPackage instances metadata fields (see org.opencastproject.mediapackage.MediaPackageImpl)
       function updateMediapackageMetadata() {
-        updateMetadataField('title','title');
+        updateMetadataField('title','title');        
+        updateMetadataField('created','start');       
         updateMetadataField('language','language');
         updateMetadataField('license','license');
         updateMetadataField('subject','subject');
         updateMetadataGroupField('creator', 'creators', 'creator');
         updateMetadataGroupField('contributor', 'contributors', 'contributor');
+
+        // update series
+        if ($('#series').val() != '') {
+          if ($('#ispartof').val() == '') {
+            createSeriesFromSearchText();
+          }
+          updateMPElement('seriestitle', $('#series').val());
+          updateMPElement('series', $('#ispartof').val());  
+        }
       }
 
       function updateMPElement(MPname, value) {
-        var $mpelm = $(mediapackage.documentElement).find(MPname);
+        var $mpelm = $(mediapackage.documentElement).find(MPname);	
         if ($mpelm.length != 0) {
-          ocUtils.log('Updating ' + MPname + ' in MediaPackage to ' + value);
-          $mpelm.text(value);
+          ocUtils.log('Updating ' + MPname + ' in MediaPackage to ' + value);          
+          MPname==="start" ? $mpelm.text(recordDate) : $mpelm.text(value);
         } else {
           ocUtils.log('Creating ' + MPname + ' in MediaPackage with value ' + value);
-          $newelm = $('<' + MPname + '></' + MPname + '>',mediapackage.documentElement).text(value);
+          $newelm = MPname==="start" ?  $('<' + MPname + '/>').text(recordDate) : $('<' + MPname + '/>').text(value);
           $newelm.appendTo(mediapackage.documentElement);
         }
       }
 
       function updateMetadataField(DCname, MPname) {
         var $dcelm = $(DCmetadata.documentElement).find('dcterms\\:' + DCname);
+        //dcterms:created ->
         if ($dcelm.length != 0) {
           updateMPElement(MPname, $dcelm.text());
         }
@@ -701,11 +740,11 @@
           if ($parent.length > 0) {
             $parent.empty();
           } else {
-            $parent = $('<' + MPgroupname + '></' + MPgroupname + '>', mediapackage.documentElement);
+            $parent = $('<' + MPgroupname + '/>');
             $(mediapackage.documentElement).append($parent);
           }
           $dcelms.each(function() {
-            $('<' + MPname + '></' + MPname + '>', mediapackage.documentElement).text($(this).text()).appendTo($parent);
+            $('<' + MPname + '/>').text($(this).text()).appendTo($parent);
           });
         }
       }
@@ -732,10 +771,10 @@
       <iframe id="player-container">
       </iframe>
       <div>
-        <label>
-          <span id="i18n_files_label">File(s)</span>:
-        </label>
-        <span id="files"></span>
+      <label>
+        <span id="i18n_files_label">File(s)</span>:
+      </label>
+      <span id="files"></span>
       </div>
     </center>
 
@@ -758,9 +797,108 @@
             </li>
             <li id="seriesContainer">
               <label class="scheduler-label" for="series" id="seriesLabel" style="width:15%;"><span id="i18n_series_label">Course/Series</span>:</label>
-              <input type="text" class="oc-ui-form-field" id="series" name="series" maxlength="255" disabled="true">
-              <input type="hidden" class="" id="ispartof" name="ispartof">
+              <input type="text" class="oc-ui-form-field" id="series" name="series" maxlength="255">
+              <input type="hidden" class="oc-ui-form-field" id="ispartof" name="ispartof">
             </li>
+           
+           
+				<li>
+              <label class="scheduler-label" id="recordingDateLabel" style="width:15%;"><span id="i18n_date_label">Recording Date</span>:</label>
+              <input type="text" size="10" id="recordDate" class="dcMetaField" name="created"/>
+            </li> 
+            <li>
+               <label class="scheduler-label" id="startTimeLabel" style="width:15%;"><span id="i18n_starttime_label">Start Time</span>:</label>
+               <select id="startTimeHour">
+                                            <option value="0">00</option>
+                                            <option value="1">01</option>
+                                            <option value="2">02</option>
+                                            <option value="3">03</option>
+                                            <option value="4">04</option>
+                                            <option value="5">05</option>
+                                            <option value="6">06</option>
+                                            <option value="7">07</option>
+                                            <option value="8">08</option>
+                                            <option value="9">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                            <option value="13">13</option>
+                                            <option value="14">14</option>
+                                            <option value="15">15</option>
+                                            <option value="16">16</option>
+                                            <option value="17">17</option>
+                                            <option value="18">18</option>
+                                            <option value="19">19</option>
+                                            <option value="20">20</option>
+                                            <option value="21">21</option>
+                                            <option value="22">22</option>
+                                            <option value="23">23</option>
+                                        </select>
+                                        <select id="startTimeMin">
+                                            <option value="0">00</option>
+                                            <option value="1">01</option>
+                                            <option value="2">02</option>
+                                            <option value="3">03</option>
+                                            <option value="4">04</option>
+                                            <option value="5">05</option>
+                                            <option value="6">06</option>
+                                            <option value="7">07</option>
+                                            <option value="8">08</option>
+                                            <option value="9">09</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                            <option value="13">13</option>
+                                            <option value="14">14</option>
+                                            <option value="15">15</option>
+                                            <option value="16">16</option>
+                                            <option value="17">17</option>
+                                            <option value="18">18</option>
+                                            <option value="19">19</option>
+                                            <option value="20">20</option>
+                                            <option value="21">21</option>
+                                            <option value="22">22</option>
+                                            <option value="23">23</option>
+                                            <option value="24">24</option>
+                                            <option value="25">25</option>
+                                            <option value="26">26</option>
+                                            <option value="27">27</option>
+                                            <option value="28">28</option>
+                                            <option value="29">29</option>
+                                            <option value="30">30</option>
+                                            <option value="31">31</option>
+                                            <option value="32">32</option>
+                                            <option value="33">33</option>
+                                            <option value="34">34</option>
+                                            <option value="35">35</option>
+                                            <option value="36">36</option>
+                                            <option value="37">37</option>
+                                            <option value="38">38</option>
+                                            <option value="39">39</option>
+                                            <option value="40">40</option>
+                                            <option value="41">41</option>
+                                            <option value="42">42</option>
+                                            <option value="43">43</option>
+                                            <option value="44">44</option>
+                                            <option value="45">45</option>
+                                            <option value="46">46</option>
+                                            <option value="47">47</option>
+                                            <option value="48">48</option>
+                                            <option value="49">49</option>
+                                            <option value="50">50</option>
+                                            <option value="51">51</option>
+                                            <option value="52">52</option>
+                                            <option value="53">53</option>
+                                            <option value="54">54</option>
+                                            <option value="55">55</option>
+                                            <option value="56">56</option>
+                                            <option value="57">57</option>
+                                            <option value="58">58</option>
+                                            <option value="59">59</option>
+                                        </select>
+                                    </li>                                   		  												                                   		                                      		                             
+
+
             <li class="additionalMeta">
               <label class="scheduler-label" for="contributor" id="contributorLabel" style="width:15%;"><span id="i18n_dept_label">Contributor</span>:</label>
               <input type="text" class="oc-ui-form-field dcMetaField" name="contributor" id="meta-contributor" maxlength="255" />
@@ -783,8 +921,8 @@
     </div>
 
     <div id="actions"">
-         <!-- control buttons -->
-         <label for="inPoint" style="padding-left: 10px">
+      <!-- control buttons -->
+      <label for="inPoint" style="padding-left: 10px">
         In point
       </label>
       <input type="text" id="inPoint" readonly="readonly" class="pointInput"/><input type="button" style="width: 160px; background-color: #C7D7D7;" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button" /><input type="button" id="play-from-in" style="width: 160px; background-color: #C7D7D7;" title="Start playing at current In point" value="&gt; Play from In point" class="ui-button" /><input type="button" id="step-in-forward" style="background-color: #C7D7D7;" title="Increase In point by one second" value="&gt;&gt;" class="ui-button" /><input type="button" id="step-in-backward" style="background-color: #C7D7D7;" title="Decrease In point by one second" value="&lt;&lt;" class="ui-button" />
