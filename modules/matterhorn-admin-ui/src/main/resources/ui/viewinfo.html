@@ -132,6 +132,10 @@
                 <td class="td-key">Presenter:</td>
                 <td class="td-value">${workflow.info.creators}</td>
               </tr>
+	      <tr>
+                <td class="td-key">Recording Date:</td>
+                <td class="td-value">${ocUtils.fromUTCDateStringToFormattedTime(workflow.info.start)}</td>
+              </tr>
             </table>
         </div>
       {/if}

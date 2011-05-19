@@ -186,7 +186,7 @@ ocUtils.getDuration = function(duration) {
 ocUtils.fromUTCDateStringToFormattedTime = function(UTCDate, duration) {
   var dateTimeSeparator = " - ";
   var date = ocUtils.fromUTCDateString(UTCDate);
-  return (ocUtils.getDateString(date) + dateTimeSeparator + ocUtils.getTimeString(date) + ocUtils.getDuration(duration));
+  return duration!=null ? (ocUtils.getDateString(date) + dateTimeSeparator + ocUtils.getTimeString(date) + ocUtils.getDuration(duration)) : (ocUtils.getDateString(date) + dateTimeSeparator + ocUtils.getTimeString(date)) ;
 }
 
 /* Convert Date object to yyyy-MM-dd'T'HH:mm:ss'Z' string.

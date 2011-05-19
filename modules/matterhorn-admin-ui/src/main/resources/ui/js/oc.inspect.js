@@ -71,6 +71,7 @@ Opencast.WorkflowInspect = (function() {
       out.info.title = mp.title;
       out.info.seriestitle = false;
       out.info.creators = '';
+      out.info.start = '';
       out.info.episodeDC = false;
       out.info.seriesDC = false;
 
@@ -79,6 +80,9 @@ Opencast.WorkflowInspect = (function() {
       }
       if (mp.seriestitle) {
         out.info.seriestitle = mp.seriestitle;
+      }
+      if (mp.start) {
+	out.info.start = mp.start;
       }
 
       // Attachments
@@ -152,7 +156,15 @@ Opencast.WorkflowInspect = (function() {
   function renderDetailsView(workflow, $target) {
     var result = TrimPath.processDOMTemplate(templateId, workflow);
     $target.append(result);
-    $target.tabs();
+    $target.tabs({
+                  select: function (event, ui) {
+                    if(ui.index == 3 && window.location.hash != '#performance')
+                    {
+                        window.location.hash = '#performance';
+                        window.location.reload();
+                    }
+                  }
+    });
     $('.unfoldable-tr').click(function() {
       var $content = $(this).find('.unfoldable-content');
       var unfolded = $content.is(':visible');
