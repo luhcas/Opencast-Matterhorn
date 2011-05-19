@@ -45,6 +45,8 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Date;
+//import java.util.List;
+//import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +64,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -134,7 +137,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("recordings/{id}.xml")
+  @Path("{id}.xml")
   @RestQuery(name = "recordingsasxml", description = "Retrieves DublinCore for specified event", returnDescription = "DublinCore in XML", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "ID of event for which DublinCore will be retrieved", type = Type.STRING) }, reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "DublinCore of event is in the body of response"),
           @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
@@ -161,7 +164,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("recordings/{id}.json")
+  @Path("{id}.json")
   @RestQuery(name = "recordingsasjson", description = "Retrieves DublinCore for specified event", returnDescription = "DublinCore in JSON", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "ID of event for which DublinCore will be retrieved", type = Type.STRING) }, reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "DublinCore of event is in the body of response"),
           @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
@@ -187,7 +190,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("recordings/{id}/agent.properties")
+  @Path("{id}/agent.properties")
   @RestQuery(name = "recordingsagentproperties", description = "Retrieves Capture Agent properties for specified event", returnDescription = "Capture Agent properties in the form of key, value pairs", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "ID of event for which agent properties will be retrieved", type = Type.STRING) }, reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Capture Agent properties of event is in the body of response"),
           @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
@@ -225,7 +228,8 @@ public class SchedulerRestService {
    * @return
    */
   @POST
-  @Path("/recordings")
+  @Path("")
+  /*
   @RestQuery(name = "newrecordings", description = "Creates new event or group of event with specified parameters", returnDescription = "If events were successfully generated, status CREATED is returned, otherwise BAD REQUEST", restParameters = {
           @RestParameter(name = "event", isRequired = true, type = Type.TEXT, description = "Dublin Core describing event", defaultValue = "${this.sampleDublinCore}"),
           @RestParameter(name = "caproperties", isRequired = true, type = Type.TEXT, description = "Capture agent properties for event", defaultValue = "${this.sampleCAProperties}"),
@@ -235,14 +239,46 @@ public class SchedulerRestService {
           @RestParameter(name = "duration", isRequired = false, type = Type.STRING, description = "Duration of each event if it recurrent"),
           @RestParameter(name = "timezone", isRequired = false, type = Type.STRING, description = "Capture agent time zone if it is different than scheduler's") }, reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_CREATED, description = "Event or events were successfully created"),
-          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid information for this request") })
-  public Response addEvent(@FormParam("event") String event, @FormParam("caproperties") String properties,
-          @FormParam("recurrence") String recurrence, @FormParam("start") String start, @FormParam("end") String end,
-          @FormParam("duration") String duration, @FormParam("timezone") String agentTimeZone) {
-    if (StringUtils.isEmpty(event)) {
-      logger.warn("No event dublin core specified.");
+          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid information for this request") })*/
+  public Response addEvent(MultivaluedMap<String,String> catalogs) {
+    DublinCoreCatalog eventCatalog;
+    Properties recordingProperties;
+    Properties caProperties = null;
+    String start;
+    String end;
+    String duration;
+    String recurrence;
+    String timezone;
+    
+    if (catalogs.containsKey("dublincore")) {
+      try {
+        eventCatalog = parseDublinCore(catalogs.getFirst("dublincore"));
+      } catch (Exception e) {
+        logger.warn("Could not parse Dublin core catalog: {}",e);
+        return Response.status(Status.BAD_REQUEST).build();
+      }
+    } else {
+      logger.warn("Cannot add event without dublin core catalog.");
       return Response.status(Status.BAD_REQUEST).build();
     }
+    
+    if (catalogs.containsKey("event")) {
+      try {
+        recordingProperties = parseProperties("event");
+      } catch (Exception e) {
+        logger.warn("Could not parse event catalog: {}", catalogs.getFirst("event"));
+        return Response.status(Status.BAD_REQUEST).build();
+      }
+      start = recordingProperties.getProperty("startDate");
+      end = recordingProperties.getProperty("endDate");
+      duration = recordingProperties.getProperty("duration");
+      recurrence = recordingProperties.getProperty("recurrence");
+      timezone = recordingProperties.getProperty("timezone");
+    } else {
+      logger.warn("Cannot add event without event catalog.");
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    
     Long startAsLong = null;
     Long endAsLong = null;
     Long durationAsLong = null;
@@ -264,29 +300,21 @@ public class SchedulerRestService {
         return Response.status(Status.BAD_REQUEST).build();
       }
     }
-
-    DublinCoreCatalog eventCatalog;
-    try {
-      eventCatalog = parseDublinCore(event);
-    } catch (Exception e) {
-      logger.warn("Could not parse Dublin core: {}", event);
-      return Response.status(Status.BAD_REQUEST).build();
-    }
-    Properties caProperties = null;
-    if (properties != null) {
+    
+    if (catalogs.containsKey("agentParameters")) {
       try {
-        caProperties = parseProperties(properties);
+        caProperties = parseProperties(catalogs.getFirst("agentParameters"));
       } catch (Exception e) {
-        logger.warn("Could not parse capture agent properties: {}", properties);
+        logger.warn("Could not parse capture agent properties: {}", catalogs.getFirst("agentParameters"));
         return Response.status(Status.BAD_REQUEST).build();
       }
     }
-
+    
     try {
       if (StringUtils.isNotEmpty(recurrence)) {
         // try to create event and it's recurrences
         Long[] createdIDs = service.addReccuringEvent(eventCatalog, recurrence, new Date(startAsLong), new Date(
-                endAsLong), durationAsLong, agentTimeZone);
+                endAsLong), durationAsLong, timezone);
         if (caProperties != null) {
           service.updateCaptureAgentMetadata(caProperties, createdIDs);
         }
@@ -317,7 +345,7 @@ public class SchedulerRestService {
    * @return true if the event was found and could be deleted.
    */
   @DELETE
-  @Path("recordings/{id}")
+  @Path("{id}")
   @RestQuery(name = "deleterecordings", description = "Removes scheduled event with specified ID.", returnDescription = "OK if event were successfully removed or NOT FOUND if event with specified ID does not exist", pathParameters = { @RestParameter(name = "id", isRequired = true, description = "Event ID", type = Type.STRING) }, reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Event was successfully removed"),
           @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist") })
@@ -346,7 +374,7 @@ public class SchedulerRestService {
    * @return
    */
   @PUT
-  @Path("recordings/{id}")
+  @Path("{id}")
   @RestQuery(name = "updaterecordings", description = "Updates Dublin Core of specified event", returnDescription = "Status OK is returned if event was successfully updated, NOT FOUND if specified event does not exist or BAD REQUEST if data is missing or invalid", pathParameters = { @RestParameter(name = "id", description = "ID of event to be updated", isRequired = true, type = Type.STRING) }, restParameters = {
           @RestParameter(name = "event", isRequired = false, description = "Updated Dublin Core for event", type = Type.TEXT),
           @RestParameter(name = "agentproperties", isRequired = false, description = "Updated Capture Agent properties", type = Type.TEXT) }, reponses = {
@@ -453,7 +481,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("recordings/recordings.xml")
+  @Path("recordings.xml")
   @RestQuery(name = "recordingsasxml", description = "Searches recordings and returns result as XML", returnDescription = "XML formated results", restParameters = {
           @RestParameter(name = "q", description = "Free text search", isRequired = false, type = Type.STRING),
           @RestParameter(name = "eventid", description = "Search by event ID", isRequired = false, type = Type.STRING),
@@ -548,7 +576,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("recordings/recordings.json")
+  @Path("recordings.json")
   @RestQuery(name = "recordingsasxml", description = "Searches recordings and returns result as JSON", returnDescription = "JSON formated results", restParameters = {
           @RestParameter(name = "q", description = "Free text search", isRequired = false, type = Type.STRING),
           @RestParameter(name = "eventid", description = "Search by event ID", isRequired = false, type = Type.STRING),
@@ -715,7 +743,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("recordings/conflicts.xml")
+  @Path("conflicts.xml")
   @RestQuery(name = "conflictingrecordingsasxml", description = "Searches for conflicting recordings based on parameters", returnDescription = "Returns NO CONTENT if no recordings are in conflict within specified period or list of conflicting recordings in XML", restParameters = {
           @RestParameter(name = "device", description = "Device identifier for which conflicts will be searched", isRequired = false, type = Type.TEXT),
           @RestParameter(name = "start", description = "Start time of conflicting period", isRequired = false, type = Type.STRING),
@@ -782,7 +810,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("recordings/conflicts.json")
+  @Path("conflicts.json")
   @RestQuery(name = "conflictingrecordingsasxml", description = "Searches for conflicting recordings based on parameters", returnDescription = "Returns NO CONTENT if no recordings are in conflict within specified period or list of conflicting recordings in JSON", restParameters = {
           @RestParameter(name = "device", description = "Device identifier for which conflicts will be searched", isRequired = false, type = Type.TEXT),
           @RestParameter(name = "start", description = "Start time of conflicting period", isRequired = false, type = Type.STRING),
@@ -843,7 +871,7 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("recordings/calendars")
+  @Path("calendars")
   @RestQuery(name = "getcalendar", description = "Returns iCalendar for specified set of events", returnDescription = "ICalendar for events", restParameters = {
           @RestParameter(name = "agentid", description = "Filter events by capture agent", isRequired = false, type = Type.STRING),
           @RestParameter(name = "seriesid", description = "Filter events by series", isRequired = false, type = Type.STRING) }, reponses = {
