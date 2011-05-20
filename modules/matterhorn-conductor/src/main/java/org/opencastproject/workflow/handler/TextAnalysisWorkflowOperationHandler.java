@@ -303,7 +303,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       // TODO: Note that the way of having one image extracted after the other is suited for
       // the ffmpeg-based encoder. When switching to other encoding engines such as gstreamer, it might be preferable
       // to pass in all timepoints to the image extraction method at once.
-      Map<Long, Job> extractImageJobs = new HashMap<Long, Job>();
+      SortedMap<Long, Job> extractImageJobs = new TreeMap<Long, Job>();
       List<Attachment> images = new LinkedList<Attachment>();
       try {
         for (long time : times) {
