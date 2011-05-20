@@ -18,7 +18,8 @@
 var ocSeries        = ocSeries || {};
 ocSeries.components = {};
 ocSeries.additionalComponents = {};
-ocSeries.rolePrivileges = [];
+ocSeries.roles = [];
+ocSeries.seriesRolesList = {};
 
 /*    PAGE CONFIGURATION    */
 var SERIES_SERVICE_URL = "/series";
@@ -33,6 +34,8 @@ ocSeries.init = function(){
   //Load i18n strings and replace default english
   // disabled temporarily - see MH-6510
   ocSeries.Internationalize();
+
+  ocSeries.roles = ocSecurity.loadRoles();
   
   //Add folding action for hidden sections.
   $('.oc-ui-collapsible-widget .form-box-head').click(
@@ -46,7 +49,7 @@ ocSeries.init = function(){
   $('#additionalContentTabs').tabs();
   
   ocSeries.RegisterComponents();
-  ocSeries.FormManager = new ocAdmin.Manager('series', '', ocSeries.components, ocSeries.additionalComponents);
+  //ocSeries.FormManager = new ocAdmin.Manager('series', '', ocSeries.components, ocSeries.additionalComponents);
   $('#submitButton').click(ocSeries.SubmitForm);
   $('#cancelButton').click(function() {
     document.location = SERIES_LIST_URL;
@@ -64,45 +67,110 @@ ocSeries.init = function(){
     }
   }
 
-  if (ocSeries.mode == CREATE_MODE) {
+  var privilegeRow = '<tr>';
+  privilegeRow += '<td><input type="text" class="role_search oc-ui-form-field"/></td>';
+  privilegeRow += '<td class="privilege_edit"><input type="checkbox" name="priv_view" class="privilege_edit" /></td>';
+  privilegeRow += '<td class="privilege_edit"><input type="checkbox" name="priv_edit" class="privilege_edit" /></td>';
+  privilegeRow += '<td class="privilege_edit"><img src="/img/icons/delete.png" alt="delete" title="Delete Role"></td>';
+  privilegeRow += '</tr>';
+  var $row;
 
-    var privilegeRow = '<tr>';
-    privilegeRow += '<td><input type="text" class="role_search oc-ui-form-field"/></td>'
-    privilegeRow += '<td class="privilege_edit"><input type="checkbox" name="priv_view"' + (ocSeries.mode == CREATE_MODE ? 'checked="checked"' : '') + ' class="privilege_edit" /></td>'
-    privilegeRow += '<td class="privilege_edit"><input type="checkbox" name="priv_edit" class="privilege_edit" /></td>'
-    privilegeRow += '<td class="privilege_edit"><img src="/img/icons/delete.png" alt="delete" title="Delete Role"></td>'
-    privilegeRow += '</tr>'
-
-    $('#rolePrivilegeTable > tbody').append(privilegeRow);
-
-    var append = function (event, ui) {
-      $('#rolePrivilegeTable > tbody').append(privilegeRow);
-      $('.role_search').autocomplete({
-        source: ocSecurity.loadRoles(),
+  var append = function(event, ui) {
+    if($(this).attr('id') == "") {
+      $row = $(privilegeRow);
+      $row.find('[name|="priv_view"]').attr('checked', 'checked');
+      $row.find('[name|="priv_view"]').attr('disabled', 'disabled');
+      $row.find('[name|="priv_edit"]').attr('disabled', 'disabled');
+      $row.find('img').hide();
+      $row.find('img').click(removeRole)
+      $row.find('.role_search').autocomplete({
+        source: ocSeries.roles,
         select: append
       });
+      $('#rolePrivilegeTable > tbody').append($row);
+      var $tr = $(this).parent().parent();
+      $tr.children().find('[name|="priv_edit"]').removeAttr('disabled');
+      $tr.children().find('[name|="priv_view"]').removeAttr('disabled');
+      $tr.children().find('img').show();
     }
+    $(this).attr('id', ui.item.value);
+  };
 
-    $('.role_search').autocomplete({
-      source: ocSecurity.loadRoles(),
+  var removeRole = function() {
+    $(this).parent().parent().remove();
+  }
+
+  if (ocSeries.mode == CREATE_MODE) {
+    $row = $(privilegeRow);
+    $row.find('[name|="priv_view"]').attr('checked', 'checked');
+    $row.find('[name|="priv_view"]').attr('disabled', 'disabled');
+    $row.find('[name|="priv_edit"]').attr('disabled', 'disabled');
+    $row.find('img').hide();
+    $row.find('img').click(removeRole)
+
+    $row.find('.role_search').autocomplete({
+      source: ocSeries.roles,
       select: append
     });
-  //    ocSecurity.loadRoles(function(roles) {
-  //      $(roles).each(function(index, role) {
-  //        ocSeries.rolePrivileges.push(new ocSecurity.Role(role));
-  //      });
-  //    });
-  //    var rolesTable = TrimPath.processDOMTemplate('rolesTableTemplate', {roles: ocSeries.rolePrivileges});
-  //$('#rolesTableContainer').append(rolesTable);
 
-  //
-  // to update the privileges from values in the UI do
-  //
-  // ocSecurity.updatePrivileges(ocSeries.rolePrivileges);
+    $('#rolePrivilegeTable > tbody').append($row);
 
   } else if (ocSeries.mode == EDIT_MODE) {
-// TODO get privileges from series and populate UI accordingly
-}
+    roles = false;
+    $.ajax({
+      url: SERIES_SERVICE_URL + '/' + seriesId  + '/acl.json',
+      type: 'GET',
+      dataType: 'json',
+      async: false,
+      success: function(data) {
+        roles = data;
+        $.each(roles.acl.ace, function () {
+          if(ocSeries.seriesRolesList[this.role] !== undefined) {
+            ocSeries.seriesRolesList[this.role][this.action] = true;
+          }
+          else {
+            ocSeries.seriesRolesList[this.role] = new Object();
+            ocSeries.seriesRolesList[this.role][this.action] = true;
+          }
+        });
+      },
+      error: function() {
+        if (ocUtils !== undefined) {
+          ocUtils.log("Could not retrieve roles from " + SERIES_SERVICE_URL + '/' + seriesId  + '/acl.json');
+        }
+      }
+    });
+    $.each(ocSeries.seriesRolesList, function(index, value) {
+      $row = $(privilegeRow);
+      $row.find('.role_search').attr('value', index);
+      $row.find('.role_search').attr('id', index);
+      $row.find('img').click(removeRole)
+      $row.find('.role_search').autocomplete({
+        source: ocSeries.roles,
+        select: append
+      });
+      if(value.edit) {
+        $row.find('[name|="priv_edit"]').attr('checked', 'checked');
+      }
+      if(value.view) {
+        $row.find('[name|="priv_view"]').attr('checked', 'checked');
+      }
+      $('#rolePrivilegeTable > tbody').append($row);
+    });
+
+    $row = $(privilegeRow);
+    $row.find('[name|="priv_view"]').attr('checked', 'checked');
+    $row.find('[name|="priv_view"]').attr('disabled', 'disabled');
+    $row.find('[name|="priv_edit"]').attr('disabled', 'disabled');
+    $row.find('img').hide();
+    $row.click(removeRole)
+
+    $row.find('.role_search').autocomplete({
+      source: ocSeries.roles,
+      select: append
+    });
+    $('#rolePrivilegeTable > tbody').append($row);
+  }
 }
 
 ocSeries.Internationalize = function(){
@@ -122,18 +190,6 @@ ocSeries.loadSeries = function(data) {
   for(var key in data) {
     $('#' + key).attr('value', data[key][0].value);
   }
-//  //ocSeries.components['description'].setValue(data['description'][0].value);
-//  if($.isArray(data.series.additionalMetadata.metadata)) {
-//    mdlist = data.series.additionalMetadata.metadata;
-//  } else {
-//    mdlist = [data.series.additionalMetadata.metadata];
-//  }
-//  for(m in mdlist){
-//    var metadata = mdlist[m];
-//    if(ocSeries.additionalComponents[metadata.key]){
-//      ocSeries.additionalComponents[metadata.key].setValue(metadata.value);
-//    }
-//  }
 }
 
 ocSeries.RegisterComponents = function(){
@@ -231,16 +287,21 @@ ocSeries.createACLDocument = function() {
   $('.role_search').each(function () {
     var $field = $(this);
     if ($field.attr('value') != "") {
-      out += '<ace>';
-      out += '<role>' + $field.attr('value') + '</role>';
-      out += '<action>view</action>';
-      out += '<allow>' + $field.parent().parent().children().find('[name|="priv_view"]').attr('checked') + '</allow>';
-      out += '</ace>';
-      out += '<ace>';
-      out += '<role>' + $field.attr('value') + '</role>';
-      out += '<action>edit</action>';
-      out += '<allow>' + $field.parent().parent().children().find('[name|="priv_edit"]').attr('checked') + '</allow>';
-      out += '</ace>';
+      if($field.parent().parent().children().find('[name|="priv_view"]').attr('checked')) {
+        out += '<ace>';
+        out += '<role>' + $field.attr('value') + '</role>';
+        out += '<action>view</action>';
+        out += '<allow>true</allow>';
+        out += '</ace>';
+      }
+      if($field.parent().parent().children().find('[name|="priv_edit"]').attr('checked')) {
+        out += '<ace>';
+        out += '<role>' + $field.attr('value') + '</role>';
+        out += '<action>edit</action>';
+        out += '<allow>true</allow>';
+        out += '</ace>';
+      }
+      
     }
   });
   out += '</ns2:acl>';
@@ -251,27 +312,15 @@ ocSeries.SubmitForm = function(){
   var dcDoc = ocSeries.createDublinCoreDocument();
   var acl = ocSeries.createACLDocument();
   if(dcDoc && ocSeries.additionalComponents.title.validate()){
-    if(ocSeries.mode === CREATE_MODE) {
-      $.ajax({
-        type: 'POST',
-        url: SERIES_SERVICE_URL + '/',
-        data: {
-          series: dcDoc,
-          acl: acl
-        },
-        complete: ocSeries.SeriesSubmitComplete
-      });
-    } else {
-      $.ajax({
-        type: 'POST',
-        url: SERIES_SERVICE_URL + '/',
-        data: {
-          series: dcDoc,
-          acl: acl
-        },
-        complete: ocSeries.SeriesSubmitComplete
-      });
-    }
+    $.ajax({
+      type: 'POST',
+      url: SERIES_SERVICE_URL + '/',
+      data: {
+        series: dcDoc,
+        acl: acl
+      },
+      complete: ocSeries.SeriesSubmitComplete
+    });
   }
 }
 

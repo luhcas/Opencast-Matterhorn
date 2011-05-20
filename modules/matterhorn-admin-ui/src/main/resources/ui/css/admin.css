@@ -154,8 +154,8 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 #rolePrivilegeTable th {text-align: left; min-width: 30px;}
 #rolePrivilegeTable th, td {padding: 5px;}
 
-#rolePrivilegeTable img {}
-#rolePrivilegeTable img:hover {border: 1px solid gray; opacity: 0.5;}
+/*#rolePrivilegeTable img {}
+#rolePrivilegeTable img:hover {border: 1px solid gray; opacity: 0.5;}*/
 
 .privilege_edit {vertical-align: middle; text-align: center; width: 30px;}
 

@@ -29,7 +29,7 @@ ocSecurity = new (function() {
     });
     return out;
   };
-
+  
   /** Update the privileges of an array of Roles. Each Roles privileges are set
    *  according to the value of checkboxes with id=${role name}CanRead / ${role name}CanRead.
    *
