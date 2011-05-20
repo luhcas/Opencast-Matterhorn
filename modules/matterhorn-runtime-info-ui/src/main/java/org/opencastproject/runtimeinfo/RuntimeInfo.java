@@ -134,9 +134,12 @@ public class RuntimeInfo {
 
     // Add the current user's organizational information
     Organization org = securityService.getOrganization();
+    
     JSONObject jsonOrg = new JSONObject();
     jsonOrg.put("id", org.getId());
     jsonOrg.put("name", org.getName());
+    jsonOrg.put("adminRole", org.getAdminRole());
+    jsonOrg.put("anonymousRole", org.getAnonymousRole());
 
     // and organization properties
     JSONObject orgProps = new JSONObject();
