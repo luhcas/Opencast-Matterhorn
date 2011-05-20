@@ -391,7 +391,7 @@ public class IngestRestService {
           @RestParameter(description = "Metadata value", isRequired = false, name = "spatial", type = RestParameter.Type.STRING),
           @RestParameter(description = "Metadata value", isRequired = false, name = "subject", type = RestParameter.Type.STRING),
           @RestParameter(description = "Metadata value", isRequired = false, name = "temporal", type = RestParameter.Type.STRING),
-          @RestParameter(description = "Metadata value", isRequired = false, name = "title", type = RestParameter.Type.STRING),
+          @RestParameter(description = "Metadata value", isRequired = true, name = "title", type = RestParameter.Type.STRING),
           @RestParameter(description = "Metadata value", isRequired = false, name = "type", type = RestParameter.Type.STRING) }, bodyParameter = @RestParameter(description = "The media track file", isRequired = true, name = "BODY", type = RestParameter.Type.FILE), reponses = {
           @RestResponse(description = "Returns augmented media package", responseCode = HttpServletResponse.SC_OK),
           @RestResponse(description = "", responseCode = HttpServletResponse.SC_BAD_REQUEST),
