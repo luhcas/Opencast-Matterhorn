@@ -212,6 +212,7 @@ Opencast.segments = (function ()
             });
             // Hide Search, too
             $('#oc_lecturer-search-field').attr('disabled', true);
+            $('#search-textarea').hide();
         }
         else
         {
