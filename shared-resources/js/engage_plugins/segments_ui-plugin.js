@@ -45,7 +45,7 @@ Opencast.segments_ui_Plugin = (function ()
     var templateMedia1 =     '{for t in track}' +
                                  '{if t.type == "presenter/delivery"}' +
                                      '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))&& (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
+                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))&& (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                              '<div id="oc-video-presenter-delivery-x-flv-http" style="display: none">' +
                                                  '${t.url}' +
                                              '</div>' +
@@ -77,7 +77,7 @@ Opencast.segments_ui_Plugin = (function ()
                                   
                                  '{if t.type == "presentation/delivery"}' +
                                      '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))&& (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
+                                         '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming))&& (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                              '<div id="oc-video-presentation-delivery-x-flv-http" style="display: none">' +
                                                  '${t.url}' +
                                              '</div>' +
@@ -125,7 +125,7 @@ Opencast.segments_ui_Plugin = (function ()
           
                                   '{if t.type == "presenter/source"}' +
                                       '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming)) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
+                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming)) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                               '<div id="oc-video-presenter-source-x-flv-http" style="display: none">' +
                                                   '${t.url}' +
                                               '</div>' +
@@ -141,7 +141,7 @@ Opencast.segments_ui_Plugin = (function ()
           
                                   '{if t.type == "presentation/source"}' +
                                       '{if (t.mimetype == "video/x-flv" || t.mimetype == "video/mp4")}' +
-                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming)) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
+                                          '{if (t.url.substring(0, 4) == "http") && (!rtmpAvailable || (rtmpAvailable && !preferStreaming)) && (!checkQuality || (checkQuality && ((quality == t.quality) || (t.quality == ""))))}' +
                                               '<div id="oc-video-presentation-source-x-flv-http" style="display: none">' +
                                                   '${t.url}' +
                                               '</div>' +
@@ -191,16 +191,32 @@ Opencast.segments_ui_Plugin = (function ()
                              '{/for}';
                                  
     var templateData1 =      '<div id="oc-title" style="display: none">' +
-                                'NoNo' +
+                                 '{if defined("dcTitle")}' +
+                                     '${dcTitle}' +
+                                 '{else}' +
+                                     'No Title' +
+                                 '{/if}' +
                              '</div>' +
                              '<div id="dc-extent" style="display: none">' +
-                                '0'
+                                 '{if defined("dcExtent")}' +
+                                     '${dcExtent}' +
+                                 '{else}' +
+                                     '0' +
+                                 '{/if}' +
                              '</div>' +
                              '<div id="oc-creator" style="display: none">' +
-                               'No creator'+
+                                 '{if defined("dcCreator")}' +
+                                     '${dcCreator}' +
+                                 '{else}' +
+                                     'No Creator' +
+                                 '{/if}' +
                              '</div>' +
                              '<div id="oc-date" style="display: none">' +
-                                 '0' +
+                                 '{if defined("dcCreated")}' +
+                                     '${dcCreated}' +
+                                 '{else}' +
+                                     '' +
+                                 '{/if}' +
                              '</div>';
         
     var templateMPAttach1 =     '{for a in attachment}' +
@@ -219,16 +235,32 @@ Opencast.segments_ui_Plugin = (function ()
                                 '{/for}';
         
     var templateData2 =      '<div id="dc-subject" style="display: none">' +
-                                 'subject' +
+                                 '{if defined("dcSubject")}' +
+                                     '${dcTitle}' +
+                                 '{else}' +
+                                     'No Subject' +
+                                 '{/if}' +
                              '</div>' +
                              '<div id="dc-contributor" style="display: none">' +
+                                 '{if defined("dcContributor")}' +
+                                     '${dcContributor}' +
+                                 '{else}' +
                                      'No Department information' +
+                                 '{/if}' +
                              '</div>' +
                              '<div id="dc-description" style="display: none">' +
-                                 'description' +
+                                 '{if defined("dcDescription")}' +
+                                     '${dcDescription}' +
+                                 '{else}' +
+                                     'No Description' +
+                                 '{/if}' +
                              '</div>' +
                              '<div id="dc-language" style="display: none">' +
-                               'language' +
+                                 '{if defined("dcLanguage")}' +
+                                     '${dcLanguage}' +
+                                 '{else}' +
+                                     'No Language' +
+                                 '{/if}' +
                              '</div>';
         
     var templateMPCatalog1 =    '{for c in catalog}' +
