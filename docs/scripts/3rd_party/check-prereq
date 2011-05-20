@@ -317,6 +317,7 @@ install_prog() {
         gsl-devel ) prog=libgsl0-dev ;;
         gmp ) prog=libgmp3c2 ;;
         zlib-devel ) prog=zlib1g-dev ;;
+        Xext-devel ) prog="libx11-dev libxpm-dev x11proto-xext-dev libxext-dev" ;;
         * ) prog="$1" ;;
       esac
       sudox apt-get -y install $prog
@@ -525,6 +526,10 @@ check_prereq() {
       #
       if [ ! -f /usr/include/zlib.h ]; then
         install_prog zlib-devel || return 1
+      fi
+      # check for X11 extensions files
+      if [ ! -f /usr/include/X11/extensions/XShm.h ]; then
+        install_prog Xext-devel || return 1
       fi
       ;;
     Debian )
