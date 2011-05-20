@@ -246,9 +246,9 @@ var ocAdmin = (function() {
   }
   
   admin.Catalog = function Catalog(param) {
-    this.namespace    = param.name || 'metadata';
-    this.components   = param.components || {};
-    this.serializer   = null;
+    this.name       = param.name;
+    this.components = param.components || {};
+    this.serializer = null;
     if(typeof param.serializer != 'undefined' && typeof param.serializer.serialize == 'function') {
       this.serializer = param.serializer;
     }

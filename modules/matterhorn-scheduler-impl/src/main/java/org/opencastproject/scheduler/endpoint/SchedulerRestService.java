@@ -264,13 +264,13 @@ public class SchedulerRestService {
     
     if (catalogs.containsKey("event")) {
       try {
-        recordingProperties = parseProperties("event");
+        recordingProperties = parseProperties(catalogs.getFirst("event"));
       } catch (Exception e) {
         logger.warn("Could not parse event catalog: {}", catalogs.getFirst("event"));
         return Response.status(Status.BAD_REQUEST).build();
       }
-      start = recordingProperties.getProperty("startDate");
-      end = recordingProperties.getProperty("endDate");
+      start = recordingProperties.getProperty("start");
+      end = recordingProperties.getProperty("end");
       duration = recordingProperties.getProperty("duration");
       recurrence = recordingProperties.getProperty("recurrence");
       timezone = recordingProperties.getProperty("timezone");
@@ -331,7 +331,7 @@ public class SchedulerRestService {
                 .build();
       }
     } catch (Exception e) {
-      logger.warn("Unable to create new event", e.getMessage());
+      logger.warn("Unable to create new event: {}", e);
       throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
     }
   }
@@ -980,6 +980,7 @@ public class SchedulerRestService {
    */
   private Properties parseProperties(String serializedProperties) throws IOException {
     Properties caProperties = new Properties();
+    logger.debug("properties: {}", serializedProperties);
     caProperties.load(new StringReader(serializedProperties));
     return caProperties;
   }

@@ -16,7 +16,7 @@
 var ocScheduler = (function() {
   var sched = {};
   // REST endpoints
-  var SCHEDULER_URL     = '/scheduler';
+  var SCHEDULER_URL     = '/recordings';
   var WORKFLOW_URL      = '/workflow';
   var CAPTURE_ADMIN_URL = '/capture-admin';
   var SERIES_URL        = '/series';
@@ -36,15 +36,15 @@ var ocScheduler = (function() {
   
   // Catalogs
   sched.dublinCore = new ocAdmin.Catalog({ //DC Metadata catalog
-    namespace: 'DublinCore Catalog',
+    name: 'dublincore',
     serializer: new ocAdmin.DublinCoreSerializer()
   });
   sched.recording = new ocAdmin.Catalog({ // Additional Recording properties
-    namespace: 'Recording',
+    name: 'event',
     serializer: new ocAdmin.Serializer()
   });
   sched.additionalCatalog = new ocAdmin.Catalog({ //Workflow Properties
-    name: 'Workflow Properties',
+    name: 'agentParameters',
     serializer: new ocAdmin.Serializer()
   });
 
@@ -238,16 +238,20 @@ var ocScheduler = (function() {
   };
 
   sched.submitForm = function(){
-    var eventXML = null;
-    eventXML = ocScheduler.FormManager.serialize();
+    var payload = {};
+    
+    payload[sched.dublinCore.name] = sched.dublinCore.serialize();
+    payload[sched.recording.name] = sched.recording.serialize();
+    payload[sched.additionalCatalog.name] = sched.additionalCatalog.serialize();
+    
     if(ocScheduler.conflictingEvents) {
       $('#missingFieldsContainer').show();
       $('#errorConflict').show();
       $('#errorConflict li').show();
       return;
     }
-    if(eventXML) {
-      $('#submitButton').attr('disabled', 'disabled');
+    if(true) {
+      /*$('#submitButton').attr('disabled', 'disabled');
       $('#submitModal').dialog({
         modal: true,
         resizable: false,
@@ -259,20 +263,21 @@ var ocScheduler = (function() {
         {
           $('.ui-dialog-titlebar-close').hide();
         }
-      });
+      });*/
       if(ocUtils.getURLParam('edit')) {
-        $.ajax({type: 'POST',
+        $.ajax({type: 'PUT',
                 url: SCHEDULER_URL + '/' + $('#eventId').val(),
+                data: payload,
                 dataType: 'text',
-                data: {event: eventXML},
-                complete: ocScheduler.EventSubmitComplete
+                complete: ocScheduler.eventSubmitComplete
                 });
       } else {
-        $.ajax({type: 'PUT',
+        ocUtils.log(payload);
+        $.ajax({type: 'POST',
                 url: SCHEDULER_URL + '/',
+                data: payload,
                 dataType: 'text',
-                data: { event: eventXML },
-                complete: ocScheduler.EventSubmitComplete
+                complete: ocScheduler.eventSubmitComplete
                });
       }
     }
@@ -700,6 +705,24 @@ ocScheduler.DeleteForm = function(){
         }
         return false; //nothing
       };
+      
+      dcComps.temporal = new ocAdmin.Component(['recurDurationHour', 'recurDurationMin', 'recurStart', 'recurStartTimeHour', 'recurStartTimeMin'],
+        { key: 'temporal'},
+        { getValue: function() {
+            var date = this.fields.recurStart.datepicker('getDate');
+            if(date && date.constructor == Date) {
+              var start = date / 1000; // Get date in milliseconds, convert to seconds.
+              start += this.fields.recurStartTimeHour.val() * 3600; // convert hour to seconds, add to date.
+              start += this.fields.recurStartTimeMin.val() * 60; //convert minutes to seconds, add to date.
+              start -= sched.tzDiff * 60; //Agent TZ offset
+              start = start * 1000; //back to milliseconds
+            }
+            var duration = this.fields.recurDurationHour.val() * 3600; // seconds per hour
+            duration += this.fields.recurDurationMin.val() * 60; // seconds per min
+            ocUtils.log(start, duration);
+          }
+        });
+      
       recComps.recurrenceStart = new ocAdmin.Component(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'],
         { required: true, key: 'startDate' },
         { getValue: function() {
@@ -993,6 +1016,27 @@ ocScheduler.DeleteForm = function(){
             return container;
           }
         });
+      
+      dcComps.temporal = new ocAdmin.Component(['durationHour', 'durationMin', 'startDate', 'startTimeHour', 'startTimeMin'],
+          { key: 'temporal'},
+          { getValue: function() {
+              var date = this.fields.startDate.datepicker('getDate');
+              if(date && date.constructor == Date) {
+                var start = date / 1000; // Get date in milliseconds, convert to seconds.
+                start += this.fields.startTimeHour.val() * 3600; // convert hour to seconds, add to date.
+                start += this.fields.startTimeMin.val() * 60; //convert minutes to seconds, add to date.
+                start -= sched.tzDiff * 60; //Agent TZ offset
+                start = start * 1000; //back to milliseconds
+              }
+              var end = this.fields.durationHour.val() * 3600; // seconds per hour
+              end += this.fields.durationMin.val() * 60 * 1000; // milliseconds per min
+              end += start;
+              ocUtils.log(start, end);
+              return 'start=' + ocUtils.toISODate(new Date(start)) + 
+                '; end=' + ocUtils.toISODate(new Date(end)) + '; scheme=W3C-DTF;';
+            }
+          });
+      
       recComps.startDate = new ocAdmin.Component(['startDate', 'startTimeHour', 'startTimeMin'],
         { required: true, key: 'startDate' },
         { getValue: function() {
