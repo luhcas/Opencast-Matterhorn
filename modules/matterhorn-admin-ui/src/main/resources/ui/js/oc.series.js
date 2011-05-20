@@ -20,10 +20,12 @@ ocSeries.components = {};
 ocSeries.additionalComponents = {};
 ocSeries.roles = [];
 ocSeries.seriesRolesList = {};
+ocSeries.anonymous_role = "";
 
 /*    PAGE CONFIGURATION    */
 var SERIES_SERVICE_URL = "/series";
 var SERIES_LIST_URL = "/admin/series_list.html";
+var ANOYMOUS_URL = "/info/me.json";
 var CREATE_MODE = 1;
 var EDIT_MODE   = 2;
 
@@ -34,6 +36,21 @@ ocSeries.init = function(){
   //Load i18n strings and replace default english
   // disabled temporarily - see MH-6510
   ocSeries.Internationalize();
+  var anonymous_role = "";
+  $.ajax({
+    url: ANOYMOUS_URL,
+    type: 'GET',
+    dataType: 'json',
+    async: false,
+    error: function () {
+      if (ocUtils !== undefined) {
+        ocUtils.log("Could not retrieve anonymous role " + ANOYMOUS_URL);
+      }
+    },
+    success: function(data) {
+      ocSeries.anonymous_role = data.org.anonymousRole;
+    }
+  });
 
   ocSeries.roles = ocSecurity.loadRoles();
   
@@ -124,6 +141,9 @@ ocSeries.init = function(){
       async: false,
       success: function(data) {
         roles = data;
+        if(!$.isArray(roles.acl.ace)) {
+          roles.acl.ace = [roles.acl.ace];
+        }
         $.each(roles.acl.ace, function () {
           if(ocSeries.seriesRolesList[this.role] !== undefined) {
             ocSeries.seriesRolesList[this.role][this.action] = true;
@@ -141,21 +161,26 @@ ocSeries.init = function(){
       }
     });
     $.each(ocSeries.seriesRolesList, function(index, value) {
-      $row = $(privilegeRow);
-      $row.find('.role_search').attr('value', index);
-      $row.find('.role_search').attr('id', index);
-      $row.find('img').click(removeRole)
-      $row.find('.role_search').autocomplete({
-        source: ocSeries.roles,
-        select: append
-      });
-      if(value.edit) {
-        $row.find('[name|="priv_edit"]').attr('checked', 'checked');
+      if(index == ocSeries.anonymous_role) {
+        $('#anonymous_view').attr('checked', 'checked');
       }
-      if(value.view) {
-        $row.find('[name|="priv_view"]').attr('checked', 'checked');
+      else {
+        $row = $(privilegeRow);
+        $row.find('.role_search').attr('value', index);
+        $row.find('.role_search').attr('id', index);
+        $row.find('img').click(removeRole)
+        $row.find('.role_search').autocomplete({
+          source: ocSeries.roles,
+          select: append
+        });
+        if(value.edit) {
+          $row.find('[name|="priv_edit"]').attr('checked', 'checked');
+        }
+        if(value.view) {
+          $row.find('[name|="priv_view"]').attr('checked', 'checked');
+        }
+        $('#rolePrivilegeTable > tbody').append($row);
       }
-      $('#rolePrivilegeTable > tbody').append($row);
     });
 
     $row = $(privilegeRow);
@@ -304,6 +329,13 @@ ocSeries.createACLDocument = function() {
       
     }
   });
+  if($('#anonymous_view').attr('checked')) {
+    out += '<ace>';
+    out += '<role>' + ocSeries.anonymous_role + '</role>';
+    out += '<action>view</action>';
+    out += '<allow>true</allow>';
+    out += '</ace>';
+  }
   out += '</ns2:acl>';
   return out;
 }
