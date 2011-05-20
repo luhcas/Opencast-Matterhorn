@@ -96,8 +96,6 @@ public final class GStreamerPipeline {
     if (pipeline == null) {
       //logger.error("Capture {} could not start, pipeline was null!", newRec.getID());
       captureFailureHandler.resetOnFailure(newRec.getID());
-      //return false;
-      Gst.deinit();
       throw new UnableToStartCaptureException("Capture " +  newRec.getID() + " could not start, pipeline was null!");
     }
 
@@ -118,6 +116,7 @@ public final class GStreamerPipeline {
     pipeline.play();
     if (pipeline.getState(wait * GStreamerPipeline.GST_SECOND) != State.PLAYING) {
       // In case of an error call stop to clean up the pipeline.  
+      logger.debug("Pipeline was unable to start after " + wait + " seconds.");
       stop(GStreamerPipeline.DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT);
       throw new UnableToStartCaptureException("Unable to start pipeline after " + wait + " seconds.  Aborting!");
     }
@@ -125,6 +124,7 @@ public final class GStreamerPipeline {
   }
 
   private void hookUpBus() {
+    logger.debug("Starting to hookup GStreamer Pipeline bus. ");
     // Hook up the shutdown handlers
     Bus bus = pipeline.getBus();
     bus.connect(new Bus.EOS() {
@@ -159,6 +159,7 @@ public final class GStreamerPipeline {
         logger.warn("{}: {}", obj.getName(), msg);
       }
     });
+    logger.debug("Successfully hooked up GStreamer Pipeline bus to Log4J.");
   }
   
   /**

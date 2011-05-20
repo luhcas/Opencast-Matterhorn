@@ -34,7 +34,7 @@ import org.gstreamer.Pad;
 import java.util.Properties;
 
 public abstract class ConsumerBin extends PartialBin {
-  public static final String GHOST_PAD_NAME = "SinkBin Ghost Pad";
+  public static final String GHOST_PAD_NAME = GStreamerProperties.SINK;
   protected Element queue;
   protected Element encoder;
   protected Element muxer;

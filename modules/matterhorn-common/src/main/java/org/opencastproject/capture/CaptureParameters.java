@@ -179,6 +179,9 @@ public interface CaptureParameters {
   /** Property specifying the GStreamer like syntax for a Custom Producer either Video or Audio **/
   String CAPTURE_DEVICE_CUSTOM_PRODUCER = ".customProducer";
 
+  /** Property specifying the GStreamer like syntax for a Custom Consumer **/
+  String CAPTURE_DEVICE_CUSTOM_CONSUMER = ".customConsumer";
+  
   /** Property specifying the name of the file to output */
   String CAPTURE_DEVICE_DEST = ".outputfile";
 

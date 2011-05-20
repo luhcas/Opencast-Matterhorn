@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.consumers.ConsumerBin;
 import org.opencastproject.capture.pipeline.bins.consumers.ConsumerFactory;
 import org.opencastproject.capture.pipeline.bins.consumers.ConsumerType;
@@ -166,9 +167,16 @@ public class CaptureDeviceBin {
           UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException {
-    createFilesinkConsumer(captureDevice, properties);
-    createXVImagesinkConsumer(properties);
+    if (properties.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
+            + CaptureParameters.CAPTURE_DEVICE_CUSTOM_CONSUMER) != null) {
+      createCustomConsumer(captureDevice, properties);
+    } else {
+      createFilesinkConsumer(captureDevice, properties);
+      createXVImagesinkConsumer(properties);
+    }
   }
+
+  
 
   /**
    * Creates a filesink Consumer for this Producer that will save the media to a file.
@@ -203,6 +211,14 @@ public class CaptureDeviceBin {
     consumerBins.add(consumerBin);
   }
 
+  private void createCustomConsumer(CaptureDevice captureDevice, Properties properties)
+          throws NoConsumerFoundException, UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
+    logger.debug("Using Custom Consumer");
+    consumerBins.add(ConsumerFactory.getInstance().getSink(ConsumerType.CUSTOM_CONSUMER, captureDevice, properties));
+  }
+  
   /**
    * Creates an XVImagesink Consumer for this Producer that will show the video input in real time.
    * 

@@ -31,7 +31,6 @@ import org.gstreamer.Element;
 import org.gstreamer.Gst;
 import org.gstreamer.Pad;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -69,13 +68,6 @@ public class ConsumerBinTest {
     } catch (Throwable t) {
       logger.warn("Skipping agent tests due to unsatisifed gstreamer installation");
       gstreamerInstalled = false;
-    }
-  }
-
-  @AfterClass
-  public static void tearDownGst() {
-    if (gstreamerInstalled) {
-      // Gst.deinit();
     }
   }
 

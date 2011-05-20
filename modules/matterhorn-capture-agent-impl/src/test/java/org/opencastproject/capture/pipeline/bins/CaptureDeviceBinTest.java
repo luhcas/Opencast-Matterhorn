@@ -19,13 +19,16 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.pipeline.PipelineTestHelpers;
+import org.opencastproject.capture.pipeline.bins.consumers.NoConsumerFoundException;
+import org.opencastproject.capture.pipeline.bins.producers.NoProducerFoundException;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
 import org.apache.commons.io.FileUtils;
+import org.gstreamer.Element;
 import org.gstreamer.Gst;
 import org.gstreamer.Pipeline;
 import org.junit.After;
@@ -42,9 +45,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Properties;
 
-@Ignore
+
 public class CaptureDeviceBinTest {
 
   private static final int PIPELINE_TEARDOWN_TIME = 500;
@@ -93,7 +97,7 @@ public class CaptureDeviceBinTest {
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION, "/tmp/testpipe/confidence");
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE, "false");
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION, "/tmp/testpipe/confidence");
-
+    captureDeviceProperties = new Properties();
     captureDeviceProperties.putAll(PipelineTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null,
             null, null, null));
   }
@@ -153,7 +157,7 @@ public class CaptureDeviceBinTest {
     Assert.assertTrue(new File(outputLocation).exists());
   }
 
-  @Test
+  @Ignore@Test
   public void testVideoTestSrcAndTestSink() throws InterruptedException {
     if (!gstreamerInstalled)
       return;
@@ -161,14 +165,14 @@ public class CaptureDeviceBinTest {
             + "/videoTestSource.mpeg");
   }
 
-  @Test
+  @Ignore@Test
   public void testV4LSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
     runDeviceTest(PipelineTestHelpers.V4L_LOCATION, ProducerType.V4LSRC, "V4L Source", tempDirectory + "/v4lSrc.mpeg");
   }
 
-  @Test
+  @Ignore@Test
   public void testV4L2SrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
@@ -176,7 +180,7 @@ public class CaptureDeviceBinTest {
             + "/v4l2Src.mpeg");
   }
 
-  @Test
+  @Ignore@Test
   public void testEpiphanSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
@@ -184,7 +188,7 @@ public class CaptureDeviceBinTest {
             tempDirectory + "/epiphanSrc.mpeg");
   }
 
-  @Test
+  @Ignore@Test
   public void testBlueCherryAndTestSink() {
     if (!gstreamerInstalled)
       return;
@@ -192,7 +196,7 @@ public class CaptureDeviceBinTest {
             tempDirectory + "/blueCherrySrc.mpeg");
   }
 
-  @Test
+  @Ignore@Test
   public void testAudioTestSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
@@ -200,7 +204,7 @@ public class CaptureDeviceBinTest {
             + "/audioTestSrc.mp2");
   }
 
-  @Test
+  @Ignore@Test
   public void testPulseSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
@@ -208,7 +212,7 @@ public class CaptureDeviceBinTest {
             + "/pulseSrc.mp2");
   }
 
-  @Test
+  @Ignore@Test
   public void testCustomVideoSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
@@ -218,7 +222,7 @@ public class CaptureDeviceBinTest {
             tempDirectory + "/customVideoSrc.mpg");
   }
 
-  @Test
+  @Ignore@Test
   public void testCustomAudioSrcAndTestSink() {
     if (!gstreamerInstalled)
       return;
@@ -227,7 +231,7 @@ public class CaptureDeviceBinTest {
             tempDirectory + "/customAudioSrc.mp2");
   }
 
-  @Test
+  @Ignore@Test
   public void testHauppageSrcNoContainerChangeAndFileBin() {
     if (!gstreamerInstalled)
       return;
@@ -235,7 +239,7 @@ public class CaptureDeviceBinTest {
             + "/hauppageNoChangeSrc.mpg");
   }
 
-  @Test
+  @Ignore@Test
   public void testHauppageSrcContainerChange() {
     if (!gstreamerInstalled)
       return;
@@ -245,7 +249,7 @@ public class CaptureDeviceBinTest {
             + "/hauppageSrc.mpg");
   }
 
-  @Test
+  @Ignore@Test
   public void testFileSrc() {
     if (!gstreamerInstalled)
       return;
@@ -253,5 +257,33 @@ public class CaptureDeviceBinTest {
             null, null);
     runDeviceTest(PipelineTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
             + "/fileSrc.mpg");
+  }
+  
+  @Test
+  public void captureDeviceBinUsesCustomConsumers() throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          NoConsumerFoundException, CaptureDeviceNullPointerException, UnableToCreateElementException,
+          NoProducerFoundException {
+    if (!gstreamerInstalled)
+      return;
+    captureDeviceProperties = new Properties();
+    String sinkName = "customConsumerFakeSink";
+    String customConsumerString = "queue name=customConsumerQueue ! fakesink name=" + sinkName;
+    CaptureDevice captureDevice = new CaptureDevice("/dev/video1", ProducerType.VIDEOTESTSRC, "videotestsrc",
+            "/tmp/testout.mpg");
+    Properties properties = new Properties();
+    properties.setProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
+            + CaptureParameters.CAPTURE_DEVICE_CUSTOM_CONSUMER, customConsumerString);
+    captureDevice.setProperties(properties);
+    CaptureDeviceBin captureDeviceBin = new CaptureDeviceBin(captureDevice, properties);
+    List<Element> elements = captureDeviceBin.getBin().getElementsRecursive();
+    boolean foundSink = false;
+    for (Element element : elements) {
+      if (element.getName().equalsIgnoreCase(sinkName)) {
+        foundSink = true;
+      }
+    }
+    Assert.assertTrue("The sink we tried to create wasn't actually created, " 
+            + "at least it wasn't in the list of elements.", foundSink);
   }
 }

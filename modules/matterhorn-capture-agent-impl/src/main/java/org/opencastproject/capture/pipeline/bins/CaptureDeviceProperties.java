@@ -21,6 +21,7 @@ import java.util.Properties;
 
 public class CaptureDeviceProperties {
   private String customProducer;
+  private String customConsumer;
   private String codec;
   private String container;
   private String bitrate;
@@ -44,6 +45,8 @@ public class CaptureDeviceProperties {
   public CaptureDeviceProperties(CaptureDevice captureDevice, Properties properties) {
     customProducer = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
             + CaptureParameters.CAPTURE_DEVICE_CUSTOM_PRODUCER);
+    customConsumer = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
+            + CaptureParameters.CAPTURE_DEVICE_CUSTOM_CONSUMER);
     codec = captureDevice.getProperties().getProperty("codec");
     container = captureDevice.getProperties().getProperty("container");
     bitrate = captureDevice.getProperties().getProperty("bitrate");
@@ -61,11 +64,19 @@ public class CaptureDeviceProperties {
   public String getCustomProducer() {
     return customProducer;
   }
-
+  
   public void setCustomSource(String customSource) {
     this.customProducer = customSource;
   }
 
+  public String getCustomConsumer() {
+    return customConsumer;
+  }
+  
+  public void setCustomConsumer(String customConsumer) {
+    this.customConsumer = customConsumer;
+  }
+  
   public String getCodec() {
     return codec;
   }
