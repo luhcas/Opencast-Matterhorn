@@ -76,13 +76,11 @@
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-capture-admin-service-api</artifactId>
       <version>${project.version}</version>
-      <type>bundle</type>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-common</artifactId>
       <version>${project.version}</version>
-      <type>bundle</type>
     </dependency>
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
