@@ -79,6 +79,7 @@
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-series-service-api</module>
         <module>modules/matterhorn-series-service-impl</module>
+        <module>modules/matterhorn-solr</module>
         <module>modules/matterhorn-workflow-service-api</module>
         <module>modules/matterhorn-workflow-service-remote</module>
       </modules>
