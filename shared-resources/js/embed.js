@@ -339,15 +339,6 @@ Opencast.Watch = (function ()
         mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
         mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
         
-        Opencast.Utils.log("Final Mediadata");
-        Opencast.Utils.log("Mediapackage ID: " + mediaPackageId);
-        Opencast.Utils.log("Media URL 1: " + mediaUrlOne);
-        Opencast.Utils.log("Media URL 2: " + mediaUrlTwo);
-        Opencast.Utils.log("Media resolution 1: " + mediaResolutionOne);
-        Opencast.Utils.log("Media resolution 1: " + mediaResolutionTwo);
-        Opencast.Utils.log("Mimetype 1: " + mimetypeOne);
-        Opencast.Utils.log("Mimetype 2: " + mimetypeTwo);
-        
         // If URL Parameter display exists and is set to revert
         var display = Opencast.Utils.getURLParameter('display');
         if ((display != null) && (display.toLowerCase() == 'invert') && (mediaUrlTwo != ''))
@@ -367,6 +358,15 @@ Opencast.Watch = (function ()
             mimetypeTwo = tmpMimetypeOne;
             mediaResolutionTwo = tmpMediaResolution;
         }
+        
+        Opencast.Utils.log("Final Mediadata");
+        Opencast.Utils.log("Mediapackage ID: " + mediaPackageId);
+        Opencast.Utils.log("Media URL 1: " + mediaUrlOne);
+        Opencast.Utils.log("Media URL 2: " + mediaUrlTwo);
+        Opencast.Utils.log("Media resolution 1: " + mediaResolutionOne);
+        Opencast.Utils.log("Media resolution 1: " + mediaResolutionTwo);
+        Opencast.Utils.log("Mimetype 1: " + mimetypeOne);
+        Opencast.Utils.log("Mimetype 2: " + mimetypeTwo);
         
         if (mediaPackageIdAvailable)
         {
