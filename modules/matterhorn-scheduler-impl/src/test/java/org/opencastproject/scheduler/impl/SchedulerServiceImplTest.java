@@ -78,7 +78,6 @@ import org.easymock.IAnswer;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -225,13 +224,12 @@ public class SchedulerServiceImplTest {
     return dc;
   }
 
-  protected DublinCoreCatalog generateEvent(String captureDeviceID) {
+  protected DublinCoreCatalog generateEvent(String captureDeviceID, Date startTime, Date endTime) {
     DublinCoreCatalog dc = dcService.newInstance();
     dc.set(PROPERTY_TITLE, "Demo event");
     dc.set(PROPERTY_CREATOR, "demo");
     dc.set(PROPERTY_SUBJECT, "demo");
-    dc.set(PROPERTY_TEMPORAL, EncodingSchemeUtils.encodePeriod(
-            new DCMIPeriod(new Date(), new Date(System.currentTimeMillis() + 600000)), Precision.Second));
+    dc.set(PROPERTY_TEMPORAL, EncodingSchemeUtils.encodePeriod(new DCMIPeriod(startTime, endTime), Precision.Second));
     dc.set(PROPERTY_SPATIAL, captureDeviceID);
     dc.set(PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(new Date(), Precision.Minute));
     dc.set(PROPERTY_LANGUAGE, "demo");
@@ -250,7 +248,7 @@ public class SchedulerServiceImplTest {
   @Test
   public void testPersistence() throws Exception {
 
-    DublinCoreCatalog event = generateEvent("demo");
+    DublinCoreCatalog event = generateEvent("demo", new Date(), new Date(System.currentTimeMillis() + 60000));
 
     Long id = schedulerService.addEvent(event);
     Assert.assertNotNull(id);
@@ -268,11 +266,11 @@ public class SchedulerServiceImplTest {
     Assert.assertNotNull(schedulerService.getEventCaptureAgentConfiguration(id));
   }
 
-  @Ignore
   @Test
   public void testEventManagement() throws Exception {
 
-    DublinCoreCatalog event = generateEvent("testdevice");
+    DublinCoreCatalog event = generateEvent("testdevice", new Date(System.currentTimeMillis() - 2000),
+            new Date(System.currentTimeMillis() + 60000));
     event.set(PROPERTY_TITLE, "Demotitle");
     Properties caProperties = generateCaptureAgentMetadata("testdevice");
     Long id = schedulerService.addEvent(event);
@@ -319,9 +317,8 @@ public class SchedulerServiceImplTest {
     Assert.assertTrue(upcoming.isEmpty());
 
     // update event
-    event.set(PROPERTY_TEMPORAL,
-            EncodingSchemeUtils.encodePeriod(new DCMIPeriod(new Date(System.currentTimeMillis() + 180000), new Date(
-                    System.currentTimeMillis() + 600000)), Precision.Second));
+    event.set(PROPERTY_TEMPORAL, EncodingSchemeUtils.encodePeriod(new DCMIPeriod(new Date(
+            System.currentTimeMillis() + 180000), new Date(System.currentTimeMillis() + 600000)), Precision.Second));
 
     schedulerService.updateEvent(event);
 
@@ -343,18 +340,14 @@ public class SchedulerServiceImplTest {
   public void testFindConflictingEvents() throws Exception {
 
     long currentTime = System.currentTimeMillis();
-    DublinCoreCatalog eventA = generateEvent("Device A");
-    eventA.set(PROPERTY_TEMPORAL, EncodingSchemeUtils.encodePeriod(new DCMIPeriod(new Date(
-            currentTime + 10 * 1000), new Date(currentTime + 3610000)), Precision.Second));
-    DublinCoreCatalog eventB = generateEvent("Device A");
-    eventB.set(PROPERTY_TEMPORAL, EncodingSchemeUtils.encodePeriod(new DCMIPeriod(new Date(
-            currentTime + 24 * 60 * 60 * 1000), new Date(currentTime + 25 * 60 * 60 * 1000)), Precision.Second));
-    DublinCoreCatalog eventC = generateEvent("Device C");
-    eventC.set(PROPERTY_TEMPORAL, EncodingSchemeUtils.encodePeriod(new DCMIPeriod(new Date(
-            currentTime - 60 * 60 * 1000), new Date(currentTime - 10 * 60 * 1000)), Precision.Second));
-    DublinCoreCatalog eventD = generateEvent("Device D");
-    eventD.set(PROPERTY_TEMPORAL, EncodingSchemeUtils.encodePeriod(new DCMIPeriod(new Date(
-            currentTime + 10 * 1000), new Date(currentTime + 3610000)), Precision.Second));
+    DublinCoreCatalog eventA = generateEvent("Device A", new Date(currentTime + 10 * 1000), new Date(
+            currentTime + 3610000));
+    DublinCoreCatalog eventB = generateEvent("Device A", new Date(currentTime + 24 * 60 * 60 * 1000), new Date(
+            currentTime + 25 * 60 * 60 * 1000));
+    DublinCoreCatalog eventC = generateEvent("Device C", new Date(currentTime - 60 * 60 * 1000), new Date(
+            currentTime - 10 * 60 * 1000));
+    DublinCoreCatalog eventD = generateEvent("Device D", new Date(currentTime + 10 * 1000), new Date(
+            currentTime + 3610000));
 
     schedulerService.addEvent(eventA);
     schedulerService.addEvent(eventB);
@@ -391,7 +384,7 @@ public class SchedulerServiceImplTest {
     String device = "Test Device";
 
     // Store an event
-    DublinCoreCatalog event = generateEvent(device);
+    DublinCoreCatalog event = generateEvent(device, new Date(), new Date(System.currentTimeMillis() + 60000));
     schedulerService.addEvent(event);
 
     // Request the calendar without specifying an etag. We should get a 200 with the icalendar in the response body

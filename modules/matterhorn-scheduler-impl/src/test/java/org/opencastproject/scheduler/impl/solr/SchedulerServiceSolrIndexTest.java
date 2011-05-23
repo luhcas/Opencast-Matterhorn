@@ -110,7 +110,7 @@ public class SchedulerServiceSolrIndexTest {
 
     Date lastModified = index.getLastModifiedDate(filter);
     Assert.assertTrue("Wrong last modified returned",
-            beforeIndexing.before(lastModified) && afterIndexing.after(lastModified));
+            !beforeIndexing.after(lastModified) && !afterIndexing.before(lastModified));
 
     SchedulerQuery q = new SchedulerQuery().setSpatial("Device one").setStartsFrom(new Date());
     Assert.assertTrue("There should be no results", index.search(q).isEmpty());
@@ -124,7 +124,7 @@ public class SchedulerServiceSolrIndexTest {
 
     lastModified = index.getLastModifiedDate(filter);
     Assert.assertTrue("Wrong last modified returned",
-            beforeIndexing.before(lastModified) && afterIndexing.after(lastModified));
+            !beforeIndexing.after(lastModified) && !afterIndexing.before(lastModified));
 
     q = new SchedulerQuery().setSpatial("Device one").setStartsFrom(new Date());
     Assert.assertTrue(!index.search(q).isEmpty());
@@ -157,7 +157,7 @@ public class SchedulerServiceSolrIndexTest {
 
     Date lastModified = index.getLastModifiedDate(filter);
     Assert.assertTrue("Wrong last modified returned",
-            beforeSecondIndexing.before(lastModified) && afterSecondIndexing.after(lastModified));
+            !beforeSecondIndexing.after(lastModified) && !afterSecondIndexing.before(lastModified));
   }
 
   @Test
