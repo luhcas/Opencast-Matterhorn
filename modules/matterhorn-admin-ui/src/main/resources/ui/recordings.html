@@ -49,7 +49,6 @@
   <body>
     <!-- VERSION AND LOGOUT BAR -->
     <div class="layout-page-header oc-ui-version-bar ui-helper-clearfix">
-      <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
         <div id="pageHeader">
             <span id="currentVersion"></span>
             <a href="/j_spring_security_logout">Log out</a>
@@ -86,12 +85,6 @@
     </div>
     <!-- PAGE TABS -->
     <div class="layout-page-header">
-      <ul class="layout-page-tabs oc-ui-page-tabs">
-        <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor ui-corner-top" id="i18n_tab_recording" onclick="document.location='recordings.html'" style="display:inline;">Recordings</li>
-        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_series" onclick="document.location='series_list.html'" style="display:inline;">Series</li>
-        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_agent" onclick="document.location='agents_status.html'" style="display:inline;">Capture Agents</li>
-        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_statistics" onclick="document.location='statistics.html'" style="display:inline;">Statistics</li>
-
             <div id="tabsWrapper" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
                 <ul id="tabs">
                     <li>
@@ -106,17 +99,19 @@
                     <li>
                         <a href="#statistics" id="i18n_tab_statistics">Statistics</a>
                     </li>
-      </ul>
+                </ul>
 
                 <div id="stage" class="ui-widget">
                     <div id="progressIndicator" class="layout-float-left ui-helper-hidden">
                       <label for="editProgress" style="margin-left: 50px;">Editing in progress</label><br />
                       <img src="img/loading.gif" alt="editing in progress" title="Editing in progress" />
-    </div>
-                    <div id="uploadContainer">
-        <button id="uploadButton" type="button">Upload Recording</button>
-        <button id="scheduleButton" type="button">Schedule Recording</button>
-      </div>
+                    </div>
+                </div>
+            </div>
+            <div id="uploadContainer">
+              <button id="uploadButton" type="button">Upload Recording</button>
+              <button id="scheduleButton" type="button">Schedule Recording</button>
+            </div>
                     <div class="clear"></div>
       <!-- div id="controlsTop" class="ui-widget-header ui-corner-top ui-helper-clearfix" -->
       <div id="controlsTop" class="ui-helper-clearfix">

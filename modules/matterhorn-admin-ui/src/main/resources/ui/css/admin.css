@@ -48,7 +48,7 @@ table tr:hover a:hover { text-decoration: underline!important; }
 #header #oc-logo { float: right;}
 #header a h1 { margin-left: 160px; font-size: 18px; color: #F6921E; text-decoration: none!important;}
 
-#tabsWrapper { border: none; background: none; margin-bottom: 30px; }
+#tabsWrapper { border: none; background: none;}
 #tabsWrapper #tabs { border-left: none; border-right: none; border-top: none; background: none; padding-left: 150px; }
 #tabsWrapper #tabs  li a { padding: 0.3em 1em; }
 
