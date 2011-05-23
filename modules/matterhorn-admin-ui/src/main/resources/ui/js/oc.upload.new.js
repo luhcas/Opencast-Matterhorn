@@ -3,7 +3,8 @@ var ocUpload = (function() {
   this.DEFAULT_WORKFLOW_DEFINITION = 'full';
   this.WORKFLOW_DEFINITION_URL = '/workflow/definitions.json';
   this.WORKFLOW_PANEL_URL = '/workflow/configurationPanel?definitionId=';
-  this.SERIES_SEARCH_URL = '/series/search';
+  this.SERIES_SEARCH_URL = '/series/series.json';
+  this.SERIES_URL = '/series'
   this.INGEST_CREATE_MP_URL = '/ingest/createMediaPackage';
   this.INGEST_ADD_CATALOG_URL = '/ingest/addDCCatalog';
   this.INGEST_PROGRESS_URL = '/ingest/getProgress';
@@ -33,7 +34,24 @@ var ocUpload = (function() {
   function initSeriesAutocomplete() {
     ocUtils.log('Initializing autocomplete for series field')
     $('#series').autocomplete({
-      source: ocUpload.SERIES_SEARCH_URL,
+      source: function(request, response) {
+        $.ajax({
+          url: ocUpload.SERIES_SEARCH_URL + '?q=' + request.term,
+          dataType: 'json',
+          type: 'GET',
+          success: function(data) {
+            var series_list = [];
+            $.each(data, function(){
+              series_list.push({value: this['http://purl.org/dc/terms/']['title'][0].value,
+                                id: this['http://purl.org/dc/terms/']['identifier'][0].value});
+            });
+            response(series_list);
+          }, 
+          error: function() {
+            ocUtils.log('could not retrieve series_data');
+          }
+        });
+      },
       select: function(event, ui){
         $('#ispartof').val(ui.item.id);
       },
@@ -451,20 +469,22 @@ ocUpload.Ingest = (function() {
   function createSeries(name) {
     var id = false;
     var seriesXml = '<series><additionalMetadata><metadata><key>title</key><value>' + name + '</value></metadata></additionalMetadata></series>';
+    seriesXml = '<dublincore xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oc="http://www.opencastproject.org/matterhorn"><dcterms:title xmlns="">' + name + '</dcterms:title></dublincore>'
     ocUpload.UI.setProgress("Creating Series " + name);
     $.ajax({
       async: false,
-      type: 'PUT',
-      url: ocUpload.SERIES_SEARCH_URL,
+      type: 'POST',
+      url: ocUpload.SERIES_URL,
       data: {
-        series: seriesXml
+        series: seriesXml,
+        acl: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ns2:acl xmlns:ns2="org.opencastproject.security"></ns2:acl>'
       },
-      dataType : 'json',
+      dataType : 'xml',
       error: function() {
         ocUpload.Listener.ingestError('Could not create Series ' + name);
       },
       success: function(data){
-        id = data.series.id;
+        id = $(data.getElementsByTagName('dcterms:identifier')).text();
       }
     });
     return id;
@@ -474,7 +494,7 @@ ocUpload.Ingest = (function() {
     var catalog = null;
     ocUpload.UI.setProgress("Loading Series Catalog");
     $.ajax({
-      url : ocUpload.SERIES_SEARCH_URL + '/' + id + '/dublincore',
+      url : '/series/' + id + '.xml',
       type : 'get',
       async : false,
       dataType : 'xml',              // TODO try to take the response directly as string
