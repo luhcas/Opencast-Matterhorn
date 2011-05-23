@@ -182,6 +182,9 @@ Opencast.Watch = (function ()
      */
     function onPlayerReady()
     {
+        var logsEnabled = (Opencast.Utils.getURLParameter('log') == "true") ? true : false;
+        Opencast.Utils.enableLogging(logsEnabled);
+        
         Opencast.Utils.log("Player ready");
          
         // Parse the plugin URLs

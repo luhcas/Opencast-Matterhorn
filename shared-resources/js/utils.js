@@ -23,7 +23,6 @@ var Opencast = Opencast || {};
 Opencast.Utils = (function ()
 {
     var loggingEnabled = false;
-
     var asciiAlphabet;
     var asciiAlphabetCashed = false;
     
@@ -564,6 +563,16 @@ Opencast.Utils = (function ()
     
     /**
      * @memberOf Opencast.Utils
+     * @description Enables or disables the Logs
+     * @param true for enabling Logs, false else
+     */
+    function enableLogging(logEnabled)
+    {
+        loggingEnabled = logEnabled||false;
+    }
+    
+    /**
+     * @memberOf Opencast.Utils
      * @description Logs given arguments -- uses console.log
      * @param any arguments console.log-valid
      * @return true if window.console exists and arguments had been logged, false else
@@ -604,6 +613,7 @@ Opencast.Utils = (function ()
         getLocaleDate: getLocaleDate,
         startsWith: startsWith,
         getRandom: getRandom,
+        enableLogging: enableLogging,
         log: log
     };
 }());
