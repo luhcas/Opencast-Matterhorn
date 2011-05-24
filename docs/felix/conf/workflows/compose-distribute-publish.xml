@@ -16,13 +16,13 @@
         <li class="ui-helper-clearfix">
           <span id="trimholdconfig">
             <input id="trimHold" name="trimHold" type="checkbox" class="configField holdCheckbox" value="true" />
-            <span id="i18n_hold_for_trim">&nbsp;Review / Trim before encoding (with option to edit info)</span>
+            <label for="trimHold" id="i18n_hold_for_trim">&nbsp;Review / Trim before encoding (with option to edit info)</label>
           </span>
         </li>
         <li class="ui-helper-clearfix">
           <span id="captionconfig">
             <input id="captionHold" name="captionHold" type="checkbox" class="configField holdCheckbox" value="true"/>
-            <span id="i18n_hold_for_caption">&nbsp;Captions file upload</span>
+            <label for="captionHold" id="i18n_hold_for_caption">&nbsp;Captions file upload</label>
           </span>
         </li>
       </ul>

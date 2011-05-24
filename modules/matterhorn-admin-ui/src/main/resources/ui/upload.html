@@ -140,7 +140,7 @@
                   <form action="">
                     <ul class="oc-ui-form-list">
                       <li>
-                        <label class="scheduler-label" for="title" id="titleLabel"><span style="color: red;">* </span><span id="i18n_title_label">Title</span>:</label>
+                        <label class="scheduler-label" for="titleField" id="titleLabel"><span style="color: red;">* </span><span id="i18n_title_label">Title</span>:</label>
                         <input type="text" id="titleField" name="title" class="oc-ui-form-field requiredField dc-metadata-field" maxlength="255" />
                       </li>
                       <li>
@@ -196,18 +196,22 @@
                   <input type="hidden" name="track" id="track" class="requiredField" value="">
 
                   <div style="width:100px; margin-left: auto; margin-right: auto; margin-bottom:10px;">
-                    <input class="uploadType-single uploadtype-select" type="radio" name="singlMultiSwitch" value="single" checked="checked"/><label for="singleUploadRadio">Single File</label>
+                    <input class="uploadType-single uploadtype-select" type="radio" name="singlMultiSwitch" id="singleUploadRadio" value="single" checked="checked"/>
+                    <label for="singleUploadRadio" class="lbl_radio">Single File</label>
                     <br />
-                    <input class="uploadType-multi uploadtype-select" type="radio" name="singlMultiSwitch" value="multi" /><label for="multiUploadRadio">Multiple Files</label>
+                    <input class="uploadType-multi uploadtype-select" type="radio" name="singlMultiSwitch" id="multiUploadRadio" value="multi" />
+                    <label for="multiUploadRadio" class="lbl_radio">Multiple Files</label>
                   </div>
 
                   <div id="uploadContainerSingle">
                     <ul class="oc-ui-form-list upload-widget">
                       <li class="ui-helper-clearfix" id="regularFileSelection">
                         <label class="scheduler-label"><span id="i18n_file_location">File Location</span>:</label>
-                        <input type="radio" class="file-source-select" name="fileSourceSingle" value="local" checked="true">Local hard drive
+                        <input type="radio" class="file-source-select" name="fileSourceSingle" id="fileSourceSingleA" value="local" checked="true">
+                        <label for="fileSourceSingleA" class="lbl_radio">Local hard drive</label>
                         &nbsp;&nbsp;
-                        <input type="radio" class="file-source-select" name="fileSourceSingle" value="inbox">Designated inbox on server
+                        <input type="radio" class="file-source-select" name="fileSourceSingle" id="fileSourceSingleB" value="inbox">
+                        <label for="fileSourceSingleB" class="lbl_radio">Designated inbox on server</label>
                       </li>
                       <!-- field: Media File -->
                       <li class="ui-helper-clearfix">
@@ -216,7 +220,7 @@
                       </li>
                       <li class="ui-helper-clearfix">
                         <label class="scheduler-label"><span id="i18n_upload_flavor">Media Characteristics</span>:</label>
-                        <input type="checkbox" class="flavor-presentation-checkbox">
+                        <input type="checkbox" class="flavor-presentation-checkbox" id="containsSlides">
                         <input type="hidden" class="track-flavor" value="presenter/source">
                         <label for="containsSlides" style="text-align: left; width: 300px;">Contains discrete images/slides/scenes</label>
                       </li>
@@ -243,9 +247,11 @@
                       <ul class="oc-ui-form-list">
                         <li class="ui-helper-clearfix" id="regularFileSelection">
                           <label class="scheduler-label"><span class="i18n_file_location">File Location</span>:</label>
-                          <input type="radio" class="file-source-select"  name="fileSourcePresentation" value="local" checked="true">Local hard drive
+                          <input type="radio" class="file-source-select"  name="fileSourcePresentation" id="fileSourcePresentationA" value="local" checked="true">
+                          <label for="fileSourcePresentationA" class="lbl_radio">Local hard drive</label>
                           &nbsp;&nbsp;
-                          <input type="radio" class="file-source-select" name="fileSourcePresentation" value="inbox">Designated inbox on server
+                          <input type="radio" class="file-source-select" name="fileSourcePresentation" id="fileSourcePresentationB" value="inbox">
+                          <label for="fileSourcePresentationB" class="lbl_radio">Designated inbox on server</label>
                         </li>
                         <!-- field: Media File -->
                         <li class="ui-helper-clearfix" id="regularFileChooser">
@@ -264,9 +270,11 @@
                       <ul class="oc-ui-form-list">
                         <li class="ui-helper-clearfix" id="regularFileSelection">
                           <label class="scheduler-label"><span class="i18n_file_location">File Location</span>:</label>
-                          <input type="radio" class="file-source-select" name="fileSourcePresenter" value="local" checked="true">Local hard drive
+                          <input type="radio" class="file-source-select" name="fileSourcePresenter" id="fileSourcePresenterA" value="local" checked="true">
+                          <label for="fileSourcePresenterA" class="lbl_radio">Local hard drive</label>
                           &nbsp;&nbsp;
-                          <input type="radio" class="file-source-select" name="fileSourcePresenter" value="inbox">Designated inbox on server
+                          <input type="radio" class="file-source-select" name="fileSourcePresenter" id="fileSourcePresenterB" value="inbox">
+                          <label for="fileSourcePresenterB" class="lbl_radio">Designated inbox on server</label>
                         </li>
                         <!-- field: Media File -->
                         <li class="ui-helper-clearfix" id="regularFileChooserMultiPresenter">
@@ -285,9 +293,11 @@
                       <ul class="oc-ui-form-list">
                         <li class="ui-helper-clearfix" id="regularFileSelection">
                           <label class="scheduler-label"><span class="i18n_file_location">File Location</span>:</label>
-                          <input type="radio" class="file-source-select" name="fileSourceAudio" value="local" checked="true">Local hard drive
+                          <input type="radio" class="file-source-select" name="fileSourceAudio" id="fileSourceAudioA" value="local" checked="true">
+                          <label for="fileSourceAudioA" class="lbl_radio">Local hard drive</label>
                           &nbsp;&nbsp;
-                          <input type="radio" class="file-source-select" name="fileSourceAudio" value="inbox">Designated inbox on server
+                          <input type="radio" class="file-source-select" name="fileSourceAudio" id="fileSourceAudioB" value="inbox">
+                          <label for="fileSourceAudioB" class="lbl_radio">Designated inbox on server</label>
                         </li>
                         <!-- field: Media File -->
                         <li class="ui-helper-clearfix" id="regularFileChooserAudioOnly">
