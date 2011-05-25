@@ -23,6 +23,9 @@ import org.opencastproject.util.NotFoundException;
 
 import org.osgi.service.component.ComponentContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
@@ -39,6 +42,9 @@ import javax.persistence.spi.PersistenceProvider;
  * JPA-based implementation of the {@link AnnotationService}
  */
 public class AnnotationServiceJpaImpl implements AnnotationService {
+
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(AnnotationRestService.class);
 
   /** The persistence unit properties */
   @SuppressWarnings("unchecked")
@@ -197,6 +203,34 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
     }
   }
 
+  public AnnotationList getAnnotationsByMediapackageId(String mediapackageId, int offset, int limit) {
+    AnnotationListImpl result = new AnnotationListImpl();
+
+    EntityManager em = null;
+    try {
+      em = emf.createEntityManager();
+      result.setTotal(getTotalByMediapackageID(mediapackageId, em));
+      result.setOffset(offset);
+      result.setLimit(limit);
+
+      Query q = em.createNamedQuery("findAnnotationsByMediapackageId");
+      q.setParameter("userId", securityService.getUser().getUserName());
+      q.setParameter("mediapackageId", mediapackageId);
+      q.setFirstResult(offset);
+      q.setMaxResults(limit);
+      @SuppressWarnings("unchecked")
+      Collection<Annotation> annotations = q.getResultList();
+	
+      for (Annotation a : annotations) {
+        result.add(a);
+      }
+
+      return result;
+    } finally {
+      em.close();
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public AnnotationList getAnnotationsByTypeAndDay(String type, String day, int offset, int limit) {
     int year = Integer.parseInt(day.substring(0, 4));
@@ -307,6 +341,13 @@ public class AnnotationServiceJpaImpl implements AnnotationService {
     Query q = em.createNamedQuery("findTotalByTypeAndMediapackageId");
     q.setParameter("userId", securityService.getUser().getUserName());
     q.setParameter("type", type);
+    q.setParameter("mediapackageId", mediapackageId);
+    return ((Long) q.getSingleResult()).intValue();
+  }
+
+  private int getTotalByMediapackageID(String mediapackageId, EntityManager em) {
+    Query q = em.createNamedQuery("findTotalByMediapackageId");
+    q.setParameter("userId", securityService.getUser().getUserName());
     q.setParameter("mediapackageId", mediapackageId);
     return ((Long) q.getSingleResult()).intValue();
   }

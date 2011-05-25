@@ -100,7 +100,7 @@ public class AnnotationServiceJpaImplTest {
   }
 
   @Test
-  public void testGetAnnotationsByMediapackage() throws Exception {
+  public void testGetAnnotationsByTypeAndMediapackageId() throws Exception {
     String type = "a type of annotation, such as 'bookmark' or 'note'";
     
     // Add an annotation
@@ -125,6 +125,46 @@ public class AnnotationServiceJpaImplTest {
     
     AnnotationList annotations = annotationService.getAnnotationsByTypeAndMediapackageId(type, "mp", 0, 100);
     Assert.assertEquals(1, annotations.getAnnotations().size());
+  }
+
+  @Test
+  public void testGetAnnotationsByMediapackageId() throws Exception {
+    
+    // Add an annotation
+    AnnotationImpl a1 = new AnnotationImpl();
+    a1.setType("note");
+    a1.setInpoint(10);
+    a1.setOutpoint(100);
+    a1.setMediapackageId("mp");
+    a1.setSessionId("session 1");
+    a1.setValue("This is some user generated content 1");
+    annotationService.addAnnotation(a1);
+
+    // Add another annotation to the same mediapackage
+    AnnotationImpl a2 = new AnnotationImpl();
+    a2.setType("comment");
+    a2.setInpoint(15);
+    a2.setOutpoint(105);
+    a2.setMediapackageId("mp");
+    a2.setSessionId("session 2");
+    a2.setValue("This is some user generated content 2");
+    annotationService.addAnnotation(a2);
+    
+    // Add another annotation to a different mediapackage
+    AnnotationImpl a3 = new AnnotationImpl();
+    a3.setType("bookmark");
+    a3.setInpoint(16);
+    a3.setOutpoint(106);
+    a3.setMediapackageId("a different mediapackage");
+    a3.setSessionId("a different session");
+    a3.setValue("More user generated content");
+    annotationService.addAnnotation(a3);
+    
+
+    // Test method
+    AnnotationList annotationResult = annotationService.getAnnotationsByMediapackageId("mp", 0, 200);
+
+    Assert.assertEquals(2, annotationResult.getAnnotations().size());
   }
   
   // TODO: Many more queries need to be tested

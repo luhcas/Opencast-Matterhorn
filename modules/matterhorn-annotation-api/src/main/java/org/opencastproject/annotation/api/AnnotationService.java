@@ -52,6 +52,20 @@ public interface AnnotationService {
    */
   AnnotationList getAnnotations(int offset, int limit);
 
+
+  /**
+   * Returns annotations of a given mediapackage ID
+   *
+   * @param mediapackageId
+   *          The mediapackage ID
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the annotation list
+   */
+  AnnotationList getAnnotationsByMediapackageId(String mediapackageId, int offset, int limit);
+
   /**
    * Returns annotations of a given type
    * 

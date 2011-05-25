@@ -44,12 +44,14 @@ import javax.xml.bind.annotation.XmlType;
 @Table(name = "ANNOTATION")
 @NamedQueries({
         @NamedQuery(name = "findAnnotations", query = "SELECT a FROM Annotation a WHERE a.userId = :userId"),
+	@NamedQuery(name = "findAnnotationsByMediapackageId", query = "SELECT a FROM Annotation a WHERE a.mediapackageId = :mediapackageId AND a.userId = :userId"),
         @NamedQuery(name = "findAnnotationsByType", query = "SELECT a FROM Annotation a WHERE a.type = :type AND a.userId = :userId"),
         @NamedQuery(name = "findAnnotationsByTypeAndMediapackageId", query = "SELECT a FROM Annotation a WHERE a.mediapackageId = :mediapackageId AND a.type = :type AND a.userId = :userId"),
         @NamedQuery(name = "findAnnotationsByTypeAndMediapackageIdOrderByOutpointDESC", query = "SELECT a FROM Annotation a WHERE a.mediapackageId = :mediapackageId AND a.type = :type AND a.userId = :userId ORDER BY a.outpoint DESC"),
         @NamedQuery(name = "findAnnotationsByIntervall", query = "SELECT a FROM Annotation a WHERE :begin <= a.created AND a.created <= :end AND a.userId = :userId"),
         @NamedQuery(name = "findAnnotationsByTypeAndIntervall", query = "SELECT a FROM Annotation a WHERE :begin <= a.created AND a.created <= :end AND a.type = :type AND a.userId = :userId"),
         @NamedQuery(name = "findTotal", query = "SELECT COUNT(a) FROM Annotation a WHERE a.userId = :userId"),
+        @NamedQuery(name = "findTotalByMediapackageId", query = "SELECT COUNT(a) FROM Annotation a WHERE a.mediapackageId = :mediapackageId AND a.userId = :userId"),
         @NamedQuery(name = "findTotalByType", query = "SELECT COUNT(a) FROM Annotation a WHERE a.type = :type AND a.userId = :userId"),
         @NamedQuery(name = "findTotalByTypeAndMediapackageId", query = "SELECT COUNT(a) FROM Annotation a WHERE a.mediapackageId = :mediapackageId AND a.type = :type AND a.userId = :userId"),
         @NamedQuery(name = "findTotalByIntervall", query = "SELECT COUNT(a) FROM Annotation a WHERE :begin <= a.created AND a.created <= :end AND a.userId = :userId"),

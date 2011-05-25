@@ -128,6 +128,8 @@ public class AnnotationRestService {
 
     if (!StringUtils.isEmpty(id) && !StringUtils.isEmpty(type))
       return Response.ok(annotationService.getAnnotationsByTypeAndMediapackageId(type, id, offset, limit)).build();
+    else if (!StringUtils.isEmpty(id))
+      return Response.ok(annotationService.getAnnotationsByMediapackageId(id, offset, limit)).build();
     else if (!StringUtils.isEmpty(type) && !StringUtils.isEmpty(day))
       return Response.ok(annotationService.getAnnotationsByTypeAndDay(type, day, offset, limit)).build();
     else if (!StringUtils.isEmpty(type))
