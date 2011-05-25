@@ -44,6 +44,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
+import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UnknownFileTypeException;
@@ -379,7 +380,15 @@ public class MediaInspectionServiceImpl extends AbstractJobProducer implements M
         // Add the mime type if it's not already present
         if (track.getMimeType() == null || override) {
           try {
-            track.setMimeType(MimeTypes.fromURI(track.getURI()));
+            MimeType mimeType = MimeTypes.fromURI(track.getURI());
+            
+            // The mimetype library doesn't know about audio/video metadata, so the type might be wrong.
+            if ("audio".equals(mimeType.getType()) && metadata.hasVideoStreamMetadata()) {
+              mimeType = MimeTypes.parseMimeType("video/" + mimeType.getSubtype());
+            } else if ("video".equals(mimeType.getType()) && !metadata.hasVideoStreamMetadata()) {
+              mimeType = MimeTypes.parseMimeType("audio/" + mimeType.getSubtype());
+            }
+            track.setMimeType(mimeType);
           } catch (UnknownFileTypeException e) {
             logger.info("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
           }
