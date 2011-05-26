@@ -76,8 +76,8 @@ public class SearchRestService {
     this.searchService = searchService;
   }
 
-  protected String generateMediaPackage() {
-    return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\">\n"
+  public String getSampleMediaPackage() {
+    return "<ns2:mediapackage xmlns:ns2=\"http://mediapackage.opencastproject.org\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\"><title>t1</title>\n"
             + "  <metadata>\n"
             + "    <catalog id=\"catalog-1\" type=\"dublincore/episode\">\n"
             + "      <mimetype>text/xml</mimetype>\n"
@@ -94,7 +94,7 @@ public class SearchRestService {
 
   @POST
   @Path("add")
-  @RestQuery(name = "add", description = "Adds a mediapackage to the search index.", restParameters = { @RestParameter(description = "The media package to add to the search index.", isRequired = true, name = "mediapackage", type = RestParameter.Type.STRING) }, reponses = {
+  @RestQuery(name = "add", description = "Adds a mediapackage to the search index.", restParameters = { @RestParameter(description = "The media package to add to the search index.", isRequired = true, name = "mediapackage", type = RestParameter.Type.TEXT, defaultValue = "${this.sampleMediaPackage}") }, reponses = {
           @RestResponse(description = "The mediapackage was added, no content to return.", responseCode = HttpServletResponse.SC_NO_CONTENT),
           @RestResponse(description = "There has been an internal error and the mediapackage could not be added", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "No content is returned.")
   public Response add(@FormParam("mediapackage") MediaPackageImpl mediaPackage) throws SearchException {
