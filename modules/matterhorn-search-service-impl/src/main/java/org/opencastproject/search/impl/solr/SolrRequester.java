@@ -80,9 +80,9 @@ public class SolrRequester {
 
   /**
    * Creates a new requester for solr that will be using the given connection object to query the search index.
-   *
+   * 
    * @param connection
-   *         the solr connection
+   *          the solr connection
    */
   public SolrRequester(SolrServer connection, SecurityService securityService) {
     if (connection == null)
@@ -93,13 +93,13 @@ public class SolrRequester {
 
   /**
    * Returns the search results for a solr query string with read access for the current user.
-   *
+   * 
    * @param q
-   *         the query
+   *          the query
    * @param limit
-   *         the limit
+   *          the limit
    * @param offset
-   *         the offset
+   *          the offset
    * @return the search results
    * @throws SolrServerException
    */
@@ -111,12 +111,12 @@ public class SolrRequester {
 
   /**
    * Creates a search result from a given solr response.
-   *
+   * 
    * @param query
-   *         The solr query.
+   *          The solr query.
    * @return The search result.
    * @throws SolrServerException
-   *         if the solr server is not working as expected
+   *           if the solr server is not working as expected
    */
   private SearchResult createSearchResult(final SolrQuery query) throws SolrServerException {
 
@@ -173,26 +173,23 @@ public class SolrRequester {
         public String getDcTitle() {
           final List<DField<String>> titles = Schema.getDcTitle(doc);
           // try to return the first title without any language information first...
-          return CollectionUtil
-                  .head(CollectionUtil.filter(titles, new Predicate<DField<String>>() {
-                    @Override
-                    public Boolean apply(DField<String> f) {
-                      return f.getSuffix().equals(Schema.LANGUAGE_UNDEFINED);
-                    }
-                  }))
-                  .map(new Function<DField<String>, String>() {
-                    @Override
-                    public String apply(DField<String> f) {
-                      return f.getValue();
-                    }
-                  })
-                  .getOrElse(new Function0<String>() {
-                    @Override
-                    public String apply() {
-                      // ... since none is present return the first arbitrary title
-                      return Schema.getFirst(titles, dfltString);
-                    }
-                  });
+          return CollectionUtil.head(CollectionUtil.filter(titles, new Predicate<DField<String>>() {
+            @Override
+            public Boolean apply(DField<String> f) {
+              return f.getSuffix().equals(Schema.LANGUAGE_UNDEFINED);
+            }
+          })).map(new Function<DField<String>, String>() {
+            @Override
+            public String apply(DField<String> f) {
+              return f.getValue();
+            }
+          }).getOrElse(new Function0<String>() {
+            @Override
+            public String apply() {
+              // ... since none is present return the first arbitrary title
+              return Schema.getFirst(titles, dfltString);
+            }
+          });
         }
 
         @Override
@@ -331,11 +328,11 @@ public class SolrRequester {
 
   /**
    * Creates a list of <code>MediaSegment</code>s from the given result document.
-   *
+   * 
    * @param doc
-   *         the result document
+   *          the result document
    * @param query
-   *         the original query
+   *          the original query
    */
   private List<MediaSegmentImpl> createSearchResultSegments(SolrDocument doc, SolrQuery query) {
     List<MediaSegmentImpl> segments = new ArrayList<MediaSegmentImpl>();
@@ -426,9 +423,9 @@ public class SolrRequester {
 
   /**
    * Modifies the query such that certain fields are being boosted (meaning they gain some weight).
-   *
+   * 
    * @param query
-   *         The user query.
+   *          The user query.
    * @return The boosted query
    */
   public StringBuffer boost(String query) {
@@ -498,9 +495,9 @@ public class SolrRequester {
 
   /**
    * Simple helper method to avoid null strings.
-   *
+   * 
    * @param f
-   *         object which implements <code>toString()</code> method.
+   *          object which implements <code>toString()</code> method.
    * @return The input object or empty string.
    */
   private static String mkString(Object f) {
@@ -512,14 +509,17 @@ public class SolrRequester {
 
   /**
    * Converts the query object into a solr query and returns the results.
-   *
+   * 
    * @param q
-   *         the query
+   *          the query
    * @param action
-   *         one of {@link org.opencastproject.search.api.SearchService#READ_PERMISSION}, {@link org.opencastproject.search.api.SearchService#WRITE_PERMISSION}
+   *          one of {@link org.opencastproject.search.api.SearchService#READ_PERMISSION},
+   *          {@link org.opencastproject.search.api.SearchService#WRITE_PERMISSION}
+   * @param applyPermissions
+   *          whether to apply the permissions to the query. Set to false for administrative queries.
    * @return the search results
    */
-  private SolrQuery getForAction(SearchQuery q, String action) throws SolrServerException {
+  private SolrQuery getForAction(SearchQuery q, String action, boolean applyPermissions) throws SolrServerException {
     StringBuilder sb = new StringBuilder();
 
     String solrQueryRequest = q.getQuery();
@@ -611,18 +611,20 @@ public class SolrRequester {
     if (sb.length() == 0)
       sb.append("*:*");
 
-    User user = securityService.getUser();
-    String[] roles = user.getRoles();
-    if (roles.length > 0) {
-      sb.append(" AND (");
-      StringBuilder roleList = new StringBuilder();
-      for (String role : roles) {
-        if (roleList.length() > 0)
-          roleList.append(" OR ");
-        roleList.append(Schema.OC_ACL_PREFIX).append(action).append(":").append(role);
+    if (applyPermissions) {
+      User user = securityService.getUser();
+      String[] roles = user.getRoles();
+      if (roles.length > 0) {
+        sb.append(" AND (");
+        StringBuilder roleList = new StringBuilder();
+        for (String role : roles) {
+          if (roleList.length() > 0)
+            roleList.append(" OR ");
+          roleList.append(Schema.OC_ACL_PREFIX).append(action).append(":").append(role);
+        }
+        sb.append(roleList.toString());
+        sb.append(")");
       }
-      sb.append(roleList.toString());
-      sb.append(")");
     }
 
     SolrQuery query = new SolrQuery(sb.toString());
@@ -658,36 +660,49 @@ public class SolrRequester {
   }
 
   /**
-   * Returns the search results that are accessible for read by the current user.
-   *
+   * Returns the search results, regardless of permissions. This should be used for maintenance purposes only.
+   * 
    * @param q
-   *         the search query
+   *          the search query
+   * @return the readable search result
+   * @throws SolrServerException
+   */
+  public SearchResult getForAdministrativeRead(SearchQuery q) throws SolrServerException {
+    SolrQuery query = getForAction(q, READ_PERMISSION, false);
+    return createSearchResult(query);
+  }
+
+  /**
+   * Returns the search results that are accessible for read by the current user.
+   * 
+   * @param q
+   *          the search query
    * @return the readable search result
    * @throws SolrServerException
    */
   public SearchResult getForRead(SearchQuery q) throws SolrServerException {
-    SolrQuery query = getForAction(q, READ_PERMISSION);
+    SolrQuery query = getForAction(q, READ_PERMISSION, true);
     return createSearchResult(query);
   }
 
   /**
    * Returns the search results that are accessible for write by the current user.
-   *
+   * 
    * @param q
-   *         the search query
+   *          the search query
    * @return the writable search result
    * @throws SolrServerException
    */
   public SearchResult getForWrite(SearchQuery q) throws SolrServerException {
-    SolrQuery query = getForAction(q, WRITE_PERMISSION);
+    SolrQuery query = getForAction(q, WRITE_PERMISSION, true);
     return createSearchResult(query);
   }
 
   /**
    * Sets the security service.
-   *
+   * 
    * @param securityService
-   *         the securityService to set
+   *          the securityService to set
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;

@@ -19,6 +19,7 @@ package org.opencastproject.search.api;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.UnauthorizedException;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 
 /**
  * Provides search capabilities, possibly to the engage tools, possibly to other services.
@@ -52,8 +53,11 @@ public interface SearchService {
    *           if an error occurs accessing the media package
    * @throws UnauthorizedException
    *           if the current user is not authorized to add this mediapackage to the search index
+   * @throws ServiceRegistryException
+   *           if the job for adding the mediapackage can not be created
    */
-  void add(MediaPackage mediaPackage) throws SearchException, MediaPackageException, UnauthorizedException;
+  void add(MediaPackage mediaPackage) throws SearchException, MediaPackageException, UnauthorizedException,
+          ServiceRegistryException;
 
   /**
    * Removes the media package identified by <code>mediaPackageId</code> from the search index.

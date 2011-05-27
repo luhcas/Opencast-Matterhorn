@@ -26,13 +26,16 @@ import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZ
 import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_NAME;
 import static org.opencastproject.util.UrlSupport.DEFAULT_BASE_URL;
 
-import org.apache.solr.client.solrj.SolrServer;
-import org.junit.Ignore;
+import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageParser;
+import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.metadata.api.StaticMetadataService;
 import org.opencastproject.metadata.dublincore.StaticMetadataServiceDublinCoreImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
@@ -46,6 +49,7 @@ import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.DefaultOrganization;
 import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.series.api.SeriesService;
@@ -58,10 +62,12 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.solr.client.solrj.SolrServer;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -69,14 +75,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Tests the functionality of the search service.
- *
+ * 
  * todo setup scenario where gathering metadata from both the media package and the dublin core is required
- *   (StaticMetadataServiceMediaPackageImpl, StaticMetadataServiceDublinCoreImpl)
+ * (StaticMetadataServiceMediaPackageImpl, StaticMetadataServiceDublinCoreImpl)
  */
 public class SearchServiceImplTest {
 
@@ -93,12 +101,11 @@ public class SearchServiceImplTest {
   private AuthorizationService authorizationService = null;
 
   /** A user with permissions. */
-  private final User userWithPermissions = new User("sample", "opencastproject.org",
-          new String[]{"ROLE_STUDENT", "ROLE_OTHERSTUDENT"});
+  private final User userWithPermissions = new User("sample", "opencastproject.org", new String[] { "ROLE_STUDENT",
+          "ROLE_OTHERSTUDENT", new DefaultOrganization().getAnonymousRole() });
 
   /** A user without permissions. */
-  private final User userWithoutPermissions = new User("sample", "opencastproject.org",
-          new String[]{"ROLE_NOTHING"});
+  private final User userWithoutPermissions = new User("sample", "opencastproject.org", new String[] { "ROLE_NOTHING" });
 
   private final Organization defaultOrganization = new DefaultOrganization();
   private final User defaultUser = userWithPermissions;
@@ -123,7 +130,7 @@ public class SearchServiceImplTest {
     }
   }
 
-
+  @SuppressWarnings("unchecked")
   @Before
   public void setUp() throws Exception {
     final File dcFile = new File(getClass().getResource("/dublincore.xml").toURI());
@@ -141,6 +148,13 @@ public class SearchServiceImplTest {
 
     // service registry
     ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(
+            serviceRegistry.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (List<String>) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
+            .andReturn(new JaxbJob()).anyTimes();
+    EasyMock.expect(serviceRegistry.updateJob((Job) EasyMock.anyObject())).andReturn(new JaxbJob()).anyTimes();
+    EasyMock.expect(serviceRegistry.getJobs((String) EasyMock.anyObject(), (Status) EasyMock.anyObject()))
+            .andReturn(new ArrayList<Job>()).anyTimes();
     EasyMock.replay(serviceRegistry);
 
     // mpeg7 service
@@ -150,12 +164,8 @@ public class SearchServiceImplTest {
     userResponder = new Responder<User>(defaultUser);
     organizationResponder = new Responder<Organization>(defaultOrganization);
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUser())
-            .andAnswer(userResponder)
-            .anyTimes();
-    EasyMock.expect(securityService.getOrganization())
-            .andAnswer(organizationResponder)
-            .anyTimes();
+    EasyMock.expect(securityService.getUser()).andAnswer(userResponder).anyTimes();
+    EasyMock.expect(securityService.getOrganization()).andAnswer(organizationResponder).anyTimes();
     EasyMock.replay(securityService);
 
     // search service
@@ -166,11 +176,10 @@ public class SearchServiceImplTest {
     service.setWorkspace(workspace);
     service.setMpeg7CatalogService(mpeg7CatalogService);
     service.setSecurityService(securityService);
+    service.setServiceRegistry(serviceRegistry);
     SolrServer solrServer = service.setupSolr(new File(solrRoot));
-    service.testSetup(solrServer,
-            new SolrRequester(solrServer, securityService),
-            new SolrIndexManager(
-                    solrServer, workspace, Arrays.asList(mdService), seriesService, mpeg7CatalogService, securityService));
+    service.testSetup(solrServer, new SolrRequester(solrServer, securityService), new SolrIndexManager(solrServer,
+            workspace, Arrays.asList(mdService), seriesService, mpeg7CatalogService, securityService));
 
     // acl
     acl = new AccessControlList();
@@ -391,8 +400,8 @@ public class SearchServiceImplTest {
 
     // Now take the role away from the user
     userResponder.setResponse(userWithoutPermissions);
-    organizationResponder.setResponse(new Organization(DEFAULT_ORGANIZATION_ID, DEFAULT_ORGANIZATION_NAME, DEFAULT_BASE_URL,
-            DEFAULT_ORGANIZATION_ADMIN, DEFAULT_ORGANIZATION_ANONYMOUS));
+    organizationResponder.setResponse(new Organization(DEFAULT_ORGANIZATION_ID, DEFAULT_ORGANIZATION_NAME,
+            DEFAULT_BASE_URL, DEFAULT_ORGANIZATION_ADMIN, DEFAULT_ORGANIZATION_ANONYMOUS));
 
     // Try to delete it
     Assert.assertFalse("Unauthorized user was able to delete a mediapackage",
@@ -423,7 +432,7 @@ public class SearchServiceImplTest {
 
   /**
    * Ads a media package with one dublin core for the episode and one for the series.
-   *
+   * 
    * todo media package needs to return a series id for this test to work
    */
   @Test
@@ -465,4 +474,52 @@ public class SearchServiceImplTest {
     assertEquals("foobar-serie", result.getItems()[0].getId());
   }
 
+  @SuppressWarnings("unchecked")
+  @Test
+  public void testPopulateIndex() throws Exception {
+    // This service registry must return a list of jobs
+    List<String> args = new ArrayList<String>();
+    args.add(new DefaultOrganization().getId());
+    
+    List<Job> jobs = new ArrayList<Job>();
+    for (long i = 0; i < 10; i++) {
+      MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+      mediaPackage.setIdentifier(IdBuilderFactory.newInstance().newIdBuilder().createNew());
+      String payload = MediaPackageParser.getAsXml(mediaPackage);
+      JaxbJob job = new JaxbJob();
+      job.setId(i);
+      job.setArguments(args);
+      job.setPayload(payload);
+      job.setStatus(Status.FINISHED);
+      jobs.add(job);
+    }
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+
+    EasyMock.expect(
+            serviceRegistry.createJob((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (List<String>) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
+            .andReturn(new JaxbJob()).anyTimes();
+    EasyMock.expect(serviceRegistry.updateJob((Job) EasyMock.anyObject())).andReturn(new JaxbJob()).anyTimes();
+    EasyMock.expect(serviceRegistry.getJobs((String) EasyMock.anyObject(), (Status) EasyMock.anyObject()))
+            .andReturn(jobs).anyTimes();
+    EasyMock.replay(serviceRegistry);
+
+    service.setServiceRegistry(serviceRegistry);
+
+    OrganizationDirectoryService orgDirectory = EasyMock.createNiceMock(OrganizationDirectoryService.class);
+    EasyMock.expect(orgDirectory.getOrganization((String) EasyMock.anyObject())).andReturn(new DefaultOrganization())
+            .anyTimes();
+    EasyMock.replay(orgDirectory);
+
+
+    service.setOrgDirectory(orgDirectory);
+    
+    // We should have nothing in the search index
+    assertEquals(0, service.getByQuery(new SearchQueryImpl()).size());
+
+    service.populateIndex();
+
+    // This time we should have 10 results
+    assertEquals(10, service.getByQuery(new SearchQueryImpl()).size());
+  }
 }
