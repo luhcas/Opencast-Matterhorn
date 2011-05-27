@@ -14,13 +14,12 @@
   ~  permissions and limitations under the License.
   -->
 
-<!-- this dublin core lacks the original title -->
+<!-- This dublin core should be considered malformed since it lacks a title. -->
 <dublincore xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance/"
             xsi:schemaLocation="http://www.opencastproject.org http://www.opencastproject.org/schema.xsd"
             xmlns:dc="http://purl.org/dc/elements/1.1/"
             xmlns:dcterms="http://purl.org/dc/terms/" xmlns:oc="http://www.opencastproject.org/matterhorn">
-  <dcterms:title xml:lang="de">Land und Vegetation: Key Player in der Klima-Szene</dcterms:title>
   <dcterms:subject>climate, land, vegetation</dcterms:subject>
   <dcterms:description xml:lang="en">
     Introduction lecture from the Institute for Atmospheric and Climate Science.

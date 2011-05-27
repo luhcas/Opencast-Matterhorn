@@ -15,8 +15,7 @@
  */
 package org.opencastproject.metadata.dublincore;
 
-import static org.opencastproject.util.RequireUtil.notNull;
-
+import org.apache.commons.io.IOUtils;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
@@ -31,8 +30,6 @@ import org.opencastproject.util.data.NonEmptyList;
 import org.opencastproject.util.data.Option;
 import org.opencastproject.util.data.Predicate;
 import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -117,8 +114,6 @@ public class StaticMetadataServiceDublinCoreImpl implements StaticMetadataServic
         return EncodingSchemeUtils.decodeDuration(a);
       }
     });
-    final String originalTitle = notNull(episode.getFirst(DublinCore.PROPERTY_TITLE, DublinCore.LANGUAGE_UNDEFINED),
-            "dcterms:title(lang=undefined)");
     final Option<String> type = Option.wrap(episode.getFirst(DublinCore.PROPERTY_TYPE));
 
     final Option<String> isPartOf = Option.wrap(episode.getFirst(DublinCore.PROPERTY_IS_PART_OF));
@@ -177,11 +172,6 @@ public class StaticMetadataServiceDublinCoreImpl implements StaticMetadataServic
       @Override
       public Option<String> getLanguage() {
         return language;
-      }
-
-      @Override
-      public String getOriginalTitle() {
-        return originalTitle;
       }
 
       @Override

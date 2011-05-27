@@ -39,7 +39,6 @@ import java.net.URI;
 import java.net.URL;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.opencastproject.metadata.dublincore.TestUtil.createDate;
 
 public final class StaticMetadataServiceDublinCoreImplTest {
@@ -67,15 +66,12 @@ public final class StaticMetadataServiceDublinCoreImplTest {
     assertEquals(createDate(2007, 12, 5, 0, 0, 0), md.getCreated().get());
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testDefectMetadata() throws Exception {
     MediaPackage mp = newMediaPackage("/manifest-simple-defect.xml");
     StaticMetadataServiceDublinCoreImpl ms = newStaticMetadataService();
-    try {
-      ms.getMetadata(mp);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    // should throw an IllegalArgumentException
+    ms.getMetadata(mp);
   }
 
   private StaticMetadataServiceDublinCoreImpl newStaticMetadataService() throws Exception {

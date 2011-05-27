@@ -44,8 +44,6 @@ public interface StaticMetadata {
 
   Option<String> getLanguage();
 
-  String getOriginalTitle();
-
   Option<String> getIsPartOf();
 
   Option<String> getReplaces();

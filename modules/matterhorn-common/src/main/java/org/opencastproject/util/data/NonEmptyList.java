@@ -25,8 +25,9 @@ import java.util.ListIterator;
 
 /**
  * Non empty list. Also immutable.
- *
- * @param <A> content type
+ * 
+ * @param <A>
+ *          content type
  */
 public final class NonEmptyList<A> implements List<A> {
   private final List<A> lst;
@@ -37,7 +38,11 @@ public final class NonEmptyList<A> implements List<A> {
     lst.addAll(Arrays.asList(as));
   }
 
-  public NonEmptyList(Collection<A> as) {
+  /**
+   * @throws IllegalArgumentException
+   *           collection is empty
+   */
+  public NonEmptyList(Collection<A> as) throws IllegalArgumentException {
     if (as.isEmpty())
       throw new IllegalArgumentException("Collection must not be empty");
     lst = new ArrayList<A>();
