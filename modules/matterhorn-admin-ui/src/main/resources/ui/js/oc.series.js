@@ -56,12 +56,12 @@ ocSeries.init = function(){
   
   //Add folding action for hidden sections.
   $('.oc-ui-collapsible-widget .form-box-head').click(
-    function() {
-      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
-      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
-      $(this).next().toggle();
-      return false;
-    });
+  function() {
+    $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
+    $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+    $(this).next().toggle();
+    return false;
+  });
     
   $('#additionalContentTabs').tabs();
   
@@ -91,8 +91,25 @@ ocSeries.init = function(){
   privilegeRow += '<td class="privilege_edit"><img src="/img/icons/delete.png" alt="delete" title="Delete Role"></td>';
   privilegeRow += '</tr>';
   var $row;
+  
+  var sourceFunction = function(request, response) {
+    var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+    var matched = $.grep( ocSeries.roles, function(value) {
+      return matcher.test( value.label || value.value || value );
+    });
+    if($(matched).size() != 0) {
+      response(matched);
+    } else {
+      this.element.parent().prepend('<p class="no_valid_rule" style="color: red;">Not a valid role</p>');
+      response(['No Match']);
+    }
+  };
 
   var append = function(event, ui) {
+    if(ui.item.value == 'No Match') {
+      $(this).parent().prepend('<p class="no_valid_rule" style="color: red;">Not a valid role</p>');
+      return false;
+    }
     if($(this).attr('id') == "") {
       $row = $(privilegeRow);
       $row.find('[name|="priv_view"]').attr('checked', 'checked');
@@ -101,7 +118,7 @@ ocSeries.init = function(){
       $row.find('img').hide();
       $row.find('img').click(removeRole)
       $row.find('.role_search').autocomplete({
-        source: ocSeries.roles,
+        source: sourceFunction,
         select: append
       });
       $('#rolePrivilegeTable > tbody').append($row);
@@ -111,6 +128,7 @@ ocSeries.init = function(){
       $tr.children().find('img').show();
     }
     $(this).attr('id', ui.item.value);
+    $(this).parent().find('p').remove();
   };
 
   var removeRole = function() {
@@ -126,7 +144,7 @@ ocSeries.init = function(){
     $row.find('img').click(removeRole)
 
     $row.find('.role_search').autocomplete({
-      source: ocSeries.roles,
+      source: sourceFunction,
       select: append
     });
 
@@ -170,7 +188,7 @@ ocSeries.init = function(){
         $row.find('.role_search').attr('id', index);
         $row.find('img').click(removeRole)
         $row.find('.role_search').autocomplete({
-          source: ocSeries.roles,
+          source: sourceFunction,
           select: append
         });
         if(value.edit) {
@@ -191,7 +209,7 @@ ocSeries.init = function(){
     $row.click(removeRole)
 
     $row.find('.role_search').autocomplete({
-      source: ocSeries.roles,
+      source: sourceFunction,
       select: append
     });
     $('#rolePrivilegeTable > tbody').append($row);
@@ -220,57 +238,57 @@ ocSeries.loadSeries = function(data) {
 ocSeries.RegisterComponents = function(){
   //Core Metadata
   ocSeries.additionalComponents.title = new ocAdmin.Component(
-    ['title'],
-    {
-      label:'seriesLabel',
-      required:true
-    }
-    );
+  ['title'],
+  {
+    label:'seriesLabel',
+    required:true
+  }
+);
   
   ocSeries.additionalComponents.contributor = new ocAdmin.Component(
-    ['contributor'],
-    {
-      label:'contributorLabel'
-    }
-    );
+  ['contributor'],
+  {
+    label:'contributorLabel'
+  }
+);
   
   ocSeries.additionalComponents.creator = new ocAdmin.Component(
-    ['creator'],
-    {
-      label: 'creatorLabel'
-    }
-    );
+  ['creator'],
+  {
+    label: 'creatorLabel'
+  }
+);
   
   //Additional Metadata
   ocSeries.additionalComponents.subject = new ocAdmin.Component(
-    ['subject'],
-    {
-      label: 'subjectLabel'
-    }
-    )
+  ['subject'],
+  {
+    label: 'subjectLabel'
+  }
+)
   
   ocSeries.additionalComponents.language = new ocAdmin.Component(
-    ['language'],
-    {
-      label: 'languageLabel'
-    }
-    )
+  ['language'],
+  {
+    label: 'languageLabel'
+  }
+)
   
   ocSeries.additionalComponents.license = new ocAdmin.Component(
-    ['license'],
-    {
-      label: 'licenseLabel'
-    }
-    )
+  ['license'],
+  {
+    label: 'licenseLabel'
+  }
+)
   
   ocSeries.components.description = new ocAdmin.Component(
-    ['description'],
-    {
-      label: 'descriptionLabel'
-    }
-    )
+  ['description'],
+  {
+    label: 'descriptionLabel'
+  }
+)
   
-/*
+  /*
   //Extended Metadata
   ocAdmin.additionalComponents.type
   //ocAdmin.additionalComponents.subtype
@@ -282,7 +300,7 @@ ocSeries.RegisterComponents = function(){
   ocAdmin.additionalComponents.spatial
   ocAdmin.additionalComponents.temporal
   ocAdmin.additionalComponents.rights
-  */
+   */
 }
 
 ocSeries.createDublinCoreDocument = function() {
@@ -311,7 +329,8 @@ ocSeries.createACLDocument = function() {
   var out = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ns2:acl xmlns:ns2="org.opencastproject.security">';
   $('.role_search').each(function () {
     var $field = $(this);
-    if ($field.attr('value') != "") {
+    //check whether there is a value and entered value is a valid role
+    if ($field.attr('value') != "" && $.inArray(ocSeries.roles, $field.attr('value')) != -1) {
       if($field.parent().parent().children().find('[name|="priv_view"]').attr('checked')) {
         out += '<ace>';
         out += '<role>' + $field.attr('value') + '</role>';
@@ -326,7 +345,6 @@ ocSeries.createACLDocument = function() {
         out += '<allow>true</allow>';
         out += '</ace>';
       }
-      
     }
   });
   if($('#anonymous_view').attr('checked')) {
@@ -360,7 +378,7 @@ ocSeries.SeriesSubmitComplete = function(xhr, status){
   if(xhr.status == 201 || xhr.status == 204){
     document.location = SERIES_LIST_URL;
   }
-/*for(var k in ocSeries.components){
+  /*for(var k in ocSeries.components){
     if(i18n[k]){
       $("#data-" + k).show();
       $("#data-" + k + " > .data-label").text(i18n[k].label + ":");

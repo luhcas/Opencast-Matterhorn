@@ -111,7 +111,7 @@
             <div class="form-box-content ui-widget-content ui-corner-all">
               <ul class="oc-ui-form-list">
                 <li>
-                  <label for="title" class="scheduler-label"><span id="i18n_title">Series Title</span>*:</label>
+                  <label for="title" class="scheduler-label"><span style="color: red;">* </span><span id="i18n_title">Series Title</span>:</label>
                   <input type="text" class="oc-ui-form-field dc-metadata-field" id="title" />
                 </li>
                 <li>
@@ -167,7 +167,7 @@
               <div id="i18n_content_descriptors" class="fold-icon-text">Privileges</div>
             </div>
             <div id="rolesTableContainer" class="ui-widget-content ui-corner-bottom">
-              <p>
+              <p id="hint">
                 Specify roles for which users can access Recordings in this Series,
                 and indicate what level of access they should have.<br />
                 Hint: Role names are formatted according to rules specific to your institution.
