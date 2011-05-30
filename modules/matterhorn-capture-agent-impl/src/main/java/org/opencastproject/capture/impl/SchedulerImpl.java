@@ -93,6 +93,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 import javax.ws.rs.core.Response;
 
@@ -150,7 +151,7 @@ public class SchedulerImpl {
    * The purpose of this flag is to keep the calendar polling thread from crushing the server if the
    * endpoint which returns the calendar takes a long time to return (say, with a huge number of events).
    */
-  private boolean locked = false;
+  private Semaphore locked = new Semaphore(1);
 
   @SuppressWarnings("unchecked")
   public SchedulerImpl(Dictionary dictionary, ConfigurationManager configurationManager,
@@ -409,15 +410,23 @@ public class SchedulerImpl {
    * @return  True if the lock is closed, false otherwise.
    */
   public boolean isLocked() {
-    return locked;
+    return locked.availablePermits() != 1;
   }
 
   /**
-   * Changes the lock value on the scheduler.
-   * @param newValue True to lock the calendar updating thread (disables calendar updates).  False to unlock/enable.
+   * Locks the scheduler from updating its calendar
+   * @return True if the lock is available, false otherwise
    */
-  public void setLocked(boolean newValue) {
-    locked = newValue;
+  private boolean lock()  {
+    return locked.tryAcquire();
+  }
+
+  /**
+   * Unlocks the scheduler from updating its calendar
+   * @return True if the lock is available, false otherwise
+   */
+  private void unlock() {
+    locked.release();
   }
 
   /**
@@ -461,6 +470,10 @@ public class SchedulerImpl {
    * @see org.opencastproject.capture.api.Scheduler#updateCalendar()
    */
   public void updateCalendar() {
+    if (isLocked() || !lock()) {
+      log.info("Scheduler is currently locked, update is already in progress...");
+      return;
+    }
     // Fetch the calendar data and build a iCal4j representation of it
     // General logic:
     // * If there is a remote calendar URL, check for updates
@@ -504,6 +517,7 @@ public class SchedulerImpl {
     }
 
     logSchedules(scheduler);
+    unlock();
   }
 
   /**
