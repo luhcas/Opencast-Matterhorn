@@ -100,14 +100,21 @@ ocSeries.init = function(){
     if($(matched).size() != 0) {
       response(matched);
     } else {
-      this.element.parent().prepend('<p class="no_valid_rule" style="color: red;">Not a valid role</p>');
+      if(this.element.parent().find('p').size() == 0) {
+        this.element.parent().prepend('<p class="no_valid_rule" style="color: red;">Not a valid role</p>');
+      }
       response(['No Match']);
     }
   };
+  
+  var closeFunction = function(event, ui) {
+    if($.inArray(ocSeries.roles, $(this).val()) == -1 && $(this).parent().find('p').size() == 0 && event.originalEvent.type != "menuselected") {
+      $(this).parent().prepend('<p class="no_valid_rule" style="color: red;">Not a valid role</p>');
+    }
+  }
 
   var append = function(event, ui) {
     if(ui.item.value == 'No Match') {
-      $(this).parent().prepend('<p class="no_valid_rule" style="color: red;">Not a valid role</p>');
       return false;
     }
     if($(this).attr('id') == "") {
@@ -119,7 +126,8 @@ ocSeries.init = function(){
       $row.find('img').click(removeRole)
       $row.find('.role_search').autocomplete({
         source: sourceFunction,
-        select: append
+        select: append,
+        close: closeFunction
       });
       $('#rolePrivilegeTable > tbody').append($row);
       var $tr = $(this).parent().parent();
@@ -145,7 +153,8 @@ ocSeries.init = function(){
 
     $row.find('.role_search').autocomplete({
       source: sourceFunction,
-      select: append
+      select: append,
+      close: closeFunction
     });
 
     $('#rolePrivilegeTable > tbody').append($row);
@@ -189,7 +198,8 @@ ocSeries.init = function(){
         $row.find('img').click(removeRole)
         $row.find('.role_search').autocomplete({
           source: sourceFunction,
-          select: append
+          select: append,
+          close: closeFunction
         });
         if(value.edit) {
           $row.find('[name|="priv_edit"]').attr('checked', 'checked');
@@ -206,11 +216,12 @@ ocSeries.init = function(){
     $row.find('[name|="priv_view"]').attr('disabled', 'disabled');
     $row.find('[name|="priv_edit"]').attr('disabled', 'disabled');
     $row.find('img').hide();
-    $row.click(removeRole)
+    $row.find('img').click(removeRole)
 
     $row.find('.role_search').autocomplete({
       source: sourceFunction,
-      select: append
+      select: append,
+      close: closeFunction
     });
     $('#rolePrivilegeTable > tbody').append($row);
   }
@@ -330,7 +341,7 @@ ocSeries.createACLDocument = function() {
   $('.role_search').each(function () {
     var $field = $(this);
     //check whether there is a value and entered value is a valid role
-    if ($field.attr('value') != "" && $.inArray(ocSeries.roles, $field.attr('value')) != -1) {
+    if ($field.attr('value') != "" && $.inArray($field.attr('value'), ocSeries.roles) != -1) {
       if($field.parent().parent().children().find('[name|="priv_view"]').attr('checked')) {
         out += '<ace>';
         out += '<role>' + $field.attr('value') + '</role>';
