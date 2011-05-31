@@ -16,8 +16,6 @@
 package org.opencastproject.security.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 
 /**
@@ -42,18 +40,22 @@ public interface AuthorizationService {
    * Gets the permissions associated with this mediapackage, as specified by its XACML attachment. The following rules
    * are used to determine the access control:
    * <ol>
-   * <li>If exactly zero {@link MediaPackageElements#XACML_POLICY} attachments are present, the returned ACL will be
+   * <li>If exactly zero {@link org.opencastproject.mediapackage.MediaPackageElements#XACML_POLICY} attachments are
+   * present, the returned ACL will be empty.</li>
+   * <li>If exactly one {@link org.opencastproject.mediapackage.MediaPackageElements#XACML_POLICY} is attached to the
+   * mediapackage, this is the source of authority</li>
+   * <li>If more than one {@link org.opencastproject.mediapackage.MediaPackageElements#XACML_POLICY} attachments are
+   * present, and one of them has no reference (
+   * {@link org.opencastproject.mediapackage.MediaPackageElement#getReference()} returns null), that attachment is
+   * presumed to be the source of authority</li>
+   * <li>If more than one {@link org.opencastproject.mediapackage.MediaPackageElements#XACML_POLICY} attachments are
+   * present, and more than one of them has no reference (
+   * {@link org.opencastproject.mediapackage.MediaPackageElement#getReference()} returns null), the returned ACL will be
    * empty.</li>
-   * <li>If exactly one {@link MediaPackageElements#XACML_POLICY} is attached to the mediapackage, this is the source of
-   * authority</li>
-   * <li>If more than one {@link MediaPackageElements#XACML_POLICY} attachments are present, and one of them has no
-   * reference ({@link MediaPackageElement#getReference()} returns null), that attachment is presumed to be the source
-   * of authority</li>
-   * <li>If more than one {@link MediaPackageElements#XACML_POLICY} attachments are present, and more than one of them
-   * has no reference ({@link MediaPackageElement#getReference()} returns null), the returned ACL will be empty.</li>
-   * <li>If more than one {@link MediaPackageElements#XACML_POLICY} attachments are present, and all of them have
-   * references ({@link MediaPackageElement#getReference()} returns a non-null reference), the returned ACL will be
-   * empty.</li>
+   * <li>If more than one {@link org.opencastproject.mediapackage.MediaPackageElements#XACML_POLICY} attachments are
+   * present, and all of them have references (
+   * {@link org.opencastproject.mediapackage.MediaPackageElement#getReference()} returns a non-null reference), the
+   * returned ACL will be empty.</li>
    * </ol>
    * 
    * @param mediapackage
