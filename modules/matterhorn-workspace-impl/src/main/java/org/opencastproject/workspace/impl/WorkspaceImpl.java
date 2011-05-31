@@ -459,6 +459,15 @@ public class WorkspaceImpl implements Workspace {
 
   /**
    * {@inheritDoc}
+   *
+   * @see org.opencastproject.workspace.api.Workspace#getURI(java.lang.String, java.lang.String, java.lang.String)
+   */
+  public URI getURI(String mediaPackageID, String mediaPackageElementID, String filename) {
+    return wfr.getURI(mediaPackageID, mediaPackageElementID, filename);
+  }
+
+  /**
+   * {@inheritDoc}
    * 
    * @see org.opencastproject.workspace.api.Workspace#getCollectionURI(java.lang.String, java.lang.String)
    */

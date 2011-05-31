@@ -67,6 +67,9 @@ public class XACMLAuthorizationService implements AuthorizationService {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(XACMLAuthorizationService.class);
 
+  /** The default filename for XACML attachments */
+  public static final String XACML_FILENAME = "xacml.xml";
+
   /** The workspace */
   protected Workspace workspace;
 
@@ -84,16 +87,34 @@ public class XACMLAuthorizationService implements AuthorizationService {
     AccessControlList accessControlList = new AccessControlList();
     List<AccessControlEntry> acl = accessControlList.getEntries();
     Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
+    URI xacmlUri = null;
     if (xacmlAttachments.length == 0) {
       logger.debug("No XACML attachment found in {}", mediapackage);
       return accessControlList;
     } else if (xacmlAttachments.length > 1) {
-      logger.warn("More than one XACML policy is attached to {}", mediapackage);
-      return accessControlList;
+      // try to find the source policy. Some may be copies sent to distribution channels.
+      for (Attachment a : xacmlAttachments) {
+        if (a.getReference() == null) {
+          if (xacmlUri == null) {
+            xacmlUri = a.getURI();
+          } else {
+            logger.warn("More than one non-referenced XACML policy is attached to {}, ACL will be empty", mediapackage);
+            return accessControlList;
+          }
+        }
+      }
+      if (xacmlUri == null) {
+        logger.warn(
+                "Multiple XACML policies are attached to {}, and none seem to be authoritative.  The ACL will be empty",
+                mediapackage);
+        return accessControlList;
+      }
+    } else {
+      xacmlUri = xacmlAttachments[0].getURI();
     }
     File xacmlPolicyFile = null;
     try {
-      xacmlPolicyFile = workspace.get(xacmlAttachments[0].getURI());
+      xacmlPolicyFile = workspace.get(xacmlUri);
     } catch (NotFoundException e) {
       logger.warn("XACML policy file not found", e);
     } catch (IOException e) {
@@ -260,14 +281,14 @@ public class XACMLAuthorizationService implements AuthorizationService {
 
     // add attachment
     String attachmentId = "xacmlpolicy";
-    URI uri = workspace.getURI(mediapackage.getIdentifier().toString(), attachmentId);
+    URI uri = workspace.getURI(mediapackage.getIdentifier().toString(), attachmentId, XACML_FILENAME);
     Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
             .elementFromURI(uri, Attachment.TYPE, MediaPackageElements.XACML_POLICY);
     attachment.setIdentifier(attachmentId);
     mediapackage.add(attachment);
 
     try {
-      workspace.put(mediapackage.getIdentifier().toString(), attachment.getIdentifier(), "xacml.xml",
+      workspace.put(mediapackage.getIdentifier().toString(), attachment.getIdentifier(), XACML_FILENAME,
               IOUtils.toInputStream(xacmlContent));
     } catch (IOException e) {
       throw new MediaPackageException("Can not store xacml for mediapackage " + mediapackage.getIdentifier());

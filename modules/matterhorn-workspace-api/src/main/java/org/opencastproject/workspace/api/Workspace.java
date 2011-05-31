@@ -131,11 +131,24 @@ public interface Workspace {
    * that are not yet stored in the working file repository, so this method will return a URI even if the file is not
    * yet stored.
    * 
-   * @param mediaPackageID
-   * @param mediaPackageElementID
+   * @deprecated Please use {@link #getURI(String, String, String)} instead
+   * @param mediaPackageID the mediapackage identifier
+   * @param mediaPackageElementID the element identifier
    * @return the URI to the file
    */
   URI getURI(String mediaPackageID, String mediaPackageElementID);
+
+  /**
+   * Get the URL for a file stored under the given media package and element IDs. MediaPackages may reference elements
+   * that are not yet stored in the working file repository, so this method will return a URI even if the file is not
+   * yet stored.
+   * 
+   * @param mediaPackageID the mediapackage identifier
+   * @param mediaPackageElementID the element identifier
+   * @param filename the filename
+   * @return the URI to the file
+   */
+  URI getURI(String mediaPackageID, String mediaPackageElementID, String filename);
 
   /**
    * Get the URL for a file stored under the given collection.

@@ -19,10 +19,12 @@ import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobContext;
+import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementParser;
+import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -120,6 +122,14 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       // Also distribute all of the metadata catalogs
       for (Catalog c : mediaPackage.getCatalogs())
         elementIds.add(c.getIdentifier());
+
+      // Also distribute the security configuration
+      Attachment[] securityAttachments = mediaPackage.getAttachments(MediaPackageElements.XACML_POLICY);
+      if (securityAttachments != null && securityAttachments.length > 0) {
+        for (Attachment a : securityAttachments) {
+          elementIds.add(a.getIdentifier());
+        }
+      }
 
       // Finally, push the elements to the distribution channel
       List<String> targetTagList = asList(targetTags);

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.series.impl;
 
+import static org.opencastproject.util.RequireUtil.notNull;
+
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
@@ -25,7 +27,6 @@ import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
 
 import org.apache.commons.lang.StringUtils;
-import org.opencastproject.util.RequireUtil;
 import org.osgi.framework.ServiceException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -242,7 +243,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public DublinCoreCatalog getSeries(String seriesID) throws SeriesException, NotFoundException {
     try {
-      return this.index.getDublinCore(RequireUtil.notNull(seriesID, "seriesID"));
+      return this.persistence.getSeries(notNull(seriesID, "seriesID"));
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Exception occured while retrieving series {}: {}", seriesID, e.getMessage());
       throw new SeriesException(e);
@@ -257,7 +258,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public AccessControlList getSeriesAccessControl(String seriesID) throws NotFoundException, SeriesException {
     try {
-      return index.getAccessControl(RequireUtil.notNull(seriesID, "seriesID"));
+      return persistence.getAccessControlList(notNull(seriesID, "seriesID"));
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Exception occurred while retrieving access control rules for series {}: {}", seriesID,
               e.getMessage());

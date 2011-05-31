@@ -298,5 +298,15 @@ public class XacmlSecurityTest {
       return null;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.opencastproject.workspace.api.Workspace#getURI(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public URI getURI(String mediaPackageID, String mediaPackageElementID, String filename) {
+      return file.toURI();
+    }
+
   }
 }

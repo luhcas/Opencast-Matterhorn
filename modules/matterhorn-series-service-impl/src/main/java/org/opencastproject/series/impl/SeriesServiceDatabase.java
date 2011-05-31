@@ -86,4 +86,17 @@ public interface SeriesServiceDatabase {
    *           if exception occurred
    */
   AccessControlList getAccessControlList(String seriesID) throws NotFoundException, SeriesServiceDatabaseException;
+
+  /**
+   * Gets a single series by its identifier.
+   * 
+   * @param seriesId
+   *          the series identifier
+   * @return the dublin core catalog for this series
+   * @throws NotFoundException
+   *           if there is no series with this identifier
+   * @throws SeriesServiceDatabaseException
+   *           if there is a problem communicating with the underlying data store
+   */
+  DublinCoreCatalog getSeries(String seriesId) throws NotFoundException, SeriesServiceDatabaseException;
 }

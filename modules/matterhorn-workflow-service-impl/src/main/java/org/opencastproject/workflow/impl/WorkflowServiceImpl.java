@@ -485,30 +485,32 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
    *      org.opencastproject.mediapackage.MediaPackage, Long, java.util.Map)
    */
   @Override
-  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage sourceMediaPackage,
           Long parentWorkflowId, Map<String, String> properties) throws WorkflowDatabaseException,
           WorkflowParsingException, NotFoundException {
 
     if (workflowDefinition == null)
       throw new IllegalArgumentException("workflow definition must not be null");
-    if (mediaPackage == null)
+    if (sourceMediaPackage == null)
       throw new IllegalArgumentException("mediapackage must not be null");
     if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
       throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
 
     User currentUser = securityService.getUser();
-    WorkflowInstance workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, parentWorkflowId,
-            currentUser, properties);
+    WorkflowInstance workflowInstance = new WorkflowInstanceImpl(workflowDefinition, sourceMediaPackage,
+            parentWorkflowId, currentUser, properties);
     workflowInstance = updateConfiguration(workflowInstance, properties);
 
-    populateMediaPackageMetadata(mediaPackage);
-    String seriesId = workflowInstance.getMediaPackage().getSeries();
+    // Use the workflow instance's mediapackage, which has been updated. The source mediaPackage has not been modified
+    MediaPackage updatedMediaPackage = workflowInstance.getMediaPackage();
+    populateMediaPackageMetadata(updatedMediaPackage);
+    String seriesId = updatedMediaPackage.getSeries();
     if (seriesId != null) {
       // If the mediapackage contains a series, find the series ACLs and add the security information to the
       // mediapackage
       try {
         AccessControlList acl = seriesService.getSeriesAccessControl(seriesId);
-        authorizationService.setAccessControl(mediaPackage, acl);
+        authorizationService.setAccessControl(updatedMediaPackage, acl);
       } catch (SeriesException e) {
         throw new WorkflowDatabaseException(e);
       } catch (MediaPackageException e) {
@@ -521,7 +523,7 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
       // Create a new job for this workflow instance
       String workflowDefinitionXml = WorkflowParser.toXml(workflowDefinition);
       String workflowInstanceXml = WorkflowParser.toXml(workflowInstance);
-      String mediaPackageXml = MediaPackageParser.getAsXml(mediaPackage);
+      String mediaPackageXml = MediaPackageParser.getAsXml(sourceMediaPackage);
 
       List<String> arguments = new ArrayList<String>();
       arguments.add(workflowDefinitionXml);

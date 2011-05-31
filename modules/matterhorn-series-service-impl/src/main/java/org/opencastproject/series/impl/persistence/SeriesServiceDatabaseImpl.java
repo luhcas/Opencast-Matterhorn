@@ -267,6 +267,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       } else {
         entity.setSeries(seriesXML);
         em.merge(entity);
+        newSeries = dc;
       }
       tx.commit();
       return newSeries;
@@ -277,6 +278,32 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       em.close();
     }
 
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.series.impl.SeriesServiceDatabase#getSeries(java.lang.String)
+   */
+  @Override
+  public DublinCoreCatalog getSeries(String seriesId) throws NotFoundException, SeriesServiceDatabaseException {
+    EntityManager em = emf.createEntityManager();
+    try {
+      EntityTransaction tx = em.getTransaction();
+      tx.begin();
+      SeriesEntity entity = em.find(SeriesEntity.class, seriesId);
+      if (entity == null) {
+        throw new NotFoundException("No series with id=" + seriesId + " exists");
+      }
+      return dcService.load(IOUtils.toInputStream(entity.getDublinCoreXML(), "UTF-8"));
+    } catch (NotFoundException e) {
+      throw e;
+    } catch (Exception e) {
+      logger.error("Could not update series: {}", e.getMessage());
+      throw new SeriesServiceDatabaseException(e);
+    } finally {
+      em.close();
+    }
   }
 
   /*
