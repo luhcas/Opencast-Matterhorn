@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-  name="org.opencastproject.userdirectory.ldap.LdapUserProvider" activate="activate">
+  name="org.opencastproject.userdirectory.ldap.LdapUserProvider" configuration-policy="require">
   <implementation class="org.opencastproject.userdirectory.ldap.LdapUserProvider" />
   <property name="service.description" value="Provides an ldap user directory" />
   <service>

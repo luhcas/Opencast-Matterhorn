@@ -134,6 +134,12 @@ public class UserAndSeriesLoader {
       load(INSTRUCTOR, 2);
       load(ADMIN, 1);
 
+      // Load a user for testing the ldap provider
+      Set<String> ldapUserRoles = new HashSet<String>();
+      ldapUserRoles.add(USER_ROLE);
+      // This is the public identifier for Josh Holtzman in the UC Berkeley Directory.
+      jpaUserProvider.addUser(new JpaUser("231693", "ldap", DEFAULT_ORGANIZATION_ID, ldapUserRoles));
+
       logger.info("Finished loading sample series and users");
     }
   }

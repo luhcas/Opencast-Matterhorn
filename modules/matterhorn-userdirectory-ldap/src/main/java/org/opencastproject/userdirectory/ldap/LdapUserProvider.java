@@ -52,6 +52,12 @@ public class LdapUserProvider implements UserProvider, ManagedService {
   /** The key to look up the organization identifer in the service configuration properties */
   private static final String ORGANIZATION_KEY = "org.opencastproject.userdirectory.ldap.org";
 
+  /** The key to look up the user DN to use for performing searches. */
+  private static final String SEARCH_USER_DN = "org.opencastproject.userdirectory.ldap.userDn";
+
+  /** The key to look up the password to use for performing searches */
+  private static final String SEARCH_PASSWORD = "org.opencastproject.userdirectory.ldap.password";
+
   /** The spring ldap userdetails service delegate */
   protected LdapUserDetailsService delegate = null;
 
@@ -69,21 +75,29 @@ public class LdapUserProvider implements UserProvider, ManagedService {
       throw new IllegalStateException("The LDAP user detail service has not yet been configured");
     }
     UserDetails userDetails = null;
+    
+    Thread currentThread = Thread.currentThread();
+    ClassLoader originalClassloader = currentThread.getContextClassLoader();
     try {
-      userDetails = delegate.loadUserByUsername(userName);
-    } catch (UsernameNotFoundException e) {
-      return null;
-    }
-    Collection<GrantedAuthority> authorities = userDetails.getAuthorities();
-    String[] roles = null;
-    if (authorities != null) {
-      int i = 0;
-      roles = new String[authorities.size()];
-      for (GrantedAuthority authority : authorities) {
-        roles[i++] = authority.getAuthority();
+      currentThread.setContextClassLoader(LdapUserProvider.class.getClassLoader());
+      try {
+        userDetails = delegate.loadUserByUsername(userName);
+      } catch (UsernameNotFoundException e) {
+        return null;
       }
+      Collection<GrantedAuthority> authorities = userDetails.getAuthorities();
+      String[] roles = null;
+      if (authorities != null) {
+        int i = 0;
+        roles = new String[authorities.size()];
+        for (GrantedAuthority authority : authorities) {
+          roles[i++] = authority.getAuthority();
+        }
+      }
+      return new User(userDetails.getUsername(), getOrganization(), roles);
+    } finally {
+      currentThread.setContextClassLoader(originalClassloader);
     }
-    return new User(userDetails.getUsername(), getOrganization(), roles);
   }
 
   /**
@@ -116,6 +130,12 @@ public class LdapUserProvider implements UserProvider, ManagedService {
     if (StringUtils.isBlank(organization))
       throw new ConfigurationException(ORGANIZATION_KEY, "is not set");
     DefaultSpringSecurityContextSource contextSource = new DefaultSpringSecurityContextSource(url);
+    String userDn = (String) properties.get(SEARCH_USER_DN);
+    String password = (String) properties.get(SEARCH_PASSWORD);
+    if (StringUtils.isNotBlank(userDn)) {
+      contextSource.setPassword(password);
+      contextSource.setUserDn(userDn);
+    }
     contextSource.setAnonymousReadOnly(true);
     try {
       contextSource.afterPropertiesSet();
@@ -140,7 +160,7 @@ public class LdapUserProvider implements UserProvider, ManagedService {
    */
   @Override
   public String toString() {
-    return getClass().getName();
+    return LdapUserProvider.class.getName();
   }
 
 }

@@ -215,7 +215,7 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
     }
     String userName = user1.getUserName();
     String organization = user1.getOrganization();
-    String password = user1.getPassword() == null ? user2.getPassword() : null;
+    String password = user1.getPassword() == null ? user2.getPassword() : user1.getPassword();
     return new User(userName, password, organization, roles);
   }
 
