@@ -137,8 +137,13 @@ public class UserAndSeriesLoader {
       // Load a user for testing the ldap provider
       Set<String> ldapUserRoles = new HashSet<String>();
       ldapUserRoles.add(USER_ROLE);
-      // This is the public identifier for Josh Holtzman in the UC Berkeley Directory.
-      jpaUserProvider.addUser(new JpaUser("231693", "ldap", DEFAULT_ORGANIZATION_ID, ldapUserRoles));
+      // This is the public identifier for Josh Holtzman in the UC Berkeley Directory, which is available for anonymous
+      // binding.
+      String ldapUserId = "231693";
+      if (jpaUserProvider.loadUser(ldapUserId) == null) {
+        jpaUserProvider.addUser(new JpaUser(ldapUserId, "ldap", DEFAULT_ORGANIZATION_ID, ldapUserRoles));
+        logger.debug("Added ldap user '{}'", ldapUserId);
+      }
 
       logger.info("Finished loading sample series and users");
     }
