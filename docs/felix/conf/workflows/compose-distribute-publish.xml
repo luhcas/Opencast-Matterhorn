@@ -59,15 +59,15 @@
          */
         components['org.opencastproject.workflow.config.trimHold'] = new ocAdmin.Component(
           ['trimHold'],
-          {nodeKey: 'org.opencastproject.workflow.config.trimHold'});
+          {key: 'org.opencastproject.workflow.config.trimHold'});
           
         components['org.opencastproject.workflow.config.captionHold'] = new ocAdmin.Component(
           ['captionHold'],
-          {nodeKey: 'org.opencastproject.workflow.config.captionHold'});
+          {key: 'org.opencastproject.workflow.config.captionHold'});
           
-        components['license'] = new ocAdmin.Component(
+        ocScheduler.dublinCore.components['license'] = new ocAdmin.Component(
           ['license'],
-          {label: 'licenseLabel'});
+          {label: 'licenseLabel', key: 'license'});
           
           //etc...
       }

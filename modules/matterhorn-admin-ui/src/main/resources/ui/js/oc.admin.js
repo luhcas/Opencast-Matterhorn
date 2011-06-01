@@ -264,8 +264,14 @@ var ocAdmin = (function() {
     this.deserialize = function deserialize(catalogBody) {
       var catalog = this.serializer.deserialize(catalogBody);
       for(var i in catalog) {
-        this.components[i].setValue(catalog[i]);
+        for(var j in this.components) {
+          if(this.components[j].key === i){
+            this.components[j].setValue(catalog[i]);
+            break;
+          }
+        }
       }
+      ocUtils.log('returning');
     }
     this.getErrors = function() {
       return this.serializer.errors;
@@ -304,6 +310,7 @@ var ocAdmin = (function() {
       doc.documentElement.setAttributeNode(ns);
       for(i in components){
         var comp = components[i];
+        this.errors.concat(comp.validate());
         var node = doc.createElement(DUBLIN_CORE_NS + ':' + comp.key);
         node.appendChild(doc.createTextNode(comp.getValue()));
         doc.documentElement.appendChild(node);
@@ -312,7 +319,14 @@ var ocAdmin = (function() {
     };
     
     this.deserialize = function deserialze(catalogBody) {
-      
+      var catalog = {};
+      ocUtils.log(catalogBody[DUBLIN_CORE_NS_URI]);
+      if(typeof catalogBody[DUBLIN_CORE_NS_URI] != 'undefined') {
+        for(i in catalogBody[DUBLIN_CORE_NS_URI]) {
+          catalog[i] = catalogBody[DUBLIN_CORE_NS_URI][i][0].value;
+        }
+      }
+      return catalog;
     }
   }
   

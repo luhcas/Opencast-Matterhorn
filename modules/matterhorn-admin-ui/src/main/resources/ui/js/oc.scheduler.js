@@ -43,7 +43,7 @@ var ocScheduler = (function() {
     name: 'event',
     serializer: new ocAdmin.Serializer()
   });
-  sched.additionalCatalog = new ocAdmin.Catalog({ //Workflow Properties
+  sched.capture = new ocAdmin.Catalog({ //Workflow Properties
     name: 'agentParameters',
     serializer: new ocAdmin.Serializer()
   });
@@ -239,10 +239,7 @@ var ocScheduler = (function() {
 
   sched.submitForm = function(){
     var payload = {};
-    
-    payload[sched.dublinCore.name] = sched.dublinCore.serialize();
-    payload[sched.recording.name] = sched.recording.serialize();
-    payload[sched.additionalCatalog.name] = sched.additionalCatalog.serialize();
+    var error = false;
     
     if(ocScheduler.conflictingEvents) {
       $('#missingFieldsContainer').show();
@@ -250,7 +247,21 @@ var ocScheduler = (function() {
       $('#errorConflict li').show();
       return;
     }
-    if(true) {
+    
+    $.extend(true, sched.capture.components, ocScheduler.workflowComponents);
+    
+    payload[sched.dublinCore.name] = sched.dublinCore.serialize();
+    payload[sched.recording.name] = sched.recording.serialize();
+    payload[sched.capture.name] = sched.capture.serialize();
+    
+    for(var i in payload) {
+      if(payload[i] === false) {
+        error = true;
+        //handle error
+      }
+    }
+    
+    if(!error) {
       /*$('#submitButton').attr('disabled', 'disabled');
       $('#submitModal').dialog({
         modal: true,
@@ -303,11 +314,11 @@ ocScheduler.DeleteForm = function(){
   }
 };*/
 
-  sched.HandleAgentChange = function(elm){
+  sched.handleAgentChange = function(elm){
     var time;
     var agent = elm.target.value;
     $(ocScheduler.inputList).empty();
-    this.recording.components.agentTimeZone = new ocAdmin.Component(['agentTimeZone']);
+    sched.recording.components.agentTimeZone = new ocAdmin.Component(['agentTimeZone'], {key: 'agentTimeZone'});
     if(agent){
       $.get('/capture-admin/agents/' + agent + '/configuration',
       function(doc){
@@ -323,7 +334,8 @@ ocScheduler.DeleteForm = function(){
           } else if(s == 'capture.device.timezone.offset') {
             var agentTz = parseInt($(i).text());
             if(agentTz !== 'NaN'){
-              sched.HandleAgentTZ(agentTz);
+              sched.recording.components.agentTimeZone.setValue(agentTz);
+              sched.handleAgentTZ(agentTz);
             }else{
               ocUtils.log("Couldn't parse TZ");
             }
@@ -333,20 +345,20 @@ ocScheduler.DeleteForm = function(){
           capabilities = devNames;
         }
         if(capabilities.length){
-          sched.DisplayCapabilities(capabilities);
+          sched.displayCapabilities(capabilities);
         }else{
-          Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
-          $('#inputList').replaceWith('Agent defaults will be used.');
+          sched.tzDiff = 0; //No agent timezone could be found, assume local time.
+          $('#inputList').html('Agent defaults will be used.');
           delete sched.recording.components.agentTimeZone;
         }
       });
     } else {
       // no valid agent, change time to local form what ever it was before.
-      delete ocScheduler.additionalMetadataComponents.agentTimeZone; //Being empty will end up defaulting to the server's Timezone.
-      if(ocScheduler.type === SINGLE_EVENT){
-        time = ocScheduler.components.startDate.getValue();
-      }else if(ocScheduler.type === MULTIPLE_EVENTS){
-        time = ocScheduler.components.recurrenceStart.getValue();
+      delete sched.recording.components.agentTimeZone; //Being empty will end up defaulting to the server's Timezone.
+      if(sched.type === SINGLE_EVENT){
+        time = sched.recording.components.startDate.getValue();
+      }else if(sched.type === MULTIPLE_EVENTS){
+        time = sched.recording.components.recurrenceStart.getValue();
       }
     };
   }
@@ -360,9 +372,9 @@ ocScheduler.DeleteForm = function(){
       $(':input', this.inputList).attr('checked', 'checked');
     }
     $(this.inputList).append('</ul>');
-    this.recording.components.resources.setFields(capabilities);
+    this.capture.components.resources.setFields(capabilities);
     if(this.selectedInputs && ocUtils.getURLParam('edit')) {
-      this.recording.components.resources.setValue(this.selectedInputs);
+      this.capture.components.resources.setValue(this.selectedInputs);
     }
     // Validate if an input was chosen
     this.inputCount = $(this.inputList).children('input:checkbox').size();
@@ -440,18 +452,30 @@ ocScheduler.DeleteForm = function(){
       function(i, agent) {
         $(sched.agentList).append($('<option></option>').val($(agent).text()).html($(agent).text())); 
       });
+    sched.loadEvent();
+  };
+
+  sched.loadEvent = function(){
     var eventId = ocUtils.getURLParam('eventId');
     if(eventId && ocUtils.getURLParam('edit')) {
       $.ajax({
         type: "GET",
         url: SCHEDULER_URL + '/' + eventId + '.json',
-        success: sched.loadEvent,
+        success: function(data) { 
+          sched.dublinCore.deserialize(data);
+        },
+        cache: false
+      });
+      $.ajax({
+        type: "GET",
+        url: SCHEDULER_URL + '/' + eventId + '/agent.properties',
+        success: function(data) { 
+          sched.capture.deserialize(data);
+        },
         cache: false
       });
     }
-  };
-
-  sched.loadEvent = function(doc){
+    /*
     var event = doc.event;
     var workflowProperties = {};
     var additionalMetadata;
@@ -504,6 +528,7 @@ ocScheduler.DeleteForm = function(){
     }
     ocScheduler.FormManager.populate(event)
     $('#agent').change(); //update the selected agent's capabilities
+    */
   }
 
   sched.eventSubmitComplete = function(xhr, status) {
@@ -655,8 +680,8 @@ ocScheduler.DeleteForm = function(){
     dcComps.subject = new ocAdmin.Component(['subject'], { key: 'subject' });
     dcComps.language = new ocAdmin.Component(['language'], { key: 'language' });
     dcComps.description = new ocAdmin.Component(['description'], { key: 'description' });
-    recComps.resources = new ocAdmin.Component([],
-      { key: 'resources' },
+    extraComps.resources = new ocAdmin.Component([],
+      { key: 'capture.device.names' },
       { getValue: function() {
           var selected = [];
           for(var el in this.fields){
@@ -851,7 +876,7 @@ ocScheduler.DeleteForm = function(){
           }
         });
   
-      recComps.device = new ocAdmin.Component(['recurAgent'],
+      recComps.device = extraComps.device = new ocAdmin.Component(['recurAgent'],
         { required: true, key: 'device' },
         { getValue: function(){
             if(this.fields.recurAgent) {
@@ -1144,7 +1169,7 @@ ocScheduler.DeleteForm = function(){
           }
         });
   
-      recComps.device = new ocAdmin.Component(['agent'],
+      recComps.device = extraComps.device = new ocAdmin.Component(['agent'],
         { required: true, key: 'device' },
         { getValue: function() {
             if(this.fields.agent) {
@@ -1185,7 +1210,7 @@ ocScheduler.DeleteForm = function(){
     }
     this.dublinCore.components = dcComps;
     this.recording.components = recComps;
-    this.additionalCatalog.components = extraComps;
+    this.capture.components = extraComps;
   }
   
   return sched;
