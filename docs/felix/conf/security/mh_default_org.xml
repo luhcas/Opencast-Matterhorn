@@ -54,13 +54,16 @@
     <!-- Enable and configure the failure URL for form-based logins -->
     <sec:form-login authentication-failure-url="/login.html?error" authentication-success-handler-ref="authSuccessHandler" />
 
-    <!-- Comment out to enable support for openID. OpenID URLs must be specified in the user detail service below -->
+    <!-- Comment out to disable support for openID. OpenID URLs must be specified in the user detail service below -->
     <sec:openid-login authentication-failure-url="/login.html?error" user-service-ref="userDetailsService" />
 
     <!-- Digest auth is used by capture agents and is used to enable transparent clustering of services -->
     <sec:custom-filter position="BASIC_AUTH_FILTER" ref="digestFilter" />
 
-    <!-- 2-legged oauth is used by trusted 3rd party applications -->
+    <!--
+      2-legged oauth is used by trusted 3rd party applications, including LTI producers.
+      If you do not plan to use OAuth, comment this out.
+    -->
     <sec:custom-filter after="BASIC_AUTH_FILTER" ref="oauthProtectedResourceFilter" />
 
     <!-- Enables "remember me" functionality -->
