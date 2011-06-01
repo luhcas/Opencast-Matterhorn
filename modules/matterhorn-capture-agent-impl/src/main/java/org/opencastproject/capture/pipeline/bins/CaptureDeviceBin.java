@@ -167,6 +167,7 @@ public class CaptureDeviceBin {
           UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException {
+    /** This will look like capture capture.device.friendlyName.customConsumer=queue ! xvimagesink **/
     if (properties.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
             + CaptureParameters.CAPTURE_DEVICE_CUSTOM_CONSUMER) != null) {
       createCustomConsumer(captureDevice, properties);

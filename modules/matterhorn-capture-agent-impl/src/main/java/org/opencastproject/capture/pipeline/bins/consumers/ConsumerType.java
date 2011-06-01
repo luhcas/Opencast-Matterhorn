@@ -20,8 +20,8 @@ package org.opencastproject.capture.pipeline.bins.consumers;
  * and are an abstraction for GStreamer Sinks.
  */
 public enum ConsumerType {
-  XVIMAGE_SINK, // Only available on Linux. Shows Producer data in real time.
   AUDIO_FILE_SINK, // Places audio data into a file.
+  CUSTOM_CONSUMER, // User defined Consumer with GStreamer CLI syntax
   VIDEO_FILE_SINK, //Places video data into a file.
-  CUSTOM_CONSUMER // User defined Consumer with GStreamer CLI syntax
+  XVIMAGE_SINK // Only available on Linux. Shows Producer data in real time.
 }

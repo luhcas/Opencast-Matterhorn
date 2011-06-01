@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -115,6 +116,41 @@ public class XProperties extends Properties {
       return null;
   }
 
+  /**
+   * This goes through the customString provided by the client and checks for any properties that they may wish
+   * substituted by ConfigurationManager properties such as ${capture.filesystem.cache.capture.url} would be replaced by
+   * the actual location of the capture cache.
+   * 
+   * @param customString
+   *          The String that you want to substitute the properties into
+   * @return The customString with all of the ${property} it was able to substitute.
+   */
+  public String replacePropertiesInCustomString(String customString) {
+    if (customString != null) {
+      // Find all properties defined by ${someProperty} looking specifically for 1$ followed by 1{ then 1 or more not }
+      // and finally 1 }
+      String regEx = "\\$\\{[^\\}]+\\}";
+      String workingString = new String(customString);
+      Pattern pattern = Pattern.compile(regEx);
+      Matcher matcher = pattern.matcher(workingString);
+      while (matcher.find()) {
+        String propertyKey = matcher.group();
+        // Strip off the ${} from the actual property key.
+        String strippedPropertyKey = propertyKey.substring(2, propertyKey.length() - 1);
+        if (strippedPropertyKey != null && !StringUtils.isEmpty(strippedPropertyKey)
+                && get(strippedPropertyKey) != null) {
+          // Get the property from the XProperties collection
+          String result = get(strippedPropertyKey).toString();
+          // Replace the key with the value.
+          workingString = workingString.replace(propertyKey, result);
+        }
+      }
+      return workingString;
+    } else {
+      return null;
+    }
+  }
+  
   /**
    * Returns the value of a variable with the same priority replacement scheme as getProperty.
    * 

@@ -94,7 +94,7 @@ public class CustomConsumerTest {
     captureDevice.setProperties(properties);
     CustomConsumer customConsumer = new CustomConsumer(captureDevice, properties);
     // Check to make sure the replacement string matches the substitution. 
-    String replacementString = customConsumer.replacePropertiesInCustomConsumerString(customConsumerString);
+    String replacementString = customConsumer.getAllCustomStringSubstitutions().replacePropertiesInCustomString(customConsumerString);
     Assert.assertTrue("CustomConsumer is not replacing CaptureDevice properties's correctly. \""
             + replacementString + "\" should be \"" + expected + "\"", replacementString.equalsIgnoreCase(expected));
   }
@@ -127,7 +127,7 @@ public class CustomConsumerTest {
     captureDevice.setProperties(properties);
     CustomConsumer customConsumer = new CustomConsumer(captureDevice, properties);
     // Check to make sure the replacement string matches the substitution.
-    String replacementString = customConsumer.replacePropertiesInCustomConsumerString(customConsumerString);
+    String replacementString =  customConsumer.getAllCustomStringSubstitutions().replacePropertiesInCustomString(customConsumerString);
     Assert.assertTrue("CustomConsumer is not replacing ConfigurationManagerProperties correctly. \""
             + replacementString + "\" should be \"" + expected + "\"", replacementString.equalsIgnoreCase(expected));
   }
@@ -141,30 +141,43 @@ public class CustomConsumerTest {
     String badCustomConsumerString = "queue ! filesink location=${}";
     String result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location=${location";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location=$location}";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location={location}";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location={}";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location=$";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location={";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location=}";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "queue ! filesink location=${fakeProperty}";
     result = testBadString(badCustomConsumerString);
     Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
+    badCustomConsumerString = "queue ! filesink location=${${" + CustomConsumer.LOCATION + "}}";
+    result = testBadString(badCustomConsumerString);
+    Assert.assertTrue(badCustomConsumerString.equalsIgnoreCase(result));
+    
     badCustomConsumerString = "";
     try {
       result = testBadString(badCustomConsumerString);
@@ -184,6 +197,6 @@ public class CustomConsumerTest {
             + CaptureParameters.CAPTURE_DEVICE_CUSTOM_CONSUMER, badCustomConsumerString);
     captureDevice.setProperties(properties);
     CustomConsumer customConsumer = new CustomConsumer(captureDevice, properties);
-    return customConsumer.replacePropertiesInCustomConsumerString(badCustomConsumerString);
+    return customConsumer.getAllCustomStringSubstitutions().replacePropertiesInCustomString(badCustomConsumerString);
   }
 }

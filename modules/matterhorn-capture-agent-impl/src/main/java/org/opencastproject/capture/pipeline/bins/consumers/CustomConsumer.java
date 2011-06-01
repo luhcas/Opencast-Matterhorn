@@ -24,25 +24,36 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinEx
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
-import org.apache.commons.lang.StringUtils;
 import org.gstreamer.Bin;
 import org.gstreamer.Element;
 import org.gstreamer.GstException;
 
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+/**
+ * CustomConsumer is for the gstreamer knowledgable user who wants to use their own consumer using gstreamer CLI style
+ * syntax. It also provides the user with the ability to user the properties found in the Capture Agent's
+ * ConfigurationManager such as the location that the captures are normally stored using ${propertyName} syntax.
+ **/
 public class CustomConsumer extends ConsumerBin {
-
+  /** Friendly is the name given by the user for the capture device. **/
   public static final String FRIENDLY_NAME = "friendlyName";
+  /** Friendly is the name given by the user for the capture device. **/
   public static final String OUTPUT_PATH = "outputPath";
+  /** The location of the device e.g. /dev/video0 **/
   public static final String LOCATION = "location";
+  /**
+   * The String representation of the ProducerType so that we can identify the device as a v4lsrc, v4l2src, filesrc etc.
+   **/
   public static final String TYPE = "type";
-  
-  /** Determines whether to create ghostpads for the bin or just leave the pads as they are. **/
+
+  /**
+   * Determines whether to create ghostpads for the bin or just leave the pads as they are. This is actually a constant
+   * and must be left as true for this class so that the created Bin from Bin.launch will be able to be connected to its
+   * related Producer in CaptureDeviceBin.
+   **/
   private static final boolean LINK_UNUSED_GHOST_PADS = true;
-  
+
   /**
    * CustomConsumer allows the user to specify at run time a custom gstreamer pipeline that will act as the consumer for
    * the Capture Device.
@@ -65,42 +76,6 @@ public class CustomConsumer extends ConsumerBin {
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException {
     super(captureDevice, properties);
-
-  }
-
-  /**
-   * This goes through the customConsumer property provided by the user and checks for any properties that they may wish
-   * substituted by ConfigurationManager properties such as ${capture.filesystem.cache.capture.url} would be replaced by
-   * the actual location of the capture cache.
-   * 
-   * @param customString
-   *          The customConsumer= string from the ConfigurationManager properties.
-   * @return The customString with all of the ${property} it was able to substitute.
-   */
-  public String replacePropertiesInCustomConsumerString(String customString) {
-    if (customString != null) {
-      XProperties allProperties = getAllCustomStringSubstitutions();
-      // Find all properties defined by ${someProperty} looking specifically for 1$ followed by 1{ then 1 or more not }
-      // and finally 1 }
-      String regEx = "\\$\\{[^\\}]+\\}";
-      String workingString = new String(customString);
-      Pattern pattern = Pattern.compile(regEx);
-      Matcher matcher = pattern.matcher(workingString);
-      while (matcher.find()) {
-        String propertyKey = matcher.group();
-        // Strip off the ${} from the actual property key.
-        String strippedPropertyKey = propertyKey.substring(2, propertyKey.length() - 1);
-        if (strippedPropertyKey != null && !StringUtils.isEmpty(strippedPropertyKey) && allProperties.get(strippedPropertyKey) != null) {
-          // Get the property from the XProperties collection
-          String result = allProperties.get(strippedPropertyKey).toString();
-          // Replace the key with the value.
-          workingString = workingString.replace(propertyKey, result);
-        }
-      }
-      return workingString;
-    } else {
-      return null;
-    }
   }
 
   /**
@@ -109,7 +84,7 @@ public class CustomConsumer extends ConsumerBin {
    * @return Returns an XProperties that contains all of the XProperties from ConfigurationManager and the mentioned
    *         properties above.
    **/
-  private XProperties getAllCustomStringSubstitutions() {
+  public XProperties getAllCustomStringSubstitutions() {
     XProperties allProperties = new XProperties();
     allProperties.putAll(properties);
     allProperties.put(FRIENDLY_NAME, captureDevice.getFriendlyName());
@@ -125,14 +100,16 @@ public class CustomConsumer extends ConsumerBin {
   }
 
   /**
-   * Creates the Bin for this class using the GStreamer Java Bin.launch command. Users can specify an Consumer in
-   * this way using a gst-launch like syntax (e.g. "fakesrc ! fakesink")
-   * @throws UnableToCreateElementException 
+   * Creates the Bin for this class using the GStreamer Java Bin.launch command. Users can specify an Consumer in this
+   * way using a gst-launch like syntax (e.g. "fakesrc ! fakesink")
+   * 
+   * @throws UnableToCreateElementException
    **/
   @Override
   protected void createElements() throws UnableToCreateElementException {
     super.createElements();
-    String customConsumer = replacePropertiesInCustomConsumerString(captureDeviceProperties.getCustomConsumer());
+    String customConsumer = getAllCustomStringSubstitutions().replacePropertiesInCustomString(
+            captureDeviceProperties.getCustomConsumer());
     logger.info("Custom Consumer is going to use Pipeline: \"" + customConsumer + "\"");
     if (captureDeviceProperties.getCustomConsumer() == null) {
       throw new UnableToCreateElementException(captureDevice.getFriendlyName(), "Custom Consumer because it was null.");
@@ -140,13 +117,15 @@ public class CustomConsumer extends ConsumerBin {
     try {
       bin = Bin.launch(customConsumer, LINK_UNUSED_GHOST_PADS);
     } catch (GstException exception) {
-      throw new UnableToCreateElementException(captureDevice.getFriendlyName(), "Custom Consumer had exception " + exception.getMessage());
+      throw new UnableToCreateElementException(captureDevice.getFriendlyName(), "Custom Consumer had exception "
+              + exception.getMessage());
     }
-    
-    
   }
 
-  /** Need an empty method for createGhostPads because the Bin.launch will create the ghost pads all on its own. **/
+  /**
+   * Need an empty method for createGhostPads because the Bin.launch will create the ghost pads all on its own so we
+   * don't have to manually do it.
+   **/
   @Override
   protected void createGhostPads() throws UnableToCreateGhostPadsForBinException {
   }
