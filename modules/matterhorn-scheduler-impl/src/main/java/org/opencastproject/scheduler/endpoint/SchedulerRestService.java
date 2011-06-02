@@ -15,7 +15,7 @@
  */
 package org.opencastproject.scheduler.endpoint;
 
-import org.opencastproject.metadata.dublincore.DublinCore;
+//import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -52,7 +52,7 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
+//import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -229,17 +229,15 @@ public class SchedulerRestService {
    */
   @POST
   @Path("")
-  /*
-  @RestQuery(name = "newrecordings", description = "Creates new event or group of event with specified parameters", returnDescription = "If events were successfully generated, status CREATED is returned, otherwise BAD REQUEST", restParameters = {
-          @RestParameter(name = "event", isRequired = true, type = Type.TEXT, description = "Dublin Core describing event", defaultValue = "${this.sampleDublinCore}"),
+  
+  @RestQuery(name = "newrecordings", description = "Creates new event or group of event with specified parameters", returnDescription = "If events were successfully generated, status CREATED is returned, otherwise BAD REQUEST",
+          restParameters = {
+          @RestParameter(name = "dublincore", isRequired = true, type = Type.TEXT, description = "Dublin Core describing event", defaultValue = "${this.sampleDublinCore}"),
           @RestParameter(name = "caproperties", isRequired = true, type = Type.TEXT, description = "Capture agent properties for event", defaultValue = "${this.sampleCAProperties}"),
-          @RestParameter(name = "recurrence", isRequired = false, type = Type.STRING, description = "Recurrence pattern if event is recurrent"),
-          @RestParameter(name = "start", isRequired = false, type = Type.STRING, description = "Start date of recurrent event"),
-          @RestParameter(name = "end", isRequired = false, type = Type.STRING, description = "End date of recurrent event"),
-          @RestParameter(name = "duration", isRequired = false, type = Type.STRING, description = "Duration of each event if it recurrent"),
-          @RestParameter(name = "timezone", isRequired = false, type = Type.STRING, description = "Capture agent time zone if it is different than scheduler's") }, reponses = {
+          @RestParameter(name = "event", isRequired = false, type = Type.TEXT, description = "Catalog containing information about the event that doesn't exist in DC (IE: Recurrence rule)") }, 
+          reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_CREATED, description = "Event or events were successfully created"),
-          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid information for this request") })*/
+          @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid information for this request") })
   public Response addEvent(MultivaluedMap<String,String> catalogs) {
     DublinCoreCatalog eventCatalog;
     Properties recordingProperties;
@@ -301,13 +299,16 @@ public class SchedulerRestService {
       }
     }
     
-    if (catalogs.containsKey("agentParameters")) {
+    if (catalogs.containsKey("agentparameters")) {
       try {
-        caProperties = parseProperties(catalogs.getFirst("agentParameters"));
+        caProperties = parseProperties(catalogs.getFirst("agentparameters"));
       } catch (Exception e) {
-        logger.warn("Could not parse capture agent properties: {}", catalogs.getFirst("agentParameters"));
+        logger.warn("Could not parse capture agent properties: {}", catalogs.getFirst("agentparameters"));
         return Response.status(Status.BAD_REQUEST).build();
       }
+    } else {
+      logger.warn("Cannot add event without capture agent parameters catalog.");
+      return Response.status(Status.BAD_REQUEST).build();
     }
     
     try {
@@ -381,12 +382,7 @@ public class SchedulerRestService {
           @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Event was successfully updated"),
           @RestResponse(responseCode = HttpServletResponse.SC_NOT_FOUND, description = "Event with specified ID does not exist"),
           @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Data is missing or invalid") })
-  public Response updateEvent(@PathParam("id") String eventID, @FormParam("event") String event,
-          @FormParam("agentproperties") String agentProperties) {
-    if (StringUtils.isEmpty(event) && StringUtils.isEmpty(agentProperties)) {
-      logger.warn("Dublin Core or Capture Agent properties for event must be specified when updating event");
-      return Response.status(Status.BAD_REQUEST).build();
-    }
+  public Response updateEvent(@PathParam("id") String eventID, MultivaluedMap<String,String> catalogs) {
 
     Long id;
     try {
@@ -397,21 +393,28 @@ public class SchedulerRestService {
     }
 
     DublinCoreCatalog eventCatalog = null;
-    if (!StringUtils.isEmpty(event)) {
+    if (catalogs.containsKey("dublincore")) {
       try {
-        eventCatalog = parseDublinCore(event);
-        eventCatalog.set(DublinCore.PROPERTY_IDENTIFIER, eventID);
+        eventCatalog = parseDublinCore(catalogs.getFirst("dublincore"));
       } catch (Exception e) {
-        logger.warn("Could not parse Dublin core: {}", event);
+        logger.warn("Could not parse Dublin core catalog: {}",e);
         return Response.status(Status.BAD_REQUEST).build();
       }
+    } else {
+      logger.warn("Cannot add event without dublin core catalog.");
+      return Response.status(Status.BAD_REQUEST).build();
     }
 
     Properties caProperties = null;
-    try {
-      caProperties = parseProperties(agentProperties);
-    } catch (Exception e) {
-      logger.warn("Could not parse capture agent properties: {}", agentProperties);
+    if (catalogs.containsKey("agentparameters")) {
+      try {
+        caProperties = parseProperties(catalogs.getFirst("agentparameters"));
+      } catch (Exception e) {
+        logger.warn("Could not parse capture agent properties: {}", catalogs.getFirst("agentparameters"));
+        return Response.status(Status.BAD_REQUEST).build();
+      }
+    } else {
+      logger.warn("Cannot add event without capture agent parameters catalog.");
       return Response.status(Status.BAD_REQUEST).build();
     }
 

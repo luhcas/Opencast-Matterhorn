@@ -44,7 +44,7 @@ var ocScheduler = (function() {
     serializer: new ocAdmin.Serializer()
   });
   sched.capture = new ocAdmin.Catalog({ //Workflow Properties
-    name: 'agentParameters',
+    name: 'agentparameters',
     serializer: new ocAdmin.Serializer()
   });
 
@@ -876,7 +876,7 @@ ocScheduler.DeleteForm = function(){
           }
         });
   
-      dcComps.device = extraComps.device = new ocAdmin.Component(['recurAgent'],
+      dcComps.device = new ocAdmin.Component(['recurAgent'],
         { required: true, key: 'spatial' },
         { getValue: function(){
             if(this.fields.recurAgent) {
