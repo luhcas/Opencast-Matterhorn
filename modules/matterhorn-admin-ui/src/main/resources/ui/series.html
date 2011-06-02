@@ -214,37 +214,5 @@
       </div><!-- END #tabsWrapper -->
 
     </div><!-- END #wrapper -->
-
-    <textarea id="rolesTableTemplate" style="display:none;">
-      <table class="rolePrivilegeTable">
-        {for role in roles}
-        <tr>
-          <td class="roleName">${role.name}</td>
-          <td>
-            <input type="checkbox" id="${role.name}CanRead" class="roleCheckbox roleCheckboxRead"
-            {if role.canRead}
-              checked="checked"
-            {/if}
-            />
-            <label for="${role.name}CanRead" class="roleLabelCanRead">Read</label>
-          </td>
-          <td>
-            <input type="checkbox" id="${role.name}CanWrite" class="roleCheckbox roleCheckboxWrite"
-            {if role.canWrite}
-              checked="checked"
-            {/if}
-            />
-            <label for="${role.name}CanRead" class="roleLabelCanWrite">Write</label>
-          </td>
-        </tr>
-        {forelse}
-        <tr>
-          <td colspan="3" style="color:darkgrey;">
-            No Roles available.
-          </td>
-        </tr>
-        {/for}
-      </table>
-    </textarea>
   </body>
 </html>

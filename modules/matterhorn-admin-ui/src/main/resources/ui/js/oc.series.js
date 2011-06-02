@@ -36,7 +36,6 @@ ocSeries.init = function(){
   //Load i18n strings and replace default english
   // disabled temporarily - see MH-6510
   ocSeries.Internationalize();
-  var anonymous_role = "";
   $.ajax({
     url: ANOYMOUS_URL,
     type: 'GET',
@@ -149,7 +148,7 @@ ocSeries.init = function(){
     $row.find('[name|="priv_view"]').attr('disabled', 'disabled');
     $row.find('[name|="priv_edit"]').attr('disabled', 'disabled');
     $row.find('img').hide();
-    $row.find('img').click(removeRole)
+    $row.find('img').click(removeRole);
 
     $row.find('.role_search').autocomplete({
       source: sourceFunction,
@@ -158,6 +157,8 @@ ocSeries.init = function(){
     });
 
     $('#rolePrivilegeTable > tbody').append($row);
+    //activate public view by default
+    $('#anonymous_view').attr('checked', 'checked');
 
   } else if (ocSeries.mode == EDIT_MODE) {
     roles = false;
