@@ -27,6 +27,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
@@ -36,6 +37,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -213,20 +215,28 @@ public class CaptureRestService {
   }
   
   @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("configuration")
+  @Produces({ MediaType.TEXT_XML, MediaType.TEXT_PLAIN })
+  @Path("configuration{type: \\.xml|\\.txt|}")
   @RestQuery(name = "config", description = "Returns a list with the default agent configuration properties.  This is in the same format as the startCapture endpoint.", pathParameters = { }, restParameters = { }, reponses = {
           @RestResponse(description = "the configuration values are returned", responseCode = HttpServletResponse.SC_OK),
           @RestResponse(description = "the configuration properties could not be retrieved", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
           @RestResponse(description = "Capture Agent is unavailable", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE) }, returnDescription = "")
-  public Response getConfiguration() {
+  public Response getConfiguration(@PathParam("type") String type) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
               .entity("Capture Agent is unavailable, please wait...").build();
     }
-    
+
     try {
-      return Response.ok(new PropertiesResponse(service.getDefaultAgentProperties())).build();
+      if (".xml".equals(type)) {
+        return Response.ok(new PropertiesResponse(service.getDefaultAgentProperties())).type(MediaType.TEXT_XML).build();
+      } else {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        service.getDefaultAgentProperties().store(baos, null);
+        String props = baos.toString();
+        baos.close();
+        return Response.ok(props).type(MediaType.TEXT_PLAIN).build();
+      }
     } catch (Exception e) {
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
               .entity("Exception while trying to obtain metadata: " + e.getMessage() + ".").build();
