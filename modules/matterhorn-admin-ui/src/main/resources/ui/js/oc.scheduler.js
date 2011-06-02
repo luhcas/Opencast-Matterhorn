@@ -552,8 +552,8 @@ ocScheduler.DeleteForm = function(){
     $('#missingFieldsContainer li').hide();
     $('#errorConflict').hide();
     $('#conflictingEvents').empty();
-    if(sched.recording.components.device.validate()) {
-      data.device = sched.recording.components.device.getValue()
+    if(sched.dublinCore.components.device.validate()) {
+      data.device = sched.dublinCore.components.device.getValue()
     }else{
       return false;
     }
@@ -876,8 +876,8 @@ ocScheduler.DeleteForm = function(){
           }
         });
   
-      recComps.device = extraComps.device = new ocAdmin.Component(['recurAgent'],
-        { required: true, key: 'device' },
+      dcComps.device = extraComps.device = new ocAdmin.Component(['recurAgent'],
+        { required: true, key: 'spatial' },
         { getValue: function(){
             if(this.fields.recurAgent) {
               this.value = this.fields.recurAgent.val();
@@ -1169,8 +1169,8 @@ ocScheduler.DeleteForm = function(){
           }
         });
   
-      recComps.device = extraComps.device = new ocAdmin.Component(['agent'],
-        { required: true, key: 'device' },
+      dcComps.device = new ocAdmin.Component(['agent'],
+        { required: true, key: 'spatial' },
         { getValue: function() {
             if(this.fields.agent) {
               this.value = this.fields.agent.val();
