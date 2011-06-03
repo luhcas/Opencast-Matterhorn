@@ -1,4 +1,7 @@
-# HOME3P must already be defined
+# HOME3P must already be defined!
+#
+# Print system info, define global variables and functions
+#
 case `uname` in
   Linux )
     [ -s /etc/issue ] && head -1 /etc/issue
@@ -12,10 +15,6 @@ case `uname` in
     export LOCAL_PREFIX=/opt/local # if compiling with MacPorts
     ;;
 esac
-export CENTOS_MIRROR=http://mirrors.kernel.org
-export EPEL_MIRROR=http://mirror.switch.ch/ftp/mirror
-export RPMFORGE_MIRROR=http://apt.sw.be/redhat/el5/en
-export MACPORTS_SVN=http://svn.macports.org/repository/macports/trunk/dports
 export MINGW32=i686-pc-mingw32
 export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw
 export CFLAGS=""
@@ -179,20 +178,43 @@ getans() {
   return 0
 }
 #
-# getcfg
-#   $1 = keyword to search in config.txt
+# getmcfg
+#   $1 = keyword to search in master config.txt (${HOME3P}/config.txt)
 #
-getcfg() {
+getmcfg() {
   set +x
-  awk '/^[ 	]*'$1'/ {
+  [ -z "$HOME3P" ] && HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
+  CFG=`awk '
+/^[ 	]*'$1'/ {
   sub("^[ 	]*'$1'[ 	]*", "");
   sub("[ 	]*$", "");
   print $0
-}' config.txt
+}' "${HOME3P}/config.txt"`
   if [ $? -ne 0 ]; then
     set -x
     return 1
   fi
+  eval echo "$CFG"
+  set -x
+  return 0
+}
+#
+# getcfg
+#   $1 = keyword to search in config.txt in current dir
+#
+getcfg() {
+  set +x
+  CFG=`awk '
+/^[ 	]*'$1'/ {
+  sub("^[ 	]*'$1'[ 	]*", "");
+  sub("[ 	]*$", "");
+  print $0
+}' config.txt`
+  if [ $? -ne 0 ]; then
+    set -x
+    return 1
+  fi
+  eval echo "$CFG"
   set -x
   return 0
 }
@@ -392,8 +414,8 @@ EOF
 # copypc
 #
 copypc() {
-  LOC=`expr "$1" : '/*\(.*\)'`
   [ -z "$HOME3P" ] && HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
+  LOC=`expr "$1" : '/*\(.*\)'`
   DEST="${HOME3P}/$LOC"; shift
   if [ ! -d "$DEST" ]; then
     rm -f "$DEST"
@@ -408,6 +430,7 @@ copypc() {
 # fix_scons
 #
 fix_scons() {
+  [ -z "$HOME3P" ] && HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
   cat > files.lst << EOF
 /usr/lib/scons-1.2.0/SCons/Tool/mingw.py
 /usr/lib/scons-2.0.1/SCons/Tool/mingw.py
@@ -419,7 +442,7 @@ EOF
   [ $? -ne 0 ] && exit 1
   for file in `cat files.lst`; do
     if [ -s "$file" ]; then
-      sudox cp ${HOME3P}/base_libs/scons/mingw.py "$file"
+      sudox cp "${HOME3P}/base_libs/scons/mingw.py" "$file"
       [ $? -ne 0 ] && return 1
     fi
   done
