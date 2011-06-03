@@ -282,11 +282,6 @@ public class SolrIndexManager {
       return false;
     }
 
-    // Add the episode metadata
-    if (episodeDocument != null && seriesDocument != null) {
-      Schema.setDcIsPartOf(episodeDocument, Schema.getId(seriesDocument));
-    }
-
     // Post everything to the search index
     try {
       if (episodeDocument != null)

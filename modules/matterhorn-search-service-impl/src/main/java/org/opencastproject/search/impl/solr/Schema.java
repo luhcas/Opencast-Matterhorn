@@ -257,7 +257,7 @@ public final class Schema {
   }
 
   public static String getId(SolrInputDocument doc) {
-    return mkString(doc.get(ID));
+    return mkString(doc.get(ID).getFirstValue());
   }
 
   public static void setId(SolrInputDocument doc, String id) {
@@ -430,7 +430,7 @@ public final class Schema {
   }
 
   public static String getOcKeywords(SolrInputDocument doc) {
-    return mkString(doc.get(OC_KEYWORDS));
+    return mkString(doc.get(OC_KEYWORDS).getFirstValue());
   }
 
   public static void setOcKeywords(SolrInputDocument doc, String keywords) {
