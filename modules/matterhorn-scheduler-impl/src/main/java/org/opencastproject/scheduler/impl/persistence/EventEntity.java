@@ -37,12 +37,12 @@ public class EventEntity {
 
   /** Serialized Dublin core */
   @Lob
-  @Column(name = "DUBLIN_CORE")
+  @Column(name = "DUBLIN_CORE", length = 65535)
   protected String dublinCoreXML;
 
   /** Serialized Capture agent metadata */
   @Lob
-  @Column(name = "CA_METADATA")
+  @Column(name = "CA_METADATA", length = 65535)
   protected String captureAgentMetadata;
 
   /**

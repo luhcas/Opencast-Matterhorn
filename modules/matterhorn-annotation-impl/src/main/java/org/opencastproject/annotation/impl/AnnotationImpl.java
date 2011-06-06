@@ -97,7 +97,7 @@ public class AnnotationImpl implements Annotation {
   private String type;
 
   @Lob
-  @Column(name = "ANNOTATION_VAL")
+  @Column(name = "ANNOTATION_VAL", length = 65535)
   @XmlElement(name = "value")
   private String value;
 

@@ -347,7 +347,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       setJobUri(job);
       return job;
     } catch (RollbackException e) {
-      tx.rollback();
+      if (tx.isActive()) {
+        tx.rollback();
+      }
       throw e;
     } finally {
       em.close();

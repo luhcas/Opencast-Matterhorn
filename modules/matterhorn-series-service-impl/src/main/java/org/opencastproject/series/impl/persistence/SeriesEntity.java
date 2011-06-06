@@ -41,12 +41,12 @@ public class SeriesEntity {
 
   /** Serialized Dublin core */
   @Lob
-  @Column(name = "DUBLIN_CORE")
+  @Column(name = "DUBLIN_CORE", length = 65535)
   protected String dublinCoreXML;
 
   /** Serialized access control */
   @Lob
-  @Column(name = "ACCESS_CONTROL")
+  @Column(name = "ACCESS_CONTROL", length = 65535)
   protected String accessControl;
 
   /**
