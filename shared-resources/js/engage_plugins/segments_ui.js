@@ -332,6 +332,10 @@ Opencast.segments_ui = (function ()
                     {
                         Opencast.Utils.log("Segments not available");
                     }
+                    // Set only default values for trimpath (if media is not available)
+                    data['search-results'].result.mediapackage.media.checkQuality = checkForQualities;
+                    data['search-results'].result.mediapackage.media.isVideo = isVideo;
+                    data['search-results'].result.mediapackage.media.rtmpAvailable = rtmpAvailable;
                     // Check if any Media.tracks are available
                     if ((data['search-results'].result.mediapackage.media !== undefined) && (data['search-results'].result.mediapackage.media.track.length > 0))
                     {
@@ -526,6 +530,12 @@ Opencast.segments_ui = (function ()
                     } else
                     {
                         Opencast.Utils.log("Media tracks not available");
+                    }
+                    // Check if track is an array or not
+                    if(!$.isArray(data['search-results'].result.mediapackage.media.track))
+                    {
+                        var tmp = $.makeArray(data['search-results'].result.mediapackage.media.track);
+                        data['search-results'].result.mediapackage.media.track = tmp;
                     }
                     // Create Trimpath Template
                     Opencast.segments_ui_Plugin.addAsPlugin($('#segmentstable1'), $('#segments_ui-media1'), $('#data1'), $('#segments_ui-mediapackagesAttachments'), $('#data2'), $('#segments_ui-mediapackagesCatalog'), $('#segmentstable2'), data['search-results'].result, segmentsAvailable);

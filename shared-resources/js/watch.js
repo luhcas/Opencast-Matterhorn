@@ -371,6 +371,20 @@ Opencast.Watch = (function ()
         mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
         mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
         
+        // Check for videoUrl and videoUrl2 URL Parameters
+        var mediaUrlTmp = Opencast.Utils.getURLParameter('videoUrl');
+        mediaUrlOne = (mediaUrlTmp == null) ? mediaUrlOne : mediaUrlTmp;
+        if(mediaUrlTmp != null)
+        {
+            Opencast.Utils.log('Set Video URL 1 manually');
+        }
+        mediaUrlTmp = Opencast.Utils.getURLParameter('videoUrl2');
+        mediaUrlTwo = (mediaUrlTmp == null) ? mediaUrlTwo : mediaUrlTmp;
+        if(mediaUrlTmp != null)
+        {
+            Opencast.Utils.log('Set Video URL 2 manually');
+        }
+        
         // If URL Parameter display exists and is set to revert
         var display = Opencast.Utils.getURLParameter('display');
         if ((display != null) && (display.toLowerCase() == 'invert') && (mediaUrlTwo != ''))
