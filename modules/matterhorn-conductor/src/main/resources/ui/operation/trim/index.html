@@ -131,12 +131,14 @@
         $('.ui-button').button();
                 
         //hide some stuff we don't want to see
-        window.parent.$('.paging-nav-container').hide(0);
+        window.parent.$('#uploadContainer').hide(0);
         $('#trimming-hint').toggle();
                 
-        window.parent.$('.recordings-button-container').hide(0);
-        window.parent.$('.recordings-categories').hide(0);
-        window.parent.$('input#filter').parent().hide(0);
+        window.parent.$('#controlsTop').hide(0);
+        window.parent.$('#searchBox').hide(0);
+        window.parent.$('#tableContainer').hide(0);
+        window.parent.$('#controlsFoot').hide(0);
+        window.parent.$('#refreshEnabled').removeAttr('checked');
                 
         // Event edit link clicked
         $('#edit-link').click(function(){
@@ -656,9 +658,7 @@ if (seriesChanged) {
       }
             
       function cancel(){
-        var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
-        videodisplay.pause();
-        parent.ocRecordings.hideHoldActionUI();
+        window.parent.location.href = window.parent.location.href;
       }
 
 
