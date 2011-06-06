@@ -139,6 +139,7 @@
         window.parent.$('#tableContainer').hide(0);
         window.parent.$('#controlsFoot').hide(0);
         window.parent.$('#refreshEnabled').removeAttr('checked');
+        window.parent.ocRecordings.updateRefreshInterval(false, $('#refreshInterval').val());
                 
         // Event edit link clicked
         $('#edit-link').click(function(){
@@ -326,7 +327,7 @@
                 }
                 url += previewFiles[i];
               }
-              $('#player-container').attr('src', url);
+              $('#player-container').attr('src', url + "&play=false&preview=true");
             }
             else {
               $('#player-container').text("No preview media files found for this media package.");

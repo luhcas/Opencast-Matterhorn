@@ -474,9 +474,11 @@ Opencast.Watch = (function ()
         {
             var playParam = Opencast.Utils.getURLParameter('play');
             var timeParam = Opencast.Utils.getURLParameter('t');
+            var previewParam = Opencast.Utils.getURLParameter('preview');
+            previewParam = previewParam == null ? false : true;
             var durationStr = $('#oc_duration').text();
             var durTextSet = (durationStr != 'Initializing') && (Opencast.Utils.getTimeInMilliseconds(durationStr) != 0);
-            var autoplay = ((playParam !== null) && (playParam.toLowerCase() == 'true')) || (!mediaPackageIdAvailable);
+            var autoplay = ((playParam !== null) && (playParam.toLowerCase() == 'true')) || (!mediaPackageIdAvailable && !previewParam);
             var time = (timeParam === null) ? 0 : Opencast.Utils.parseSeconds(timeParam);
             time = (time < 0) ? 0 : time;
             var rdy = false;
@@ -496,6 +498,9 @@ Opencast.Watch = (function ()
                 // not autoplay and jump to time
                 else
                 {
+                    if(previewParam) {
+                       Opencast.Player.doPause();
+                    }
                     if (jumpToTime(time))
                     {
                         Opencast.Utils.log("Autoplay: false");
