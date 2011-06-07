@@ -155,8 +155,8 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 #controlsTopStatistic { float: left; margin: 10px 0; }
 
 /* Role Privileges */
-#hint {margin-left: 50px;}
-#rolePrivilegeTable {margin-left: 50px; margin-top: 10px; margin-bottom: 10px;}
+#hint {margin-left: 50px; margin-top: 5px;}
+#rolePrivilegeTable {margin-left: 30%; margin-top: 10px; margin-bottom: 10px;}
 #rolePrivilegeTable th {text-align: left; min-width: 30px;}
 #rolePrivilegeTable th, td {padding: 5px;}
 
@@ -164,6 +164,7 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 #rolePrivilegeTable img:hover {border: 1px solid gray; opacity: 0.5;}*/
 
 .privilege_edit {vertical-align: middle; text-align: center; width: 30px;}
+.role_search {width: 370px; border: 1px solid #AAAAAA;}
 
 
 
