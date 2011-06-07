@@ -87,6 +87,8 @@ var ocUpload = (function() {
 
   function startUpload() {
     var missingFields = ocUpload.checkRequiredFields();
+    ocUpload.UI.collectFormData();
+    
     if (missingFields === false) {
       ocUpload.Ingest.begin();
     } else {
@@ -107,6 +109,11 @@ var ocUpload = (function() {
  *
  */
 ocUpload.UI = (function() {
+  
+  /**
+   * collected form data
+   */
+  var metadata = new Array();
 
   this.showMissingFieldsNotification = function() {
     $('#missingFieldsContainer').show();
@@ -248,9 +255,9 @@ ocUpload.UI = (function() {
 
   this.showSuccess = function() {
     ocUpload.UI.hideProgressDialog();
-    alert('Ingest successful.');
+    ocUpload.UI.showSuccesScreen();
     //ocUpload.backToRecordings();
-    window.location = '/admin';
+    //window.location = '/admin';
   }
 
   this.showFailure = function(message) {
@@ -259,6 +266,61 @@ ocUpload.UI = (function() {
     //ocUpload.backToRecordings();
     window.location = '/admin';
   }
+  
+  /**
+   * collects metadata to show in sucess screen
+   * 
+   * @return array metadata
+   */ 
+  this.collectFormData = function() {
+      ocUtils.log("Collecting metadata");
+      
+      var metadata = new Array;
+      metadata['files'] = new Array();
+      
+      $('.oc-ui-form-field').each( function() { //collect text input
+          metadata[$(this).attr('name')] = $(this).val();
+      });
+      $('.uploadForm-container:visible').each(function() { //collect file names
+          var file = $(this).contents().find('.file-selector').val();
+          if(file != undefined) {
+              metadata['files'].push(file);
+          }
+          
+      });
+      this.metadata = metadata;
+  }
+  
+  /**
+   * loads success screen template and fills with data
+   */
+  this.showSuccesScreen = function() {
+      var data = this.metadata;
+      $('#stage').load('complete.html', function() {
+        for (var key in data) {
+          if (data[key] != "" && key != 'files') { //print text, not file names
+            $('#field-'+key).css('display','block');
+            if (data[key] instanceof Array) {
+              $('#field-'+key).children('.fieldValue').text(data[key].join(', '));
+            } else {
+              $('#field-'+key).children('.fieldValue').text(data[key]);
+            }
+          }
+        }
+        $('.field-filename').each(function() { //print file names
+            var file = data['files'].shift();
+            if(file) {
+                $(this).children('.fieldValue').text(file);
+            } else {
+                $(this).hide();
+            }
+        });
+        //When should it show this heading?
+        //$('#heading-metadata').text('Your recording with the following information has been resubmitted');
+      });
+  }
+  
+  
 
   return this;
 })();
