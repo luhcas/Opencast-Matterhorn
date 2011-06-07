@@ -15,7 +15,7 @@ table tr:hover a:hover { text-decoration: underline!important; }
 .layout-float-left { float: left; }
 .clear {clear:both; height: 0px; width: 0px;}
 .center { text-align: center;}
-.recordings-page {margin: 10px;}
+.recordings-page {margin-left: 30px; margin-right: 30px;}
 
 /* Icons */
 .icon { width:16px; height:16px; background-repeat: none; background-position: center center; float: left; }
