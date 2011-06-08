@@ -432,6 +432,8 @@
         </configuration>
       </plugin>
       <!-- Deploy OSGi bundles to a container -->
+
+<!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -451,6 +453,71 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-file-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>unpack-to-felix</id>
+            <phase>install</phase>
+            <goals><goal>unpack</goal></goals>
+            <configuration>
+              <files>${project.build.directory}/${project.build.finalName}.jar</files>
+              <ignoreAggregator>true</ignoreAggregator>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+-->
+      <plugin>
+        <groupId>com.goldin.plugins</groupId>
+        <artifactId>maven-copy-plugin</artifactId>
+        <version>0.2.3</version>
+        <executions>
+          <execution>
+            <id>unpack-to-felix</id>
+            <phase>install</phase>
+            <goals><goal>copy</goal></goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <targetPath>${unpackTo}/${project.build.finalName}</targetPath>
+                  <file>${project.build.directory}/${project.build.finalName}.jar</file>
+                  <unpack>true</unpack>
+                </resource>
+              </resources>
+              <failIfNotFound>false</failIfNotFound>
+              <runIf>{{ new File( project.build.directory ).isDirectory() }}</runIf>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.goldin.plugins</groupId>
+        <artifactId>maven-copy-plugin</artifactId>
+        <version>0.2.3</version>
+        <executions>
+          <execution>
+            <id>deploy-to-felix</id>
+            <phase>install</phase>
+            <goals><goal>copy</goal></goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <targetPath>${deployTo}</targetPath>
+                  <file>${project.build.directory}/${project.build.finalName}.jar</file>
+                  <unpack>false</unpack>
+                </resource>
+              </resources>
+              <failIfNotFound>false</failIfNotFound>
+              <runIf>{{ new File( project.build.directory ).isDirectory() }}</runIf>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <!-- Attach sources for all builds -->
       <!--
       <plugin>
@@ -624,6 +691,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
           <version>2.4.3</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-file-plugin</artifactId>
+          <version>1.0</version>
         </plugin>
         <plugin>
           <groupId>com.atlassian.maven.plugins</groupId>
