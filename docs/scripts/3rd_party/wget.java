@@ -79,9 +79,7 @@ public class wget
       System.exit(1);
     }
 
-    String url = args[0];  // take only the first argument
-
-    URL u;
+    URL url = new URL(args[0]);  // take only the first argument
     HttpURLConnection huc;
     InputStream is = null;
     DataInputStream dis = null;
@@ -89,8 +87,7 @@ public class wget
     int rcc, ii, b;
 
     try {
-      u = new URL(url);
-      huc = (HttpURLConnection)u.openConnection();
+      huc = (HttpURLConnection)url.openConnection();
 
       /* Check for errors and repeat after sleep */
       getHttpResponseCode(huc, rcm); ii = 0;
@@ -100,7 +97,7 @@ public class wget
           System.err.println("WARNING: Service unavailable or timeout occurred - repeating...");
           Thread.currentThread().sleep(15000);
 
-          huc = (HttpURLConnection)u.openConnection();
+          huc = (HttpURLConnection)url.openConnection();
 
           getHttpResponseCode(huc, rcm); ii = ii + 1;
         }
@@ -142,7 +139,7 @@ public class wget
     catch (ClassCastException cce) {
       System.err.println("ERROR: Wrong protocol");
       System.err.println(cce.toString());
-      System.exit(2);
+      System.exit(102);
     }
     catch (MalformedURLException mue) {
       System.err.println("ERROR: Malformed URL specified");
