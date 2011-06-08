@@ -50,9 +50,11 @@ END {
 }' "${HOME3P}/config.txt" > $TMPFILE
 [ $? -ne 0 ] && exit 1
 #
-MAXN=`awk 'END {print NR}' $TMPFILE`
+sort -fu $TMPFILE > "$NOTFOUND"
 [ $? -ne 0 ] && exit 1
-rm -f "$NOTFOUND"
+mv "$NOTFOUND" $TMPFILE
+[ $? -ne 0 ] && exit 1
+MAXN=`awk 'END {print NR}' $TMPFILE`
 [ $? -ne 0 ] && exit 1
 touch "$NOTFOUND"
 [ $? -ne 0 ] && exit 1
