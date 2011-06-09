@@ -16,11 +16,13 @@
 
 package org.opencastproject.search.impl.solr;
 
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrInputDocument;
 import org.opencastproject.util.data.CollectionUtil;
 import org.opencastproject.util.data.Function;
 import org.opencastproject.util.data.Option;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -430,7 +432,8 @@ public final class Schema {
   }
 
   public static String getOcKeywords(SolrInputDocument doc) {
-    return mkString(doc.get(OC_KEYWORDS).getFirstValue());
+    SolrInputField keywords = doc.get(OC_KEYWORDS);
+    return keywords == null ? "" : mkString(keywords.getFirstValue());
   }
 
   public static void setOcKeywords(SolrInputDocument doc, String keywords) {
