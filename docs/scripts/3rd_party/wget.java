@@ -41,19 +41,22 @@ public class wget
       rcm.message = uhe.getMessage();
     }
     catch (FileNotFoundException fnfe) {  // never thrown?!
-      rcm.rc = 404;  // File Not Found
+      rcm.rc = 404;  // Not Found
       rcm.message = fnfe.getMessage();
     }
     catch (ConnectException ce) {
       rcm.rc = 408;  // Request timeout
       rcm.message = ce.getMessage();
+      if (rcm.message.equals("Connection refused")) {
+        rcm.rc = 422;  // Connection refused
+      }
     }
     catch (SocketTimeoutException ste) {
       rcm.rc = 408;  // Request timeout
       rcm.message = ste.getMessage();
     }
     catch (IOException ioe) {
-      rcm.rc = 422;  // Other I/O Exception
+      rcm.rc = 423;  // Other I/O Exception
       rcm.message = ioe.getMessage();
     }
   } // getHttpResponseCode
@@ -79,7 +82,6 @@ public class wget
       System.exit(1);
     }
 
-    URL url = new URL(args[0]);  // take only the first argument
     HttpURLConnection huc;
     InputStream is = null;
     DataInputStream dis = null;
@@ -87,6 +89,7 @@ public class wget
     int rcc, ii, b;
 
     try {
+      URL url = new URL(args[0]);  // take only the first argument
       huc = (HttpURLConnection)url.openConnection();
 
       /* Check for errors and repeat after sleep */
@@ -115,6 +118,8 @@ public class wget
           else if (rcm.rc == 404)
             throw new FileNotFoundException(rcm.message);
           else if (rcm.rc == 422)
+            throw new ConnectException(rcm.message);
+          else if (rcm.rc == 423)
             throw new IOException(rcm.message);
           else
             throw new IOException("Client Error (" + rcm.rc + ")");
@@ -137,7 +142,7 @@ public class wget
       }
     }
     catch (ClassCastException cce) {
-      System.err.println("ERROR: Wrong protocol");
+      System.err.println("ERROR: Unsupported protocol");
       System.err.println(cce.toString());
       System.exit(102);
     }
@@ -152,12 +157,12 @@ public class wget
       System.exit(4);
     }
     catch (FileNotFoundException fnfe) {
-      System.err.println("ERROR: 404 File not found");
+      System.err.println("ERROR: 404 Not found");
       System.err.println(fnfe.toString());
       System.exit(5);
     }
     catch (ConnectException ce) {
-      System.err.println("ERROR: Connection timed out");
+      System.err.println("ERROR: " + ce.getMessage());
       System.err.println(ce.toString());
       System.exit(6);
     }

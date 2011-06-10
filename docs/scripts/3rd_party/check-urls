@@ -9,6 +9,7 @@ set -x
 source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #
+# Main repositories
 export CENTOS_MIRROR=`getmcfg CENTOS_MIRROR:`
 export EPEL_MIRROR=`getmcfg EPEL_MIRROR:`
 export RPMFORGE_MIRROR=`getmcfg RPMFORGE_MIRROR:`
@@ -32,19 +33,32 @@ getcfgx() {
 }
 #
 fetch() {
-# wget -U "$UA" --spider "$1"
-  java wget -h "$1"
-  error=$?
-  if [ $error -ne 0 ]; then
-    # Check if protocol error
-    if [ $error -eq 102 ]; then
-      # Try with wget instead
-      wget -U "$UA" --spider "$1"
-      [ $? -ne 0 ] && echo "$1" >> "$2"
-    else
-      echo "$1" >> "$2"
+  first=1
+  for URL in $1; do
+    mirror=0
+    sm="${URL#mirror-}"
+    [ x"$sm" != x"$URL" ] && mirror=1
+    [ $first -eq 0 ] && mirror=1
+#
+#   wget -U "$UA" --spider "$sm"
+    java wget -h "$sm"
+    error=$?
+    if [ $error -ne 0 ]; then
+      # Check if protocol error
+      if [ $error -eq 102 ]; then
+        # Try with wget instead
+        wget -U "$UA" --spider "$sm"
+        if [ $? -ne 0 ]; then
+          [ $mirror -gt 0 ] && echo -n "mirror: " >> "$2"
+          echo "$sm" >> "$2"
+        fi
+      else
+        [ $mirror -gt 0 ] && echo -n "mirror: " >> "$2"
+        echo "$sm" >> "$2"
+      fi
     fi
-  fi
+    first=0
+  done
   return 0
 }
 #
@@ -54,11 +68,11 @@ awk '
   /^[ 	]*[^#]+$/ {
     sub("^[ 	]*", ""); sub("[ 	]*$", "");
     prog = $1;
-    if (match(prog, "._url:$")) {
-      sub("_url:$", "", prog);
-      sub("[^ 	]+_url:[ 	]*", "");
+    if (match(prog, "._url[s]*:$")) {
+      sub("_url[s]*:$", "", prog);
+      sub("[^ 	]+_url[s]*:[ 	]*", "");
       sub("[/]*$", "");
-      url[prog] = $0;
+      urls[prog] = $0;
     }
     else if (match(prog, "._pkg[s]*:$")) {
       sub("_pkg[s]*:$", "", prog);
@@ -67,11 +81,15 @@ awk '
     }
   }
 END {
-  for (ii in url) {
+  for (ii in urls) {
     if (ii in pkgs) {
-      n = split(pkgs[ii], a);
-      for (jj = 1; jj <= n; jj++) {
-        print url[ii] "/" a[jj]
+      m = split(urls[ii], a);
+      n = split(pkgs[ii], b);
+      for (jj = 1; jj <= m; jj++) {
+        for (kk = 1; kk <= n; kk++) {
+          if (jj > 1) { printf("mirror-") }
+          print a[jj] "/" b[kk] 
+        }
       }
     }
     else {
@@ -79,7 +97,7 @@ END {
     }
   }
   for (ii in pkgs) {
-    if (!(ii in url)) {
+    if (!(ii in urls)) {
       print "Pkgs for " ii " defined without URL in master config.txt" > "/dev/stderr"
     }
   }
@@ -90,6 +108,8 @@ sort -fu $TMPFILE > "$NOTFOUND"
 [ $? -ne 0 ] && exit 1
 mv "$NOTFOUND" $TMPFILE
 [ $? -ne 0 ] && exit 1
+#cp $TMPFILE expanded.txt
+#[ $? -ne 0 ] && exit 1
 MAXN=`awk 'END {print NR}' $TMPFILE`
 [ $? -ne 0 ] && exit 1
 touch "$NOTFOUND"
@@ -102,7 +122,7 @@ N=1
 while [ $N -le $MAXN ]; do
   URL=`awk 'NR=='$N' {print; exit}' $TMPFILE`
   [ $? -ne 0 ] && exit 1
-  # Expand mirror variables
+  # Expand environment variables
   URL=`eval echo "$URL"`
   fetch "$URL" "$NOTFOUND"
   N=`expr $N + 1`
@@ -110,16 +130,16 @@ done
 #
 # 2. Check all other configs
 #
-for config in `find . -name config.txt`; do
-  URL=`getcfgx URL: $config`
+for config in `find "${HOME3P}" -name config.txt`; do
+  URL=`getcfgx URL: "$config"`
   [ -n "$URL" ] && fetch "$URL" "$NOTFOUND"
-  URL1=`getcfgx URL1: $config`
+  URL1=`getcfgx URL1: "$config"`
   [ -n "$URL1" ] && fetch "$URL1" "$NOTFOUND"
-  URL2=`getcfgx URL2: $config`
+  URL2=`getcfgx URL2: "$config"`
   [ -n "$URL2" ] && fetch "$URL2" "$NOTFOUND"
-  URL3=`getcfgx URL3: $config`
+  URL3=`getcfgx URL3: "$config"`
   [ -n "$URL3" ] && fetch "$URL3" "$NOTFOUND"
-  URL4=`getcfgx URL4: $config`
+  URL4=`getcfgx URL4: "$config"`
   [ -n "$URL4" ] && fetch "$URL4" "$NOTFOUND"
 done
 #

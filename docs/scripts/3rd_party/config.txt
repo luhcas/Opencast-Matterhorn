@@ -29,25 +29,25 @@ xz_x64_url: ${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
 xz_x64_pkgs: xz-4.999.9-0.3.beta.20091007git.el5.x86_64.rpm xz-libs-4.999.9-0.3.beta.20091007git.el5.x86_64.rpm
 
 gcc_x86_url: ${CENTOS_MIRROR}/centos/5/os/i386/CentOS
-gcc_x86_pkgs: gcc-4.1.2-50.el5.i386.rpm cpp-4.1.2-50.el5.i386.rpm libgomp-4.4.4-13.el5.i386.rpm
+gcc_x86_pkgs: gcc-4.1.2-50.el5.i386.rpm cpp-4.1.2-50.el5.i386.rpm libgcc-4.1.2-50.el5.i386.rpm libgomp-4.4.4-13.el5.i386.rpm
 
 gcc_x86_upd_url: ${CENTOS_MIRROR}/centos/5/updates/i386/RPMS
 gcc_x86_upd_pkgs: glibc-devel-2.5-58.el5_6.3.i386.rpm glibc-headers-2.5-58.el5_6.3.i386.rpm kernel-headers-2.6.18-238.5.1.el5.i386.rpm glibc-2.5-58.el5_6.3.i686.rpm glibc-common-2.5-58.el5_6.3.i386.rpm nscd-2.5-58.el5_6.3.i386.rpm
 
 gcc_x64_url: ${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
-gcc_x64_pkgs: gcc-4.1.2-50.el5.x86_64.rpm cpp-4.1.2-50.el5.x86_64.rpm libgomp-4.4.4-13.el5.x86_64.rpm
+gcc_x64_pkgs: gcc-4.1.2-50.el5.x86_64.rpm cpp-4.1.2-50.el5.x86_64.rpm libgcc-4.1.2-50.el5.x86_64.rpm libgomp-4.4.4-13.el5.x86_64.rpm
 
 gcc_x64_upd_url: ${CENTOS_MIRROR}/centos/5/updates/x86_64/RPMS
 gcc_x64_upd_pkgs: glibc-devel-2.5-58.el5_6.3.x86_64.rpm glibc-headers-2.5-58.el5_6.3.x86_64.rpm kernel-headers-2.6.18-238.5.1.el5.x86_64.rpm glibc-2.5-58.el5_6.3.i686.rpm glibc-2.5-58.el5_6.3.x86_64.rpm glibc-common-2.5-58.el5_6.3.x86_64.rpm nscd-2.5-58.el5_6.3.x86_64.rpm
 
 gpp_x86_url: ${CENTOS_MIRROR}/centos/5/os/i386/CentOS
-gpp_x86_pkgs: gcc-c++-4.1.2-50.el5.i386.rpm gcc-4.1.2-50.el5.i386.rpm cpp-4.1.2-50.el5.i386.rpm libgomp-4.4.4-13.el5.i386.rpm libstdc++-devel-4.1.2-50.el5.i386.rpm
+gpp_x86_pkgs: gcc-c++-4.1.2-50.el5.i386.rpm gcc-4.1.2-50.el5.i386.rpm cpp-4.1.2-50.el5.i386.rpm libstdc++-4.1.2-50.el5.i386.rpm libgomp-4.4.4-13.el5.i386.rpm libstdc++-devel-4.1.2-50.el5.i386.rpm
 
 gpp_x86_upd_url: ${CENTOS_MIRROR}/centos/5/updates/i386/RPMS
 gpp_x86_upd_pkgs: glibc-devel-2.5-58.el5_6.3.i386.rpm glibc-headers-2.5-58.el5_6.3.i386.rpm kernel-headers-2.6.18-238.5.1.el5.i386.rpm glibc-2.5-58.el5_6.3.i686.rpm glibc-common-2.5-58.el5_6.3.i386.rpm nscd-2.5-58.el5_6.3.i386.rpm
 
 gpp_x64_url: ${CENTOS_MIRROR}/centos/5/os/x86_64/CentOS
-gpp_x64_pkgs: gcc-c++-4.1.2-50.el5.x86_64.rpm gcc-4.1.2-50.el5.x86_64.rpm cpp-4.1.2-50.el5.x86_64.rpm libgomp-4.4.4-13.el5.x86_64.rpm libstdc++-devel-4.1.2-50.el5.x86_64.rpm
+gpp_x64_pkgs: gcc-c++-4.1.2-50.el5.x86_64.rpm gcc-4.1.2-50.el5.x86_64.rpm cpp-4.1.2-50.el5.x86_64.rpm libstdc++-4.1.2-50.el5.x86_64.rpm libgomp-4.4.4-13.el5.x86_64.rpm libstdc++-devel-4.1.2-50.el5.x86_64.rpm
 
 gpp_x64_upd_url: ${CENTOS_MIRROR}/centos/5/updates/x86_64/RPMS
 gpp_x64_upd_pkgs: glibc-devel-2.5-58.el5_6.3.x86_64.rpm glibc-headers-2.5-58.el5_6.3.x86_64.rpm kernel-headers-2.6.18-238.5.1.el5.x86_64.rpm glibc-2.5-58.el5_6.3.i686.rpm glibc-2.5-58.el5_6.3.x86_64.rpm glibc-common-2.5-58.el5_6.3.x86_64.rpm nscd-2.5-58.el5_6.3.x86_64.rpm

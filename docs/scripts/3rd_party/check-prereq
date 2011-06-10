@@ -51,35 +51,42 @@ install_prog() {
         wget ) # wget is missing, get it with java wget
           case `arch` in
             i386 )
-              URL=`getmcfg wget_x86_url:`
+              URLS=`getmcfg wget_x86_url:`
               rpms=`getmcfg wget_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg wget_x64_url:`
+              URLS=`getmcfg wget_x64_url:`
               rpms=`getmcfg wget_x64_pkgs:`
               ;;
           esac
           #
-          if [ ! -s "$rpms" ]; then
-            copypkg "$rpms"
-            if [ $? -ne 0 ]; then
-              if [ ! -s wget.class ]; then
-                javac -d . ../wget.java
-                [ $? -ne 0 ] && return 1
+          for rpm in $rpms; do
+            if [ ! -s "$rpm" ]; then
+              copypkg "$rpm"
+              if [ $? -ne 0 ]; then
+                if [ ! -s wget.class ]; then
+                  javac -d . ../wget.java
+                  [ $? -ne 0 ] && return 1
+                fi
+                ok=1
+                for URL in $URLS; do
+                  java wget "$URL/$rpm" > "$rpm"
+                  ok=$?
+                  [ $ok -eq 0 ] && break
+                done
+                [ $ok -ne 0 ] && return 1
               fi
-              java wget "$URL/$rpms" > "$rpms"
-              [ $? -ne 0 ] && return 1
             fi
-          fi
+          done
           ;;
         zip )
           case `arch` in
             i386 )
-              URL=`getmcfg zip_x86_url:`
+              URLS=`getmcfg zip_x86_url:`
               rpms=`getmcfg zip_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg zip_x64_url:`
+              URLS=`getmcfg zip_x64_url:`
               rpms=`getmcfg zip_x64_pkgs:`
               ;;
           esac
@@ -87,11 +94,11 @@ install_prog() {
         unzip )
           case `arch` in
             i386 )
-              URL=`getmcfg unzip_x86_url:`
+              URLS=`getmcfg unzip_x86_url:`
               rpms=`getmcfg unzip_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg unzip_x64_url:`
+              URLS=`getmcfg unzip_x64_url:`
               rpms=`getmcfg unzip_x64_pkgs:`
               ;;
           esac
@@ -99,11 +106,11 @@ install_prog() {
         xz )
           case `arch` in
             i386 )
-              URL=`getmcfg xz_x86_url:`
+              URLS=`getmcfg xz_x86_url:`
               rpms=`getmcfg xz_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg xz_x64_url:`
+              URLS=`getmcfg xz_x64_url:`
               rpms=`getmcfg xz_x64_pkgs:`
               ;;
           esac
@@ -111,15 +118,15 @@ install_prog() {
         gcc )
           case `arch` in
             i386 )
-              URL=`getmcfg gcc_x86_url:`
+              URLS=`getmcfg gcc_x86_url:`
               rpms=`getmcfg gcc_x86_pkgs:`
-              UPD_URL=`getmcfg gcc_x86_upd_url:`
+              UPD_URLS=`getmcfg gcc_x86_upd_url:`
               upd_rpms=`getmcfg gcc_x86_upd_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg gcc_x64_url:`
+              URLS=`getmcfg gcc_x64_url:`
               rpms=`getmcfg gcc_x64_pkgs:`
-              UPD_URL=`getmcfg gcc_x64_upd_url:`
+              UPD_URLS=`getmcfg gcc_x64_upd_url:`
               upd_rpms=`getmcfg gcc_x64_upd_pkgs:`
               ;;
           esac
@@ -127,15 +134,15 @@ install_prog() {
         g++ )
           case `arch` in
             i386 )
-              URL=`getmcfg gpp_x86_url:`
+              URLS=`getmcfg gpp_x86_url:`
               rpms=`getmcfg gpp_x86_pkgs:`
-              UPD_URL=`getmcfg gpp_x86_upd_url:`
+              UPD_URLS=`getmcfg gpp_x86_upd_url:`
               upd_rpms=`getmcfg gpp_x86_upd_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg gpp_x64_url:`
+              URLS=`getmcfg gpp_x64_url:`
               rpms=`getmcfg gpp_x64_pkgs:`
-              UPD_URL=`getmcfg gpp_x64_upd_url:`
+              UPD_URLS=`getmcfg gpp_x64_upd_url:`
               upd_rpms=`getmcfg gpp_x64_upd_pkgs:`
               ;;
           esac
@@ -143,11 +150,11 @@ install_prog() {
         yacc )
           case `arch` in
             i386 )
-              URL=`getmcfg yacc_x86_url:`
+              URLS=`getmcfg yacc_x86_url:`
               rpms=`getmcfg yacc_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg yacc_x64_url:`
+              URLS=`getmcfg yacc_x64_url:`
               rpms=`getmcfg yacc_x64_pkgs:`
               ;;
           esac
@@ -155,11 +162,11 @@ install_prog() {
         perl-dbi )
           case `arch` in
             i386 )
-              URL=`getmcfg perl-dbi_x86_url:`
+              URLS=`getmcfg perl-dbi_x86_url:`
               rpms=`getmcfg perl-dbi_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg perl-dbi_x64_url:`
+              URLS=`getmcfg perl-dbi_x64_url:`
               rpms=`getmcfg perl-dbi_x64_pkgs:`
               ;;
           esac
@@ -167,11 +174,11 @@ install_prog() {
         git ) 
           case `arch` in
             i386 )
-              URL=`getmcfg git_x86_url:`
+              URLS=`getmcfg git_x86_url:`
               rpms=`getmcfg git_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg git_x64_url:`
+              URLS=`getmcfg git_x64_url:`
               rpms=`getmcfg git_x64_pkgs:`
               ;;
           esac
@@ -179,11 +186,11 @@ install_prog() {
         jam ) 
           case `arch` in
             i386 )
-              URL=`getmcfg jam_x86_url:`
+              URLS=`getmcfg jam_x86_url:`
               rpms=`getmcfg jam_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg jam_x64_url:`
+              URLS=`getmcfg jam_x64_url:`
               rpms=`getmcfg jam_x64_pkgs:`
               ;;
           esac
@@ -191,11 +198,11 @@ install_prog() {
         yasm ) 
           case `arch` in
             i386 )
-              URL=`getmcfg yasm_x86_url:`
+              URLS=`getmcfg yasm_x86_url:`
               rpms=`getmcfg yasm_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg yasm_x64_url:`
+              URLS=`getmcfg yasm_x64_url:`
               rpms=`getmcfg yasm_x64_pkgs:`
               ;;
           esac
@@ -203,11 +210,11 @@ install_prog() {
         ImageMagick )
           case `arch` in
             i386 )
-              URL=`getmcfg ImageMagick_x86_url:`
+              URLS=`getmcfg ImageMagick_x86_url:`
               rpms=`getmcfg ImageMagick_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg ImageMagick_x64_url:`
+              URLS=`getmcfg ImageMagick_x64_url:`
               rpms=`getmcfg ImageMagick_x64_pkgs:`
               ;;
           esac
@@ -215,11 +222,11 @@ install_prog() {
         automake )
           case `arch` in
             i386 )
-              URL=`getmcfg automake_x86_url:`
+              URLS=`getmcfg automake_x86_url:`
               rpms=`getmcfg automake_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg automake_x64_url:`
+              URLS=`getmcfg automake_x64_url:`
               rpms=`getmcfg automake_x64_pkgs:`
               ;;
           esac
@@ -227,11 +234,11 @@ install_prog() {
         gsl-devel )
           case `arch` in
             i386 )
-              URL=`getmcfg gsl-devel_x86_url:`
+              URLS=`getmcfg gsl-devel_x86_url:`
               rpms=`getmcfg gsl-devel_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg gsl-devel_x64_url:`
+              URLS=`getmcfg gsl-devel_x64_url:`
               rpms=`getmcfg gsl-devel_x64_pkgs:`
               ;;
           esac
@@ -239,11 +246,11 @@ install_prog() {
         desktop-file-utils )
           case `arch` in
             i386 )
-              URL=`getmcfg desktop-file-utils_x86_url:`
+              URLS=`getmcfg desktop-file-utils_x86_url:`
               rpms=`getmcfg desktop-file-utils_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg desktop-file-utils_x64_url:`
+              URLS=`getmcfg desktop-file-utils_x64_url:`
               rpms=`getmcfg desktop-file-utils_x64_pkgs:`
               ;;
           esac
@@ -251,11 +258,11 @@ install_prog() {
         gmp )
           case `arch` in
             i386 )
-              URL=`getmcfg gmp_x86_url:`
+              URLS=`getmcfg gmp_x86_url:`
               rpms=`getmcfg gmp_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg gmp_x64_url:`
+              URLS=`getmcfg gmp_x64_url:`
               rpms=`getmcfg gmp_x64_pkgs:`
               ;;
           esac
@@ -263,11 +270,11 @@ install_prog() {
         zlib-devel )
           case `arch` in
             i386 )
-              URL=`getmcfg zlib-devel_x86_url:`
+              URLS=`getmcfg zlib-devel_x86_url:`
               rpms=`getmcfg zlib-devel_x86_pkgs:`
               ;;
             x86_64 )
-              URL=`getmcfg zlib-devel_x64_url:`
+              URLS=`getmcfg zlib-devel_x64_url:`
               rpms=`getmcfg zlib-devel_x64_pkgs:`
               ;;
           esac
@@ -281,8 +288,13 @@ install_prog() {
         if [ ! -s "$rpm" ]; then
           copypkg "$rpm"
           if [ $? -ne 0 ]; then
-            wget -4O "$rpm" "$URL/$rpm"
-            if [ $? -ne 0 ]; then
+            ok=1
+            for URL in $URLS; do
+              wget -4O "$rpm" "$URL/$rpm"
+              ok=$?
+              [ $ok -eq 0 ] && break
+            done
+            if [ $ok -ne 0 ]; then
               rm -f "$rpm"
               return 1
             fi
@@ -293,11 +305,13 @@ install_prog() {
         if [ ! -s "$upd_rpm" ]; then
           copypkg "$upd_rpm"
           if [ $? -ne 0 ]; then
-            wget -4O "$upd_rpm" "$UPD_URL/$upd_rpm"
-            if [ $? -ne 0 ]; then
-              rm -f "$upd_rpm"
-              return 1
-            fi
+            for UPD_URL in $UPD_URLS; do
+              wget -4O "$upd_rpm" "$UPD_URL/$upd_rpm"
+              if [ $? -ne 0 ]; then
+                rm -f "$upd_rpm"
+                return 1
+              fi
+            done
           fi
         fi
       done
@@ -346,19 +360,26 @@ install_macports() {
   cd packages
   [ $? -ne 0 ] && return 1
   #
-  URL=`getmcfg MacPorts_mac_url:`
-  dmg=`getmcfg MacPorts_mac_pkgs:`
-  if [ ! -s "$dmg" ]; then
-    copypkg "$dmg"
-    if [ $? -ne 0 ]; then
-      if [ ! -s wget.class ]; then
-        javac -d . ../wget.java
-        [ $? -ne 0 ] && return 1
+  URLS=`getmcfg MacPorts_mac_url:`
+  dmgs=`getmcfg MacPorts_mac_pkgs:`
+  for dmg in $dmgs; do
+    if [ ! -s "$dmg" ]; then
+      copypkg "$dmg"
+      if [ $? -ne 0 ]; then
+        if [ ! -s wget.class ]; then
+          javac -d . ../wget.java
+          [ $? -ne 0 ] && return 1
+        fi
+        ok=1
+        for URL in $URLS; do
+          java wget "$URL/$dmg" > "$dmg"
+          ok=$?
+          [ $ok -eq 0 ] && break
+        done
+        [ $ok -ne 0 ] && return 1
       fi
-      java wget "$URL/$dmg" > "$dmg"
-      [ $? -ne 0 ] && return 1
     fi
-  fi
+  done
   #
   sudox hdiutil attach "$dmg"
   [ $? -ne 0 ] && return 1
@@ -391,19 +412,26 @@ install_git() {
   cd packages
   [ $? -ne 0 ] && return 1
   #
-  URL=`getmcfg git_mac_url:`
-  dmg=`getmcfg git_mac_pkgs:`
-  if [ ! -s "$dmg" ]; then
-    copypkg "$dmg"
-    if [ $? -ne 0 ]; then
-      if [ ! -s wget.class ]; then
-        javac -d . ../wget.java
-        [ $? -ne 0 ] && return 1
+  URLS=`getmcfg git_mac_url:`
+  dmgs=`getmcfg git_mac_pkgs:`
+  for dmg in $dmgs; do
+    if [ ! -s "$dmg" ]; then
+      copypkg "$dmg"
+      if [ $? -ne 0 ]; then
+        if [ ! -s wget.class ]; then
+          javac -d . ../wget.java
+          [ $? -ne 0 ] && return 1
+        fi
+        ok=1
+        for URL in $URLS; do
+          java wget "$URL/$dmg" > "$dmg"
+          ok=$?
+          [ $ok -eq 0 ] && break
+        done
+        [ $ok -ne 0 ] && return 1
       fi
-      java wget "$URL/$dmg" > "$dmg"
-      [ $? -ne 0 ] && return 1
     fi
-  fi
+  done
   #
   sudox hdiutil attach "$dmg"
   [ $? -ne 0 ] && return 1
@@ -584,11 +612,11 @@ install_mingw32() {
       rpms=""
       case `arch` in
         i386 )
-          URL=`getmcfg mingw32-gcc_x86_url:`
+          URLS=`getmcfg mingw32-gcc_x86_url:`
           rpms=`getmcfg mingw32-gcc_x86_pkgs:`
           ;;
         x86_64 )
-          URL=`getmcfg mingw32-gcc_x64_url:`
+          URLS=`getmcfg mingw32-gcc_x64_url:`
           rpms=`getmcfg mingw32-gcc_x64_pkgs:`
           ;;
       esac
@@ -610,11 +638,11 @@ install_mingw32() {
       rpms=""
       case `arch` in
         i386 )
-          URL=`getmcfg mingw32-gpp_x86_url:`
+          URLS=`getmcfg mingw32-gpp_x86_url:`
           rpms=`getmcfg mingw32-gpp_x86_pkgs:`
           ;;
         x86_64 )
-          URL=`getmcfg mingw32-gpp_x64_url:`
+          URLS=`getmcfg mingw32-gpp_x64_url:`
           rpms=`getmcfg mingw32-gpp_x64_pkgs:`
           ;;
       esac
@@ -633,7 +661,7 @@ install_mingw32() {
       install_rpms $rpms
       [ $? -ne 0 ] && return 1
       #
-      URL=`getmcfg mingw32-w32api_src_url:`
+      URLS=`getmcfg mingw32-w32api_src_url:`
       pkg=`getmcfg mingw32-w32api_src_pkgs:`
       if [ ! -s "$pkg" -a ! -s "${pkg%.lzma}" ]; then
         copypkg "$pkg"
@@ -680,7 +708,7 @@ fix_libs() {
       # Install patchelf 0.5
       #
       if [ ! "`patchelf --version 2>/dev/null`" = "patchelf 0.5" ]; then
-        URL=`getmcfg patchelf_src_url:`
+        URLS=`getmcfg patchelf_src_url:`
         pkg=`getmcfg patchelf_src_pkgs:`
         if [ ! -s "$pkg" ]; then
           copypkg "$pkg"
@@ -732,24 +760,31 @@ EOF
       if [ ! -d /usr/libx ]; then
         case `arch` in
           i386 )
-            URL=`getmcfg gmp_x86_url:`
-            rpm=`getmcfg gmp_x86_pkgs:`
+            URLS=`getmcfg gmp_x86_url:`
+            rpms=`getmcfg gmp_x86_pkgs:`
             ;;
           x86_64 )
-            URL=`getmcfg gmp_x64_url:`
-            rpm=`getmcfg gmp_x64_pkgs:`
+            URLS=`getmcfg gmp_x64_url:`
+            rpms=`getmcfg gmp_x64_pkgs:`
             ;;
         esac
-        if [ ! -s "$rpm" ]; then
-          copypkg "$rpm"
-          if [ $? -ne 0 ]; then
-            wget -4O "$rpm" "$URL/$rpm"
+        for rpm in $rpms; do
+          if [ ! -s "$rpm" ]; then
+            copypkg "$rpm"
             if [ $? -ne 0 ]; then
-              rm -f "$rpm"
-              return 1
+              ok=1
+              for URL in $URLS; do
+                wget -4O "$rpm" "$URL/$rpm"
+                ok=$?
+                [ $ok -eq 0 ] && break
+              done
+              if [ $ok -ne 0 ]; then
+                rm -f "$rpm"
+                return 1
+              fi
             fi
           fi
-        fi
+        done
         rpm2cpio "$rpm" | cpio -i -dmuv
         [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
         case `arch` in
@@ -826,6 +861,7 @@ case `arch` in
     ;;
 esac
 #
+# Main repositories
 export CENTOS_MIRROR=`getmcfg CENTOS_MIRROR:`
 export EPEL_MIRROR=`getmcfg EPEL_MIRROR:`
 export RPMFORGE_MIRROR=`getmcfg RPMFORGE_MIRROR:`
