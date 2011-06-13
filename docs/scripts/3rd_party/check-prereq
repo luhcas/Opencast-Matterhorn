@@ -305,13 +305,16 @@ install_prog() {
         if [ ! -s "$upd_rpm" ]; then
           copypkg "$upd_rpm"
           if [ $? -ne 0 ]; then
+            ok=1
             for UPD_URL in $UPD_URLS; do
               wget -4O "$upd_rpm" "$UPD_URL/$upd_rpm"
-              if [ $? -ne 0 ]; then
-                rm -f "$upd_rpm"
-                return 1
-              fi
+              ok=$?
+              [ $ok -eq 0 ] && break
             done
+            if [ $ok -ne 0 ]; then
+              rm -f "$upd_rpm"
+              return 1
+            fi
           fi
         fi
       done
@@ -379,6 +382,8 @@ install_macports() {
         [ $ok -ne 0 ] && return 1
       fi
     fi
+    # There can be only one!
+    break
   done
   #
   sudox hdiutil attach "$dmg"
@@ -431,6 +436,8 @@ install_git() {
         [ $ok -ne 0 ] && return 1
       fi
     fi
+    # There can be only one!
+    break
   done
   #
   sudox hdiutil attach "$dmg"
@@ -624,8 +631,13 @@ install_mingw32() {
         if [ ! -s "$rpm" ]; then
           copypkg "$rpm"
           if [ $? -ne 0 ]; then
-            wget -4O "$rpm" "$URL/$rpm"
-            if [ $? -ne 0 ]; then
+            ok=1
+            for URL in $URLS; do
+              wget -4O "$rpm" "$URL/$rpm"
+              ok=$?
+              [ $ok -eq 0 ] && break
+            done
+            if [ $ok -ne 0 ]; then
               rm -f "$rpm"
               return 1
             fi
@@ -650,8 +662,13 @@ install_mingw32() {
         if [ ! -s "$rpm" ]; then
           copypkg "$rpm"
           if [ $? -ne 0 ]; then
-            wget -4O "$rpm" "$URL/$rpm"
-            if [ $? -ne 0 ]; then
+            ok=1
+            for URL in $URLS; do
+              wget -4O "$rpm" "$URL/$rpm"
+              ok=$?
+              [ $ok -eq 0 ] && break
+            done
+            if [ $ok -ne 0 ]; then
               rm -f "$rpm"
               return 1
             fi
@@ -662,24 +679,33 @@ install_mingw32() {
       [ $? -ne 0 ] && return 1
       #
       URLS=`getmcfg mingw32-w32api_src_url:`
-      pkg=`getmcfg mingw32-w32api_src_pkgs:`
-      if [ ! -s "$pkg" -a ! -s "${pkg%.lzma}" ]; then
-        copypkg "$pkg"
-        if [ $? -ne 0 ]; then
-          wget -4O "$pkg" "$URL/$pkg"
+      pkgs=`getmcfg mingw32-w32api_src_pkgs:`
+      for pkg in $pkgs; do
+        if [ ! -s "$pkg" -a ! -s "${pkg%.lzma}" ]; then
+          copypkg "$pkg"
           if [ $? -ne 0 ]; then
-            rm -f "$pkg"
-            return 1
+            ok=1
+            for URL in $URLS; do
+              wget -4O "$pkg" "$URL/$pkg"
+              ok=$?
+              [ $ok -eq 0 ] && break
+            done
+            if [ $ok -ne 0 ]; then
+              rm -f "$pkg"
+              return 1
+            fi
           fi
         fi
-      fi
+        # There can be only one!
+        break
+      done
       if [ ! -s "${pkg%.lzma}" ]; then
         xz -d "$pkg"
         [ $? -ne 0 ] && return 1
       fi
       cd $MINGW32_PREFIX
       [ $? -ne 0 ] && return 1
-      sudox tar -xvf "${HOME3P}/packages/w32api-3.15-1-mingw32-dev.tar"
+      sudox tar -xvf "${HOME3P}/packages/${pkg%.lzma}"
       [ $? -ne 0 ] && return 1
       ;;
     Debian )
@@ -709,17 +735,26 @@ fix_libs() {
       #
       if [ ! "`patchelf --version 2>/dev/null`" = "patchelf 0.5" ]; then
         URLS=`getmcfg patchelf_src_url:`
-        pkg=`getmcfg patchelf_src_pkgs:`
-        if [ ! -s "$pkg" ]; then
-          copypkg "$pkg"
-          if [ $? -ne 0 ]; then
-            wget -4O "$pkg" "$URL/$pkg"
+        pkgs=`getmcfg patchelf_src_pkgs:`
+        for pkg in $pkgs; do
+          if [ ! -s "$pkg" ]; then
+            copypkg "$pkg"
             if [ $? -ne 0 ]; then
-              rm -f "$pkg"
-              return 1
+              ok=1
+              for URL in $URLS; do
+                wget -4O "$pkg" "$URL/$pkg"
+                ok=$?
+                [ $ok -eq 0 ] && break
+              done
+              if [ $ok -ne 0 ]; then
+                rm -f "$pkg"
+                return 1
+              fi
             fi
           fi
-        fi
+          # There can be only one!
+          break
+        done
         bzip2 -dc "$pkg" | tar -xv
         [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
         cd patchelf-0.5
@@ -784,6 +819,8 @@ EOF
               fi
             fi
           fi
+          # There can be only one!
+          break
         done
         rpm2cpio "$rpm" | cpio -i -dmuv
         [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
