@@ -346,14 +346,14 @@ ocSeries.createACLDocument = function() {
       if($field.parent().parent().children().find('[name|="priv_view"]').attr('checked')) {
         out += '<ace>';
         out += '<role>' + $field.attr('value') + '</role>';
-        out += '<action>view</action>';
+        out += '<action>read</action>';
         out += '<allow>true</allow>';
         out += '</ace>';
       }
       if($field.parent().parent().children().find('[name|="priv_edit"]').attr('checked')) {
         out += '<ace>';
         out += '<role>' + $field.attr('value') + '</role>';
-        out += '<action>edit</action>';
+        out += '<action>write</action>';
         out += '<allow>true</allow>';
         out += '</ace>';
       }
@@ -362,7 +362,7 @@ ocSeries.createACLDocument = function() {
   if($('#anonymous_view').attr('checked')) {
     out += '<ace>';
     out += '<role>' + ocSeries.anonymous_role + '</role>';
-    out += '<action>view</action>';
+    out += '<action>read</action>';
     out += '<allow>true</allow>';
     out += '</ace>';
   }
