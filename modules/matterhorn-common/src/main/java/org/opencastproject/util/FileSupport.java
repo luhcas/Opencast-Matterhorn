@@ -116,9 +116,9 @@ public final class FileSupport {
    * <p/>
    * Note that if <code>targetLocation</code> is a directory than the directory itself, not only its content is copied.
    * 
-   * @param sourceFile
+   * @param sourceLocation
    *          the source file or directory
-   * @param targetFile
+   * @param targetLocation
    *          the directory to copy the source file or directory to
    * @param overwrite
    *          <code>true</code> to overwrite existing files
@@ -126,21 +126,17 @@ public final class FileSupport {
    * @throws IOException
    *           if copying of the file or directory failed
    */
-  public static File copy(File sourceFile, File targetFile, boolean overwrite) throws IOException {
-
-    // This variable is used when the channel copy files, and stores the maximum size of the file parts copied from source to target
-    final long chunk = 1024 * 1024 * 512; // 512 MB
-
-    File dest = determineDestination(targetFile, sourceFile, overwrite);
+  public static File copy(File sourceLocation, File targetLocation, boolean overwrite) throws IOException {
+    File dest = determineDestination(targetLocation, sourceLocation, overwrite);
 
     // We are copying a directory
-    if (sourceFile.isDirectory()) {
+    if (sourceLocation.isDirectory()) {
       if (!dest.exists()) {
         dest.mkdir();
       }
-      String[] children = sourceFile.list();
+      String[] children = sourceLocation.list();
       for (int i = 0; i < children.length; i++) {
-        copy(new File(sourceFile, children[i]), dest, overwrite);
+        copy(new File(sourceLocation, children[i]), dest, overwrite);
       }
     }
     // We are copying a file
@@ -149,53 +145,21 @@ public final class FileSupport {
       if (dest.exists())
         delete(dest);
 
-      FileChannel sourceChannel = null;
-      FileChannel targetChannel = null;
-      FileInputStream sourceStream = null;
-      FileOutputStream targetStream = null;
-      long size = 0;
-
+      FileChannel source = null;
+      FileChannel destination = null;
       try {
-        sourceStream = new FileInputStream(sourceFile);
-        targetStream = new FileOutputStream(targetFile);
-        try {
-          sourceChannel = sourceStream.getChannel();
-          targetChannel = targetStream.getChannel();
-          size = targetChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-        } catch (IOException ioe) {
-          logger.warn("Got IOException using Channels for copying.");
-        } finally {
-          // This has to be in "finally", because in 64-bit machines the channel copy may fail to copy the whole file without causing a exception
-          if ((sourceChannel != null) && (targetChannel != null) && (size < sourceFile.length()))
-            // Failing back to using FileChannels *but* with chunks and not altogether
-            logger.info("Trying to copy the file in chunks using Channels");
-          if (size != sourceFile.length()) {
-            while (size < sourceFile.length())
-              size += targetChannel.transferFrom(sourceChannel, size, chunk);
-          }
-        }
-      } catch (IOException ioe) {
-        if ((sourceStream != null) && (targetStream != null) && (size < sourceFile.length())) {
-          logger.warn("Got IOException using Channels for copying in chunks. Trying to use stream copy instead...");
-          int copied = 0;
-          byte buffer[] = new byte[Integer.MAX_VALUE];
-          while ((copied = sourceStream.read(buffer, 0, buffer.length)) != -1)
-            targetStream.write(buffer, 0, copied);
-        } else
-          throw ioe;
+        source = new FileInputStream(sourceLocation).getChannel();
+        destination = new FileOutputStream(dest).getChannel();
+        destination.transferFrom(source, 0, source.size());
       } finally {
-        if (sourceChannel != null)
-          sourceChannel.close();
-        if (sourceStream != null)
-          sourceStream.close();
-        if (targetChannel != null)
-          targetChannel.close();
-        if (targetStream != null)
-          targetStream.close();
+        if (source != null)
+          source.close();
+        if (destination != null)
+          destination.close();
       }
 
-      if (sourceFile.length() != dest.length()) {
-        logger.warn("Source " + sourceFile + " and target " + dest + " do not have the same length");
+      if (sourceLocation.length() != dest.length()) {
+        logger.warn("Source " + sourceLocation + " and target " + dest + " do not have the same length");
         // TOOD: Why would this happen?
         // throw new IOException("Source " + sourceLocation + " and target " +
         // dest + " do not have the same length");
@@ -532,7 +496,7 @@ public final class FileSupport {
   }
 
   private static Process createLinkDirectoryProcess(File sourceDirectory, File targetDirectory, boolean overwrite)
-  throws IOException {
+          throws IOException {
     Process p;
     if (!System.getProperty("os.name").startsWith("Windows")) {
       if (overwrite) {
@@ -551,9 +515,9 @@ public final class FileSupport {
     }
     return p;
   }
-
+  
   private static File determineDestination(File targetLocation, File sourceLocation, boolean overwrite)
-  throws IOException {
+          throws IOException {
     File dest = null;
 
     // Is the source file/directory readable
