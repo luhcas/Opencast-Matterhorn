@@ -1285,7 +1285,7 @@ if( confirm('Are you sure you wish to delete ' + eventIdList.length + ' upcoming
         links.push('<a href="javascript:ocRecordings.stopWorkflow(\'' + id + '\')">Ignore</a>');
       }
     });
-    return links.join(' \n');
+    return links.join(' | \n');
   }
 
   return this;
