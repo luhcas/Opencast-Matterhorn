@@ -1247,7 +1247,7 @@ if( confirm('Are you sure you wish to delete ' + eventIdList.length + ' upcoming
 
       } else if (action == 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
-      } else if(actions[i] === 'play') {
+      } else if(actions[index] === 'play') {
         var workflow = ocRecordings.getWorkflow(id);
         if (workflow) {
           var mpId = workflow.mediapackage.id;
