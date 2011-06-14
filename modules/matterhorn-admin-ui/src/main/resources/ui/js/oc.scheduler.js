@@ -570,7 +570,7 @@ ocScheduler.DeleteForm = function(){
           sched.recording.components.recurrence.validate() && sched.recording.components.recurrenceDuration.validate()){
         data.start = sched.recording.components.recurrenceStart.getValue();
         data.end = sched.recording.components.recurrenceEnd.getValue();
-        data.duration = sched.recording..components.recurrenceDuration.getValue();
+        data.duration = sched.recording.components.recurrenceDuration.getValue();
         data.rrule = sched.recording.components.recurrence.getValue();
       } else {
         return false;
