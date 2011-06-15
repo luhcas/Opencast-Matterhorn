@@ -17,7 +17,6 @@ package org.opencastproject.kernel.userdirectory;
 
 import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ADMIN;
 import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
-import static org.opencastproject.security.api.SecurityConstants.MH_ADMIN;
 
 import org.opencastproject.security.api.RoleProvider;
 import org.opencastproject.security.api.User;
@@ -111,20 +110,6 @@ public class InMemoryUserAndRoleProvider implements UserProvider, RoleProvider {
   @Override
   public String toString() {
     return getClass().getName();
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.security.api.RoleProvider#getLocalRole(java.lang.String)
-   */
-  @Override
-  public String getLocalRole(String role) {
-    if (role.equals(MH_ADMIN)) {
-      return "ROLE_ADMIN";
-    } else {
-      return null;
-    }
   }
 
   /**

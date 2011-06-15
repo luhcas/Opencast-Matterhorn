@@ -22,7 +22,6 @@ import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.security.api.UserProvider;
-import org.opencastproject.util.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +32,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -51,10 +48,10 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
   private static final Logger logger = LoggerFactory.getLogger(UserAndRoleDirectoryServiceImpl.class);
 
   /** The list of user providers */
-  protected Map<String, List<UserProvider>> userProviders = new HashMap<String, List<UserProvider>>();
+  protected List<UserProvider> userProviders = new ArrayList<UserProvider>();
 
   /** The list of role providers */
-  protected Map<String, List<RoleProvider>> roleProviders = new HashMap<String, List<RoleProvider>>();
+  protected List<RoleProvider> roleProviders = new ArrayList<RoleProvider>();
 
   /** The security service */
   protected SecurityService securityService = null;
@@ -65,14 +62,9 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    * @param userProvider
    *          the user provider to add
    */
-  protected void addUserProvider(UserProvider userProvider) {
+  protected synchronized void addUserProvider(UserProvider userProvider) {
     logger.debug("Adding {} to the list of user providers", userProvider);
-    List<UserProvider> providers = userProviders.get(userProvider.getOrganization());
-    if (providers == null) {
-      providers = new ArrayList<UserProvider>();
-      userProviders.put(userProvider.getOrganization(), providers);
-    }
-    providers.add(userProvider);
+    userProviders.add(userProvider);
   }
 
   /**
@@ -81,12 +73,9 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    * @param userProvider
    *          the user provider to remove
    */
-  protected void removeUserProvider(UserProvider userProvider) {
+  protected synchronized void removeUserProvider(UserProvider userProvider) {
     logger.debug("Removing {} from the list of user providers", userProvider);
-    List<UserProvider> providers = userProviders.get(userProvider.getOrganization());
-    if (providers != null) {
-      providers.remove(userProvider);
-    }
+    roleProviders.remove(userProvider);
   }
 
   /**
@@ -95,14 +84,9 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    * @param roleProvider
    *          the role provider to add
    */
-  protected void addRoleProvider(RoleProvider roleProvider) {
+  protected synchronized void addRoleProvider(RoleProvider roleProvider) {
     logger.debug("Adding {} to the list of role providers", roleProvider);
-    List<RoleProvider> providers = roleProviders.get(roleProvider.getOrganization());
-    if (providers == null) {
-      providers = new ArrayList<RoleProvider>();
-      roleProviders.put(roleProvider.getOrganization(), providers);
-    }
-    providers.add(roleProvider);
+    roleProviders.add(roleProvider);
   }
 
   /**
@@ -111,12 +95,9 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    * @param roleProvider
    *          the role provider to remove
    */
-  protected void removeRoleProvider(RoleProvider roleProvider) {
+  protected synchronized void removeRoleProvider(RoleProvider roleProvider) {
     logger.debug("Removing {} from the list of role providers", roleProvider);
-    List<RoleProvider> providers = roleProviders.get(roleProvider.getOrganization());
-    if (providers != null) {
-      providers.remove(roleProvider);
-    }
+    roleProviders.remove(roleProvider);
   }
 
   /**
@@ -130,13 +111,12 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
     if (org == null) {
       throw new IllegalStateException("No organization is set");
     }
-    List<RoleProvider> orgRoleProviders = roleProviders.get(org.getId());
-    if (orgRoleProviders == null || orgRoleProviders.isEmpty()) {
-      throw new IllegalStateException("No role providers for " + org);
-    }
     SortedSet<String> roles = new TreeSet<String>();
-    for (RoleProvider roleProvider : orgRoleProviders) {
+    for (RoleProvider roleProvider : roleProviders) {
       for (String role : roleProvider.getRoles()) {
+        if (!roleProvider.getOrganization().equals(org.getId())) {
+          continue;
+        }
         roles.add(role);
       }
     }
@@ -154,13 +134,12 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
     if (org == null) {
       throw new IllegalStateException("No organization is set");
     }
-    List<UserProvider> orgUserProviders = userProviders.get(org.getId());
-    if (orgUserProviders == null || orgUserProviders.isEmpty()) {
-      throw new IllegalStateException("No user providers for " + org);
-    }
     // Collect all of the roles known from each of the user providers for this user
     User user = null;
-    for (UserProvider userProvider : orgUserProviders) {
+    for (UserProvider userProvider : userProviders) {
+      if (!userProvider.getOrganization().equals(org.getId())) {
+        continue;
+      }
       User providerUser = userProvider.loadUser(userName);
       if (providerUser == null) {
         continue;
@@ -227,30 +206,6 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.security.api.RoleDirectoryService#getLocalRole(java.lang.String)
-   */
-  @Override
-  public String getLocalRole(String role) throws NotFoundException {
-    Organization org = securityService.getOrganization();
-    if (org == null) {
-      throw new IllegalStateException("No organization is set");
-    }
-    List<RoleProvider> orgRoleProviders = roleProviders.get(org.getId());
-    if (orgRoleProviders == null || orgRoleProviders.isEmpty()) {
-      throw new IllegalStateException("No role providers for " + org);
-    }
-    for (RoleProvider roleProvider : orgRoleProviders) {
-      String localRole = roleProvider.getLocalRole(role);
-      if (localRole != null) {
-        return localRole;
-      }
-    }
-    throw new NotFoundException("No role '" + role + "' defined for organization '" + org.getId() + "'");
   }
 
 }

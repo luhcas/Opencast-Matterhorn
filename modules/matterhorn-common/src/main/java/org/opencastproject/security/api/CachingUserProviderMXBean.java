@@ -16,15 +16,15 @@
 package org.opencastproject.security.api;
 
 /**
- * A marker interface for the federation of all {@link RoleProvider}s.
+ * A JMX interface for caching user providers.
  */
-public interface RoleDirectoryService {
+public interface CachingUserProviderMXBean {
 
   /**
-   * Gets all known roles.
+   * Gets the ratio of cache hits to total requests.
    * 
-   * @return the roles
+   * @return the hit ratio
    */
-  String[] getRoles();
+  float getCacheHitRatio();
 
 }

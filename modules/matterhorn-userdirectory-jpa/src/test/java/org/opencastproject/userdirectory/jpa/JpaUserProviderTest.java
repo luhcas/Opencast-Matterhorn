@@ -87,21 +87,4 @@ public class JpaUserProviderTest {
     Assert.assertEquals("There should be two roles", 2, provider.getRoles().length);
   }
 
-  @Test
-  public void testRoleMappings() throws Exception {
-    // By default, the provider should return null
-    Assert.assertNull(provider.getLocalRole("appRole1"));
-    
-    // Set a role mapping
-    provider.setRoleMapping("appRole1", "localRole1");
-    Assert.assertEquals("localRole1", provider.getLocalRole("appRole1"));
-    
-    // Override the mapping
-    provider.setRoleMapping("appRole1", "localRole1");
-    Assert.assertEquals("localRole1", provider.getLocalRole("appRole1"));
-
-    // Clear the mapping
-    provider.setRoleMapping("appRole1", null);
-    Assert.assertNull(provider.getLocalRole("appRole1"));
-  }
 }
