@@ -1,4 +1,4 @@
-URL: http://ocropus.googlecode.com/files/ocropus-0.4.tar.gz
+URL: http://ocropus.googlecode.com/files
 PKG: ocropus-0.4.tar.gz
 SHA: 5558218169d9667aa5947432356c80c59e13c090
 DIR: ocropus-0.4

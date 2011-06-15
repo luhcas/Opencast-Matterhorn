@@ -81,6 +81,9 @@ the following newly installed operating systems:
 
 - Mac OS X Snow Leopard 10.6.* with Xcode 3.2.*
 
+Operating systems should be installed for a developer/development,
+wherever possible.
+
 All necessary prerequisites are downloaded and installed
 automatically, except for the following utilities, which should
 already be installed on the system:
@@ -88,6 +91,48 @@ already be installed on the system:
 - java
 - gzip
 - bzip2
+
+
+Packages download
+=================
+
+All packages needed for the compilation are downloaded from their
+original locations. The locations and possible mirrors are specified
+in "master" config file ($HOME3P/config.txt).
+
+Typical entry in this config.txt has the following syntax:
+
+  variable: value [another_value ...]
+
+First the base URLs for most common mirrors are defined (like
+CENTOS_MIRROR, EPEL_MIRROR, ...). These definitions can be used later on
+as shell variables when defining URLs for packages.
+
+Then come the definitions for packages (always in pairs):
+
+  package_url: primary_url [mirror1_url ...]
+  package_pkgs: package1.rpm [package2.rpm ...]
+
+All packages listed in the <package_pkgs> are downloaded from the same
+<package_url>. If download from the <primary_url> fails, next URL
+in the URL list is tried (i.e. <mirror1_url>) and so on.
+
+Similar syntax is used in all other package-specific config files
+in subdirectories (see box below).
+
+To check the availability of all needed packages, a script "check-urls"
+is provided. This script parses "master" config file and all
+package-specific config files and tries to download all packages listed.
+No data is actually downloaded, just the availability is checked. If any
+of the URLs are not valid/found/..., their number is reported at the end
+of script execution. Problematic URLs are also listed in the file
+"not_found.txt", where mirror URLs are marked with the keyword "mirror:"
+before the URL.
+
+If you want a complete log of the url check, use:
+./check-urls 2>&1 | tee check-urls.log
+
+Keywords to search for possible errors in log file are WARNING: and ERROR:
 
 
 Description of interactive run
@@ -135,19 +180,20 @@ see below).
 | --------------------                                               |
 | For example for ffmpeg:                                            |
 |                                                                    |
-| URL: http://ffmpeg.org/releases/ffmpeg-0.6.tar.gz                  |
+| URL: http://ffmpeg.org/releases                                    |
 | PKG: ffmpeg-0.6.tar.gz                                             |
 | SHA: 9e4bc2f1fdb4565bea54d7fb38e705b40620e208                      |
 | DIR: ffmpeg-0.6                                                    |
 | PCP1: pc-ffmpeg.zip                                                |
 | PCP2: _ffmpeg.zip                                                  |
 |                                                                    |
-| - URL is location of the package (for wget)                        |
-| - PKG is the output package name from download                     |
+| - URL is location of the package (without package name)            |
+| - PKG is the package name                                          |
 | - SHA is expected SHA1 160-bit checksum of package (not required)  |
 | - DIR is untarred/unzipped directory from package                  |
 | - PCP is PC package zip name                                       |
 |                                                                    |
+| URL definition can have primary and mirrors URLs.                  |
 | There can be up to 4 URL/PKG combinations (URL, URL1, URL2 & URL3) |
 | and PC package zip names.                                          |
 +--------------------------------------------------------------------+

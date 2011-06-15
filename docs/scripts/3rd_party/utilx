@@ -275,28 +275,36 @@ download() {
   else
     if [ -f config.txt ]; then
       for ii in "" 1 2 3; do
-        for url in `getcfg URL${ii}:`; do
-          pkg=`getcfg PKG${ii}:`
-          if [ -z "$pkg" ]; then
-            echo "PKG${ii} not defined for URL${ii}: $url" 1>&2
-            continue
-          fi
-          if [ ! -f "$pkg" ]; then
+        ppos=0
+        for pkg in `getcfg PKG${ii}:`; do
+          let ppos=ppos+1
+          if [ ! -s "$pkg" ]; then
             copypkg "$pkg"
             if [ $? -ne 0 ]; then
-              wget -4O "$pkg" "$url"
-              if [ $? -ne 0 ]; then
+              ok=1
+              for URL in `getcfg URL${ii}:`; do
+                wget -4O "$pkg" "$URL/$pkg"
+                ok=$?
+                [ $ok -eq 0 ] && break
+              done
+              if [ $ok -ne 0 ]; then
                 rm -f "$pkg"
                 return 1
+              else
+                shas=`getcfg SHA${ii}:`
+                sha=""; jj=0
+                for sha in $shas; do
+                  let jj=jj+1
+                  [ $jj -eq $ppos ] && break
+                done
+                if [ -n "$sha" ]; then
+                  shax=`shasumx "$pkg"`
+                  if [ "$shax" != "$sha" ]; then
+                    echo "Error transferring PKG${ii}: $pkg" 1>&2
+                    return 1
+                  fi
+                fi
               fi
-            fi
-          fi
-          sha=`getcfg SHA${ii}:`
-          if [ -n "$sha" ]; then
-            shax=`shasumx "$pkg"`
-            if [ "$shax" != "$sha" ]; then
-              echo "Error transferring PKG${ii}: $pkg" 1>&2
-              return 1
             fi
           fi
         done

@@ -1,4 +1,4 @@
-URL: ftp://ftp.videolan.org/pub/videolan/x264/snapshots/x264-snapshot-20100903-2245.tar.bz2
+URL: ftp://ftp.videolan.org/pub/videolan/x264/snapshots
 PKG: x264-snapshot-20100903-2245.tar.bz2
 SHA: ee36d2e14f3fccd354ee6096960ec7e6b2f70a32
 DIR: x264-snapshot-20100903-2245

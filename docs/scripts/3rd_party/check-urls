@@ -139,8 +139,6 @@ for config in `find "${HOME3P}" -name config.txt`; do
   [ -n "$URL2" ] && fetch "$URL2" "$NOTFOUND"
   URL3=`getcfgx URL3: "$config"`
   [ -n "$URL3" ] && fetch "$URL3" "$NOTFOUND"
-  URL4=`getcfgx URL4: "$config"`
-  [ -n "$URL4" ] && fetch "$URL4" "$NOTFOUND"
 done
 #
 if [ -s "$NOTFOUND" ]; then

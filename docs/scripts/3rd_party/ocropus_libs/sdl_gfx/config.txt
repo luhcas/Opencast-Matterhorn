@@ -1,4 +1,4 @@
-URL: http://www.ferzkopp.net/Software/SDL_gfx-2.0/SDL_gfx-2.0.22.tar.gz
+URL: http://www.ferzkopp.net/Software/SDL_gfx-2.0
 PKG: SDL_gfx-2.0.22.tar.gz
 SHA: 6d384d8dbf7fe56e4dfef1aaa06a106f62ef91d1
 DIR: SDL_gfx-2.0.22
