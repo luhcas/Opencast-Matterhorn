@@ -147,17 +147,17 @@
                     <thead>
                       <tr>
                         <th width="25%" class="ui-widget-header"><div>Title</div></th>
-                        <th width="25%" class="ui-widget-header"><div>Organizer</div></th>
-                        <th width="25%" class="ui-widget-header"><div>Department</div></th>
+			<th width="25%" class="ui-widget-header"><div>Contributor</div></th>
+                        <th width="25%" class="ui-widget-header"><div>Organizer</div></th>                        
                         <th width="25%" class="ui-widget-header"><div>Action</div></th>
                       </tr>
                     </thead>
                     <tbody>
                       {for series in seriesView}
                       <tr>
-                        <td class="ui-state-active">${series.title}</td>
+                        <td class="ui-state-active">${series.title}</td>                       
+ 			<td class="ui-state-active">${series.creator}</td>
                         <td class="ui-state-active">${series.contributor}</td>
-                        <td class="ui-state-active">${series.creator}</td>
                         <td class="ui-state-active" align="center">
                           <a href="viewseries.html?seriesId=${series.id}">View Info</a><br />
                           <a href="series.html?seriesId=${series.id}&edit=true">Edit</a><!--  | <a href="javascript:ocSeriesList.deleteSeries('${series.id}', '${series.title}');">Delete</a> -->
