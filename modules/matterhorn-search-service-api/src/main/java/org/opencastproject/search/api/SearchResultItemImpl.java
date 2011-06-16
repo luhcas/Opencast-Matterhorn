@@ -649,7 +649,8 @@ public class SearchResultItemImpl implements SearchResultItem {
   /**
    * Build a result item from an anonymously implemented interface to ensure you don't miss any fields.
    */
-  public static SearchResultItemImpl fill(SearchResultItemImpl item, SearchResultItem from) {
+  public static SearchResultItemImpl fill(SearchResultItem from) {
+    SearchResultItemImpl item = new SearchResultItemImpl();
     item.setId(from.getId());
     item.setMediaPackage(from.getMediaPackage());
     item.setDcExtent(from.getDcExtent());

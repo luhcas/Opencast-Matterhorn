@@ -137,7 +137,7 @@ public class SolrRequester {
 
     // Walk through response and create new items with title, creator, etc:
     for (final SolrDocument doc : solrResponse.getResults()) {
-      final SearchResultItemImpl item = SearchResultItemImpl.fill(new SearchResultItemImpl(), new SearchResultItem() {
+      final SearchResultItemImpl item = SearchResultItemImpl.fill(new SearchResultItem() {
         private final String dfltString = null;
 
         @Override
@@ -284,14 +284,16 @@ public class SolrRequester {
 
         @Override
         public SearchResultItemType getType() {
-          return SearchResultItemType.valueOf(Schema.getOcMediatype(doc));
+          String t = Schema.getOcMediatype(doc);
+          return t != null ? SearchResultItemType.valueOf(t) : null;
         }
 
         @Override
         public String[] getKeywords() {
-          if (getType().equals(SearchResultItemType.AudioVisual))
-            return Schema.getOcKeywords(doc).split(" ");
-          else
+          if (getType().equals(SearchResultItemType.AudioVisual)) {
+            String k = Schema.getOcKeywords(doc);
+            return k != null ? k.split(" ") : new String[0];
+          } else
             return new String[0];
         }
 
@@ -312,8 +314,7 @@ public class SolrRequester {
 
         @Override
         public MediaSegment[] getSegments() {
-          if (getType().equals(SearchResultItemType.AudioVisual))
-            return createSearchResultSegments(doc, query).toArray(new MediaSegmentImpl[0]);
+          if (SearchResultItemType.AudioVisual.equals(getType()))            return createSearchResultSegments(doc, query).toArray(new MediaSegmentImpl[0]);
           else
             return new MediaSegmentImpl[0];
         }

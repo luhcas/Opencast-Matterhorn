@@ -233,9 +233,9 @@
   <!-- The bundle id. This is the unique identifier. -->
     <field name="id" type="string" indexed="true" stored="true" required="true" /> 
    
-    <!-- Dublin core fields. -->
+   <!-- Dublin core fields. -->
     
-   <field name="dc_title" type="text" indexed="true" stored="true" omitNorms="true" multiValued="false"/>
+   <field name="dc_title" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="dc_subject" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="dc_creator" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="dc_publisher" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>  
@@ -247,19 +247,19 @@
    <field name="dc_available_to" type="date" indexed="true" stored="true" omitNorms="true" multiValued="false"/>
    <field name="dc_language" type="string" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="dc_rights_holder" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
-   <field name="dc_spatial" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_spatial" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
    <field name="dc_temporal" type="text" indexed="true" stored="true" omitNorms="true"/>
    <field name="dc_is_part_of" type="string" indexed="true" stored="true" omitNorms="true"/>
    <field name="dc_replaces" type="string" indexed="true" stored="true" omitNorms="true"/>
    <field name="dc_type" type="text" indexed="true" stored="true" omitNorms="true"/>
-   <field name="dc_access_rights" type="text" indexed="true" stored="true" omitNorms="true"/>
-   <field name="dc_license" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_access_rights" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
+   <field name="dc_license" type="text" indexed="true" stored="true" omitNorms="true" multiValued="true"/>
       
-  <!-- Series fields -->
+   <!-- Series fields -->
   
    <field name="xml" type="text" indexed="false" stored="true" multiValued="false"/>
    <field name="access_control" type="text" indexed="false" stored="true" multiValued="false"/>
-  <!-- Sort fields -->
+   <!-- Sort fields -->
   
    <field name="dc_title_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
    <field name="dc_subject_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>

@@ -29,7 +29,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * This class reflects the solr schema.xml. Please access the index _only_ by means of this class.
+ * This class reflects the solr schema.xml. Please access the index _only_ by means of this class. Note that all getters
+ * returning simple values may always return null.
  */
 public final class Schema {
 
@@ -259,7 +260,8 @@ public final class Schema {
   }
 
   public static String getId(SolrInputDocument doc) {
-    return mkString(doc.get(ID).getFirstValue());
+    SolrInputField f = doc.get(ID);
+    return f != null ? mkString(f.getFirstValue()) : null;
   }
 
   public static void setId(SolrInputDocument doc, String id) {
@@ -432,8 +434,8 @@ public final class Schema {
   }
 
   public static String getOcKeywords(SolrInputDocument doc) {
-    SolrInputField keywords = doc.get(OC_KEYWORDS);
-    return keywords == null ? "" : mkString(keywords.getFirstValue());
+    SolrInputField f = doc.get(OC_KEYWORDS);
+    return f != null ? mkString(f.getFirstValue()) : null;
   }
 
   public static void setOcKeywords(SolrInputDocument doc, String keywords) {
@@ -523,7 +525,7 @@ public final class Schema {
   }
 
   private static String mkString(Object v) {
-    return v != null ? v.toString() : "";
+    return v != null ? v.toString() : null;
   }
 
   private static Date mkDate(Object v) {
