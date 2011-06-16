@@ -724,6 +724,7 @@ public class SchedulerServiceSolrIndex implements SchedulerServiceIndex {
     }
     String solrQueryString = buildSolrQueryString(query);
     solrQuery.setQuery(solrQueryString);
+    solrQuery.setRows(Integer.MAX_VALUE);
 
     if (query.getSort() != null) {
       SolrQuery.ORDER order = query.isSortAscending() ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc;
