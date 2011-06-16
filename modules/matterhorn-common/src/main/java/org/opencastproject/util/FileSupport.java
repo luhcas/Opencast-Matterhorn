@@ -129,7 +129,10 @@ public final class FileSupport {
   public static File copy(File sourceFile, File targetFile, boolean overwrite) throws IOException {
 
     // This variable is used when the channel copy files, and stores the maximum size of the file parts copied from source to target
-    final long chunk = 1024 * 1024 * 512; // 512 MB
+    final int chunk = 1024 * 1024 * 512; // 512 MB
+    
+    // This variable is used when the cannel copy fails completely, as the size of the memory buffer used to copy the data from one stream to the other.
+    final int bufferSize = 1024 * 1024; // 1 MB 
 
     File dest = determineDestination(targetFile, sourceFile, overwrite);
 
@@ -145,7 +148,9 @@ public final class FileSupport {
     }
     // We are copying a file
     else {
-      dest.getParentFile().mkdirs();
+      // If dest is not an "absolute file", getParentFile may return null, even if there *is* a parent file.
+      // That's why "getAbsoluteFile" is used here
+      dest.getAbsoluteFile().getParentFile().mkdirs();
       if (dest.exists())
         delete(dest);
 
@@ -178,7 +183,7 @@ public final class FileSupport {
         if ((sourceStream != null) && (targetStream != null) && (size < sourceFile.length())) {
           logger.warn("Got IOException using Channels for copying in chunks. Trying to use stream copy instead...");
           int copied = 0;
-          byte[] buffer = new byte[Integer.MAX_VALUE];
+          byte[] buffer = new byte[bufferSize];
           while ((copied = sourceStream.read(buffer, 0, buffer.length)) != -1)
             targetStream.write(buffer, 0, copied);
         } else
@@ -571,7 +576,9 @@ public final class FileSupport {
           throw new IOException("Source and target locations must be different");
         
         // Search the first existing parent of the target file, to check if it can be written
-        for (File iter = dest; iter != null; iter = iter.getParentFile())
+        // getParentFile can return null even though there *is* a parent file, if the file is not absolute
+        // That's the reason why getAbsoluteFile is used here
+        for (File iter = dest.getAbsoluteFile(); iter != null; iter = iter.getParentFile())
           if (iter.exists()) {
             if (iter.canWrite())
               break;
