@@ -50,6 +50,7 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -132,6 +133,10 @@ public class CalendarGenerator {
 
     DateTime startDate = new DateTime(period.getStart());
     DateTime endDate = new DateTime(period.getEnd());
+    if (endDate.before(new Date())) {
+      logger.debug("Event has already passed, skipping!");
+      return false;
+    }
     startDate.setUtc(true);
     endDate.setUtc(true);
     String seriesID = null;
