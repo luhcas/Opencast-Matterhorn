@@ -863,7 +863,7 @@ ocRecordings = new (function() {
   this.stopWorkflow = function(id) {
     var wf = ocRecordings.getWorkflow(id);
     if (wf) {
-      if(confirm('Are you sure you wish to delete ' + wf.title + '?')){
+      if(confirm('Are you sure you wish to delete ' + wf.mediapackage.title + '?')){
         $.ajax({
           url: WORKFLOW_URL + '/stop',
           type: 'POST',
