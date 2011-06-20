@@ -129,7 +129,41 @@ var ocScheduler = (function() {
       });
     
     $('#seriesSelect').autocomplete({
-      source: SERIES_URL + '/search',
+      source: function(request, response) {
+        $.ajax({
+          url: SERIES_URL + '/series.json?q=' + request.term,
+          dataType: 'json',
+          type: 'GET',
+          success: function(data) {
+            var series_list = [];
+            $.each(data, function(){
+              series_list.push({value: this['http://purl.org/dc/terms/']['title'][0].value,
+                                id: this['http://purl.org/dc/terms/']['identifier'][0].value});
+            });
+            series_list.sort(function stringComparison(a, b)	{
+              a = a.value;
+              a = a.toLowerCase();
+              a = a.replace(/ä/g,"a");
+              a = a.replace(/ö/g,"o");
+              a = a.replace(/ü/g,"u");
+              a = a.replace(/ß/g,"s");
+
+              b = b.value;
+              b = b.toLowerCase();
+              b = b.replace(/ä/g,"a");
+              b = b.replace(/ö/g,"o");
+              b = b.replace(/ü/g,"u");
+              b = b.replace(/ß/g,"s");
+
+              return(a==b)?0:(a>b)?1:-1;
+            });
+            response(series_list);
+          }, 
+          error: function() {
+            ocUtils.log('could not retrieve series_data');
+          }
+        });
+      },
       select: function(event, ui){
         $('#series').val(ui.item.id);
       },
