@@ -202,10 +202,10 @@ ocSeries.init = function(){
           select: append,
           close: closeFunction
         });
-        if(value.edit) {
+        if(value.write) {
           $row.find('[name|="priv_edit"]').attr('checked', 'checked');
         }
-        if(value.view) {
+        if(value.read) {
           $row.find('[name|="priv_view"]').attr('checked', 'checked');
         }
         $('#rolePrivilegeTable > tbody').append($row);
