@@ -271,6 +271,10 @@ public class XACMLAuthorizationService implements AuthorizationService {
    */
   @Override
   public MediaPackage setAccessControl(MediaPackage mediapackage, AccessControlList acl) throws MediaPackageException {
+    if (acl == null) {
+      logger.debug("No ACL specified: no XACML attachment will be added to mediapackage '{}'", mediapackage);
+      return mediapackage;
+    }
     // Get XACML representation of these role + action tuples
     String xacmlContent = null;
     try {
