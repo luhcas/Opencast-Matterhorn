@@ -55,6 +55,17 @@
     -->
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
 
+    <fieldType name="caseInsensitiveString" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+      <analyzer type="index">
+        <tokenizer class="org.opencastproject.solr.NonTokenizingFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="org.opencastproject.solr.NonTokenizingFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+      </analyzer>
+    </fieldType>
+
     <!-- boolean type: "true" or "false" -->
     <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
 
@@ -259,27 +270,28 @@
   
    <field name="xml" type="text" indexed="false" stored="true" multiValued="false"/>
    <field name="access_control" type="text" indexed="false" stored="true" multiValued="false"/>
+
    <!-- Sort fields -->
   
-   <field name="dc_title_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_subject_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_creator_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_publisher_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>  
-   <field name="dc_contributor_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_abstract_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_description_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_title_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_subject_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_creator_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_publisher_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>  
+   <field name="dc_contributor_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_abstract_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_description_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
    <field name="dc_created_sort" type="date" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
    <field name="dc_available_from_sort" type="date" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
    <field name="dc_available_to_sort" type="date" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_language_sort" type="string" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_rights_holder_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_spatial_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_temporal_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_is_part_of_sort" type="string" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_replaces_sort" type="string" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_type_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_access_rights_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
-   <field name="dc_license_sort" type="text" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_language_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_rights_holder_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_spatial_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_temporal_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_is_part_of_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_replaces_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_type_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_access_rights_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
+   <field name="dc_license_sort" type="caseInsensitiveString" indexed="true" stored="false" omitNorms="true" multiValued="false"/>
    
   <!-- A fulltext copy field. -->
     <field name="fulltext" type="text" indexed="true" stored="false" multiValued="true"/>
@@ -310,9 +322,26 @@
    <copyField source="dc_contributor" dest="fulltext"/>
    
    <copyField source="dc_title" dest="dc_title_sort"/>
+   <copyField source="dc_subject" dest="dc_subject_sort"/>
+   <copyField source="dc_creator" dest="dc_creator_sort"/>
+   <copyField source="dc_publisher" dest="dc_publisher_sort"/>
+   <copyField source="dc_contributor" dest="dc_contributor_sort"/>
+   <copyField source="dc_abstract" dest="dc_abstract_sort"/>
+   <copyField source="dc_description" dest="dc_description_sort"/>
+
    <copyField source="dc_created" dest="dc_created_sort"/>
    <copyField source="dc_available_from" dest="dc_available_from_sort"/>
    <copyField source="dc_available_to" dest="dc_available_to_sort"/>
+
+   <copyField source="dc_language" dest="dc_language_sort"/>
+   <copyField source="dc_rights_holder" dest="dc_rights_holder_sort"/>
+   <copyField source="dc_spatial" dest="dc_spatial_sort"/>
+   <copyField source="dc_temporal" dest="dc_temporal_sort"/>
+   <copyField source="dc_is_part_of" dest="dc_is_part_of_sort"/>
+   <copyField source="dc_replaces" dest="dc_replaces_sort"/>
+   <copyField source="dc_type" dest="dc_type_sort"/>
+   <copyField source="dc_access_rights" dest="dc_access_rights_sort"/>
+   <copyField source="dc_license" dest="dc_license_sort"/>
 
   <!-- Similarity is the scoring routine for each document vs. a query.
       A custom similarity may be specified here, but the default is fine
