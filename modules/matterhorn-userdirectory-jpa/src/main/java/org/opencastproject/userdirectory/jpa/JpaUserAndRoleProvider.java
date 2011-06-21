@@ -16,7 +16,7 @@
 package org.opencastproject.userdirectory.jpa;
 
 import org.opencastproject.security.api.RoleProvider;
-import org.opencastproject.security.api.SecurityConstants;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserProvider;
 import org.opencastproject.util.PasswordEncoder;
@@ -32,6 +32,7 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -44,7 +45,10 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
   private static final Logger logger = LoggerFactory.getLogger(JpaUserAndRoleProvider.class);
 
   /** The JPA provider */
-  protected PersistenceProvider persistenceProvider;
+  protected PersistenceProvider persistenceProvider = null;
+
+  /** The security service */
+  protected SecurityService securityService = null;
 
   /**
    * @param persistenceProvider
@@ -64,6 +68,14 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
   @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
+  }
+
+  /**
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
   }
 
   /** The factory used to generate the entity manager */
@@ -91,6 +103,25 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
     }
   }
 
+  public User loadUser(String userName, String organizationId) {
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query q = em.createNamedQuery("user");
+      q.setParameter("u", userName);
+      q.setParameter("o", organizationId);
+      JpaUser user = null;
+      try {
+        user = (JpaUser) q.getSingleResult();
+      } catch (NoResultException e) {
+        return null;
+      }
+      Set<String> roles = user.getRoles();
+      return new User(userName, user.getPassword(), user.getOrganization(), roles.toArray(new String[roles.size()]));
+    } finally {
+      em.close();
+    }
+  }
+
   /**
    * {@inheritDoc}
    * 
@@ -98,18 +129,8 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
    */
   @Override
   public User loadUser(String userName) {
-    EntityManager em = emf.createEntityManager();
-    try {
-      JpaUser user = em.find(JpaUser.class, userName);
-      if (user == null) {
-        return null;
-      } else {
-        Set<String> roles = user.getRoles();
-        return new User(userName, user.getPassword(), user.getOrganization(), roles.toArray(new String[roles.size()]));
-      }
-    } finally {
-      em.close();
-    }
+    String orgId = securityService.getOrganization().getId();
+    return loadUser(userName, orgId);
   }
 
   /**
@@ -165,7 +186,7 @@ public class JpaUserAndRoleProvider implements UserProvider, RoleProvider {
    */
   @Override
   public String getOrganization() {
-    return SecurityConstants.DEFAULT_ORGANIZATION_ID;
+    return ALL_ORGANIZATIONS;
   }
 
   /**

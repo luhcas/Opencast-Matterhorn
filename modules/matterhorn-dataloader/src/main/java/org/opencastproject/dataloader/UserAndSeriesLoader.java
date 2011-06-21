@@ -22,6 +22,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.userdirectory.jpa.JpaUser;
@@ -40,6 +41,9 @@ import java.util.Set;
  * A data loader to populate the series and JPA user provider with sample data.
  */
 public class UserAndSeriesLoader {
+
+  /** The second tenant */
+  public static final String TENANT1 = "tenant1";
 
   /** The number of series to load */
   public static final int NUM_SERIES = 10;
@@ -82,6 +86,9 @@ public class UserAndSeriesLoader {
 
   /** The JPA-based user provider, which includes an addUser() method */
   protected JpaUserAndRoleProvider jpaUserProvider = null;
+
+  /** The security service */
+  protected SecurityService securityService = null;
 
   /**
    * Callback on component activation.
@@ -130,20 +137,17 @@ public class UserAndSeriesLoader {
         }
       }
 
-      load(STUDENT, 20);
-      load(INSTRUCTOR, 2);
-      load(ADMIN, 1);
+      load(STUDENT, 20, DEFAULT_ORGANIZATION_ID);
+      load(STUDENT, 20, TENANT1);
 
-      // Load a user for testing the ldap provider
-      Set<String> ldapUserRoles = new HashSet<String>();
-      ldapUserRoles.add(USER_ROLE);
-      // This is the public identifier for Josh Holtzman in the UC Berkeley Directory, which is available for anonymous
-      // binding.
-      String ldapUserId = "231693";
-      if (jpaUserProvider.loadUser(ldapUserId) == null) {
-        jpaUserProvider.addUser(new JpaUser(ldapUserId, "ldap", DEFAULT_ORGANIZATION_ID, ldapUserRoles));
-        logger.debug("Added ldap user '{}'", ldapUserId);
-      }
+      load(INSTRUCTOR, 2, DEFAULT_ORGANIZATION_ID);
+      load(INSTRUCTOR, 2, TENANT1);
+
+      load(ADMIN, 1, DEFAULT_ORGANIZATION_ID);
+      load(ADMIN, 1, TENANT1);
+
+      loadLdapUser(DEFAULT_ORGANIZATION_ID);
+      loadLdapUser(TENANT1);
 
       logger.info("Finished loading sample series and users");
     }
@@ -157,7 +161,7 @@ public class UserAndSeriesLoader {
    * @param numPerSeries
    *          the number of users to load per series
    */
-  protected void load(String prefix, int numPerSeries) {
+  protected void load(String prefix, int numPerSeries, String orgId) {
     String lowerCasePrefix = prefix.toLowerCase();
     int totalUsers = numPerSeries * NUM_SERIES;
 
@@ -165,11 +169,11 @@ public class UserAndSeriesLoader {
             lowerCasePrefix, lowerCasePrefix, lowerCasePrefix, totalUsers, lowerCasePrefix, totalUsers });
 
     for (int i = 1; i <= totalUsers; i++) {
-      if (jpaUserProvider.loadUser(lowerCasePrefix + i) == null) {
+      if (jpaUserProvider.loadUser(lowerCasePrefix + i, orgId) == null) {
         Set<String> roleSet = new HashSet<String>();
         roleSet.add(USER_ROLE);
         roleSet.add(SERIES_PREFIX + (((i - 1) % NUM_SERIES) + 1) + "_" + prefix);
-        JpaUser user = new JpaUser(lowerCasePrefix + i, lowerCasePrefix + i, DEFAULT_ORGANIZATION_ID, roleSet);
+        JpaUser user = new JpaUser(lowerCasePrefix + i, lowerCasePrefix + i, orgId, roleSet);
         try {
           jpaUserProvider.addUser(user);
           logger.debug("Added {}", user);
@@ -177,6 +181,25 @@ public class UserAndSeriesLoader {
           logger.warn("Can not add {}: {}", user, e);
         }
       }
+    }
+  }
+
+  /**
+   * Load a user for testing the ldap provider
+   * 
+   * @param organizationId
+   *          the organization
+   */
+  protected void loadLdapUser(String organizationId) {
+    Set<String> ldapUserRoles = new HashSet<String>();
+    ldapUserRoles.add(USER_ROLE);
+    // This is the public identifier for Josh Holtzman in the UC Berkeley Directory, which is available for anonymous
+    // binding.
+    String ldapUserId = "231693";
+
+    if (jpaUserProvider.loadUser(ldapUserId, organizationId) == null) {
+      jpaUserProvider.addUser(new JpaUser(ldapUserId, "ldap", organizationId, ldapUserRoles));
+      logger.debug("Added ldap user '{}' into organization '{}'", ldapUserId, organizationId);
     }
   }
 
@@ -194,6 +217,14 @@ public class UserAndSeriesLoader {
    */
   public void setSeriesService(SeriesService seriesService) {
     this.seriesService = seriesService;
+  }
+
+  /**
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
   }
 
 }

@@ -15,10 +15,12 @@
  */
 package org.opencastproject.userdirectory.jpa;
 
-import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.SecurityService;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import org.easymock.EasyMock;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Assert;
@@ -34,9 +36,14 @@ public class JpaUserProviderTest {
 
   private ComboPooledDataSource pooledDataSource = null;
   private JpaUserAndRoleProvider provider = null;
-
+  private Organization org1 = null;
+  private Organization org2 = null;
+  
   @Before
   public void setUp() throws Exception {
+    org1 = new Organization("org1", "org1", "localhost", "admin", "anon");
+    org2 = new Organization("org2", "org2", "127.0.0.1", "admin", "anon");
+
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
     pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis());
@@ -65,7 +72,14 @@ public class JpaUserProviderTest {
   public void testLoadAndGetUser() throws Exception {
     Set<String> authorities = new HashSet<String>();
     authorities.add("ROLE_ASTRO_101_SPRING_2011_STUDENT");
-    JpaUser user = new JpaUser("user1", "pass1", DEFAULT_ORGANIZATION_ID, authorities);
+    JpaUser user = new JpaUser("user1", "pass1", org1.getId(), authorities);
+    
+    // Set the security sevice
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getOrganization()).andReturn(org1).anyTimes();
+    EasyMock.replay(securityService);
+    provider.setSecurityService(securityService);
+    
     provider.addUser(user);
     Assert.assertNotNull(provider.loadUser("user1"));
     Assert.assertNull("Loading 'does not exist' should return null", provider.loadUser("does not exist"));
@@ -73,15 +87,21 @@ public class JpaUserProviderTest {
 
   @Test
   public void testRoles() throws Exception {
+    // Set the security sevice
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getOrganization()).andReturn(org1).anyTimes();
+    EasyMock.replay(securityService);
+    provider.setSecurityService(securityService);
+
     Set<String> authoritiesOne = new HashSet<String>();
     authoritiesOne.add("ROLE_ONE");
-    JpaUser userOne = new JpaUser("user1", "pass1", DEFAULT_ORGANIZATION_ID, authoritiesOne);
+    JpaUser userOne = new JpaUser("user1", "pass1", org1.getId(), authoritiesOne);
     provider.addUser(userOne);
 
     Set<String> authoritiesTwo = new HashSet<String>();
     authoritiesTwo.add("ROLE_ONE");
     authoritiesTwo.add("ROLE_TWO");
-    JpaUser userTwo = new JpaUser("user2", "pass2", DEFAULT_ORGANIZATION_ID, authoritiesTwo);
+    JpaUser userTwo = new JpaUser("user2", "pass2", org1.getId(), authoritiesTwo);
     provider.addUser(userTwo);
 
     Assert.assertEquals("There should be two roles", 2, provider.getRoles().length);

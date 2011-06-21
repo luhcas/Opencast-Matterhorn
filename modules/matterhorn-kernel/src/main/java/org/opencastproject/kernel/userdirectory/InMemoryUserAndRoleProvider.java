@@ -119,7 +119,7 @@ public class InMemoryUserAndRoleProvider implements UserProvider, RoleProvider {
    */
   @Override
   public String getOrganization() {
-    return DEFAULT_ORGANIZATION_ID;
+    return ALL_ORGANIZATIONS;
   }
 
 }

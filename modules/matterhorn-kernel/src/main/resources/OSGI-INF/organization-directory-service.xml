@@ -3,12 +3,14 @@
 
   <scr:component name="org.opencastproject.kernel.security.OrganizationDirectoryServiceImpl" activate="activate" immediate="true">
     <implementation class="org.opencastproject.kernel.security.OrganizationDirectoryServiceImpl" />
+    <property name="service.pid" value="org.opencastproject.organization" />
     <property name="service.description" value="Organization Directory Service" />
     <service>
       <provide interface="org.opencastproject.security.api.OrganizationDirectoryService" />
+      <provide interface="org.osgi.service.cm.ManagedServiceFactory" />
     </service>
-    <reference name="orgDirectory" interface="org.opencastproject.security.api.Organization"
-      cardinality="0..n" policy="dynamic" bind="addOrganizationDirectory" unbind="removeOrganizationDirectory" />
+    <reference name="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"
+      cardinality="1..1" policy="static" bind="setConfigurationAdmin" />
   </scr:component>
 
   <scr:component name="org.opencastproject.kernel.security.OrganizationEndpoint" immediate="true">

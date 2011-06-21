@@ -25,6 +25,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
@@ -34,7 +35,8 @@ import javax.persistence.Table;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "MH_USER")
-@NamedQuery(name = "roles", query = "select distinct user.roles from JpaUser user")
+@NamedQueries({ @NamedQuery(name = "user", query = "select u from JpaUser u where u.username=:u and u.organization=:o"),
+        @NamedQuery(name = "roles", query = "select distinct user.roles from JpaUser user") })
 public class JpaUser {
 
   /** The java.io.serialization uid */
@@ -47,11 +49,13 @@ public class JpaUser {
   @Column
   protected String password;
 
+  @Id
   @Column
   protected String organization;
 
   @ElementCollection
-  @CollectionTable(name = "MH_ROLE", joinColumns = @JoinColumn(name = "USERNAME"))
+  @CollectionTable(name = "MH_ROLE", joinColumns = { @JoinColumn(name = "USERNAME", referencedColumnName = "USERNAME"),
+          @JoinColumn(name = "ORGANIZATION", referencedColumnName = "ORGANIZATION") })
   @Column(name = "ROLE")
   protected Set<String> roles;
 

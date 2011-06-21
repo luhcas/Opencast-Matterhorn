@@ -20,6 +20,9 @@ package org.opencastproject.security.api;
  */
 public interface UserProvider {
 
+  /** The constant indicating that a provider should be consulted for all organizations */
+  String ALL_ORGANIZATIONS = "*";
+
   /**
    * Loads a user by username, or returns null if this user is not known to this provider.
    * 
@@ -30,7 +33,8 @@ public interface UserProvider {
   User loadUser(String userName);
 
   /**
-   * Returns the identifier for the organization that is associated with this user provider.
+   * Returns the identifier for the organization that is associated with this user provider. If equal to
+   * {@link #ALL_ORGANIZATIONS}, this provider will always be consulted, regardless of the organization.
    * 
    * @return the defining organization
    */
