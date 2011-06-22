@@ -193,6 +193,8 @@ ocUtils.fromUTCDateStringToFormattedTime = function(UTCDate, duration) {
  *
  */
 ocUtils.toISODate = function(date, utc) {
+//align date format
+var date = new Date(date);
   var out;
   if(typeof utc == 'undefined') {
     utc = true;
