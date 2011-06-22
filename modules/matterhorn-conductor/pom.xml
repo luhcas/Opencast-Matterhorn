@@ -38,6 +38,11 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-series-service-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-search-service-api</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -151,6 +156,7 @@
               OSGI-INF/operations/analyze-text.xml,
               OSGI-INF/operations/analyze-videosegments.xml,
               OSGI-INF/operations/append.xml,
+              OSGI-INF/operations/apply-acl.xml,
               OSGI-INF/operations/capture.xml,
               OSGI-INF/operations/caption.xml,
               OSGI-INF/operations/cli.xml,

@@ -393,6 +393,15 @@
       </configurations>
     </operation>
 
+    <!-- Apply ACL from series to the mediapackage -->
+
+    <operation
+      id="apply-acl"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Applying access control rules">
+    </operation>
+
     <!-- Distribute to download server -->
     
     <operation
