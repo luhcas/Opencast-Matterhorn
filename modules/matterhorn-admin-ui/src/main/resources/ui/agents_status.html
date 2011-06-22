@@ -10,23 +10,20 @@
         <link rel="stylesheet" type="text/css" href="css/admin.css" />
         <!-- scripts -->
         <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="js/oc.utils.js"></script>
         <script type="text/javascript" src="jquery/jquery-ui-1.8.1.custom.min.js"></script>
         <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
-        <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
+	<script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+
         <script type="text/javascript">
-            $(document).ready( function() {
+            $(document).ready( function() {              
 
-                $('#stage').xslt("../../capture-admin/agents", "xsl/agents_status.xsl", function() {
-                    $('#agentsTable').tablesorter({ cssHeader: 'oc-ui-sortable', cssAsc: 'oc-ui-sortable-Ascending', cssDesc: 'oc-ui-sortable-Descending'});
+		var polling_time;
+		var last_updated;
+		var agentsObj = {};
+		agentsObj["agents"] = [];
+		var agentsCount = undefined,dispAgCount = 0;
 
-                    //header underline
-                    $(".header").hover(function() {
-                        $(this).css('text-decoration', 'underline');
-                    }, function(){
-                        $(this).css('text-decoration', 'none')
-                    });
-
-                });
                 $("#tabsWrapper").tabs({
                   select: function (event, ui) {
                     switch (ui.index) {
@@ -49,7 +46,130 @@
                     }
                   },
                   selected: 2
-                });
+                });	
+		
+
+		function displayAgentState(data){		
+			var agent_name = "";
+			dispAgCount++;
+			polling_time = 0;			
+
+			if ( data["properties-response"].properties != ""){			
+				$.each(data["properties-response"].properties.item,function(a,item){				
+						if (item.key==="capture.agent.state.remote.polling.interval"){
+							polling_time = item.value;
+						}
+						if (item.key==="capture.agent.name") {
+							agent_name = item.value;
+						}				
+				});	
+			}				
+			if (polling_time >0) {	
+				$.each(agentsObj["agents"],function(i,item){
+					if ((item.name == agent_name)&&(item["time-since-last-update"] > polling_time*1000 )) {						
+						item.state = "offline";
+						return false;
+					}	
+				});
+			}
+			if (agentsCount == dispAgCount) showAgentsStatus();		
+		}
+
+		function processOneAgent(agent){
+			$.each(agent,function(b,property){				
+				var devices,devices_arr;
+				if (b==="name") {
+					$.ajax({
+						dataType : 'json',
+						type : 'get',
+						url : '/capture-admin/agents/'+property+'/configuration.json',
+						success : displayAgentState
+					});
+				}		
+				if (b==="time-since-last-update") last_updated=property;
+				if ((b==="capabilities")&&(property!="")) {
+					$.each(property.item,function(c,device){
+						if (device.key=="capture.device.names"){									
+							devices = device.value.toLowerCase().split(',');							
+							devices_arr = device.value.toLowerCase().split(',');										
+							return false;
+						}
+					});
+					var i;
+					agent["devices"] = devices;
+					for(i=0;i<devices.length;i++) { agent.devices[i] = {"device": devices[i]}; agent.devices[i]["properties"] = []; }
+					$.each(property.item,function(c,device){
+						var prop = device.key.split('.');
+						var name = "",i;
+						for (i=3;i<prop.length;i++){ name += prop[i]+" "; }						
+						var index = $.inArray( prop[2].toLowerCase(), devices_arr);
+						if ( index != -1) {														
+							agent.devices[index]["properties"].push({"key":name.trim(),"value":device.value});	
+						}
+					});
+				}	
+				else {
+					agent[b.toString()] = property;	
+				}
+			});		
+		}	
+	
+		function processAgents(data){			
+			$.each(data.agents,function(a,agent){			
+				if ($.isArray(agent)) { 
+					$.each(agent,function(b,one){ 
+						processOneAgent(one); 
+					}); 
+				}	
+				else processOneAgent(agent);
+				agentsObj.agents = $(agent).toArray();
+			});
+			agentsCount = agentsObj.agents.length;	
+			//showAgentsStatus();									
+		}		
+
+		function showAgentsStatus(){
+			var result = TrimPath.processDOMTemplate("tableTemplate", agentsObj);	
+			$('#stage').empty().append(result);
+			 		
+			$('#captureTable').tablesorter({
+				cssHeader: 'oc-ui-sortable',
+				cssAsc: 'oc-ui-sortable-Ascending',
+				cssDesc: 'oc-ui-sortable-Descending' ,
+				headers: { 3: { sorter: false } }
+			});				
+										
+	   
+			$("ul.propnav li").click(function() { 		  
+				//Drop down the subnav on click  
+				$(this).find("ul.itemnav").slideDown('fast').show();
+	 			
+				$(this).find('ul.itemnav li span.dev-prop-val').each(function(){
+					var span_len = $(this).parents('li').width()-$(this).siblings('span').width();
+					if ($(this).width()>span_len) {	
+						var font_size = Math.round(parseFloat($(this).css('font-size')));
+						var letters = Math.floor(span_len/font_size - 3);
+						$(this).attr('title',$(this).text());
+						$(this).text($(this).text().substring(0,letters)+"...");													
+					}
+				});
+			   
+				$(this).hover(function() {  
+				}, function(){  
+					//When the mouse hovers out of the subnav, move it back up
+					$(this).find("ul.itemnav").slideUp('slow');   
+				});  
+			   			 
+			}); 				
+		}
+
+		$.ajax({
+			dataType : 'json',
+			type : 'get',
+			url : '/capture-admin/agents.json',
+			success : processAgents
+		});		
+		
             });
         </script>
     </head>
@@ -106,22 +226,74 @@
                     </li>
                 </ul>
 
-                <div id="stage" class="ui-widget">
-                    <!-- Table is replaced by xslt -->
-                    <table id="capturetable">
-                        <thead>
-                            <tr>
-                                <th width="33%" class="ui-widget-header"><div>Agent Name</div></th>
-                                <th width="33%" class="ui-widget-header"><div>Capabilities</div></th>
-                                <th width="33%" class="ui-widget-header"><div>Status</div></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="clear"></div>
+		
+                <div id="stage" class="ui-widget ui-helper-clearfix"></div>
+                
             </div><!-- END #tabsWrapper -->
+		
+	 <!-- JS TEMPLATE -->
+        <div id="templates" style="display:none;">
+      	<textarea id="tableTemplate">      		
+      		<table id="captureTable" class="ui-widget" cellspacing="0" width="100%">
+      		<thead>      			
+					<tr>
+						<th id="sortAgent" width="25%" class="ui-widget-header sortable"><div>Agent Name<div class="sort-icon ui-icon-triangle-2-n-s"></div></div></th>
+						<th id="sortCapabilities" width="50%" class="ui-widget-header sortable"><div>Capabilities<div class="sort-icon ui-icon-triangle-2-n-s"></div></div></th>
+						<th id="sortStatus" width="25%" class="ui-widget-header sortable"><div>Status<div class="sort-icon ui-icon-triangle-2-n-s"></div></div></th>              		
+            	</tr>      		
+      		</thead>
+      		<tbody>
+      		{for agent in agents}		
+		   		 <tr>
+						<td class="ui-state-active">
+							<div style="margin-left:10px;"><a title="${agent.name}" href="${agent.url}">${agent.name}</a></div>
+						</td>
+						<td class="ui-state-active" align="center">
+							{if agent.devices}
+							<ul class="propnav">
+								{for capability in agent.devices}														
+									<li>
+									<span class="subnav"></span>
+									<span class="device">${capability.device}</span>
+									{if capability.properties }										
+										<ul class="itemnav">
+											{for property in capability.properties}
+											<li><span class="dev-prop">${property.key} :</span><span class="dev-prop-val">${property.value}</span>
+											</li>
+											{/for}
+										</ul>										
+									{/if}	
+									</li>																	
+								{/for}	
+								</ul>
+							{else}
+							<span style="text-align:center;">No capabilities found</span>
+							{/if}
+						</td>
+						{if agent.state}						
+						  <td class="ui-state-active">
+							<span class="icon icon-${agent.state}"></span>
+							<span>${agent.state}</span>	
+						  </td>
+	    
+			{else}
+			<td class="ui-state-active"><td>
+			{/if}
+		    		</tr>
+		    	{forelse}
+     				<tr>
+        				<td class="ui-state-active" colspan="3" align="center">
+          				No Capture Agents found
+        				</td>
+      			</tr>
+    			{/for}
+      		</tbody>
+      		</table>      	
+      	</textarea>	
+
+      </div>   <!-- END #templates -->  
+
+
         </div><!-- END #wrapper -->
     </body>
 </html>
