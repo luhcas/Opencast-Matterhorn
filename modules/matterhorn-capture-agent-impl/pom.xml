@@ -133,7 +133,6 @@
     <dependency>
       <groupId>net.fortuna.ical4j</groupId>
       <artifactId>ical4j</artifactId>
-      <version>1.0-rc1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

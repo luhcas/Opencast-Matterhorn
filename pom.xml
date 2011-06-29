@@ -703,6 +703,12 @@
         <version>9.0.0</version>
       </dependency>
 
+      <dependency>
+        <groupId>net.fortuna.ical4j</groupId>
+        <artifactId>ical4j</artifactId>
+        <version>1.0-rc2-patched</version>
+      </dependency>
+
       <!-- OSGi -->
       <dependency>
         <groupId>org.osgi</groupId>

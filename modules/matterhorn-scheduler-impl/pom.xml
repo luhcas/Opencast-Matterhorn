@@ -108,7 +108,6 @@
     <dependency>
       <groupId>net.fortuna.ical4j</groupId>
       <artifactId>ical4j</artifactId>
-      <version>1.0-rc2-patched</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>

@@ -100,11 +100,6 @@
       <version>1.1.1</version>
     </dependency>
     <dependency>
-      <groupId>net.fortuna.ical4j</groupId>
-      <artifactId>ical4j</artifactId>
-      <version>1.0-rc2-patched</version>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>javax.persistence</artifactId>
     </dependency>
@@ -161,12 +156,6 @@
               org.opencastproject.solr;version=${project.version},
               *;resolution:=optional
             </Import-Package>
-            <Private-Package>
-              net.fortuna.ical4j.*
-            </Private-Package>
-            <Embed-Dependency>
-              ical4j;inline=true
-            </Embed-Dependency>
             <Service-Component>
               OSGI-INF/series-service-index.xml,
               OSGI-INF/series-service-persistence.xml,
