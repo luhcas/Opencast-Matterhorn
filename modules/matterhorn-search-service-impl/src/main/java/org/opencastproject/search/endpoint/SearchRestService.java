@@ -18,8 +18,9 @@ package org.opencastproject.search.endpoint;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.search.api.SearchException;
+import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchService;
-import org.opencastproject.search.impl.SearchQueryImpl;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.rest.RestParameter;
 import org.opencastproject.util.doc.rest.RestQuery;
@@ -45,6 +46,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 /**
  * The REST endpoint
@@ -134,12 +136,13 @@ public class SearchRestService {
           @RestParameter(defaultValue = "false", description = "Whether to include this series episodes. This can be used in combination with \"id\" or \"q\".", isRequired = false, name = "episodes", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "false", description = "Whether to include this series information itself. This can be used in combination with \"id\" or \"q\".", isRequired = false, name = "series", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "0", description = "The maximum number of items to return per page.", isRequired = false, name = "limit", type = RestParameter.Type.STRING),
-          @RestParameter(defaultValue = "0", description = "The page number.", isRequired = false, name = "offset", type = RestParameter.Type.STRING) }, reponses = { @RestResponse(description = "The request was processed succesfully.", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "The search results, expressed as xml or json.")
+          @RestParameter(defaultValue = "0", description = "The page number.", isRequired = false, name = "offset", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "false", description = "Whether this is an administrative query", isRequired = false, name = "admin", type = RestParameter.Type.STRING) }, reponses = { @RestResponse(description = "The request was processed succesfully.", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "The search results, expressed as xml or json.")
   public Response getEpisodeAndSeriesById(@QueryParam("id") String id, @QueryParam("q") String text,
           @QueryParam("episodes") boolean includeEpisodes, @QueryParam("series") boolean includeSeries,
           @QueryParam("limit") int limit, @QueryParam("offset") int offset, @PathParam("format") String format) {
 
-    SearchQueryImpl query = new SearchQueryImpl();
+    SearchQuery query = new SearchQuery();
 
     // If id is specified, do a search based on id
     if (!StringUtils.isBlank(id)) {
@@ -176,7 +179,8 @@ public class SearchRestService {
           @RestParameter(description = "Any episode that matches this free-text query.", isRequired = false, name = "q", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "false", description = "Whether to include this series episodes. This can be used in combination with \"id\" or \"q\".", isRequired = false, name = "episodes", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "0", description = "The maximum number of items to return per page.", isRequired = false, name = "limit", type = RestParameter.Type.STRING),
-          @RestParameter(defaultValue = "0", description = "The page number.", isRequired = false, name = "offset", type = RestParameter.Type.STRING) }, reponses = { @RestResponse(description = "The request was processed succesfully.", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "The search results, expressed as xml or json.")
+          @RestParameter(defaultValue = "0", description = "The page number.", isRequired = false, name = "offset", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "false", description = "Whether this is an administrative query", isRequired = false, name = "admin", type = RestParameter.Type.STRING) }, reponses = { @RestResponse(description = "The request was processed succesfully.", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "The search results, expressed as xml or json.")
   public Response getEpisode(@QueryParam("id") String id, @QueryParam("q") String text,
           @QueryParam("tag") String[] tags, @QueryParam("flavor") String[] flavors, @QueryParam("limit") int limit,
           @QueryParam("offset") int offset, @PathParam("format") String format) {
@@ -193,7 +197,7 @@ public class SearchRestService {
       }
     }
 
-    SearchQueryImpl search = new SearchQueryImpl();
+    SearchQuery search = new SearchQuery();
     search.withId(id).withElementFlavors(flavorSet.toArray(new MediaPackageElementFlavor[flavorSet.size()]))
             .withElementTags(tags).withLimit(limit).withOffset(offset);
     if (!StringUtils.isBlank(text))
@@ -214,15 +218,17 @@ public class SearchRestService {
           @RestParameter(description = "The output format (json or xml) of the response body.", isRequired = false, name = "format", type = RestParameter.Type.STRING),
           @RestParameter(description = "Any episode or series that matches this free-text query.", isRequired = false, name = "q", type = RestParameter.Type.STRING),
           @RestParameter(defaultValue = "0", description = "The maximum number of items to return per page.", isRequired = false, name = "limit", type = RestParameter.Type.STRING),
-          @RestParameter(defaultValue = "0", description = "The page number.", isRequired = false, name = "offset", type = RestParameter.Type.STRING) }, reponses = {
+          @RestParameter(defaultValue = "0", description = "The page number.", isRequired = false, name = "offset", type = RestParameter.Type.STRING),
+          @RestParameter(defaultValue = "false", description = "Whether this is an administrative query", isRequired = false, name = "admin", type = RestParameter.Type.STRING) }, reponses = {
           @RestResponse(description = "The request was processed succesfully.", responseCode = HttpServletResponse.SC_OK),
           @RestResponse(description = "Wrong output format specified.", responseCode = HttpServletResponse.SC_NOT_ACCEPTABLE) }, returnDescription = "The search results, expressed as xml or json.")
   public Response getEpisodesAndSeries(@QueryParam("q") String text, @QueryParam("limit") int limit,
-          @QueryParam("offset") int offset, @QueryParam("format") String format) {
+          @QueryParam("offset") int offset, @QueryParam("format") String format, @QueryParam("admin") boolean admin)
+          throws SearchException, UnauthorizedException {
 
     // format may be null or empty (not specified), or 'json' or 'xml'
     if ((format == null) || format.matches("(json|xml)?")) {
-      SearchQueryImpl query = new SearchQueryImpl();
+      SearchQuery query = new SearchQuery();
       query.includeEpisodes(true);
       query.includeSeries(true);
       query.withLimit(limit);
@@ -232,10 +238,22 @@ public class SearchRestService {
       else
         query.withPublicationDateSort(true);
 
-      if ("json".equals(format))
-        return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_JSON).build();
-      else
-        return Response.ok(searchService.getByQuery(query)).type(MediaType.APPLICATION_XML).build();
+      // Build the response
+      ResponseBuilder rb = Response.ok();
+
+      if (admin) {
+        rb.entity(searchService.getForAdministrativeRead(query)).type(MediaType.APPLICATION_JSON);
+      } else {
+        rb.entity(searchService.getByQuery(query)).type(MediaType.APPLICATION_JSON);
+      }
+
+      if ("json".equals(format)) {
+        rb.type(MediaType.APPLICATION_JSON);
+      } else {
+        rb.type(MediaType.TEXT_XML);
+      }
+
+      return rb.build();
     }
 
     return Response.status(Response.Status.NOT_ACCEPTABLE).build();
@@ -250,7 +268,7 @@ public class SearchRestService {
           @RestParameter(defaultValue = "0", description = "The page number.", isRequired = false, name = "offset", type = RestParameter.Type.STRING) }, reponses = { @RestResponse(description = "The request was processed succesfully.", responseCode = HttpServletResponse.SC_OK) }, returnDescription = "The search results, expressed as xml or json")
   public Response getByLuceneQuery(@QueryParam("q") String q, @QueryParam("limit") int limit,
           @QueryParam("offset") int offset, @PathParam("format") String format) {
-    SearchQueryImpl query = new SearchQueryImpl();
+    SearchQuery query = new SearchQuery();
     if (!StringUtils.isBlank(q))
       query.withQuery(q);
     else

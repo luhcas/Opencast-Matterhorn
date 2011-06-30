@@ -17,8 +17,10 @@ package org.opencastproject.kernel.rest;
 
 import org.opencastproject.rest.RestConstants;
 import org.opencastproject.rest.StaticResource;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.ext.RequestHandler;
@@ -127,6 +129,11 @@ public class RestPublisher implements RestConstants {
       public Response toResponse(NotFoundException e) {
         return Response.status(404).entity(fourOhFour).type(MediaType.TEXT_PLAIN).build();
       }
+    });
+    providers.add(new ExceptionMapper<UnauthorizedException>() {
+      public Response toResponse(UnauthorizedException e) {
+        return Response.status(HttpStatus.SC_UNAUTHORIZED).entity("unauthorized").type(MediaType.TEXT_PLAIN).build();
+      };
     });
     providers.add(new RestDocRedirector());
 

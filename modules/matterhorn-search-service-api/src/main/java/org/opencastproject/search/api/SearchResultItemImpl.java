@@ -50,6 +50,9 @@ public class SearchResultItemImpl implements SearchResultItem {
   @XmlAttribute(name = "id")
   private String id = "";
 
+  @XmlAttribute(name = "org")
+  private String organization;
+
   /** The media package */
   @XmlElement(name = "mediapackage")
   private MediaPackage mediaPackage = null;
@@ -174,6 +177,24 @@ public class SearchResultItemImpl implements SearchResultItem {
    */
   public void setId(String id) {
     this.id = id;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchResultItem#getOrganization()
+   */
+  @Override
+  public String getOrganization() {
+    return organization;
+  }
+
+  /**
+   * @param organization
+   *          the organization to set
+   */
+  public void setOrganization(String organization) {
+    this.organization = organization;
   }
 
   /**
@@ -652,6 +673,7 @@ public class SearchResultItemImpl implements SearchResultItem {
   public static SearchResultItemImpl fill(SearchResultItem from) {
     SearchResultItemImpl item = new SearchResultItemImpl();
     item.setId(from.getId());
+    item.setOrganization(from.getOrganization());
     item.setMediaPackage(from.getMediaPackage());
     item.setDcExtent(from.getDcExtent());
     item.setDcTitle(from.getDcTitle());

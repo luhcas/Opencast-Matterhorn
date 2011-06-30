@@ -67,7 +67,7 @@ public interface AuthorizationService {
   AccessControlList getAccessControlList(MediaPackage mediapackage) throws MediaPackageException;
 
   /**
-   * Attaches the provided policies to a mediapackage as a XACML attachment.
+   * Attaches the provided policies to a mediapackage as a XACML attachment, replacing any previous policy element.
    * 
    * @param mediapackage
    *          the mediapackage

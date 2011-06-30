@@ -147,6 +147,7 @@
               org.opencastproject.mediapackage.identifier;version=${project.version},
               org.opencastproject.mediapackage.elementbuilder;version=${project.version},
               org.opencastproject.mediapackage.selector;version=${project.version},
+              org.opencastproject.event;version=${project.version},
               org.opencastproject.job.api;version=${project.version},
               org.opencastproject.rest;version=${project.version},
               org.opencastproject.serviceregistry.api;version=${project.version},

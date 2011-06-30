@@ -15,12 +15,17 @@
  */
 package org.opencastproject.series.impl;
 
+import static org.opencastproject.event.EventAdminConstants.ID;
+import static org.opencastproject.event.EventAdminConstants.PAYLOAD;
+import static org.opencastproject.event.EventAdminConstants.SERIES_ACL_TOPIC;
+import static org.opencastproject.event.EventAdminConstants.SERIES_TOPIC;
 import static org.opencastproject.util.RequireUtil.notNull;
 
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AccessControlParser;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesQuery;
 import org.opencastproject.series.api.SeriesService;
@@ -31,10 +36,14 @@ import org.osgi.framework.ServiceException;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +63,9 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   /** Persistent storage */
   protected SeriesServiceDatabase persistence;
 
+  /** The OSGI event admin service */
+  protected EventAdmin eventAdmin;
+
   /**
    * OSGi callback for setting index.
    * 
@@ -70,6 +82,15 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    */
   public void setPersistence(SeriesServiceDatabase persistence) {
     this.persistence = persistence;
+  }
+
+  /**
+   * OSGi callback for setting the event admin.
+   * 
+   * @param eventAdmin
+   */
+  public void setEventAdmin(EventAdmin eventAdmin) {
+    this.eventAdmin = eventAdmin;
   }
 
   /**
@@ -157,6 +178,14 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       throw new SeriesException(e);
     }
 
+    String xml = null;
+    try {
+      xml = dc.toXmlString();
+    } catch (IOException e) {
+      throw new SeriesException(e);
+    }
+    sendEvent(SERIES_TOPIC, identifier, xml);
+
     return newSeries;
   }
 
@@ -192,7 +221,32 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       throw new SeriesException(e);
     }
 
+    String xml = null;
+    try {
+      xml = AccessControlParser.toXml(accessControl);
+    } catch (IOException e) {
+      throw new SeriesException(e);
+    }
+    sendEvent(SERIES_ACL_TOPIC, seriesID, xml);
+
     return updated;
+  }
+
+  /**
+   * Sends an OSGI Event.
+   * 
+   * @param topic
+   *          the event topic
+   * @param objectId
+   *          the series identifier
+   * @param payload
+   *          the event payload
+   */
+  private void sendEvent(String topic, String objectId, String payload) {
+    Dictionary<String, String> eventProperties = new Hashtable<String, String>();
+    eventProperties.put(ID, objectId);
+    eventProperties.put(PAYLOAD, payload);
+    eventAdmin.postEvent(new Event(topic, eventProperties));
   }
 
   /*

@@ -39,6 +39,7 @@ import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.metadata.api.StaticMetadataService;
 import org.opencastproject.metadata.dublincore.StaticMetadataServiceDublinCoreImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
+import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.search.api.SearchService;
@@ -220,7 +221,7 @@ public class SearchServiceImplTest {
    */
   @Test
   public void testEmptySearchIndex() {
-    SearchResult result = service.getByQuery(new SearchQueryImpl().withId("foo"));
+    SearchResult result = service.getByQuery(new SearchQuery().withId("foo"));
     assertEquals(0, result.size());
   }
 
@@ -254,7 +255,7 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
 
     // Make sure it's properly indexed and returned for authorized users
-    SearchQueryImpl q = new SearchQueryImpl();
+    SearchQuery q = new SearchQuery();
     q.includeEpisodes(true);
     q.includeSeries(false);
     q.withId("10.0000/1");
@@ -269,7 +270,7 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
 
     // This mediapackage should not be readable by the current user (due to the lack of role ROLE_UNKNOWN)
-    q = new SearchQueryImpl();
+    q = new SearchQuery();
     q.includeEpisodes(true);
     q.includeSeries(false);
     q.withId("10.0000/1");
@@ -306,20 +307,20 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
 
     // Make sure it's properly indexed and returned
-    SearchQueryImpl q = new SearchQueryImpl();
+    SearchQuery q = new SearchQuery();
     q.includeEpisodes(true);
     q.includeSeries(false);
     q.withId("10.0000/1");
     assertEquals(1, service.getByQuery(q).size());
 
-    q = new SearchQueryImpl();
+    q = new SearchQuery();
     q.includeEpisodes(true);
     q.includeSeries(false);
 
     assertEquals(1, service.getByQuery(q).size());
 
     // Test for various fields
-    q = new SearchQueryImpl();
+    q = new SearchQuery();
     q.includeEpisodes(true);
     q.includeSeries(false);
     q.withId("10.0000/1");
@@ -360,7 +361,7 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
 
     // Make sure it's properly indexed and returned
-    SearchQueryImpl q = new SearchQueryImpl();
+    SearchQuery q = new SearchQuery();
     q.includeEpisodes(true);
     q.includeSeries(false);
     q.withId("10.0000/2");
@@ -417,7 +418,7 @@ public class SearchServiceImplTest {
     userResponder.setResponse(defaultUser);
     organizationResponder.setResponse(defaultOrganization);
 
-    SearchQueryImpl q = new SearchQueryImpl();
+    SearchQuery q = new SearchQuery();
     q.includeEpisodes(true);
     q.includeSeries(false);
     q.withId("10.0000/1");
@@ -425,7 +426,7 @@ public class SearchServiceImplTest {
     q.withId(null); // Clear the ID requirement
     assertEquals(0, service.getByQuery(q).size());
 
-    q = new SearchQueryImpl();
+    q = new SearchQuery();
     q.withDeletedSince(deletedDate);
     assertEquals(1, service.getByQuery(q).size());
   }
@@ -465,7 +466,7 @@ public class SearchServiceImplTest {
     service.add(mediaPackage);
 
     // Make sure it's properly indexed and returned
-    SearchQueryImpl q = new SearchQueryImpl();
+    SearchQuery q = new SearchQuery();
     q.includeEpisodes(false);
     q.includeSeries(true);
 
@@ -515,11 +516,11 @@ public class SearchServiceImplTest {
     service.setOrgDirectory(orgDirectory);
     
     // We should have nothing in the search index
-    assertEquals(0, service.getByQuery(new SearchQueryImpl()).size());
+    assertEquals(0, service.getByQuery(new SearchQuery()).size());
 
     service.populateIndex();
 
     // This time we should have 10 results
-    assertEquals(10, service.getByQuery(new SearchQueryImpl()).size());
+    assertEquals(10, service.getByQuery(new SearchQuery()).size());
   }
 }

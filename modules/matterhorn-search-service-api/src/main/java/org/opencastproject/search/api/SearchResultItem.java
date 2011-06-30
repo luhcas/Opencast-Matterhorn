@@ -47,6 +47,13 @@ public interface SearchResultItem {
   MediaPackage getMediaPackage();
 
   /**
+   * Returns the organization that produced this item.
+   * 
+   * @return the organization identifier
+   */
+  String getOrganization();
+  
+  /**
    * @return the dcExtent
    */
   long getDcExtent();

@@ -116,7 +116,9 @@ public class UserAndRoleDirectoryServiceImpl implements UserDirectoryService, Us
     SortedSet<String> roles = new TreeSet<String>();
     for (RoleProvider roleProvider : roleProviders) {
       for (String role : roleProvider.getRoles()) {
-        if (!roleProvider.getOrganization().equals(org.getId())) {
+        String currentOrgId = org.getId();
+        String providerOrgId = roleProvider.getOrganization();
+        if (!currentOrgId.equals(providerOrgId) && !ALL_ORGANIZATIONS.equals(providerOrgId)) {
           continue;
         }
         roles.add(role);

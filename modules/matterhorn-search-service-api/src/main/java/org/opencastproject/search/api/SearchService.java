@@ -84,6 +84,20 @@ public interface SearchService {
   SearchResult getByQuery(SearchQuery q) throws SearchException;
 
   /**
+   * Finds search results across any organization, protected by any access control. This should be used for
+   * administrative purposes, such as bulk edits based on metadata updates.
+   * 
+   * @param q
+   *          The {@link SearchQuery} containing the details of the desired results
+   * @return The search result
+   * @throws SearchException
+   *           if an error occurs while searching for media packages
+   * @throws UnauthorizedException
+   *           if the user does not an administrative role
+   */
+  SearchResult getForAdministrativeRead(SearchQuery q) throws SearchException, UnauthorizedException;
+
+  /**
    * Sends a query to the search service. Depending on the service implementation, the query might be an sql statement a
    * solr query or something similar. In the future, a higher level query language might be a better solution.
    * 

@@ -22,6 +22,7 @@ import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.serviceregistry.api.RemoteBase;
 
 import org.apache.http.HttpResponse;
@@ -113,22 +114,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
    */
   @Override
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
-    StringBuilder url = new StringBuilder();
-    List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-    if (q.getText() != null) {
-      queryStringParams.add(new BasicNameValuePair("q", q.getText()));
-    }
-    queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(q.getLimit())));
-    queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(q.getOffset())));
-    if (!q.isIncludeEpisodes() && q.isIncludeSeries()) {
-      url.append("/series?");
-    } else if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
-      url.append("/episode?");
-    } else {
-      url.append("/?");
-    }
-    url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
-    HttpGet get = new HttpGet(url.toString());
+    HttpGet get = new HttpGet(getSearchUrl(q, false));
     HttpResponse response = null;
     try {
       response = getResponse(get);
@@ -141,6 +127,40 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
       closeConnection(response);
     }
     throw new SearchException("Unable to perform getByQuery from remote search index");
+  }
+
+  /**
+   * Builds the a search URL.
+   * 
+   * @param q
+   *          the search query
+   * @param admin
+   *          whether this is for an administrative read
+   * @return the search URL
+   */
+  private String getSearchUrl(SearchQuery q, boolean admin) {
+    StringBuilder url = new StringBuilder();
+    if (!q.isIncludeEpisodes() && q.isIncludeSeries()) {
+      url.append("/series?");
+    } else if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
+      url.append("/episode?");
+    } else {
+      url.append("/?");
+    }
+
+    List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
+    if (q.getText() != null) {
+      queryStringParams.add(new BasicNameValuePair("q", q.getText()));
+    }
+    if (admin) {
+      queryStringParams.add(new BasicNameValuePair("admin", Boolean.TRUE.toString()));
+    }
+    queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(q.getLimit())));
+    queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(q.getOffset())));
+    
+    url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
+
+    return url.toString();
   }
 
   /**
@@ -174,5 +194,28 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     }
     throw new SearchException("Unable to perform getByQuery from remote search index");
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getForAdministrativeRead(org.opencastproject.search.api.SearchQuery)
+   */
+  @Override
+  public SearchResult getForAdministrativeRead(SearchQuery q) throws SearchException, UnauthorizedException {
+    HttpGet get = new HttpGet(getSearchUrl(q, true));
+    HttpResponse response = null;
+    try {
+      response = getResponse(get);
+      if (response != null) {
+        return SearchResultImpl.valueOf(response.getEntity().getContent());
+      }
+    } catch (Exception e) {
+      throw new SearchException(
+              "Unable to parse results of a getForAdministrativeRead request from remote search index: ", e);
+    } finally {
+      closeConnection(response);
+    }
+    throw new SearchException("Unable to perform getForAdministrativeRead from remote search index");
+  }
+
 }

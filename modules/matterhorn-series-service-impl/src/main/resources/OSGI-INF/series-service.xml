@@ -12,4 +12,6 @@
     cardinality="1..1" policy="static" bind="setPersistence" />    
   <reference name="series-index" interface="org.opencastproject.series.impl.SeriesServiceIndex"
     cardinality="1..1" policy="static" bind="setIndex" />
+  <reference name="eventAdmin" interface="org.osgi.service.event.EventAdmin"
+    cardinality="1..1" policy="static" bind="setEventAdmin" />
 </scr:component>

@@ -34,10 +34,12 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.event.EventAdmin;
 
 import java.io.File;
 import java.io.InputStream;
@@ -94,10 +96,14 @@ public class SeriesServiceImplTest {
     index = new SeriesServiceSolrIndex(root);
     index.setDublinCoreService(dcService);
     index.activate(null);
-    
+
+    EventAdmin eventAdmin = EasyMock.createNiceMock(EventAdmin.class);
+    EasyMock.replay(eventAdmin);
+
     seriesService = new SeriesServiceImpl();
     seriesService.setPersistence(seriesDatabase);
     seriesService.setIndex(index);
+    seriesService.setEventAdmin(eventAdmin);
     seriesService.activate(null);
 
     InputStream in = null;

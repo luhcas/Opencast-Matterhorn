@@ -16,6 +16,8 @@
 
 package org.opencastproject.search.impl;
 
+import static org.opencastproject.security.api.SecurityConstants.MH_ADMIN;
+
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -222,7 +224,7 @@ public final class SearchServiceImpl implements SearchService {
 
     // Populate the search index if it is empty
     try {
-      if (solrRequester.getForAdministrativeRead(new SearchQueryImpl()).getItems().length == 0
+      if (solrRequester.getForAdministrativeRead(new SearchQuery()).getItems().length == 0
               && serviceRegistry.count(JOB_TYPE, Status.FINISHED) > 0) {
         populateIndex();
       }
@@ -338,13 +340,14 @@ public final class SearchServiceImpl implements SearchService {
    */
   public void add(MediaPackage mediaPackage) throws SearchException, MediaPackageException, IllegalArgumentException,
           UnauthorizedException, ServiceRegistryException {
+    User currentUser = securityService.getUser();
+    String orgAdminRole = securityService.getOrganization().getAdminRole();
+    if (!currentUser.hasRole(orgAdminRole) && !currentUser.hasRole(MH_ADMIN)
+            && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
+      throw new UnauthorizedException(currentUser, SearchService.WRITE_PERMISSION);
+    }
     if (mediaPackage == null) {
       throw new IllegalArgumentException("Unable to add a null mediapackage");
-    }
-    User currentUser = securityService.getUser();
-    String adminRole = securityService.getOrganization().getAdminRole();
-    if (!currentUser.hasRole(adminRole) && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
-      throw new UnauthorizedException(currentUser, SearchService.WRITE_PERMISSION);
     }
     try {
       logger.debug("Attempting to add mediapackage {} to search index", mediaPackage.getIdentifier());
@@ -377,7 +380,7 @@ public final class SearchServiceImpl implements SearchService {
   public boolean delete(String mediaPackageId) throws SearchException, UnauthorizedException {
     SearchResult result;
     try {
-      result = solrRequester.getForWrite(new SearchQueryImpl().withId(mediaPackageId));
+      result = solrRequester.getForWrite(new SearchQuery().withId(mediaPackageId));
       if (result.getItems().length == 0) {
         logger.warn(
                 "Can not delete mediapackage {}, which is not available for the current user to delete from the search index.",
@@ -420,6 +423,24 @@ public final class SearchServiceImpl implements SearchService {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchService#getForAdministrativeRead(org.opencastproject.search.api.SearchQuery)
+   */
+  @Override
+  public SearchResult getForAdministrativeRead(SearchQuery q) throws SearchException, UnauthorizedException {
+    User user = securityService.getUser();
+    if (!user.hasRole(MH_ADMIN)) {
+      throw new UnauthorizedException(user, getClass().getName() + ".getForAdministrativeRead");
+    }
+    try {
+      return solrRequester.getForAdministrativeRead(q);
+    } catch (SolrServerException e) {
+      throw new SearchException(e);
+    }
+  }
+
   // FIXME: this should use paging. It is a work in progress...
   protected void populateIndex() throws ServiceRegistryException, MediaPackageException, SolrServerException,
           UnauthorizedException {
@@ -440,5 +461,4 @@ public final class SearchServiceImpl implements SearchService {
       }
     }
   }
-
 }

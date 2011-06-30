@@ -73,6 +73,7 @@ public final class Schema {
   public static final String SUFFIX_TO = "to";
 
   // Additional fields
+  public static final String OC_ORGANIZATION = "oc_organization";
   public static final String OC_MEDIAPACKAGE = "oc_mediapackage";
   public static final String OC_KEYWORDS = "oc_keywords";
   public static final String OC_COVER = "oc_cover";
@@ -129,6 +130,8 @@ public final class Schema {
    */
   interface FieldCollector {
     Option<String> getId();
+    
+    Option<String> getOrganization();
 
     Option<Date> getDcCreated();
 
@@ -195,6 +198,8 @@ public final class Schema {
   public static void fill(SolrInputDocument doc, FieldCollector fields) {
     if (fields.getId().isSome())
       setId(doc, fields.getId().get());
+    if (fields.getOrganization().isSome())
+      setOrganization(doc, fields.getOrganization().get());
     if (fields.getDcCreated().isSome())
       setDcCreated(doc, fields.getDcCreated().get());
     if (fields.getDcExtent().isSome())
@@ -259,6 +264,10 @@ public final class Schema {
     return mkString(doc.get(ID));
   }
 
+  public static String getOrganization(SolrDocument doc) {
+    return mkString(doc.get(OC_ORGANIZATION));
+  }
+
   public static String getId(SolrInputDocument doc) {
     SolrInputField f = doc.get(ID);
     return f != null ? mkString(f.getFirstValue()) : null;
@@ -266,6 +275,10 @@ public final class Schema {
 
   public static void setId(SolrInputDocument doc, String id) {
     doc.setField(ID, id);
+  }
+
+  public static void setOrganization(SolrInputDocument doc, String organization) {
+    doc.setField(OC_ORGANIZATION, organization);
   }
 
   public static Date getDcCreated(SolrDocument doc) {

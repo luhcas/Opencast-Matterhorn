@@ -15,6 +15,8 @@
  */
 package org.opencastproject.authorization.xacml;
 
+import static org.opencastproject.mediapackage.MediaPackageElements.XACML_POLICY;
+
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -54,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -70,6 +73,9 @@ public class XACMLAuthorizationService implements AuthorizationService {
   /** The default filename for XACML attachments */
   public static final String XACML_FILENAME = "xacml.xml";
 
+  /** The default element ID for XACML attachments */
+  public static final String XACML_ELEMENT_ID = "security-policy";
+
   /** The workspace */
   protected Workspace workspace;
 
@@ -84,84 +90,93 @@ public class XACMLAuthorizationService implements AuthorizationService {
   @SuppressWarnings("unchecked")
   @Override
   public AccessControlList getAccessControlList(MediaPackage mediapackage) {
-    AccessControlList accessControlList = new AccessControlList();
-    List<AccessControlEntry> acl = accessControlList.getEntries();
-    Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
-    URI xacmlUri = null;
-    if (xacmlAttachments.length == 0) {
-      logger.debug("No XACML attachment found in {}", mediapackage);
-      return accessControlList;
-    } else if (xacmlAttachments.length > 1) {
-      // try to find the source policy. Some may be copies sent to distribution channels.
-      for (Attachment a : xacmlAttachments) {
-        if (a.getReference() == null) {
-          if (xacmlUri == null) {
-            xacmlUri = a.getURI();
-          } else {
-            logger.warn("More than one non-referenced XACML policy is attached to {}, ACL will be empty", mediapackage);
-            return accessControlList;
-          }
-        }
-      }
-      if (xacmlUri == null) {
-        logger.warn(
-                "Multiple XACML policies are attached to {}, and none seem to be authoritative.  The ACL will be empty",
-                mediapackage);
+    Thread currentThread = Thread.currentThread();
+    ClassLoader originalClassLoader = currentThread.getContextClassLoader();
+    try {
+      currentThread.setContextClassLoader(XACMLAuthorizationService.class.getClassLoader());
+      AccessControlList accessControlList = new AccessControlList();
+      List<AccessControlEntry> acl = accessControlList.getEntries();
+      Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
+      URI xacmlUri = null;
+      if (xacmlAttachments.length == 0) {
+        logger.debug("No XACML attachment found in {}", mediapackage);
         return accessControlList;
-      }
-    } else {
-      xacmlUri = xacmlAttachments[0].getURI();
-    }
-    File xacmlPolicyFile = null;
-    try {
-      xacmlPolicyFile = workspace.get(xacmlUri);
-    } catch (NotFoundException e) {
-      logger.warn("XACML policy file not found", e);
-    } catch (IOException e) {
-      logger.warn("Unable to access XACML policy file {}", xacmlPolicyFile, e);
-    }
-
-    FileInputStream in;
-    try {
-      in = new FileInputStream(xacmlPolicyFile);
-    } catch (FileNotFoundException e) {
-      throw new IllegalStateException("Unable to find file in the workspace: " + xacmlPolicyFile);
-    }
-
-    PolicyType policy = null;
-    try {
-      policy = ((JAXBElement<PolicyType>) XACMLUtils.jBossXacmlJaxbContext.createUnmarshaller().unmarshal(in))
-              .getValue();
-    } catch (JAXBException e) {
-      throw new IllegalStateException("Unable to unmarshall xacml document" + xacmlPolicyFile);
-    }
-    for (Object object : policy.getCombinerParametersOrRuleCombinerParametersOrVariableDefinition()) {
-      if (object instanceof RuleType) {
-        RuleType rule = (RuleType) object;
-        if (rule.getTarget() == null) {
-          continue;
-        }
-        ActionType action = rule.getTarget().getActions().getAction().get(0);
-        String actionForAce = (String) action.getActionMatch().get(0).getAttributeValue().getContent().get(0);
-        String role = null;
-        JAXBElement<ApplyType> apply = (JAXBElement<ApplyType>) rule.getCondition().getExpression();
-        for (JAXBElement<?> element : apply.getValue().getExpression()) {
-          if (element.getValue() instanceof AttributeValueType) {
-            role = (String) ((AttributeValueType) element.getValue()).getContent().get(0);
-            break;
+      } else if (xacmlAttachments.length > 1) {
+        // try to find the source policy. Some may be copies sent to distribution channels.
+        for (Attachment a : xacmlAttachments) {
+          if (a.getReference() == null) {
+            if (xacmlUri == null) {
+              xacmlUri = a.getURI();
+            } else {
+              logger.warn("More than one non-referenced XACML policy is attached to {}, ACL will be empty",
+                      mediapackage);
+              return accessControlList;
+            }
           }
         }
-        if (role == null) {
-          logger.warn("Unable to find a role in rule {}", rule);
-          continue;
+        if (xacmlUri == null) {
+          logger.warn(
+                  "Multiple XACML policies are attached to {}, and none seem to be authoritative.  The ACL will be empty",
+                  mediapackage);
+          return accessControlList;
         }
-        AccessControlEntry ace = new AccessControlEntry(role, actionForAce, rule.getEffect().equals(EffectType.PERMIT));
-        acl.add(ace);
       } else {
-        logger.debug("Skipping {}", object);
+        xacmlUri = xacmlAttachments[0].getURI();
       }
+      File xacmlPolicyFile = null;
+      try {
+        xacmlPolicyFile = workspace.get(xacmlUri);
+      } catch (NotFoundException e) {
+        logger.warn("XACML policy file not found", e);
+      } catch (IOException e) {
+        logger.warn("Unable to access XACML policy file {}", xacmlPolicyFile, e);
+      }
+
+      FileInputStream in;
+      try {
+        in = new FileInputStream(xacmlPolicyFile);
+      } catch (FileNotFoundException e) {
+        throw new IllegalStateException("Unable to find file in the workspace: " + xacmlPolicyFile);
+      }
+
+      PolicyType policy = null;
+      try {
+        policy = ((JAXBElement<PolicyType>) XACMLUtils.jBossXacmlJaxbContext.createUnmarshaller().unmarshal(in))
+                .getValue();
+      } catch (JAXBException e) {
+        throw new IllegalStateException("Unable to unmarshall xacml document" + xacmlPolicyFile);
+      }
+      for (Object object : policy.getCombinerParametersOrRuleCombinerParametersOrVariableDefinition()) {
+        if (object instanceof RuleType) {
+          RuleType rule = (RuleType) object;
+          if (rule.getTarget() == null) {
+            continue;
+          }
+          ActionType action = rule.getTarget().getActions().getAction().get(0);
+          String actionForAce = (String) action.getActionMatch().get(0).getAttributeValue().getContent().get(0);
+          String role = null;
+          JAXBElement<ApplyType> apply = (JAXBElement<ApplyType>) rule.getCondition().getExpression();
+          for (JAXBElement<?> element : apply.getValue().getExpression()) {
+            if (element.getValue() instanceof AttributeValueType) {
+              role = (String) ((AttributeValueType) element.getValue()).getContent().get(0);
+              break;
+            }
+          }
+          if (role == null) {
+            logger.warn("Unable to find a role in rule {}", rule);
+            continue;
+          }
+          AccessControlEntry ace = new AccessControlEntry(role, actionForAce, rule.getEffect()
+                  .equals(EffectType.PERMIT));
+          acl.add(ace);
+        } else {
+          logger.debug("Skipping {}", object);
+        }
+      }
+      return accessControlList;
+    } finally {
+      Thread.currentThread().setContextClassLoader(originalClassLoader);
     }
-    return accessControlList;
   }
 
   /**
@@ -172,69 +187,79 @@ public class XACMLAuthorizationService implements AuthorizationService {
    */
   @Override
   public boolean hasPermission(MediaPackage mediapackage, String action) {
-    Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
-    if (xacmlAttachments.length == 0) {
-      logger.info("No XACML attachment found in {}", mediapackage);
-      return true;
-    } else if (xacmlAttachments.length > 1) {
-      logger.warn("More than one XACML policy is attached to {}", mediapackage);
-      return false;
-    }
-    File xacmlPolicyFile = null;
+    Thread currentThread = Thread.currentThread();
+    ClassLoader originalClassLoader = currentThread.getContextClassLoader();
     try {
-      xacmlPolicyFile = workspace.get(xacmlAttachments[0].getURI());
-    } catch (NotFoundException e) {
-      logger.warn("XACML policy file not found", e);
-    } catch (IOException e) {
-      logger.warn("Unable to access XACML policy file {}", xacmlPolicyFile, e);
+      currentThread.setContextClassLoader(XACMLAuthorizationService.class.getClassLoader());
+      Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
+      if (xacmlAttachments.length == 0) {
+        logger.info("No XACML attachment found in {}", mediapackage);
+        return true;
+      } else if (xacmlAttachments.length > 1) {
+        logger.warn("More than one XACML policy is attached to {}", mediapackage);
+        return false;
+      }
+      File xacmlPolicyFile = null;
+      try {
+        xacmlPolicyFile = workspace.get(xacmlAttachments[0].getURI());
+      } catch (NotFoundException e) {
+        logger.warn("XACML policy file not found", e);
+      } catch (IOException e) {
+        logger.warn("Unable to access XACML policy file {}", xacmlPolicyFile, e);
+      }
+
+      RequestContext requestCtx = RequestResponseContextFactory.createRequestCtx();
+
+      User user = securityService.getUser();
+
+      // Create a subject type
+      SubjectType subject = new SubjectType();
+      subject.getAttribute().add(
+              RequestAttributeFactory.createStringAttributeType(XACMLUtils.SUBJECT_IDENTIFIER, XACMLUtils.ISSUER,
+                      user.getUserName()));
+      for (String role : user.getRoles()) {
+        AttributeType attSubjectID = RequestAttributeFactory.createStringAttributeType(
+                XACMLUtils.SUBJECT_ROLE_IDENTIFIER, XACMLUtils.ISSUER, role);
+        subject.getAttribute().add(attSubjectID);
+      }
+
+      // Create a resource type
+      URI uri = null;
+      try {
+        uri = new URI(mediapackage.getIdentifier().toString());
+      } catch (URISyntaxException e) {
+        logger.warn("Unable to represent mediapackage identifier '{}' as a URI", mediapackage.getIdentifier()
+                .toString());
+      }
+      org.jboss.security.xacml.core.model.context.ResourceType resourceType = new org.jboss.security.xacml.core.model.context.ResourceType();
+      resourceType.getAttribute()
+              .add(RequestAttributeFactory.createAnyURIAttributeType(XACMLUtils.RESOURCE_IDENTIFIER, XACMLUtils.ISSUER,
+                      uri));
+
+      // Create an action type
+      org.jboss.security.xacml.core.model.context.ActionType actionType = new org.jboss.security.xacml.core.model.context.ActionType();
+      actionType.getAttribute().add(
+              RequestAttributeFactory
+                      .createStringAttributeType(XACMLUtils.ACTION_IDENTIFIER, XACMLUtils.ISSUER, action));
+
+      // Create a Request Type
+      RequestType requestType = new RequestType();
+      requestType.getSubject().add(subject);
+      requestType.getResource().add(resourceType);
+      requestType.setAction(actionType);
+      try {
+        requestCtx.setRequest(requestType);
+      } catch (IOException e) {
+        logger.warn("Unable to set the xacml request type", e);
+        return false;
+      }
+
+      PolicyDecisionPoint pdp = getPolicyDecisionPoint(xacmlPolicyFile);
+
+      return pdp.evaluate(requestCtx).getDecision() == XACMLConstants.DECISION_PERMIT;
+    } finally {
+      Thread.currentThread().setContextClassLoader(originalClassLoader);
     }
-
-    RequestContext requestCtx = RequestResponseContextFactory.createRequestCtx();
-
-    User user = securityService.getUser();
-
-    // Create a subject type
-    SubjectType subject = new SubjectType();
-    subject.getAttribute().add(
-            RequestAttributeFactory.createStringAttributeType(XACMLUtils.SUBJECT_IDENTIFIER, XACMLUtils.ISSUER,
-                    user.getUserName()));
-    for (String role : user.getRoles()) {
-      AttributeType attSubjectID = RequestAttributeFactory.createStringAttributeType(
-              XACMLUtils.SUBJECT_ROLE_IDENTIFIER, XACMLUtils.ISSUER, role);
-      subject.getAttribute().add(attSubjectID);
-    }
-
-    // Create a resource type
-    URI uri = null;
-    try {
-      uri = new URI(mediapackage.getIdentifier().toString());
-    } catch (URISyntaxException e) {
-      logger.warn("Unable to represent mediapackage identifier '{}' as a URI", mediapackage.getIdentifier().toString());
-    }
-    org.jboss.security.xacml.core.model.context.ResourceType resourceType = new org.jboss.security.xacml.core.model.context.ResourceType();
-    resourceType.getAttribute().add(
-            RequestAttributeFactory.createAnyURIAttributeType(XACMLUtils.RESOURCE_IDENTIFIER, XACMLUtils.ISSUER, uri));
-
-    // Create an action type
-    org.jboss.security.xacml.core.model.context.ActionType actionType = new org.jboss.security.xacml.core.model.context.ActionType();
-    actionType.getAttribute().add(
-            RequestAttributeFactory.createStringAttributeType(XACMLUtils.ACTION_IDENTIFIER, XACMLUtils.ISSUER, action));
-
-    // Create a Request Type
-    RequestType requestType = new RequestType();
-    requestType.getSubject().add(subject);
-    requestType.getResource().add(resourceType);
-    requestType.setAction(actionType);
-    try {
-      requestCtx.setRequest(requestType);
-    } catch (IOException e) {
-      logger.warn("Unable to set the xacml request type", e);
-      return false;
-    }
-
-    PolicyDecisionPoint pdp = getPolicyDecisionPoint(xacmlPolicyFile);
-
-    return pdp.evaluate(requestCtx).getDecision() == XACMLConstants.DECISION_PERMIT;
   }
 
   /**
@@ -271,36 +296,58 @@ public class XACMLAuthorizationService implements AuthorizationService {
    */
   @Override
   public MediaPackage setAccessControl(MediaPackage mediapackage, AccessControlList acl) throws MediaPackageException {
-    if (acl == null) {
-      logger.debug("No ACL specified: no XACML attachment will be added to mediapackage '{}'", mediapackage);
+    Thread currentThread = Thread.currentThread();
+    ClassLoader originalClassLoader = currentThread.getContextClassLoader();
+    try {
+      currentThread.setContextClassLoader(XACMLAuthorizationService.class.getClassLoader());
+      if (acl == null) {
+        logger.debug("No ACL specified: no XACML attachment will be added to mediapackage '{}'", mediapackage);
+        return mediapackage;
+      }
+      // Get XACML representation of these role + action tuples
+      String xacmlContent = null;
+      try {
+        xacmlContent = XACMLUtils.getXacml(mediapackage, acl);
+      } catch (JAXBException e) {
+        throw new MediaPackageException("Unable to generate xacml for mediapackage " + mediapackage.getIdentifier());
+      }
+
+      // Get any existing attachment
+      List<URI> existingXacmlFiles = new ArrayList<URI>();
+      for (Attachment a : mediapackage.getAttachments(XACML_POLICY)) {
+        existingXacmlFiles.add(a.getURI());
+        mediapackage.remove(a);
+      }
+
+      // add attachment
+      URI uri = workspace.getURI(mediapackage.getIdentifier().toString(), XACML_ELEMENT_ID, XACML_FILENAME);
+      Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .elementFromURI(uri, Attachment.TYPE, XACML_POLICY);
+      attachment.setIdentifier(XACML_ELEMENT_ID);
+      mediapackage.add(attachment);
+
+      try {
+        workspace.put(mediapackage.getIdentifier().toString(), attachment.getIdentifier(), XACML_FILENAME,
+                IOUtils.toInputStream(xacmlContent));
+      } catch (IOException e) {
+        throw new MediaPackageException("Can not store xacml for mediapackage " + mediapackage.getIdentifier());
+      }
+      attachment.setURI(uri);
+
+      // Remove the old xacml file(s)
+      for (URI uriExistingXacml : existingXacmlFiles) {
+        try {
+          workspace.delete(uriExistingXacml);
+        } catch (Exception e) {
+          logger.warn("Unable to delete previous xacml file: {}", e);
+        }
+      }
+
+      // return augmented mediapackage
       return mediapackage;
+    } finally {
+      Thread.currentThread().setContextClassLoader(originalClassLoader);
     }
-    // Get XACML representation of these role + action tuples
-    String xacmlContent = null;
-    try {
-      xacmlContent = XACMLUtils.getXacml(mediapackage, acl);
-    } catch (JAXBException e) {
-      throw new MediaPackageException("Unable to generate xacml for mediapackage " + mediapackage.getIdentifier());
-    }
-
-    // add attachment
-    String attachmentId = "xacmlpolicy";
-    URI uri = workspace.getURI(mediapackage.getIdentifier().toString(), attachmentId, XACML_FILENAME);
-    Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-            .elementFromURI(uri, Attachment.TYPE, MediaPackageElements.XACML_POLICY);
-    attachment.setIdentifier(attachmentId);
-    mediapackage.add(attachment);
-
-    try {
-      workspace.put(mediapackage.getIdentifier().toString(), attachment.getIdentifier(), XACML_FILENAME,
-              IOUtils.toInputStream(xacmlContent));
-    } catch (IOException e) {
-      throw new MediaPackageException("Can not store xacml for mediapackage " + mediapackage.getIdentifier());
-    }
-    attachment.setURI(uri);
-
-    // return augmented mediapackage
-    return mediapackage;
   }
 
   /**

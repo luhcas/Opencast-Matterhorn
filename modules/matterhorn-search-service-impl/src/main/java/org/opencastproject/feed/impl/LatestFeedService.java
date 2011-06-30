@@ -20,7 +20,6 @@ import org.opencastproject.feed.api.Feed.Type;
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
-import org.opencastproject.search.impl.SearchQueryImpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +42,7 @@ public class LatestFeedService extends AbstractFeedService implements FeedGenera
    */
   protected SearchResult loadFeedData(Type type, String[] query, int limit, int offset) {
     try {
-      SearchQuery q = new SearchQueryImpl();
+      SearchQuery q = new SearchQuery();
       q.includeEpisodes(true).includeSeries(false);
       q.withLimit(limit).withOffset(offset);
       q.withPublicationDateSort(true);
