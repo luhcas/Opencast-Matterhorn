@@ -111,6 +111,12 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlElement(name = "time-in-queue")
   protected Long timeInQueue;
 
+  @XmlAttribute(name = "max-attempts")
+  protected int maxAttempts;
+
+  @XmlAttribute(name = "failed-attempts")
+  protected int failedAttempts;
+
   /** The position of this operation in the workflow instance */
   protected int position;
 
@@ -118,6 +124,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    * No-arg constructor needed for JAXB serialization
    */
   public WorkflowOperationInstanceImpl() {
+    this.maxAttempts = 1;
   }
 
   /**
@@ -129,10 +136,12 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    *          the operation's position within the workflow
    */
   public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def, int position) {
+    this();
     this.position = position;
     setTemplate(def.getId());
     setState(OperationState.INSTANTIATED);
     setDescription(def.getDescription());
+    setMaxAttempts(def.getMaxAttempts());
     setFailWorkflowOnException(def.isFailWorkflowOnException());
     setExceptionHandlingWorkflow(def.getExceptionHandlingWorkflow());
     setExecutionCondition(def.getExecutionCondition());
@@ -155,6 +164,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    *          the state
    */
   public WorkflowOperationInstanceImpl(String id, OperationState state) {
+    this();
     setTemplate(id);
     setState(state);
   }
@@ -543,4 +553,43 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     this.continuable = continuable;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getFailedAttempts()
+   */
+  @Override
+  public int getFailedAttempts() {
+    return failedAttempts;
+  }
+  
+  /**
+   * @param failedAttempts the failedAttempts to set
+   */
+  public void setFailedAttempts(int failedAttempts) {
+    this.failedAttempts = failedAttempts;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getMaxAttempts()
+   */
+  @Override
+  public int getMaxAttempts() {
+    return maxAttempts;
+  }
+
+  /**
+   * @param maxAttempts
+   *          the maxAttempts to set
+   * @throws IllegalArgumentException
+   *           if maxAttempts is less than one.
+   */
+  public void setMaxAttempts(int maxAttempts) {
+    if (maxAttempts < 1) {
+      throw new IllegalArgumentException("maxAttempts must be >=1");
+    }
+    this.maxAttempts = maxAttempts;
+  }
 }

@@ -153,4 +153,18 @@ public interface WorkflowOperationInstance extends Configurable {
    */
   Boolean isAbortable();
 
+  /**
+   * Returns the number of attempts the workflow service will make to execute this operation.
+   * 
+   * @return the maximum number of retries before failing
+   */
+  int getMaxAttempts();
+
+  /**
+   * Returns the number of failed executions that have previously been attempted.
+   * 
+   * @return the number of previous attempts
+   */
+  int getFailedAttempts();
+
 }

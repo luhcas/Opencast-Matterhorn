@@ -37,7 +37,6 @@ import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
-import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
@@ -161,9 +160,6 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
 
   /** The authorization service */
   protected AuthorizationService authorizationService = null;
-
-  /** The series service */
-  private SeriesService seriesService;
 
   /** The user directory service */
   protected UserDirectoryService userDirectoryService = null;
@@ -1080,35 +1076,44 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
     // Add the exception's localized message to the workflow instance
     workflow.addErrorMessage(e.getLocalizedMessage());
 
-    WorkflowOperationInstance currentOperation = e.getOperation();
-    String errorDefId = currentOperation.getExceptionHandlingWorkflow();
+    WorkflowOperationInstanceImpl currentOperation = (WorkflowOperationInstanceImpl) e.getOperation();
+    int failedAttempt = currentOperation.getFailedAttempts() + 1;
+    currentOperation.setFailedAttempts(failedAttempt);
 
-    // Adjust the workflow state according to the setting on the operation
-    if (currentOperation.isFailWorkflowOnException()) {
-      if (StringUtils.isBlank(errorDefId)) {
-        workflow.setState(FAILED);
-      } else {
-        workflow.setState(FAILING);
+    if (failedAttempt == currentOperation.getMaxAttempts()) {
+      String errorDefId = currentOperation.getExceptionHandlingWorkflow();
 
-        // Remove the rest of the original workflow
-        int currentOperationPosition = workflow.getOperations().indexOf(currentOperation);
-        List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
-        operations.addAll(workflow.getOperations().subList(0, currentOperationPosition + 1));
-        workflow.setOperations(operations);
+      // Adjust the workflow state according to the setting on the operation
+      if (currentOperation.isFailWorkflowOnException()) {
+        if (StringUtils.isBlank(errorDefId)) {
+          workflow.setState(FAILED);
+        } else {
+          workflow.setState(FAILING);
 
-        // Append the operations
-        WorkflowDefinition errorDef = null;
-        try {
-          errorDef = getWorkflowDefinitionById(errorDefId);
-          workflow.extend(errorDef);
-        } catch (NotFoundException notFoundException) {
-          throw new IllegalStateException("Unable to find the error workflow definition '" + errorDefId + "'");
+          // Remove the rest of the original workflow
+          int currentOperationPosition = workflow.getOperations().indexOf(currentOperation);
+          List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
+          operations.addAll(workflow.getOperations().subList(0, currentOperationPosition + 1));
+          workflow.setOperations(operations);
+
+          // Append the operations
+          WorkflowDefinition errorDef = null;
+          try {
+            errorDef = getWorkflowDefinitionById(errorDefId);
+            workflow.extend(errorDef);
+          } catch (NotFoundException notFoundException) {
+            throw new IllegalStateException("Unable to find the error workflow definition '" + errorDefId + "'");
+          }
         }
       }
-    }
 
-    // Fail the current operation
-    currentOperation.setState(OperationState.FAILED);
+      // Fail the current operation
+      currentOperation.setState(OperationState.FAILED);
+    } else {
+      // We're going to try again, so set the current operation to instantiated
+      currentOperation.setState(OperationState.INSTANTIATED);
+      runWorkflowOperation(workflow, null); // I *think* we don't need properties here, since this isn't a resume (jmh)
+    }
     return workflow;
   }
 
@@ -1535,16 +1540,6 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
    */
   public void setAuthorizationService(AuthorizationService authorizationService) {
     this.authorizationService = authorizationService;
-  }
-
-  /**
-   * Callback for setting the series service
-   * 
-   * @param seriesService
-   *          the series service
-   */
-  public void setSeriesService(SeriesService seriesService) {
-    this.seriesService = seriesService;
   }
 
   /**

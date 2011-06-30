@@ -58,8 +58,13 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   @XmlElementWrapper(name = "configurations")
   protected Set<WorkflowConfiguration> configurations;
 
+  @XmlAttribute(name = "max-attempts")
+  protected int maxAttempts;
+
   /** A no-arg constructor is needed by JAXB */
   public WorkflowOperationDefinitionImpl() {
+    super();
+    this.maxAttempts = 1;
     this.failWorkflowOnException = true;
   }
 
@@ -75,7 +80,7 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
    */
   public WorkflowOperationDefinitionImpl(String id, String description, String exceptionHandlingWorkflow,
           boolean failWorkflowOnException) {
-    super();
+    this();
     this.id = id;
     this.description = description;
     this.exceptionHandlingWorkflow = exceptionHandlingWorkflow;
@@ -217,6 +222,24 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
       }
     }
     return set;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#getMaxAttempts()
+   */
+  @Override
+  public int getMaxAttempts() {
+    return maxAttempts;
+  }
+
+  /**
+   * @param maxAttempts
+   *          the maxAttempts to set
+   */
+  public void setMaxAttempts(int maxAttempts) {
+    this.maxAttempts = maxAttempts;
   }
 
   /**

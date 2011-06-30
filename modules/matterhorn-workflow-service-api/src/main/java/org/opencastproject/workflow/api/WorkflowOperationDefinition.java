@@ -64,4 +64,10 @@ public interface WorkflowOperationDefinition extends Configurable {
    */
   String getSkipCondition();
 
+  /**
+   * Returns the number of attempts the workflow service will make to execute this operation.
+   * 
+   * @return the maximum number of retries before failing
+   */
+  int getMaxAttempts();
 }

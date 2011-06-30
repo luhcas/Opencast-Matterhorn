@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.workflow.api.WorkflowOperationResult.Action.CONTINUE;
+
 import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
 import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
 
@@ -40,6 +42,8 @@ import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
+import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
@@ -110,6 +114,7 @@ public class WorkflowServiceImplTest {
     handlerRegistrations.add(new HandlerRegistration("op2", succeedingOperationHandler));
     handlerRegistrations.add(new HandlerRegistration("op3", failingOperationHandler));
     handlerRegistrations.add(new HandlerRegistration("opPause", new ResumableTestWorkflowOperationHandler()));
+    handlerRegistrations.add(new HandlerRegistration("failOneTime", new FailOnceWorkflowOperationHandler()));
 
     // instantiate a service implementation and its DAO, overriding the methods that depend on the osgi runtime
     service = new WorkflowServiceImpl() {
@@ -133,7 +138,8 @@ public class WorkflowServiceImplTest {
     service.setAuthorizationService(authzService);
 
     OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
-    EasyMock.expect(organizationDirectoryService.getOrganization((String)EasyMock.anyObject())).andReturn(securityService.getOrganization()).anyTimes();
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(securityService.getOrganization()).anyTimes();
     EasyMock.replay(organizationDirectoryService);
     service.setOrganizationDirectoryService(organizationDirectoryService);
 
@@ -145,7 +151,8 @@ public class WorkflowServiceImplTest {
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
+    serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService,
+            organizationDirectoryService);
 
     dao = new WorkflowServiceSolrIndex();
     dao.setServiceRegistry(serviceRegistry);
@@ -520,6 +527,26 @@ public class WorkflowServiceImplTest {
     Assert.assertEquals(WorkflowState.FAILED, service.getWorkflowById(instance.getId()).getState());
   }
 
+  @Test
+  public void testRetry() throws Exception {
+    WorkflowDefinitionImpl def = new WorkflowDefinitionImpl();
+    def.setId("workflow-definition-1");
+    def.setTitle("workflow-definition-1");
+    def.setDescription("workflow-definition-1");
+    def.setPublished(true);
+    service.registerWorkflowDefinition(def);
+
+    WorkflowOperationDefinitionImpl opDef = new WorkflowOperationDefinitionImpl("failOneTime", "fails once", null, true);
+    opDef.setMaxAttempts(2);
+    def.add(opDef);
+
+    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+
+    WorkflowInstance workflow = startAndWait(def, mp, WorkflowState.SUCCEEDED);
+
+    Assert.assertTrue(service.getWorkflowById(workflow.getId()).getOperations().get(0).getFailedAttempts() == 1);
+  }
+
   /**
    * Starts many concurrent workflows to test DB deadlock.
    * 
@@ -592,6 +619,28 @@ public class WorkflowServiceImplTest {
     public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
             throws WorkflowOperationException {
       throw new WorkflowOperationException("this operation handler always fails.  that's the point.");
+    }
+  }
+
+  class FailOnceWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+
+    /** Whether this handler has been run yet */
+    private boolean hasRun = false;
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance,
+     *      org.opencastproject.job.api.JobContext)
+     */
+    @Override
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance, JobContext context)
+            throws WorkflowOperationException {
+      if (!hasRun) {
+        hasRun = true;
+        throw new WorkflowOperationException("This operation handler fails on the first run, but succeeds thereafter");
+      }
+      return createResult(CONTINUE);
     }
   }
 }
