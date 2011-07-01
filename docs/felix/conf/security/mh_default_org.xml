@@ -41,8 +41,8 @@
     <!-- Enable 2-legged OAuth access ("signed fetch") to the LTI launch servlet -->
     <sec:intercept-url pattern="/lti" method="POST" access="ROLE_OAUTH_USER" />
 
-    <!-- Everything else is for any logged in user -->
-    <sec:intercept-url pattern='/**' access='ROLE_ADMIN' />
+    <!-- Everything else is for the admin users -->
+    <sec:intercept-url pattern='/**' access='ROLE_ADMIN, ROLE_COURSE_ADMIN, ROLE_INSTRUCTOR' />
 
     <!-- ############################# -->
     <!-- # LOGIN / LOGOUT MECHANISMS # -->

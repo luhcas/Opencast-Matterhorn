@@ -63,7 +63,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 /**
- * Create an iCalendar from the provided {@link Event}s.
+ * Create an iCalendar from the provided dublin core events.
  * 
  */
 public class CalendarGenerator {

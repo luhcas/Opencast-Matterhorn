@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.opencastproject.workflow.impl.SecurityServiceStub.DEFAULT_ORG_ADMIN;
 
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -27,9 +28,7 @@ import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.DefaultOrganization;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
-import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -132,19 +131,19 @@ public class WorkflowStatisticsTest {
     service.setSecurityService(securityService);
 
     AuthorizationService authzService = EasyMock.createNiceMock(AuthorizationService.class);
-    EasyMock.expect(authzService.getAccessControlList((MediaPackage)EasyMock.anyObject())).andReturn(acl).anyTimes();
+    EasyMock.expect(authzService.getAccessControlList((MediaPackage) EasyMock.anyObject())).andReturn(acl).anyTimes();
     EasyMock.replay(authzService);
     service.setAuthorizationService(authzService);
-    
-    User anonymous = new User("anonymous", "opencast.org", new String[] { SecurityConstants.MH_ANONYMOUS });
+
     UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(DEFAULT_ORG_ADMIN).anyTimes();
     EasyMock.replay(userDirectoryService);
     service.setUserDirectoryService(userDirectoryService);
 
     Organization organization = new DefaultOrganization();
     OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
-    EasyMock.expect(organizationDirectoryService.getOrganization((String)EasyMock.anyObject())).andReturn(organization).anyTimes();
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(organization).anyTimes();
     EasyMock.replay(organizationDirectoryService);
     service.setOrganizationDirectoryService(organizationDirectoryService);
 
@@ -163,7 +162,8 @@ public class WorkflowStatisticsTest {
     EasyMock.replay(workspace);
 
     // Mock the service registry
-    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService,
+            userDirectoryService, organizationDirectoryService);
 
     // Create the workflow database (solr)
     dao = new WorkflowServiceSolrIndex();
@@ -217,7 +217,7 @@ public class WorkflowStatisticsTest {
   }
 
   class IndividualWorkflowListener implements WorkflowListener {
-    
+
     private long id = -1;
 
     IndividualWorkflowListener(long id) {

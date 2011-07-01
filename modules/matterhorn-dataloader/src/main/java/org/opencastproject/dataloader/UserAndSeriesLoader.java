@@ -63,14 +63,20 @@ public class UserAndSeriesLoader {
   /** The user role */
   public static final String USER_ROLE = "ROLE_USER";
 
+  /** The instructor role */
+  public static final String INSTRUCTOR_ROLE = "ROLE_INSTRUCTOR";
+
+  /** The course admin role */
+  public static final String COURSE_ADMIN_ROLE = "ROLE_COURSE_ADMIN";
+
   /** The student role suffix */
-  public static final String STUDENT = "STUDENT";
+  public static final String STUDENT_PREFIX = "STUDENT";
 
   /** The instructor role suffix */
-  public static final String INSTRUCTOR = "INSTRUCTOR";
+  public static final String INSTRUCTOR_PREFIX = "INSTRUCTOR";
 
   /** The departmental admin (not the super admin) role suffix */
-  public static final String ADMIN = "ADMIN";
+  public static final String ADMIN_PREFIX = "ADMIN";
 
   /** The read permission */
   public static final String READ = "read";
@@ -115,12 +121,13 @@ public class UserAndSeriesLoader {
         AccessControlList acl = new AccessControlList();
 
         // Add read permissions for viewing the series content in engage
-        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + STUDENT, READ, true));
-        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR, READ, true));
-        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN, READ, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + STUDENT_PREFIX, READ, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR_PREFIX, READ, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN_PREFIX, READ, true));
 
-        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR, WRITE, true));
-        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN, WRITE, true));
+        // Add write permissions for the instructors and admins
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR_PREFIX, WRITE, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN_PREFIX, WRITE, true));
 
         try {
           dc.set(DublinCore.PROPERTY_IDENTIFIER, seriesId);
@@ -137,14 +144,14 @@ public class UserAndSeriesLoader {
         }
       }
 
-      load(STUDENT, 20, DEFAULT_ORGANIZATION_ID);
-      load(STUDENT, 20, TENANT1);
+      load(STUDENT_PREFIX, 20, new String[] { USER_ROLE }, DEFAULT_ORGANIZATION_ID);
+      load(STUDENT_PREFIX, 20, new String[] { USER_ROLE }, TENANT1);
 
-      load(INSTRUCTOR, 2, DEFAULT_ORGANIZATION_ID);
-      load(INSTRUCTOR, 2, TENANT1);
+      load(INSTRUCTOR_PREFIX, 2, new String[] { USER_ROLE, INSTRUCTOR_ROLE }, DEFAULT_ORGANIZATION_ID);
+      load(INSTRUCTOR_PREFIX, 2, new String[] { USER_ROLE, INSTRUCTOR_ROLE }, TENANT1);
 
-      load(ADMIN, 1, DEFAULT_ORGANIZATION_ID);
-      load(ADMIN, 1, TENANT1);
+      load(ADMIN_PREFIX, 1, new String[] { USER_ROLE, COURSE_ADMIN_ROLE }, DEFAULT_ORGANIZATION_ID);
+      load(ADMIN_PREFIX, 1, new String[] { USER_ROLE, COURSE_ADMIN_ROLE }, TENANT1);
 
       loadLdapUser(DEFAULT_ORGANIZATION_ID);
       loadLdapUser(TENANT1);
@@ -156,13 +163,17 @@ public class UserAndSeriesLoader {
   /**
    * Loads demo users into persistence.
    * 
-   * @param prefix
+   * @param rolePrefix
    *          the role prefix
    * @param numPerSeries
    *          the number of users to load per series
+   * @param additionalRoles
+   *          any additional roles to add for each user
+   * @param orgId
+   *          the organization id
    */
-  protected void load(String prefix, int numPerSeries, String orgId) {
-    String lowerCasePrefix = prefix.toLowerCase();
+  protected void load(String rolePrefix, int numPerSeries, String[] additionalRoles, String orgId) {
+    String lowerCasePrefix = rolePrefix.toLowerCase();
     int totalUsers = numPerSeries * NUM_SERIES;
 
     logger.info("Adding sample {}s, usernames and passwords are {}1/{}1... {}{}/{}{}", new Object[] { lowerCasePrefix,
@@ -171,8 +182,10 @@ public class UserAndSeriesLoader {
     for (int i = 1; i <= totalUsers; i++) {
       if (jpaUserProvider.loadUser(lowerCasePrefix + i, orgId) == null) {
         Set<String> roleSet = new HashSet<String>();
-        roleSet.add(USER_ROLE);
-        roleSet.add(SERIES_PREFIX + (((i - 1) % NUM_SERIES) + 1) + "_" + prefix);
+        for (String additionalRole : additionalRoles) {
+          roleSet.add(additionalRole);
+        }
+        roleSet.add(SERIES_PREFIX + (((i - 1) % NUM_SERIES) + 1) + "_" + rolePrefix);
         JpaUser user = new JpaUser(lowerCasePrefix + i, lowerCasePrefix + i, orgId, roleSet);
         try {
           jpaUserProvider.addUser(user);

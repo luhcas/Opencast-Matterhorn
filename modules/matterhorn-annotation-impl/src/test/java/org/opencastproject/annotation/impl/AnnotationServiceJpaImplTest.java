@@ -15,9 +15,10 @@
  */
 package org.opencastproject.annotation.impl;
 
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+
 import org.opencastproject.annotation.api.Annotation;
 import org.opencastproject.annotation.api.AnnotationList;
-import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 
@@ -56,7 +57,7 @@ public class AnnotationServiceJpaImplTest {
     props.put("eclipselink.ddl-generation.output-mode", "database");
     
     // Set up a mock security service that always returns "me" as the current user
-    User me = new User("me", "opencast.org", new String[] { SecurityConstants.MH_ANONYMOUS });
+    User me = new User("me", "opencast.org", new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
     EasyMock.expect(securityService.getUser()).andReturn(me).anyTimes();
     EasyMock.replay(securityService);

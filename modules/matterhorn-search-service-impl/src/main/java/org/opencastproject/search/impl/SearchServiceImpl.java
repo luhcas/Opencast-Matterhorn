@@ -16,7 +16,7 @@
 
 package org.opencastproject.search.impl;
 
-import static org.opencastproject.security.api.SecurityConstants.MH_ADMIN;
+import static org.opencastproject.security.api.SecurityConstants.GLOBAL_ADMIN_ROLE;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
@@ -342,7 +342,7 @@ public final class SearchServiceImpl implements SearchService {
           UnauthorizedException, ServiceRegistryException {
     User currentUser = securityService.getUser();
     String orgAdminRole = securityService.getOrganization().getAdminRole();
-    if (!currentUser.hasRole(orgAdminRole) && !currentUser.hasRole(MH_ADMIN)
+    if (!currentUser.hasRole(orgAdminRole) && !currentUser.hasRole(GLOBAL_ADMIN_ROLE)
             && !authorizationService.hasPermission(mediaPackage, WRITE_PERMISSION)) {
       throw new UnauthorizedException(currentUser, SearchService.WRITE_PERMISSION);
     }
@@ -431,7 +431,7 @@ public final class SearchServiceImpl implements SearchService {
   @Override
   public SearchResult getForAdministrativeRead(SearchQuery q) throws SearchException, UnauthorizedException {
     User user = securityService.getUser();
-    if (!user.hasRole(MH_ADMIN)) {
+    if (!user.hasRole(GLOBAL_ADMIN_ROLE)) {
       throw new UnauthorizedException(user, getClass().getName() + ".getForAdministrativeRead");
     }
     try {

@@ -16,16 +16,17 @@
 
 package org.opencastproject.mediapackage;
 
-import org.junit.Test;
-import org.opencastproject.util.ConfigurationException;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import org.opencastproject.util.ConfigurationException;
+
+import org.junit.Test;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Test case for media package references.

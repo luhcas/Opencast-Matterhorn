@@ -16,17 +16,18 @@
 
 package org.opencastproject.mediapackage;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.opencastproject.mediapackage.MediaPackageElement.Type;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import org.opencastproject.mediapackage.MediaPackageElement.Type;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Test ccase for the {@link MediaPackageElementBuilderImpl}.

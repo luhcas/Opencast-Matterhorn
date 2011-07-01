@@ -16,8 +16,6 @@
 package org.opencastproject.remotetest.capture;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.PASSWORD;
-import static org.opencastproject.remotetest.Main.USERNAME;
 
 import org.opencastproject.remotetest.Main;
 import org.opencastproject.remotetest.util.TrustedHttpClient;

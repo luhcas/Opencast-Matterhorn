@@ -22,7 +22,7 @@ import static org.opencastproject.event.EventAdminConstants.SERIES_TOPIC;
 import static org.opencastproject.job.api.Job.Status.FINISHED;
 import static org.opencastproject.mediapackage.MediaPackageElementParser.getFromXml;
 import static org.opencastproject.mediapackage.MediaPackageElements.XACML_POLICY;
-import static org.opencastproject.security.api.SecurityConstants.MH_ADMIN;
+import static org.opencastproject.security.api.SecurityConstants.GLOBAL_ADMIN_ROLE;
 
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
@@ -174,7 +174,7 @@ public class SeriesUpdatedEventHandler implements EventHandler {
           try {
             DefaultOrganization defaultOrg = new DefaultOrganization();
             securityService.setOrganization(defaultOrg);
-            securityService.setUser(new User(systemAccount, defaultOrg.getId(), new String[] { MH_ADMIN }));
+            securityService.setUser(new User(systemAccount, defaultOrg.getId(), new String[] { GLOBAL_ADMIN_ROLE }));
 
             SearchQuery q = new SearchQuery().withId(seriesId);
             SearchResult result = searchService.getForAdministrativeRead(q);

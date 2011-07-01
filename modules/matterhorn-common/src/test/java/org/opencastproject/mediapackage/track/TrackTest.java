@@ -15,11 +15,10 @@
  */
 package org.opencastproject.mediapackage.track;
 
-import junit.framework.Assert;
-import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -27,7 +26,17 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.elementbuilder.TrackBuilderPlugin;
+
+import junit.framework.Assert;
+
+import org.apache.commons.io.IOUtils;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.w3c.dom.Document;
+
+import java.io.StringWriter;
+import java.net.URI;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -35,12 +44,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.stream.StreamSource;
-import java.io.StringWriter;
-import java.net.URI;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test case to Test the implementation of {@link TrackImpl}.

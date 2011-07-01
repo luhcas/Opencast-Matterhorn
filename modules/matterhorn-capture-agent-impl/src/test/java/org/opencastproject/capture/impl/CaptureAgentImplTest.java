@@ -15,10 +15,11 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.RecordingState;
-import org.opencastproject.capture.CaptureParameters;
 
+import org.apache.commons.io.FileUtils;
 import org.gstreamer.Gst;
 import org.junit.After;
 import org.junit.Assert;
@@ -34,7 +35,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Properties;
-import org.apache.commons.io.FileUtils;
 
 /**
  * Test the implementation of the Capture Agent, which uses gstreamer to generate pipelines that capture the media.

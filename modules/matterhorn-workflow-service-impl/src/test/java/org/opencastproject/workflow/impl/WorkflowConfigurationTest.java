@@ -19,9 +19,9 @@ import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowParser;
-import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
 import org.junit.Assert;
 import org.junit.Test;

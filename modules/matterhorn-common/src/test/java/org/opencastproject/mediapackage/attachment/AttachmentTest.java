@@ -15,8 +15,9 @@
  */
 package org.opencastproject.mediapackage.attachment;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackageBuilderTest;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -24,10 +25,10 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 
-import java.io.File;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.io.File;
 
 /**
  * Test case for the {@link AttachmentImpl} attachment implementation.
@@ -59,7 +60,7 @@ public class AttachmentTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.mediapackage.attachment.AttachmentImpl#fromURI(URI)}.
+   * Test method for {@link org.opencastproject.mediapackage.attachment.AttachmentImpl#fromURI(java.net.URI)}.
    */
   @Test
   public void testFromURL() {

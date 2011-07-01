@@ -90,8 +90,8 @@ public final class User {
     this.userName = userName;
     this.password = password;
     this.organization = organization;
-    if (roles == null || roles.length == 0) {
-      this.roles = new String[] { SecurityConstants.MH_ANONYMOUS };
+    if (roles == null) {
+      this.roles = new String[0];
     } else {
       Arrays.sort(roles);
       this.roles = roles;

@@ -15,10 +15,10 @@
  */
 package org.opencastproject.util.doc.rest;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
 
 /**
  * This annotation type is used for annotating RESTful service(each java class). This annotation type needs to be kept

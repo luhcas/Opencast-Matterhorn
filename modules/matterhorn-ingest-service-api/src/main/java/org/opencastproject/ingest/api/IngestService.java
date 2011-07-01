@@ -19,6 +19,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.identifier.HandleException;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -118,10 +119,12 @@ public interface IngestService {
    *           if an unexpected error occurs
    * @throws NotFoundException
    *           if either one of the workflow definition or workflow instance was not found
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
   WorkflowInstance addZippedMediaPackage(InputStream zippedMediaPackage, String workflowDefinitionID,
           Map<String, String> wfConfig, Long worfklowId) throws MediaPackageException, IOException, IngestException,
-          NotFoundException;
+          NotFoundException, UnauthorizedException;
 
   /**
    * Create a new MediaPackage in the repository.
@@ -313,9 +316,11 @@ public interface IngestService {
    *           if an unexpected error occurs
    * @throws NotFoundException
    *           if either one of the workflow definition or workflow instance was not found
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
   WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String, String> properties,
-          Long workflowId) throws IllegalStateException, IngestException, NotFoundException;
+          Long workflowId) throws IllegalStateException, IngestException, NotFoundException, UnauthorizedException;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.

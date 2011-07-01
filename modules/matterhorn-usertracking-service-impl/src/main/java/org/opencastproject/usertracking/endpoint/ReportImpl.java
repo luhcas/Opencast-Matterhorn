@@ -15,6 +15,9 @@
  */
 package org.opencastproject.usertracking.endpoint;
 
+import org.opencastproject.usertracking.api.Report;
+import org.opencastproject.usertracking.api.ReportItem;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -25,9 +28,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.opencastproject.usertracking.api.ReportItem;
-import org.opencastproject.usertracking.api.Report;
 
 /**
  * A {@link Report}

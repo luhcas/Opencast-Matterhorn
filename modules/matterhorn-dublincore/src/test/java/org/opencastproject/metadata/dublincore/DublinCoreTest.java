@@ -16,8 +16,6 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_CREATED;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +26,7 @@ import static org.opencastproject.metadata.dublincore.DublinCore.ENC_SCHEME_URI;
 import static org.opencastproject.metadata.dublincore.DublinCore.LANGUAGE_ANY;
 import static org.opencastproject.metadata.dublincore.DublinCore.LANGUAGE_UNDEFINED;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_CONTRIBUTOR;
+import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_CREATED;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_CREATOR;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_FORMAT;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_IDENTIFIER;

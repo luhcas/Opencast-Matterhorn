@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.inspection.api.MediaInspectionException;
-
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobContext;
@@ -38,6 +37,16 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.gstreamer.Bin;
+import org.gstreamer.Bus;
+import org.gstreamer.Element;
+import org.gstreamer.ElementFactory;
+import org.gstreamer.Gst;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pad;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
+import org.gstreamer.elements.DecodeBin;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.LoggerFactory;
@@ -49,16 +58,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
-import org.gstreamer.Element;
-import org.gstreamer.Bin;
-import org.gstreamer.Pad;
-import org.gstreamer.elements.DecodeBin;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.Gst;
-import org.gstreamer.ElementFactory;
-import org.gstreamer.State;
 
 /**
  * Splits video streams from NCast cards.

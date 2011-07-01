@@ -26,13 +26,13 @@ import org.opencastproject.mediapackage.MediaPackageElementParser;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.easymock.EasyMock;

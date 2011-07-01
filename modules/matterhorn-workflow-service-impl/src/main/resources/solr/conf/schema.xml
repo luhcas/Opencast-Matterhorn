@@ -50,7 +50,6 @@
     <field name="seriesid" type="string" indexed="true" stored="false" multiValued="false" />
     <field name="seriestitle" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
     <field name="title" type="text" indexed="true" stored="false" multiValued="false" />
-    <field name="org" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="license" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="language" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="contributor" type="text" indexed="true" stored="false" multiValued="false" />
@@ -73,8 +72,10 @@
     <field name="license_sort" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
     <field name="subject_sort" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
 
-   <!-- Authorization fields -->
-   <dynamicField name="oc_acl_*"  type="text"  indexed="true"  stored="true" multiValued="true" />
+    <!-- Authorization fields -->
+    <field name="oc_creator" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
+    <field name="oc_org" type="caseInsensitiveString" indexed="true" stored="false" multiValued="false" />
+    <dynamicField name="oc_acl_*"  type="text"  indexed="true"  stored="true" multiValued="true" />
 
   </fields>
 

@@ -21,10 +21,10 @@ package org.opencastproject.security.api;
 public interface SecurityConstants {
 
   /** Name of the Matterhorn admin role */
-  String MH_ADMIN = "mh_admin";
+  String GLOBAL_ADMIN_ROLE = "MATTERHORN_ADMINISTRATOR";
 
   /** Name of the Matterhorn anonymous role */
-  String MH_ANONYMOUS = "mh_anonymous";
+  String ANONYMOUS_USERNAME = "anonymous";
 
   /** The default organization identifier */
   String DEFAULT_ORGANIZATION_ID = "mh_default_org";
@@ -36,6 +36,6 @@ public interface SecurityConstants {
   String DEFAULT_ORGANIZATION_ADMIN = "ROLE_ADMIN";
 
   /** Name of the default organization's local anonymous role */
-  String DEFAULT_ORGANIZATION_ANONYMOUS = "anonymous";
-  
+  String DEFAULT_ORGANIZATION_ANONYMOUS = "ANONYMOUS";
+
 }

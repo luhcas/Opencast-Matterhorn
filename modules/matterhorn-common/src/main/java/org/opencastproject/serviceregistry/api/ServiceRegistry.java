@@ -15,11 +15,11 @@
  */
 package org.opencastproject.serviceregistry.api;
 
-import java.util.List;
-
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.util.NotFoundException;
+
+import java.util.List;
 
 /**
  * Manages clustered services and the {@link Job}s they may create to enable asynchronous job handling.

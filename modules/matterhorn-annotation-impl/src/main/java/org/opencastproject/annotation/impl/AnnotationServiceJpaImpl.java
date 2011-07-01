@@ -22,7 +22,6 @@ import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.util.NotFoundException;
 
 import org.osgi.service.component.ComponentContext;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,6 +16,7 @@
 package org.opencastproject.mediapackage.identifier;
 
 import junit.framework.Assert;
+
 import org.junit.Test;
 
 /**

@@ -15,13 +15,14 @@
  */
 package org.opencastproject.authorization.xacml;
 
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
+
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.DefaultOrganization;
 import org.opencastproject.security.api.Organization;
-import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.util.NotFoundException;
@@ -50,24 +51,24 @@ import java.util.List;
 public class XacmlSecurityTest {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(XacmlSecurityTest.class);
+  protected static final Logger logger = LoggerFactory.getLogger(XacmlSecurityTest.class);
 
   /** The stub workspace to store xacml files */
-  private WorkspaceStub workspace = null;
+  protected WorkspaceStub workspace = null;
 
   /** The username to use with the security service */
-  private final String currentUser = "me";
+  protected final String currentUser = "me";
 
   /** The organization to use */
-  private final Organization organization = new DefaultOrganization();
+  protected final Organization organization = new DefaultOrganization();
 
   /** The roles to use with the security service */
-  private final List<String> currentRoles = new ArrayList<String>();
+  protected final List<String> currentRoles = new ArrayList<String>();
 
   // Override the behavior of the security service to use the current user and roles defined here
-  private SecurityService securityService = null;
+  protected SecurityService securityService = null;
 
-  private XACMLAuthorizationService authzService = null;
+  protected XACMLAuthorizationService authzService = null;
 
   @Before
   public void setUp() throws Exception {
@@ -117,8 +118,8 @@ public class XacmlSecurityTest {
     acl.add(new AccessControlEntry("student", "read", true));
     acl.add(new AccessControlEntry("student", "comment", true));
 
-    acl.add(new AccessControlEntry(SecurityConstants.MH_ANONYMOUS, "read", true));
-    acl.add(new AccessControlEntry(SecurityConstants.MH_ANONYMOUS, "comment", false));
+    acl.add(new AccessControlEntry(DEFAULT_ORGANIZATION_ANONYMOUS, "read", true));
+    acl.add(new AccessControlEntry(DEFAULT_ORGANIZATION_ANONYMOUS, "comment", false));
 
     String xacml = XACMLUtils.getXacml(mediapackage, accessControlList);
     logger.debug("XACML contents: {}", xacml);
@@ -144,7 +145,7 @@ public class XacmlSecurityTest {
     Assert.assertTrue(authzService.hasPermission(mediapackage, "comment"));
 
     currentRoles.clear();
-    currentRoles.add(SecurityConstants.MH_ANONYMOUS);
+    currentRoles.add(DEFAULT_ORGANIZATION_ANONYMOUS);
     Assert.assertFalse(authzService.hasPermission(mediapackage, "delete"));
     Assert.assertTrue(authzService.hasPermission(mediapackage, "read"));
     Assert.assertFalse(authzService.hasPermission(mediapackage, "comment"));
@@ -152,7 +153,7 @@ public class XacmlSecurityTest {
   }
 
   static class WorkspaceStub implements Workspace {
-    private File file = null;
+    protected File file = null;
 
     public WorkspaceStub() throws IOException {
       this.file = File.createTempFile("xacml", "xml");
@@ -300,7 +301,7 @@ public class XacmlSecurityTest {
 
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.opencastproject.workspace.api.Workspace#getURI(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override

@@ -17,8 +17,8 @@ package org.opencastproject.workflow.impl;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.metadata.api.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.metadata.api.MediapackageMetadataImpl;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;

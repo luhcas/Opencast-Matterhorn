@@ -122,9 +122,12 @@
               org.jboss.security.xacml.sunxacml,
               org.jboss.security.xacml.sunxacml.attr,
               org.jboss.security.xacml.sunxacml.attr.proxy,
+              org.jboss.security.xacml.sunxacml.combine,
               org.jboss.security.xacml.sunxacml.cond,
+              org.jboss.security.xacml.sunxacml.cond.cluster,
               org.jboss.security.xacml.sunxacml.ctx,
-              org.jboss.security.xacml.sunxacml.finder
+              org.jboss.security.xacml.sunxacml.finder,
+              org.jboss.security.xacml.sunxacml.finder.impl
             </Private-Package>
             <Import-Package>
               org.slf4j,

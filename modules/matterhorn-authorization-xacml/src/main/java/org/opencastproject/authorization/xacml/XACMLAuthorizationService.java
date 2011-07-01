@@ -182,6 +182,24 @@ public class XACMLAuthorizationService implements AuthorizationService {
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.security.api.AuthorizationService#hasPolicy(org.opencastproject.mediapackage.MediaPackage)
+   */
+  @Override
+  public boolean hasPolicy(MediaPackage mediapackage) throws MediaPackageException {
+    Attachment[] xacmlAttachments = mediapackage.getAttachments(MediaPackageElements.XACML_POLICY);
+    if (xacmlAttachments.length == 0) {
+      logger.debug("No XACML attachment found in {}", mediapackage);
+      return false;
+    } else if (xacmlAttachments.length == 1) {
+      return true;
+    }
+    logger.warn("More than one XACML policy is attached to {}", mediapackage);
+    return false;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.security.api.AuthorizationService#hasPermission(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String)
    */

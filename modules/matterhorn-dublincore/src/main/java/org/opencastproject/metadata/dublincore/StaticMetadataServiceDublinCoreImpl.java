@@ -15,7 +15,6 @@
  */
 package org.opencastproject.metadata.dublincore;
 
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
@@ -30,6 +29,8 @@ import org.opencastproject.util.data.NonEmptyList;
 import org.opencastproject.util.data.Option;
 import org.opencastproject.util.data.Predicate;
 import org.opencastproject.workspace.api.Workspace;
+
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

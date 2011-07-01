@@ -37,6 +37,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -215,7 +216,11 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
    */
   public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd, Map<String, String> workflowConfig)
           throws MediaPackageException, IOException, IngestException, NotFoundException {
-    return addZippedMediaPackage(zipStream, wd, workflowConfig, null);
+    try {
+      return addZippedMediaPackage(zipStream, wd, workflowConfig, null);
+    } catch (UnauthorizedException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   /**
@@ -225,7 +230,8 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
    *      java.util.Map, java.lang.Long)
    */
   public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd, Map<String, String> workflowConfig,
-          Long workflowId) throws MediaPackageException, IOException, IngestException, NotFoundException {
+          Long workflowId) throws MediaPackageException, IOException, IngestException, NotFoundException,
+          UnauthorizedException {
     // Start a job synchronously. We can't keep the open input stream waiting around.
     Job job = null;
 
@@ -233,7 +239,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
 
     // Keep track of the zip file we use to store the zip stream
     File zipFile = null;
-    
+
     try {
 
       // We don't need anybody to do the dispatching for us. Therefore we need to make sure that the job is never in
@@ -615,6 +621,8 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
       return ingest(mp, null, null, null);
     } catch (NotFoundException e) {
       throw new IngestException(e);
+    } catch (UnauthorizedException e) {
+      throw new IllegalStateException(e);
     }
   }
 
@@ -626,7 +634,11 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
    */
   @Override
   public WorkflowInstance ingest(MediaPackage mp, String wd) throws IngestException, NotFoundException {
-    return ingest(mp, wd, null, null);
+    try {
+      return ingest(mp, wd, null, null);
+    } catch (UnauthorizedException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   /**
@@ -638,7 +650,11 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
   @Override
   public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String, String> properties) throws IngestException,
           NotFoundException {
-    return ingest(mp, wd, properties, null);
+    try {
+      return ingest(mp, wd, properties, null);
+    } catch (UnauthorizedException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   /**
@@ -648,7 +664,7 @@ public class IngestServiceImpl extends AbstractJobProducer implements IngestServ
    *      java.lang.String, java.util.Map, java.lang.Long)
    */
   public WorkflowInstance ingest(MediaPackage mp, String workflowDefinitionID, Map<String, String> properties,
-          Long workflowId) throws IngestException, NotFoundException {
+          Long workflowId) throws IngestException, NotFoundException, UnauthorizedException {
     // If the workflow definition ID is null, use the default, or throw if there is none
     if (workflowDefinitionID == null) {
       if (this.defaultWorkflowDefinionId == null) {

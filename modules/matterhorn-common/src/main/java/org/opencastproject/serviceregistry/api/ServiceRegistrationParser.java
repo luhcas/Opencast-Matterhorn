@@ -15,6 +15,8 @@
  */
 package org.opencastproject.serviceregistry.api;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -25,8 +27,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * Marshals and unmarshals {@link ServiceRegistration}s.

@@ -15,8 +15,6 @@
  */
 package org.opencastproject.mediapackage.track;
 
-import junit.framework.Assert;
-import org.junit.Test;
 import org.opencastproject.mediapackage.AudioStream;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Stream;
@@ -25,6 +23,10 @@ import org.opencastproject.mediapackage.VideoStream;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
+
+import junit.framework.Assert;
+
+import org.junit.Test;
 
 import java.net.URI;
 

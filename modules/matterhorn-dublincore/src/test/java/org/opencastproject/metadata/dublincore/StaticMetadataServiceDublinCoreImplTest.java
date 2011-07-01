@@ -16,11 +16,9 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import junit.framework.Assert;
-import org.apache.commons.io.IOUtils;
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.opencastproject.metadata.dublincore.TestUtil.createDate;
+
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -33,13 +31,17 @@ import org.opencastproject.util.data.Function;
 import org.opencastproject.util.data.Predicate;
 import org.opencastproject.workspace.api.Workspace;
 
+import junit.framework.Assert;
+
+import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
+import org.easymock.IAnswer;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-
-import static org.junit.Assert.assertEquals;
-import static org.opencastproject.metadata.dublincore.TestUtil.createDate;
 
 public final class StaticMetadataServiceDublinCoreImplTest {
 

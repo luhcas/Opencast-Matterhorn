@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
@@ -101,8 +102,11 @@ public interface WorkflowService {
    *           if there is a problem accessing the workflow instance from persistence
    * @throws NotFoundException
    *           if there is no workflow instance with this identifier
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
-  WorkflowInstance getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException;
+  WorkflowInstance getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException,
+          UnauthorizedException;
 
   /**
    * Finds workflow instances based on the specified query.
@@ -215,9 +219,11 @@ public interface WorkflowService {
    *           if there is a problem accessing the workflow instance in persistence
    * @throws WorkflowParsingException
    *           if there is a problem parsing the workflow instance from persistence
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
   WorkflowInstance stop(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException,
-          WorkflowParsingException;
+          WorkflowParsingException, UnauthorizedException;
 
   /**
    * Temporarily suspends a started workflow instance.
@@ -231,9 +237,11 @@ public interface WorkflowService {
    *           if there is a problem accessing the workflow instance in persistence
    * @throws WorkflowParsingException
    *           if there is a problem parsing the workflow instance from persistence
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
   WorkflowInstance suspend(long workflowInstanceId) throws WorkflowDatabaseException, WorkflowParsingException,
-          NotFoundException;
+          NotFoundException, UnauthorizedException;
 
   /**
    * Resumes a suspended workflow instance.
@@ -247,9 +255,11 @@ public interface WorkflowService {
    *           if there is a problem accessing the workflow instance in persistence
    * @throws WorkflowParsingException
    *           if there is a problem parsing the workflow instance from persistence
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
   WorkflowInstance resume(long workflowInstanceId) throws NotFoundException, WorkflowDatabaseException,
-          WorkflowParsingException;
+          WorkflowParsingException, UnauthorizedException;
 
   /**
    * Resumes a suspended workflow instance, applying new properties to the workflow.
@@ -267,9 +277,11 @@ public interface WorkflowService {
    *           if there is a problem parsing the workflow instance from persistence
    * @throws IllegalStateException
    *           if the workflow with this identifier is not in the paused state
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
   WorkflowInstance resume(long workflowInstanceId, Map<String, String> properties) throws NotFoundException,
-          WorkflowDatabaseException, WorkflowParsingException, IllegalStateException;
+          WorkflowDatabaseException, WorkflowParsingException, IllegalStateException, UnauthorizedException;
 
   /**
    * Updates the given workflow instance with regard to the media package, the properties and the operations involved.
@@ -280,8 +292,11 @@ public interface WorkflowService {
    *           if there is a problem storing the workflow instance in persistence
    * @throws WorkflowParsingException
    *           if there is a problem serializing the workflow instance for persistence
+   * @throws UnauthorizedException
+   *           if the current user does not have {@link #READ_PERMISSION} on the workflow instance's mediapackage.
    */
-  void update(WorkflowInstance workflowInstance) throws WorkflowDatabaseException, WorkflowParsingException;
+  void update(WorkflowInstance workflowInstance) throws WorkflowDatabaseException, WorkflowParsingException,
+          UnauthorizedException;
 
   /**
    * Gets the list of available workflow definitions. In order to be "available", a workflow definition must be

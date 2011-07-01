@@ -19,6 +19,7 @@ import static org.opencastproject.workflow.impl.WorkflowServiceImpl.NO;
 import static org.opencastproject.workflow.impl.WorkflowServiceImpl.PROPERTY_PATTERN;
 import static org.opencastproject.workflow.impl.WorkflowServiceImpl.YES;
 
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -180,7 +181,7 @@ final class WorkflowOperationWorker {
    *           if serializing the workflow fails
    */
   public WorkflowOperationResult start() throws WorkflowOperationException, WorkflowDatabaseException,
-          WorkflowParsingException {
+          WorkflowParsingException, UnauthorizedException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
 
     // Do we need to execute the operation?
@@ -188,8 +189,8 @@ final class WorkflowOperationWorker {
     String skipCondition = operation.getSkipCondition(); // unless
 
     boolean skip = false;
-    if (StringUtils.isNotBlank(executeCondition) && (PROPERTY_PATTERN.matcher(executeCondition).matches()
-            || NO.contains(executeCondition.toLowerCase()))) {
+    if (StringUtils.isNotBlank(executeCondition)
+            && (PROPERTY_PATTERN.matcher(executeCondition).matches() || NO.contains(executeCondition.toLowerCase()))) {
       skip = true;
     } else if (StringUtils.isNotBlank(skipCondition)
             && (!PROPERTY_PATTERN.matcher(skipCondition).matches() || YES.contains(skipCondition.toLowerCase()))) {
@@ -239,7 +240,7 @@ final class WorkflowOperationWorker {
    *           if the workflow operation cannot be resumed
    */
   public WorkflowOperationResult resume() throws WorkflowOperationException, WorkflowDatabaseException,
-          WorkflowParsingException, IllegalStateException {
+          WorkflowParsingException, IllegalStateException, UnauthorizedException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
 
     // Make sure we have a (suitable) handler

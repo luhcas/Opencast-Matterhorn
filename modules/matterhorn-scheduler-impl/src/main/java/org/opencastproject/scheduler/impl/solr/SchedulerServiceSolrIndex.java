@@ -623,7 +623,7 @@ public class SchedulerServiceSolrIndex implements SchedulerServiceIndex {
   }
 
   /**
-   * Builds a solr search query from a {@link SeriesQuery}.
+   * Builds a solr search query from a {@link org.opencastproject.series.api.SeriesQuery}.
    * 
    * @param query
    *          the series query

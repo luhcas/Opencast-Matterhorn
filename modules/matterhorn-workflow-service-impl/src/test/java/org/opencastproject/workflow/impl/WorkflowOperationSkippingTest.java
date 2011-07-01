@@ -17,8 +17,7 @@ package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
-import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+import static org.opencastproject.workflow.impl.SecurityServiceStub.DEFAULT_ORG_ADMIN;
 
 import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -31,8 +30,6 @@ import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.DefaultOrganization;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
-import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -115,9 +112,11 @@ public class WorkflowOperationSkippingTest {
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
 
-    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
+    SecurityServiceStub securityService = new SecurityServiceStub();
+    service.setSecurityService(securityService);
+
     UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(DEFAULT_ORG_ADMIN).anyTimes();
     EasyMock.replay(userDirectoryService);
     service.setUserDirectoryService(userDirectoryService);
 
@@ -127,14 +126,6 @@ public class WorkflowOperationSkippingTest {
             .andReturn(organization).anyTimes();
     EasyMock.replay(organizationDirectoryService);
     service.setOrganizationDirectoryService(organizationDirectoryService);
-
-    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
-    EasyMock.expect(securityService.getUser()).andReturn(anonymous).anyTimes();
-    EasyMock.expect(securityService.getOrganization()).andReturn(organization).anyTimes();
-    EasyMock.replay(securityService);
-
-    securityService = new SecurityServiceStub();
-    service.setSecurityService(securityService);
 
     ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
 

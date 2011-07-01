@@ -29,6 +29,7 @@ import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.scheduler.api.SchedulerException;
 import org.opencastproject.scheduler.api.SchedulerQuery;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -262,9 +263,11 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    *           if workflow with ID from DublinCore cannot be found
    * @throws WorkflowException
    *           if update fails
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to update the workflow
    */
   protected void updateWorkflow(DublinCoreCatalog event, Date startDate, Date endDate) throws SchedulerException,
-          NotFoundException, WorkflowException {
+          NotFoundException, WorkflowException, UnauthorizedException {
     WorkflowInstance workflow = workflowService.getWorkflowById(Long.parseLong(event
             .getFirst(DublinCore.PROPERTY_IDENTIFIER)));
     WorkflowOperationInstance scheduleOperation = workflow.getCurrentOperation();
@@ -337,8 +340,10 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    *          workflow to be stopped
    * @throws NotFoundException
    *           if there is no workflow with specified ID
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to stop the workflow
    */
-  protected void stopWorkflowInstance(long eventID) throws NotFoundException {
+  protected void stopWorkflowInstance(long eventID) throws NotFoundException, UnauthorizedException {
     try {
       workflowService.stop(eventID);
     } catch (WorkflowException e) {
@@ -364,7 +369,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * , java.lang.String)
    */
   @Override
-  public Long addEvent(final DublinCoreCatalog eventCatalog) throws SchedulerException {
+  public Long addEvent(final DublinCoreCatalog eventCatalog) throws SchedulerException, UnauthorizedException {
     DCMIPeriod period = EncodingSchemeUtils.decodeMandatoryPeriod(eventCatalog.getFirst(DublinCore.PROPERTY_TEMPORAL));
     if (!period.hasEnd() || !period.hasStart()) {
       throw new IllegalArgumentException(
@@ -428,7 +433,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    */
   @Override
   public Long[] addReccuringEvent(DublinCoreCatalog templateCatalog, String recPattern, Date beginning, Date end,
-          long duration, String timeZone) throws SchedulerException {
+          long duration, String timeZone) throws SchedulerException, UnauthorizedException {
     final List<DublinCoreCatalog> eventList;
     try {
       eventList = createEventCatalogsFromReccurence(templateCatalog, recPattern, beginning, end, duration, timeZone);
@@ -590,7 +595,8 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * DublinCoreCatalog)
    */
   @Override
-  public void updateEvent(final DublinCoreCatalog eventCatalog) throws NotFoundException, SchedulerException {
+  public void updateEvent(final DublinCoreCatalog eventCatalog) throws NotFoundException, SchedulerException,
+          UnauthorizedException {
     if (eventCatalog == null) {
       logger.warn("Cannot update <null> event.");
       return;

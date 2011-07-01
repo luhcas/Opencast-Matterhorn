@@ -22,10 +22,10 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 
 import org.junit.Assert;

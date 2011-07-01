@@ -15,10 +15,11 @@
  */
 package org.opencastproject.runtimeinfo.rest;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-import org.apache.commons.lang.StringEscapeUtils;
 
 @Deprecated
 public class RestEndpoint {

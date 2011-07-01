@@ -19,10 +19,10 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.metadata.api.MediaPackageMetadata;
-import org.opencastproject.metadata.api.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
+import org.opencastproject.metadata.api.MediaPackageMetadata;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.metadata.api.MediapackageMetadataImpl;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;

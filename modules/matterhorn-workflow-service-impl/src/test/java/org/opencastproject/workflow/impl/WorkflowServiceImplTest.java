@@ -16,9 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import static org.opencastproject.workflow.api.WorkflowOperationResult.Action.CONTINUE;
-
-import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ANONYMOUS;
-import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+import static org.opencastproject.workflow.impl.SecurityServiceStub.DEFAULT_ORG_ADMIN;
 
 import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -29,21 +27,20 @@ import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.OrganizationDirectoryService;
-import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
-import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
-import org.opencastproject.workflow.api.WorkflowOperationDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
@@ -126,9 +123,8 @@ public class WorkflowServiceImplTest {
     securityService = new SecurityServiceStub();
     service.setSecurityService(securityService);
 
-    User anonymous = new User("anonymous", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ANONYMOUS });
     UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(DEFAULT_ORG_ADMIN).anyTimes();
     EasyMock.replay(userDirectoryService);
     service.setUserDirectoryService(userDirectoryService);
 
@@ -554,7 +550,7 @@ public class WorkflowServiceImplTest {
    */
   @Test
   public void testManyConcurrentWorkflows() throws Exception {
-    int count = 50;
+    int count = 10;
     Assert.assertEquals(0, service.countWorkflowInstances());
     List<WorkflowInstance> instances = new ArrayList<WorkflowInstance>();
 

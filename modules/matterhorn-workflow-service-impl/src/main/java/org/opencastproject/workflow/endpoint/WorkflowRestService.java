@@ -28,6 +28,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.AbstractJobProducerEndpoint;
 import org.opencastproject.rest.RestConstants;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.LocalHashMap;
 import org.opencastproject.util.NotFoundException;
@@ -534,7 +535,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
           @RestResponse(responseCode = SC_OK, description = "An XML representation of the workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No workflow instance with that identifier exists.") })
   public WorkflowInstance getWorkflowAsXml(@PathParam("id") long id) throws WorkflowDatabaseException,
-          NotFoundException {
+          NotFoundException, UnauthorizedException {
     return service.getWorkflowById(id);
   }
 
@@ -545,7 +546,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
           @RestResponse(responseCode = SC_OK, description = "A JSON representation of the workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No workflow instance with that identifier exists.") })
   public WorkflowInstance getWorkflowAsJson(@PathParam("id") long id) throws WorkflowDatabaseException,
-          NotFoundException {
+          NotFoundException, UnauthorizedException {
     return getWorkflowAsXml(id);
   }
 
@@ -598,7 +599,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @RestQuery(name = "stop", description = "Stops a workflow instance.", returnDescription = "An XML representation of the stopped workflow instance", restParameters = { @RestParameter(name = "id", isRequired = true, description = "The workflow instance identifier", type = STRING) }, reponses = {
           @RestResponse(responseCode = SC_OK, description = "An XML representation of the stopped workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No running workflow instance with that identifier exists.") })
-  public WorkflowInstance stop(@FormParam("id") long workflowInstanceId) throws WorkflowException, NotFoundException {
+  public WorkflowInstance stop(@FormParam("id") long workflowInstanceId) throws WorkflowException, NotFoundException,
+          UnauthorizedException {
     return service.stop(workflowInstanceId);
   }
 
@@ -608,7 +610,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @RestQuery(name = "suspend", description = "Suspends a workflow instance.", returnDescription = "An XML representation of the suspended workflow instance", restParameters = { @RestParameter(name = "id", isRequired = true, description = "The workflow instance identifier", type = STRING) }, reponses = {
           @RestResponse(responseCode = SC_OK, description = "An XML representation of the suspended workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No running workflow instance with that identifier exists.") })
-  public Response suspend(@FormParam("id") long workflowInstanceId) throws NotFoundException {
+  public Response suspend(@FormParam("id") long workflowInstanceId) throws NotFoundException, UnauthorizedException {
     try {
       WorkflowInstance workflow = service.suspend(workflowInstanceId);
       return Response.ok(workflow).build();
@@ -624,7 +626,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
           @RestResponse(responseCode = SC_OK, description = "An XML representation of the resumed workflow instance."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No suspended workflow instance with that identifier exists.") })
   public Response resume(@FormParam("id") long workflowInstanceId, @FormParam("properties") LocalHashMap properties)
-          throws NotFoundException {
+          throws NotFoundException, UnauthorizedException {
     Map<String, String> map;
     if (properties == null) {
       map = new HashMap<String, String>();
@@ -647,7 +649,7 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No suspended workflow instance with that identifier exists.") })
   public Response resume(@FormParam("id") long workflowInstanceId,
           @FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("properties") LocalHashMap properties)
-          throws NotFoundException {
+          throws NotFoundException, UnauthorizedException {
     Map<String, String> map;
     if (properties == null) {
       map = new HashMap<String, String>();
@@ -670,7 +672,8 @@ public class WorkflowRestService extends AbstractJobProducerEndpoint {
   @POST
   @Path("update")
   @RestQuery(name = "update", description = "Updates a workflow instance.", returnDescription = "No content.", restParameters = { @RestParameter(name = "workflow", isRequired = true, description = "The XML representation of the workflow instance.", type = TEXT) }, reponses = { @RestResponse(responseCode = SC_NO_CONTENT, description = "Workflow instance updated.") })
-  public Response update(@FormParam("workflow") String workflowInstance) {
+  public Response update(@FormParam("workflow") String workflowInstance) throws NotFoundException,
+          UnauthorizedException {
     try {
       WorkflowInstance instance = WorkflowParser.parseWorkflowInstance(workflowInstance);
       service.update(instance);

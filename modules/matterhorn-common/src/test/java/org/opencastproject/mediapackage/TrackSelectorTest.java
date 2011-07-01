@@ -16,13 +16,14 @@
 
 package org.opencastproject.mediapackage;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.opencastproject.mediapackage.selector.TrackSelector;
-
 import static org.junit.Assert.assertEquals;
 import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTATION_SOURCE;
 import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTER_SOURCE;
+
+import org.opencastproject.mediapackage.selector.TrackSelector;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test case for {@link TrackSelector}.

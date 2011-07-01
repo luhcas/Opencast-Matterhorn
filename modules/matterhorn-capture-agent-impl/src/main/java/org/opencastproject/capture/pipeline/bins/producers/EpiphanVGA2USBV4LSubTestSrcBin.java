@@ -26,7 +26,6 @@ import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.Pipeline;
 import org.gstreamer.elements.AppSink;
-
 import org.gstreamer.event.EOSEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

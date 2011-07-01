@@ -15,20 +15,21 @@
  */
 package org.opencastproject.mediapackage;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.opencastproject.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector;
-import org.opencastproject.mediapackage.selector.SimpleElementSelector;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.opencastproject.mediapackage.MediaPackageElements.AUDIENCE_SOURCE;
 import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTATION_SOURCE;
 import static org.opencastproject.mediapackage.MediaPackageElements.PRESENTER_SOURCE;
+
+import org.opencastproject.mediapackage.MediaPackageElement.Type;
+import org.opencastproject.mediapackage.selector.AbstractMediaPackageElementSelector;
+import org.opencastproject.mediapackage.selector.SimpleElementSelector;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test case for {@link SimpleElementSelector}.

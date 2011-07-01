@@ -15,6 +15,8 @@
  */
 package org.opencastproject.capture.admin.api;
 
+import org.opencastproject.util.HashtableAdapter;
+
 import java.util.Properties;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -23,8 +25,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.opencastproject.util.HashtableAdapter;
 
 /**
  * A representation of an agent which stores its name, state and time-since-last-update value.

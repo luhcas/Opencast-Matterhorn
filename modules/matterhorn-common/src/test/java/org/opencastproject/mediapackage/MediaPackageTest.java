@@ -16,11 +16,19 @@
 
 package org.opencastproject.mediapackage;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.util.ConfigurationException;
+
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,12 +36,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * Test cases for the media package.

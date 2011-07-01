@@ -16,9 +16,9 @@
 
 package org.opencastproject.util;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
+import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;

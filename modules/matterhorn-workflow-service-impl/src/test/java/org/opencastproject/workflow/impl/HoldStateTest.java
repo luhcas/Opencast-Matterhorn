@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.workflow.impl.SecurityServiceStub.DEFAULT_ORG_ADMIN;
+
 import org.opencastproject.job.api.JobContext;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -26,9 +28,7 @@ import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.DefaultOrganization;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
-import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -114,15 +114,14 @@ public class HoldStateTest {
 
     securityService = new SecurityServiceStub();
     service.setSecurityService(securityService);
-    
+
     AuthorizationService authzService = EasyMock.createNiceMock(AuthorizationService.class);
-    EasyMock.expect(authzService.getAccessControlList((MediaPackage)EasyMock.anyObject())).andReturn(acl).anyTimes();
+    EasyMock.expect(authzService.getAccessControlList((MediaPackage) EasyMock.anyObject())).andReturn(acl).anyTimes();
     EasyMock.replay(authzService);
     service.setAuthorizationService(authzService);
 
-    User anonymous = new User("anonymous", "opencast.org", new String[] { SecurityConstants.MH_ANONYMOUS });
     UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(DEFAULT_ORG_ADMIN).anyTimes();
     EasyMock.replay(userDirectoryService);
     service.setUserDirectoryService(userDirectoryService);
 
@@ -137,7 +136,8 @@ public class HoldStateTest {
     EasyMock.replay(mds);
     service.addMetadataService(mds);
 
-    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService,
+            userDirectoryService, organizationDirectoryService);
 
     dao = new WorkflowServiceSolrIndex();
     dao.solrRoot = sRoot + File.separator + "solr";

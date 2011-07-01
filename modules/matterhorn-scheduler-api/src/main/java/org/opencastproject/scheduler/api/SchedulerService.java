@@ -17,6 +17,7 @@ package org.opencastproject.scheduler.api;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 
 import java.util.Date;
@@ -43,8 +44,10 @@ public interface SchedulerService {
    * @return ID of created event
    * @throws SchedulerException
    *           if creating new events failed
+   * @throws UnauthorizedException
+   *           if the caller is not authorized to take this action
    */
-  Long addEvent(DublinCoreCatalog eventCatalog) throws SchedulerException;
+  Long addEvent(DublinCoreCatalog eventCatalog) throws SchedulerException, UnauthorizedException;
 
   /**
    * Creates series of events using DublinCore as template and recurrence pattern. For each event default capture agent
@@ -70,9 +73,11 @@ public interface SchedulerService {
    * @return array of events IDs that were created
    * @throws SchedulerException
    *           if events cannot be created
+   * @throws UnauthorizedException
+   *           if the caller is not authorized to take this action
    */
   Long[] addReccuringEvent(DublinCoreCatalog eventCatalog, String recPattern, Date beginning, Date end, long duration,
-          String timeZone) throws SchedulerException;
+          String timeZone) throws SchedulerException, UnauthorizedException;
 
   /**
    * Updates existing events with capture agent metadata. Configuration will be updated from event's DublinCore:
@@ -108,8 +113,10 @@ public interface SchedulerService {
    *           if events with specified DublinCore ID cannot be found
    * @throws SchedulerException
    *           if update fails
+   * @throws UnauthorizedException
+   *           if the caller is not authorized to take this action
    */
-  void updateEvent(DublinCoreCatalog eventCatalog) throws NotFoundException, SchedulerException;
+  void updateEvent(DublinCoreCatalog eventCatalog) throws NotFoundException, SchedulerException, UnauthorizedException;
 
   /**
    * Removes event with specified ID.

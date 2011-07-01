@@ -15,8 +15,8 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
-import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.CaptureParameters;
+import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.security.api.TrustedHttpClientException;

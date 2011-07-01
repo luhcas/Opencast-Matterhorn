@@ -15,10 +15,10 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.CaptureParameters;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
-import org.opencastproject.capture.CaptureParameters;
 
 import junit.framework.Assert;
 

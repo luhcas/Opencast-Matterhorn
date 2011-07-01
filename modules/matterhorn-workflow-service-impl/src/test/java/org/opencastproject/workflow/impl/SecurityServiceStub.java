@@ -30,7 +30,7 @@ public class SecurityServiceStub implements SecurityService {
 
 //  private User user = new User("admin", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ADMIN });
 //
-  private static final User admin = new User("admin", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ADMIN });
+  public static final User DEFAULT_ORG_ADMIN = new User("admin", DEFAULT_ORGANIZATION_ID, new String[] { DEFAULT_ORGANIZATION_ADMIN });
 
   /** Holds delegates users for new threads that have been spawned from authenticated threads */
   private static final ThreadLocal<User> user = new ThreadLocal<User>();
@@ -42,7 +42,7 @@ public class SecurityServiceStub implements SecurityService {
    * 
    */
   public SecurityServiceStub() {
-    setUser(admin);
+    setUser(DEFAULT_ORG_ADMIN);
     setOrganization(new DefaultOrganization());
   }
   

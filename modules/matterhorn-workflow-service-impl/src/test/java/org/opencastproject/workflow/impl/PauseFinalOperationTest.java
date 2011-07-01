@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.workflow.impl.SecurityServiceStub.DEFAULT_ORG_ADMIN;
+
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -23,8 +25,6 @@ import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.OrganizationDirectoryService;
-import org.opencastproject.security.api.SecurityConstants;
-import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
 import org.opencastproject.serviceregistry.api.ServiceRegistryInMemoryImpl;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -102,27 +102,28 @@ public class PauseFinalOperationTest {
     securityService = new SecurityServiceStub();
     service.setSecurityService(securityService);
 
-    User anonymous = new User("anonymous", "opencast.org", new String[] { SecurityConstants.MH_ANONYMOUS });
     UserDirectoryService userDirectoryService = EasyMock.createMock(UserDirectoryService.class);
-    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(anonymous).anyTimes();
+    EasyMock.expect(userDirectoryService.loadUser((String) EasyMock.anyObject())).andReturn(DEFAULT_ORG_ADMIN).anyTimes();
     EasyMock.replay(userDirectoryService);
     service.setUserDirectoryService(userDirectoryService);
-    
+
     AuthorizationService authzService = EasyMock.createNiceMock(AuthorizationService.class);
-    EasyMock.expect(authzService.getAccessControlList((MediaPackage)EasyMock.anyObject())).andReturn(acl).anyTimes();
+    EasyMock.expect(authzService.getAccessControlList((MediaPackage) EasyMock.anyObject())).andReturn(acl).anyTimes();
     EasyMock.replay(authzService);
     service.setAuthorizationService(authzService);
 
     OrganizationDirectoryService organizationDirectoryService = EasyMock.createMock(OrganizationDirectoryService.class);
-    EasyMock.expect(organizationDirectoryService.getOrganization((String)EasyMock.anyObject())).andReturn(securityService.getOrganization()).anyTimes();
+    EasyMock.expect(organizationDirectoryService.getOrganization((String) EasyMock.anyObject()))
+            .andReturn(securityService.getOrganization()).anyTimes();
     EasyMock.replay(organizationDirectoryService);
     service.setOrganizationDirectoryService(organizationDirectoryService);
-    
+
     MediaPackageMetadataService mds = EasyMock.createNiceMock(MediaPackageMetadataService.class);
     EasyMock.replay(mds);
     service.addMetadataService(mds);
 
-    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService, userDirectoryService, organizationDirectoryService);
+    ServiceRegistryInMemoryImpl serviceRegistry = new ServiceRegistryInMemoryImpl(service, securityService,
+            userDirectoryService, organizationDirectoryService);
 
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);

@@ -20,6 +20,7 @@ import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -426,6 +427,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     } catch (NotFoundException e) {
       logger.warn("Unable to find a workflow with id='{}'", recordingId);
       return;
+    } catch (UnauthorizedException e) {
+      logger.warn("Can not update workflow: {}", e.getMessage());
     }
     try {
       if (state.endsWith("_error")) {

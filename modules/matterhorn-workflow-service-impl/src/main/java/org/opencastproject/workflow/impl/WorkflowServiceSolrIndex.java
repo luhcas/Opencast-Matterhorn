@@ -15,7 +15,9 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.security.api.SecurityConstants.GLOBAL_ADMIN_ROLE;
 import static org.opencastproject.workflow.api.WorkflowService.READ_PERMISSION;
+import static org.opencastproject.workflow.api.WorkflowService.WRITE_PERMISSION;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -120,9 +122,6 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
   /** The key in solr documents representing the workflow's ID */
   protected static final String ID_KEY = "id";
 
-  /** The key in solr documents representing the organization that owns this workflow instance */
-  private static final String ORG_KEY = "org";
-
   /** The key in solr documents representing the workflow's current state */
   private static final String STATE_KEY = "state";
 
@@ -155,6 +154,15 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
 
   /** The key in solr documents representing the full text index */
   private static final String FULLTEXT_KEY = "fulltext";
+
+  /**
+   * The key in solr documents representing the workflow's creator. This, along with the ACLs, are used for determining
+   * whether a user can view a workflow or not.
+   */
+  private static final String WORKFLOW_CREATOR_KEY = "oc_creator";
+
+  /** The key in solr documents representing the organization that owns this workflow instance */
+  private static final String ORG_KEY = "oc_org";
 
   /** The key in solr documents representing the prefix to an access control entry */
   private static final String ACL_KEY_PREFIX = "oc_acl_";
@@ -245,7 +253,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
                   instancesInServiceRegistry);
           for (Job job : serviceRegistry.getJobs(WorkflowService.JOB_TYPE, null)) {
             WorkflowInstance instance = WorkflowParser.parseWorkflowInstance(job.getPayload());
-              index(instance);
+            index(instance);
           }
           logger.info("Finished populating the workflow search index with {} workflows.", instancesInServiceRegistry);
         }
@@ -367,7 +375,6 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     doc.addField(ID_KEY, instance.getId());
     doc.addField(WORKFLOW_DEFINITION_KEY, instance.getTemplate());
     doc.addField(STATE_KEY, instance.getState().toString());
-    doc.addField(ORG_KEY, instance.getCreator().getOrganization());
     String xml = WorkflowParser.toXml(instance);
     doc.addField(XML_KEY, xml);
 
@@ -428,6 +435,9 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
       doc.addField(SUBJECT_KEY, buf.toString());
     }
 
+    User currentUser = securityService.getUser();
+    doc.addField(WORKFLOW_CREATOR_KEY, currentUser.getUserName());
+    doc.addField(ORG_KEY, currentUser.getOrganization());
     try {
       AccessControlList acl = authorizationService.getAccessControlList(mp);
       addAuthorization(doc, acl);
@@ -451,26 +461,23 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
 
     // Define containers for common permissions
     List<String> reads = new ArrayList<String>();
-    permissions.put(WorkflowService.READ_PERMISSION, reads);
+    permissions.put(READ_PERMISSION, reads);
     List<String> writes = new ArrayList<String>();
-    permissions.put(WorkflowService.WRITE_PERMISSION, writes);
+    permissions.put(WRITE_PERMISSION, writes);
 
-    // The admin user can read and write
+    // The organization admins can read and write
     String adminRole = securityService.getOrganization().getAdminRole();
     reads.add(adminRole);
     writes.add(adminRole);
 
-    if (acl.getEntries().isEmpty()) {
-      // TODO: Use authorization service to look up the current user's home organization's adminstrative role
-      permissions.put(WorkflowService.READ_PERMISSION, reads);
-    } else {
+    if (!acl.getEntries().isEmpty()) {
       for (AccessControlEntry entry : acl.getEntries()) {
         if (!entry.isAllow()) {
-          logger.warn("Search service does not support denial via ACL, ignoring {}", entry);
+          logger.warn("Workflow service does not support denial via ACL, ignoring {}", entry);
           continue;
         }
         List<String> actionPermissions = permissions.get(entry.getAction());
-        if (acl == null) {
+        if (actionPermissions == null) {
           actionPermissions = new ArrayList<String>();
           permissions.put(entry.getAction(), actionPermissions);
         }
@@ -785,17 +792,17 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
 
     // Limit the results to only those workflow instances the current user can read
     User user = securityService.getUser();
-    String[] roles = user.getRoles();
-    if (roles.length > 0) {
-      sb.append(" AND (");
-      StringBuilder roleList = new StringBuilder();
-      for (String role : roles) {
-        if (roleList.length() > 0)
-          roleList.append(" OR ");
-        roleList.append(ACL_KEY_PREFIX).append(READ_PERMISSION).append(":").append(role);
+    if (!user.hasRole(GLOBAL_ADMIN_ROLE)) {
+      sb.append(" AND ").append(ORG_KEY).append(":").append(user.getOrganization());
+      String[] roles = user.getRoles();
+      if (roles.length > 0) {
+        sb.append(" AND (").append(WORKFLOW_CREATOR_KEY).append(":").append(user.getUserName());
+        for (String role : roles) {
+          sb.append(" OR ");
+          sb.append(ACL_KEY_PREFIX).append(READ_PERMISSION).append(":").append(role);
+        }
+        sb.append(")");
       }
-      sb.append(roleList.toString());
-      sb.append(")");
     }
 
     return sb.toString();
