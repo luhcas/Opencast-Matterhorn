@@ -15,12 +15,16 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.opencastproject.workflow.api.WorkflowService.READ_PERMISSION;
+import static org.opencastproject.workflow.api.WorkflowService.WRITE_PERMISSION;
 import static org.opencastproject.workflow.impl.SecurityServiceStub.DEFAULT_ORG_ADMIN;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.DefaultOrganization;
@@ -170,10 +174,15 @@ public class WorkflowServiceImplAuthzTest {
 
   @Test
   public void testWorkflowWithSecurityPolicy() throws Exception {
+
+    // Create an ACL for the authorization service to return
+    AccessControlList acl = new AccessControlList();
+    acl.getEntries().add(new AccessControlEntry("ROLE_INSTRUCTOR", READ_PERMISSION, true));
+    acl.getEntries().add(new AccessControlEntry("ROLE_INSTRUCTOR", WRITE_PERMISSION, true));
+
     // Mock up an authorization service that always returns "true" for hasPermission()
     AuthorizationService authzService = EasyMock.createNiceMock(AuthorizationService.class);
-    EasyMock.expect(authzService.getAccessControlList((MediaPackage) EasyMock.anyObject()))
-            .andReturn(new AccessControlList()).anyTimes();
+    EasyMock.expect(authzService.getAccessControlList((MediaPackage) EasyMock.anyObject())).andReturn(acl).anyTimes();
     EasyMock.expect(authzService.hasPermission((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject()))
             .andReturn(true).anyTimes();
     EasyMock.replay(authzService);
@@ -193,6 +202,7 @@ public class WorkflowServiceImplAuthzTest {
     // Ensure that this instructor can access the workflow
     try {
       service.getWorkflowById(workflow.getId());
+      assertEquals(1, service.countWorkflowInstances());
     } catch (Exception e) {
       fail(e.getMessage());
     }
@@ -201,6 +211,7 @@ public class WorkflowServiceImplAuthzTest {
     securityService.setUser(DEFAULT_ORG_ADMIN);
     try {
       service.getWorkflowById(workflow.getId());
+      assertEquals(1, service.countWorkflowInstances());
     } catch (Exception e) {
       fail(e.getMessage());
     }
@@ -209,6 +220,7 @@ public class WorkflowServiceImplAuthzTest {
     securityService.setUser(globalAdmin);
     try {
       service.getWorkflowById(workflow.getId());
+      assertEquals(1, service.countWorkflowInstances());
     } catch (Exception e) {
       fail(e.getMessage());
     }
@@ -218,6 +230,7 @@ public class WorkflowServiceImplAuthzTest {
     securityService.setUser(instructor2);
     try {
       service.getWorkflowById(workflow.getId());
+      assertEquals(1, service.countWorkflowInstances());
     } catch (Exception e) {
       fail(e.getMessage());
     }
@@ -231,6 +244,7 @@ public class WorkflowServiceImplAuthzTest {
     } catch (Exception e) {
       // expected
     }
+    assertEquals(0, service.countWorkflowInstances());
   }
 
   @Test
@@ -258,6 +272,7 @@ public class WorkflowServiceImplAuthzTest {
     // Ensure that this instructor can access the workflow
     try {
       service.getWorkflowById(workflow.getId());
+      assertEquals(1, service.countWorkflowInstances());
     } catch (Exception e) {
       fail(e.getMessage());
     }
@@ -266,6 +281,7 @@ public class WorkflowServiceImplAuthzTest {
     securityService.setUser(DEFAULT_ORG_ADMIN);
     try {
       service.getWorkflowById(workflow.getId());
+      assertEquals(1, service.countWorkflowInstances());
     } catch (Exception e) {
       fail(e.getMessage());
     }
@@ -274,11 +290,12 @@ public class WorkflowServiceImplAuthzTest {
     securityService.setUser(globalAdmin);
     try {
       service.getWorkflowById(workflow.getId());
+      assertEquals(1, service.countWorkflowInstances());
     } catch (Exception e) {
       fail(e.getMessage());
     }
 
-    // Ensure the other instructor can not see the workflow, since there is no security policy
+    // Ensure the other instructor can not see the workflow, since there is no security policy granting access
     securityService.setUser(instructor2);
     try {
       service.getWorkflowById(workflow.getId());
@@ -286,6 +303,7 @@ public class WorkflowServiceImplAuthzTest {
     } catch (UnauthorizedException e) {
       // expected
     }
+    assertEquals(0, service.countWorkflowInstances());
 
     // Ensure the instructor from a different org can not see the workflow, even though they share a role
     securityService.setOrganization(otherOrganization);
@@ -296,6 +314,7 @@ public class WorkflowServiceImplAuthzTest {
     } catch (Exception e) {
       // expected
     }
+    assertEquals(0, service.countWorkflowInstances());
   }
 
 }

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
 import static org.opencastproject.security.api.SecurityConstants.GLOBAL_ADMIN_ROLE;
 import static org.opencastproject.workflow.api.WorkflowService.READ_PERMISSION;
 import static org.opencastproject.workflow.api.WorkflowService.WRITE_PERMISSION;
@@ -25,6 +26,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
+import org.opencastproject.security.api.DefaultOrganization;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.User;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
@@ -216,7 +218,14 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
       logger.debug("Workflows will be added to the search index asynchronously");
       indexingExecutor = Executors.newSingleThreadExecutor();
     }
-    activate();
+    try {
+      securityService.setOrganization(new DefaultOrganization());
+      securityService.setUser(new User("workflowadmin", DEFAULT_ORGANIZATION_ID, new String[] { GLOBAL_ADMIN_ROLE }));
+      activate();
+    } finally {
+      securityService.setUser(null);
+      securityService.setOrganization(null);
+    }
   }
 
   /**
@@ -501,7 +510,7 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
    */
   @Override
   public long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException {
-    StringBuffer query = new StringBuffer();
+    StringBuilder query = new StringBuilder();
 
     // Consider the workflow state
     if (state != null) {
@@ -519,6 +528,8 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     if (query.length() == 0) {
       query.append("*:*");
     }
+
+    appendSolrAuthFragment(query);
 
     try {
       QueryResponse response = solrServer.query(new SolrQuery(query.toString()));
@@ -791,6 +802,12 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     }
 
     // Limit the results to only those workflow instances the current user can read
+    appendSolrAuthFragment(sb);
+
+    return sb.toString();
+  }
+
+  protected void appendSolrAuthFragment(StringBuilder sb) {
     User user = securityService.getUser();
     if (!user.hasRole(GLOBAL_ADMIN_ROLE)) {
       sb.append(" AND ").append(ORG_KEY).append(":").append(user.getOrganization());
@@ -804,8 +821,6 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
         sb.append(")");
       }
     }
-
-    return sb.toString();
   }
 
   /**

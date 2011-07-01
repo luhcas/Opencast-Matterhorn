@@ -33,6 +33,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageParser;
 import org.opencastproject.metadata.api.MediaPackageMetadata;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AuthorizationService;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
@@ -40,6 +41,8 @@ import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.security.api.User;
 import org.opencastproject.security.api.UserDirectoryService;
+import org.opencastproject.series.api.SeriesException;
+import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
@@ -169,6 +172,9 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
 
   /** The organization directory service */
   protected OrganizationDirectoryService organizationDirectoryService = null;
+
+  /** The series service */
+  protected SeriesService seriesService;
 
   static {
     YES = new HashSet<String>(Arrays.asList(new String[] { "yes", "true", "on" }));
@@ -513,18 +519,18 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
     String seriesId = updatedMediaPackage.getSeries();
     if (seriesId != null) {
 
-      // FIXME: For 1.2.x, we don't yet have ACL enforcement during processing. Re-enable this for 1.3.
-
       // If the mediapackage contains a series, find the series ACLs and add the security information to the
       // mediapackage
-      // try {
-      // AccessControlList acl = seriesService.getSeriesAccessControl(seriesId);
-      // authorizationService.setAccessControl(updatedMediaPackage, acl);
-      // } catch (SeriesException e) {
-      // throw new WorkflowDatabaseException(e);
-      // } catch (MediaPackageException e) {
-      // throw new WorkflowDatabaseException(e);
-      // }
+      try {
+        AccessControlList acl = seriesService.getSeriesAccessControl(seriesId);
+        authorizationService.setAccessControl(updatedMediaPackage, acl);
+      } catch (SeriesException e) {
+        throw new WorkflowDatabaseException(e);
+      } catch (MediaPackageException e) {
+        throw new WorkflowDatabaseException(e);
+      } catch (NotFoundException e) {
+        logger.warn("Series {} not found, unable to set ACLs", seriesId);
+      }
     }
 
     // Create and configure the workflow instance
@@ -1630,6 +1636,16 @@ public class WorkflowServiceImpl implements WorkflowService, JobProducer, Manage
    */
   protected void setDao(WorkflowServiceIndex index) {
     this.index = index;
+  }
+
+  /**
+   * Sets the series service
+   * 
+   * @param seriesService
+   *          the seriesService to set
+   */
+  public void setSeriesService(SeriesService seriesService) {
+    this.seriesService = seriesService;
   }
 
   /**
