@@ -15,8 +15,11 @@
  */
 package org.opencastproject.capture.admin.impl;
 
+import static org.opencastproject.capture.admin.api.AgentState.CAPTURING;
+import static org.opencastproject.capture.admin.api.AgentState.IDLE;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+
 import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.admin.api.AgentState;
 
 import junit.framework.Assert;
 
@@ -30,7 +33,7 @@ public class AgentTest {
 
   @Before
   public void setUp() {
-    agent = new AgentImpl("test", AgentState.IDLE, "http://localhost/", null);
+    agent = new AgentImpl("test", DEFAULT_ORGANIZATION_ID, IDLE, "http://localhost/", null);
     Assert.assertNotNull(agent);
     time = agent.getLastHeardFrom();
   }
@@ -44,24 +47,24 @@ public class AgentTest {
   @Test
   public void correctInformation() {
     Assert.assertEquals("test", agent.getName());
-    Assert.assertEquals(AgentState.IDLE, agent.getState());
+    Assert.assertEquals(IDLE, agent.getState());
     Assert.assertEquals("http://localhost/", agent.getUrl());
   }
-  
+
   @Test
   public void changedInformation() throws InterruptedException {
     Assert.assertEquals("test", agent.getName());
-    Assert.assertEquals(AgentState.IDLE, agent.getState());
+    Assert.assertEquals(IDLE, agent.getState());
     Assert.assertEquals(time, agent.getLastHeardFrom());
 
     Thread.sleep(1);
-    agent.setState(AgentState.CAPTURING);
+    agent.setState(CAPTURING);
 
     Assert.assertEquals("test", agent.getName());
-    Assert.assertEquals(AgentState.CAPTURING, agent.getState());
+    Assert.assertEquals(CAPTURING, agent.getState());
     Thread.sleep(1);
     if (agent.getLastHeardFrom() <= time || agent.getLastHeardFrom() > System.currentTimeMillis()) {
       Assert.fail("Invalid checkin time");
     }
-  }  
+  }
 }

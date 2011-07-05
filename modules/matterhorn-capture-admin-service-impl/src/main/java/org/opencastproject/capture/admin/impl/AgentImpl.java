@@ -25,14 +25,17 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -42,7 +45,6 @@ import javax.persistence.Transient;
  */
 @Entity
 @Table(name = "CAPTURE_AGENT_STATE")
-@NamedQueries({ @NamedQuery(name = "AgentImpl.getAll", query = "SELECT a FROM AgentImpl a") })
 public class AgentImpl implements Agent {
 
   private static final Logger log = LoggerFactory.getLogger(AgentImpl.class);
@@ -51,6 +53,7 @@ public class AgentImpl implements Agent {
    * The name of the agent.
    */
   @Id
+  @Column(name = "ID")
   protected String name;
 
   /**
@@ -66,12 +69,23 @@ public class AgentImpl implements Agent {
   @Column(name = "URL")
   protected String url;
 
+  @Id
+  @Column(name = "ORG")
+  protected String organization;
+
   /**
    * The time at which the agent last checked in with this service. Note that this is an absolute timestamp (ie,
    * milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in).
    */
   @Column(name = "LAST_HEARD_FROM", nullable = false)
   protected Long lastHeardFrom;
+
+  /** The roles allowed to schedule this agent */
+  @ElementCollection
+  @Column(name = "ROLE")
+  @CollectionTable(name = "CAPTURE_AGENT_ROLE", joinColumns = { @JoinColumn(name = "ID", referencedColumnName = "ID"),
+          @JoinColumn(name = "ORG", referencedColumnName = "ORG") })
+  protected Set<String> schedulerRoles = new HashSet<String>();
 
   /**
    * The capabilities the agent has Capabilities are the devices this agent can record from, with a friendly name
@@ -81,11 +95,11 @@ public class AgentImpl implements Agent {
   @Lob
   protected String configurationString;
 
-  //Private var to store the caps as a properties object.
+  // Private var to store the caps as a properties object.
   @Transient
   private Properties capabilitiesProperties;
 
-  //Private var to store the configuration as a properties object.
+  // Private var to store the configuration as a properties object.
   @Transient
   private Properties configurationProperties;
 
@@ -100,15 +114,18 @@ public class AgentImpl implements Agent {
    * 
    * @param agentName
    *          The name of the agent.
+   * @param organization
+   *          The organization identifier to which this agent belongs
    * @param agentState
    *          The state of the agent. This should be defined from the constants in AgentState
    * @param configuration
    *          The configuration of the agent.
    */
-  public AgentImpl(String agentName, String agentState, String agentUrl, Properties configuration) {
+  public AgentImpl(String agentName, String organization, String agentState, String agentUrl, Properties configuration) {
     name = agentName;
     this.setState(agentState);
     this.setUrl(agentUrl);
+    this.setOrganization(organization);
     // Agents with no capabilities are allowed. These can/will be updated after the agent is built if necessary.
     setConfiguration(configuration);
   }
@@ -196,6 +213,36 @@ public class AgentImpl implements Agent {
   }
 
   /**
+   * @return the schedulerRoles
+   */
+  public Set<String> getSchedulerRoles() {
+    return schedulerRoles;
+  }
+
+  /**
+   * @param schedulerRoles
+   *          the schedulerRoles to set
+   */
+  public void setSchedulerRoles(Set<String> schedulerRoles) {
+    this.schedulerRoles = schedulerRoles;
+  }
+
+  /**
+   * @return the organization
+   */
+  public String getOrganization() {
+    return organization;
+  }
+
+  /**
+   * @param organization
+   *          the organization to set
+   */
+  public void setOrganization(String organization) {
+    this.organization = organization;
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.capture.admin.api.Agent#setConfiguration(java.util.Properties)
@@ -205,7 +252,7 @@ public class AgentImpl implements Agent {
       return;
     }
 
-    //Set the configuration variables
+    // Set the configuration variables
     configurationProperties = configuration;
     try {
       StringWriter sw = new StringWriter();
@@ -215,7 +262,7 @@ public class AgentImpl implements Agent {
       log.warn("Unable to store agent " + "'s capabilities to the database, IO exception occurred.", e);
     }
 
-    //Figure out the capabiltiies variables
+    // Figure out the capabiltiies variables
 
     capabilitiesProperties = new Properties();
 
@@ -259,11 +306,42 @@ public class AgentImpl implements Agent {
   @PostLoad
   private void loadCaps() {
     configurationProperties = new Properties();
-    try {
-      configurationProperties.load(new StringReader(this.configurationString));
-      this.setConfiguration(configurationProperties);
-    } catch (IOException e) {
-      log.warn("Unable to load agent " + name + "'s capabilities, IO exception occurred.", e);
+    if (configurationString == null) {
+      log.info("No configuration properties set yet for '{}'", name);
+    } else {
+      try {
+        configurationProperties.load(new StringReader(this.configurationString));
+        this.setConfiguration(configurationProperties);
+      } catch (IOException e) {
+        log.warn("Unable to load agent " + name + "'s capabilities, IO exception occurred.", e);
+      }
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o instanceof AgentImpl) {
+      return name.equals(((AgentImpl) o).name);
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return name.hashCode();
   }
 }

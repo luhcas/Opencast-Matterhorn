@@ -15,8 +15,10 @@
  */
 package org.opencastproject.capture.admin.impl;
 
+import static org.opencastproject.capture.admin.api.AgentState.IDLE;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+
 import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.AgentStateUpdate;
 
 import junit.framework.Assert;
@@ -26,13 +28,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class AgentStateUpdateTest {
-  
+
   private Agent agent = null;
   private AgentStateUpdate asu = null;
 
   @Before
   public void setUp() throws InterruptedException {
-    agent = new AgentImpl("test", AgentState.IDLE, "", null);
+    agent = new AgentImpl("test", DEFAULT_ORGANIZATION_ID, IDLE, "", null);
     Assert.assertNotNull(agent);
     Thread.sleep(5);
     asu = new AgentStateUpdate(agent);
@@ -48,14 +50,14 @@ public class AgentStateUpdateTest {
   @Test
   public void correctInformation() {
     Assert.assertEquals("test", asu.getName());
-    Assert.assertEquals(AgentState.IDLE, asu.getState());
+    Assert.assertEquals(IDLE, asu.getState());
     if (asu.getTimeSinceLastUpdate() <= 1) {
       Assert.fail("Invalid update time in agent state update");
     }
   }
 
   @Test
-  //This is a stupid test, but it gets us up to 100%...
+  // This is a stupid test, but it gets us up to 100%...
   public void blank() {
     asu = new AgentStateUpdate();
     Assert.assertNotNull(asu);

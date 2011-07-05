@@ -15,12 +15,19 @@
  */
 package org.opencastproject.capture.admin.impl;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.opencastproject.capture.admin.api.AgentState.KNOWN_STATES;
+import static org.opencastproject.capture.admin.api.AgentState.UNKNOWN;
+
 import org.opencastproject.capture.admin.api.Agent;
-import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.SecurityConstants;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.security.api.UnauthorizedException;
+import org.opencastproject.security.api.User;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -30,22 +37,26 @@ import org.opencastproject.workflow.api.WorkflowService;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
+import org.osgi.service.cm.ManagedServiceFactory;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
@@ -53,7 +64,7 @@ import javax.persistence.spi.PersistenceProvider;
 /**
  * IMPL for the capture-admin service (MH-1336, MH-1394, MH-1457, MH-1475 and MH-1476).
  */
-public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, ManagedService {
+public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, ManagedServiceFactory {
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateServiceImpl.class);
 
@@ -73,8 +84,14 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   /** The workflow service */
   protected WorkflowService workflowService;
 
-  private HashMap<String, Agent> agents;
+  /** The security service */
+  protected SecurityService securityService;
+
+  // TODO: Remove the in-memory recordings map, and use the database instead
   private HashMap<String, Recording> recordings;
+
+  /** Maps the configuration PID to the agent, so agents can be updated via the configuration factory pattern */
+  protected Map<String, AgentImpl> pidMap = new ConcurrentHashMap<String, AgentImpl>();
 
   /**
    * @param persistenceProvider
@@ -95,6 +112,14 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   }
 
   /**
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
@@ -105,7 +130,6 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   public CaptureAgentStateServiceImpl() {
     logger.info("CaptureAgentStateServiceImpl starting.");
-    agents = new HashMap<String, Agent>();
     recordings = new HashMap<String, Recording>();
   }
 
@@ -113,21 +137,6 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   public void activate(ComponentContext cc) {
     emf = persistenceProvider.createEntityManagerFactory(
             "org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl", persistenceProperties);
-
-    // Pull all the existing agents into the in-memory structure
-    EntityManager em = emf.createEntityManager();
-    List<AgentImpl> dbResults = null;
-    Query q = em.createNamedQuery("AgentImpl.getAll");
-    dbResults = (List<AgentImpl>) q.getResultList();
-    em.close();
-
-    if (dbResults != null) {
-      for (Agent a : dbResults) {
-        if (!agents.containsKey(a.getName())) {
-          agents.put(a.getName(), a);
-        }
-      }
-    }
   }
 
   public void deactivate() {
@@ -137,19 +146,75 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   }
 
   /**
+   * Gets an agent by name, using the current user's organizational context.
+   * 
+   * @param name
+   *          the unique agent name
+   * @return the agent
+   */
+  protected AgentImpl getAgent(String name) {
+    EntityManager em = emf.createEntityManager();
+    try {
+      return getAgent(name, securityService.getOrganization().getId(), em);
+    } finally {
+      em.close();
+    }
+  }
+
+  /**
+   * Gets an agent by name and organization.
+   * 
+   * @param name
+   *          the unique agent name
+   * @param org
+   *          the organization identifier
+   * @return the agent
+   */
+  protected AgentImpl getAgent(String name, String org) {
+    EntityManager em = emf.createEntityManager();
+    try {
+      return getAgent(name, org, em);
+    } finally {
+      em.close();
+    }
+  }
+
+  /**
+   * Gets an agent by name and organization, using an open entitymanager.
+   * 
+   * @param name
+   *          the unique agent name
+   * @param org
+   *          the organization
+   * @param em
+   *          the entity manager
+   * @return the agent
+   */
+  protected AgentImpl getAgent(String name, String organization, EntityManager em) {
+    try {
+      Query q = em.createQuery("select a from AgentImpl a where a.name = :id and a.organization = :org");
+      q.setParameter("id", name);
+      q.setParameter("org", organization);
+      return (AgentImpl) q.getSingleResult();
+    } catch (NoResultException e) {
+      return null;
+    }
+  }
+
+  /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentState(java.lang.String)
    */
   public Agent getAgentState(String agentName) {
-    Agent req = agents.get(agentName);
+    Agent agent = getAgent(agentName);
     // If that agent doesn't exist, return an unknown agent, else return the known agent
-    if (req == null) {
+    if (agent == null) {
       logger.debug("Agent {} does not exist in the system.", agentName);
     } else {
       logger.debug("Agent {} found, returning state.", agentName);
     }
-    return req;
+    return agent;
   }
 
   /**
@@ -167,39 +232,37 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     } else if (StringUtils.isBlank(agentName)) {
       logger.debug("Unable to set agent state, agent name is blank or null.");
       return BAD_PARAMETER;
-    } else if (!AgentState.KNOWN_STATES.contains(state)) {
+    } else if (!KNOWN_STATES.contains(state)) {
       logger.warn("can not set agent to an invalid state: ", state);
       return BAD_PARAMETER;
     } else {
       logger.debug("Agent '{}' state set to '{}'", agentName, state);
     }
 
-    Agent req = agents.get(agentName);
-    // if the agent is known set the state
-    if (req != null) {
-      logger.debug("Setting Agent {} to state {}.", agentName, state);
-      req.setState(state);
-      agents.put(agentName, req);
-      updateAgentInDatabase(req);
-    } else {
+    AgentImpl agent = getAgent(agentName);
+    if (agent == null) {
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       logger.debug("Creating Agent {} with state {}.", agentName, state);
-      Agent a = new AgentImpl(agentName, state, "", new Properties());
-      agents.put(agentName, a);
+      Organization org = securityService.getOrganization();
+      AgentImpl a = new AgentImpl(agentName, org.getId(), state, "", new Properties());
       updateAgentInDatabase(a);
+    } else {
+      // the agent is known, so set the state
+      logger.debug("Setting Agent {} to state {}.", agentName, state);
+      agent.setState(state);
+      updateAgentInDatabase(agent);
     }
 
     return OK;
   }
 
   public boolean setAgentUrl(String agentName, String agentUrl) {
-    Agent req = agents.get(agentName);
-    if (req != null) {
-      req.setUrl(agentUrl);
-      agents.put(agentName, req);
-      updateAgentInDatabase(req);
-    } else {
+    AgentImpl agent = getAgent(agentName);
+    if (agent == null) {
       return false;
+    } else {
+      agent.setUrl(agentUrl);
+      updateAgentInDatabase(agent);
     }
     return true;
   }
@@ -210,13 +273,13 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#removeAgent(java.lang.String)
    */
   public int removeAgent(String agentName) {
-    if (agents.containsKey(agentName)) {
+    if (getAgent(agentName) == null) {
+      return NO_SUCH_AGENT;
+    } else {
       logger.debug("Removing Agent {}.", agentName);
-      agents.remove(agentName);
       deleteAgentFromDatabase(agentName);
       return OK;
     }
-    return NO_SUCH_AGENT;
   }
 
   /**
@@ -225,7 +288,48 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getKnownAgents()
    */
   public Map<String, Agent> getKnownAgents() {
-    return agents;
+    EntityManager em = emf.createEntityManager();
+    User user = securityService.getUser();
+    Organization org = securityService.getOrganization();
+    String orgAdmin = org.getAdminRole();
+    String[] roles = user.getRoles();
+    try {
+      Query q = em.createQuery("SELECT a FROM AgentImpl a where a.organization = :org");
+      q.setParameter("org", securityService.getOrganization().getId());
+
+      // Filter the results in memory if this user is not an administrator
+      List<AgentImpl> agents = q.getResultList();
+      if (!user.hasRole(SecurityConstants.GLOBAL_ADMIN_ROLE) && !user.hasRole(orgAdmin)) {
+        for (Iterator<AgentImpl> iter = agents.iterator(); iter.hasNext();) {
+          AgentImpl agent = iter.next();
+          Set<String> schedulerRoles = agent.getSchedulerRoles();
+          // If there are no roles associated with this capture agent, it is available to anyone who can pass the
+          // coarse-grained web layer security
+          if (schedulerRoles == null || schedulerRoles.isEmpty()) {
+            continue;
+          }
+          boolean hasSchedulerRole = false;
+          for (String role : roles) {
+            if (schedulerRoles.contains(role)) {
+              hasSchedulerRole = true;
+              break;
+            }
+          }
+          if (!hasSchedulerRole) {
+            iter.remove();
+          }
+        }
+      }
+
+      // Build the map that the API defines as agent name->agent
+      Map<String, Agent> map = new HashMap<String, Agent>();
+      for (AgentImpl agent : agents) {
+        map.put(agent.getName(), agent);
+      }
+      return map;
+    } finally {
+      em.close();
+    }
   }
 
   /**
@@ -235,12 +339,12 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    */
   public Properties getAgentCapabilities(String agentName) {
 
-    Agent req = agents.get(agentName);
+    Agent agent = getAgent(agentName);
 
-    if (req != null) {
-      return agents.get(agentName).getCapabilities();
-    } else {
+    if (agent == null) {
       return null;
+    } else {
+      return agent.getCapabilities();
     }
   }
 
@@ -250,15 +354,13 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentConfiguration(java.lang.String)
    */
   public Properties getAgentConfiguration(String agentName) {
-
-    Agent req = agents.get(agentName);
-
-    if (req != null) {
-      return agents.get(agentName).getConfiguration();
-    } else {
+    Agent agent = getAgent(agentName);
+    if (agent == null) {
       return null;
+    } else {
+      return agent.getConfiguration();
     }
-  }  
+  }
 
   /**
    * {@inheritDoc}
@@ -266,21 +368,20 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setAgentConfiguration
    */
   public int setAgentConfiguration(String agentName, Properties configuration) {
-    Agent req = agents.get(agentName);
-    if (req != null) {
+    AgentImpl agent = getAgent(agentName);
+    if (agent != null) {
       logger.debug("Setting Agent {}'s capabilities", agentName);
-      req.setConfiguration(configuration);
-      updateAgentInDatabase(req);
+      agent.setConfiguration(configuration);
+      updateAgentInDatabase(agent);
     } else {
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       if (StringUtils.isBlank(agentName)) {
         logger.debug("Unable to set agent state, agent name is blank or null.");
         return BAD_PARAMETER;
       }
-
-      logger.debug("Creating Agent {} with state {}.", agentName, AgentState.UNKNOWN);
-      Agent a = new AgentImpl(agentName, AgentState.UNKNOWN, "", configuration);
-      agents.put(agentName, a);
+      logger.debug("Creating Agent {} with state {}.", agentName, UNKNOWN);
+      Organization org = securityService.getOrganization();
+      AgentImpl a = new AgentImpl(agentName, org.getId(), UNKNOWN, "", configuration);
       updateAgentInDatabase(a);
     }
 
@@ -293,24 +394,26 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @param agent
    *          The Agent you wish to modify or add in the database.
    */
-  private synchronized void updateAgentInDatabase(Agent agent) {
+  protected void updateAgentInDatabase(AgentImpl agent) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
       tx = em.getTransaction();
       tx.begin();
-      Agent existing = em.find(AgentImpl.class, agent.getName());
-      if (existing != null) {
+      AgentImpl existing = getAgent(agent.getName(), agent.getOrganization(), em);
+      if (existing == null) {
+        em.persist(agent);
+      } else {
         existing.setConfiguration(agent.getConfiguration());
         existing.setLastHeardFrom(agent.getLastHeardFrom());
         existing.setState(agent.getState());
+        existing.setSchedulerRoles(agent.getSchedulerRoles());
         em.merge(existing);
-      } else {
-        em.persist(agent);
       }
       tx.commit();
     } catch (RollbackException e) {
       logger.warn("Unable to commit to DB in updateAgent.");
+      throw e;
     } finally {
       em.close();
     }
@@ -322,13 +425,13 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @param agentName
    *          The name of the agent you wish to remove.
    */
-  private synchronized void deleteAgentFromDatabase(String agentName) {
+  private void deleteAgentFromDatabase(String agentName) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = null;
     try {
       tx = em.getTransaction();
       tx.begin();
-      Agent existing = em.find(AgentImpl.class, agentName);
+      Agent existing = getAgent(agentName, securityService.getOrganization().getId(), em);
       if (existing != null) {
         em.remove(existing);
       }
@@ -472,8 +575,80 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     return ids;
   }
 
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary props) throws ConfigurationException {
+  // // ManagedServiceFactory Methods ////
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.osgi.service.cm.ManagedServiceFactory#getName()
+   */
+  @Override
+  public String getName() {
+    return "org.opencastproject.capture.agent";
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.osgi.service.cm.ManagedServiceFactory#updated(java.lang.String, java.util.Dictionary)
+   */
+  @Override
+  public void updated(String pid, Dictionary properties) throws ConfigurationException {
+
+    // Find or create the agent in the pidMap
+    AgentImpl agent = pidMap.get(pid);
+    if (agent == null) {
+      agent = new AgentImpl();
+      pidMap.put(pid, agent);
+    }
+
+    // Set the agent properties
+    String nameConfig = (String) properties.get("id");
+    if (isEmpty(nameConfig)) {
+      throw new ConfigurationException("id", "must be specified");
+    }
+
+    String urlConfig = (String) properties.get("url");
+    if (isEmpty(urlConfig)) {
+      throw new ConfigurationException("url", "must be specified");
+    }
+
+    String orgConfig = (String) properties.get("organization");
+    if (isEmpty(orgConfig)) {
+      throw new ConfigurationException("organization", "must be specified");
+    }
+
+    String schedulerRolesConfig = (String) properties.get("schedulerRoles");
+    if (isEmpty(schedulerRolesConfig)) {
+      throw new ConfigurationException("schedulerRoles", "must be specified");
+    }
+
+    agent.name = nameConfig.trim();
+    agent.url = urlConfig.trim();
+    agent.organization = orgConfig.trim();
+    String[] schedulerRoles = schedulerRolesConfig.split(",");
+    for (String role : schedulerRoles) {
+      agent.schedulerRoles.add(role.trim());
+    }
+    agent.setState(UNKNOWN);
+
+    // Update the database
+    logger.info("Roles '{}' may schedule '{}'", schedulerRolesConfig, agent.name);
+    updateAgentInDatabase(agent);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.osgi.service.cm.ManagedServiceFactory#deleted(java.lang.String)
+   */
+  @Override
+  public void deleted(String pid) {
+    AgentImpl agent = pidMap.remove(pid);
+    if (agent == null) {
+      logger.warn("{} was not a managed capture agent pid", pid);
+    } else {
+      deleteAgentFromDatabase(agent.name);
+    }
   }
 }
