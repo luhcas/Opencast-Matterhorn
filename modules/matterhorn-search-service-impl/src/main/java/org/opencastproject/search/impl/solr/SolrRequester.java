@@ -293,6 +293,11 @@ public class SolrRequester {
         }
 
         @Override
+        public String getOcMediapackage() {
+          return Schema.getOcMediapackage(doc);
+        }
+
+        @Override
         public SearchResultItemType getType() {
           String t = Schema.getOcMediatype(doc);
           return t != null ? SearchResultItemType.valueOf(t) : null;

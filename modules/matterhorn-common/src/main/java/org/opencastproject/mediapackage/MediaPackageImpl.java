@@ -26,6 +26,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1412,6 +1413,22 @@ public final class MediaPackageImpl implements MediaPackage {
       Unmarshaller unmarshaller = context.createUnmarshaller();
       Source source = new StreamSource(xml);
       return unmarshaller.unmarshal(source, MediaPackageImpl.class).getValue();
+    } catch (JAXBException e) {
+      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
+    }
+  }
+
+  /**
+   * Reads the media package from an xml node.
+   *
+   * @param xml
+   *          the node
+   * @return the deserialized media package
+   */
+  public static MediaPackageImpl valueOf(Node xml) throws MediaPackageException {
+    try {
+      Unmarshaller unmarshaller = context.createUnmarshaller();
+      return unmarshaller.unmarshal(xml, MediaPackageImpl.class).getValue();
     } catch (JAXBException e) {
       throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }

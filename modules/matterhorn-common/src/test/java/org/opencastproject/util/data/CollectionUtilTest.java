@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class CollectionUtilTest {
@@ -104,5 +105,35 @@ public class CollectionUtilTest {
     assertTrue(CollectionUtil.head(list).fold(match));
     List<String> empty = Arrays.asList();
     assertFalse(CollectionUtil.head(empty).fold(match));
+  }
+
+  @Test
+  public void testFoldl() {
+    List<Integer> ints = Arrays.asList(1, 2, 3, 4);
+    assertTrue(10 == CollectionUtil.foldl(ints, 0, new Function2<Integer, Integer, Integer>() {
+      @Override
+      public Integer apply(Integer a, Integer b) {
+        return a + b;
+      }
+    }));
+    List<String> strings = Arrays.asList("vaughn", "bodé", "andré", "franquin");
+    assertTrue(23 == CollectionUtil.foldl(strings, 0, new Function2<Integer, String, Integer>() {
+      @Override
+      public Integer apply(Integer a, String s) {
+        return a + s.length();
+      }
+    }));
+    assertTrue(5 == CollectionUtil.foldl(Collections.<Integer>emptyList(), 5, new Function2<Integer, Integer, Integer>() {
+      @Override
+      public Integer apply(Integer a, Integer b) {
+        return a + b;
+      }
+    }));
+  }
+
+  @Test
+  public void mkString() {
+    List<Integer> l = Arrays.asList(1, 2, 3);
+    assertEquals("1-2-3", CollectionUtil.mkString(l, "-"));
   }
 }

@@ -18,12 +18,6 @@ package org.opencastproject.search.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -32,6 +26,11 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * This class models an item in the search result. It represents a 'video' or 'series' object. It does not, however,
@@ -136,6 +135,9 @@ public class SearchResultItemImpl implements SearchResultItem {
   /** Dublin core field 'dc:license' */
   @XmlElement
   private String dcLicense = null;
+
+  /** Field oc_mediapackage */
+  private String ocMediapackage;
 
   /** Search result item type */
   @XmlElement
@@ -546,6 +548,15 @@ public class SearchResultItemImpl implements SearchResultItem {
     return mediaType;
   }
 
+  @Override
+  public String getOcMediapackage() {
+    return ocMediapackage;
+  }
+
+  public void setOcMediapackage(String mediapackage) {
+    this.ocMediapackage = mediapackage;
+  }
+
   /**
    * @param mediaType
    *          the mediaType to set
@@ -695,6 +706,7 @@ public class SearchResultItemImpl implements SearchResultItem {
     item.setDcType(from.getDcType());
     item.setDcAccessRights(from.getDcAccessRights());
     item.setDcLicense(from.getDcLicense());
+    item.setOcMediapackage(from.getOcMediapackage());
     item.setMediaType(from.getType());
     for (String k : from.getKeywords())
       item.addKeyword(k);

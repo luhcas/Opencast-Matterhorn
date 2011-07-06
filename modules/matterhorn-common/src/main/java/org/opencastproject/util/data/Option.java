@@ -22,6 +22,7 @@ import java.util.Iterator;
 
 /**
  * The option type encapsulates on optional value. It contains either some value or is empty.
+ * Please make sure to NEVER wrap null into a some. Instead use none.
  */
 public abstract class Option<A> implements Iterable<A> {
 
@@ -74,6 +75,28 @@ public abstract class Option<A> implements Iterable<A> {
       public Iterator<A> iterator() {
         return Collections.singletonList(a).iterator();
       }
+
+      @Override
+      public int hashCode() {
+        // since an Option should NEVER contain any null this is safe
+        return a.hashCode();
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        if (o instanceof Option) {
+          Option<?> opt = (Option<?>) o;
+          // since an Option should NEVER contain any null this is safe
+          return opt.isSome() && a.equals(opt.get());
+        } else {
+          return false;
+        }
+      }
+
+      @Override
+      public String toString() {
+        return "Some(" + a + ")";
+      }
     };
   }
 
@@ -122,6 +145,21 @@ public abstract class Option<A> implements Iterable<A> {
       public Iterator<A> iterator() {
         return new ArrayList<A>().iterator();
       }
+
+      @Override
+      public int hashCode() {
+        return -1;
+      }
+
+      @Override
+      public boolean equals(Object o) {
+        return o instanceof Option && ((Option) o).isNone();
+      }
+
+      @Override
+      public String toString() {
+        return "None";
+      }
     };
   }
 
@@ -159,6 +197,13 @@ public abstract class Option<A> implements Iterable<A> {
   }
 
   /**
+   * If this is none return <code>node</code> else this.
+   */
+  public Option<A> orElse(Option<A> none) {
+    return isSome() ? this : none;
+  }
+
+  /**
    * Get the contained value or throw an exception.
    */
   public abstract A get();
@@ -182,6 +227,22 @@ public abstract class Option<A> implements Iterable<A> {
       @Override
       public A apply() {
         throw new RuntimeException(message);
+      }
+    };
+  }
+
+  /**
+   * Create an equals function.
+   * <pre>
+   *   some("abc").map(eq("bcd")).getOrElse(false) // false
+   *   some("abc").map(eq("abc")).getOrElse(false) // true
+   * </pre>
+   */
+  public static Function<String, Boolean> eq(final String compare) {
+    return new Function<String, Boolean>() {
+      @Override
+      public Boolean apply(String s) {
+        return compare.equals(s);
       }
     };
   }

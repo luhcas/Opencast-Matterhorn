@@ -16,6 +16,7 @@
 
 package org.opencastproject.util.data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -60,12 +61,32 @@ public final class CollectionUtil {
    * to produce a new collection <code>bs</code>.
    * <p/>
    * An (empty) instance of the target collection has to be provided explicitly.
+   *
+   * @param as
+   *          the source collection
+   * @param bs
+   *          the (empty) target collection
+   * @param f
+   *          the function to apply to each element of <code>as</code>
    */
   public static <A, B, BB extends Collection<B>> BB map(Collection<A> as, BB bs, Function<A, B> f) {
     for (A x : as) {
       bs.add(f.apply(x));
     }
     return bs;
+  }
+
+  /**
+   * Apply a binary function (operator) to a start value and all elements of the list in turn.
+   * <p/>
+   * Example: (+) 0 [1, 2, 3] -> (((0 + 1) + 2) + 3)
+   */
+  public static <A, B> B foldl(Collection<A> as, B start, Function2<B, A, B> f) {
+    B fold = start;
+    for (A a : as) {
+      fold = f.apply(fold, a);
+    }
+    return fold;
   }
 
   /**
@@ -173,6 +194,33 @@ public final class CollectionUtil {
     Set<A> r = new HashSet<A>(as.length);
     for (A a : as) r.add(a);
     return r;
+  }
+
+  /**
+   * Make a string from a collection separating each element by <code>sep</code>.
+   */
+  public static String mkString(Collection<?> as, String sep) {
+    StringBuffer b = new StringBuffer();
+    for (Object a : as) {
+      b.append(a).append(sep);
+    }
+    return b.substring(0, Math.max(b.length() - sep.length(), 0));
+  }
+
+  /**
+   * Merge collections <code>a</code> and <code>b</code> into <code>target</code>.
+   */
+  public static <A, CC extends Collection<A>> CC merge(CC target, Collection<? extends A> a, Collection<? extends A> b) {
+    target.addAll(a);
+    target.addAll(b);
+    return target;
+  }
+
+  /**
+   * Create a new empty list with elements of type A.
+   */
+  public static <A> List<A> list(Class<A> cls) {
+    return new ArrayList<A>();
   }
 
 }

@@ -17,6 +17,7 @@
 package org.opencastproject.mediapackage;
 
 import org.opencastproject.mediapackage.identifier.Id;
+import org.w3c.dom.Node;
 
 import java.io.InputStream;
 
@@ -72,6 +73,17 @@ public interface MediaPackageBuilder {
    *           if loading of the media package fails
    */
   MediaPackage loadFromXml(String xml) throws MediaPackageException;
+
+  /**
+   * Loads a media package from the manifest.
+   *
+   * @param xml
+   *          the media package manifest as an xml node
+   * @return the media package
+   * @throws MediaPackageException
+   *           if loading of the media package fails
+   */
+  MediaPackage loadFromXml(Node xml) throws MediaPackageException;
 
   /**
    * Sets the media package serializer that is used to resolve urls and helps in serialization and deserialization of

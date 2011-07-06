@@ -151,6 +151,7 @@
         <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-oaipmh</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-series-service-api</module>
         <module>modules/matterhorn-series-service-impl</module>

@@ -154,6 +154,11 @@ public interface SearchResultItem {
   String getDcLicense();
 
   /**
+   * @return the mediapackage serialized to XML
+   */
+  String getOcMediapackage();
+
+  /**
    * @return the mediaType
    */
   SearchResultItemType getType();
