@@ -90,8 +90,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   // TODO: Remove the in-memory recordings map, and use the database instead
   private HashMap<String, Recording> recordings;
 
-  /** Maps the configuration PID to the agent, so agents can be updated via the configuration factory pattern */
-  protected Map<String, AgentImpl> pidMap = new ConcurrentHashMap<String, AgentImpl>();
+  /** Maps the configuration PID to the agent ID, so agents can be updated via the configuration factory pattern */
+  protected Map<String, String> pidMap = new ConcurrentHashMap<String, String>();
 
   /**
    * @param persistenceProvider
@@ -595,42 +595,48 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   @Override
   public void updated(String pid, Dictionary properties) throws ConfigurationException {
 
-    // Find or create the agent in the pidMap
-    AgentImpl agent = pidMap.get(pid);
-    if (agent == null) {
-      agent = new AgentImpl();
-      pidMap.put(pid, agent);
-    }
-
-    // Set the agent properties
+    // Get the agent properties
     String nameConfig = (String) properties.get("id");
     if (isEmpty(nameConfig)) {
       throw new ConfigurationException("id", "must be specified");
     }
+    nameConfig = nameConfig.trim();
 
     String urlConfig = (String) properties.get("url");
     if (isEmpty(urlConfig)) {
       throw new ConfigurationException("url", "must be specified");
     }
+    urlConfig = urlConfig.trim();
 
     String orgConfig = (String) properties.get("organization");
     if (isEmpty(orgConfig)) {
       throw new ConfigurationException("organization", "must be specified");
     }
+    orgConfig = orgConfig.trim();
 
     String schedulerRolesConfig = (String) properties.get("schedulerRoles");
     if (isEmpty(schedulerRolesConfig)) {
       throw new ConfigurationException("schedulerRoles", "must be specified");
     }
+    schedulerRolesConfig = schedulerRolesConfig.trim();
 
-    agent.name = nameConfig.trim();
-    agent.url = urlConfig.trim();
-    agent.organization = orgConfig.trim();
-    String[] schedulerRoles = schedulerRolesConfig.split(",");
-    for (String role : schedulerRoles) {
-      agent.schedulerRoles.add(role.trim());
+    // If we don't already have a mapping for this PID, create one
+    if (!pidMap.containsKey(pid)) {
+      pidMap.put(pid, nameConfig);
     }
-    agent.setState(UNKNOWN);
+
+    AgentImpl agent = getAgent(nameConfig, orgConfig);
+    if (agent == null) {
+      agent = new AgentImpl(nameConfig, orgConfig, UNKNOWN, urlConfig, new Properties());
+    } else {
+      agent.url = urlConfig.trim();
+      agent.organization = orgConfig.trim();
+      agent.state = UNKNOWN;
+      String[] schedulerRoles = schedulerRolesConfig.split(",");
+      for (String role : schedulerRoles) {
+        agent.schedulerRoles.add(role.trim());
+      }
+    }
 
     // Update the database
     logger.info("Roles '{}' may schedule '{}'", schedulerRolesConfig, agent.name);
@@ -644,11 +650,11 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    */
   @Override
   public void deleted(String pid) {
-    AgentImpl agent = pidMap.remove(pid);
-    if (agent == null) {
+    String agentId = pidMap.remove(pid);
+    if (agentId == null) {
       logger.warn("{} was not a managed capture agent pid", pid);
     } else {
-      deleteAgentFromDatabase(agent.name);
+      deleteAgentFromDatabase(agentId);
     }
   }
 }
