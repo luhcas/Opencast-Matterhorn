@@ -35,7 +35,9 @@ import javax.persistence.Table;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "MH_USER")
-@NamedQueries({ @NamedQuery(name = "user", query = "select u from JpaUser u where u.username=:u and u.organization=:o"),
+@NamedQueries({
+        @NamedQuery(name = "user", query = "select u from JpaUser u where u.username=:u and u.organization=:o"),
+        @NamedQuery(name = "users", query = "select u from JpaUser u where u.organization=:o"),
         @NamedQuery(name = "roles", query = "select distinct user.roles from JpaUser user") })
 public class JpaUser {
 

@@ -109,6 +109,9 @@
             <JPA-PersistenceUnits>
               org.opencastproject.userdirectory
             </JPA-PersistenceUnits>
+            <Http-Alias>/rolemanager</Http-Alias>
+            <Http-Classpath>/ui</Http-Classpath>
+            <Http-Welcome>users.html</Http-Welcome>
           </instructions>
         </configuration>
       </plugin>

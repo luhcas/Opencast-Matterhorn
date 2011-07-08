@@ -4,6 +4,12 @@
   immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.userdirectory.jpa.JpaUserAndRoleProvider" />
   <property name="service.description" value="Provides a user directory" />
+
+  <!-- Also register as a REST endpoint -->
+  <property name="opencast.service.type" value="org.opencastproject.users.jpa" />
+  <property name="opencast.service.jobproducer" value="false" />
+  <property name="opencast.service.path" value="/users" />
+
   <service>
     <provide interface="org.opencastproject.security.api.UserProvider" />
     <provide interface="org.opencastproject.security.api.RoleProvider" />

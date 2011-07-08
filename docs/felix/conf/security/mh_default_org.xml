@@ -41,9 +41,13 @@
     <!-- Enable anonymous access to the rss and atom feeds -->
     <sec:intercept-url pattern='/feeds/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
 
-    <!-- Secure the management URLs for admins only -->
+    <!-- Secure the system management URLs for admins only -->
     <sec:intercept-url pattern='/services/*' access='ROLE_ADMIN' />
     <sec:intercept-url pattern='/system/**' access='ROLE_ADMIN' />
+    
+    <!-- Secure the user management URLs for admins only -->
+    <sec:intercept-url pattern='/users/**' access='ROLE_ADMIN' />
+    <sec:intercept-url pattern='/admin/users.html' access='ROLE_ADMIN' />
 
     <!-- Enable 2-legged OAuth access ("signed fetch") to the LTI launch servlet -->
     <sec:intercept-url pattern="/lti" method="POST" access="ROLE_OAUTH_USER" />
