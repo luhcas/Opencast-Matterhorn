@@ -20,6 +20,8 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 
@@ -30,6 +32,7 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -74,11 +77,17 @@ public class SeriesServicePersistenceTest {
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
 
+    // Mock up a security service
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getOrganization()).andReturn(new DefaultOrganization()).anyTimes();
+    EasyMock.replay(securityService);
+
     seriesDatabase = new SeriesServiceDatabaseImpl();
     seriesDatabase.setPersistenceProvider(new PersistenceProvider());
     seriesDatabase.setPersistenceProperties(props);
     DublinCoreCatalogService dcService = new DublinCoreCatalogService();
     seriesDatabase.setDublinCoreService(dcService);
+    seriesDatabase.setSecurityService(securityService);
     seriesDatabase.activate(null);
 
     InputStream in = null;

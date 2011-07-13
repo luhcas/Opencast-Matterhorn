@@ -109,7 +109,7 @@ public interface SeriesServiceIndex {
   List<DublinCoreCatalog> search(SeriesQuery query) throws SeriesServiceDatabaseException;
 
   /**
-   * Returns number of series in search index.
+   * Returns number of series in search index, across all organizations.
    * 
    * @return number of series in search index
    * @throws SeriesServiceDatabaseException

@@ -20,6 +20,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AccessControlParser;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.series.impl.SeriesServiceDatabase;
 import org.opencastproject.series.impl.SeriesServiceDatabaseException;
 import org.opencastproject.util.NotFoundException;
@@ -39,6 +40,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 
@@ -61,6 +63,9 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
 
   /** Dublin core service for serializing and deserializing Dublin cores */
   protected DublinCoreCatalogService dcService;
+
+  /** The security service */
+  protected SecurityService securityService;
 
   /**
    * Creates {@link EntityManagerFactory} using persistence provider and properties passed via OSGi.
@@ -100,6 +105,16 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    */
   public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
     this.persistenceProvider = persistenceProvider;
+  }
+
+  /**
+   * OSGi callback to set the security service.
+   * 
+   * @param securityService
+   *          the securityService to set
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
   }
 
   /**
@@ -155,7 +170,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
-      SeriesEntity entity = em.find(SeriesEntity.class, seriesId);
+      SeriesEntity entity = getSeriesEntity(seriesId, em);
       if (entity == null) {
         throw new NotFoundException("Series with ID " + seriesId + " does not exist");
       }
@@ -209,13 +224,13 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    * @see org.opencastproject.series.impl.SeriesServiceDatabase#getAccessControlList(java.lang.String)
    */
   @Override
-  public AccessControlList getAccessControlList(String seriesID) throws NotFoundException,
+  public AccessControlList getAccessControlList(String seriesId) throws NotFoundException,
           SeriesServiceDatabaseException {
     EntityManager em = emf.createEntityManager();
     try {
-      SeriesEntity entity = em.find(SeriesEntity.class, seriesID);
+      SeriesEntity entity = getSeriesEntity(seriesId, em);
       if (entity == null) {
-        throw new NotFoundException("Could not found series with ID " + seriesID);
+        throw new NotFoundException("Could not found series with ID " + seriesId);
       }
       AccessControlList acl = null;
       if (entity.getAccessControl() != null) {
@@ -225,7 +240,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     } catch (NotFoundException e) {
       throw e;
     } catch (Exception e) {
-      logger.error("Could not retrieve ACL for series '{}': {}", seriesID, e.getMessage());
+      logger.error("Could not retrieve ACL for series '{}': {}", seriesId, e.getMessage());
       throw new SeriesServiceDatabaseException(e);
     } finally {
       em.close();
@@ -256,10 +271,11 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
-      SeriesEntity entity = em.find(SeriesEntity.class, seriesId);
+      SeriesEntity entity = getSeriesEntity(seriesId, em);
       if (entity == null) {
         // no series stored, create new entity
         entity = new SeriesEntity();
+        entity.setOrganization(securityService.getOrganization().getId());
         entity.setSeriesId(seriesId);
         entity.setSeries(seriesXML);
         em.persist(entity);
@@ -291,7 +307,7 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
-      SeriesEntity entity = em.find(SeriesEntity.class, seriesId);
+      SeriesEntity entity = getSeriesEntity(seriesId, em);
       if (entity == null) {
         throw new NotFoundException("No series with id=" + seriesId + " exists");
       }
@@ -313,11 +329,11 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    * org.opencastproject.security.api.AccessControlList)
    */
   @Override
-  public boolean storeSeriesAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
+  public boolean storeSeriesAccessControl(String seriesId, AccessControlList accessControl) throws NotFoundException,
           SeriesServiceDatabaseException {
     if (accessControl == null) {
-      logger.error("Access control parameter is <null> for series '{}'", seriesID);
-      throw new IllegalArgumentException("Argument for updating ACL for series " + seriesID + " is null");
+      logger.error("Access control parameter is <null> for series '{}'", seriesId);
+      throw new IllegalArgumentException("Argument for updating ACL for series " + seriesId + " is null");
     }
 
     String serializedAC;
@@ -332,9 +348,9 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
-      SeriesEntity entity = em.find(SeriesEntity.class, seriesID);
+      SeriesEntity entity = getSeriesEntity(seriesId, em);
       if (entity == null) {
-        throw new NotFoundException("Series with ID " + seriesID + " does not exist.");
+        throw new NotFoundException("Series with ID " + seriesId + " does not exist.");
       }
       if (entity.getAccessControl() != null) {
         updated = true;
@@ -353,4 +369,22 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
     }
   }
 
+  /**
+   * Gets a series by its ID, using the current organizational context.
+   * 
+   * @param id
+   *          the series identifier
+   * @param em
+   *          an open entity manager
+   * @return the series entity, or null if not found
+   */
+  protected SeriesEntity getSeriesEntity(String id, EntityManager em) {
+    String orgId = securityService.getOrganization().getId();
+    Query q = em.createNamedQuery("seriesById").setParameter("seriesId", id).setParameter("organization", orgId);
+    try {
+      return (SeriesEntity) q.getSingleResult();
+    } catch (NoResultException e) {
+      return null;
+    }
+  }
 }

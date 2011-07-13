@@ -56,7 +56,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(SeriesServiceImpl.class);
-
+  
   /** Index for searching */
   protected SeriesServiceIndex index;
 

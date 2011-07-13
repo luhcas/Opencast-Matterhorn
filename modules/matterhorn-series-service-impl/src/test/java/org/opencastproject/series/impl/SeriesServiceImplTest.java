@@ -21,6 +21,8 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.series.api.SeriesQuery;
 import org.opencastproject.series.impl.persistence.SeriesServiceDatabaseImpl;
 import org.opencastproject.series.impl.solr.SeriesServiceSolrIndex;
@@ -85,25 +87,33 @@ public class SeriesServiceImplTest {
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
 
+    // Mock up a security service
+    SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    EasyMock.expect(securityService.getOrganization()).andReturn(new DefaultOrganization()).anyTimes();
+    EasyMock.replay(securityService);
+
     seriesDatabase = new SeriesServiceDatabaseImpl();
     seriesDatabase.setPersistenceProvider(new PersistenceProvider());
     seriesDatabase.setPersistenceProperties(props);
     dcService = new DublinCoreCatalogService();
     seriesDatabase.setDublinCoreService(dcService);
     seriesDatabase.activate(null);
+    seriesDatabase.setSecurityService(securityService);
     
     root = PathSupport.concat("target", Long.toString(currentTime));
     index = new SeriesServiceSolrIndex(root);
     index.setDublinCoreService(dcService);
+    index.setSecurityService(securityService);
     index.activate(null);
 
     EventAdmin eventAdmin = EasyMock.createNiceMock(EventAdmin.class);
     EasyMock.replay(eventAdmin);
-
+    
     seriesService = new SeriesServiceImpl();
     seriesService.setPersistence(seriesDatabase);
     seriesService.setIndex(index);
     seriesService.setEventAdmin(eventAdmin);
+
     seriesService.activate(null);
 
     InputStream in = null;

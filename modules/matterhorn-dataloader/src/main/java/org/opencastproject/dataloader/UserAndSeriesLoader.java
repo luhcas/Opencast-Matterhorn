@@ -22,6 +22,8 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.OrganizationDirectoryService;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
@@ -96,6 +98,9 @@ public class UserAndSeriesLoader {
   /** The security service */
   protected SecurityService securityService = null;
 
+  /** The organization directory */
+  protected OrganizationDirectoryService organizationDirectoryService = null;
+
   /**
    * Callback on component activation.
    */
@@ -115,6 +120,8 @@ public class UserAndSeriesLoader {
     @Override
     public void run() {
       logger.info("Adding sample series...");
+      String[] organizationIds = new String[] { DEFAULT_ORGANIZATION_ID, TENANT1 };
+
       for (int i = 1; i <= NUM_SERIES; i++) {
         String seriesId = SERIES_PREFIX + i;
         DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
@@ -134,8 +141,17 @@ public class UserAndSeriesLoader {
           dc.set(DublinCore.PROPERTY_TITLE, "Series #" + i);
           dc.set(DublinCore.PROPERTY_CREATOR, "Creator #" + i);
           dc.set(DublinCore.PROPERTY_CONTRIBUTOR, "Contributor #" + i);
-          seriesService.updateSeries(dc);
-          seriesService.updateAccessControl(seriesId, acl);
+
+          for (String orgId : organizationIds) {
+            Organization org = organizationDirectoryService.getOrganization(orgId);
+            try {
+              securityService.setOrganization(org);
+              seriesService.updateSeries(dc);
+              seriesService.updateAccessControl(seriesId, acl);
+            } finally {
+              securityService.setOrganization(null);
+            }
+          }
           logger.debug("Added series {}", dc);
         } catch (SeriesException e) {
           logger.warn("Unable to create series {}", dc);
@@ -238,6 +254,14 @@ public class UserAndSeriesLoader {
    */
   public void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
+  }
+
+  /**
+   * @param organizationDirectoryService
+   *          the organizationDirectoryService to set
+   */
+  public void setOrganizationDirectoryService(OrganizationDirectoryService organizationDirectoryService) {
+    this.organizationDirectoryService = organizationDirectoryService;
   }
 
 }

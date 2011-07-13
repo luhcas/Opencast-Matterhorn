@@ -21,6 +21,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 /**
@@ -31,6 +33,9 @@ import javax.persistence.Table;
  */
 @Entity(name = "SeriesEntity")
 @Table(name = "SERIES")
+@NamedQueries({
+        @NamedQuery(name = "seriesById", query = "select s from SeriesEntity as s where s.seriesId=:seriesId and s.organization=:organization"),
+        @NamedQuery(name = "allSeriesInOrg", query = "select s from SeriesEntity as s where s.organization=:organization") })
 public class SeriesEntity {
 
   /** Series ID, primary key */
@@ -38,6 +43,11 @@ public class SeriesEntity {
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "SERIES_ID", length = 128)
   protected String seriesId;
+
+  /** Series ID, primary key */
+  @Id
+  @Column(name = "ORG_ID", length = 128)
+  protected String organization;
 
   /** Serialized Dublin core */
   @Lob
@@ -115,4 +125,18 @@ public class SeriesEntity {
     this.accessControl = accessControl;
   }
 
+  /**
+   * @return the organization
+   */
+  public String getOrganization() {
+    return organization;
+  }
+
+  /**
+   * @param organization
+   *          the organization to set
+   */
+  public void setOrganization(String organization) {
+    this.organization = organization;
+  }
 }
