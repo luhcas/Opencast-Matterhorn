@@ -636,11 +636,6 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
     append(sb, SolrFields.CREATED_KEY, query.getCreatedFrom(), query.getCreatedTo());
     append(sb, SolrFields.ORGANIZATION, orgId);
 
-    // If we're looking for anything, set the query to a wildcard search
-    if (sb.length() == 0) {
-      sb.append("*:*");
-    }
-
     return sb.toString();
   }
 

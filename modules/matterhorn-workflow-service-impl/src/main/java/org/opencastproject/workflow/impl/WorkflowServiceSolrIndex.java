@@ -524,10 +524,11 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
       query.append(OPERATION_KEY).append(":").append(operation);
     }
 
-    // We want all available workflows
-    if (query.length() == 0) {
-      query.append("*:*");
-    }
+    // We want all available workflows for this organization
+    String orgId = securityService.getOrganization().getId();
+    if (query.length() > 0)
+      query.append(" AND ");
+    query.append(ORG_KEY).append(":").append(orgId);
 
     appendSolrAuthFragment(query);
 
@@ -560,7 +561,9 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
 
     // Get all definitions and then query for the numbers and the current operation per definition
     try {
-      SolrQuery solrQuery = new SolrQuery("*:*");
+      String orgId = securityService.getOrganization().getId();
+      String queryString = new StringBuilder().append(ORG_KEY).append(":").append(orgId).toString();
+      SolrQuery solrQuery = new SolrQuery(queryString);
       solrQuery.addFacetField(WORKFLOW_DEFINITION_KEY);
       solrQuery.addFacetField(OPERATION_KEY);
       solrQuery.setFacetMinCount(0);
@@ -594,7 +597,8 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
               OperationReport operationReport = new OperationReport();
               operationReport.setId(operation.getName());
 
-              solrQuery = new SolrQuery("*:*");
+              String baseSolrQueryString = new StringBuilder().append(ORG_KEY).append(":").append(orgId).toString();
+              solrQuery = new SolrQuery(baseSolrQueryString);
               solrQuery.addFacetField(STATE_KEY);
               solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.FAILED);
               solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.FAILING);
@@ -780,7 +784,8 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
    * @return the solr query string
    */
   protected String buildSolrQueryString(WorkflowQuery query) {
-    StringBuilder sb = new StringBuilder();
+    String orgId = securityService.getOrganization().getId();
+    StringBuilder sb = new StringBuilder().append(ORG_KEY).append(":").append(orgId);
     append(sb, MEDIAPACKAGE_KEY, query.getMediaPackageId());
     append(sb, SERIES_ID_KEY, query.getSeriesId());
     appendFuzzy(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
@@ -795,11 +800,6 @@ public class WorkflowServiceSolrIndex implements WorkflowServiceIndex {
     appendFuzzy(sb, SUBJECT_KEY, query.getSubject());
     appendMap(sb, OPERATION_KEY, query.getCurrentOperations());
     appendMap(sb, STATE_KEY, query.getStates());
-
-    // If we're looking for anything, set the query to a wildcard search
-    if (sb.length() == 0) {
-      sb.append("*:*");
-    }
 
     // Limit the results to only those workflow instances the current user can read
     appendSolrAuthFragment(sb);

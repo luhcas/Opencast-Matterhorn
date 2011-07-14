@@ -242,7 +242,7 @@
   <fields>
 
   <!-- The composite unique identifier, comprised of the series and organization IDs. -->
-  <field name="composite_id" type="caseInsensitiveString" indexed="true" stored="true" required="true" multiValued="false" /> 
+  <field name="composite_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    
    <!-- Dublin core fields. -->
     
@@ -269,7 +269,7 @@
    <!-- Series fields -->
   
    <field name="xml" type="text" indexed="false" stored="true" multiValued="false"/>
-   <field name="organization" type="caseInsensitiveString" indexed="true" stored="true" required="true" multiValued="false"/>
+   <field name="organization" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
    <field name="access_control" type="text" indexed="false" stored="true" multiValued="false"/>
 
    <!-- Sort fields -->

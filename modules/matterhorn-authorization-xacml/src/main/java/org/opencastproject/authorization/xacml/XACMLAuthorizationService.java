@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -330,10 +329,13 @@ public class XACMLAuthorizationService implements AuthorizationService {
         throw new MediaPackageException("Unable to generate xacml for mediapackage " + mediapackage.getIdentifier());
       }
 
-      // Get any existing attachment
-      List<URI> existingXacmlFiles = new ArrayList<URI>();
+      // Remove the old xacml file(s)
       for (Attachment a : mediapackage.getAttachments(XACML_POLICY)) {
-        existingXacmlFiles.add(a.getURI());
+        try {
+          workspace.delete(a.getURI());
+        } catch (Exception e) {
+          logger.warn("Unable to delete previous xacml file: {}", e);
+        }
         mediapackage.remove(a);
       }
 
@@ -351,15 +353,6 @@ public class XACMLAuthorizationService implements AuthorizationService {
         throw new MediaPackageException("Can not store xacml for mediapackage " + mediapackage.getIdentifier());
       }
       attachment.setURI(uri);
-
-      // Remove the old xacml file(s)
-      for (URI uriExistingXacml : existingXacmlFiles) {
-        try {
-          workspace.delete(uriExistingXacml);
-        } catch (Exception e) {
-          logger.warn("Unable to delete previous xacml file: {}", e);
-        }
-      }
 
       // return augmented mediapackage
       return mediapackage;
