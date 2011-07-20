@@ -15,26 +15,15 @@
  */
 package org.opencastproject.remotetest.util;
 
-import org.opencastproject.remotetest.Main;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.opencastproject.remotetest.Main;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.w3c.dom.NodeList;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -49,6 +38,18 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test utilities
@@ -86,6 +87,29 @@ public class Utils {
     transformer.transform(domSource, result);
     InputStream in = new ByteArrayInputStream(out.toByteArray());
     return IOUtils.toString(in, "UTF-8");
+  }
+
+  /**
+   * Converts a node list to a list of their string values. Nodes that do not have a string
+   * value are returned as the empty string.
+   */
+  public static List<String> nodeListToStringList(NodeList nodes) {
+    List<String> strings = new ArrayList<String>(nodes.getLength());
+    for (int i = 0; i < nodes.getLength(); i++) {
+      Node node = nodes.item(i);
+      if (node.getNodeValue() != null) {
+        strings.add(node.getNodeValue().trim());
+      } else {
+        Node fchild = node.getFirstChild();
+        if (fchild != null && fchild.getNodeValue() != null) {
+          strings.add(fchild.getNodeValue().trim());
+        } else {
+          strings.add("");
+        }
+      }
+
+    }
+    return strings;
   }
 
   public static Object xpath(String document, String path, QName returnType) throws Exception {

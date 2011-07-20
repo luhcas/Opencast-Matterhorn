@@ -1339,6 +1339,16 @@
       </roles>
       <timezone>-8</timezone>
     </developer>
+    <developer>
+      <id>cedriessen</id>
+      <name>Christoph Driessen</name>
+      <email>christoph@entwinemedia.com</email>
+      <url>http://entwinemedia.com</url>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? -->
@@ -1353,6 +1363,15 @@
       <archive>http://n2.nabble.com/matterhorn-Matterhorn-f2233301.html</archive>
     </mailingList>
   </mailingLists>
+  svn commit --username cedriessen -m "MH-7991 -- persist time of last harvesting"
+  Authentication realm:<https://opencast.jira.com:443> Subversion Repository
+  Password for 'cedriessen':
+  Authentication realm:<https://opencast.jira.com:443> Subversion Repository
+  Username: cedriessen
+  Password for 'cedriessen':
+  Authentication realm:<https://opencast.jira.com:443> Subversion Repository
+  Username:
+
 
   <licenses>
     <license>

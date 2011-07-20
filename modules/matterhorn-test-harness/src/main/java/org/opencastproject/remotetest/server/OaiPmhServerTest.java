@@ -37,8 +37,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -112,11 +112,13 @@ public class OaiPmhServerTest {
   }
 
   @Test
-  public void testListMetadataFormatsAll() {
+  public void testListMetadataFormatsAll() throws Exception {
     Document response = doGetRequest("verb=ListMetadataFormats");
     assertXpathExists(response, "//ListMetadataFormats");
-    assertXpathEquals(response, "//metadataFormat[1]/metadataPrefix/text()", "oai_dc");
-    assertXpathEquals(response, "//metadataFormat[2]/metadataPrefix/text()", "matterhorn");
+    List<String> prefixes =
+        Utils.nodeListToStringList((NodeList) Utils.xpath(response, "//metadataPrefix", XPathConstants.NODESET));
+    assertTrue(prefixes.contains("oai_dc"));
+    assertTrue(prefixes.contains("matterhorn"));
   }
 
   @Test

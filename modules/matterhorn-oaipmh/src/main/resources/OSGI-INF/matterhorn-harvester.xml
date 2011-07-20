@@ -24,4 +24,13 @@
              interface="org.opencastproject.security.api.OrganizationDirectoryService"
              cardinality="1..1"
              policy="static"/>
+  <reference name="persistence"
+             interface="javax.persistence.spi.PersistenceProvider"
+             cardinality="1..1"
+             policy="static"/>
+  <reference name="persistenceProps"
+             interface="java.util.Map"
+             cardinality="1..1"
+             policy="static"
+             target="(type=persistence)"/>
 </scr:component>

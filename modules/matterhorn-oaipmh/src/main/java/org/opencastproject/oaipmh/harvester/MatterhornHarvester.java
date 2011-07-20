@@ -16,9 +16,11 @@
 
 package org.opencastproject.oaipmh.harvester;
 
+import org.joda.time.DateTime;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.oaipmh.util.PersistenceEnv;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
@@ -41,9 +43,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.opencastproject.oaipmh.harvester.LastHarvested.cleanup;
+import static org.opencastproject.oaipmh.harvester.LastHarvested.getLastHarvestDate;
+import static org.opencastproject.oaipmh.harvester.LastHarvested.update;
+import static org.opencastproject.oaipmh.util.ConcurrencyUtil.shutdownAndAwaitTermination;
 import static org.opencastproject.oaipmh.util.OsgiUtil.checkDictionary;
 import static org.opencastproject.oaipmh.util.OsgiUtil.getCfg;
 import static org.opencastproject.oaipmh.util.OsgiUtil.getCfgAsInt;
+import static org.opencastproject.oaipmh.util.PersistenceUtil.newEntityManagerFactory;
+import static org.opencastproject.oaipmh.util.PersistenceUtil.newPersistenceEnvironment;
 
 /**
  * The matterhorn harvester is intended to harvest the "matterhorn" metadata prefix from
@@ -80,6 +88,8 @@ public class MatterhornHarvester implements ManagedService {
 
   private ScheduledExecutorService scheduler;
 
+  private PersistenceEnv penv;
+
   @Override
   public synchronized void updated(Dictionary properties) throws ConfigurationException {
     logger.info("Updated");
@@ -98,7 +108,10 @@ public class MatterhornHarvester implements ManagedService {
       scheduler = Executors.newSingleThreadScheduledExecutor();
       logger.info("Schedule harvesting " + urlsRaw + " at " + initialDelay + ", " + period + " (minutes)");
       final Function0<Void> secConf = createSecurityConfigurator(properties, componentContext);
-      Worker worker = new Worker(urls, searchService, secConf);
+      // get persistence provider
+      penv = newPersistenceEnvironment(newEntityManagerFactory(componentContext, "org.opencastproject.oaipmh.harvester"));
+      // create a new worker
+      Worker worker = new Worker(urls, searchService, secConf, penv);
       scheduler.scheduleAtFixedRate(worker, initialDelay, period, TimeUnit.MINUTES);
     } catch (ConfigurationException e) {
       logger.info("Configuration not complete since at least property " + e.getProperty() + " is missing or malformed. "
@@ -160,7 +173,15 @@ public class MatterhornHarvester implements ManagedService {
   public synchronized void deactivate() {
     logger.info("Deactivate");
     if (scheduler != null)
-      scheduler.shutdownNow();
+      shutdownAndAwaitTermination(scheduler, 60, new Function0<Void>() {
+        @Override
+        public Void apply() {
+          logger.error("Scheduler does not terminate");
+          return null;
+        }
+      });
+    if (penv != null)
+      penv.close();
   }
 
   static class Worker implements Runnable {
@@ -171,37 +192,44 @@ public class MatterhornHarvester implements ManagedService {
     private final SearchService searchService;
     private final MediaPackageBuilder mediaPackageBuilder;
     private final Function0<Void> securityConfigurator;
+    private final PersistenceEnv penv;
 
     /**
      * @param urls the urls, i.e. the repositories, to harvest
      * @param searchService the search service to feed
      * @param securityConfigurator a function to configure the security service in order to access the search service
      */
-    Worker(String[] urls, SearchService searchService, Function0<Void> securityConfigurator) {
+    Worker(String[] urls, SearchService searchService,
+           Function0<Void> securityConfigurator, PersistenceEnv penv) {
       this.urls = urls;
       this.searchService = searchService;
       this.securityConfigurator = securityConfigurator;
       this.mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+      this.penv = penv;
     }
 
     @Override
     public void run() {
-      // configure security settings
+      // configure security settings for this thread
       securityConfigurator.apply();
       for (String url : urls) {
-        logger.info("Harvesting " + url);
         try {
-          harvest(url);
+          DateTime now = new DateTime();
+          harvest(url, getLastHarvestDate(penv, url));
+          // save the time of the last harvest but with a security delta of 1 minutes
+          update(penv, new LastHarvested(url, now.minusMinutes(1).toDate()));
         } catch (Exception e) {
           logger.error("An error occured while harvesting " + url + ". Skipping this repository for now...", e);
         }
       }
+      cleanup(penv, urls);
     }
 
-    private void harvest(String url) throws Exception {
+    private void harvest(String url, Option<Date> from) throws Exception {
+      logger.info("Harvesting " + url + " from " + from + " on thread " + Thread.currentThread());
       OaiPmhRepositoryClient repositoryClient = OaiPmhRepositoryClient.newHarvester(url);
       ListRecordsResponse response =
-          repositoryClient.listRecords(MH_METADATA_PREFIX, Option.<Date>none(), Option.<Date>none(), Option.<String>none());
+          repositoryClient.listRecords(MH_METADATA_PREFIX, from, Option.<Date>none(), Option.<String>none());
       if (!response.isError()) {
         for (Node mediaPackageNode : ListRecordsResponse.getAllMetadataElems(response, repositoryClient)) {
           MediaPackage mediaPackage = mediaPackageBuilder.loadFromXml(mediaPackageNode);
