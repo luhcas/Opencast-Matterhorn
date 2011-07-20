@@ -16,6 +16,9 @@
 
 package org.opencastproject.oaipmh;
 
+/**
+ * OAI specific constants like request parameter names etc.
+ */
 public interface OaiPmhConstants {
 
   String VERB_IDENTIFY = "Identify";
