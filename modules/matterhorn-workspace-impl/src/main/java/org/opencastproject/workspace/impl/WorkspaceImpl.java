@@ -184,7 +184,7 @@ public class WorkspaceImpl implements Workspace {
     File f = getWorkspaceFile(uri, false);
 
     // Does the file exist and is it up to date?
-    Long workspaceFileLastModified = new Long (0); //make sure this is not null, otherwise the requested file can not be copied
+    Long workspaceFileLastModified = new Long(0); //make sure this is not null, otherwise the requested file can not be copied
     if (f.isFile()) {
       workspaceFileLastModified = new Long(f.lastModified());
     }
@@ -201,11 +201,7 @@ public class WorkspaceImpl implements Workspace {
               FileUtils.deleteQuietly(f);
               FileSupport.link(wfrCopy, f);
             } else {
-<<<<<<< .working
-              logger.debug("{} is up to date");
-=======
               FileSupport.copy(wfrCopy, f);
->>>>>>> .merge-rechts.r10442
             }
           } else {
             logger.debug("{} is up to date", f);
