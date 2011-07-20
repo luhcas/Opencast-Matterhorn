@@ -184,7 +184,7 @@ public class WorkspaceImpl implements Workspace {
     File f = getWorkspaceFile(uri, false);
 
     // Does the file exist and is it up to date?
-    Long workspaceFileLastModified = null;
+    Long workspaceFileLastModified = new Long (0); //make sure this is not null, otherwise the requested file can not be copied
     if (f.isFile()) {
       workspaceFileLastModified = new Long(f.lastModified());
     }
@@ -194,22 +194,24 @@ public class WorkspaceImpl implements Workspace {
         String localPath = uri.toString().substring(wfrUrl.length());
         File wfrCopy = new File(PathSupport.concat(wfrRoot, localPath));
         if (wfrCopy.isFile()) {
-          if (f.isFile()) {
-            // if the file exists in the workspace, but is older than the wfr copy, replace it
-            if (workspaceFileLastModified < wfrCopy.lastModified()) {
-              logger.debug("Replacing {} with an updated version from the file repository", f.getAbsolutePath());
-              if (linkingEnabled) {
-                FileUtils.deleteQuietly(f);
-                FileSupport.link(wfrCopy, f);
-              } else {
-                FileSupport.copy(wfrCopy, f);
-              }
+          // if the file exists in the workspace, but is older than the wfr copy, replace it
+          if (workspaceFileLastModified < wfrCopy.lastModified()) {
+            logger.debug("Replacing {} with an updated version from the file repository", f.getAbsolutePath());
+            if (linkingEnabled) {
+              FileUtils.deleteQuietly(f);
+              FileSupport.link(wfrCopy, f);
             } else {
+<<<<<<< .working
               logger.debug("{} is up to date");
+=======
+              FileSupport.copy(wfrCopy, f);
+>>>>>>> .merge-rechts.r10442
             }
-            logger.debug("Getting {} directly from working file repository root at {}", uri, f);
-            return new File(f.getAbsolutePath());
+          } else {
+            logger.debug("{} is up to date", f);
           }
+          logger.debug("Getting {} directly from working file repository root at {}", uri, f);
+          return new File(f.getAbsolutePath());
         }
       }
     }
