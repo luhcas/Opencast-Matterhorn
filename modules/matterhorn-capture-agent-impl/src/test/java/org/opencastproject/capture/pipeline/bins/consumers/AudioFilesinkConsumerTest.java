@@ -155,8 +155,10 @@ public class AudioFilesinkConsumerTest {
     captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     AudioFilesinkConsumer audioFileSinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
-    checkEncoderProperties(audioFileSinkBin, "faac", "128000");
-    checkMuxerProperties(audioFileSinkBin, "mp4mux");
+    if (audioFileSinkBin != null) {
+      checkEncoderProperties(audioFileSinkBin, "faac", "128000");
+      checkMuxerProperties(audioFileSinkBin, "mp4mux");
+    }
   }
 
   @Test
@@ -167,8 +169,10 @@ public class AudioFilesinkConsumerTest {
     captureDevice = PipelineTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
             "/tmp/testpipe/test.mp2", captureDeviceProperties);
     AudioFilesinkConsumer audioFileSinkBin = createAudioFileSinkBinDontWantException(captureDeviceProperties);
-    checkEncoderProperties(audioFileSinkBin, AudioFilesinkConsumer.DEFAULT_ENCODER, bitrateDefault);
-    checkMuxerProperties(audioFileSinkBin, "mpegtsmux");
+    if (audioFileSinkBin != null) {
+      checkEncoderProperties(audioFileSinkBin, AudioFilesinkConsumer.DEFAULT_ENCODER, bitrateDefault);
+      checkMuxerProperties(audioFileSinkBin, "mpegtsmux");
+    }
   }
 
   /** Testing permutations of possible file locations for tests **/
