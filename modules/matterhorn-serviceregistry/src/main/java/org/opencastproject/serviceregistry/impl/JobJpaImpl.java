@@ -243,7 +243,7 @@ public class JobJpaImpl extends JaxbJob {
    * @see org.opencastproject.job.api.JaxbJob#getArguments()
    */
   @Lob
-  @Column(name = "argument", length = 65535)
+  @Column(name = "argument", length = 2147483647)
   @OrderColumn(name = "listindex")
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "JOB_ARG", joinColumns = @JoinColumn(name = "ID", referencedColumnName = "ID"), uniqueConstraints = @UniqueConstraint(columnNames = {
@@ -344,7 +344,7 @@ public class JobJpaImpl extends JaxbJob {
    * @see org.opencastproject.job.api.JaxbJob#getPayload()
    */
   @Lob
-  @Column(name = "PAYLOAD", length = 65535)
+  @Column(name = "PAYLOAD", length = 2147483647)
   @XmlElement
   @Override
   public String getPayload() {
