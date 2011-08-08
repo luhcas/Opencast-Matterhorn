@@ -13,7 +13,6 @@
  *  permissions and limitations under the License.
  *
  */
- 
 var Opencast = Opencast || {};
 
 /**
@@ -52,17 +51,15 @@ Opencast.Initialize = (function ()
         creator = "",
         segmentForwardDelay = 200,
         segmentBackwardDelay = 200,
-        segmentTimeoutForward, segmentTimeoutBackward,
-        segmentForwardClickedCounter = 0,
+        segmentTimeoutForward, segmentTimeoutBackward, segmentForwardClickedCounter = 0,
         segmentBackwardClickedCounter = 0,
         timeout = 200,
         closetimer = 0,
-        ddmenuitem = 0,
-        dropdownActive = false;
+        ddmenuitem = 0;
         
     /**
-     @memberOf Opencast.Initialize
-     @description set the id of the div.
+     * @memberOf Opencast.Initialize
+     * @description set the id of the div.
      */
     function setDivId(id)
     {
@@ -70,8 +67,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description get the id of the div.
+     * @memberOf Opencast.Initialize
+     * @description get the id of the div.
      */
     function getDivId()
     {
@@ -79,9 +76,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the maxFormat.
-     @param Sring format
+     * @memberOf Opencast.Player
+     * @description Set the maxFormat.
+     * @param Sring format
      */
     function setMaxFormat(format)
     {
@@ -89,9 +86,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Get the maxFormat.
-     @return Sring maxFormat
+     * @memberOf Opencast.Player
+     * @description Get the maxFormat.
+     * @return Sring maxFormat
      */
     function getMaxFormat()
     {
@@ -99,9 +96,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the customHeight.
-     @param Sring height
+     * @memberOf Opencast.Player
+     * @description Set the customHeight.
+     * @param Sring height
      */
     function setCustomHeight(height)
     {
@@ -109,9 +106,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Get the customHeight.
-     @return Sring customHeight
+     * @memberOf Opencast.Player
+     * @description Get the customHeight.
+     * @return Sring customHeight
      */
     function getCustomHeight()
     {
@@ -119,9 +116,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the customWidth.
-     @param Sring height
+     * @memberOf Opencast.Player
+     * @description Set the customWidth.
+     * @param Sring height
      */
     function setCustomWidth(width)
     {
@@ -129,9 +126,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Get the customWidth.
-     @return Sring customWidth
+     * @memberOf Opencast.Player
+     * @description Get the customWidth.
+     * @return Sring customWidth
      */
     function getCustomWidth()
     {
@@ -139,8 +136,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the playerReady.
+     * @memberOf Opencast.Player
+     * @description Set the playerReady.
      */
     function setPlayerReady(playerReadyBool)
     {
@@ -148,9 +145,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Get the playerReady.
-     @return Boolean playerReady
+     * @memberOf Opencast.Player
+     * @description Get the playerReady.
+     * @return Boolean playerReady
      */
     function getPlayerReady()
     {
@@ -158,8 +155,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description Keylistener.
+     * @memberOf Opencast.Initialize
+     * @description Keylistener.
      */
     function keyboardListener()
     {
@@ -171,7 +168,36 @@ Opencast.Initialize = (function ()
                 {
                     Opencast.Player.doToggleMute();
                 }
-                if (event.which === 80 || event.which === 112 || event.which === 83 || event.which === 84 || event.which === 116 || event.which === 115 || event.which === 85 || event.which === 117 || event.which === 68 || event.which === 100 || event.which === 48 || event.which === 49 || event.which === 50 || event.which === 51 || event.which === 52 || event.which === 53 || event.which === 54 || event.which === 55 || event.which === 56 || event.which === 57 || event.which === 67 || event.which === 99 || event.which === 82 || event.which === 114 || event.which === 70 || event.which === 102 || event.which === 83 || event.which === 115 || event.which === 73 || event.which === 105)
+                if (event.which === 80 ||
+                	event.which === 112 ||
+                	event.which === 83 ||
+                	event.which === 84 ||
+                	event.which === 116 ||
+                	event.which === 115 ||
+                	event.which === 85 ||
+                	event.which === 117 ||
+                	event.which === 68 ||
+                	event.which === 100 ||
+                	event.which === 48 ||
+                	event.which === 49 ||
+                	event.which === 50 ||
+                	event.which === 51 ||
+                	event.which === 52 ||
+                	event.which === 53 ||
+                	event.which === 54 ||
+                	event.which === 55 ||
+                	event.which === 56 ||
+                	event.which === 57 ||
+                	event.which === 67 ||
+                	event.which === 99 ||
+                	event.which === 82 ||
+                	event.which === 114 ||
+                	event.which === 70 ||
+                	event.which === 102 ||
+                	event.which === 83 ||
+                	event.which === 115 ||
+                	event.which === 73 ||
+                	event.which === 105)
                 {
                     Videodisplay.passCharCode(event.which);
                 }
@@ -181,30 +207,29 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description close the drop dowan menue.
+     * @memberOf Opencast.Initialize
+     * @description close the drop dowan menue.
      */
     function dropdown_close()
     {
-        if (ddmenuitem && !dropdownActive)
+        if (ddmenuitem)
         {
-            ddmenuitem.hide();
+            ddmenuitem.css('visibility', 'hidden');
         }
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description new timer.
+     * @memberOf Opencast.Initialize
+     * @description new timer.
      */
     function dropdown_timer()
     {
         closetimer = window.setTimeout(dropdown_close, timeout);
-        dropdownActive = false;
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description cancel the timer.
+     * @memberOf Opencast.Initialize
+     * @description cancel the timer.
      */
     function dropdown_canceltimer()
     {
@@ -212,38 +237,47 @@ Opencast.Initialize = (function ()
         {
             window.clearTimeout(closetimer);
             closetimer = null;
-        } 
+        }
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description open the drop down menue.
+     * @memberOf Opencast.Initialize
+     * @description open the drop down menue.
      */
     function dropdown_open()
     {
-        dropdownActive = true;
         if (getDivId() === VIDEOSIZE)
         {
+            $('#oc_video-size-dropdown-div').css('width', '20%');
+            $('#oc_player_video-dropdown').css('left', $('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
+            $('#oc_player_video-dropdown').css('visibility', 'visible');
+            $('#oc_volume-menue').css('visibility', 'hidden');
             ddmenuitem = $('#oc_player_video-dropdown');
-            ddmenuitem.css('left', $('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
-            ddmenuitem.show();
-            
         }
-
+        else
+        {
+            $('#oc_volume-menue').css('visibility', 'visible');
+            $('#oc_player_video-dropdown').css('visibility', 'hidden');
+            ddmenuitem = $('#oc_volume-menue');
+        }
         dropdown_canceltimer();
         setDivId('');
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description open the drop down menu video.
+     * @memberOf Opencast.Initialize
+     * @description open the drop down menu video.
      */
     function dropdownVideo_open()
     {
         setDivId(VIDEOSIZE);
         dropdown_open();
     }
-
+    
+    /**
+     * @memberOf Opencast.Initialize
+     * @description on player ready listener
+     */
     function onPlayerReadyListener()
     {
         if (intvalOnPlayerReady === "")
@@ -251,7 +285,11 @@ Opencast.Initialize = (function ()
             intvalOnPlayerReady = window.setInterval("Opencast.Initialize.onPlayerReady()", 100);
         }
     }
-
+    
+    /**
+     * @memberOf Opencast.Initialize
+     * @description on player ready
+     */
     function onPlayerReady()
     {
         if (getPlayerReady() === true)
@@ -263,18 +301,16 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Initialize
-     @description binds the Video Control Button
+     * @memberOf Opencast.Initialize
+     * @description binds the Video Control Button
      */
     function bindVidSize()
     {
-        $('#oc_btn-dropdown, #oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
-        $('#oc_btn-dropdown, #oc_player_video-dropdown').bind('mouseout', dropdown_timer);
+        $('#oc_video-size-controls').bind('mouseover', dropdownVideo_open);
+        $('#oc_video-size-controls').bind('mouseout', dropdown_timer);
     }
-    
     $(document).ready(function ()
     {
-
         keyboardListener();
         $('#wysiwyg').wysiwyg(
         {
@@ -353,10 +389,13 @@ Opencast.Initialize = (function ()
                 }
             }
         });
+        $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
+        $('#oc_player_video-dropdown').bind('mouseout', dropdown_timer);
         // Handler focus
         $('#oc_btn-dropdown').focus(function ()
         {
-            dropdownVideo_open();
+            setDivId(VIDEOSIZE);
+            dropdown_open();
         });
         // Handler blur
         $('#oc_btn-dropdown').blur(function ()
@@ -385,7 +424,6 @@ Opencast.Initialize = (function ()
         {
             dropdown_timer();
         });
-
         // aria roles
         $("#editorContainer").attr("className", "oc_editTime");
         $("#editField").attr("className", "oc_editTime");
@@ -742,20 +780,6 @@ Opencast.Initialize = (function ()
             Opencast.Series.doToggleSeriesDropdown()
         });
         $('#oc_video-player-controls').hide();
-        
-        // on change
-        $('#oc_video-quality-options').change(function()
-        {
-            var videoQuality = $('#oc_video-quality-options').val();
-            Opencast.Utils.log("Request to set video quality to " + videoQuality + ", changing the URL...");
-            newLoc = Opencast.Utils.getCleanedURLAdvanced(false, true, videoQuality, true);
-            // change URL if new parameter
-            if (loc != newLoc)
-            {
-                window.location = newLoc;
-            }
-        });
-        
         onPlayerReadyListener();
         var mediaPackageId = Opencast.Utils.getURLParameter('id');
         $.ajax(
@@ -766,7 +790,7 @@ Opencast.Initialize = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
-                if((data !== undefined) && (data['search-results'] !== undefined) && (data['search-results'].result !== undefined))
+                if ((data !== undefined) && (data['search-results'] !== undefined) && (data['search-results'].result !== undefined))
                 {
                     var result_data = data['search-results'].result;
                     var input_string = '';
@@ -783,7 +807,8 @@ Opencast.Initialize = (function ()
                         input_string += '<div id="oc_title-creator">' + result_data.dcCreator + '</h2>';
                     }
                     $('#oc_title').html(input_string);
-                } else
+                }
+                else
                 {
                     $('#oc_title').html('');
                 }
@@ -800,7 +825,7 @@ Opencast.Initialize = (function ()
     {
         myWidth = 0;
         myHeight = 0;
-        if (typeof(window.innerWidth) === 'number')
+        if (typeof (window.innerWidth) === 'number')
         {
             //Non-IE
             myWidth = window.innerWidth;
@@ -829,9 +854,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Get the new height of the flash component.
-     @param Number mediaPercentOne, Number mediaPercentTwo
+     * @memberOf Opencast.Player
+     * @description Get the new height of the flash component.
+     * @param Number mediaPercentOne, Number mediaPercentTwo
      */
     function getNewHeight(mediaPercentOne, mediaPercentTwo)
     {
@@ -919,9 +944,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Get the new height of the flash component.
-     @param Number mediaPercentOne, Number mediaPercentTwo
+     * @memberOf Opencast.Player
+     * @description Get the new height of the flash component.
+     * @param Number mediaPercentOne, Number mediaPercentTwo
      */
     function getNewHeightSingle()
     {
@@ -949,8 +974,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the new height of the flash component
+     * @memberOf Opencast.Player
+     * @description Set the new height of the flash component
      */
     function doResize()
     {
@@ -992,8 +1017,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description init function
+     * @memberOf Opencast.Player
+     * @description init function
      */
     function init()
     {
@@ -1002,8 +1027,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the new custom height
+     * @memberOf Opencast.Player
+     * @description Set the new custom height
      */
     function setCostumEmbedHeight()
     {
@@ -1028,8 +1053,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the new custom width
+     * @memberOf Opencast.Player
+     * @description Set the new custom width
      */
     function setCostumEmbedWidth()
     {
@@ -1054,8 +1079,8 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set the embed height and width
+     * @memberOf Opencast.Player
+     * @description Set the embed height and width
      */
     function setEmbed()
     {
@@ -1077,7 +1102,7 @@ Opencast.Initialize = (function ()
             setMaxFormat(formatTwo);
         }
         // you must not divide by zero
-        if(getMaxFormat() == 0)
+        if (getMaxFormat() == 0)
         {
             setMaxFormat(1);
         }
@@ -1086,7 +1111,6 @@ Opencast.Initialize = (function ()
         var embedHeightThree = Math.round(460 / getMaxFormat()) + OTHERDIVHEIGHT;
         var embedHeightFour = Math.round(380 / getMaxFormat()) + OTHERDIVHEIGHT;
         var embedHeightFive = Math.round(300 / getMaxFormat()) + OTHERDIVHEIGHT;
-        
         $("#oc_embed-icon-one").css("width", "110px");
         $("#oc_embed-icon-one").css("height", "73px");
         $("#oc_embed-icon-one").attr(
@@ -1167,9 +1191,9 @@ Opencast.Initialize = (function ()
     }
     
     /**
-     @memberOf Opencast.Player
-     @description Set media resuliton of the videos
-     @param Number mediaResolutionOne, Number mediaResolutionTwo
+     * @memberOf Opencast.Player
+     * @description Set media resuliton of the videos
+     * @param Number mediaResolutionOne, Number mediaResolutionTwo
      */
     function setMediaResolution(mediaResolutionOne, mediaResolutionTwo)
     {
@@ -1181,13 +1205,12 @@ Opencast.Initialize = (function ()
             mediaTwoHeight = 1,
             mediaSingleWidth = 1,
             mediaSingleHeight = 1;
-        
         // Parse first string
         var mediaResolutionOneArray = mediaResolutionOneString.split('x');
         var v1 = parseInt(mediaResolutionOneArray[0], 10);
         var v2 = parseInt(mediaResolutionOneArray[1], 10);
         var arr1IsUndef = isNaN(v1) || isNaN(v2);
-        if(!arr1IsUndef)
+        if (!arr1IsUndef)
         {
             mediaOneWidth = v1;
             mediaOneHeight = v2;
@@ -1202,7 +1225,7 @@ Opencast.Initialize = (function ()
             var v3 = parseInt(mediaResolutionTwoArray[0], 10);
             var v4 = parseInt(mediaResolutionTwoArray[1], 10);
             var arr2IsUndef = isNaN(v3) || isNaN(v4);
-            if(!arr2IsUndef)
+            if (!arr2IsUndef)
             {
                 mediaTwoWidth = v3;
                 mediaTwoHeight = v4;
@@ -1210,11 +1233,9 @@ Opencast.Initialize = (function ()
                 formatTwo = (mediaTwoHeight >= 0) ? (mediaTwoWidth / mediaTwoHeight) : mediaTwoWidth;
             }
         }
-        
         // set the embed section
         setEmbed();
     }
-    
     return {
         bindVidSize: bindVidSize,
         doResize: doResize,
