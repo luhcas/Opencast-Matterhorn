@@ -190,15 +190,11 @@ Opencast.Watch = (function ()
         
         $.log("Player ready");
         
-        // check if advanced player of embed player
+        // check if advanced player or embed player
         var loc = window.location.href;
         if(loc.search(/embed.html.+/g) != -1)
         {
             advancedPlayer = false;
-        }
-        
-        if(!advancedPlayer)
-        {
             $.log("Player is: Embed Player");
             PLAYERSTYLE = "embedPlayer";
         } else
@@ -343,6 +339,7 @@ Opencast.Watch = (function ()
                 Opencast.AnalyticsPlugin.resizePlugin();
             });
             $('#oc_segment-table').html($('#oc-segments').html());
+            $('#oc_search').show();
         } else
         {
             $(".segments").css("margin-top", "-3px");
