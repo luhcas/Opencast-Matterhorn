@@ -128,8 +128,8 @@ public final class UrlSupport {
     if (url == null)
       throw new IllegalArgumentException("Argument url is null");
 
+    url = url.trim();
     url = checkSeparator(url);
-    url.trim();
 
     if (url.endsWith("/") || (url.length() == 1))
       return url;

@@ -137,7 +137,7 @@ public final class PathSupport {
   public static String trim(String path) {
     if (path == null)
       throw new IllegalArgumentException("Argument path is null");
-    path.trim();
+    path = path.trim();
     path = removeDoubleSeparator(adjustSeparator(path));
     if (path.endsWith(File.separator) || (path.length() == 1))
       return path;
