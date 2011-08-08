@@ -24,6 +24,40 @@ Opencast.Initialize = (function ()
     var VOLUME = 'volume',
         VIDEOSIZE = 'videosize',
         divId = '',
+        timeout = 200,  // http://javascript-array.com/scripts/jquery_simple_drop_down_menu/
+        closetimer = 0,
+        ddmenuitem = 0,
+        keysSet = false,
+        KEY_0,
+        KEY_1,
+        KEY_2,
+        KEY_3,
+        KEY_4,
+        KEY_5,
+        KEY_6,
+        KEY_7,
+        KEY_8,
+        KEY_9,
+        KEY_C,
+        KEY_D,
+        KEY_F,
+        KEY_I,
+        KEY_M,
+        KEY_P,
+        KEY_R,
+        KEY_S,
+        KEY_T,
+        KEY_U,
+        KEY_c,
+        KEY_d,
+        KEY_f,
+        KEY_i,
+        KEY_m,
+        KEY_p,
+        KEY_r,
+        KEY_s,
+        KEY_t,
+        KEY_u,
         VIDEOSIZEONLYRIGHT = "videoSizeOnlyRight",
         VIDEOSIZEONLYLEFT = "videoSizeOnlyLeft",
         SINGLEPLAYER = "Singleplayer",
@@ -92,19 +126,91 @@ Opencast.Initialize = (function ()
     
     /**
      @memberOf Opencast.Initialize
-     @description Keylistener.
+     @description sets the keys to its ascii characters
      */
+    function setKeys()
+    {
+        if(!keysSet)
+        {
+            var asciiAlphabet = $.getAsciiAlphabet();
+            KEY_0 = asciiAlphabet['0'],
+            KEY_1 = asciiAlphabet['1'],
+            KEY_2 = asciiAlphabet['2'],
+            KEY_3 = asciiAlphabet['3'],
+            KEY_4 = asciiAlphabet['4'],
+            KEY_5 = asciiAlphabet['5'],
+            KEY_6 = asciiAlphabet['6'],
+            KEY_7 = asciiAlphabet['7'],
+            KEY_8 = asciiAlphabet['8'],
+            KEY_9 = asciiAlphabet['9'],
+            KEY_C = asciiAlphabet['C'],
+            KEY_D = asciiAlphabet['D'],
+            KEY_F = asciiAlphabet['F'],
+            KEY_I = asciiAlphabet['I'],
+            KEY_M = asciiAlphabet['M'],
+            KEY_P = asciiAlphabet['P'],
+            KEY_R = asciiAlphabet['R'],
+            KEY_S = asciiAlphabet['S'],
+            KEY_T = asciiAlphabet['T'],
+            KEY_U = asciiAlphabet['U'],
+            KEY_c = asciiAlphabet['c'],
+            KEY_d = asciiAlphabet['d'],
+            KEY_f = asciiAlphabet['f'],
+            KEY_i = asciiAlphabet['i'],
+            KEY_m = asciiAlphabet['m'],
+            KEY_p = asciiAlphabet['p'],
+            KEY_r = asciiAlphabet['r'],
+            KEY_s = asciiAlphabet['s'],
+            KEY_t = asciiAlphabet['t'],
+            KEY_u = asciiAlphabet['u'];
+            keysSet = true;
+        }
+    }
+    
+    /**
+     @memberOf Opencast.Initialize
+     @description Keylistener.
+     */    
     function keyboardListener()
     {
+        setKeys();
         $(document).keyup(function (event)
         {
             if (event.altKey === true && event.ctrlKey === true)
             {
-                if (event.which === 77 || event.which === 109) // press m or M
+                if (event.which === KEY_M ||
+                    event.which === KEY_m)
                 {
                     Opencast.Player.doToggleMute();
                 }
-                if (event.which === 80 || event.which === 112 || event.which === 83 || event.which === 84 || event.which === 116 || event.which === 115 || event.which === 85 || event.which === 117 || event.which === 68 || event.which === 100 || event.which === 48 || event.which === 49 || event.which === 50 || event.which === 51 || event.which === 52 || event.which === 53 || event.which === 54 || event.which === 55 || event.which === 56 || event.which === 57 || event.which === 67 || event.which === 99 || event.which === 82 || event.which === 114 || event.which === 70 || event.which === 102 || event.which === 83 || event.which === 115 || event.which === 73 || event.which === 105)
+                if (event.which === KEY_0 ||
+                    event.which === KEY_0 ||
+                    event.which === KEY_2 ||
+                    event.which === KEY_3 ||
+                    event.which === KEY_4 ||
+                    event.which === KEY_5 ||
+                    event.which === KEY_6 ||
+                    event.which === KEY_7 ||
+                    event.which === KEY_8 ||
+                    event.which === KEY_9 ||
+                    event.which === KEY_C ||
+                    event.which === KEY_D ||
+                    event.which === KEY_F ||
+                    event.which === KEY_I ||
+                    event.which === KEY_P ||
+                    event.which === KEY_R ||
+                    event.which === KEY_S ||
+                    event.which === KEY_T ||
+                    event.which === KEY_U ||
+                    event.which === KEY_c ||
+                    event.which === KEY_d ||
+                    event.which === KEY_f ||
+                    event.which === KEY_i ||
+                    event.which === KEY_p ||
+                    event.which === KEY_r ||
+                    event.which === KEY_s ||
+                    event.which === KEY_t ||
+                    event.which === KEY_u)
                 {
                     Videodisplay.passCharCode(event.which);
                 }
@@ -112,11 +218,6 @@ Opencast.Initialize = (function ()
             }
         });
     }
-    
-    // http://javascript-array.com/scripts/jquery_simple_drop_down_menu/
-    var timeout = 200;
-    var closetimer = 0;
-    var ddmenuitem = 0;
     
     /**
      @memberOf Opencast.Initialize

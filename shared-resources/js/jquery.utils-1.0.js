@@ -46,7 +46,7 @@
         if(!asciiAlphabetCashed)
         {
             // Cashe ASCII alphabet
-            asciiAlphabet = $.getAsciiAlphabet_internal();
+            asciiAlphabet = getAsciiAlphabet_internal();
             asciiAlphabetCashed = true;
         }
         return asciiAlphabet;
