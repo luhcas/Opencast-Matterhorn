@@ -33,7 +33,7 @@ Opencast.segments_text_Plugin = (function ()
                                     '<td width="85%" align="left" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})" style="cursor:pointer;cursor:hand;">' +
                                         '&nbsp;<a class="segments-time"' +
                                             'onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
-                                            '${Opencast.Utils.formatSeconds(Math.floor(parseInt(s.time) / 1000))}' +
+                                            '${$.formatSeconds(Math.floor(parseInt(s.time) / 1000))}' +
                                         '</a>' +
                                         '&nbsp;<a onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">${s.text}</a>' +
                                     '</td>' +
@@ -90,12 +90,12 @@ Opencast.segments_text_Plugin = (function ()
     {
         if ((element !== undefined) && (segments_data.segment !== undefined) && (segments_data.segment.length > 0))
         {
-            Opencast.Utils.log("Segments Text Plugin: Data available, processing template");
+            $.log("Segments Text Plugin: Data available, processing template");
             processedTemplateData = template.process(segments_data);
             element.html(processedTemplateData);
         } else
         {
-            Opencast.Utils.log("Segments Text Plugin: No data available");
+            $.log("Segments Text Plugin: No data available");
         }
     }
     

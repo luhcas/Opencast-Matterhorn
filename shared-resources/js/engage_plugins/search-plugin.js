@@ -32,7 +32,7 @@ Opencast.search_Plugin = (function ()
                                 '<td style="width:90px; text-align:center;" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
                                     '<a class="segments-time"' +
                                         'onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
-                                        '${Opencast.Utils.formatSeconds(Math.floor(parseInt(s.time) / 1000))}' +
+                                        '${$.formatSeconds(Math.floor(parseInt(s.time) / 1000))}' +
                                     '</a>' +
                                 '</td>' +
                                 '<td style="text-align:left;" onclick="Opencast.Watch.seekSegment(${Math.floor(parseInt(s.time) / 1000)})">' +
@@ -107,7 +107,7 @@ Opencast.search_Plugin = (function ()
     {
         if (element !== undefined)
         {
-            Opencast.Utils.log("Search Plugin: Data available, processing template");
+            $.log("Search Plugin: Data available, processing template");
             if (search_value !== '')
             {
                 var newTemplate = getHeader(search_value) + '<br />' + template;
@@ -121,7 +121,7 @@ Opencast.search_Plugin = (function ()
             return true;
         } else
         {
-            Opencast.Utils.log("Search Plugin: No data available");
+            $.log("Search Plugin: No data available");
             return false;
         }
     }

@@ -246,9 +246,9 @@ function AC_AddExtension(src, ext)
         if (playerType === "/engage/ui/embed.html")
         {
             // check if URL parameters are duplicate. If so: reload with cleaned URL
-            Opencast.Utils.gotoCleanedURL();
+            $.gotoCleanedURL();
                 
-            var play = Opencast.Utils.getURLParameter('play');
+            var play = $.getURLParameter('play');
             if ((play === null) || (play !== "true"))
             {
                 str = '<input id="oc_image" type="image" src="" alt="Matterhorn Player" title="Click to start" />';

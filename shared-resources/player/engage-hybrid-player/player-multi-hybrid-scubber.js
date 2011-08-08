@@ -76,7 +76,7 @@ Opencast.Scrubber = (function ()
         {
             var toolTipPlayheadPercent = ( $(this).position().left + 4 ) / $('#oc_flash-player').width();
             var toolTipPlayheadSeconds = Math.round(toolTipPlayheadPercent * Opencast.Player.getDuration());
-            var toolTipPlayhead = Opencast.Utils.formatSeconds(toolTipPlayheadSeconds);
+            var toolTipPlayhead = $.formatSeconds(toolTipPlayheadSeconds);
             	        	
         	$("#divToolTip").attr("value", toolTipPlayhead);
             $("#divToolTip").html(toolTipPlayhead);

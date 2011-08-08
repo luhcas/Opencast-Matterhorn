@@ -420,7 +420,7 @@ Opencast.segments_ui_Plugin = (function ()
             cs7 = true;
         }
         var tl = '' + (cs1 ? " 1 " : '') + (cs2 ? " 2 " : '') + (cs3 ? " 3 " : '') + (cs4 ? " 4 " : '') + (cs5 ? " 5 " : '') + (cs6 ? " 6 " : '') + (cs7 ? " 7 " : '');
-        Opencast.Utils.log("Segments UI Plugin: Following Templates have (successfully) been proceeded: " + tl + " from 7 Templates possible");
+        $.log("Segments UI Plugin: Following Templates have (successfully) been proceeded: " + tl + " from 7 Templates possible");
     }
 
     return {

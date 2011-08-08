@@ -235,7 +235,7 @@ Opencast.search = (function ()
         $('#search-loading').show();
         $('#oc-search-result').hide();
         $('.oc-segments-preview').css('display', 'block');
-        var mediaPackageId = Opencast.Utils.getURLParameter('id');
+        var mediaPackageId = $.getURLParameter('id');
         // Request JSONP data
         $.ajax(
         {
@@ -245,24 +245,24 @@ Opencast.search = (function ()
             jsonp: 'jsonp',
             success: function (data)
             {
-                Opencast.Utils.log("Search AJAX call: Requesting data succeeded");
+                $.log("Search AJAX call: Requesting data succeeded");
                 // get rid of every '@' in the JSON data
                 // dataStor = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
                 dataStor = data;
                 var segmentsAvailable = true;
                 if ((dataStor === undefined) || (dataStor['search-results'] === undefined) || (dataStor['search-results'].result === undefined))
                 {
-                    Opencast.Utils.log("Search AJAX call: Data not available for search value '" + escape(searchValue) + "'");
+                    $.log("Search AJAX call: Data not available for search value '" + escape(searchValue) + "'");
                     segmentsAvailable = false;
                 } else
                 {
-                    Opencast.Utils.log("Search AJAX call: Data available for search value '" + escape(searchValue) + "'");
+                    $.log("Search AJAX call: Data available for search value '" + escape(searchValue) + "'");
                 }
                 // Check if Segments + Segments Text is available
                 segmentsAvailable = segmentsAvailable && (dataStor['search-results'].result.segments !== undefined) && (dataStor['search-results'].result.segments.segment.length > 0);
                 if (segmentsAvailable)
                 {
-                    dataStor['search-results'].result.segments.currentTime = Opencast.Utils.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
+                    dataStor['search-results'].result.segments.currentTime = $.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
                     // Set Duration until this Segment ends
                     var completeDuration = 0;
                     $.each(dataStor['search-results'].result.segments.segment, function (i, value)
@@ -305,7 +305,7 @@ Opencast.search = (function ()
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                Opencast.Utils.log("Search Ajax call: Requesting data failed");
+                $.log("Search Ajax call: Requesting data failed");
                 if (!foundAlready)
                 {
                     setNoSegmentDataAvailable();

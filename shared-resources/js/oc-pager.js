@@ -150,7 +150,7 @@ Opencast.pager = (function ()
      */
     function getCurrentPageID()
     {
-        var value = Opencast.Utils.getURLParameter("page");
+        var value = $.getURLParameter("page");
         /* if the GET parameter page is not there
          * Assume that we are on page 1
          * otherwise return the page value from the get parameter
@@ -167,7 +167,7 @@ Opencast.pager = (function ()
      */
     function getCurrentSearchQuery()
     {
-        var value = Opencast.Utils.getURLParameter("q");
+        var value = $.getURLParameter("q");
         return value;
     }
     

@@ -13,21 +13,17 @@
  *  permissions and limitations under the License.
  *
  */
- 
-var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace utils delegate.
- * @description Helper Functions used by more than 1 Plugin
+ * @description jQuery plugin for useful utility functions
  */
-Opencast.Utils = (function ()
+(function ($)
 {
     var loggingEnabled = false;
     var asciiAlphabet;
     var asciiAlphabetCashed = false;
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns the ascii alphabet lower case (internal function for cashing)
      * @return the alphabet lower case
      */
@@ -42,39 +38,36 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns the ascii alphabet lower case
      * @return the alphabet lower case
      */
-    function getAsciiAlphabet()
+    $.getAsciiAlphabet = function()
     {
         if(!asciiAlphabetCashed)
         {
             // Cashe ASCII alphabet
-            asciiAlphabet = getAsciiAlphabet_internal();
+            asciiAlphabet = $.getAsciiAlphabet_internal();
             asciiAlphabetCashed = true;
         }
         return asciiAlphabet;
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns the ASCII value of char
      * @param char Character to get the ASCII value from
      * @return the ASCII value of char
      */
-    function toAscii(charToConvert)
+    $.toAscii = function(charToConvert)
     {
-        return getAsciiAlphabet()[charToConvert]||'';
+        return $.getAsciiAlphabet()[charToConvert]||'';
     }
         
     /**
-     * @memberOf Opencast.Utils
      * @description Returns the Input Time in Milliseconds
      * @param data Data in the Format ab:cd:ef
      * @return Time from the Data in Milliseconds
      */
-    function getTimeInMilliseconds(data)
+    $.getTimeInMilliseconds = function(data)
     {
         if ((data !== undefined) && (data !== null) && (data != 0) && (data.length) && (data.indexOf(':') != -1))
         {
@@ -102,12 +95,11 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns formatted Seconds
      * @param seconds Seconds to format
      * @return formatted Seconds
      */
-    function formatSeconds(seconds)
+    $.formatSeconds = function(seconds)
     {
         if (seconds === null)
         {
@@ -136,12 +128,11 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Converts a date to a human readable date string
      * @param date
      * @return formatted date string
      */
-    function getDateString(date)
+    $.getDateString = function(date)
     {
         var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
         var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -160,12 +151,11 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Converts a date to a human readable time string
      * @param date
      * @return formatted time string
      */
-    function getTimeString(date)
+    $.getTimeString = function(date)
     {
         var timeSeparator = ":";
         var d = date;
@@ -176,12 +166,11 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Converts a UTC date string to date
      * @param dcc UTC date string, e.g. dcc = 2011-03-07T00:00:00+01:00
      * @return date
      */
-    function dateStringToDate(dcc)
+    $.dateStringToDate = function(dcc)
     {
         var date = new Date(0);
         if (dcc.indexOf('T') != -1)
@@ -210,11 +199,10 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns an Array of URL Arguments
      * @return an Array of URL Arguments if successful, [] else
      */
-    function parseURL()
+    $.parseURL = function()
     {
         var vars = [],
             hash;
@@ -232,12 +220,11 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Removes the duplicates of a given array
      * @param arr Array to remove the duplicates of
      * @return a copy of arr wihout its duplicates if arr is a valid array, [] else
      */
-    function removeDuplicates(arr)
+    $.removeDuplicates = function(arr)
     {
         var newArr = [];
         // check whether arr is an Array
@@ -267,7 +254,6 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns the url array to string, connected via links
      * @param arr URL Array (e.g. created via parseURL())
      * @param link11 first link (e.g. comes directly after the .html: ?)
@@ -275,7 +261,7 @@ Opencast.Utils = (function ()
      * @param link2 third link, connects the first and the second value of an URL parameter (e.g. =)
      * @return the url array to string, connected via links, if arr is a valid array, '' else
      */
-    function urlArrayToString(arr, link11, link12, link2)
+    $.urlArrayToString = function(arr, link11, link12, link2)
     {
         var str = '';
         // check whether arr is an Array
@@ -287,11 +273,11 @@ Opencast.Utils = (function ()
             link2 = link2 || '=';
             for (var i = 0; i < arr.length; ++i)
             {
-                var parsedUrlAt = getURLParameter(arr[i]);
+                var parsedUrlAt = $.getURLParameter(arr[i]);
                 if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null))
                 {
                     var l = (i == 0) ? link11 : link12;
-                    str += l + arr[i] + link2 + parseURL()[arr[i]];
+                    str += l + arr[i] + link2 + $.parseURL()[arr[i]];
                 }
             }
         }
@@ -299,26 +285,24 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Removes the duplicate URL parameters, e.g. url?a=b&a=c&a=d => url?a=d
      * @return a cleaned URL
      */
-    function getCleanedURL()
+    $.getCleanedURL = function()
     {
-        var urlArr = removeDuplicates(parseURL());
+        var urlArr = $.removeDuplicates($.parseURL());
         var windLoc = window.location.href;
         windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
-        return windLoc + urlArrayToString(urlArr, "?", "&", "=");
+        return windLoc + $.urlArrayToString(urlArr, "?", "&", "=");
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Checks if URL parameters are duplicate and cleans it if appropriate (clean => page reload)
      */
-    function gotoCleanedURL()
+    $.gotoCleanedURL = function()
     {
         var loc = window.location;
-        var newLoc = Opencast.Utils.getCleanedURL();
+        var newLoc = $.getCleanedURL();
         // If necessary: remove duplicate URL parameters
         if (loc != newLoc)
         {
@@ -327,14 +311,13 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Checks if URL parameters are duplicate and cleans it if appropriate and returns the cleaned URL afterwards
      * @param embed true if watch.html should be replaced with embed.html, false if embed.html should be replaced with watch.html
      * @param withTime true if adding the current Time, false else
      * @param videoQuality the videoQuality if available, false else
      * @param okay true if play URL parameter sould be set to true, false else
      */
-    function getCleanedURLAdvanced(embed, withTime, videoQuality, play)
+    $.getCleanedURLAdvanced = function(embed, withTime, videoQuality, play)
     {
         embed = embed||false;
         withTime = withTime||false;
@@ -345,7 +328,7 @@ Opencast.Utils = (function ()
             // add time to link "open in advanced player"
             var seconds = parseInt(getTimeInMilliseconds(Opencast.Player.getCurrentTime())) / 1000;
         }
-        // parse URL string -- modified version of Opencast.Utils.parseURL-module
+        // parse URL string -- modified version of $.parseURL-module
         var vars = [],
             hash,
             str = window.location.href + ((videoQuality != false) ? ("&quality=" + videoQuality) : '') + (withTime ? ("&t=" +  seconds) : '');
@@ -359,7 +342,7 @@ Opencast.Utils = (function ()
                 vars[hash[0]] = hash[1];
             }
         }
-        var urlArr = removeDuplicates(vars);
+        var urlArr = $.removeDuplicates(vars);
         var windLoc = window.location.href;
         windLoc = (windLoc.indexOf('?') != -1) ? window.location.href.substring(0, window.location.href.indexOf('?')) : windLoc;
         // URL parameter array to string
@@ -367,10 +350,10 @@ Opencast.Utils = (function ()
         for (var i = 0; i < urlArr.length; ++i)
         {
             var l = (i == 0) ? '?' : '&';
-            var parsedUrlAt = getURLParameter(urlArr[i]);
+            var parsedUrlAt = $.getURLParameter(urlArr[i]);
             if ((parsedUrlAt !== undefined) && (parsedUrlAt !== null) && (urlArr[i] != 'quality') && (urlArr[i] != 't') && (urlArr[i] != 'play'))
             {
-                str += l + urlArr[i] + '=' + parseURL()[urlArr[i]];
+                str += l + urlArr[i] + '=' + $.parseURL()[urlArr[i]];
             } else if((videoQuality != false) && (urlArr[i] == 'quality'))
             {
                 str += l + urlArr[i] + "=" + videoQuality;
@@ -386,7 +369,6 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns the value of URL-Parameter 'name'
      *              Current used URL Parameters:
      *                  - id:               the current media package id
@@ -396,7 +378,7 @@ Opencast.Utils = (function ()
      *                  - videoUrl2:        the current url for video 2
      *                  - coverUrl:         the current url for cover (preview image)
      *                  - t:                jump to given time
-     *                                          Valid Parameter Formats (as seen at Opencast.Utils.parseSeconds):
+     *                                          Valid Parameter Formats (as seen at $.parseSeconds):
      *                                              - Minutes and seconds:  XmYs    or    YsXm    or    XmY
      *                                              - Minutes only:         Xm
      *                                              - Seconds only:         Ys      or    Y
@@ -415,9 +397,9 @@ Opencast.Utils = (function ()
      *                                              - hd
      * @return the value of URL-Parameter 'name' or null if not defined
      */
-    function getURLParameter(name)
+    $.getURLParameter = function(name)
     {
-        var urlParam = parseURL()[name];
+        var urlParam = $.parseURL()[name];
         if ((urlParam === undefined) || (urlParam === ''))
         {
             return null;
@@ -426,7 +408,6 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Parses Seconds
      *
      * Format: Minutes and seconds:  XmYs    or    YsXm    or    XmY
@@ -435,7 +416,7 @@ Opencast.Utils = (function ()
      *
      * @return parsed Seconds if parsing was successfully, 0 else
      */
-    function parseSeconds(val)
+    $.parseSeconds = function(val)
     {
         if ((val !== undefined) && !(val == ""))
         {
@@ -516,23 +497,21 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description create date in format MM/DD/YYYY
      * @param timeDate Time and Date
      */
-    function getLocaleDate(timeDate)
+    $.getLocaleDate = function(timeDate)
     {
         return timeDate.substring(0, 10);
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns a random Number in between [min, max]
      * @param min Min Value
      * @param max Max Value
      * @return a random Number in between [min, max]
      */
-    function getRandom(min, max)
+    $.getRandom = function(min, max)
     {
         if (min > max)
         {
@@ -546,13 +525,12 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Returns if 'haystack' starts with 'start'
      * @param haystack String to search in
      * @param start String to search for
      * @return true if 'haystack' starts with 'start', false else
      */
-    function startsWith(haystack, start)
+    $.startsWith = function(haystack, start)
     {
         if ((typeof(haystack) == 'string') && (typeof(start) == 'string'))
         {
@@ -562,22 +540,20 @@ Opencast.Utils = (function ()
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Enables or disables the Logs
      * @param true for enabling Logs, false else
      */
-    function enableLogging(logEnabled)
+    $.enableLogging = function(logEnabled)
     {
         loggingEnabled = logEnabled||false;
     }
     
     /**
-     * @memberOf Opencast.Utils
      * @description Logs given arguments -- uses console.log
      * @param any arguments console.log-valid
      * @return true if window.console exists and arguments had been logged, false else
      */
-    function log()
+    $.log = function()
     {
         if(loggingEnabled && window.console)
         {
@@ -593,27 +569,4 @@ Opencast.Utils = (function ()
         }
         return false;
     }
-    
-    return {
-        getAsciiAlphabet: getAsciiAlphabet,
-        toAscii: toAscii,
-        removeDuplicates: removeDuplicates,
-        urlArrayToString: urlArrayToString,
-        getCleanedURL: getCleanedURL,
-        gotoCleanedURL: gotoCleanedURL,
-        getCleanedURLAdvanced: getCleanedURLAdvanced,
-        getDateString: getDateString,
-        getTimeString: getTimeString,
-        dateStringToDate: dateStringToDate,
-        getTimeInMilliseconds: getTimeInMilliseconds,
-        formatSeconds: formatSeconds,
-        parseURL: parseURL,
-        getURLParameter: getURLParameter,
-        parseSeconds: parseSeconds,
-        getLocaleDate: getLocaleDate,
-        startsWith: startsWith,
-        getRandom: getRandom,
-        enableLogging: enableLogging,
-        log: log
-    };
-}());
+})(jQuery);

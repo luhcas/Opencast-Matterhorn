@@ -56,7 +56,7 @@ Opencast.Analytics = (function ()
             dataType: 'xml',
             success: function (xml)
             {
-                Opencast.Utils.log("Analytics AJAX call: Requesting data succeeded");
+                $.log("Analytics AJAX call: Requesting data succeeded");
                 var tmpData = $(xml).find('footprint');
                 if (tmpData !== undefined)
                 {
@@ -73,7 +73,7 @@ Opencast.Analytics = (function ()
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                Opencast.Utils.log("Analytics Ajax call: Requesting data failed");
+                $.log("Analytics Ajax call: Requesting data failed");
                 displayNoAnalyticsAvailable("No data available (1), initialize");
             }
         });
@@ -104,7 +104,7 @@ Opencast.Analytics = (function ()
             dataType: 'xml',
             success: function (xml)
             {
-                Opencast.Utils.log("Analytics AJAX call: Requesting data succeeded");
+                $.log("Analytics AJAX call: Requesting data succeeded");
                 var position = 0;
                 var views;
                 var lastPosition = -1;
@@ -177,7 +177,7 @@ Opencast.Analytics = (function ()
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                Opencast.Utils.log("Analytics Ajax call: Requesting data failed");
+                $.log("Analytics Ajax call: Requesting data failed");
                 displayNoAnalyticsAvailable("No data available (1)");
             }
         });

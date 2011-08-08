@@ -90,14 +90,14 @@ Opencast.Description_Plugin = (function ()
     {
         if ((element !== undefined) && (description_data !== undefined))
         {
-            Opencast.Utils.log("Description Plugin: Data available, processing template");
+            $.log("Description Plugin: Data available, processing template");
             processedTemplateData = template.process(description_data);
             element.html(processedTemplateData);
             return true;
         }
         else
         {
-            Opencast.Utils.log("Description Plugin: No data availablee");
+            $.log("Description Plugin: No data availablee");
             return false;
         }
     }

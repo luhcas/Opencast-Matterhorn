@@ -197,14 +197,14 @@ Opencast.segments_ui = (function ()
                 newSegments = [];
                 segmentsNrs = [];
                 
-                Opencast.Utils.log("Segments UI AJAX call: Requesting data succeeded");
+                $.log("Segments UI AJAX call: Requesting data succeeded");
                 if ((data !== undefined) && (data['search-results'] !== undefined) && (data['search-results'].result !== undefined))
                 {
-                    Opencast.Utils.log("Segments UI AJAX call: Data available");
+                    $.log("Segments UI AJAX call: Data available");
                     // Streaming Mode is default true
                     var videoModeStream = true;
                     // Check whether a Videomode has been selected
-                    var urlParamProgStream = Opencast.Utils.getURLParameter('videomode') || Opencast.Utils.getURLParameter('vmode');
+                    var urlParamProgStream = $.getURLParameter('videomode') || $.getURLParameter('vmode');
                     // If such an URL Parameter exists (if parameter doesn't exist, the return value is null)
                     if (urlParamProgStream !== null)
                     {
@@ -218,17 +218,17 @@ Opencast.segments_ui = (function ()
                         {
                             videoModeStream = false;
                         }
-                        Opencast.Utils.log("Videomode manually set to: " + (videoModeStream ? "Streaming" : "Progressive"));
+                        $.log("Videomode manually set to: " + (videoModeStream ? "Streaming" : "Progressive"));
                     }
-                    Opencast.Utils.log("Videomode: " + (videoModeStream ? "Streaming if possible" : "Progressive"));
+                    $.log("Videomode: " + (videoModeStream ? "Streaming if possible" : "Progressive"));
                     // Check if Segments + Segments Text is available
                     var segmentsAvailable = (data['search-results'].result !== undefined) && (data['search-results'].result.segments !== undefined) && (data['search-results'].result.segments.segment.length > 0);
                     if (segmentsAvailable)
                     {
-                        Opencast.Utils.log("Segments available");
+                        $.log("Segments available");
                         // get rid of every '@' in the JSON data
                         // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
-                        data['search-results'].result.segments.currentTime = Opencast.Utils.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
+                        data['search-results'].result.segments.currentTime = $.getTimeInMilliseconds(Opencast.Player.getCurrentTime());
                         // Get the complete Track Duration // TODO: handle more clever
                         var complDur = 0;
                         $.each(data['search-results'].result.segments.segment, function (i, value)
@@ -243,9 +243,9 @@ Opencast.segments_ui = (function ()
                         var scrubberLength = parseInt($('#oc_body').width());
                         var minPixel= Math.max(minSegmentPixels, 5);
                         var minSegmentLen = complDur / (scrubberLength / minPixel);
-                        Opencast.Utils.log("Min. scrubber length: " + scrubberLength);
-                        Opencast.Utils.log("Min. segment pixel: " + minPixel);
-                        Opencast.Utils.log("Min. segment length: " + minSegmentLen);
+                        $.log("Min. scrubber length: " + scrubberLength);
+                        $.log("Min. segment pixel: " + minPixel);
+                        $.log("Min. segment length: " + minSegmentLen);
                         var newSegmentsIndex = 0;
                         var hiddenSegmentsNr = 0;
                         var hiddenSegmentsStr = '';
@@ -305,7 +305,7 @@ Opencast.segments_ui = (function ()
                         /*
                         $.each(segmentsNrs, function (i, value)
                         {
-                            Opencast.Utils.log("segmentsNrs[" + i + "] = " + segmentsNrs[i]);
+                            $.log("segmentsNrs[" + i + "] = " + segmentsNrs[i]);
                         });
                         */
                         $.each(data['search-results'].result.segments.segment, function (i, value)
@@ -323,14 +323,14 @@ Opencast.segments_ui = (function ()
                         var oldLength = data['search-results'].result.segments.segment.length;
                         data['search-results'].result.segments.segment = newSegments;
                         retSegments = data['search-results'].result.segments;
-                        Opencast.Utils.log("Removed " + (oldLength - newSegments.length) + "/" + oldLength + " Segments due to being too small in relation to the scrubber length:" + hiddenSegmentsStr);
+                        $.log("Removed " + (oldLength - newSegments.length) + "/" + oldLength + " Segments due to being too small in relation to the scrubber length:" + hiddenSegmentsStr);
                         if(!$.browser.msie)
                         {
                             initResizeEnd();
                         }
                     } else
                     {
-                        Opencast.Utils.log("Segments not available");
+                        $.log("Segments not available");
                     }
                     // Set only default values for trimpath (if media is not available)
                     data['search-results'].result.mediapackage.media.checkQuality = checkForQualities;
@@ -339,7 +339,7 @@ Opencast.segments_ui = (function ()
                     // Check if any Media.tracks are available
                     if ((data['search-results'].result.mediapackage.media !== undefined) && (data['search-results'].result.mediapackage.media.track.length > 0))
                     {
-                        Opencast.Utils.log("Media tracks available");
+                        $.log("Media tracks available");
                         // Set whether prefer streaming of progressive
                         data['search-results'].result.mediapackage.media.preferStreaming = videoModeStream;
                         // Check if the File is a Video
@@ -362,7 +362,7 @@ Opencast.segments_ui = (function ()
                         var highQual = false;
                         var hdQual = false;
                         
-                        var checkForQualities = Opencast.Utils.getURLParameter('quality')||"medium";
+                        var checkForQualities = $.getURLParameter('quality')||"medium";
                         if(checkForQualities=="low")
                         {
                             lowQualReq = true;
@@ -378,11 +378,11 @@ Opencast.segments_ui = (function ()
                         }
                         if(lowQualReq || medQualReq || highQualReq || hdQualReq)
                         {
-                            Opencast.Utils.log("Checking for qualities: " + checkForQualities + " quality requested");
+                            $.log("Checking for qualities: " + checkForQualities + " quality requested");
                             checkForQualities = true;
                         } else
                         {
-                            Opencast.Utils.log("Checking for qualities: No such quality available ('" + checkForQualities + "')");
+                            $.log("Checking for qualities: No such quality available ('" + checkForQualities + "')");
                             checkForQualities = false;
                         }
                         
@@ -432,7 +432,7 @@ Opencast.segments_ui = (function ()
                             {
                                 data['search-results'].result.mediapackage.media.track[i].quality = "";
                             }
-                            if (!isVideo && Opencast.Utils.startsWith(this.mimetype, 'video'))
+                            if (!isVideo && $.startsWith(this.mimetype, 'video'))
                             {
                                 isVideo = true;
                             }
@@ -489,10 +489,10 @@ Opencast.segments_ui = (function ()
                             }
                             // display a selector in the ui
                             $('#oc_video-quality').show();
-                            Opencast.Utils.log("Different qualities are available.");
+                            $.log("Different qualities are available.");
                         } else
                         {
-                            Opencast.Utils.log("Different qualities are not available.");
+                            $.log("Different qualities are not available.");
                         }
                         
                         if(checkForQualities)
@@ -524,12 +524,12 @@ Opencast.segments_ui = (function ()
                         data['search-results'].result.mediapackage.media.checkQuality = checkForQualities;
                         data['search-results'].result.mediapackage.media.isVideo = isVideo;
                         data['search-results'].result.mediapackage.media.rtmpAvailable = rtmpAvailable;
-                        Opencast.Utils.log(checkForQualities ? ("Quality set to '" + data['search-results'].result.mediapackage.media.quality + "'") : "No specific quality has been set");
-                        Opencast.Utils.log(isVideo ? "Media is a Video" : "Media is not a Video");
-                        Opencast.Utils.log(rtmpAvailable ? "Streaming (rtmp) is available" : "Streaming (rtmp) is not available");
+                        $.log(checkForQualities ? ("Quality set to '" + data['search-results'].result.mediapackage.media.quality + "'") : "No specific quality has been set");
+                        $.log(isVideo ? "Media is a Video" : "Media is not a Video");
+                        $.log(rtmpAvailable ? "Streaming (rtmp) is available" : "Streaming (rtmp) is not available");
                     } else
                     {
-                        Opencast.Utils.log("Media tracks not available");
+                        $.log("Media tracks not available");
                     }
                     // Check if track is an array or not
                     if(!$.isArray(data['search-results'].result.mediapackage.media.track))
@@ -548,14 +548,14 @@ Opencast.segments_ui = (function ()
                 }
                 else
                 {
-                    Opencast.Utils.log("Ajax call: Data not available");
+                    $.log("Ajax call: Data not available");
                     Opencast.Watch.continueProcessing(true);
                 }
             },
             // If no data comes back
             error: function (xhr, ajaxOptions, thrownError)
             {
-                Opencast.Utils.log("Segments UI Ajax call: Requesting data failed");
+                $.log("Segments UI Ajax call: Requesting data failed");
                 $('#data').html('No Segment UI available');
                 $('#data').hide();
                 Opencast.Watch.continueProcessing(true);

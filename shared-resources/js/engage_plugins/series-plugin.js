@@ -74,12 +74,12 @@ Opencast.Series_Plugin = (function()
     {
         if ((element !== undefined) && (series_data.pages !==  undefined) && (series_data.pages.length > 0))
         {
-            Opencast.Utils.log("Series Plugin: Data available, processing template");
+            $.log("Series Plugin: Data available, processing template");
             processedTemplate = template.process(series_data);
             element.html(processedTemplate);
         } else
         {
-            Opencast.Utils.log("Series Plugin: No data available");
+            $.log("Series Plugin: No data available");
         }
     }
 

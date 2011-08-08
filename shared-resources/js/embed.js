@@ -158,10 +158,10 @@ Opencast.Watch = (function ()
      */
     function onPlayerReady()
     {
-        var logsEnabled = (Opencast.Utils.getURLParameter('log') == "true") ? true : false;
-        Opencast.Utils.enableLogging(logsEnabled);
+        var logsEnabled = ($.getURLParameter('log') == "true") ? true : false;
+        $.enableLogging(logsEnabled);
         
-        Opencast.Utils.log("Player ready");
+        $.log("Player ready");
         
         // Parse the plugin URLs
         $.getJSON('js/servicedata.json', function(data)
@@ -177,19 +177,19 @@ Opencast.Watch = (function ()
             seriesSeriesURL = data.plugin_urls.series.series;
             seriesEpisodeURL = data.plugin_urls.series.episode;
             
-            Opencast.Utils.log("Plugin URLs");
-            Opencast.Utils.log("Analytics URL: " + analyticsURL);
-            Opencast.Utils.log("Annotation URL: " + annotationURL);
-            Opencast.Utils.log("Description (Episode) URL: " + descriptionEpisodeURL);
-            Opencast.Utils.log("Description (Stats) URL: " + descriptionStatsURL);
-            Opencast.Utils.log("Search URL: " + searchURL);
-            Opencast.Utils.log("Segments (Text) URL: " + segmentsTextURL);
-            Opencast.Utils.log("Segments (UI) URL: " + segmentsUIURL);
-            Opencast.Utils.log("Segments URL: " + segmentsURL);
-            Opencast.Utils.log("Series (Series) URL: " + seriesSeriesURL);
-            Opencast.Utils.log("Series (Episode) URL: " + seriesEpisodeURL);
+            $.log("Plugin URLs");
+            $.log("Analytics URL: " + analyticsURL);
+            $.log("Annotation URL: " + annotationURL);
+            $.log("Description (Episode) URL: " + descriptionEpisodeURL);
+            $.log("Description (Stats) URL: " + descriptionStatsURL);
+            $.log("Search URL: " + searchURL);
+            $.log("Segments (Text) URL: " + segmentsTextURL);
+            $.log("Segments (UI) URL: " + segmentsUIURL);
+            $.log("Segments URL: " + segmentsURL);
+            $.log("Series (Series) URL: " + seriesSeriesURL);
+            $.log("Series (Episode) URL: " + seriesEpisodeURL);
             
-            mediaPackageId = (data.mediaDebugInfo.mediaPackageId == "") ? Opencast.Utils.getURLParameter('id') : data.mediaDebugInfo.mediaPackageId;
+            mediaPackageId = (data.mediaDebugInfo.mediaPackageId == "") ? $.getURLParameter('id') : data.mediaDebugInfo.mediaPackageId;
             mediaUrlOne = (data.mediaDebugInfo.mediaUrlOne == "") ? null : data.mediaDebugInfo.mediaUrlOne;
             mediaUrlTwo = (data.mediaDebugInfo.mediaUrlTwo == "") ? null : data.mediaDebugInfo.mediaUrlTwo;
             mediaResolutionOne = (data.mediaDebugInfo.mediaResolutionOne == "") ? null : data.mediaDebugInfo.mediaResolutionOne;
@@ -197,22 +197,22 @@ Opencast.Watch = (function ()
             mimetypeOne = (data.mediaDebugInfo.mimetypeOne == "") ? null : data.mediaDebugInfo.mimetypeOne;
             mimetypeTwo = (data.mediaDebugInfo.mimetypeTwo == "") ? null : data.mediaDebugInfo.mimetypeTwo;
             
-            Opencast.Utils.log("Media Debug Info");
-            Opencast.Utils.log("Mediapackage ID: " + mediaPackageId);
-            Opencast.Utils.log("Media URL 1: " + mediaUrlOne);
-            Opencast.Utils.log("Media URL 2: " + mediaUrlTwo);
-            Opencast.Utils.log("Media resolution 1: " + mediaResolutionOne);
-            Opencast.Utils.log("Media resolution 1: " + mediaResolutionTwo);
-            Opencast.Utils.log("Mimetype 1: " + mimetypeOne);
-            Opencast.Utils.log("Mimetype 2: " + mimetypeTwo);
+            $.log("Media Debug Info");
+            $.log("Mediapackage ID: " + mediaPackageId);
+            $.log("Media URL 1: " + mediaUrlOne);
+            $.log("Media URL 2: " + mediaUrlTwo);
+            $.log("Media resolution 1: " + mediaResolutionOne);
+            $.log("Media resolution 1: " + mediaResolutionTwo);
+            $.log("Mimetype 1: " + mimetypeOne);
+            $.log("Mimetype 2: " + mimetypeTwo);
             
-            var userId = Opencast.Utils.getURLParameter('user');
+            var userId = $.getURLParameter('user');
             if (mediaPackageId === null)
             {
                 mediaPackageIdAvailable = false;
             }
             var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
-            restEndpoint = Opencast.Utils.getURLParameter('videoUrl') !== null ? "preview.xml" : restEndpoint;
+            restEndpoint = $.getURLParameter('videoUrl') !== null ? "preview.xml" : restEndpoint;
             Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
             Opencast.Player.setUserId(userId);
             if (mediaPackageIdAvailable)
@@ -244,7 +244,7 @@ Opencast.Watch = (function ()
     function continueProcessing(error)
     {
         var err = error || false;
-        Opencast.Utils.log("Continue processing (" + (error ? "with error" : "without error") + ")");
+        $.log("Continue processing (" + (error ? "with error" : "without error") + ")");
         if (error)
         {
             $('body').css('background-color', '#FFFFFF');
@@ -265,11 +265,11 @@ Opencast.Watch = (function ()
         // set the media URLs
         if(mediaUrlOne === null)
         {
-            mediaUrlOne = Opencast.Utils.getURLParameter('videoUrl');
+            mediaUrlOne = $.getURLParameter('videoUrl');
         }
         if(mediaUrlOne === null)
         {
-            mediaUrlTwo = Opencast.Utils.getURLParameter('videoUrl2');
+            mediaUrlTwo = $.getURLParameter('videoUrl2');
         }
         coverUrlOne = $('#oc-cover-presenter').html();
         coverUrlTwo = $('#oc-cover-presentation').html();
@@ -343,24 +343,24 @@ Opencast.Watch = (function ()
         mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
         
         // Check for videoUrl and videoUrl2 URL Parameters
-        var mediaUrlTmp = Opencast.Utils.getURLParameter('videoUrl');
+        var mediaUrlTmp = $.getURLParameter('videoUrl');
         mediaUrlOne = (mediaUrlTmp == null) ? mediaUrlOne : mediaUrlTmp;
         if(mediaUrlTmp != null)
         {
-            Opencast.Utils.log('Set Video URL 1 manually');
+            $.log('Set Video URL 1 manually');
         }
-        mediaUrlTmp = Opencast.Utils.getURLParameter('videoUrl2');
+        mediaUrlTmp = $.getURLParameter('videoUrl2');
         mediaUrlTwo = (mediaUrlTmp == null) ? mediaUrlTwo : mediaUrlTmp;
         if(mediaUrlTmp != null)
         {
-            Opencast.Utils.log('Set Video URL 2 manually');
+            $.log('Set Video URL 2 manually');
         }
         
         // If URL Parameter display exists and is set to revert
-        var display = Opencast.Utils.getURLParameter('display');
+        var display = $.getURLParameter('display');
         if ((display != null) && (display.toLowerCase() == 'invert') && (mediaUrlTwo != ''))
         {
-            Opencast.Utils.log("Inverting the displays and its covers");
+            $.log("Inverting the displays and its covers");
             // Invert the displays and its covers
             var tmpMediaURLOne = mediaUrlOne;
             var tmpCoverURLOne = coverUrlOne;
@@ -376,14 +376,14 @@ Opencast.Watch = (function ()
             mediaResolutionTwo = tmpMediaResolution;
         }
         
-        Opencast.Utils.log("Final Mediadata");
-        Opencast.Utils.log("Mediapackage ID: " + mediaPackageId);
-        Opencast.Utils.log("Media URL 1: " + mediaUrlOne);
-        Opencast.Utils.log("Media URL 2: " + mediaUrlTwo);
-        Opencast.Utils.log("Media resolution 1: " + mediaResolutionOne);
-        Opencast.Utils.log("Media resolution 1: " + mediaResolutionTwo);
-        Opencast.Utils.log("Mimetype 1: " + mimetypeOne);
-        Opencast.Utils.log("Mimetype 2: " + mimetypeTwo);
+        $.log("Final Mediadata");
+        $.log("Mediapackage ID: " + mediaPackageId);
+        $.log("Media URL 1: " + mediaUrlOne);
+        $.log("Media URL 2: " + mediaUrlTwo);
+        $.log("Media resolution 1: " + mediaResolutionOne);
+        $.log("Media resolution 1: " + mediaResolutionTwo);
+        $.log("Mimetype 1: " + mimetypeOne);
+        $.log("Mimetype 2: " + mimetypeTwo);
         
         if (mediaPackageIdAvailable)
         {
@@ -465,10 +465,10 @@ Opencast.Watch = (function ()
         {
             $('.progress-list').height("6px");
         }
-        var formattedSecs = Opencast.Utils.formatSeconds(Opencast.Player.getDuration());
+        var formattedSecs = $.formatSeconds(Opencast.Player.getDuration());
         Opencast.Player.setTotalTime(formattedSecs);
         
-        Opencast.Utils.log("Media duration: " + formattedSecs);
+        $.log("Media duration: " + formattedSecs);
         
         // Give the player a second to finish loading, then proceed
         setTimeout(function()
@@ -486,14 +486,14 @@ Opencast.Watch = (function ()
     {
         if(!durationSetSuccessfully)
         {
-            var playParam = Opencast.Utils.getURLParameter('play');
-            var timeParam = Opencast.Utils.getURLParameter('t');
-            var previewParam = Opencast.Utils.getURLParameter('preview');
+            var playParam = $.getURLParameter('play');
+            var timeParam = $.getURLParameter('t');
+            var previewParam = $.getURLParameter('preview');
             previewParam = previewParam == null ? false : true;
             var durationStr = $('#oc_duration').text();
-            var durTextSet = (durationStr != 'Initializing') && (Opencast.Utils.getTimeInMilliseconds(durationStr) != 0);
+            var durTextSet = (durationStr != 'Initializing') && ($.getTimeInMilliseconds(durationStr) != 0);
             var autoplay = ((playParam !== null) && (playParam.toLowerCase() == 'true')) || (!mediaPackageIdAvailable && !previewParam);
-            var time = (timeParam === null) ? 0 : Opencast.Utils.parseSeconds(timeParam);
+            var time = (timeParam === null) ? 0 : $.parseSeconds(timeParam);
             time = (time < 0) ? 0 : time;
             var rdy = false;
             // duration set
@@ -505,7 +505,7 @@ Opencast.Watch = (function ()
                     // attention: first call 'play', after that 'jumpToTime', otherwise nothing happens!
                     if (Opencast.Player.doPlay() && jumpToTime(time))
                     {
-                        Opencast.Utils.log("Autoplay: true");
+                        $.log("Autoplay: true");
                         rdy = true;
                     }
                 }
@@ -517,7 +517,7 @@ Opencast.Watch = (function ()
                     }
                     if (jumpToTime(time))
                     {
-                        Opencast.Utils.log("Autoplay: false");
+                        $.log("Autoplay: false");
                         rdy = true;
                     }
                 }
@@ -549,12 +549,12 @@ Opencast.Watch = (function ()
     {
         if(time > 0)
         {
-            Opencast.Utils.log("Jump to time: true (" + time +"s)");
+            $.log("Jump to time: true (" + time +"s)");
             var seekSuccessful = Videodisplay.seek(time);
             return seekSuccessful;
         } else
         {
-            Opencast.Utils.log("Jump to time: false");
+            $.log("Jump to time: false");
             return true;
         }
     }

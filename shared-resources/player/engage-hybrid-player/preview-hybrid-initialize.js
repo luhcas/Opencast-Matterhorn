@@ -84,7 +84,7 @@ Opencast.Initialize = (function ()
     {
         if(!keysSet)
         {
-            var asciiAlphabet = Opencast.Utils.getAsciiAlphabet();
+            var asciiAlphabet = $.getAsciiAlphabet();
             KEY_0 = asciiAlphabet['0'],
             KEY_1 = asciiAlphabet['1'],
             KEY_2 = asciiAlphabet['2'],

@@ -66,13 +66,13 @@ Opencast.segments_Plugin = (function ()
     {
         if ((processedTemplateData !== false) && (element !== undefined) && (segments_data.segment !== undefined) && (segments_data.segment.length > 0))
         {
-            Opencast.Utils.log("Series Plugin: Data available, processing template");
+            $.log("Series Plugin: Data available, processing template");
             element.html(processedTemplateData);
             return true;
         }
         else
         {
-            Opencast.Utils.log("Series Plugin: No data available");
+            $.log("Series Plugin: No data available");
             return false;
         }
     }

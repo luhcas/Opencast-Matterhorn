@@ -186,7 +186,7 @@ Opencast.segments_ui_slider_Plugin = (function ()
             cs3 = true;
         }
         var tl = '' + (cs1 ? " 1 " : '') + (cs2 ? " 2 " : '') + (cs3 ? " 3 " : '');
-        Opencast.Utils.log("Segments UI Slider Plugin: Following Templates have (successfully) been proceeded: " + tl+ " from 3 Templates possible");
+        $.log("Segments UI Slider Plugin: Following Templates have (successfully) been proceeded: " + tl+ " from 3 Templates possible");
     }
     
     return {
