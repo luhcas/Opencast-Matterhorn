@@ -22,6 +22,7 @@
         <script type="text/javascript" src="jquery/jquery-ui-1.8.1.custom.min.js"></script>
         <script type="text/javascript" src="jquery/plugins/jwysiwyg/jquery.wysiwyg.js"></script>
         <script type="text/javascript" src="jquery/plugins/jquery.client.js"></script>
+        <script type="text/javascript" src="jquery/plugins/jquery.cookie.js"></script>
         <script type="text/javascript" src="js/engage-ui.js"></script>
         <script type="text/javascript" src="js/jquery.timers-1.2.js"></script>
         <script type="text/javascript" src="js/engage_plugins/json2.js"></script>
@@ -43,7 +44,7 @@
         <script type="text/javascript" src="engage-hybrid-player/bridge/Videodisplay.js"></script>
         <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
         <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script>
-        <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>
+        <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSpinbutton.js"></script>
         <script type="text/javascript" src="js/watch.js"></script>
     </head>
     <body>
@@ -134,16 +135,11 @@
                      <span id="oc_volume-dropdown">
                          <input id="oc_btn-volume" class="oc_btn-volume-high" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value="" />
                      </span>
-                     <span id="oc_volume-menue">
-                         <div id="oc_volume-dropdown-div">
-                             <div id="oc_volume-slider">
-                                 <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume" alt="Volume">
-                                     <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden"></label>
-                                     <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value="" />
-                                 </div>
-                             </div>
-                         </div>
-                     </span>
+                     <button id="oc_volume-container">
+                           <div id="oc_volume-back">
+                               <div id="oc_volume-front"></div>
+                           </div>
+                     </button>
                  </div>
                  <!-- END #oc_sound -->
                 

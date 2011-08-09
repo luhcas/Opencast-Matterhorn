@@ -55,6 +55,10 @@ Opencast.ariaSpinbutton = (function ()
    * saves last volume before mute
    */
   var mute = false;
+  /**
+   * true saves/reads volume with cookie in browser
+   */
+  var withVolumeCookie = false;
 
 
   /**
@@ -65,7 +69,7 @@ Opencast.ariaSpinbutton = (function ()
    * @param maximum   mixed   maximum of range
    */
 
-  function initialize(parentElementId, backgroundElementId, foregroundElementId, count, minimum, maximum)
+  function initialize(parentElementId, backgroundElementId, foregroundElementId, count, minimum, maximum, withVolumeCookie)
   {
 
     //set obj properties
@@ -75,6 +79,7 @@ Opencast.ariaSpinbutton = (function ()
     this.countSteps = count;
     this.rangeMaximum = maximum;
     this.rangeMinimum = minimum;
+    this.withVolumeCookie = !isNaN(withVolumeCookie); 
     this.doHover = true;
 
     //calculate width of each step in px
@@ -85,18 +90,19 @@ Opencast.ariaSpinbutton = (function ()
     var rwidth = (this.range = maximum - minimum) / count;
     this.rangeStepWidth = rwidth;
 
-    //jump to default position
-    this.jumpTo(count);
+    //jump to default position, read from cookie if set
+    var defaultPosition = this.getCookie() ? this.getCookie() : count;
+    this.jumpTo(defaultPosition);
     this.initalizeARIA();
 
     //initalise mouse possition tracking
-    this.parentEl.mouseenter(function(e) { Opencast.ariaSpinbutton.handleMouseenterEvent(e); } );
-    this.parentEl.mouseleave(function(e) { Opencast.ariaSpinbutton.handleMouseleaveEvent(e); } );
-    this.parentEl.mousemove(function(e) { Opencast.ariaSpinbutton.handleMousemoveEvent(e); });
-    this.parentEl.click(function(e) { Opencast.ariaSpinbutton.handleClickEvent(e); } );
+    this.parentEl.mouseenter(function(e) {Opencast.ariaSpinbutton.handleMouseenterEvent(e);} );
+    this.parentEl.mouseleave(function(e) {Opencast.ariaSpinbutton.handleMouseleaveEvent(e);} );
+    this.parentEl.mousemove(function(e) {Opencast.ariaSpinbutton.handleMousemoveEvent(e);});
+    this.parentEl.click(function(e) {Opencast.ariaSpinbutton.handleClickEvent(e);} );
 
     //initalise klick events
-    this.parentEl.keydown(function(e) { Opencast.ariaSpinbutton.handleKeydownEvent(e); } );
+    this.parentEl.keydown(function(e) {Opencast.ariaSpinbutton.handleKeydownEvent(e);} );
     
     //hack: click event is handeld in flash Videodisplay.passCharCode(event.which);
     $(document).keydown(function (event)
@@ -104,8 +110,8 @@ Opencast.ariaSpinbutton = (function ()
       if (event.altKey === true && event.ctrlKey === true)
       {
         switch(event.keyCode) {
-        case 85: Opencast.ariaSpinbutton.increase(); break;
-        case 68: Opencast.ariaSpinbutton.decrease(); break;
+        case 85:Opencast.ariaSpinbutton.increase();break;
+        case 68:Opencast.ariaSpinbutton.decrease();break;
         }
       }
     });
@@ -145,6 +151,7 @@ Opencast.ariaSpinbutton = (function ()
     this.jumpToVisualOnly(position);
     this.currentPosition = position;
     this.updateARIA();
+    this.setCookie();
     
     var newVal = (position * this.rangeStepWidth) / 100;
     //only set value if flex bridge is initalised
@@ -194,8 +201,8 @@ Opencast.ariaSpinbutton = (function ()
   function handleKeydownEvent(event)
   {
     switch(event.keyCode) {
-      case 37: this.decrease(); break;
-      case 39: this.increase(); break;
+      case 37:this.decrease();break;
+      case 39:this.increase();break;
     }
   }
 
@@ -241,6 +248,23 @@ Opencast.ariaSpinbutton = (function ()
       }
     }
   }
+  
+  function setCookie()
+  {
+      if(this.withVolumeCookie) {
+        $.cookie('public_player_volume', this.currentPosition, {expires: 365, path: '/'});
+      }
+      
+  }
+  function getCookie()
+  {
+      var cookieVal = $.cookie('public_player_volume');
+      if(isNaN(parseInt(cookieVal)) || !this.withVolumeCookie) {
+         $.cookie('public_player_volume', null);
+         cookieVal = null;
+      }
+      return cookieVal;
+  }      
 
   return {
     initialize : initialize,
@@ -256,6 +280,8 @@ Opencast.ariaSpinbutton = (function ()
     updateARIA : updateARIA,
     decrease : decrease,
     increase : increase,
-    toggleMute : toggleMute
+    toggleMute : toggleMute,
+    setCookie : setCookie,
+    getCookie : getCookie
   };
  }());

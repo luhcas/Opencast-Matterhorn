@@ -85,7 +85,7 @@ table
 
 #oc_video-player-controls-embed
 {
-  height:                   28px;
+  height:                   26px;
   width:                    100%;
   background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
@@ -170,7 +170,6 @@ table
   float:                    left;
   width:                    33.33%;
   text-align:               center;
-  margin-top:               4px;
 }
 
 #oc_sound
@@ -451,7 +450,7 @@ input::-moz-focus-inner,
 .segment-holder 
 {
   background-color:         #b8b8b8;
-  height:                   25px;
+  height:                   15px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
   border-bottom-width:      0px;
@@ -473,7 +472,7 @@ input::-moz-focus-inner,
 .segment-holder-over 
 {
   background-color:         #d8d8d8;
-  height:                   25px;
+  height:                   15px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
   border-bottom-width:      0px;
@@ -493,9 +492,9 @@ input::-moz-focus-inner,
 }
 
 .segments {
-  border-color:             #000000;
-  border-style:             solid;
-  border-width:             1px;
+  border-right-color:             #000000;
+  border-right-style:             solid;
+  border-right-width:             1px;
   width:                    100%;
 }
 

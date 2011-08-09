@@ -23,7 +23,7 @@ Opencast.Initialize = (function ()
 {
     var myWidth = 0,
         myHeight = 0,
-        OTHERDIVHEIGHT = 100,
+        OTHERDIVHEIGHT = 70, //needs to be changed in embed-hybrid-initialize.js:716 too
         MINWIDTH = 300,
         VOLUME = 'volume',
         VIDEOSIZE = 'videosize',

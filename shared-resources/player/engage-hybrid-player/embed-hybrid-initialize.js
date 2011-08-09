@@ -449,8 +449,6 @@ Opencast.Initialize = (function ()
         {
             dropdown_timer();
         });
-        // init the aria slider for the volume
-        Opencast.ariaSlider.init();
         // aria roles
         $("#editorContainer").attr("className", "oc_editTime");
         $("#editField").attr("className", "oc_editTime");
@@ -816,7 +814,7 @@ Opencast.Initialize = (function ()
         onPlayerReadyListener();
         // to calculate the embed flash height
         iFrameHeight = document.documentElement.clientHeight;
-        otherDivHeight = 100;
+        otherDivHeight = 70; //needs to be changed in player-multi-hybrid-initialize.js:25 too
         flashHeight = iFrameHeight - otherDivHeight;
         flashWidth = document.documentElement.clientWidth;
         $("#oc_flash-player").css('height', flashHeight + 'px');
