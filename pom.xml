@@ -1387,6 +1387,17 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>sozores</id>
+      <name>Susana Ozores</name>
+      <email>sozores@teltek.es</email>
+      <organization>Universidade de Vigo</organization>
+      <organizationUrl>http://www.uvigo.es</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? -->
