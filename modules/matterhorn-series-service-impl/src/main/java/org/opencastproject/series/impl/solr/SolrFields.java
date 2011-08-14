@@ -29,6 +29,12 @@ public interface SolrFields {
   /** The key representing Access Control List */
   String ACCESS_CONTROL_KEY = "access_control";
 
+  /** The key representing the roles that can contribute to the series */
+  String ACCESS_CONTROL_CONTRIBUTE = "acl_contribute";
+
+  /** The key representing the roles that can edit the series */
+  String ACCESS_CONTROL_EDIT = "acl_edit";
+
   /** Dublin core fields */
   String TITLE_KEY = "dc_title";
   String SUBJECT_KEY = "dc_subject";

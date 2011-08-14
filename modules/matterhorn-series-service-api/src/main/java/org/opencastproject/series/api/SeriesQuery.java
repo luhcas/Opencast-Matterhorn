@@ -61,6 +61,11 @@ public class SeriesQuery {
   protected Date availableTo;
   /** Rights holder search */
   protected String rightsHolder;
+  /**
+   * Show only series for which the current user may edit the series (true), otherwise show series for which the current
+   * user can contribute content toward the series
+   */
+  protected boolean edit;
   /** Sort by field */
   protected Sort sort = Sort.CREATED;
   /** Sort order */
@@ -494,6 +499,24 @@ public class SeriesQuery {
    */
   public String getRightsHolder() {
     return rightsHolder;
+  }
+
+  /**
+   * Whether the results for this query should contain only series that the current user can edit.
+   * 
+   * @return
+   */
+  public boolean isEdit() {
+    return edit;
+  }
+
+  /**
+   * Set the edit flag.
+   * 
+   * @param edit
+   */
+  public void setEdit(boolean edit) {
+    this.edit = edit;
   }
 
 }

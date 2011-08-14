@@ -15,40 +15,7 @@
  */
 package org.opencastproject.series.impl.solr;
 
-import org.opencastproject.metadata.dublincore.DCMIPeriod;
-import org.opencastproject.metadata.dublincore.DublinCore;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.metadata.dublincore.DublinCoreValue;
-import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
-import org.opencastproject.metadata.dublincore.Temporal;
-import org.opencastproject.security.api.AccessControlList;
-import org.opencastproject.security.api.AccessControlParser;
-import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.series.api.SeriesException;
-import org.opencastproject.series.api.SeriesQuery;
-import org.opencastproject.series.impl.SeriesServiceDatabaseException;
-import org.opencastproject.series.impl.SeriesServiceIndex;
-import org.opencastproject.solr.SolrServerFactory;
-import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.SolrUtils;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.util.ClientUtils;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrInputDocument;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.opencastproject.security.api.SecurityConstants.GLOBAL_ADMIN_ROLE;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -62,6 +29,44 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
+import org.opencastproject.metadata.dublincore.DCMIPeriod;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.metadata.dublincore.Temporal;
+import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AccessControlParser;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
+import org.opencastproject.series.api.SeriesException;
+import org.opencastproject.series.api.SeriesQuery;
+import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.series.impl.SeriesServiceDatabaseException;
+import org.opencastproject.series.impl.SeriesServiceIndex;
+import org.opencastproject.solr.SolrServerFactory;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.SolrUtils;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements {@link SeriesServiceIndex}.
@@ -352,6 +357,13 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
 
     final SolrInputDocument inputDoc = ClientUtils.toSolrInputDocument(seriesDoc);
     inputDoc.setField(SolrFields.ACCESS_CONTROL_KEY, serializedAC);
+    for (AccessControlEntry ace : accessControl.getEntries()) {
+      if (SeriesService.CONTRIBUTE_CONTENT_PERMISSION.equals(ace.getAction()) && ace.isAllow()) {
+        inputDoc.addField(SolrFields.ACCESS_CONTROL_CONTRIBUTE, ace.getRole());
+      } else if (SeriesService.EDIT_SERIES_PERMISSION.equals(ace.getAction()) && ace.isAllow()) {
+        inputDoc.addField(SolrFields.ACCESS_CONTROL_EDIT, ace.getRole());
+      }
+    }
 
     if (synchronousIndexing) {
       try {
@@ -556,6 +568,36 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
   }
 
   /**
+   * Appends a multivalued query parameter to a solr query
+   * 
+   * @param sb
+   *          The {@link StringBuilder} containing the query
+   * @param key
+   *          the key for this search parameter
+   * @param values
+   *          the values for this search parameter
+   * @return the appended {@link StringBuilder}
+   */
+  private StringBuilder append(StringBuilder sb, String key, String[] values) {
+    if (StringUtils.isBlank(key) || values.length == 0) {
+      return sb;
+    }
+    if (sb.length() > 0) {
+      sb.append(" AND (");
+    }
+    for (int i = 0; i < values.length; i++) {
+      if (i > 0) {
+        sb.append(" OR ");
+      }
+      sb.append(key);
+      sb.append(":");
+      sb.append(ClientUtils.escapeQueryChars(values[i]));
+    }
+    sb.append(")");
+    return sb;
+  }
+
+  /**
    * Appends query parameters to a solr query in a way that they are found even though they are not treated as a full
    * word in solr.
    * 
@@ -615,9 +657,11 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
    * 
    * @param query
    *          the series query
+   * @param forEdit
+   *          if this query should return only series available to the current user for editing
    * @return the solr query string
    */
-  protected String buildSolrQueryString(SeriesQuery query) {
+  protected String buildSolrQueryString(SeriesQuery query, boolean forEdit) {
     String orgId = securityService.getOrganization().getId();
     StringBuilder sb = new StringBuilder();
     append(sb, SolrFields.COMPOSITE_ID_KEY, getCompositeKey(query.getSeriesId(), orgId));
@@ -636,7 +680,32 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
     append(sb, SolrFields.CREATED_KEY, query.getCreatedFrom(), query.getCreatedTo());
     append(sb, SolrFields.ORGANIZATION, orgId);
 
+    appendAuthorization(sb, forEdit);
+
     return sb.toString();
+  }
+
+  /**
+   * Appends the authorization information to the solr query string
+   * 
+   * @param sb
+   *          the {@link StringBuilder} containing the query
+   * @param forEdit
+   *          if this query should return only series available to the current user for editing
+   * 
+   * @return the appended {@link StringBuilder}
+   */
+  protected StringBuilder appendAuthorization(StringBuilder sb, boolean forEdit) {
+    User currentUser = securityService.getUser();
+    Organization currentOrg = securityService.getOrganization();
+    if (!currentUser.hasRole(currentOrg.getAdminRole()) && !currentUser.hasRole(GLOBAL_ADMIN_ROLE)) {
+      if (forEdit) {
+        append(sb, SolrFields.ACCESS_CONTROL_EDIT, currentUser.getRoles());
+      } else {
+        append(sb, SolrFields.ACCESS_CONTROL_CONTRIBUTE, currentUser.getRoles());
+      }
+    }
+    return sb;
   }
 
   /**
@@ -705,7 +774,8 @@ public class SeriesServiceSolrIndex implements SeriesServiceIndex {
     solrQuery.setRows(count);
     solrQuery.setStart(startPage * count);
 
-    String solrQueryString = buildSolrQueryString(query);
+    String solrQueryString = null;
+    solrQueryString = buildSolrQueryString(query, query.isEdit());
     solrQuery.setQuery(solrQueryString);
 
     if (query.getSort() != null) {

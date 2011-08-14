@@ -15,20 +15,9 @@
  */
 package org.opencastproject.series.impl.persistence;
 
-import org.opencastproject.metadata.dublincore.DublinCore;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.security.api.AccessControlList;
-import org.opencastproject.security.api.AccessControlParser;
-import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.series.impl.SeriesServiceDatabase;
-import org.opencastproject.series.impl.SeriesServiceDatabaseException;
-import org.opencastproject.util.NotFoundException;
-
-import org.apache.commons.io.IOUtils;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.opencastproject.series.api.SeriesService.CONTRIBUTE_CONTENT_PERMISSION;
+import static org.opencastproject.series.api.SeriesService.EDIT_SERIES_PERMISSION;
+import static org.opencastproject.series.api.SeriesService.READ_CONTENT_PERMISSION;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +32,24 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
+
+import org.apache.commons.io.IOUtils;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AccessControlParser;
+import org.opencastproject.security.api.AccessControlUtil;
+import org.opencastproject.security.api.Organization;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UnauthorizedException;
+import org.opencastproject.security.api.User;
+import org.opencastproject.series.impl.SeriesServiceDatabase;
+import org.opencastproject.series.impl.SeriesServiceDatabaseException;
+import org.opencastproject.util.NotFoundException;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implements {@link SeriesServiceDatabase}. Defines permanent storage for series.
@@ -174,6 +181,16 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       if (entity == null) {
         throw new NotFoundException("Series with ID " + seriesId + " does not exist");
       }
+      // Ensure this user is allowed to delete this series
+      String accessControlXml = entity.getAccessControl();
+      if (accessControlXml != null) {
+        AccessControlList acl = AccessControlParser.parseAcl(accessControlXml);
+        User currentUser = securityService.getUser();
+        Organization currentOrg = securityService.getOrganization();
+        if (!AccessControlUtil.isAuthorized(acl, currentUser, currentOrg, EDIT_SERIES_PERMISSION)) {
+          throw new UnauthorizedException(currentUser + " is not authorized to update series " + seriesId);
+        }
+      }
       em.remove(entity);
       tx.commit();
     } catch (NotFoundException e) {
@@ -232,11 +249,11 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       if (entity == null) {
         throw new NotFoundException("Could not found series with ID " + seriesId);
       }
-      AccessControlList acl = null;
-      if (entity.getAccessControl() != null) {
-        acl = AccessControlParser.parseAcl(entity.getAccessControl());
+      if (entity.getAccessControl() == null) {
+        return null;
+      } else {
+        return AccessControlParser.parseAcl(entity.getAccessControl());
       }
-      return acl;
     } catch (NotFoundException e) {
       throw e;
     } catch (Exception e) {
@@ -254,7 +271,8 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
    * DublinCoreCatalog)
    */
   @Override
-  public DublinCoreCatalog storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException {
+  public DublinCoreCatalog storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException,
+          UnauthorizedException {
     if (dc == null) {
       throw new SeriesServiceDatabaseException("Invalid value for Dublin core catalog: null");
     }
@@ -281,6 +299,16 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
         em.persist(entity);
         newSeries = dc;
       } else {
+        // Ensure this user is allowed to update this series
+        String accessControlXml = entity.getAccessControl();
+        if (accessControlXml != null) {
+          AccessControlList acl = AccessControlParser.parseAcl(accessControlXml);
+          User currentUser = securityService.getUser();
+          Organization currentOrg = securityService.getOrganization();
+          if (!AccessControlUtil.isAuthorized(acl, currentUser, currentOrg, EDIT_SERIES_PERMISSION)) {
+            throw new UnauthorizedException(currentUser + " is not authorized to update series " + seriesId);
+          }
+        }
         entity.setSeries(seriesXML);
         em.merge(entity);
         newSeries = dc;
@@ -310,6 +338,19 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       SeriesEntity entity = getSeriesEntity(seriesId, em);
       if (entity == null) {
         throw new NotFoundException("No series with id=" + seriesId + " exists");
+      }
+      // Ensure this user is allowed to read this series
+      String accessControlXml = entity.getAccessControl();
+      if (accessControlXml != null) {
+        AccessControlList acl = AccessControlParser.parseAcl(accessControlXml);
+        User currentUser = securityService.getUser();
+        Organization currentOrg = securityService.getOrganization();
+        // There are several reasons a user may need to load a series: to read content, to edit it, or add content
+        if (!AccessControlUtil.isAuthorized(acl, currentUser, currentOrg, READ_CONTENT_PERMISSION)
+                && !AccessControlUtil.isAuthorized(acl, currentUser, currentOrg, CONTRIBUTE_CONTENT_PERMISSION)
+                && !AccessControlUtil.isAuthorized(acl, currentUser, currentOrg, EDIT_SERIES_PERMISSION)) {
+          throw new UnauthorizedException(currentUser + " is not authorized to see series " + seriesId);
+        }
       }
       return dcService.load(IOUtils.toInputStream(entity.getDublinCoreXML(), "UTF-8"));
     } catch (NotFoundException e) {
@@ -353,6 +394,16 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
         throw new NotFoundException("Series with ID " + seriesId + " does not exist.");
       }
       if (entity.getAccessControl() != null) {
+        // Ensure this user is allowed to update this series
+        String accessControlXml = entity.getAccessControl();
+        if (accessControlXml != null) {
+          AccessControlList acl = AccessControlParser.parseAcl(accessControlXml);
+          User currentUser = securityService.getUser();
+          Organization currentOrg = securityService.getOrganization();
+          if (!AccessControlUtil.isAuthorized(acl, currentUser, currentOrg, EDIT_SERIES_PERMISSION)) {
+            throw new UnauthorizedException(currentUser + " is not authorized to update ACLs on series " + seriesId);
+          }
+        }
         updated = true;
       }
       entity.setAccessControl(serializedAC);

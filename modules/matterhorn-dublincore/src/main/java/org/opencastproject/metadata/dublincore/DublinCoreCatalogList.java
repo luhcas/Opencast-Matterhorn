@@ -41,6 +41,22 @@ public class DublinCoreCatalogList {
   /** Array storing Dublin cores */
   private List<DublinCoreCatalog> catalogList;
 
+  /** Default no-arg constructor initialized with an empty catalog list */
+  public DublinCoreCatalogList() {
+    catalogList = new LinkedList<DublinCoreCatalog>();
+  }
+
+  /**
+   * Initialize with the given catalog list.
+   * 
+   * @param catalogs
+   *          the catalogs to initialize this list with.
+   */
+  public DublinCoreCatalogList(List<DublinCoreCatalog> catalogs) {
+    this();
+    catalogList.addAll(catalogs);
+  }
+
   /**
    * Returns list of DUblin Core currently stored
    * 

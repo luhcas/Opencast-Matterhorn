@@ -20,6 +20,7 @@ import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
@@ -246,8 +247,10 @@ public class CalendarGenerator {
    * @param seriesID
    *          {@link DublinCoreCatalog} to be retrieved
    * @return DC serialized to string or null
+   * @throws UnauthorizedException
+   *           if the current user is not allowed to view this series
    */
-  private String getSeriesDublinCoreAsString(String seriesID) {
+  private String getSeriesDublinCoreAsString(String seriesID) throws UnauthorizedException {
     if (StringUtils.isBlank(seriesID))
       return null;
     if (seriesService == null) {

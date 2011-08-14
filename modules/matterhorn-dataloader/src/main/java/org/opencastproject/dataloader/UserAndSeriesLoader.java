@@ -24,7 +24,10 @@ import org.opencastproject.security.api.AccessControlEntry;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.Organization;
 import org.opencastproject.security.api.OrganizationDirectoryService;
+import org.opencastproject.security.api.SecurityConstants;
 import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UnauthorizedException;
+import org.opencastproject.security.api.User;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.userdirectory.jpa.JpaUser;
@@ -86,6 +89,9 @@ public class UserAndSeriesLoader {
   /** The write permission */
   public static final String WRITE = "write";
 
+  /** The contribute permission */
+  public static final String CONTRIBUTE = "contribute";
+
   /** The logger */
   protected static final Logger logger = LoggerFactory.getLogger(UserAndSeriesLoader.class);
 
@@ -132,7 +138,11 @@ public class UserAndSeriesLoader {
         acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR_PREFIX, READ, true));
         acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN_PREFIX, READ, true));
 
-        // Add write permissions for the instructors and admins
+        // Add contribute permissions for adding recordings to these series
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR_PREFIX, CONTRIBUTE, true));
+        acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN_PREFIX, CONTRIBUTE, true));
+
+        // Add write permissions for the instructors and admins to make changes to the series themselves
         acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + INSTRUCTOR_PREFIX, WRITE, true));
         acl.getEntries().add(new AccessControlEntry(SERIES_PREFIX + i + "_" + ADMIN_PREFIX, WRITE, true));
 
@@ -145,11 +155,16 @@ public class UserAndSeriesLoader {
           for (String orgId : organizationIds) {
             Organization org = organizationDirectoryService.getOrganization(orgId);
             try {
+              securityService.setUser(new User("userandseriesloader", orgId,
+                      new String[] { SecurityConstants.GLOBAL_ADMIN_ROLE }));
               securityService.setOrganization(org);
               seriesService.updateSeries(dc);
               seriesService.updateAccessControl(seriesId, acl);
+            } catch (UnauthorizedException e) {
+              logger.warn(e.getMessage());
             } finally {
               securityService.setOrganization(null);
+              securityService.setUser(null);
             }
           }
           logger.debug("Added series {}", dc);

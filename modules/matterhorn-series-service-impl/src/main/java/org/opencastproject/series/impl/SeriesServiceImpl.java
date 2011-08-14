@@ -19,49 +19,54 @@ import static org.opencastproject.event.EventAdminConstants.ID;
 import static org.opencastproject.event.EventAdminConstants.PAYLOAD;
 import static org.opencastproject.event.EventAdminConstants.SERIES_ACL_TOPIC;
 import static org.opencastproject.event.EventAdminConstants.SERIES_TOPIC;
+import static org.opencastproject.security.api.SecurityConstants.DEFAULT_ORGANIZATION_ID;
+import static org.opencastproject.security.api.SecurityConstants.GLOBAL_ADMIN_ROLE;
 import static org.opencastproject.util.RequireUtil.notNull;
 
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
 import org.opencastproject.security.api.AccessControlList;
 import org.opencastproject.security.api.AccessControlParser;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.UnauthorizedException;
+import org.opencastproject.security.api.User;
 import org.opencastproject.series.api.SeriesException;
 import org.opencastproject.series.api.SeriesQuery;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
-
-import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.ServiceException;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.UUID;
-
 /**
  * Implements {@link SeriesService}. Uses {@link SeriesServiceDatabase} for permanent storage and
  * {@link SeriesServiceIndex} for searching.
  * 
  */
-public class SeriesServiceImpl implements SeriesService, ManagedService {
+public class SeriesServiceImpl implements SeriesService {
 
   /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(SeriesServiceImpl.class);
-  
+
   /** Index for searching */
   protected SeriesServiceIndex index;
 
   /** Persistent storage */
   protected SeriesServiceDatabase persistence;
+
+  /** The security service */
+  protected SecurityService securityService;
 
   /** The OSGI event admin service */
   protected EventAdmin eventAdmin;
@@ -85,6 +90,16 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   }
 
   /**
+   * OSGi callback for setting the security service.
+   * 
+   * @param securityService
+   *          the security service
+   */
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
+  }
+
+  /**
    * OSGi callback for setting the event admin.
    * 
    * @param eventAdmin
@@ -105,6 +120,21 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   public void activate(ComponentContext cc) throws Exception {
     logger.info("Activating Series Service");
 
+    try {
+      // Run as the superuser so we get all series, regardless of organization or role
+      securityService.setOrganization(new DefaultOrganization());
+      securityService.setUser(new User("seriesadmin", DEFAULT_ORGANIZATION_ID, new String[] { GLOBAL_ADMIN_ROLE }));
+      populateSolr();
+    } finally {
+      securityService.setOrganization(null);
+      securityService.setUser(null);
+    }
+  }
+
+  /**
+   * If the solr index is empty, but there are series in the database, populate the solr index.
+   */
+  private void populateSolr() {
     long instancesInSolr = 0L;
     try {
       instancesInSolr = this.index.count();
@@ -137,21 +167,12 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   /*
    * (non-Javadoc)
    * 
-   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
-   */
-  @Override
-  public void updated(@SuppressWarnings("unchecked") Dictionary properties) throws ConfigurationException {
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see
    * org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.metadata.dublincore.DublinCoreCatalog
    * )
    */
   @Override
-  public DublinCoreCatalog updateSeries(final DublinCoreCatalog dc) throws SeriesException {
+  public DublinCoreCatalog updateSeries(final DublinCoreCatalog dc) throws SeriesException, UnauthorizedException {
     if (dc == null) {
       throw new IllegalArgumentException("DC argument for updating series must not be null");
     }
@@ -279,10 +300,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public DublinCoreCatalogList getSeries(SeriesQuery query) throws SeriesException {
     try {
-      List<DublinCoreCatalog> result = index.search(query);
-      DublinCoreCatalogList dcList = new DublinCoreCatalogList();
-      dcList.setCatalogList(result);
-      return dcList;
+      return new DublinCoreCatalogList(index.search(query));
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Failed to execute search query: {}", e.getMessage());
       throw new SeriesException(e);

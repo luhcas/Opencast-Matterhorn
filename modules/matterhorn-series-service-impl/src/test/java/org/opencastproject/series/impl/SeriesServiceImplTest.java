@@ -15,22 +15,11 @@
  */
 package org.opencastproject.series.impl;
 
-
-import org.opencastproject.metadata.dublincore.DublinCore;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.security.api.AccessControlEntry;
-import org.opencastproject.security.api.AccessControlList;
-import org.opencastproject.security.api.DefaultOrganization;
-import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.series.api.SeriesQuery;
-import org.opencastproject.series.impl.persistence.SeriesServiceDatabaseImpl;
-import org.opencastproject.series.impl.solr.SeriesServiceSolrIndex;
-import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.PathSupport;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mchange.v2.c3p0.DataSources;
+import java.io.File;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -41,32 +30,43 @@ import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.security.api.AccessControlEntry;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.DefaultOrganization;
+import org.opencastproject.security.api.SecurityConstants;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.security.api.User;
+import org.opencastproject.series.api.SeriesQuery;
+import org.opencastproject.series.impl.persistence.SeriesServiceDatabaseImpl;
+import org.opencastproject.series.impl.solr.SeriesServiceSolrIndex;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PathSupport;
 import org.osgi.service.event.EventAdmin;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
 
 /**
  * Test for Series Service.
- *
+ * 
  */
 public class SeriesServiceImplTest {
 
   private ComboPooledDataSource pooledDataSource;
   private SeriesServiceDatabaseImpl seriesDatabase;
   private String storage;
-  
+
   private SeriesServiceSolrIndex index;
   private DublinCoreCatalogService dcService;
   private String root;
-  
+
   private SeriesServiceImpl seriesService;
-  
+
   private DublinCoreCatalog testCatalog;
-  
+
   /**
    * @throws java.lang.Exception
    */
@@ -74,7 +74,7 @@ public class SeriesServiceImplTest {
   public void setUp() throws Exception {
     long currentTime = System.currentTimeMillis();
     storage = PathSupport.concat("target", "db" + currentTime + ".h2.db");
-    
+
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
     pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + currentTime);
@@ -89,7 +89,10 @@ public class SeriesServiceImplTest {
 
     // Mock up a security service
     SecurityService securityService = EasyMock.createNiceMock(SecurityService.class);
+    User user = new User("admin", SecurityConstants.DEFAULT_ORGANIZATION_ID,
+            new String[] { SecurityConstants.GLOBAL_ADMIN_ROLE });
     EasyMock.expect(securityService.getOrganization()).andReturn(new DefaultOrganization()).anyTimes();
+    EasyMock.expect(securityService.getUser()).andReturn(user).anyTimes();
     EasyMock.replay(securityService);
 
     seriesDatabase = new SeriesServiceDatabaseImpl();
@@ -99,7 +102,7 @@ public class SeriesServiceImplTest {
     seriesDatabase.setDublinCoreService(dcService);
     seriesDatabase.activate(null);
     seriesDatabase.setSecurityService(securityService);
-    
+
     root = PathSupport.concat("target", Long.toString(currentTime));
     index = new SeriesServiceSolrIndex(root);
     index.setDublinCoreService(dcService);
@@ -108,11 +111,12 @@ public class SeriesServiceImplTest {
 
     EventAdmin eventAdmin = EasyMock.createNiceMock(EventAdmin.class);
     EasyMock.replay(eventAdmin);
-    
+
     seriesService = new SeriesServiceImpl();
     seriesService.setPersistence(seriesDatabase);
     seriesService.setIndex(index);
     seriesService.setEventAdmin(eventAdmin);
+    seriesService.setSecurityService(securityService);
 
     seriesService.activate(null);
 
@@ -124,7 +128,7 @@ public class SeriesServiceImplTest {
       IOUtils.closeQuietly(in);
     }
   }
-  
+
   /**
    * @throws java.lang.Exception
    */
@@ -145,12 +149,12 @@ public class SeriesServiceImplTest {
     seriesService.updateSeries(testCatalog);
     DublinCoreCatalog retrivedSeries = seriesService.getSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
     Assert.assertEquals("Some title", retrivedSeries.getFirst(DublinCore.PROPERTY_TITLE));
-    
+
     testCatalog.set(DublinCore.PROPERTY_TITLE, "Some other title");
     seriesService.updateSeries(testCatalog);
     retrivedSeries = seriesService.getSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
     Assert.assertEquals("Some other title", retrivedSeries.getFirst(DublinCore.PROPERTY_TITLE));
-    
+
     seriesService.deleteSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
     try {
       seriesService.getSeries(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
@@ -159,7 +163,7 @@ public class SeriesServiceImplTest {
       // expected
     }
   }
-  
+
   @Test
   public void testSeriesQuery() throws Exception {
     testCatalog.set(DublinCore.PROPERTY_TITLE, "Some title");
@@ -167,13 +171,13 @@ public class SeriesServiceImplTest {
     SeriesQuery q = new SeriesQuery().setSeriesTitle("other");
     List<DublinCoreCatalog> result = seriesService.getSeries(q).getCatalogList();
     Assert.assertEquals(0, result.size());
-    
+
     testCatalog.set(DublinCore.PROPERTY_TITLE, "Some other title");
     seriesService.updateSeries(testCatalog);
     result = seriesService.getSeries(q).getCatalogList();
     Assert.assertEquals(1, result.size());
   }
-  
+
   @Test
   public void testAddingSeriesWithoutID() throws Exception {
     testCatalog.remove(DublinCore.PROPERTY_IDENTIFIER);
@@ -182,29 +186,30 @@ public class SeriesServiceImplTest {
     String id = newSeries.getFirst(DublinCore.PROPERTY_IDENTIFIER);
     Assert.assertNotNull("New series should have id set", id);
   }
-  
+
   @Test
   public void testACLManagment() throws Exception {
     // sample access control list
     AccessControlList accessControlList = new AccessControlList();
     List<AccessControlEntry> acl = accessControlList.getEntries();
     acl.add(new AccessControlEntry("admin", "delete", true));
-    
+
     try {
       seriesService.updateAccessControl("failid", accessControlList);
       Assert.fail("Should fail when adding ACL to nonexistent series,");
     } catch (NotFoundException e) {
       // expected
     }
-    
+
     seriesService.updateSeries(testCatalog);
     seriesService.updateAccessControl(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER), accessControlList);
-    AccessControlList retrievedACL = seriesService.getSeriesAccessControl(testCatalog.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+    AccessControlList retrievedACL = seriesService.getSeriesAccessControl(testCatalog
+            .getFirst(DublinCore.PROPERTY_IDENTIFIER));
     Assert.assertNotNull(retrievedACL);
     acl = retrievedACL.getEntries();
     Assert.assertEquals(acl.size(), 1);
     Assert.assertEquals("admin", acl.get(0).getRole());
-    
+
     acl = accessControlList.getEntries();
     acl.clear();
     acl.add(new AccessControlEntry("student", "read", true));

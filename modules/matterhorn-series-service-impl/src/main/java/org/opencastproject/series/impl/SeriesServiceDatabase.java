@@ -17,6 +17,7 @@ package org.opencastproject.series.impl;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 
 /**
@@ -33,8 +34,10 @@ public interface SeriesServiceDatabase {
    * @return Dublin Core catalog representing newly created series or null if series Dublin Core was updated
    * @throws SeriesServiceDatabaseException
    *           if exception occurs
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to perform this action
    */
-  DublinCoreCatalog storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException;
+  DublinCoreCatalog storeSeries(DublinCoreCatalog dc) throws SeriesServiceDatabaseException, UnauthorizedException;
 
   /**
    * Store access control associated with specified series. IllegalArgumentException is thrown if accessControl

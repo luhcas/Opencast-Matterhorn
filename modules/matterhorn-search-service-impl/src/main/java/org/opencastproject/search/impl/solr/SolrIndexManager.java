@@ -658,7 +658,8 @@ public class SolrIndexManager {
    *          the access control list for this mediapackage
    * @return an input document ready to be posted to solr or null
    */
-  private SolrInputDocument createSeriesInputDocument(String seriesId, AccessControlList acl) throws IOException {
+  private SolrInputDocument createSeriesInputDocument(String seriesId, AccessControlList acl) throws IOException,
+          UnauthorizedException {
 
     if (seriesId == null)
       return null;

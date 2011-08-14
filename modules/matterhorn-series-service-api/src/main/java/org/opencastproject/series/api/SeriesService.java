@@ -18,6 +18,7 @@ package org.opencastproject.series.api;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
 import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.UnauthorizedException;
 import org.opencastproject.util.NotFoundException;
 
 /**
@@ -25,6 +26,15 @@ import org.opencastproject.util.NotFoundException;
  * 
  */
 public interface SeriesService {
+
+  /** Identifier for the permission to make changes to a series */
+  String EDIT_SERIES_PERMISSION = "write";
+
+  /** Identifier for the permission to read content associated with this series */
+  String READ_CONTENT_PERMISSION = "read";
+
+  /** Identifier for the permission to contribute content to this series */
+  String CONTRIBUTE_CONTENT_PERMISSION = "contribute";
 
   /**
    * Adds or updates series. IllegalArgumentException is thrown if dc argument is null.
@@ -34,8 +44,10 @@ public interface SeriesService {
    * @return Dublin Core catalog of newly created series or null if series Dublin Core was just updated
    * @throws SeriesException
    *           if adding or updating fails
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to perform this action
    */
-  DublinCoreCatalog updateSeries(DublinCoreCatalog dc) throws SeriesException;
+  DublinCoreCatalog updateSeries(DublinCoreCatalog dc) throws SeriesException, UnauthorizedException;
 
   /**
    * Updates access control rules for specified series. Not specifying series ID or trying to update series with null
@@ -48,11 +60,13 @@ public interface SeriesService {
    * @return true if ACL was updated and false it if was created
    * @throws NotFoundException
    *           if series with given ID cannot be found
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to perform this action
    * @throws SeriesException
    *           if exception occurred
    */
   boolean updateAccessControl(String seriesID, AccessControlList accessControl) throws NotFoundException,
-          SeriesException;
+          SeriesException, UnauthorizedException;
 
   /**
    * Removes series
@@ -63,8 +77,10 @@ public interface SeriesService {
    *           if deleting fails
    * @throws NotFoundException
    *           if series with specified ID does not exist
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to perform this action
    */
-  void deleteSeries(String seriesID) throws SeriesException, NotFoundException;
+  void deleteSeries(String seriesID) throws SeriesException, NotFoundException, UnauthorizedException;
 
   /**
    * Returns Dublin core representing series by series ID.
@@ -74,8 +90,10 @@ public interface SeriesService {
    * @return {@link DublinCoreCatalog} representing series
    * @throws SeriesException
    *           if retrieving fails
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to perform this action
    */
-  DublinCoreCatalog getSeries(String seriesID) throws SeriesException, NotFoundException;
+  DublinCoreCatalog getSeries(String seriesID) throws SeriesException, NotFoundException, UnauthorizedException;
 
   /**
    * Returns access control rules for series with given ID.
@@ -96,8 +114,10 @@ public interface SeriesService {
    * @param query
    *          {@link SeriesQuery} representing query
    * @return List of all matching series
+   * @throws UnauthorizedException
+   *           if the current user is not authorized to perform this action
    * @throws SeriesException
    *           if query could not be performed
    */
-  DublinCoreCatalogList getSeries(SeriesQuery query) throws SeriesException;
+  DublinCoreCatalogList getSeries(SeriesQuery query) throws SeriesException, UnauthorizedException;
 }

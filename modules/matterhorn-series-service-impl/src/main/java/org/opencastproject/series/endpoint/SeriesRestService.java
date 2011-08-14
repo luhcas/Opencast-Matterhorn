@@ -26,31 +26,9 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_IDENTIFIER;
+import static org.opencastproject.util.doc.rest.RestParameter.Type.BOOLEAN;
 import static org.opencastproject.util.doc.rest.RestParameter.Type.STRING;
 import static org.opencastproject.util.doc.rest.RestParameter.Type.TEXT;
-
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.rest.RestConstants;
-import org.opencastproject.security.api.AccessControlList;
-import org.opencastproject.security.api.AccessControlParser;
-import org.opencastproject.series.api.SeriesException;
-import org.opencastproject.series.api.SeriesQuery;
-import org.opencastproject.series.api.SeriesService;
-import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.SolrUtils;
-import org.opencastproject.util.doc.rest.RestParameter;
-import org.opencastproject.util.doc.rest.RestQuery;
-import org.opencastproject.util.doc.rest.RestResponse;
-import org.opencastproject.util.doc.rest.RestService;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -70,6 +48,29 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogList;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.rest.RestConstants;
+import org.opencastproject.security.api.AccessControlList;
+import org.opencastproject.security.api.AccessControlParser;
+import org.opencastproject.security.api.UnauthorizedException;
+import org.opencastproject.series.api.SeriesException;
+import org.opencastproject.series.api.SeriesQuery;
+import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.SolrUtils;
+import org.opencastproject.util.doc.rest.RestParameter;
+import org.opencastproject.util.doc.rest.RestQuery;
+import org.opencastproject.util.doc.rest.RestResponse;
+import org.opencastproject.util.doc.rest.RestService;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST endpoint for Series Service.
@@ -299,7 +300,8 @@ public class SeriesRestService {
           @RestResponse(responseCode = SC_CREATED, description = "The access control list has been created."),
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No series with this identifier was found."),
           @RestResponse(responseCode = SC_BAD_REQUEST, description = "The required path or form params were missing in the request.") })
-  public Response updateAccessControl(@PathParam("seriesID") String seriesID, @FormParam("acl") String accessControl) {
+  public Response updateAccessControl(@PathParam("seriesID") String seriesID, @FormParam("acl") String accessControl)
+          throws UnauthorizedException {
     if (accessControl == null) {
       logger.warn("Access control parameter is null.");
       return Response.status(BAD_REQUEST).build();
@@ -330,7 +332,7 @@ public class SeriesRestService {
   @RestQuery(name = "delete", description = "Delete a series", returnDescription = "No content.", pathParameters = { @RestParameter(name = "seriesID", isRequired = true, description = "The series identifier", type = STRING) }, reponses = {
           @RestResponse(responseCode = SC_NOT_FOUND, description = "No series with this identifier was found."),
           @RestResponse(responseCode = SC_NO_CONTENT, description = "The series was deleted.") })
-  public Response deleteSeries(@PathParam("seriesID") String seriesID) {
+  public Response deleteSeries(@PathParam("seriesID") String seriesID) throws UnauthorizedException {
     try {
       this.seriesService.deleteSeries(seriesID);
       return Response.ok().build();
@@ -347,6 +349,7 @@ public class SeriesRestService {
   @Path("series.json")
   @RestQuery(name = "listSeriesAsJson", description = "Returns the series matching the query parameters", returnDescription = "Returns the series search results as JSON", restParameters = {
           @RestParameter(name = "q", isRequired = false, description = "Free text search", type = STRING),
+          @RestParameter(name = "edit", isRequired = false, description = "Whether this query should return only series that are editable", type = BOOLEAN),
           @RestParameter(name = "seriesId", isRequired = false, description = "The series identifier", type = STRING),
           @RestParameter(name = "seriesTitle", isRequired = false, description = "The series title", type = STRING),
           @RestParameter(name = "creator", isRequired = false, description = "The series creator", type = STRING),
@@ -365,16 +368,17 @@ public class SeriesRestService {
           @RestParameter(name = "count", isRequired = false, description = "Results per page (max 100)", type = STRING) }, reponses = { @RestResponse(responseCode = SC_OK, description = "The access control list.") })
   // CHECKSTYLE:OFF
   public Response getSeriesAsJson(@QueryParam("q") String text, @QueryParam("seriesId") String seriesId,
-          @QueryParam("seriesTitle") String seriesTitle, @QueryParam("creator") String creator,
-          @QueryParam("contributor") String contributor, @QueryParam("publisher") String publisher,
-          @QueryParam("rightsholder") String rightsHolder, @QueryParam("createdfrom") String createdFrom,
-          @QueryParam("createdto") String createdTo, @QueryParam("language") String language,
-          @QueryParam("license") String license, @QueryParam("subject") String subject,
-          @QueryParam("abstract") String seriesAbstract, @QueryParam("description") String description,
-          @QueryParam("sort") String sort, @QueryParam("startPage") String startPage, @QueryParam("count") String count) {
+          @QueryParam("edit") Boolean edit, @QueryParam("seriesTitle") String seriesTitle,
+          @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
+          @QueryParam("publisher") String publisher, @QueryParam("rightsholder") String rightsHolder,
+          @QueryParam("createdfrom") String createdFrom, @QueryParam("createdto") String createdTo,
+          @QueryParam("language") String language, @QueryParam("license") String license,
+          @QueryParam("subject") String subject, @QueryParam("abstract") String seriesAbstract,
+          @QueryParam("description") String description, @QueryParam("sort") String sort,
+          @QueryParam("startPage") String startPage, @QueryParam("count") String count) {
     // CHECKSTYLE:ON
     try {
-      DublinCoreCatalogList result = getSeries(text, seriesId, seriesTitle, creator, contributor, publisher,
+      DublinCoreCatalogList result = getSeries(text, seriesId, edit, seriesTitle, creator, contributor, publisher,
               rightsHolder, createdFrom, createdTo, language, license, subject, seriesAbstract, description, sort,
               startPage, count);
       return Response.ok(result.getResultsAsJson()).build();
@@ -389,6 +393,7 @@ public class SeriesRestService {
   @Path("series.xml")
   @RestQuery(name = "listSeriesAsXml", description = "Returns the series matching the query parameters", returnDescription = "Returns the series search results as XML", restParameters = {
           @RestParameter(name = "q", isRequired = false, description = "Free text search", type = STRING),
+          @RestParameter(name = "edit", isRequired = false, description = "Whether this query should return only series that are editable", type = BOOLEAN),
           @RestParameter(name = "seriesId", isRequired = false, description = "The series identifier", type = STRING),
           @RestParameter(name = "seriesTitle", isRequired = false, description = "The series title", type = STRING),
           @RestParameter(name = "creator", isRequired = false, description = "The series creator", type = STRING),
@@ -407,16 +412,17 @@ public class SeriesRestService {
           @RestParameter(name = "count", isRequired = false, description = "Results per page (max 100)", type = STRING) }, reponses = { @RestResponse(responseCode = SC_OK, description = "The access control list.") })
   // CHECKSTYLE:OFF
   public Response getSeriesAsXml(@QueryParam("q") String text, @QueryParam("seriesId") String seriesId,
-          @QueryParam("seriesTitle") String seriesTitle, @QueryParam("creator") String creator,
-          @QueryParam("contributor") String contributor, @QueryParam("publisher") String publisher,
-          @QueryParam("rightsholder") String rightsHolder, @QueryParam("createdfrom") String createdFrom,
-          @QueryParam("createdto") String createdTo, @QueryParam("language") String language,
-          @QueryParam("license") String license, @QueryParam("subject") String subject,
-          @QueryParam("abstract") String seriesAbstract, @QueryParam("description") String description,
-          @QueryParam("sort") String sort, @QueryParam("startPage") String startPage, @QueryParam("count") String count) {
+          @QueryParam("edit") Boolean edit, @QueryParam("seriesTitle") String seriesTitle,
+          @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
+          @QueryParam("publisher") String publisher, @QueryParam("rightsholder") String rightsHolder,
+          @QueryParam("createdfrom") String createdFrom, @QueryParam("createdto") String createdTo,
+          @QueryParam("language") String language, @QueryParam("license") String license,
+          @QueryParam("subject") String subject, @QueryParam("abstract") String seriesAbstract,
+          @QueryParam("description") String description, @QueryParam("sort") String sort,
+          @QueryParam("startPage") String startPage, @QueryParam("count") String count) {
     // CHECKSTYLE:ON
     try {
-      DublinCoreCatalogList result = getSeries(text, seriesId, seriesTitle, creator, contributor, publisher,
+      DublinCoreCatalogList result = getSeries(text, seriesId, edit, seriesTitle, creator, contributor, publisher,
               rightsHolder, createdFrom, createdTo, language, license, subject, seriesAbstract, description, sort,
               startPage, count);
       return Response.ok(result.getResultsAsXML()).build();
@@ -427,10 +433,10 @@ public class SeriesRestService {
   }
 
   // CHECKSTYLE:OFF
-  private DublinCoreCatalogList getSeries(String text, String seriesId, String seriesTitle, String creator,
-          String contributor, String publisher, String rightsHolder, String createdFrom, String createdTo,
-          String language, String license, String subject, String seriesAbstract, String description, String sort,
-          String startPageString, String countString) throws SeriesException {
+  private DublinCoreCatalogList getSeries(String text, String seriesId, Boolean edit, String seriesTitle,
+          String creator, String contributor, String publisher, String rightsHolder, String createdFrom,
+          String createdTo, String language, String license, String subject, String seriesAbstract, String description,
+          String sort, String startPageString, String countString) throws SeriesException, UnauthorizedException {
     // CHECKSTYLE:ON
     int startPage = 0;
     if (StringUtils.isNotEmpty(startPageString)) {
@@ -459,6 +465,9 @@ public class SeriesRestService {
     SeriesQuery q = new SeriesQuery();
     q.setCount(count);
     q.setStartPage(startPage);
+    if (edit != null) {
+      q.setEdit(edit);
+    }
     if (StringUtils.isNotEmpty(text)) {
       q.setText(text.toLowerCase());
     }
