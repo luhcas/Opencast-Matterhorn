@@ -14,6 +14,5 @@ For the impatient, experienced, and brave, here's the short version:
 
 Logging configuration can be customized by modifying $FELIX/conf/services/org.ops4j.pax.logging.properties.
 
-Detailed instructions for a variety of platforms and topologies are available at http://opencast.jira.com/wiki/display/MH/Install+and+Configure+%28Trunk%29
-
+Detailed instructions for a variety of platforms and topologies are available at http://opencast.jira.com/wiki/display/MH/Installation+and+Configuration+%28Trunk%29
 Questions should go to the Matterhorn list (matterhorn@opencastproject.org) or the #opencast IRC channel at irc.freenode.net
