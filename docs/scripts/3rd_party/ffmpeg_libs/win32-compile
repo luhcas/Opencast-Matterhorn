@@ -18,8 +18,9 @@ compile x264   win32 || exit 1
 compile xvid   win32 || exit 1
 # faac and faad depends on mp4v2 (not really?!)
 compile faac   win32 || exit 1
-compile faad   win32 || exit 1
 # theora depends on sdl, ogg, vorbis and png12 (base_libs)
 compile theora win32 || exit 1
+# webM support depends on ogg and vorbis
+compile libvpx win32 || exit 1
 #
 exit 0

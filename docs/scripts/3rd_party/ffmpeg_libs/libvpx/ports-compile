@@ -6,16 +6,10 @@ set -x
 source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #
-download .      || exit 1
-download mp4v2  || exit 1
-download sdl    || exit 1
-download ogg    || exit 1
-download vorbis || exit 1
-download lame   || exit 1
-download x264   || exit 1
-download xvid   || exit 1
-download faac   || exit 1
-download theora || exit 1
-download libvpx || exit 1
+[ -f .done-ports ] && exit 0
 #
+sudox port install libtheora || exit 1
+#
+touch .done-ports
+[ $? -ne 0 ] && exit 1
 exit 0

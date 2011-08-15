@@ -21,9 +21,6 @@ mv "$dir" "${dir}-linux"
 cd "${dir}-linux"
 [ $? -ne 0 ] && exit 1
 #
-cp ../common.h libavutil
-[ $? -ne 0 ] && exit 1
-#
 ./configure \
 --enable-gpl \
 --enable-version3 \
@@ -32,13 +29,13 @@ cp ../common.h libavutil
 --disable-ffserver \
 --extra-cflags='-I${LOCAL_PREFIX}/include' \
 --extra-ldflags='-L${LOCAL_PREFIX}/lib -Wl,-rpath,${LOCAL_PREFIX}/lib' \
---enable-libxvid --extra-libs='-lxvidcore' \
+--extra-libs='-lxvidcore' \
 --enable-libx264 --extra-libs='-lx264 -lpthread' \
 --enable-libmp3lame --extra-libs='-lmp3lame' \
---enable-libfaad --extra-libs='-lfaad' \
 --enable-libfaac --extra-libs='-lfaac' \
 --enable-libvorbis --extra-libs='-lvorbis' \
 --enable-libtheora --extra-libs='-ltheora' \
+--enable-libvpx --extra-libs='-lvpx' \
 --enable-runtime-cpudetect
 [ $? -ne 0 ] && exit 1
 make
