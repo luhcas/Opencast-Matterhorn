@@ -76,7 +76,7 @@
 		}
 
 		function processOneAgent(agent){
-			$.each(agent,function(b,property){				
+			$.each(agent,function(b,property){
 				var devices,devices_arr;
 				if (b==="name") {
 					$.ajax({
@@ -85,9 +85,12 @@
 						url : '/capture-admin/agents/'+property+'/configuration.json',
 						success : displayAgentState
 					});
-				}		
-				if (b==="time-since-last-update") last_updated=property;
-				if ((b==="capabilities")&&(property!="")) {
+				} else if (b==="time-since-last-update") {
+          last_updated=property;
+        } else if ((b==="capabilities")&&(property!="")) {
+          if(!$.isArray(property.item)) {
+            property.item = [property.item];
+          }
 					$.each(property.item,function(c,device){
 						if (device.key=="capture.device.names"){									
 							devices = device.value.toLowerCase().split(',');							
@@ -107,8 +110,7 @@
 							agent.devices[index]["properties"].push({"key":name.trim(),"value":device.value});	
 						}
 					});
-				}	
-				else {
+				} else {
 					agent[b.toString()] = property;	
 				}
 			});		
