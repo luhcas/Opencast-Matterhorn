@@ -25,7 +25,8 @@ cd "${dir}-win32"
 #
 ./configure \
 --extra-cflags="-I${MINGW32_PREFIX}/include/pthread" \
---host=${MINGW32} --cross-prefix=${MINGW32}-
+--host=${MINGW32} --cross-prefix=${MINGW32}- \
+--enable-shared
 [ $? -ne 0 ] && exit 1
 make
 [ $? -ne 0 ] && exit 1
