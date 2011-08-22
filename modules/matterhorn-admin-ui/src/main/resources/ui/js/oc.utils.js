@@ -17,6 +17,22 @@ var ocUtils = ocUtils || {};
 
 ocUtils.templateRoot = "jst/";
 
+ocUtils.formatInt = function(value){
+   var groupingSeparator= ',',       
+       formatted = '';
+
+   if (typeof value == 'number') value += '';	
+   var count=0, i=value.length;  
+   while (i--) {
+      if (count !== 0 && count % 3 === 0) {
+	   formatted = groupingSeparator + formatted;    
+      }
+      formatted = value.substr(i, 1) + formatted;
+      count++;
+   }    
+   return formatted;
+}
+
 ocUtils.internationalize = function(obj, prefix){
   for(var i in obj){
     if(typeof obj[i] == 'object'){
