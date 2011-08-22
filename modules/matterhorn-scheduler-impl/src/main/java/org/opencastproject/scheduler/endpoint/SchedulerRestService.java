@@ -746,17 +746,21 @@ public class SchedulerRestService {
   @Path("conflicts.xml")
   @RestQuery(name = "conflictingrecordingsasxml", description = "Searches for conflicting recordings based on parameters", returnDescription = "Returns NO CONTENT if no recordings are in conflict within specified period or list of conflicting recordings in XML", restParameters = {
           @RestParameter(name = "device", description = "Device identifier for which conflicts will be searched", isRequired = false, type = Type.TEXT),
-          @RestParameter(name = "start", description = "Start time of conflicting period", isRequired = false, type = Type.STRING),
-          @RestParameter(name = "end", description = "End time of conflicting period", isRequired = false, type = Type.STRING),
-          @RestParameter(name = "duration", description = "If recurrence rule is specified duration of each conflicting period", isRequired = false, type = Type.STRING),
-          @RestParameter(name = "rrule", description = "Rule for recurrent conflicting period", isRequired = false, type = Type.STRING) }, reponses = {
+          @RestParameter(name = "start", description = "Start time of conflicting period, in milliseconds", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "end", description = "End time of conflicting period, in milliseconds", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "duration", description = "If recurrence rule is specified duration of each conflicting period, in milliseconds", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "rrule", description = "Rule for recurrent conflicting, specified as: \"FREQ=WEEKLY;BYDAY=day(s);BYHOUR=hour;BYMINUTE=minute\". FREQ is required. BYDAY may include one or more (separated by commas) of the following: SU,MO,TU,WE,TH,FR,SA.", isRequired = false, type = Type.STRING) }, reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_NO_CONTENT, description = "No conflicting events found"),
           @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Found conflicting events, returned in body of response"),
           @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid parameters") })
   public Response getConflictingEventsXml(@QueryParam("device") String device, @QueryParam("start") String startDate,
           @QueryParam("end") String endDate, @QueryParam("duration") String duration, @QueryParam("rrule") String rrule) {
-    if (StringUtils.isEmpty(device) || startDate == null || endDate == null || duration == null) {
+    if (StringUtils.isEmpty(device) || startDate == null || endDate == null) {
       logger.warn("Either device, start date, end date or duration were not specified");
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    if (StringUtils.isNotEmpty(rrule) && duration == null) {
+      logger.warn("If checking recurrence, must include duration.");
       return Response.status(Status.BAD_REQUEST).build();
     }
     Long startDateAsLong;
@@ -813,10 +817,10 @@ public class SchedulerRestService {
   @Path("conflicts.json")
   @RestQuery(name = "conflictingrecordingsasxml", description = "Searches for conflicting recordings based on parameters", returnDescription = "Returns NO CONTENT if no recordings are in conflict within specified period or list of conflicting recordings in JSON", restParameters = {
           @RestParameter(name = "device", description = "Device identifier for which conflicts will be searched", isRequired = false, type = Type.TEXT),
-          @RestParameter(name = "start", description = "Start time of conflicting period", isRequired = false, type = Type.STRING),
-          @RestParameter(name = "end", description = "End time of conflicting period", isRequired = false, type = Type.STRING),
-          @RestParameter(name = "duration", description = "If recurrence rule is specified duration of each conflicting period", isRequired = false, type = Type.STRING),
-          @RestParameter(name = "rrule", description = "Rule for recurrent conflicting period", isRequired = false, type = Type.STRING) }, reponses = {
+          @RestParameter(name = "start", description = "Start time of conflicting period, in milliseconds", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "end", description = "End time of conflicting period, in milliseconds", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "duration", description = "If recurrence rule is specified duration of each conflicting period, in milliseconds", isRequired = false, type = Type.STRING),
+          @RestParameter(name = "rrule", description = "Rule for recurrent conflicting, specified as: \"FREQ=WEEKLY;BYDAY=day(s);BYHOUR=hour;BYMINUTE=minute\". FREQ is required. BYDAY may include one or more (separated by commas) of the following: SU,MO,TU,WE,TH,FR,SA.", isRequired = false, type = Type.STRING) }, reponses = {
           @RestResponse(responseCode = HttpServletResponse.SC_NO_CONTENT, description = "No conflicting events found"),
           @RestResponse(responseCode = HttpServletResponse.SC_OK, description = "Found conflicting events, returned in body of response"),
           @RestResponse(responseCode = HttpServletResponse.SC_BAD_REQUEST, description = "Missing or invalid parameters") })
