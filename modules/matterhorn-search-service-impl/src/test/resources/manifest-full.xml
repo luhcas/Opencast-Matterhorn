@@ -6,7 +6,7 @@
     <url>dublincore.xml</url>
     <checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</checksum>
   </catalog>
-  <catalog id="catalog-2" type="dublincore/series" ref="series:foobar-serie">
+  <catalog id="catalog-2" type="dublincore/series" ref="series:foobar-series">
     <mimetype>text/xml</mimetype>
     <url>series-dublincore.xml</url>
     <checksum type="md5">2b8a52878c536e64e20e309b5d7c1070</checksum>

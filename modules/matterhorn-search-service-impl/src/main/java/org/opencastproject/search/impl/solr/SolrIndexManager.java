@@ -268,6 +268,9 @@ public class SolrIndexManager {
     try {
       episodeDocument = createEpisodeInputDocument(sourceMediaPackage, acl);
       seriesDocument = createSeriesInputDocument(sourceMediaPackage.getSeries(), acl);
+      if (seriesDocument != null) {
+        Schema.enrich(episodeDocument, seriesDocument);
+      }
     } catch (Exception e) {
       throw new SolrServerException(e);
     }

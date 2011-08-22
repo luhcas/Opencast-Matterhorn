@@ -16,6 +16,10 @@
 
 package org.opencastproject.search.impl.solr;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
@@ -23,14 +27,9 @@ import org.opencastproject.util.data.CollectionUtil;
 import org.opencastproject.util.data.Function;
 import org.opencastproject.util.data.Option;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 /**
- * This class reflects the solr schema.xml.
- * Note that all getters returning simple values may always return null.
- * Please access the index _only_ by means of this class.
+ * This class reflects the solr schema.xml. Note that all getters returning simple values may always return null. Please
+ * access the index _only_ by means of this class.
  */
 public final class Schema {
 
@@ -67,6 +66,10 @@ public final class Schema {
   public static final String DC_SPATIAL_PREFIX = "dc_spatial_";
   public static final String DC_ACCESS_RIGHTS_PREFIX = "dc_access_rights_";
   public static final String DC_LICENSE_PREFIX = "dc_license_";
+
+  // Filters for audio and video files
+  public static final String HAS_AUDIO = "has_audio_file";
+  public static final String HAS_VIDEO = "has_video_file";
 
   // Suffixes
   public static final String SUFFIX_FROM = "from";
@@ -130,7 +133,7 @@ public final class Schema {
    */
   interface FieldCollector {
     Option<String> getId();
-    
+
     Option<String> getOrganization();
 
     Option<Date> getDcCreated();
@@ -258,6 +261,29 @@ public final class Schema {
       setSegmentText(doc, v);
     for (DField<String> v : fields.getSegmentHint())
       setSegmentHint(doc, v);
+  }
+
+  /**
+   * Adds one solr document's data as unstructured, full-text searchable data to another document.
+   * 
+   * @param docToEnrich
+   *          the solr document to enrich with the other additional metadata
+   * 
+   * @param additionalMetadata
+   *          the solr document containing the additional metadata
+   * @throws IllegalArgumentException
+   *           if either of the documents are null
+   */
+  public static void enrich(SolrInputDocument docToEnrich, SolrInputDocument additionalMetadata)
+          throws IllegalArgumentException {
+    if (docToEnrich == null || additionalMetadata == null) {
+      throw new IllegalArgumentException("Documents must not be null");
+    }
+    for (String fieldName : additionalMetadata.getFieldNames()) {
+      for (Object value : additionalMetadata.getFieldValues(fieldName)) {
+        docToEnrich.addField(FULLTEXT, value);
+      }
+    }
   }
 
   public static String getId(SolrDocument doc) {

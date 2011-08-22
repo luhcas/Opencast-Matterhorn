@@ -4,26 +4,22 @@
   xmlns:dcterms="http://purl.org/dc/terms/" xmlns:oc="http://www.opencastproject.org/matterhorn">
 
   <dcterms:title xml:lang="en">
-    Land and Vegetation: Key players on the Climate Scene
+    Climate Sciences 101
   </dcterms:title>
   <dcterms:subject>
-    climate, land, vegetation
+    Atmospheric Science
   </dcterms:subject>
   <dcterms:description xml:lang="en">
-    Introduction lecture from the Institute for Atmospheric
-    and Climate Science.
+    Introduction to Climate Science.
   </dcterms:description>
   <dcterms:publisher>
     ETH Zurich, Switzerland
   </dcterms:publisher>
   <dcterms:identifier>
-    foobar-serie
+    foobar-series
   </dcterms:identifier>
   <dcterms:modified xsi:type="dcterms:W3CDTF">
     2007-12-05
   </dcterms:modified>
-  <dcterms:format xsi:type="dcterms:IMT">
-    video/x-dv
-  </dcterms:format>
 
 </dublincore>
