@@ -139,6 +139,19 @@
             </table>
         </div>
       {/if}
+      {if workflow.template != "scheduling"}
+	<div class="form-box layout-centered ui-widget layout-centered">
+          <div class="form-box-head ui-widget-header ui-corner-top">File Upload</div>
+          <div class="form-box-content ui-widget-content ui-corner-bottom">
+            <table id="uploadedFileContainer">
+              <tr>
+                <td class="td-key">File Uploaded:</td>
+                <td class="td-value"></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      {/if}
       {if workflow.info.episodeDC}
         <div class="form-box layout-centered  ui-widget layout-centered">
             <div class="form-box-head ui-widget-header ui-corner-top unfoldable-header">
@@ -254,6 +267,7 @@
         </tr>
       </table>
                             </textarea>
+
 
                             <textarea id="catalogDownloadTemplate" style="display:none;">
       <table>

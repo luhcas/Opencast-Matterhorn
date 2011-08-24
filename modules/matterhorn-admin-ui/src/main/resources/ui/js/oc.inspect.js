@@ -3,7 +3,7 @@ var Opencast = Opencast || {};
 Opencast.WorkflowInspect = (function() {
 
   this.WORKFLOW_INSTANCE_URL = '../workflow/instance/';
-  this.SCHEDULER_URL = '../scheduler/';
+  this.SCHEDULER_URL = '../recordings/';
 
   var $container;       // id of the target container
   var templateId;
@@ -142,7 +142,7 @@ Opencast.WorkflowInspect = (function() {
 
     // in case of an 'upcoming event' episode dublin core catalog is obtained from scheduler service
     if (workflow.template == 'scheduling') {
-      out.info.episodeDC = this.SCHEDULER_URL + workflow.id + '/dublincore';
+      out.info.episodeDC = this.SCHEDULER_URL + workflow.id;//+"/dublincore";
     }
 
     return {
@@ -183,6 +183,15 @@ Opencast.WorkflowInspect = (function() {
     var result = TrimPath.processDOMTemplate(templateId, workflow);
     $target.append(result);
 
+    if (!$.isEmptyObject(workflow.workflow.mediapackage.media.track)){
+	$.each(workflow.workflow.mediapackage.media.track,function(i,track){
+	   if (track.type==="presenter/source"){ 
+		var fname = track.url.substring(track.url.lastIndexOf("/")+1,track.url.length);
+		$('#uploadedFileContainer td.td-value').html(fname); 
+ 	   }	   
+	});
+    }
+
     // Render Episode DC if present
     if (workflow.workflow.info.episodeDC !== false) {
       if (workflow.workflow.info.episodeDC.sameHost == true) {
@@ -202,9 +211,9 @@ Opencast.WorkflowInspect = (function() {
           }
         }
       });
-      } else {
-        var episode = TrimPath.processDOMTemplate('catalogDownloadTemplate', workflow.workflow.info.episodeDC);
-        $('#episodeContainer').append(episode);
+      } else {	
+	var episode = TrimPath.processDOMTemplate('catalogDownloadTemplate', workflow.workflow.info.episodeDC);
+       	$('#episodeContainer').append(episode);			        
       }
     }
 
