@@ -77,7 +77,7 @@ body {
 	position: absolute;
 	width: 80%;
 	top: -300px;
-	left: 0;
+	left: -2000px;
 }
 
 #skip a {

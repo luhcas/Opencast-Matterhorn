@@ -18,38 +18,10 @@
   background-color:         #ffffff;
 } 
 
-#oc_embed-title-bar
-{
-  height:                   20px;
-  width:                    100%;
-  background-position:      0 -4px;
-  background-color:			black;
-} 
-  
-#oc_embed-title
-{
-  font-size:                1em;
-  text-align:               center;
-  color:                    #FA6E23;
-  margin-top:               2px;
-}
-
-#oc-link-advanced-player
-{
-  display:                  none;
-}
-
-#oc_embed-title a
-{
-  color:                    #FA6E23;
-  margin-top:               2px;
-}
-
-#oc-link-advanced-player
-{
-  display:                  none;
-}
-
+#oc-link-advanced-player {position: relative; z-index: 500; color: #FA6E23; background: transparent;}
+#oc-link-advanced-player img { position: relative; z-index: 500; padding: 10px; }
+#analytics-and-annotations { height: 18px; }
+#data { background: black; }
 body
 {
   font-family:              Verdana;
@@ -65,23 +37,10 @@ table
   clear:                    both;   
 }
 
-#oc_body
-{
-  position:                 relative; 
-}
+#oc_body { position: relative; overflow: hidden; }
 
-#oc_flash-player
-{
-  text-align:               center;
-  background-color:         #000000;  
-}
-
-#oc_video-player-controls
-{
-  height:                   30px;
-  background-position:      0 0px;
-  background-image:         url("../img/oc_icons.png");
-}
+#oc_flash-player { text-align: center; background-color: #000000; }
+#oc_video-player-controls { height: 30px; background-position: 0 0px; background-image: url("../img/oc_icons.png"); }
 
 #oc_video-player-controls-embed
 {
@@ -201,13 +160,7 @@ table
   width:                    60px;
 }
 
-#oc_volume-dropdown
-{
-  margin:                   0;
-  padding:                  0;
-  float:                    left;
-  margin-right:             5px;
-}
+#oc_volume-dropdown { margin: 0; padding: 0; float: left; margin-right: 5px; }
 
 #oc_volume-dropdown-div
 {   
@@ -497,4 +450,7 @@ input::-moz-focus-inner,
   border-right-width:             1px;
   width:                    100%;
 }
-
+/* controllbar slide effect */
+#oc_controlbar-embed, #oc_video-player-controls, #data, #oc_controlbar-wrapper { position: relative; z-index: 500; }
+#segment-tooltip { z-index: 550; }
+#oc_controlbar-wrapper { background: #000000; }
