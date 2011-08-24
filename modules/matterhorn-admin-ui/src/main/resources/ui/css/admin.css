@@ -137,8 +137,8 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 /* FORM LISTS */
 .lbl_radio { vertical-align: 10% }
 .oc-ui-form-list li { padding: 4px 0; }
-.oc-ui-form-list .scheduler-label { display: inline-block; width: 30%; text-align: right; vertical-align: top; }
-.oc-ui-form-field { border: 1px #aaa solid; width: 500px; }
+.oc-ui-form-list .scheduler-label { display: inline-block; width: 35%; text-align: right; vertical-align: top; }
+.oc-ui-form-field { border: 1px #aaa solid; width: 450px; }
 .oc-ui-checkbox-list { padding-left: 30px; }
 .oc-ui-collapsible-widget > .ui-widget-content { display: none; }
 .form-box { margin-top: 10px; width: 800px; }
@@ -160,7 +160,6 @@ table#agentsTable th, table#seriesTable th, table#recordingsTable th, table#stat
 
 /* Schedule */
 .scheduler-selection-container { margin-top: 10px; text-align: center; }
-#workflowConfigContainer { padding: 20px; }
 #workflowConfigContainer legend { padding: 0 5px; }
 #workflowConfigContainer fieldset { padding: 10px; }
 .scheduler-day-table td, .scheduler-day-table th { padding: 4px; border: 1px solid #AAAAAA;}

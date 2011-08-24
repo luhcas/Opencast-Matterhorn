@@ -11,22 +11,20 @@
   <![CDATA[
     <fieldset>
       <legend>Holds</legend>
-      <span>Processing should be paused to allow for:</span>
-      <ul class="oc-ui-checkbox-list" id="hold-ul">
-        <li class="ui-helper-clearfix">
-          <span id="trimholdconfig">
-            <input id="trimHold" name="trimHold" type="checkbox" class="configField holdCheckbox" value="true" />
+      <ul class="oc-ui-form-list">       
+          <li class="ui-helper-clearfix"><label class="scheduler-label">Processing should be paused to allow for:</label></li>        
+	  <label class="scheduler-label"></label>
+	  <span id="trimholdconfig">
+            <input type="checkbox" id="trimHold" name="trimHold" class="configField holdCheckbox" value="true">
             <label for="trimHold" id="i18n_hold_for_trim">&nbsp;Review / Trim before encoding (with option to edit info)</label>
-          </span>
-        </li>
-        <li class="ui-helper-clearfix">
-          <span id="captionconfig">
-            <input id="captionHold" name="captionHold" type="checkbox" class="configField holdCheckbox" value="true"/>
+	  </span>
+          <label class="scheduler-label"></label>
+	  <span id="captionconfig">
+            <input type="checkbox" id="captionHold" name="captionHold" class="configField holdCheckbox" value="true">
             <label for="captionHold" id="i18n_hold_for_caption">&nbsp;Captions file upload</label>
           </span>
-        </li>
       </ul>
-    </fieldset>
+    </fieldset>    
     <fieldset>
       <legend>Distribution</legend>
       <ul class="oc-ui-form-list">
