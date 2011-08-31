@@ -231,6 +231,12 @@ var ocScheduler = (function() {
     $('#recurDurationMin').change(this.checkForConflictingEvents);
     $('#recurAgent').change(this.checkForConflictingEvents);
     $('#daySelect :checkbox').change(this.checkForConflictingEvents);
+
+    $('input#title,span.scheduler-instruction-text').hover(function(){
+	$('li#titleNote span.scheduler-instruction-text').addClass('scheduler-instruction-text-hover');
+    }, function(){
+	$('li#titleNote span.scheduler-instruction-text').removeClass('scheduler-instruction-text-hover');
+    });
   }
 
   sched.changeRecordingType = function changeRecordingType(recType){
