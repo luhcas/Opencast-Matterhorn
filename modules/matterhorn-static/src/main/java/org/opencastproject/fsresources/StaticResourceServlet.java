@@ -15,6 +15,8 @@
  */
 package org.opencastproject.fsresources;
 
+import java.io.BufferedReader;
+import java.util.logging.Level;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -40,15 +43,13 @@ import javax.servlet.http.HttpServletResponse;
  * apache httpd or another web server optimized for serving static content.
  */
 public class StaticResourceServlet extends HttpServlet {
+
   /** The serialization UID */
   private static final long serialVersionUID = 1L;
-
   /** Full range marker. */
   private static final ArrayList<Range> FULL_RANGE;
-
   /** The mime types map */
   private static final MimetypesFileTypeMap MIME_TYPES_MAP;
-
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(StaticResourceServlet.class);
 
@@ -57,7 +58,6 @@ public class StaticResourceServlet extends HttpServlet {
     FULL_RANGE = new ArrayList<Range>();
     MIME_TYPES_MAP = new MimetypesFileTypeMap();
   }
-
   /** The filesystem directory to serve files fro */
   protected String distributionDirectory;
 
@@ -82,9 +82,21 @@ public class StaticResourceServlet extends HttpServlet {
       }
     }
 
-    if (distributionDirectory == null)
+    if (distributionDirectory == null) {
       distributionDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
               + "static";
+    }
+
+    InputStream is = this.getClass().getResourceAsStream("/META-INF/mime.types");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    try {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        MIME_TYPES_MAP.addMimeTypes(line);
+      }
+    } catch (IOException ex) {
+      java.util.logging.Logger.getLogger(StaticResourceServlet.class.getName()).log(Level.SEVERE, null, ex);
+    }
   }
 
   /**
@@ -238,7 +250,6 @@ public class StaticResourceServlet extends HttpServlet {
       throw exception;
     }
   }
-
   /**
    * MIME multipart separation string
    */
@@ -269,14 +280,16 @@ public class StaticResourceServlet extends HttpServlet {
       if (headerValueTime == (-1L)) {
         // If the ETag the client gave does not match the entity
         // etag, then the entire entity is returned.
-        if (!eTag.equals(headerValue.trim()))
+        if (!eTag.equals(headerValue.trim())) {
           return FULL_RANGE;
+        }
       } else {
         // If the timestamp of the entity the client got is older than
         // the last modification date of the entity, the entire entity
         // is returned.
-        if (lastModified > (headerValueTime + 1000))
+        if (lastModified > (headerValueTime + 1000)) {
           return FULL_RANGE;
+        }
       }
     }
 
@@ -329,10 +342,11 @@ public class StaticResourceServlet extends HttpServlet {
       } else {
         try {
           currentRange.start = Long.parseLong(rangeDefinition.substring(0, dashPos));
-          if (dashPos < rangeDefinition.length() - 1)
+          if (dashPos < rangeDefinition.length() - 1) {
             currentRange.end = Long.parseLong(rangeDefinition.substring(dashPos + 1, rangeDefinition.length()));
-          else
+          } else {
             currentRange.end = fileLength - 1;
+          }
         } catch (NumberFormatException e) {
           response.addHeader("Content-Range", "bytes */" + fileLength);
           response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
@@ -388,13 +402,15 @@ public class StaticResourceServlet extends HttpServlet {
         exception = e;
         len = -1;
       }
-      if (len < buffer.length)
+      if (len < buffer.length) {
         break;
+      }
     }
     return exception;
   }
 
   protected class Range {
+
     protected long start;
     protected long end;
     protected long length;
@@ -403,8 +419,9 @@ public class StaticResourceServlet extends HttpServlet {
      * Validate range.
      */
     public boolean validate() {
-      if (end >= length)
+      if (end >= length) {
         end = length - 1;
+      }
       return ((start >= 0) && (end >= 0) && (start <= end) && (length > 0));
     }
 
@@ -414,5 +431,4 @@ public class StaticResourceServlet extends HttpServlet {
       length = 0;
     }
   }
-
 }
