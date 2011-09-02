@@ -1251,7 +1251,7 @@ if( confirm('Are you sure you wish to delete ' + eventIdList.length + ' upcoming
         var workflow = ocRecordings.getWorkflow(id);
         if (workflow) {
           var mpId = workflow.mediapackage.id;
-          links.push('<a href="../engage/ui/watch.html?id=' + mpId + '">Play</a>');
+          links.push('<a href="../engage/ui/watch.html?id=' + mpId + '" title="Go to Matterhorn Media Module Watch page to view this recording">Play</a>');
         }
 
       } else if (action == 'play') {
@@ -1269,7 +1269,7 @@ if( confirm('Are you sure you wish to delete ' + eventIdList.length + ' upcoming
             data = $.parseJSON(data);
             ENGAGE_URL = data.engage;
           }
-          links.push('<a href="' + ENGAGE_URL + '/engage/ui/watch.html?id=' + mpId + '">Play</a>');
+          links.push('<a href="' + ENGAGE_URL + '/engage/ui/watch.html?id=' + mpId + '" title="Go to Matterhorn Media Module Watch page to view this recording">Play</a>');
         }
 
       } else if (action == 'delete') {
