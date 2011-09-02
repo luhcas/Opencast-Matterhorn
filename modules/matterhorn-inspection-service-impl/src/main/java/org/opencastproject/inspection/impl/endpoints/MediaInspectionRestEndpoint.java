@@ -111,7 +111,7 @@ public class MediaInspectionRestEndpoint extends AbstractJobProducerEndpoint {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("inspect")
-  @RestQuery(name = "inspect", description = "Analyze a given media file, returning a receipt to check on the status and outcome of the job", restParameters = { @RestParameter(description = "Location of the media file.", isRequired = true, name = "uri", type = RestParameter.Type.STRING) }, reponses = {
+  @RestQuery(name = "inspect", description = "Analyze a given media file, returning a receipt to check on the status and outcome of the job", restParameters = { @RestParameter(description = "Location of the media file.", isRequired = false, name = "uri", type = RestParameter.Type.STRING) }, reponses = {
           @RestResponse(description = "XML encoded receipt is returned.", responseCode = HttpServletResponse.SC_NO_CONTENT),
           @RestResponse(description = "Service unavailabe or not currently present", responseCode = HttpServletResponse.SC_SERVICE_UNAVAILABLE),
           @RestResponse(description = "Problem retrieving media file or invalid media file or URL.", responseCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR) }, returnDescription = "")
