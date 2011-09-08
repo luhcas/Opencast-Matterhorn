@@ -8,7 +8,6 @@
     <provide interface="org.opencastproject.capture.impl.CaptureAgentImpl" /> <!-- This should not be necessary (jt) -->
     <provide interface="org.opencastproject.capture.api.CaptureAgent" />
     <provide interface="org.opencastproject.capture.api.StateService" />
-    <provide interface="org.opencastproject.capture.api.ConfidenceMonitor" />
     <provide interface="org.osgi.service.cm.ManagedService" />
   </service>
   <reference name="configService" interface="org.opencastproject.capture.impl.ConfigurationManager"

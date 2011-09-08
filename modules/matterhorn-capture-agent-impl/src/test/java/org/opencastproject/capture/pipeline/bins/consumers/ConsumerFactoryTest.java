@@ -125,6 +125,32 @@ public class ConsumerFactoryTest {
       logger.error("Unable to create an Audio File Sink in SinkFactoryTest", e);
     }
   }
+  
+  @Test
+  public void testAudioMonitoringSink() {
+    if (!gstreamerInstalled)
+      return;
+    try {
+      ConsumerBin sinkBin = getSink(ConsumerType.AUDIO_MONITORING_SINK);
+      Assert.assertTrue(sinkBin instanceof AudioMonitoringConsumer);
+      Assert.assertTrue(sinkBin.getSrc() != null);
+    } catch (UnableToCreateElementException e) {
+      logger.error("Unable to create an Audio Monitoring Sink in SinkFactoryTest", e);
+    }
+  }
+  
+  @Test
+  public void testVideoMonitoringSink() {
+    if (!gstreamerInstalled)
+      return;
+    try {
+      ConsumerBin sinkBin = getSink(ConsumerType.VIDEO_MONITORING_SINK);
+      Assert.assertTrue(sinkBin instanceof VideoMonitoringConsumer);
+      Assert.assertTrue(sinkBin.getSrc() != null);
+    } catch (UnableToCreateElementException e) {
+      logger.error("Unable to create an Video Monitoring Sink in SinkFactoryTest", e);
+    }
+  }
 
   private ConsumerBin getSink(ConsumerType sinkDeviceName) throws UnableToCreateElementException {
     ConsumerBin sinkBin = null;

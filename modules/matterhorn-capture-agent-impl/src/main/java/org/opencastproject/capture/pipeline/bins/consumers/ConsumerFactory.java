@@ -74,10 +74,16 @@ public final class ConsumerFactory {
       return new AudioFilesinkConsumer(captureDevice, properties);
     else if (consumerType == ConsumerType.XVIMAGE_SINK)
       return new XVImagesinkConsumer(captureDevice, properties);
+    else if (consumerType == ConsumerType.FILE_SINK)
+      return new FilesinkConsumer(captureDevice, properties);
     else if (consumerType == ConsumerType.VIDEO_FILE_SINK)
       return new VideoFilesinkConsumer(captureDevice, properties);
     else if (consumerType == ConsumerType.CUSTOM_CONSUMER)
       return new CustomConsumer(captureDevice, properties);
+    else if (consumerType == ConsumerType.AUDIO_MONITORING_SINK)
+      return new AudioMonitoringConsumer(captureDevice, properties);
+    else if (consumerType == ConsumerType.VIDEO_MONITORING_SINK)
+      return new VideoMonitoringConsumer(captureDevice, properties);
     else {
       throw new NoConsumerFoundException("No valid SinkBin found for device " + consumerType);
     }

@@ -21,8 +21,6 @@ import org.opencastproject.capture.impl.RecordingImpl;
 import org.opencastproject.capture.impl.UnableToStartCaptureException;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBin;
-import org.opencastproject.capture.pipeline.bins.consumers.AudioMonitoring;
-import org.opencastproject.capture.pipeline.bins.consumers.VideoMonitoring;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory;
 import org.opencastproject.capture.pipeline.bins.producers.ProducerFactory.ProducerType;
 
@@ -54,10 +52,6 @@ public final class GStreamerPipeline {
   private static final Logger logger = LoggerFactory.getLogger(GStreamerPipeline.class);
   // Capture properties. 
   private static Properties properties;
-  // Unused boolean that used to be used to determine if Epiphan was broken.
-  protected static boolean broken;
-  // Used to be used by epiphan. 
-  protected static int v4LSrcIndex;
   // List of captureDeviceBins inside the pipeline so that we can send each an EOS. 
   private ArrayList<CaptureDeviceBin> captureDeviceBins;
   // Pipeline used to capture. 
@@ -112,6 +106,7 @@ public final class GStreamerPipeline {
       wait = 5; // Default taken from gstreamer docs
     }
 
+    pipeline.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, pipeline.getName());
     // Try and start the pipeline
     pipeline.play();
     if (pipeline.getState(wait * GStreamerPipeline.GST_SECOND) != State.PLAYING) {
@@ -296,7 +291,7 @@ public final class GStreamerPipeline {
         logger.error("Device " + name + " is an unrecognized device ", e);
       }
     }
-
+    
     return devices;
   }
 
@@ -379,7 +374,7 @@ public final class GStreamerPipeline {
    * @param srcLoc The source location that should be set to something. 
    * @throws CannotFindSourceFileOrDeviceException Thrown if the source location is null or the empty string. 
    */
-  private static void checkSrcLocationExists(String name, String srcLoc) throws CannotFindSourceFileOrDeviceException {
+  static void checkSrcLocationExists(String name, String srcLoc) throws CannotFindSourceFileOrDeviceException {
     if (srcLoc == null || ("").equals(srcLoc)) {
       throw new CannotFindSourceFileOrDeviceException("Unable to create pipeline for " + name
               + " because its source file/device does not exist!");
@@ -388,7 +383,7 @@ public final class GStreamerPipeline {
 
   /** This is legacy code that determines a Producer from the JV4L library. It really only supports the reference
    * capture devices. **/
-  private static ProducerType determineSourceFromJ4VLInfo(String srcLoc)
+  static ProducerType determineSourceFromJ4VLInfo(String srcLoc)
           throws UnrecognizedDeviceException {
     // ALSA source
     if (srcLoc.contains("hw:")) {
@@ -440,21 +435,12 @@ public final class GStreamerPipeline {
     Gst.init(); // cannot using gst library without first initialising it
 
     Pipeline pipeline = new Pipeline();
-
-    if (confidence) {
-      for (CaptureDevice c : devices) {
-        if (c.getName() == ProducerType.ALSASRC)
-          AudioMonitoring.getConfidencePipeline(pipeline, c, properties);
-        else
-          VideoMonitoring.getConfidencePipeline(pipeline, c, properties);
-      }
-    } else {
-      for (CaptureDevice c : devices) {
-        if (!addCaptureDeviceBinsToPipeline(c, pipeline))
-          logger.error("Failed to create pipeline for {}.", c);
-      }
+    for (CaptureDevice c : devices) {
+      if (!addCaptureDeviceBinsToPipeline(c, pipeline))
+        logger.error("Failed to create pipeline for {}.", c);
     }
 
+    pipeline.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, pipeline.getName());
     return pipeline;
   }
 

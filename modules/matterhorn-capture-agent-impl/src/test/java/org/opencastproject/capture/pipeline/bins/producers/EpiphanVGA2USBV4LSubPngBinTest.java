@@ -106,8 +106,9 @@ public class EpiphanVGA2USBV4LSubPngBinTest extends EpiphanVGA2USBV4LTest {
     EpiphanVGA2USBV4LSubPngBin subBin = (EpiphanVGA2USBV4LSubPngBin) epiphanBin.getSubBin();
     Assert.assertEquals(subBin.getSource().get(GStreamerProperties.LOCATION), imageMockPath);
     Assert.assertEquals(subBin.getSink().get(GStreamerProperties.EMIT_SIGNALS), false);
-    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.DROP), true);
-    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.MAX_BUFFERS), 1);
+    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.DROP), false);
+    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.ASYNC), true);
+    Assert.assertEquals(subBin.getSink().get(GStreamerProperties.MAX_BUFFERS), 5);
     // if (subBin.caps != null) {
     // //TODO: can not convert to Caps
     // Assert.assertEquals(subBin.caps_filter.get("caps"), Caps.fromString(subBin.caps));

@@ -21,7 +21,6 @@ import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.ConfidenceMonitor;
 import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.AgentConfigurationJob;
@@ -29,7 +28,6 @@ import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.LoadRecordingsJob;
 import org.opencastproject.capture.pipeline.GStreamerPipeline;
-import org.opencastproject.capture.pipeline.bins.consumers.AudioMonitoring;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
@@ -61,9 +59,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
@@ -81,7 +76,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -96,7 +90,6 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -113,12 +106,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.opencastproject.capture.impl.monitoring.ConfidenceMonitorImpl;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines to store several tracks from a
  * certain recording.
  */
-public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService,
+public class CaptureAgentImpl implements CaptureAgent, StateService,  ManagedService,
         ConfigurationManagerListener, CaptureFailureHandler {
   // The amount of time to wait until shutting down the pipeline manually. 
   //private static final long DEFAULT_PIPELINE_SHUTDOWN_TIMEOUT = 60000L;
@@ -130,15 +124,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /** The amount of time between the recording load task running, measured in seconds **/
   private static final int RECORDING_LOAD_TASK_DELAY = 60;
-
-  /** The capture type for audio devices */
-  public static final String CAPTURE_TYPE_AUDIO = "audio";
-  /** The capture type for video devices */
-  public static final String CAPTURE_TYPE_VIDEO = "video";
-
-  /** Pipeline for confidence monitoring while agent is idle */
-  private Pipeline confidencePipe = null;
-
+  
   /** Keeps the recordings which have not been successfully ingested yet. **/
   private Map<String, AgentRecording> pendingRecordings = new ConcurrentHashMap<String, AgentRecording>();
 
@@ -882,52 +868,24 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @see org.opencastproject.capture.admin.api.AgentState
    */
   protected void setAgentState(String state) {
-    if (confidence) {
-      if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
-        confidencePipe.stop();
-        // TODO: What if this loop never finishes?
-        while (true) {
-          if (confidencePipe.isPlaying())
-            continue;
-          break;
-        }
-        confidencePipe = null;
+    // ConfidenceMonitorImp shoud be an singelton service and allways active
+    if (confidence && ConfidenceMonitorImpl.getInstance() != null) {
+      if (state.equalsIgnoreCase(AgentState.CAPTURING)) {
+        ConfidenceMonitorImpl.getInstance().stopMonitoring();
         logger.info("Confidence monitoring has been shut down.");
+        // Gst.deinit();
       } else if (state.equalsIgnoreCase(AgentState.IDLE)) {
+        
         try {
-          while (true) {
-            if (configService.getAllProperties().size() == 0)
-              continue;
-            break;
+          if (ConfidenceMonitorImpl.getInstance().startMonitoring()) {
+            logger.info("Confidence monitoring started.");
           }
-          // TODO Fix confidence monitoring
-          // confidencePipe = PipelineFactory.create(configService.getAllProperties(), true, this);
-          Bus bus = confidencePipe.getBus();
-          bus.connect(new Bus.EOS() {
-
-            @Override
-            public void endOfStream(GstObject source) {
-              // TODO Auto-generated method stub
-
-            }
-          });
-          confidencePipe.play();
           // TODO: What if the pipeline crashes out? We just run without it?
-          logger.info("Confidence monitoring beginning.");
         } catch (Exception e) {
           logger.warn("Confidence monitoring not started: {}", e);
         }
       }
     }
-
-    /*
-     * // When returning to idle state reload Epiphan driver to prevent problems caused by // too many captures running
-     * without reloaded the driver. if (state.equals(AgentState.IDLE)){ try { Process p =
-     * Runtime.getRuntime().exec("reload_epiphan"); p.waitFor(); if (p.exitValue() == 0) {
-     * logger.debug("VGA2USB driver successfully reloaded"); } else {
-     * logger.warn("Unable to reload Epiphan VGA2USB driver."); } p.destroy(); } catch (Exception e) {
-     * logger.warn("Unable to reload Epiphan VGA2USB driver."); } }
-     */
 
     agentState = state;
   }
@@ -1226,10 +1184,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public void activate(ComponentContext ctx) {
     logger.info("Starting CaptureAgentImpl.");
     confidence = Boolean.valueOf(configService.getItem(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
-    if (confidence)
-      logger.info("Confidence monitoring enabled.");
-    else
-      logger.info("Confidence monitoring disabled.");
+//    if (confidence)
+//      logger.info("Confidence monitoring enabled.");
+//    else
+//      logger.info("Confidence monitoring disabled.");
 
     if (ctx != null) {
       // Setup the shell commands
@@ -1501,79 +1459,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       logger.error("SchedulerException in StateServiceImpl while trying to schedule capability push jobs: {}.", e);
     }
   }
-
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.ConfidenceMonitor#grabFrame(java.lang.String)
-   */
-  public byte[] grabFrame(String friendlyName) {
-    // get the image for the device specified
-    String location = configService.getItem(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
-    String device = configService.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + friendlyName
-            + CaptureParameters.CAPTURE_DEVICE_DEST);
-    File fimage = new File(location, device + ".jpg");
-    int length = (int) fimage.length();
-    byte[] ibytes = new byte[length];
-    try {
-      // Read the bytes and dump them to the byte array
-      InputStream fis = new FileInputStream(fimage);
-      fis.read(ibytes, 0, length);
-      fis.close();
-      return ibytes;
-    } catch (FileNotFoundException e) {
-      logger.error("Could not read confidence image from: {}", device);
-    } catch (IOException e) {
-      logger.error("Confidence read error: {}", e.getMessage());
-    }
-    return null;
-  }
-
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.ConfidenceMonitor#getFriendlyNames()
-   */
-  public LinkedList<String> getFriendlyNames() {
-    String devices = configService.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
-    String[] friendlyNames = devices.split(",");
-    LinkedList<String> deviceList = new LinkedList<String>();
-    // For each device name in the split list above
-    for (String name : friendlyNames) {
-      String srcName = configService.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name
-              + CaptureParameters.CAPTURE_DEVICE_SOURCE);
-      // Determine the type and add it to the appropriate list
-      if (srcName.contains("hw:")) {
-        deviceList.add(name + "," + CAPTURE_TYPE_AUDIO);
-      } else {
-        deviceList.add(name + "," + CAPTURE_TYPE_VIDEO);
-      }
-    }
-    return deviceList;
-  }
-
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.ConfidenceMonitor#getRMSValues(java.lang.String, double)
-   */
-  public List<Double> getRMSValues(String friendlyName, double timestamp) {
-    return AudioMonitoring.getRMSValues(friendlyName, timestamp);
-  }
-
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.capture.api.ConfidenceMonitor#getCoreUrl()
-   */
-  public String getCoreUrl() {
-    return configService.getItem(CaptureParameters.CAPTURE_CORE_URL);
-  }
-
+  
   /**
    * Determines if the current agent state is idle.
    * 

@@ -20,6 +20,7 @@ package org.opencastproject.capture.pipeline.bins;
  **/
 public interface GStreamerProperties {
   /** General Properties **/
+  String ASYNC = "async";
   String SINK = "sink";
   String SRC = "src";
   String SRCTEMPLATE = "src%d";

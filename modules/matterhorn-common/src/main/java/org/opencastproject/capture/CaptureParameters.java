@@ -267,5 +267,4 @@ public interface CaptureParameters {
    * tries to start a second capture while the first is still in progress.
    */
   String CAPTURE_SCHEDULE_INTEREVENT_BUFFERTIME = "capture.schedule.event.buffertime";
-
 }

@@ -25,6 +25,7 @@ public class ConfidenceMonitoringProperties {
   private String device;
   private int interval;
   private int monitoringLength;
+  private boolean debug;
 
   /** Used to store the confidence monitoring properties. **/
   public ConfidenceMonitoringProperties(CaptureDevice captureDevice, Properties properties) {
@@ -34,8 +35,8 @@ public class ConfidenceMonitoringProperties {
       interval = Integer.parseInt(properties.getProperty(
               CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
                       + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "5"));
-      monitoringLength = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_AUDIO_LENGTH,
-              "60"));
+      monitoringLength = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_AUDIO_LENGTH, "60"));
+      debug = Boolean.parseBoolean(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG, "false"));
     }
   }
 
@@ -55,4 +56,7 @@ public class ConfidenceMonitoringProperties {
     return monitoringLength;
   }
 
+  public boolean isDebug() {
+    return debug;
+  }
 }

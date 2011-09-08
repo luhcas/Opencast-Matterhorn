@@ -102,6 +102,8 @@ public final class ProducerFactory {
       return new EpiphanVGA2USBV4LProducer(captureDevice, properties);
     else if (captureDevice.getName() == ProducerType.HAUPPAUGE_WINTV)
       return new HauppaugePVR350VideoProducer(captureDevice, properties);
+    else if (captureDevice.getName() == ProducerType.FILE)
+      return new UndecodedFileProducer(captureDevice, properties);
     else if (captureDevice.getName() == ProducerType.FILE_DEVICE)
       return new FileProducer(captureDevice, properties);
     else if (captureDevice.getName() == ProducerType.BLUECHERRY_PROVIDEO)

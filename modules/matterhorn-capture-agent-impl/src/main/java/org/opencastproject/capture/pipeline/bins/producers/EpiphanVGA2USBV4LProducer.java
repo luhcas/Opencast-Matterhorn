@@ -83,8 +83,6 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
   /** Elements. */
   private Element identity;
 
-  private Element videorate;
-
   private Element colorspace;
 
   /** Source element. */
