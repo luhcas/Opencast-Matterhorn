@@ -11,6 +11,8 @@ ocRecordings = new (function() {
   var STATISTICS_DELAY = 3000;     // time interval for statistics update
 
   var UPCOMMING_EVENTS_GRACE_PERIOD = 30 * 1000;
+  
+  
 
   var SORT_FIELDS = {
     'Title' : 'TITLE',
@@ -38,6 +40,7 @@ ocRecordings = new (function() {
   this.currentShownRecordings = 0;
   this.numSelectedRecordings = 0;
   this.changedBulkEditFields = {};
+  this.recordings = {};
 
   // components
   this.searchbox = null;
@@ -366,8 +369,8 @@ ocRecordings = new (function() {
       }
     } else if (wf.state == 'RUNNING') {
       if (op) {
-          this.state = 'Processing';
-          this.operation = op.description;
+        this.state = 'Processing';
+        this.operation = op.description;
       } else {
         this.state = 'Running';
       }
@@ -444,8 +447,8 @@ ocRecordings = new (function() {
     } else {
       ocRecordings.currentShownRecordings = ocRecordings.totalRecordings;
     }
-    var result = TrimPath.processDOMTemplate(template, makeRenderData(data));
-    $( '#tableContainer' ).empty().append(result);
+    
+    $('#tableContainer').jqotesubtpl("templates/recordings-table.tpl", makeRenderData(data));
     
     if(registerRecordingSelectHandler) {
       $('.selectRecording').click(function() {
@@ -609,6 +612,7 @@ ocRecordings = new (function() {
 
   this.displayHoldUI = function(wfId) {
     var workflow = ocRecordings.getWorkflow(wfId);
+    location.hash = "#/hold";
     if (workflow) {
       var operation = workflow.operations.operation;  // ocRecordings.findFirstOperation(workflow, 'PAUSED');
       if (operation !== false && operation.holdurl !== undefined) {
@@ -616,7 +620,8 @@ ocRecordings = new (function() {
         this.Hold.operation = operation;
         $('#holdWorkflowId').val(wfId);     // provide Id of hold actions workflow as value of html element (for backwards compatibility)
         $('#holdActionUI').attr('src', operation.holdurl);
-        $('#stage').hide();
+        console.log(operation.holdurl);
+        $('#addHeader').hide();
         $('#holdActionStage').show();
       } else {
         ocUtils.log('Warning: could not display hold action UI: hold operation not found (id=' + wfId + ')');
@@ -702,15 +707,17 @@ ocRecordings = new (function() {
  *
  */
   this.init = function() {
+    
+    $('#addHeader').jqotesubtpl('templates/recordings-header.tpl', {});
 
-    // upload/schedule button
+// upload/schedule button
     $('#uploadButton').button({
       icons:{
         primary:'ui-icon-circle-plus'
       }
     })
     .click( function() {
-      window.location.href = '../../admin/upload.html' + '?' + ocRecordings.buildURLparams();
+      window.location.href = '../../admin/index.html#/upload' + '?' + ocRecordings.buildURLparams();
     });
     $('#scheduleButton').button({
       icons:{
@@ -718,7 +725,7 @@ ocRecordings = new (function() {
       }
     })
     .click( function() {
-      window.location.href = '../../admin/scheduler.html';
+      window.location.href = '../../admin/index.html#/scheduler';
     });
 
     // ocRecordings state selectors
@@ -867,18 +874,18 @@ ocRecordings = new (function() {
         $.ajax({
           url: WORKFLOW_URL + '/stop',
           type: 'POST',
-        data       : {
-          id: id
-        },
-        error      : function(XHR,status,e){
+          data       : {
+            id: id
+          },
+          error      : function(XHR,status,e){
             alert('Could not stop Processing.');
-        },
+          },
           success: function(){
-          ocRecordings.reload();
-        }
-      });
+            ocRecordings.reload();
+          }
+        });
+      }
     }
-  }
   }
 
   this.publishRecording = function(wfId) {
@@ -1019,9 +1026,9 @@ ocRecordings = new (function() {
         $('#cancelBulkAction').hide();
         ocRecordings.Configuration.state = 'bulkdelete'
       }
-        refresh();
-      }
+      refresh();
     }
+  }
   
   function bulkEditApplyMessage() {
     return "Changes will be made in " + ocUtils.sizeOf(ocRecordings.changedBulkEditFields) +
@@ -1082,51 +1089,51 @@ ocRecordings = new (function() {
         },
         ocRecordings.bulkActionComplete);
       } else if(ocRecordings.Configuration.state === 'bulkdelete') {
-if( confirm('Are you sure you wish to delete ' + eventIdList.length + ' upcoming recordings? \nNo record of these will remain. You will need to reschedule if needed.') ){
-        progressChunk = (100 / eventIdList.length)
-        $('#deleteProgress').progressbar({
-          value: 0,
-          complete: function(){
-            $('#deleteModal').dialog('destroy');
-            ocRecordings.bulkActionComplete();
-          }
-        });
-        $('#deleteModal').dialog({
-          modal: true,
-          resizable: false,
-          draggable: false,
-          create: function (event, ui)
-          {
-            $('.ui-dialog-titlebar-close').hide();
-          }
-        });
-        var toid = setInterval(function(){
-          var id = eventIdList.pop();
-          if(typeof id === 'undefined'){
-            clearInterval(toid);
-            ocUtils.log(progress);
-            $('#deleteProgress').progressbar('value', ++progress);
-            if(failed > 0) {
-              $('#deleteError').show();
-            }
-            return;
-          }
-          $.ajax({
-            url: '/scheduler/'+id,
-            type: 'DELETE',
-            complete: function(xhr, status) {
-              if(xhr.status == 500) {
-                failed++;
-                $('#deleteErrorMessage').text('Failed to delete ' + failed + ' recordings.');
-              } else {
-              progress = progress + progressChunk;
-              $('#deleteProgress').progressbar('value', progress);
-            }
+        if( confirm('Are you sure you wish to delete ' + eventIdList.length + ' upcoming recordings? \nNo record of these will remain. You will need to reschedule if needed.') ){
+          progressChunk = (100 / eventIdList.length)
+          $('#deleteProgress').progressbar({
+            value: 0,
+            complete: function(){
+              $('#deleteModal').dialog('destroy');
+              ocRecordings.bulkActionComplete();
             }
           });
-        }, 250);
+          $('#deleteModal').dialog({
+            modal: true,
+            resizable: false,
+            draggable: false,
+            create: function (event, ui)
+            {
+              $('.ui-dialog-titlebar-close').hide();
+            }
+          });
+          var toid = setInterval(function(){
+            var id = eventIdList.pop();
+            if(typeof id === 'undefined'){
+              clearInterval(toid);
+              ocUtils.log(progress);
+              $('#deleteProgress').progressbar('value', ++progress);
+              if(failed > 0) {
+                $('#deleteError').show();
+              }
+              return;
+            }
+            $.ajax({
+              url: '/scheduler/'+id,
+              type: 'DELETE',
+              complete: function(xhr, status) {
+                if(xhr.status == 500) {
+                  failed++;
+                  $('#deleteErrorMessage').text('Failed to delete ' + failed + ' recordings.');
+                } else {
+                  progress = progress + progressChunk;
+                  $('#deleteProgress').progressbar('value', progress);
+                }
+              }
+            });
+          }, 250);
+        }
       }
-}
     }
   }
 
@@ -1236,14 +1243,12 @@ if( confirm('Are you sure you wish to delete ' + eventIdList.length + ' upcoming
     refresh();
   }
   
-  $(document).ready(this.init);
-
   this.makeActions = function(recording, actions) {
     var id = recording.id;
     var links = [];
     $.each(actions, function(index, action) {
       if (action == 'view') {
-        links.push('<a href="viewinfo.html?id=' + id + '">View Info</a>');
+        links.push('<a href="index.html#/viewinfo?id=' + id + '">View Info</a>');
 
       } else if (action == 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');

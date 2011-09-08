@@ -24,7 +24,7 @@ ocSeries.anonymous_role = "";
 
 /*    PAGE CONFIGURATION    */
 var SERIES_SERVICE_URL = "/series";
-var SERIES_LIST_URL = "/admin/series_list.html";
+var SERIES_LIST_URL = "/admin/index.html#/series_list";
 var ANOYMOUS_URL = "/info/me.json";
 var CREATE_MODE = 1;
 var EDIT_MODE   = 2;
@@ -33,6 +33,8 @@ ocSeries.mode = CREATE_MODE;
 
 /*    UI FUNCTIONS    */
 ocSeries.init = function(){
+  
+  $('#addHeader').jqotesubtpl('templates/series.tpl', {});
   //Load i18n strings and replace default english
   // disabled temporarily - see MH-6510
   ocSeries.Internationalize();

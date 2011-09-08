@@ -81,6 +81,10 @@
           return '';
         }
       }
+      
+      function cancel() {
+        window.parent.location.href = "/admin";
+      }
 
       function continueWorkflow() {
         if (ocUploadListener.filename !== null) {
@@ -222,7 +226,7 @@
     </div>
     <div id="actions">
         <button type="button" id="continueBtn" onclick="continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording without captions.">Continue processing</button>
-        <button type="button" style="margin-right:16px;" title="Cancel" onclick="parent.ocRecordings.hideHoldActionUI();">Cancel</button>
+        <button type="button" style="margin-right:16px;" title="Cancel" onclick="cancel();">Cancel</button>
     </div>
     <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
 

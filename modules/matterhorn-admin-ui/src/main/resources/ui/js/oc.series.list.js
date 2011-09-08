@@ -18,13 +18,25 @@ ocSeriesList.views = {} || ocSeriesList.views;
 ocSeriesList.views.seriesView = {} || ocSeriesList.seriesView;
 
 ocSeriesList.init = function(){
+  //var result = TrimPath.processDOMTemplate("seriesTemplate", ocSeriesList.views);
+  //  $('#seriesTableContainer').html(result);
+  
+  $('#addHeader').jqotesubtpl('templates/series_list-header.tpl', {});
+  
+  $.ajax({
+    url: "/series/series.json?edit=true",
+    type: "GET",
+    success: function(data)
+    {
+      ocSeriesList.buildSeriesView(data);
+    }
+  });
+  
   $("#addSeriesButton").button({
     icons:{
       primary:"ui-icon-circle-plus"
     }
   });
-var result = TrimPath.processDOMTemplate("seriesTemplate", ocSeriesList.views);
-  $('#seriesTableContainer').html(result);
 }
 
 ocSeriesList.buildSeriesView = function(data) {
@@ -42,30 +54,17 @@ ocSeriesList.buildSeriesView = function(data) {
       }
     }
   }
-//  if(typeof data.seriesList === 'object'){
-//    if(!$.isArray(data.seriesList.series)){
-//      data.seriesList.series = [data.seriesList.series]
-//    }
-//    $.each(data.seriesList.series, function(i,series){
-//      var s = ocSeriesList.views.seriesView[series.id] = {};
-//      s.id = series.id;
-//      if(typeof series.additionalMetadata === 'object') {
-//        if(!$.isArray(series.additionalMetadata.metadata)){
-//          series.additionalMetadata.metadata = [series.additionalMetadata.metadata];
-//        }
-//        for(var j=0; j < series.additionalMetadata.metadata.length; j++){
-//          var metadata = series.additionalMetadata.metadata[j];
-//          if(metadata.key === 'title'){
-//            s.title = metadata.value;
-//          } else if(metadata.key === 'creator') {
-//            s.creator = metadata.value;
-//          } else if(metadata.key  === 'contributor') {
-//            s.contributor = metadata.value;
-//          }
-//        }
-//      }
-//    });
-//  }
+  $('#seriesTableContainer').jqotesubtpl("templates/series_list-table.tpl", ocSeriesList.views);
+  $('#seriesTable').tablesorter({
+    cssHeader: 'oc-ui-sortable',
+    cssAsc: 'oc-ui-sortable-Ascending',
+    cssDesc: 'oc-ui-sortable-Descending' ,
+    headers: {
+      3: {
+        sorter: false
+      }
+    }
+  });
 }
 
 ocSeriesList.deleteSeries = function(seriesId, title) {

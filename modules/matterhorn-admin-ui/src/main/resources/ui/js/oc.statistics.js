@@ -85,8 +85,7 @@ ocStatistics = new (function() {
     var state = ocStatistics.Configuration.state;
     ocStatistics.buildServersView(data);
     ocStatistics.buildServicesView(data);
-    var result = TrimPath.processDOMTemplate(state + "Template", ocStatistics);
-    $("#tableContainer").html(result);
+    $("#tableContainer").jqotesubtpl("templates/statistics-table-" + state + ".tpl", ocStatistics);
   }
 
   /** Make the page reload with the currently set configuration
@@ -111,12 +110,16 @@ ocStatistics = new (function() {
       var reg = serviceInstance.serviceRegistration;
       var server = ocStatistics.serversView[reg.host];
       if(server == null) {
-        server = {'host' : reg.host, 'online' : reg.online, 'maintenance' : reg.maintenance};
+        server = {
+          'host' : reg.host, 
+          'online' : reg.online, 
+          'maintenance' : reg.maintenance
+        };
         ocStatistics.serversView[reg.host] = server;
-	server.runningTotal = 0;
-	server.queuedTotal = 0;
-	server.meanRunTimeTotal = 0;
-	server.meanQueueTimeTotal = 0;
+        server.runningTotal = 0;
+        server.queuedTotal = 0;
+        server.meanRunTimeTotal = 0;
+        server.meanQueueTimeTotal = 0;
         server.services = [];
       }
       // if the service is not a job producer, we don't show it here
@@ -142,12 +145,12 @@ ocStatistics = new (function() {
     });
 
     $.each(ocStatistics.serversView,function(s,server){
-	server.runningTotal = ocUtils.formatInt(server.runningTotal);
-	server.queuedTotal = ocUtils.formatInt(server.queuedTotal);
-	var duration = ocUtils.getDuration(server.meanRunTimeTotal);
-	server.meanRunTimeTotal = duration.substring(duration.indexOf(':')+1);
-	duration = ocUtils.getDuration(server.meanQueueTimeTotal);
-	server.meanQueueTimeTotal = duration.substring(duration.indexOf(':')+1);
+      server.runningTotal = ocUtils.formatInt(server.runningTotal);
+      server.queuedTotal = ocUtils.formatInt(server.queuedTotal);
+      var duration = ocUtils.getDuration(server.meanRunTimeTotal);
+      server.meanRunTimeTotal = duration.substring(duration.indexOf(':')+1);
+      duration = ocUtils.getDuration(server.meanQueueTimeTotal);
+      server.meanQueueTimeTotal = duration.substring(duration.indexOf(':')+1);
     });
   }
   
@@ -164,12 +167,14 @@ ocStatistics = new (function() {
       var serviceTypeIdentifier = reg.type.replace(/\./g, "_");
       var service = ocStatistics.servicesView[serviceTypeIdentifier];
       if(service == null) {
-        service = {'id' : serviceTypeIdentifier}; //, 'online' : reg.online, 'maintenance' : reg.maintenance};
+        service = {
+          'id' : serviceTypeIdentifier
+        }; //, 'online' : reg.online, 'maintenance' : reg.maintenance};
         service.servers = [];
-	service.meanRunTimeTotal = 0;
-	service.meanQueueTimeTotal = 0;
-	service.runningTotal = 0;
-	service.queuedTotal = 0;
+        service.meanRunTimeTotal = 0;
+        service.meanQueueTimeTotal = 0;
+        service.runningTotal = 0;
+        service.queuedTotal = 0;
         ocStatistics.servicesView[serviceTypeIdentifier] = service;
       }      
 
@@ -195,12 +200,12 @@ ocStatistics = new (function() {
     });		
 
     $.each(ocStatistics.servicesView,function(i,service){		
-	service.runningTotal = ocUtils.formatInt(service.runningTotal);
-	service.queuedTotal = ocUtils.formatInt(service.queuedTotal);
-	var duration = ocUtils.getDuration(service.meanRunTimeTotal);
-	service.meanRunTimeTotal = duration.substring(duration.indexOf(':')+1);
-	duration = ocUtils.getDuration(service.meanQueueTimeTotal);
-	service.meanQueueTimeTotal = duration.substring(duration.indexOf(':')+1);
+      service.runningTotal = ocUtils.formatInt(service.runningTotal);
+      service.queuedTotal = ocUtils.formatInt(service.queuedTotal);
+      var duration = ocUtils.getDuration(service.meanRunTimeTotal);
+      service.meanRunTimeTotal = duration.substring(duration.indexOf(':')+1);
+      duration = ocUtils.getDuration(service.meanQueueTimeTotal);
+      service.meanQueueTimeTotal = duration.substring(duration.indexOf(':')+1);
     });
   }
 
@@ -208,6 +213,8 @@ ocStatistics = new (function() {
  *
  */
   this.init = function() {
+    
+    $('#addHeader').jqotesubtpl('templates/statistics-header.tpl', {});
 
     // ocStatistics state selectors
     $( '#stats-' +  ocStatistics.Configuration.state).attr('checked', true);
@@ -224,7 +231,5 @@ ocStatistics = new (function() {
 
   };
   
-  $(document).ready(this.init);
-
   return this;
 })();

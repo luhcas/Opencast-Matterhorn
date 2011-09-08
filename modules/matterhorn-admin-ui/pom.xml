@@ -256,7 +256,7 @@
             <Private-Package>ui.*, uitests.*</Private-Package>
             <Http-Alias>/admin</Http-Alias>
             <Http-Classpath>/ui</Http-Classpath>
-            <Http-Welcome>recordings.html?show=all</Http-Welcome>
+            <Http-Welcome>index.html</Http-Welcome>
           </instructions>
         </configuration>
       </plugin>

@@ -14,10 +14,14 @@
  *
  */
 var ocViewSeries = (function(){
-  var SERIES_URL = '/series';
-  var self = this;
+  var SERIES_URL2 = '/series';
   
-  this.init = function() {
+  var PURL = "http://purl.org/dc/terms/";
+
+  this.initViewSeries = function() {
+    console.log("inside ocViewSeries.log");
+    $('#addHeader').jqotesubtpl('templates/viewseries.tpl', {});
+    
     var id = ocUtils.getURLParam('seriesId');
 
     $('.oc-ui-collapsible-widget .ui-widget-header').click( function() {
@@ -27,32 +31,22 @@ var ocViewSeries = (function(){
       return false;
     });
     $('#id').text(id);
-    self.loadSeries(id);
+    loadSeries(id);
   };
     
-  this.loadSeries = function(seriesId) {
+   this.loadSeries = function(seriesId) {
     var i, mdList, metadata, series;
+    console.log(seriesId);
     if(seriesId !== '') {
-      $.get(SERIES_URL + '/' + seriesId + '.json', function(data) {
-        series = data.series;
-        if(series.description !== undefined) {
-          $('#description').text(series.description);
-        }
-        if(series.additionalMetadata !== undefined) {
-          if(!$.isArray(series.additionalMetadata.metadata)){
-            mdList = [series.additionalMetadata.metadata];
-          } else {
-            mdList = series.additionalMetadata.metadata;
-          }
-          for(i in mdList) {
-            metadata = mdList[i];
-            $('#' + metadata.key).text(metadata.value);
-          }
-        }
+      $.get(SERIES_URL2 + '/' + seriesId + '.json', function(data) {
+        $.each(data[PURL], function(key, value) 
+        {
+          $('#' + key).text(value[0].value);
+        });
       });
     }
-  };
+  }
   
   return this;
   
-}());
+})();

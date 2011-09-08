@@ -9,6 +9,14 @@ Opencast.WorkflowInspect = (function() {
   var templateId;
   var instanceView;     // view of the workflow instance data
   var targetView;       // indicates if technical details or info page should be rendered ('details' | 'info')
+  this.workflow;
+  
+  this.initialize = function()
+  {
+    $('#addHeader').jqotesubtpl('templates/viewinfo-header.tpl', {});
+    var id = ocUtils.getURLParam('id');
+    Opencast.WorkflowInspect.renderInfo(id, 'infoContainer', 'info');
+  }
 
   this.renderInfo = function(id, container, template) {
     targetView = 'info';
@@ -38,6 +46,7 @@ Opencast.WorkflowInspect = (function() {
    */
   this.rx = function(data) {
     instanceView = buildInstanceView(data.workflow);
+    this.workflow = data.workflow;
     if (targetView == 'details') {
       renderDetailsView(instanceView, $container);
     } else if (targetView == 'info') {
@@ -82,7 +91,7 @@ Opencast.WorkflowInspect = (function() {
         out.info.seriestitle = mp.seriestitle;
       }
       if (mp.start) {
-	out.info.start = mp.start;
+        out.info.start = mp.start;
       }
 
       // Attachments
@@ -154,16 +163,17 @@ Opencast.WorkflowInspect = (function() {
    *
    */
   function renderDetailsView(workflow, $target) {
-    var result = TrimPath.processDOMTemplate(templateId, workflow);
-    $target.append(result);
+    //    var result = TrimPath.processDOMTemplate(templateId, workflow);
+    //    $target.append(result);
+    $target.jqoteapptpl("templates/viewinfo-" + templateId + ".tpl", workflow);
     $target.tabs({
-                  select: function (event, ui) {
-                    if(ui.index == 3 && window.location.hash != '#performance')
-                    {
-                        window.location.hash = '#performance';
-                        window.location.reload();
-                    }
-                  }
+      select: function (event, ui) {
+        if(ui.index == 3 && window.location.hash != '#performance')
+        {
+          window.location.hash = '#performance';
+          window.location.reload();
+        }
+      }
     });
     $('.unfoldable-tr').click(function() {
       var $content = $(this).find('.unfoldable-content');
@@ -180,40 +190,44 @@ Opencast.WorkflowInspect = (function() {
    *
    */
   function renderInfoView(workflow, $target) {
-    var result = TrimPath.processDOMTemplate(templateId, workflow);
-    $target.append(result);
+    //var result = TrimPath.processDOMTemplate(templateId, workflow);
+    //$target.append(result);
+    Opencast.WorkflowInspect.workflow = workflow;
+    $target.jqoteapptpl("templates/viewinfo-" + templateId + ".tpl", workflow);
 
     if (!$.isEmptyObject(workflow.workflow.mediapackage.media.track)){
-	$.each(workflow.workflow.mediapackage.media.track,function(i,track){
-	   if (track.type==="presenter/source"){ 
-		var fname = track.url.substring(track.url.lastIndexOf("/")+1,track.url.length);
-		$('#uploadedFileContainer td.td-value').html(fname); 
- 	   }	   
-	});
+      $.each(workflow.workflow.mediapackage.media.track,function(i,track){
+        if (track.type==="presenter/source"){ 
+          var fname = track.url.substring(track.url.lastIndexOf("/")+1,track.url.length);
+          $('#uploadedFileContainer td.td-value').html(fname); 
+        }	   
+      });
     }
 
     // Render Episode DC if present
     if (workflow.workflow.info.episodeDC !== false) {
       if (workflow.workflow.info.episodeDC.sameHost == true) {
-      $.ajax({
-        url : workflow.workflow.info.episodeDC.url,
-        type : 'GET',
-        dataType : 'xml',
-        error : function() {
-          $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
-        },
-        success : function(data) {
-          data = Opencast.RenderUtils.DCXMLtoObj(data);
-          var episode = TrimPath.processDOMTemplate('episodeTemplate', data);
-          $('#episodeContainer').append(episode);
-          if (data.dc.license) {
-            $('#licenseField').text(data.dc.license);
+        $.ajax({
+          url : workflow.workflow.info.episodeDC.url,
+          type : 'GET',
+          dataType : 'xml',
+          error : function() {
+            $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
+          },
+          success : function(data) {
+            data = Opencast.RenderUtils.DCXMLtoObj(data);
+            //            var episode = TrimPath.processDOMTemplate('episode', data);
+            //            $('#episodeContainer').append(episode);
+            $('#episodeContainer').jqoteapptpl("templates/viewinfo-episode.tpl", data);
+            if (data.dc.license) {
+              $('#licenseField').text(data.dc.license);
+            }
           }
-        }
-      });
+        });
       } else {	
-	var episode = TrimPath.processDOMTemplate('catalogDownloadTemplate', workflow.workflow.info.episodeDC);
-       	$('#episodeContainer').append(episode);			        
+        //        var episode = TrimPath.processDOMTemplate('catalog', workflow.workflow.info.episodeDC);
+        //        $('#episodeContainer').append(episode);			        
+        $('#episodeContainer').jqoteapptpl("templates/viewinfo-catalog.tpl", workflow.workflow.info.episodeDC);
       }
     }
 
@@ -228,13 +242,16 @@ Opencast.WorkflowInspect = (function() {
             $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
           },
           success : function(data) {
-            var series = TrimPath.processDOMTemplate('seriesTemplate', Opencast.RenderUtils.DCXMLtoObj(data));
-            $('#seriesContainer').append(series);
+            //            var series = TrimPath.processDOMTemplate('series', Opencast.RenderUtils.DCXMLtoObj(data));
+            //            $('#seriesContainer').append(series);
+            console.log(Opencast.RenderUtils.DCXMLtoObj(data));
+            $('#seriesContainer').jqoteapptpl("templates/viewinfo-series.tpl", Opencast.RenderUtils.DCXMLtoObj(data));
           }
         });
       } else {
-        var series = TrimPath.processDOMTemplate('catalogDownloadTemplate', workflow.workflow.info.seriesDC);
-        $('#seriesContainer').append(series);
+        //        var series = TrimPath.processDOMTemplate('catalog', workflow.workflow.info.seriesDC);
+        //        $('#seriesContainer').append(series);
+        $('#seriesContainer').jqoteapptpl("templates/viewinfo-catalog.tpl", workflow.workflow.info.seriesDC);
       }
     }
 

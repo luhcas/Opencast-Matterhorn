@@ -144,7 +144,7 @@
         // Event edit link clicked
         $('#edit-link').click(function(){
           //parent.Recordings.retryRecording(id);
-          parent.location.href = "/admin/upload.html?retry=" + id;
+          parent.location.href = "/admin/index.html#/upload?retry=" + id;
           return false;
         });
                 
@@ -693,7 +693,7 @@
       }
             
       function cancel(){
-        window.parent.location.href = window.parent.location.href;
+        window.parent.location.href = "/admin";
       }
 
 
