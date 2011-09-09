@@ -53,4 +53,15 @@ public interface ConfidenceMonitor {
    * @return URL of matterhorn core
    */
   String getCoreUrl();
+  
+  /**
+   * Begin monitoring devices without recording.
+   * @return true if successfully started
+   */
+  boolean startMonitoring();
+  
+  /**
+   * Stop monitoring devices.
+   */
+  void stopMonitoring();
 }
