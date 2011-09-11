@@ -100,8 +100,12 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
    * @see org.opencastproject.feed.impl.AbstractFeedGenerator#getDescription()
    */
   public String getDescription() {
+    String dcAbstract = null;
     SearchResult rs = seriesData.get();
-    return (rs != null) ? rs.getItems()[0].getDcAbstract() : super.getDescription();
+    if (rs != null) {
+      dcAbstract = rs.getItems()[0].getDcAbstract();
+    }
+    return dcAbstract == null ? super.getDescription() : dcAbstract;
   }
 
   /**
