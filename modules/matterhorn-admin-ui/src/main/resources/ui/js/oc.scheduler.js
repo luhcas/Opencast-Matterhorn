@@ -637,7 +637,7 @@ ocScheduler.DeleteForm = function(){
           eid = events[i].id;
           if(sched.mode === CREATE_MODE || (sched.mode === EDIT_MODE && curId !== eid)) {
             sched.conflictingEvents = true;
-            $('#conflictingEvents').append('<li><a href="scheduler.html?eventId=' + events[i].id + '&edit=true" target="_new">' + events[i].title + '</a></li>');
+            $('#conflictingEvents').append('<li><a href="index.html#/scheduler?eventId=' + events[i].id + '&edit=true" target="_new">' + events[i].title + '</a></li>');
           }
         }
         if(sched.conflictingEvents) {

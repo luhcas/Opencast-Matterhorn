@@ -1250,7 +1250,7 @@ ocRecordings = new (function() {
         links.push('<a href="index.html#/viewinfo?id=' + id + '">View Info</a>');
 
       } else if (action == 'edit') {
-        links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
+        links.push('<a href="index.html#/scheduler?eventId=' + id + '&edit=true">Edit</a>');
       } else if(actions[index] === 'play') {
         var workflow = ocRecordings.getWorkflow(id);
         if (workflow) {
