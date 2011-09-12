@@ -91,10 +91,12 @@
 
           <input type="hidden" name="track" id="track" class="requiredField" value="">
 
-          <div style="width:100px; margin-left: auto; margin-right: auto; margin-bottom:10px;">
+          <div style="margin-bottom:10px;">
+            <label class="scheduler-label"></label>
             <input class="uploadType-single uploadtype-select" type="radio" name="singlMultiSwitch" id="singleUploadRadio" value="single" checked="checked"/>
             <label for="singleUploadRadio" class="lbl_radio">Single File</label>
             <br />
+            <label class="scheduler-label"></label>
             <input class="uploadType-multi uploadtype-select" type="radio" name="singlMultiSwitch" id="multiUploadRadio" value="multi" />
             <label for="multiUploadRadio" class="lbl_radio">Multiple Files</label>
           </div>
