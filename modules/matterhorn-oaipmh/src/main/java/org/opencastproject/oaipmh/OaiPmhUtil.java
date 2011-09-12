@@ -81,7 +81,9 @@ public final class OaiPmhUtil {
   }
 
   public static DateFormat newDateFormat() {
-    return new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+    f.setTimeZone(TimeZone.getTimeZone("UTC"));
+    return f;
   }
 
   private static final String GRANULARITY_DAY = "YYYY-MM-DD";
