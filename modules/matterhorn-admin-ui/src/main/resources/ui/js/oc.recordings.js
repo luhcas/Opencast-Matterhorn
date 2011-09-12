@@ -620,7 +620,6 @@ ocRecordings = new (function() {
         this.Hold.operation = operation;
         $('#holdWorkflowId').val(wfId);     // provide Id of hold actions workflow as value of html element (for backwards compatibility)
         $('#holdActionUI').attr('src', operation.holdurl);
-        console.log(operation.holdurl);
         $('#addHeader').hide();
         $('#holdActionStage').show();
       } else {

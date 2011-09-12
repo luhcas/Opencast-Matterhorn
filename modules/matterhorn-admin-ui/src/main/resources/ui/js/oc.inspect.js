@@ -242,15 +242,10 @@ Opencast.WorkflowInspect = (function() {
             $('#episodeContainer').text('Error: Could not retrieve Episode Dublin Core Catalog');
           },
           success : function(data) {
-            //            var series = TrimPath.processDOMTemplate('series', Opencast.RenderUtils.DCXMLtoObj(data));
-            //            $('#seriesContainer').append(series);
-            console.log(Opencast.RenderUtils.DCXMLtoObj(data));
             $('#seriesContainer').jqoteapptpl("templates/viewinfo-series.tpl", Opencast.RenderUtils.DCXMLtoObj(data));
           }
         });
       } else {
-        //        var series = TrimPath.processDOMTemplate('catalog', workflow.workflow.info.seriesDC);
-        //        $('#seriesContainer').append(series);
         $('#seriesContainer').jqoteapptpl("templates/viewinfo-catalog.tpl", workflow.workflow.info.seriesDC);
       }
     }

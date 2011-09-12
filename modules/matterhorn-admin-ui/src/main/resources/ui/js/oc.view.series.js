@@ -19,7 +19,6 @@ var ocViewSeries = (function(){
   var PURL = "http://purl.org/dc/terms/";
 
   this.initViewSeries = function() {
-    console.log("inside ocViewSeries.log");
     $('#addHeader').jqotesubtpl('templates/viewseries.tpl', {});
     
     var id = ocUtils.getURLParam('seriesId');
@@ -36,7 +35,6 @@ var ocViewSeries = (function(){
     
    this.loadSeries = function(seriesId) {
     var i, mdList, metadata, series;
-    console.log(seriesId);
     if(seriesId !== '') {
       $.get(SERIES_URL2 + '/' + seriesId + '.json', function(data) {
         $.each(data[PURL], function(key, value) 
