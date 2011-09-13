@@ -392,7 +392,7 @@ public class ServiceRegistryEndpoint {
   @GET
   @Path("maxconcurrentjobs")
   @Produces(MediaType.TEXT_PLAIN)
-  @RestQuery(name = "maxconcurrentjobs", description = "Returns the number of jobs this server can execute concurrently.", returnDescription = "The maximum number of concurrent jobs", reponses = { @RestResponse(responseCode = SC_OK, description = "Maximum number of concurrent jobs returned.") })
+  @RestQuery(name = "maxconcurrentjobs", description = "Returns the number of jobs that the servers in this service registry can execute concurrently. If there is only one server in this service registry this will be the number of jobs that one server is able to do at one time. If it is a distributed install across many servers then this number will be the total number of jobs the cluster can process concurrently.", returnDescription = "The maximum number of concurrent jobs", reponses = { @RestResponse(responseCode = SC_OK, description = "Maximum number of concurrent jobs returned.") })
   public Response getMaximumConcurrentWorkflows() {
     try {
       Integer count = serviceRegistry.getMaxConcurrentJobs();
