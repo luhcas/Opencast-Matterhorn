@@ -50,6 +50,10 @@ public class RTPVideoSinkConsumerTest {
     try {
       Gst.init();
       gstreamerInstalled = testRTPElementsExists();
+      if (!gstreamerInstalled) {
+        logger.warn("Minimum one of the Gstreamer Elements are not installed. "
+                + "Please install gstreamer-plugins (base, good and ugly).");
+      }
     } catch (Throwable t) {
       logger.warn("Skipping agent tests due to unsatisifed gstreamer installation");
       gstreamerInstalled = false;
@@ -57,17 +61,22 @@ public class RTPVideoSinkConsumerTest {
   }
   
   public static boolean testRTPElementsExists() {
-    return PipelineTestHelpers.testGstreamerElement(GStreamerElements.RTPH264PAY) 
+    return PipelineTestHelpers.testGstreamerElement(GStreamerElements.RTPH264PAY)
             && PipelineTestHelpers.testGstreamerElement(GStreamerElements.RTPBIN)
             && PipelineTestHelpers.testGstreamerElement(GStreamerElements.UDPSINK) 
-            && PipelineTestHelpers.testGstreamerElement(GStreamerElements.UDPSRC);
+            && PipelineTestHelpers.testGstreamerElement(GStreamerElements.UDPSRC)
+            && PipelineTestHelpers.testGstreamerElement(GStreamerElements.X264ENC)
+            && PipelineTestHelpers.testGstreamerElement(GStreamerElements.VIDEORATE)
+            && PipelineTestHelpers.testGstreamerElement(GStreamerElements.FFMPEGCOLORSPACE);
   }
   
   public static RTPVideoSinkConsumer createRTPVideoSinkConsumer(CaptureDevice captureDevice) {
     RTPVideoSinkConsumer rtpConsumer = null;
     try {
       rtpConsumer = new RTPVideoSinkConsumer(captureDevice, captureDevice.getProperties());
-    } catch (Exception e) { }
+    } catch (Exception e) { 
+      logger.error("Can not create RTPVideoSinkConsumer", e);
+    }
     return rtpConsumer;
   }
   
@@ -145,6 +154,8 @@ public class RTPVideoSinkConsumerTest {
     
     RTPVideoSinkConsumer rtpConsumer = createRTPVideoSinkConsumer(captureDevice);
     
+    if (rtpConsumer == null) return; 
+    
     Assert.assertEquals(rtpConsumer.rtpsink.get("ts-offset").toString(), "0");
     Assert.assertEquals(rtpConsumer.rtpsink.get("port").toString(), "5000");
     Assert.assertEquals(rtpConsumer.rtpsink.get("sync").toString(), "false");
@@ -165,7 +176,7 @@ public class RTPVideoSinkConsumerTest {
     if (!PipelineTestHelpers.testGstreamerElement(GStreamerElements.FFENC_MPEG2VIDEO) 
             || !PipelineTestHelpers.testGstreamerElement("rtpmpvpay")) {
       
-      logger.info("Skip testing custom encoder/payloader, because Gstreamer elements not installed!");
+      logger.info("Skip testing custom encoder/payloader, because Gstreamer elements are not installed!");
       return;
     }
     
@@ -186,6 +197,8 @@ public class RTPVideoSinkConsumerTest {
             captureDevice.getFriendlyName(), captureDevice.getOutputPath(), properties);
     
     RTPVideoSinkConsumer rtpConsumer = createRTPVideoSinkConsumer(customCaptureDevice);
+    
+    if (rtpConsumer == null) return;
     
     Assert.assertNotNull(rtpConsumer);
     Assert.assertTrue(rtpConsumer.encoder.getName().startsWith(GStreamerElements.FFENC_MPEG2VIDEO));
@@ -209,6 +222,8 @@ public class RTPVideoSinkConsumerTest {
             captureDevice.getFriendlyName(), captureDevice.getOutputPath(), properties);
     
     RTPVideoSinkConsumer rtpConsumer = createRTPVideoSinkConsumer(customCaptureDevice);
+    
+    if (rtpConsumer == null) return;
     
     Assert.assertNotNull(rtpConsumer);
     Caps fpsCaps = rtpConsumer.capsfilter.getStaticPad(GStreamerProperties.SINK).getCaps(); 
