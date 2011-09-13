@@ -116,7 +116,7 @@ var ocUpload = (function() {
   }
 
   this.backToRecordings = function() {
-    window.history.back();
+    location.href = "/admin/index.html";
   }
 
   return this;
