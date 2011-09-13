@@ -50,6 +50,8 @@ public final class MonitoringGStreamerPipeline {
   public static Pipeline create(Properties properties) 
           throws CannotFindSourceFileOrDeviceException, UnrecognizedDeviceException {
     
+    if (monitoringPipeline != null) return monitoringPipeline;
+    
     Gst.init();
     monitoringPipeline = new Pipeline("Confidence-Monitoring");
 
