@@ -25,6 +25,7 @@ public enum ConsumerType {
   CUSTOM_CONSUMER, // User defined Consumer with GStreamer CLI syntax
   VIDEO_FILE_SINK, //Places video data into a file.
   AUDIO_MONITORING_SINK,  // Get rms values from audio stream
-  VIDEO_MONITORING_SINK,   // Save a frame (at given interval) as a jpeg for confidence monitoring
+  VIDEO_MONITORING_SINK,  // Grab a frame (at specific interval) as a jpeg for confidence monitoring
+  RTCP_VIDEO_SINK,        // Create an video network stream (RTP)
   XVIMAGE_SINK // Only available on Linux. Shows Producer data in real time.
 }

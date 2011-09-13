@@ -86,6 +86,7 @@ public class CaptureDeviceBin {
     if (!confidenceOnly) {
       // pass if captureagent should capture
       createConsumers(this.captureDevice, properties);
+      createRTCPVideoSinkConsumer(captureDevice, properties);
     }
     
     createMontoringConsumer(this.captureDevice, properties);
@@ -231,6 +232,50 @@ public class CaptureDeviceBin {
       throw new NoConsumerFoundException("Undefined Consumer!");
     }
     consumerBins.add(consumerBin);
+  }
+  
+  /**
+   * Creates a RTP Consumer for this Producer that will stream videodata over the network.
+   * 
+   * @param captureDevice
+   *          The details of the capture device.
+   * @param properties
+   *          The confidence monitoring properties.
+   * @throws UnableToLinkGStreamerElementsException
+   *           If any of the Consumer Elements are unable to link this Exception is thrown.
+   * @throws UnableToCreateGhostPadsForBinException
+   *           If the beginning of the Consumer is unable to ghost its sink pad then this Exception is thrown.
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException
+   *           If any of the Consumer Elements are null when their properties are set this Exception is thrown.
+   * @throws CaptureDeviceNullPointerException
+   *           Thrown if parameter captureDevice is null since it is necessary to creating a Consumer.
+   * @throws UnableToCreateElementException
+   *           Thrown if any of the Consumer Elements can't be created.
+   * @throws NoProducerFoundException
+   *           Thrown if the captureDevice.getName returns a ConsumerType that unrecognized.
+   * **/
+  private void createRTCPVideoSinkConsumer(CaptureDevice captureDevice, Properties properties) 
+          throws NoConsumerFoundException, UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
+    
+    ConsumerBin consumerBin;
+    String prefix = CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName();
+    
+    if (producerBin.isVideoDevice() 
+            && properties.containsKey(prefix + CaptureParameters.CAPTURE_RTP_CONSUMER_RTP_PORT)
+            && properties.containsKey(prefix + CaptureParameters.CAPTURE_RTP_CONSUMER_RTCP_PORT_IN)
+            && properties.containsKey(prefix + CaptureParameters.CAPTURE_RTP_CONSUMER_RTCP_PORT_OUT)) {
+            
+      logger.info("Create an RTP Video Consumer (host: {}, RTP port: {}, RTCP port out: {}, RTCP  port in: {})", new Object[] {
+              properties.getProperty(prefix + CaptureParameters.CAPTURE_RTP_CONSUMER_HOST, "localhost"),
+              properties.getProperty(prefix + CaptureParameters.CAPTURE_RTP_CONSUMER_RTP_PORT),
+              properties.getProperty(prefix + CaptureParameters.CAPTURE_RTP_CONSUMER_RTCP_PORT_OUT),
+              properties.getProperty(prefix + CaptureParameters.CAPTURE_RTP_CONSUMER_RTCP_PORT_IN)});
+              
+      consumerBin = ConsumerFactory.getInstance().getSink(ConsumerType.RTCP_VIDEO_SINK, captureDevice, properties);
+      consumerBins.add(consumerBin);
+    }
   }
 
   private void createCustomConsumer(CaptureDevice captureDevice, Properties properties)
