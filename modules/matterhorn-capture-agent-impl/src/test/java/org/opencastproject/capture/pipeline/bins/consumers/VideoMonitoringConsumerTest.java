@@ -99,6 +99,9 @@ public class VideoMonitoringConsumerTest {
   
   @After
   public void tearDown() {
+    if (!gstreamerInstalled)
+      return;
+
     captureDevice = null;
     File path = new File(testPath);
     for (File f : path.listFiles()) {
