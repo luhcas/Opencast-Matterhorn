@@ -414,4 +414,36 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     }
     return builder.toString();
   }
+
+  @Override
+  public Job watermark(Track mediaTrack, String watermark, String profileId) throws EncoderException,
+          MediaPackageException {   
+    String url = "/watermark";
+    HttpPost post = new HttpPost(url);
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("sourceTrack", getXML(mediaTrack)));
+      params.add(new BasicNameValuePair("watermark", watermark));
+      params.add(new BasicNameValuePair("profileId", profileId));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (Exception e) {
+      throw new EncoderException("Unable to assemble a remote composer request for track " + mediaTrack, e);
+    }
+    HttpResponse response = null;
+    try {
+      response = getResponse(post);
+      if (response != null) {
+        String content = EntityUtils.toString(response.getEntity());
+        Job r = JobParser.parseJob(content);
+        logger.info("watermarking job {} started on a remote composer", r.getId());
+        return r;
+      }
+    } catch (Exception e) {
+      throw new EncoderException("Unable to watermark track " + mediaTrack + " using a remote composer service", e);
+    } finally {
+      closeConnection(response);
+    }
+    throw new EncoderException("Unable to watermark track " + mediaTrack + " using a remote composer service");
+  }
 }

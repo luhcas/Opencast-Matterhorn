@@ -174,7 +174,6 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
     // Fist, update the parameters
     if (properties != null)
       params.putAll(properties);
-
     // build command
     BufferedReader in = null;
     Process encoderProcess = null;

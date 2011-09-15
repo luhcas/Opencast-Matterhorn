@@ -62,7 +62,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -81,7 +80,7 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
 
   /** List of available operations on jobs */
   private enum Operation {
-    Caption, Encode, Image, ImageConversion, Mux, Trim
+    Caption, Encode, Image, ImageConversion, Mux, Trim, Watermark
   };
 
   /** Encoding profile manager */
@@ -156,10 +155,9 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
    *           if encoding fails
    */
   protected Track encode(Job job, Track videoTrack, Track audioTrack, String profileId,
-          Dictionary<String, String> properties) throws EncoderException, MediaPackageException {
+          Map<String, String> properties) throws EncoderException, MediaPackageException {
 
     final String targetTrackId = idBuilder.createNew().toString();
-
     try {
       // Get the tracks and make sure they exist
       final File audioFile;
@@ -209,7 +207,7 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
                 targetTrackId, profileId });
 
       // Do the work
-      File encodingOutput = encoderEngine.mux(audioFile, videoFile, profile, null);
+      File encodingOutput = encoderEngine.mux(audioFile, videoFile, profile, properties);
 
       // Put the file in the workspace
       URI returnURL = null;
@@ -944,6 +942,13 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
           resultingElement = trim(job, firstTrack, encodingProfile, start, duration);
           serialized = MediaPackageElementParser.getAsXml(resultingElement);
           break;
+        case Watermark:
+          firstTrack = (Track) MediaPackageElementParser.getFromXml(arguments.get(0));
+          String watermark = arguments.get(1);
+          encodingProfile = arguments.get(2);
+          resultingElement = watermark(job, firstTrack, watermark, encodingProfile);
+          serialized = MediaPackageElementParser.getAsXml(resultingElement);
+          break;        
         default:
           throw new IllegalStateException("Don't know how to handle operation '" + operation + "'");
       }
@@ -957,6 +962,8 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
       throw new ServiceRegistryException("Error handling operation '" + op + "'", e);
     }
   }
+
+
 
   /**
    * Sets the media inspection service
@@ -1087,5 +1094,49 @@ public class ComposerServiceImpl extends AbstractJobProducer implements Composer
   protected OrganizationDirectoryService getOrganizationDirectoryService() {
     return organizationDirectoryService;
   }
+
+  @Override
+  public Job watermark(Track mediaTrack, String watermark, String profileId) throws EncoderException,
+          MediaPackageException {
+    try {
+      return serviceRegistry.createJob(
+              JOB_TYPE,
+              Operation.Watermark.toString(),
+              Arrays.asList(MediaPackageElementParser.getAsXml(mediaTrack), watermark, profileId));
+    } catch (ServiceRegistryException e) {
+      throw new EncoderException("Unable to create a job", e);
+    }    
+  }
+  
+  /**
+   * Encodes a video track with a watermark.
+   * 
+   * @param mediaTrack
+   *          the video track
+   * @param watermark
+   *          the watermark image
+   * @param profileId
+   *          the encoding profile
+   * 
+   * @param block
+   *          <code>true</code> to only return once encoding is finished
+   * @return the receipt
+   * @throws EncoderException
+   *           if encoding fails
+   */ 
+  protected MediaPackageElement watermark(Job job, Track mediaTrack, String watermark, String encodingProfile) 
+          throws EncoderException, MediaPackageException {
+    logger.info("watermarking track {}.", mediaTrack.getIdentifier());
+    File watermarkFile = new File(watermark);
+    if (!watermarkFile.exists()) {
+      logger.error("Watermark image {} not found.", watermark);
+      throw new EncoderException("Watermark image not found");
+    }
+    
+    Map<String, String> watermarkProperties = new HashMap<String, String>(); 
+    watermarkProperties.put("watermark", watermarkFile.getAbsolutePath());
+    
+    return this.encode(job, mediaTrack, null, encodingProfile, watermarkProperties);
+  }  
 
 }
