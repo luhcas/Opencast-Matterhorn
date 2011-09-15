@@ -57,7 +57,7 @@ ocWorkflow.definitionSelected = function(defId, container, callback) {
       }
       if(ocWorkflowPanel && ocWorkflowPanel.registerComponents && typeof ocScheduler != 'undefined'){
         ocScheduler.workflowComponents = {}; //Clear the previously selected panel's components
-        ocWorkflowPanel.registerComponents(ocScheduler.workflowComponents);
+        ocWorkflowPanel.registerComponents(ocScheduler.capture.components);
       }else{
         ocUtils.log("component registration handler not found.", ocWorkflowPanel, ocWorkflowPanel.registerComponents);
       }

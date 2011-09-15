@@ -17,10 +17,16 @@ ocSeriesList = {} || ocSeriesList;
 ocSeriesList.views = {} || ocSeriesList.views;
 ocSeriesList.views.seriesView = {} || ocSeriesList.seriesView;
 
+ocSeriesList.Configuration = new (function(){
+  //default configuration
+  this.count = 10;
+  this.total = 10;
+  this.startPage = 0;  
+  this.lastPage = 0;
+  this.sort = 'TITLE_ASC';  
+});
+
 ocSeriesList.init = function(){
-  //var result = TrimPath.processDOMTemplate("seriesTemplate", ocSeriesList.views);
-  //  $('#seriesTableContainer').html(result);
-  
   $('#addHeader').jqotesubtpl('templates/series_list-header.tpl', {});
   
   $.ajax({
@@ -38,6 +44,17 @@ ocSeriesList.init = function(){
     }
   });
 }
+
+ocSeriesList.buildURLparams = function() {
+  var pa = [];
+  for (p in ocSeriesList.Configuration) {
+    if (ocSeriesList.Configuration[p] != null) {	
+      pa.push(p + '=' + escape(this.Configuration[p]));
+    }
+  }
+  return pa.join('&');
+}
+ 
 
 ocSeriesList.buildSeriesView = function(data) {
   ocUtils.log($.isArray(data));

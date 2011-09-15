@@ -32,6 +32,7 @@ var ocAdmin = (function() {
     this.required = false;
     this.value = null;
     this.key = null;
+    this.errors = { missingRequired: new ocAdmin.Error('missingRequired') };
     
     /* @lends ocAdmin.Component.prototype */
     /** 
@@ -77,6 +78,9 @@ var ocAdmin = (function() {
               break;
             case 'key':
               this.key = props[f];
+              break;
+            case 'errors':
+              this.errors = props[f];
               break;
             default:
               this.properties[f] = props[f];
@@ -200,7 +204,7 @@ var ocAdmin = (function() {
      */
     this.validate = function() {
       if(!this.required) {
-        return true;
+        return []; //empty error array.
       } else {
         var oneIsValid = false;
         for(var e in this.fields) {
@@ -217,10 +221,10 @@ var ocAdmin = (function() {
           }
         }
         if(oneIsValid) {
-          return true;
+          return [];
         }
       }
-      return false;
+      return this.errors.missingRequired;
     }
     
     this.setFields(fields);
@@ -271,7 +275,6 @@ var ocAdmin = (function() {
           }
         }
       }
-      ocUtils.log('returning');
     }
     this.getErrors = function() {
       return this.serializer.errors;
@@ -282,9 +285,10 @@ var ocAdmin = (function() {
     this.errors = [];
     this.serialize = function serialize(components) {
       var body = '';
+      this.errors = [];
       for(i in components) {
         var comp = components[i];
-        this.errors.concat(comp.validate());
+        this.errors = this.errors.concat(comp.validate());
         ocUtils.log(comp);
         body += comp.key + '=' + comp.getValue() + '\n';
       }
@@ -294,8 +298,10 @@ var ocAdmin = (function() {
       var lines = catalogBody.split('\n');
       var catalog = {};
       for(var i in lines) {
-        var keyVal = lines[i].split('=');
-        catalog[keyVal[0]] = keyVal[1];
+        if(lines[i] != '' && lines[i].charAt(0) != '#') {
+          var keyVal = lines[i].split('=');
+          catalog[keyVal[0]] = keyVal[1];
+        }
       }
       return catalog;
     }
@@ -304,13 +310,14 @@ var ocAdmin = (function() {
   admin.DublinCoreSerializer = function DublinCoreSerializer() {
     this.errors = [];
     this.serialize = function serialize(components) {
+      this.errors = [];
       var doc = ocUtils.createDoc(DC_CATALOG_ROOT_EL, DC_CATALOG_ROOT_NS);
       var ns = doc.createAttribute('xmlns:' + DUBLIN_CORE_NS);
       ns.nodeValue = DUBLIN_CORE_NS_URI;
       doc.documentElement.setAttributeNode(ns);
       for(i in components){
         var comp = components[i];
-        this.errors.concat(comp.validate());
+        this.errors = this.errors.concat(comp.validate());
         var node = doc.createElement(DUBLIN_CORE_NS + ':' + comp.key);
         node.appendChild(doc.createTextNode(comp.getValue()));
         doc.documentElement.appendChild(node);
@@ -327,6 +334,14 @@ var ocAdmin = (function() {
         }
       }
       return catalog;
+    }
+  }
+  
+  admin.Error = function Error(name, label) {
+    this.name = name || 'missingRequired';
+    this.label = label || '';
+    if(typeof this.label === 'string') {
+      this.label = [this.label];
     }
   }
   

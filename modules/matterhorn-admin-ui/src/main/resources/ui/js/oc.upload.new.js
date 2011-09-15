@@ -27,6 +27,20 @@ var ocUpload = (function() {
     $('#workflowSelector').change(ocUpload.UI.selectWorkflowDefinition);
     $('#submitButton').button().click(startUpload);
     $('#cancelButton').button().click(backToRecordings);
+    
+    var initializerDate;
+    initializerDate = new Date();  
+
+    $('#startTimeHour').val(initializerDate.getHours()); 
+    $('#startTimeMin').val(initializerDate.getMinutes()); 
+
+    $('#recordDate').datepicker({
+      showOn: 'both',
+      buttonImage: 'img/icons/calendar.gif',
+      buttonImageOnly: true,
+      dateFormat: 'yy-mm-dd'
+    });
+    $('#recordDate').datepicker('setDate', initializerDate);  
 
     ocUpload.UI.loadWorkflowDefinitions();
     initSeriesAutocomplete();
@@ -41,6 +55,7 @@ var ocUpload = (function() {
           dataType: 'json',
           type: 'GET',
           success: function(data) {
+            data = data.catalogs;
             var series_list = [];
             $.each(data, function(){
               series_list.push({value: this['http://purl.org/dc/terms/']['title'][0].value,
@@ -178,7 +193,7 @@ ocUpload.UI = (function() {
         ocUtils.log('Loaded workflow definitions: ' + defs.join(', '));
       }
     });
-    $('.workflowConfigContainer').load(ocUpload.WORKFLOW_PANEL_URL + ocUpload.DEFAULT_WORKFLOW_DEFINITION);
+    $('.workflowConfigContainer').load(ocUpload.WORKFLOW_PANEL_URL + ocUpload.DEFAULT_WORKFLOW_DEFINITION); 
   }
 
   this.toggleUnfoldable = function() {
@@ -384,9 +399,10 @@ ocUpload.Ingest = (function() {
 
     // enqueue Series Dublin Core
     var series = $('#series').val();
-    if (series) {
+    //var seriesId = $('#ispartof').val();
+    if (series !== '') {
       var seriesId = $('#ispartof').val();
-      if (!seriesId) {
+      if (seriesId === '') {
         seriesId = createSeries(series);
       }
       MediaPackage.elements.push(
@@ -492,6 +508,12 @@ ocUpload.Ingest = (function() {
       $newElm.text($field.val());
       $(dcDoc.documentElement).append($newElm);
     });
+    var $created = $(dcDoc.createElement('dcterms:created'))
+    var date = $('#recordDate').datepicker('getDate').getTime();
+    date += $('#startTimeHour').val() * 60 * 60 * 1000;
+    date += $('#startTimeMin').val() * 60 * 1000;
+    $created.text(ocUtils.toISODate(new Date(date)));
+    $(dcDoc.documentElement).append($created);
     var out = ocUtils.xmlToString(dcDoc);
     return out;
   }
@@ -548,8 +570,7 @@ ocUpload.Ingest = (function() {
 
   function createSeries(name) {
     var id = false;
-    var seriesXml = '<series><additionalMetadata><metadata><key>title</key><value>' + name + '</value></metadata></additionalMetadata></series>';
-    seriesXml = '<dublincore xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oc="http://www.opencastproject.org/matterhorn"><dcterms:title xmlns="">' + name + '</dcterms:title></dublincore>'
+    var seriesXml = '<dublincore xmlns="http://www.opencastproject.org/xsd/1.0/dublincore/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oc="http://www.opencastproject.org/matterhorn"><dcterms:title xmlns="">' + name + '</dcterms:title></dublincore>'
     ocUpload.UI.setProgress("Creating Series " + name);
     $.ajax({
       async: false,
@@ -557,14 +578,15 @@ ocUpload.Ingest = (function() {
       url: ocUpload.SERIES_URL,
       data: {
         series: seriesXml,
-        acl: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ns2:acl xmlns:ns2="org.opencastproject.security"></ns2:acl>'
+        acl: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><ns2:acl xmlns:ns2="org.opencastproject.security"><ace><role>anonymous</role><action>read</action><allow>true</allow></ace></ns2:acl>'
       },
       dataType : 'xml',
       error: function() {
         ocUpload.Listener.ingestError('Could not create Series ' + name);
       },
       success: function(data){
-        id = $(data.getElementsByTagName('dcterms:identifier')).text();
+        window.debug = data;
+        id = $('identifier', data).text();
       }
     });
     return id;

@@ -112,7 +112,7 @@ ocUtils.getDateString = function(date) {
   var dateSeparator = " ";
   var yearSeparator = " ";
   var d = date;
-  var datestring = days[(d.getDate() + 1) % 7];
+  var datestring = days[d.getDay()];
   datestring += daySeparator;
   datestring += months[d.getMonth() % 12];
   datestring += dateSeparator;
@@ -300,4 +300,26 @@ ocUtils.sizeOf = function(obj) {
     }
   }
   return length;
+}
+
+ocUtils.exists = function(obj) {
+  if(typeof obj !== 'undefined') {
+    return true;
+  }
+  return false;
+}
+
+ocUtils.getDCJSONParam = function(dcJSON, param, namespace) {
+  namespace = 'http://purl.org/dc/terms/' || namespace;
+  for (var i in dcJSON) {
+    var metadata = dcJSON[i];
+    if (i === namespace) {
+      for (var j in metadata) {
+        if (j === param) {
+          return metadata[param][0].value;
+        }
+      }
+    }
+  }
+  return false;
 }
