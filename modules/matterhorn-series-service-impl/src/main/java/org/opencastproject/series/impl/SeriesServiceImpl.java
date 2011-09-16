@@ -26,6 +26,7 @@ import static org.opencastproject.util.RequireUtil.notNull;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -300,7 +301,11 @@ public class SeriesServiceImpl implements SeriesService {
   @Override
   public DublinCoreCatalogList getSeries(SeriesQuery query) throws SeriesException {
     try {
-      return new DublinCoreCatalogList(index.search(query));
+      List<DublinCoreCatalog> result = index.search(query);
+      DublinCoreCatalogList dcList = new DublinCoreCatalogList();
+      dcList.setCatalogCount(getSeriesCount());
+      dcList.setCatalogList(result);
+      return dcList;
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Failed to execute search query: {}", e.getMessage());
       throw new SeriesException(e);
@@ -334,6 +339,15 @@ public class SeriesServiceImpl implements SeriesService {
     } catch (SeriesServiceDatabaseException e) {
       logger.error("Exception occurred while retrieving access control rules for series {}: {}", seriesID,
               e.getMessage());
+      throw new SeriesException(e);
+    }
+  }
+  
+  public int getSeriesCount() throws SeriesException {
+    try {
+      return persistence.countSeries();
+    } catch (SeriesServiceDatabaseException e) {
+      logger.error("Exception occured while counting series.", e);
       throw new SeriesException(e);
     }
   }

@@ -47,7 +47,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -515,7 +514,15 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   @Override
   public Object clone() {
     DublinCoreCatalogImpl clone = new DublinCoreCatalogImpl();
-    clone.data = (Map<EName, List<CatalogEntry>>) ((HashMap<EName, List<CatalogEntry>>) data).clone();
+    for (Map.Entry<EName, List<CatalogEntry>> entry : data.entrySet()) {
+      EName elmName = entry.getKey();
+      EName elmNameCopy = new EName(elmName.getNamespaceName(), elmName.getLocalName());
+      List<CatalogEntry> elmsCopy = new ArrayList<CatalogEntry>();
+      for (CatalogEntry catalogEntry : entry.getValue()) {
+        elmsCopy.add(new CatalogEntry(catalogEntry.getEName(), catalogEntry.getValue(), catalogEntry.getAttributes()));
+      }
+      clone.data.put(elmNameCopy, elmsCopy);
+    }
     return clone;
   }
 
@@ -573,7 +580,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     Set<Entry<String, JSONObject>> namespaceEntrySet = json.entrySet();
     for (Entry<String, JSONObject> namespaceEntry : namespaceEntrySet) { // e.g. http://purl.org/dc/terms/
       String namespace = namespaceEntry.getKey();
-      String prefix = bindings.lookupPrefix(namespace);
+      //String prefix = bindings.lookupPrefix(namespace);
       JSONObject namespaceObj = namespaceEntry.getValue();
       Set<Entry<String, JSONArray>> entrySet = namespaceObj.entrySet();
       for (Entry<String, JSONArray> entry : entrySet) { // e.g. title

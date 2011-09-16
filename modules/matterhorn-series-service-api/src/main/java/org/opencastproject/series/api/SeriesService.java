@@ -120,4 +120,6 @@ public interface SeriesService {
    *           if query could not be performed
    */
   DublinCoreCatalogList getSeries(SeriesQuery query) throws SeriesException, UnauthorizedException;
+  
+  int getSeriesCount() throws SeriesException;
 }

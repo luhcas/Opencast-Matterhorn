@@ -639,7 +639,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
      * @param attributes
      *          the element attributes
      */
-    CatalogEntry(EName name, String value, Map<EName, String> attributes) {
+    public CatalogEntry(EName name, String value, Map<EName, String> attributes) {
       this.name = name;
       this.value = value;
       this.attributes = attributes;

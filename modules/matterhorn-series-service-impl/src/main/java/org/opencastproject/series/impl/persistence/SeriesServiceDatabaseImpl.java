@@ -419,7 +419,20 @@ public class SeriesServiceDatabaseImpl implements SeriesServiceDatabase {
       em.close();
     }
   }
-
+  
+  public int countSeries() throws SeriesServiceDatabaseException {
+    EntityManager em = emf.createEntityManager();
+    Query query = em.createQuery("SELECT COUNT(e) FROM SeriesEntity e");
+    try {
+      Long total = (Long) query.getSingleResult();
+      return total.intValue();
+    } catch (Exception e) {
+      logger.error("Could not find number of series.", e);
+      throw new SeriesServiceDatabaseException(e);
+    } finally {
+      em.close();
+    }
+  }
   /**
    * Gets a series by its ID, using the current organizational context.
    * 

@@ -102,4 +102,6 @@ public interface SeriesServiceDatabase {
    *           if there is a problem communicating with the underlying data store
    */
   DublinCoreCatalog getSeries(String seriesId) throws NotFoundException, SeriesServiceDatabaseException;
+
+  int countSeries() throws SeriesServiceDatabaseException;
 }

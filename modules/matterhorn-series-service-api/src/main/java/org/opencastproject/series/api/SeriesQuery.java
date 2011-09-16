@@ -67,7 +67,7 @@ public class SeriesQuery {
    */
   protected boolean edit;
   /** Sort by field */
-  protected Sort sort = Sort.CREATED;
+  protected Sort sort = Sort.TITLE;
   /** Sort order */
   protected boolean sortAscending = true;
 
@@ -75,7 +75,7 @@ public class SeriesQuery {
   public enum Sort {
     TITLE, SUBJECT, CREATOR, PUBLISHER, CONTRIBUTOR, ABSTRACT, DESCRIPTION, CREATED, AVAILABLE_FROM, AVAILABLE_TO, LANGUAGE, RIGHTS_HOLDER, SPATIAL, TEMPORAL, IS_PART_OF, REPLACES, TYPE, ACCESS, LICENCE
   }
-
+  
   /**
    * Set search by license
    * 

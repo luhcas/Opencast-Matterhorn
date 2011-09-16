@@ -16,8 +16,10 @@
 package org.opencastproject.metadata.dublincore;
 
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
@@ -40,6 +42,7 @@ public class DublinCoreCatalogList {
 
   /** Array storing Dublin cores */
   private List<DublinCoreCatalog> catalogList;
+  private int totalCatalogCount = 0;
 
   /** Default no-arg constructor initialized with an empty catalog list */
   public DublinCoreCatalogList() {
@@ -89,6 +92,25 @@ public class DublinCoreCatalogList {
       catalogList = new LinkedList<DublinCoreCatalog>();
     catalogList.add(catalog);
   }
+  
+  /**
+   * Get the total number of catalogs 
+   * 
+   * @return int totalCatalogCount
+   */
+  
+  public int getCatalogCount() {
+    return totalCatalogCount;
+  }
+  
+  /**
+   * Set the total number of catalogs
+   * 
+   * @param total
+   */
+  public void setCatalogCount(int total) {
+    totalCatalogCount = total;
+  }
 
   /**
    * Serializes list to XML.
@@ -107,7 +129,8 @@ public class DublinCoreCatalogList {
       DOMImplementation impl = builder.getDOMImplementation();
 
       Document doc = impl.createDocument(null, null, null);
-      Node root = doc.createElement("dublincorelist");
+      Element root = doc.createElement("dublincorelist");
+      root.setAttribute("totalCount", String.valueOf(totalCatalogCount));
       doc.appendChild(root);
       for (DublinCoreCatalog series : catalogList) {
         Node node = doc.importNode(series.toXml().getDocumentElement(), true);
@@ -131,13 +154,17 @@ public class DublinCoreCatalogList {
    */
   @SuppressWarnings("unchecked")
   public String getResultsAsJson() {
-    if (catalogList == null)
+    if (catalogList == null) {
       catalogList = new LinkedList<DublinCoreCatalog>();
+    }
 
+    JSONObject jsonObj = new JSONObject();
     JSONArray jsonArray = new JSONArray();
     for (DublinCoreCatalog catalog : catalogList) {
       jsonArray.add(((DublinCoreCatalogImpl) catalog).toJsonObject());
     }
-    return jsonArray.toJSONString();
+    jsonObj.put("totalCount", String.valueOf(totalCatalogCount));
+    jsonObj.put("catalogs", jsonArray);
+    return jsonObj.toJSONString();
   }
 }
