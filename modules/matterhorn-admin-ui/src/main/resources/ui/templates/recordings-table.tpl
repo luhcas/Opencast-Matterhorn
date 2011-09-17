@@ -40,7 +40,7 @@
         <td class="status-column-cell ui-state-active">
 
           <div class="workflowActionButton ui-helper-clearfix" style="float:left;">
-            <a href="inspect.html?id=<%= data[j].recordings[i].id %>" title="View Technical Details for this Recording">
+            <a href="index.html#/inspect?id=<%= data[j].recordings[i].id %>" title="View Technical Details for this Recording">
               <span class="ui-icon ui-icon-gear inspect-workflow-button" style="float:left;"></span>
             </a>
           </div>

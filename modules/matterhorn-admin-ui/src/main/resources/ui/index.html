@@ -90,9 +90,11 @@
             document.title = "Info" + matterhorn;
             return 0;
             break;   
-          case "/review":
+          case "/inspect":
+            Opencast.WorkflowInspect.initInspect();
+            document.title = "Inspect" + matterhorn;
             return 0;
-            break;
+            break;   
         }
       }
       
