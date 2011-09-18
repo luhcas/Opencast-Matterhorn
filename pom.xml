@@ -48,6 +48,7 @@
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-metadata</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-scheduler-api</module>
         <module>modules/matterhorn-scheduler-impl</module>
@@ -76,6 +77,7 @@
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-series-service-api</module>
         <module>modules/matterhorn-series-service-impl</module>
@@ -104,6 +106,7 @@
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-static</module>
         <module>modules/matterhorn-webconsole</module>
@@ -128,6 +131,7 @@
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
@@ -152,6 +156,7 @@
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-oaipmh</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-series-service-api</module>
         <module>modules/matterhorn-series-service-impl</module>
@@ -184,6 +189,7 @@
         <module>modules/matterhorn-lti</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-search-service-api</module>
         <module>modules/matterhorn-search-service-remote</module>
@@ -213,6 +219,7 @@
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-textanalyzer-api</module>
         <module>modules/matterhorn-textanalyzer-impl</module>
@@ -240,6 +247,7 @@
         <module>modules/matterhorn-inspection-service-remote</module>
         <module>modules/matterhorn-json</module>
         <module>modules/matterhorn-kernel</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-textanalyzer-api</module>
         <module>modules/matterhorn-textanalyzer-remote</module>
@@ -335,6 +343,7 @@
         <module>modules/matterhorn-capture-agent-api</module>
         <module>modules/matterhorn-capture-agent-impl</module>
         <module>modules/matterhorn-confidence-monitoring-ui</module>
+        <module>modules/matterhorn-runtime-dependencies</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-static</module>
         <module>modules/matterhorn-webconsole</module>
@@ -811,31 +820,31 @@
       <dependency>
         <groupId>org.eclipse.persistence</groupId>
         <artifactId>org.eclipse.persistence.core</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.2</version>
       </dependency>
 
       <dependency>
         <groupId>org.eclipse.persistence</groupId>
         <artifactId>org.eclipse.persistence.jpa</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.2</version>
       </dependency>
 
       <dependency>
         <groupId>org.eclipse.persistence</groupId>
         <artifactId>org.eclipse.persistence.asm</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.2</version>
       </dependency>
 
       <dependency>
         <groupId>org.eclipse.persistence</groupId>
         <artifactId>org.eclipse.persistence.antlr</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.2</version>
       </dependency>
 
       <dependency>
         <groupId>org.eclipse.persistence</groupId>
         <artifactId>javax.persistence</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.2</version>
       </dependency>
 
       <!-- CXF -->
@@ -1074,7 +1083,7 @@
       <dependency>
         <groupId>commons-pool</groupId>
         <artifactId>commons-pool</artifactId>
-        <version>1.5.2</version>
+        <version>1.5.3</version>
       </dependency>
 
       <dependency>
