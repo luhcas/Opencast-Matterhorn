@@ -60,7 +60,6 @@ Opencast.WorkflowInspect = (function() {
   this.rx = function(data) {
     instanceView = buildInstanceView(data.workflow);
     workflow = data.workflow;
-    console.log(workflow);
     if (targetView == 'details') {
       renderDetailsView(instanceView, $container);
     } else if (targetView == 'info') {
@@ -181,13 +180,13 @@ Opencast.WorkflowInspect = (function() {
     //    $target.append(result);
     $target.jqoteapptpl("templates/viewinfo-" + templateId + ".tpl", workflow);
     $target.tabs({
-      select: function (event, ui) {
-        if(ui.index == 3 && window.location.hash != '#performance')
-        {
-          window.location.hash = '#performance';
-          window.location.reload();
-        }
-      }
+//      select: function (event, ui) {
+//        if(ui.index == 3 && window.location.hash != '#performance')
+//        {
+//          window.location.hash = '#performance';
+//          window.location.reload();
+//        }
+//      }
     });
     $('.unfoldable-tr').click(function() {
       var $content = $(this).find('.unfoldable-content');
