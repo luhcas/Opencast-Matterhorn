@@ -57,17 +57,19 @@ ocSeriesList.buildURLparams = function() {
  
 
 ocSeriesList.buildSeriesView = function(data) {
-  ocUtils.log($.isArray(data));
-  for(var i = 0; i < data.length; i++) {
-    var s = ocSeriesList.views.seriesView[data[i]['http://purl.org/dc/terms/']['identifier'][0].value] = {};
-    s.id = data[i]['http://purl.org/dc/terms/']['identifier'][0].value;
-    for(var key in data[i]['http://purl.org/dc/terms/']) {
+  var PURL = "http://purl.org/dc/terms/";
+  ocUtils.log($.isArray(data.catalogs));
+  console.log(data);
+  for(var i = 0; i < data.catalogs.length; i++) {
+    var s = ocSeriesList.views.seriesView[data.catalogs[i][PURL]['identifier'][0].value] = {};
+    s.id = data.catalogs[i][PURL]['identifier'][0].value;
+    for(var key in data.catalogs[i][PURL]) {
       if(key === 'title'){
-        s.title = data[i]['http://purl.org/dc/terms/'][key][0].value
+        s.title = data.catalogs[i][PURL][key][0].value
       } else if(key === 'creator') {
-        s.creator = data[i]['http://purl.org/dc/terms/'][key][0].value
+        s.creator = data.catalogs[i][PURL][key][0].value
       } else if(key  === 'contributor') {
-        s.contributor = data[i]['http://purl.org/dc/terms/'][key][0].value
+        s.contributor = data.catalogs[i][PURL][key][0].value
       }
     }
   }
