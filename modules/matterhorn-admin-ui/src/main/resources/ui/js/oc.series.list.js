@@ -58,8 +58,7 @@ ocSeriesList.buildURLparams = function() {
 
 ocSeriesList.buildSeriesView = function(data) {
   var PURL = "http://purl.org/dc/terms/";
-  ocUtils.log($.isArray(data.catalogs));
-  console.log(data);
+  var sorting;
   for(var i = 0; i < data.catalogs.length; i++) {
     var s = ocSeriesList.views.seriesView[data.catalogs[i][PURL]['identifier'][0].value] = {};
     s.id = data.catalogs[i][PURL]['identifier'][0].value;
@@ -73,6 +72,16 @@ ocSeriesList.buildSeriesView = function(data) {
       }
     }
   }
+  if($.cookie('column') == null) 
+  {
+    $.cookie('column', 0)
+  }
+  if($.cookie('direction') == null) 
+  {
+    $.cookie('direction', 0) //standard is ASC
+  }
+  sorting = [[$.cookie('column'), $.cookie('direction')]];
+  console.log(sorting);
   $('#seriesTableContainer').jqotesubtpl("templates/series_list-table.tpl", ocSeriesList.views);
   $('#seriesTable').tablesorter({
     cssHeader: 'oc-ui-sortable',
@@ -82,6 +91,18 @@ ocSeriesList.buildSeriesView = function(data) {
       3: {
         sorter: false
       }
+    },
+    sortList: sorting
+  });
+  $('#seriesTable th').click(function(){
+    var index = $(this).parent().children().index($(this));
+    if(index != 3)
+    {
+      if(index == $.cookie('column'))
+      {
+          $.cookie('direction', $.cookie('direction') == 0 ? 1 : 0);
+      }
+      $.cookie('column', index)
     }
   });
 }
