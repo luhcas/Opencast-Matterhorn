@@ -26,3 +26,6 @@ a:hover {
   text-decoration: underline;
   color:#A72123;
 }
+
+#logout {color: white; text-decoration: none; float: right; margin-right: 25px; display: none;}
+#logout:hover {text-decoration: underline;}
