@@ -70,11 +70,13 @@
 
     <div id="oc_title-bar">
       <div id="oc_title-bar-container">
-        <div id="oc_title-bar-logo">
+        <div id="oc_title-bar-logo">      
           <a href="/welcome.html" title="Back to Opencast Matterhorn Welcome page" tabindex="25">
             <div id="matterhorn-main-logo"></div>
           </a>
         </div>
+       
+        <div id="oc_title"></div>
         <div id="oc_search">
           <form action="index.html">
             <label id="skip" for="oc_searchField">
@@ -92,7 +94,7 @@
         </div>
       </div>
       <div class="clear"></div>
-      <div>
+      <div class="logoutcontainer">
         <a id="logout" href="/j_spring_security_logout">Log out</a>
         <div class="clear"></div>
       </div>
@@ -117,7 +119,7 @@
     <!-- END #oc_mh2go -->
 
     <div id="oc_player-head">
-      <div id="oc_title"></div>
+      
       <div id="oc_player-head-see-more" class="ui-helper-hidden">
         <a href="javascript: " id="oc_see-more-button" title="click to see more of this series" role="button" aria-pressed="false">
           <div>
@@ -144,6 +146,12 @@
 
       </div>
       <div class="clear"></div>
+      
+      <!-- Shortcut dialog -->
+    		<div id="oc_shortcuts" title="Shortcuts">
+     		<span><a name="shortcuts"></a></span>
+      		<div id="oc_client_shortcuts"></div>
+    		</div>
     </div>
     <!-- END #oc_player-head -->
 
@@ -374,12 +382,7 @@
               Segment Text
             </a>
           </li>
-          <li class="oc_lecturer-search-field-wrap ui-corner-top" id="search-textarea">
-            <label id="skip" for="oc_lecturer-search-field" class="oc_offScreen-hidden">
-              Search this recording
-            </label>
-            <input id="oc_lecturer-search-field" type="text" onkeyup="Opencast.search.showResult(this, this.value);" onfocus="$(this).trigger('click');Opencast.search.showResult(this, this.value);" size="30" value="Search this recording" />
-          </li>
+          <li></li>
         </ul>
       </div>
       <!-- END #oc_tabs -->
@@ -410,6 +413,12 @@
       <!-- END #oc_slides -->
 
       <div id="oc_slidetext" class="fl-fix">
+        <div id="search-textarea">     			
+     			<label id="skip" for="oc_lecturer-search-field" class="oc_offScreen-hidden">
+              Search this recording
+            </label>
+            <input id="oc_lecturer-search-field" type="text" onkeyup="Opencast.search.showResult(this, this.value);" onfocus="$(this).trigger('click');Opencast.search.showResult(this, this.value);" size="30" value="Search this recording" />
+		  </div>			        
         <div id="segments_text-loading" class="loadingImage"></div>
         <div id="oc-segments_text"></div>
       </div>
@@ -424,11 +433,6 @@
 
     <div id="segment-tooltip" class="segment-tooltip"></div>
 
-    <!-- Shortcut dialog -->
-    <div id="oc_shortcuts" title="Shortcuts">
-      <span><a name="shortcuts"></a></span>
-      <div id="oc_client_shortcuts"></div>
-    </div>
     <!-- END #oc_shortcuts -->
 
     <!-- Download dialog -->

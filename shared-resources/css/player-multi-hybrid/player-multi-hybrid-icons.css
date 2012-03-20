@@ -33,14 +33,14 @@ input
   list-style:none outside none;
 }
 #oc_player-head-right a {
-  float: right;
-  background: url("/engage/ui/img/engage_player/oc_icons_2.png") no-repeat -150px -125px transparent;
+	float: left;
+  color: #F1F1F1;
+  /*background: url("/engage/ui/img/engage_player/oc_icons_2.png") no-repeat -150px -125px transparent;*/
   padding-left: 25px;
   line-height: 20px;
   margin: 5px 10px;
 }
 #oc_player-head-right a div {
-  background-color: white;
   }
 #oc_player-head-right #oc_share-button {
   background-position: -150px -125px;
