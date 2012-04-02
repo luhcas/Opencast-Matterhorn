@@ -4,7 +4,7 @@
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://search.opencastproject.org">
     <xsl:template match="/">
-      <table cellspacing="0" width="100%">
+      <table cellspacing="0" style="border-collapse:collapse;" width="100%">
         <xsl:for-each select="ns2:search-results/result">
             <tr class="search-item">
                     <td style="vertical-align: middle; text-align: center; width: 180px; height: 140px;">
@@ -26,7 +26,7 @@
                             </a>
                         </td>
                         
-                        <td style="vertical-align: top; text-align:left; padding-top: 10px; padding-right: 10px;">
+                        <td style="vertical-align: top; text-align:left; padding-top: 25px; padding-left: 10px; padding-right: 10px;">
                             <xsl:choose>
                                  <xsl:when test="mediapackage/media/track/mimetype[.='video/x-flv'] or mediapackage/media/track/mimetype[.='video/mp4'] or mediapackage/media/track/mimetype[.='audio/x-adpcm']">
                                     <b>

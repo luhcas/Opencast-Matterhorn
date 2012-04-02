@@ -27,7 +27,7 @@ table
 }
 
 a, a:link, a:visited{
-  cursor: pointer;
+  cursor: pointer;d
   color: #a45940; /* #A42424 */
   text-decoration: none;
   outline: none;
@@ -140,7 +140,7 @@ color: #000;
 #oc_player-head { padding: 1px 10px 1px 10px; position: relative; border-left: none; border-right: none; min-width: 756px; }
 #oc_player-head-right { margin-left: 100px; }
 
-.oc_player-head-dropdown { background: url("/engage/ui/img/engage_player/content-bg.png"); color: #000000; padding: 10px; margin-bottom: 5px; }
+.oc_player-head-dropdown { background: url("/engage/ui/img/engage_player/content-bg.png"); color: #000000; padding: 10px; margin-top: 2px; margin-bottom: 5px; }
 
 .shortcut-element { display: inline-block; width: 230px; font-size: 12px; }
 .shortcut-combination { display: inline-block; width: 103px; color: #333333; font-weight: bold; }
@@ -617,15 +617,6 @@ option:hover
   background-color:         #E3E3D7;
 }
 
-.oc_embed-textarea
-{
-  width:                    80%;
-  max-width:                99%;
-  overflow:                 auto;
-  margin-top:               5px;
-  border: 1px solid #a45940;
-}
-
 .oc_DisplayNone
 {
   display:                  none;
@@ -690,28 +681,26 @@ option:hover
 
 .scrubber-button
 {
-  background:               transparent url("/engage/ui/img/engage_player/oc_icons.png");
-  background-position:      -60px -360px;
-  height:                   19px;
-  width:                    9px;
+  height:                   20px;
+  width:                    20px;
   position:                 relative;
   border:                   0px;
-  top:                      0px;
+  top:                      -7px;
   z-index:                  2;
-  margin-left:              -4px;
+  margin-left:              -7px;
+  display: 									none;
 }
 
 #draggable
 {
-  background:               transparent url("/engage/ui/img/engage_player/oc_icons.png");
-  background-position:      -60px -360px;
-  height:                   19px;
-  width:                    9px;
+  background:               transparent url("/engage/ui/img/engage_player/draggable.png") no-repeat;
+  height:                   20px;
+  width:                    20px;
   position:                 relative;
   border:                   0px;
-  top:                      -19px;
+  top:                      -8px;
   z-index:                  3;
-  margin-left:              -4px;
+  margin-left:              -7px;
 }
 
 button::-moz-focus-inner,
@@ -902,22 +891,39 @@ input::-moz-focus-inner,
 #oc_embed-left
 {
   float:                    left;
-  width:                    70%;
+  width:                    40%;
 }
 
 #oc_embed-right
 {
   float:                    left;
   margin-left:              10px;
-  width:                    25%;
+  width:                    20%;
 }
 #oc_embed-right label
 {
-  display: block;
-  width: 50px;
-  float: left;
-
+  display: 									block;
+  width: 										50px;
+  float: 										left;
 }
+
+#oc_embed-text {
+	width: 										40%;
+	float: 										left;
+}
+
+.oc_embed-textarea
+{
+  width:                    100%;
+  max-width:                100%;
+  min-width: 								100%;
+  max-height: 							200px;
+  height: 									45px;
+  overflow:                 auto;
+  margin-top:               5px;
+  border: 1px solid #a45940;
+}
+
 #oc_costum-width
 {
   flaot:                    left;

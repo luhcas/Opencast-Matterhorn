@@ -100,7 +100,7 @@ a.segments-time:hover, a.segments-time:focus{
 }
 
 #oc-segments_text tr:hover {
-    background-color: url("/engage/ui/img/engage_player/content-bg.png");
+    background: url("/engage/ui/img/engage_player/content-bg.png");
     color: #000000;
 }
 

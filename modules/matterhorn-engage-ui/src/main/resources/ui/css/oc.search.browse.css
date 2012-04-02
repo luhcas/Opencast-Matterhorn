@@ -79,7 +79,10 @@ a:hover {
   margin-top:2px;
   position:relative;
   padding:5px 0px;
-  border-bottom: 1px solid #333333;
+}
+
+tr.search-item td {
+	border-bottom: 1px solid #bbbbbb;
 }
 
 div.table-row {
@@ -125,11 +128,12 @@ div.right-container13 {
 
 img.thumb {
   width: 160px;
-  padding: 10px;
+  margin: 10px;
+  border: 1px solid #777777;
 }
 
 a.itemtitle {
-  color: #174B49;
+  color: #631719;
   font-size:16px;
   font-weight: bold;
   font-family: arial,helvetica,clean,sans-serif;
@@ -137,7 +141,7 @@ a.itemtitle {
 }
 
 a.itemtitle:hover {
-  color:          #A72123;
+  color:          #871b1d;
   text-decoration:underline;
 }
 
@@ -160,7 +164,7 @@ span.itemdesc {
 }
 
 span.title {
-  color: #2D8F8B;
+  color: #fa6d21;
   font-size: 14px;
   font-weight: bold;
 }
