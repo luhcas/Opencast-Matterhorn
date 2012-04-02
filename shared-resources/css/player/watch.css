@@ -152,7 +152,7 @@ input.ui-button {
 /* End: Flash Player loading */
 
 #oc-search-result tr:hover {
-    background-color: #FFFFCC;
+    background-color: rgba(255,255,255,0.1);
 }
 
 #oc-search-result {
@@ -174,7 +174,7 @@ input.ui-button {
 
 #oc_video-view {
     text-align: right;
-    margin-top: 6px;
+    padding-top: 6px;
     height: 20px;
 }
 
@@ -191,14 +191,36 @@ input.ui-button {
 }
 
 #logout {
-  color: #4a6364;
   text-decoration: none;
   display: none;
-  position: absolute;
-  top: 10px;
-  right: 0px;
 }
 
 #logout:hover {
   text-decoration: underline;
 }
+
+#oc_description {
+	margin: 10px 5px 5px 5px;	
+	background: url("/engage/ui/img/engage_player/content-bg.png");
+	color: #000000;
+}
+
+.oc_description-value {
+	color: #513838;
+}
+
+#oc_slides {
+	margin: 10px 5px 5px 5px;	
+}
+
+#oc_slidetext { 
+	background: url("/engage/ui/img/engage_player/content-bg.png");
+	margin: 10px 5px 5px; 
+}
+
+.oc-segments-preview img {
+	border: 1px solid #333333;
+	margin: 2px;
+}
+
+

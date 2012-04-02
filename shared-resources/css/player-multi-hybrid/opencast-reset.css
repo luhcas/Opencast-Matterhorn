@@ -19,7 +19,7 @@ pre,code,kbd,samp,tt {font-family:monospace;*font-size:108%;line-height:100%;}
 
 html{color:#000;background:#F1F1F1;}
 body,div,dl,dt,dd,ol,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}
-fieldset,img{border:0;}
+fieldset,img{border: none;}
 address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}
 
 caption,th{text-align:left;}
@@ -90,6 +90,8 @@ p,fieldset,pre {
     /*so things don't run into each other*/
     margin-bottom:1em;
 }
+
+.clear { clear: both; }
 /* setting a consistent width, 160px; 
    control of type=file still not possible */
 input[type=password],textarea{width:12.25em;*width:11.9em;}

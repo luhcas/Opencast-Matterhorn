@@ -86,7 +86,7 @@
             <input id="oc_btn-search" class="handcursor" type="image" src="/engage/ui/img/misc/space.png" name="search" title="do search Matterhorn" value="Search" tabindex="50" aria-label="do search Matterhorn" />
           </form>
         </div>
-        </script>
+
         <div id="oc_title-bar-gallery-link">
           <a href="index.html" title="go to Media Gallery" tabindex="30">
             Go to Media Gallery
@@ -94,10 +94,6 @@
         </div>
       </div>
       <div class="clear"></div>
-      <div class="logoutcontainer">
-        <a id="logout" href="/j_spring_security_logout">Log out</a>
-        <div class="clear"></div>
-      </div>
     </div>
     <!-- END #oc_title-bar -->
     
@@ -118,40 +114,126 @@
     </div>
     <!-- END #oc_mh2go -->
 
-    <div id="oc_player-head">
+    <div id="oc_player-head" class="ui-widget-content">
       
       <div id="oc_player-head-see-more" class="ui-helper-hidden">
-        <a href="javascript: " id="oc_see-more-button" title="click to see more of this series" role="button" aria-pressed="false">
-          <div>
-            See More
-          </div>
-        </a>
+			<a href="javascript: " id="oc_see-more-button" title="click to see more of this series" role="button" aria-pressed="false">
+				<div>
+            	See More
+          	</div>
+		 	</a>
       </div>
       <div id="oc_player-head-right">
-        <a href="javascript: " id="oc_shortcut-button" title="click to show shortcuts" role="button" aria-pressed="false" tabindex="80">
+		<a id="oc_shortcut-button" title="click to show shortcuts" role="button" aria-pressed="false" tabindex="80">
           <div>
             Shortcuts
           </div>
-        </a>
-        <a href="javascript: " id="oc_share-button" title="click to show share options" role="button" aria-pressed="false" tabindex="70">
-          <div>
-            Share
+		</a>
+		<a id="oc_btn-embed" class="handcursor" title="Embed" role="button" aria-pressed="false">
+		  <div>            
+            Embed
           </div>
         </a>
-        <a href="javascript: " id="oc_download-button" title="click to show downloads" role="button" aria-pressed="false" tabindex="60">
-          <div>
-            Download
-          </div>
-      </a>
+        <a id="oc_btn-share-time" class="handcursor" title="Share video URL at current time" role="button" aria-pressed="false">
+		  <div>					
+			Link
+		  </div>
+		</a>
+		<a id="oc_download-button" title="click to show downloads" role="button" aria-pressed="false" tabindex="60">
+		  <div>
+			Download
+		  </div>
+		</a>
+		<a id="logout" href="/j_spring_security_logout" style="float:right;">
+		  <div>
+			Log out
+		  </div>
+		</a>
 
       </div>
-      <div class="clear"></div>
       
-      <!-- Shortcut dialog -->
-    		<div id="oc_shortcuts" title="Shortcuts">
-     		<span><a name="shortcuts"></a></span>
-      		<div id="oc_client_shortcuts"></div>
-    		</div>
+      <div class="clear"></div>
+
+		<!-- Shortcuts Dialog -->
+        <div class="shortcuts-wrapper oc_player-head-dropdown" style="display:none;">
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + P</div><div class="shortcut-meaning">Play / pause video</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + M</div><div class="shortcut-meaning">Mute / unmute</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + I</div><div class="shortcut-meaning">Show / hide shortcuts</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + S</div><div class="shortcut-meaning">Stop video</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + U</div><div class="shortcut-meaning">Volume up</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt 0 - 9</div><div class="shortcut-meaning">Seek the time slider</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + F</div><div class="shortcut-meaning">Forward video</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + D</div><div class="shortcut-meaning">Volume down</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + C</div><div class="shortcut-meaning">Captions on / off</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + R</div><div class="shortcut-meaning">Rewind video</div></div>
+            <div class="shortcut-element"><div class="shortcut-combination">Control + Alt + T</div><div class="shortcut-meaning">Current time</div></div>
+        </div>
+      
+      <!-- Embed Dialog -->
+		<div title="Embed" class="embed-wrapper oc_player-head-dropdown" style="display:none;">
+      <div id="oc_embed-left">
+			<input id="oc_embed-icon-one" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
+        	<input id="oc_embed-icon-two" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
+        	<input id="oc_embed-icon-three" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
+        	<input id="oc_embed-icon-four" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
+        	<input id="oc_embed-icon-five" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
+      </div>
+      <div id="oc_embed-right">
+        	<div id="oc_embed-custom-title">
+          	Custom size:
+        	</div>
+        	<label for="oc_embed-costum-width-textinput" class="handcursor">
+          	Width:
+        	</label>
+			&nbsp;
+        	<input id="oc_embed-costum-width-textinput" maxlength="4" type="text" name="Costum width min 300px" alt="Costum width min 300px" title="Costum width min 300px" value="" />
+        		<div class="clear"></div>
+        	<label for="oc_embed-costum-height-textinput" class="handcursor">
+          	Height:
+        	</label>
+			&nbsp;
+        	<input id="oc_embed-costum-height-textinput" maxlength="4" type="text" name="" alt="" title="" value="" />
+
+        	<div class="clear"></div>
+        	<label for="oc_embed-costum-hide-controls-checkbox" class="handcursor">
+          	Controls:
+        	</label>
+			&nbsp;
+        	<input id="oc_embed-costum-hide-controls-checkbox" type="checkbox" name="Display controls" alt="Display controls" title="Display controls" value="" />
+			<br />
+        	<label for="oc_embed-costum-hide-controls-checkbox" class="handcursor">
+
+        	<a href="javascript: " id="oc_btn-leave-session-time" onclick="$('#oc_embed').dialog('close');" class="handcursor ui-helper-hidden-accessible" title="Leave embed dialog" role="button">
+          	Leave embed dialog
+        	</a>
+      </div>
+
+      <div class="clear"></div>
+      <label for="oc_embed-textarea">
+        	Choose your embed size. Copy the text and paste it in your html page.
+      </label>
+      <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
+    	</div>
+    	<!-- END Embed Dialog -->
+    	
+    	<!-- Link Dialog -->
+		<div class="link-wrapper oc_player-head-dropdown" title="Video at current time" style="display:none;">
+      	<div id="oc_share-time-text"></div>
+      	<div>
+				<textarea id="oc_share-time-textfield" class="oc_embed-textarea" rows="1" cols="1"></textarea><br />
+				<a href="javascript: " id="oc_btn-email" class="handcursor" title="Email" role="button">E-Mail</a> | 
+				<a href="javascript: " id="oc_btn-share-time" class="handcursor" title="Share video URL at current time" role="button">Copy to clipboard</a>
+      	</div>
+      	<div id="oc_share-time-tip">
+				Press the pause button in the player to get the exact time.
+      	</div>
+    	</div>
+    	<!-- END Link Dialog -->      
+      
+      <!-- Download dialog -->
+            <div id="oc_client_downloads" class="download-wrapper oc_player-head-dropdown" style="display:none;"></div>
+    <!-- END Download dialog -->
+
     </div>
     <!-- END #oc_player-head -->
 
@@ -302,10 +384,10 @@
                   </table>
                   <div class="progress-list">
                     <span class="load-progress" value="0"></span>
-                    <span id="play-progress" class="play-progress" value="0"></span>
+                    <span id="play-progress" class="play-progress ui-widget-content" value="0"></span>
                     <span id="scubber-channel" class="scrubber-channel">
                       <input id="scrubber" type="submit" type="image" src="/engage/ui/img/misc/space.png" class="scrubber-button" role="slider" />
-                      <div id="draggable" class="ui-widget-content"></div>
+                      <div id="draggable"></div>
                     </span>
                   </div>
                 </td>
@@ -360,8 +442,9 @@
         <div class="clear"></div>
       </div>
       <!-- END #oc_video-view -->
-    </div>
+    
     <!-- END #oc_body -->
+	</div>
 
     <!-- Tabs -->
     <div id="oc_ui_tabs">
@@ -389,7 +472,7 @@
 
       <div id="oc_description" class="fl-fix">
         <div id="description-loading" class="loadingImage"></div>
-        <div id="oc-description"></div>
+        <div id="oc-description" class="description-container"></div>
       </div>
       <!-- END #oc_description -->
 
@@ -400,10 +483,11 @@
               <div id="segments-loading" class="loadingImage">
               </div>
               <div id="slider">
-                <img alt="Scroll to previous slides" src="/engage/ui/img/engage_player/leftarrow.png" class="scrollButtons left" />
+                
                 <div id="scroll" class="scroll">
                   <div id="scrollcontainer" class="scrollContainer"></div>
                 </div>
+                <img alt="Scroll to previous slides" src="/engage/ui/img/engage_player/leftarrow.png" class="scrollButtons left" />
                 <img alt="Scroll to subsequent slides" src="/engage/ui/img/engage_player/rightarrow.png" class="scrollButtons right" />
               </div>
             </div>
@@ -413,8 +497,8 @@
       <!-- END #oc_slides -->
 
       <div id="oc_slidetext" class="fl-fix">
-        <div id="search-textarea">     			
-     			<label id="skip" for="oc_lecturer-search-field" class="oc_offScreen-hidden">
+          <div id="search-textarea">     			
+     		<label id="skip" for="oc_lecturer-search-field" class="oc_offScreen-hidden">
               Search this recording
             </label>
             <input id="oc_lecturer-search-field" type="text" onkeyup="Opencast.search.showResult(this, this.value);" onfocus="$(this).trigger('click');Opencast.search.showResult(this, this.value);" size="30" value="Search this recording" />
@@ -435,34 +519,7 @@
 
     <!-- END #oc_shortcuts -->
 
-    <!-- Download dialog -->
-    <div id="oc_downloads" title="Download Media Files">
-      <span id="skip"><a name="downloads"></a></span>
-      <div id="oc_client_downloads"></div>
-    </div>
-    <!-- END #oc_downloads -->
 
-    <!-- #share-button-layer dialog -->
-    <div id="oc_share-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-helper-hidden" title="share this Video" tabindex="-1" role="dialog" aria-hidden="true">
-      <ul id="oc_share-list" class="oc_popuplayer-list">
-        <li>
-          <a href="javascript: " id="oc_btn-embed" class="handcursor" title="Embed" role="button">
-            Embed
-          </a>
-        </li>
-        <li>
-          <a href="javascript: " id="oc_btn-email" class="handcursor" title="Email" role="button">
-            Email
-          </a>
-        </li>
-        <li>
-          <a href="javascript: " id="oc_btn-share-time" class="handcursor" title="Share video URL at current time" role="button">
-            Video at current time
-          </a>
-        </li>
-      </ul>
-    </div>
-    <!-- END #oc_share-layer -->
 
     <!-- #time-chooser-layer dialog -->
     <div id="oc_time-chooser-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-helper-hidden" title="change player time/ session time" tabindex="-1" role="dialog" aria-hidden="true">
@@ -483,65 +540,6 @@
       </button>
     </div>
     <!-- END #oc_time-chooser-layer -->
-
-    <!-- Embed Dialog -->
-    <div id="oc_embed" title="Embed">
-      <div id="oc_embed-left">
-        <input id="oc_embed-icon-one" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
-        <input id="oc_embed-icon-two" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
-        <input id="oc_embed-icon-three" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
-        <input id="oc_embed-icon-four" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
-        <input id="oc_embed-icon-five" class="oc_embed-icon" type="submit" name="" alt="" title="" value="" />
-      </div>
-      <div id="oc_embed-right">
-        <div id="oc_embed-custom-title">
-          Custom size:
-        </div>
-        <label for="oc_embed-costum-width-textinput" class="handcursor">
-          Width:
-        </label>
-	&nbsp;
-        <input id="oc_embed-costum-width-textinput" maxlength="4" type="text" name="Costum width min 300px" alt="Costum width min 300px" title="Costum width min 300px" value="" />
-        <div class="clear"></div>
-        <label for="oc_embed-costum-height-textinput" class="handcursor">
-          Height:
-        </label>
-	&nbsp;
-        <input id="oc_embed-costum-height-textinput" maxlength="4" type="text" name="" alt="" title="" value="" />
-
-        <div class="clear"></div>
-        <label for="oc_embed-costum-hide-controls-checkbox" class="handcursor">
-          Controls:
-        </label>
-		&nbsp;
-        <input id="oc_embed-costum-hide-controls-checkbox" type="checkbox" name="Display controls" alt="Display controls" title="Display controls" value="" />
-	<br />
-        <label for="oc_embed-costum-hide-controls-checkbox" class="handcursor">
-
-        <a href="javascript: " id="oc_btn-leave-session-time" onclick="$('#oc_embed').dialog('close');" class="handcursor ui-helper-hidden-accessible" title="Leave embed dialog" role="button">
-          Leave embed dialog
-        </a>
-      </div>
-
-      <div class="clear"></div>
-      <label for="oc_embed-textarea">
-        Choose your embed size. Copy the text and paste it in your html page.
-      </label>
-      <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
-    </div>
-    <!-- END #oc_embed -->
-
-    <!-- Share video at current time Dialog -->
-    <div id="oc_share-time" title="Video at current time">
-      <div id="oc_share-time-text"></div>
-      <div>
-	<textarea id="oc_share-time-textfield" class="oc_embed-textarea" rows="1" cols="1"></textarea>
-      </div>
-      <div id="oc_share-time-tip">
-	Press the pause button in the player to get the exact time.
-      </div>
-    </div>
-    <!-- END #oc_share-time -->
 
     <!-- Series dialog -->
     <div id="oc_series" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-state-hover" title="see more of this series" tabindex="-1" role="dialog" aria-hidden="true"></div>

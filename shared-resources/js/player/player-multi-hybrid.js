@@ -84,6 +84,7 @@ Opencast.Player = (function ()
         detailedLogging = false,
         lastValidTime = "Initializing";
         
+              
         
     /*************************************************************/
     /* getter

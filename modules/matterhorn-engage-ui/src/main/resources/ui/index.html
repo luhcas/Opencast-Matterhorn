@@ -6,12 +6,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="/engage/ui/img/favicon.ico">
     <!-- styles -->
+    <link rel="stylesheet" type="text/css" href="/engage/ui/css/jquery-ui/jquery-ui.css"></link>
+    <link rel="stylesheet" type="text/css" href="/engage/ui/css/jquery-ui/jquery-ui-custom.css"></link>
     <link rel="stylesheet" type="text/css" href="/engage/ui/css/player-multi-hybrid/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="/engage/ui/css/oc.search.browse.css" />
     <link rel="stylesheet" type="text/css" href="/engage/ui/css/oc.pager.css" />
     <link rel="stylesheet" type="text/css" href="/engage/ui/css/player/shared.css">
     <!-- scripts -->
     <script type="text/javascript" src="/engage/ui/js/jquery/jquery.js"></script>
+		<script type="text/javascript" src="/engage/ui/js/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="/engage/ui/js/jquery/plugins/jquery.utils.js"></script>
     <script type="text/javascript" src="/engage/ui/js/jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="/engage/ui/js/oc-pager.js"></script>
@@ -139,24 +142,38 @@
       });
     </script>
   </head>
-  <!------------------------- BODY ------------------------->
+  <!-- ######## BODY ######## -->
   <body style="overflow-x: hidden;">
-    <div id="pageHeader">
+    
+    <!-- LOGO -->
+    <div id="header">
+      <div id="logotitle">
+        <a href="/welcome.html" title="Back to Opencast Matterhorn Welcome page"><img src="/engage/ui/img/mh_logos/Matterhorn_80x56.gif" alt="Matterhorn Home Page" title="Matterhorn Home Page" align="left"></a>
+      </div>
+      <div class="mm-title-container">
+				<h2 class="mm-title">Media Module</h2>      
+      </div>
+      
+      <div id="oc_search" style="display: block;">
+        <form action="index.html">
+          <label for="oc_searchField" id="skip">
+            Search Media
+          </label>
+          <input type="text" tabindex="40" value="Search Media" name="q" class="oc_searchfield handcursor" id="oc_searchField">
+          <input type="image" aria-label="do search Matterhorn" tabindex="50" value="" title="do search Matterhorn" name="search" class="handcursor ui-button ui-widget ui-state-default" id="oc_btn-search" role="button" aria-disabled="false">
+        </form>
+      </div>
+      
+      <div class="clear"></div>
+    </div>
+
+		<div id="pageHeader" class="ui-widget-content">
       &nbsp;<!--<div id="currentVersion"></div>
       <div id="newestVersion" style="text-align: right; float: right;"></div>-->
       <a id="logout" href="/j_spring_security_logout">Log out</a>
       <div class="clear"></div>
     </div>
-    <!-- LOGO -->
-    <div id="header">
-      <div id="logotitle">
-        <a href="/welcome.html" title="Back to Opencast Matterhorn Welcome page"><img src="/engage/ui/img/mh_logos/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left"></a><h1>Media Module</h1>
-      </div>
-      <div id="oclogo">
-        <a href="http://www.opencastproject.org"><img src="/engage/ui/img/mh_logos/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project"></a>
-      </div>
-    </div><hr style="clear:both;border-style: none none solid none;height:1px; color:#CCCCCC;padding-top: 10px; margin-right:20px;margin-left:20px;">
-
+    
     <!-- If no Javascript is activated -->
     <noscript>
       <center>
@@ -179,23 +196,7 @@
     <!-- START: Hide when no Javascript is activated -->
     <script type="text/javascript">
       document.write('<div class="oc-holder">');
-      document.write('<div class="oc-search-bar-holder fl-helper-clearfix">');
-      document.write('&nbsp;');
-      document.write('<div class="oc-search-bar">');
-      document.write('<span class="subscriptions"><a id="rsslink" href="/feeds/rss/2.0/latest">RSS</a>&nbsp;|&nbsp;<a id="atomlink" href="/feeds/atom/0.3/latest">ATOM</a></span>');
-      document.write('<br/>');
-      document.write('<span style="float:right">');
-      document.write('<form action="index.html">');
-      document.write('<label id="skip" for="searchField">');
-      document.write('Search Field');
-      document.write('</label>');
-      document.write('<input id="searchField" type="text" name="q" value="" /><input id="searchSubmit" type="submit" value="Search" />');
-      document.write('</form>');
-      document.write('</span>');
-      document.write('</div>');
-      document.write('</div>');
       document.write('<div class="oc-search-result-header">');
-      document.write('<h2>Media Gallery</h2>');
       document.write('<div class="oc-sort-controls">');
       document.write('</div>');
       document.write('</div>');
@@ -221,5 +222,16 @@
       document.write('</div>');
     </script>
     <!-- END: Hide when no Javascript is activated -->
+    
+    <div id="oc_footer">
+			<div style="float: right; margin-right: 30px;">        
+        <a href="http://www.opencast.org" >        
+        	<img src="/engage/ui/img/mh_logos/opencast_logo.gif" alt="Opencast Community Project" style="padding-right: 15px;" title="Opencast Community Project" />       	
+        </a>
+        <span style="font-size: 10px; color: #666666;">An Opencast Community Project</span>
+      </div>
+        
+    </div>
+  
   </body>
 </html>

@@ -792,17 +792,17 @@ Opencast.Watch = (function ()
      */
     function getClientShortcuts()
     {
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + I = Toggle the keyboard shortcuts information between show or hide.</span><br/>");
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + P = Toggle the video between pause or play.</span><br/>");
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + S = Stop the video.</span><br/>");
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + M = Toggle between mute or unmute the video.</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + I = Show / hide shortcuts</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + P = Play / pause video</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + S = Stop video</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + M = Mute / unmute</span><br/>");
         $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + U = Volume up</span><br/>");
         $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + D = Volume down</span><br/>");
         $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt 0 - 9 = Seek the time slider</span><br/>");
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + C = Toggle between captions on or off.</span><br/>");
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + F = Forward the video.</span><br/>");
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + R = Rewind the video.</span><br/>");
-        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + T = the current time for the screen reader</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + C = Captions on / off</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + F = Forward video</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + R = Rewind video</span><br/>");
+        $('#oc_client_shortcuts').append("<span tabindex=\"0\">Control + Alt + T = The current time for the screen reader</span><br/>");
         $('#oc_client_shortcuts').append('<a href="javascript: " id="oc_btn-leave_shortcut" onclick="$(\'#oc_shortcut-button\').trigger(\'click\');" class="handcursor ui-helper-hidden-accessible" title="Leave shortcut dialog" role="button">Leave embed dialog</a>');
         switch ($.client.os)
         {
@@ -817,7 +817,7 @@ Opencast.Watch = (function ()
         case "Linux":
             break;
         }
-    }
+    } 
 
     return {
         getAnalyticsURL: getAnalyticsURL,

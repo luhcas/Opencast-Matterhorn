@@ -15,6 +15,7 @@
  */
 var Opencast = Opencast || {};
 
+
 /**
  * @namespace the global Opencast namespace Initialize
  */
@@ -87,7 +88,11 @@ Opencast.Initialize = (function ()
         KEY_r,
         KEY_s,
         KEY_t,
-        KEY_u;
+        KEY_u,
+        shortcutWrapperOpen = false,
+        embedWrapperOpen = false,
+        downloadWrapperOpen = false,
+        linkWrapperOpen = false;
 
     /**
      * @memberOf Opencast.Initialize
@@ -386,6 +391,109 @@ Opencast.Initialize = (function ()
     }
     $(document).ready(function ()
     {
+        
+        /* oc_player-head 
+           SHORTCUTS */                
+
+        $('#oc_shortcut-button').click( 
+            function() {
+                if ( !shortcutWrapperOpen ) {                         
+                    $('#oc_btn-embed').css({'color': '#F1F1F1'});
+                    $('.embed-wrapper').hide(); 
+                    $('#oc_btn-share-time').css({'color': '#F1F1F1'});
+                    $('.link-wrapper').hide();
+                    $('#oc_download-button').css({'color': '#F1F1F1'});
+                    $('.download-wrapper').hide();
+                    $('#oc_shortcut-button').css({'color': '#FDB38B'});
+                    $('.shortcuts-wrapper').show();
+                    shortcutWrapperOpen = true;
+                    embedWrapperOpen = false;
+                    linkWrapperOpen = false;
+                    downloadWrapperOpen = false;
+                
+            } else {
+                    $('#oc_shortcut-button').css({'color': '#F1F1F1'});
+                    $('.shortcuts-wrapper').hide();
+                    shortcutWrapperOpen = false;
+            }
+        });     
+        
+        /* oc_player-head 
+           EMBED */
+           
+        $('#oc_btn-embed').click( 
+            function() {
+                if ( !embedWrapperOpen ) {               
+                    $('#oc_shortcut-button').css({'color': '#F1F1F1'});
+                    $('.shortcuts-wrapper').hide();
+                    $('#oc_btn-share-time').css({'color': '#F1F1F1'});
+                    $('.link-wrapper').hide();
+                    $('#oc_download-button').css({'color': '#F1F1F1'});
+                    $('.download-wrapper').hide();
+                    $('#oc_btn-embed').css({'color': '#FDB38B'});
+                    $('.embed-wrapper').show();
+                    embedWrapperOpen = true;
+                    shortcutWrapperOpen = false;
+                    linkWrapperOpen = false;
+                    downloadWrapperOpen = false;
+             } else {            
+                    $('#oc_btn-embed').css({'color': '#F1F1F1'});
+                    $('.embed-wrapper').hide();
+                    embedWrapperOpen = false;
+            }
+        }); 
+        
+        /* oc_player-head 
+           LINK */
+           
+        $('#oc_btn-share-time').click( 
+            function() {           
+                if ( !linkWrapperOpen ) {                
+                $('#oc_shortcut-button').css({'color': '#F1F1F1'});
+                $('.shortcuts-wrapper').hide();
+                $('#oc_btn-embed').css({'color': '#F1F1F1'});
+                $('.embed-wrapper').hide();
+                $('#oc_download-button').css({'color': '#F1F1F1'});
+                $('.download-wrapper').hide();
+                $('#oc_btn-share-time').css({'color': '#FDB38B'});
+                $('.link-wrapper').show();
+                linkWrapperOpen = true;
+                shortcutWrapperOpen = false;
+                embedWrapperOpen = false;
+                downloadWrapperOpen = false;
+            } else {
+                $('#oc_btn-share-time').css({'color': '#F1F1F1'});
+                $('.link-wrapper').hide();
+                linkWrapperOpen = false;
+            }
+        }); 
+        
+        /* oc_player-head 
+           DOWNLOAD */
+           
+        $('#oc_download-button').click( 
+            function() {           
+                if ( !downloadWrapperOpen ) {                
+                $('#oc_shortcut-button').css({'color': '#F1F1F1'});
+                $('.shortcuts-wrapper').hide();
+                $('#oc_btn-embed').css({'color': '#F1F1F1'});
+                $('.embed-wrapper').hide();
+                $('#oc_btn-share-time').css({'color': '#F1F1F1'});
+                $('.link-wrapper').hide();
+                $('#oc_download-button').css({'color': '#FDB38B'});
+                $('.download-wrapper').show();
+                linkWrapperOpen = false;
+                shortcutWrapperOpen = false;
+                embedWrapperOpen = false;
+                downloadWrapperOpen = true;
+            } else {
+                $('#oc_download-button').css({'color': '#F1F1F1'});
+                $('.download-wrapper').hide();
+                downloadWrapperOpen = false;
+            }
+        });       
+            
+        
         keyboardListener();
         $('#wysiwyg').wysiwyg(
         {
@@ -1387,4 +1495,7 @@ Opencast.Initialize = (function ()
         init: init,
         setMediaResolution: setMediaResolution
     };
+    
 }());
+
+		

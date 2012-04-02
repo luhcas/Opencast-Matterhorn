@@ -83,25 +83,25 @@ div.segment-tooltip
 a.segments-time, a.segments-time:link, a.segments-time:visited{
   margin-right: 16px;
   cursor: pointer;
-  color: #2d8f8b;
+  color: #513838;
   text-decoration: none;
 }
 
 a.segments-time:hover, a.segments-time:focus{
-  color: #2d8f8b;
+  color: #513838;
   text-decoration: underline;
 }
 
 #slider {
-    width: 80%;
     margin: 0 auto;
     position: relative;
     border: 1px solid #ccc;
-	  height: 85px;
+	height: 85px;
 }
 
 #oc-segments_text tr:hover {
-    background-color: #FFFFCC;
+    background-color: url("/engage/ui/img/engage_player/content-bg.png");
+    color: #000000;
 }
 
 #segmentstable1 {

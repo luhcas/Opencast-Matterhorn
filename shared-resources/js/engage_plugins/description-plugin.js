@@ -23,19 +23,19 @@ Opencast.Description_Plugin = (function ()
 {
     // The Template to process
     var template =  '<div>' +
-                        'Date:&nbsp;<span style="color:grey;">${result.dcCreated}</span><br />' +
-                        'Contributor:&nbsp;<span style="color:grey;">${result.dcContributor}</span><br />' +
-                        'Language:&nbsp;<span style="color:grey;">${result.dcLanguage}</span><br />' +
-                        'Views:&nbsp;<span style="color:grey;">${result.dcViews}</span><br />' +
-                        // 'See related Videos: <span style="color:grey;"></span><br />' +
-                        'Series:&nbsp;<span style="color:grey;">${result.dcSeriesTitle}</span><br />' +
+                        'Date:&nbsp;<span class="oc_description-value">${result.dcCreated}</span><br />' +
+                        'Contributor:&nbsp;<span class="oc_description-value">${result.dcContributor}</span><br />' +
+                        'Language:&nbsp;<span class="oc_description-value">${result.dcLanguage}</span><br />' +
+                        'Views:&nbsp;<span class="oc_description-value">${result.dcViews}</span><br />' +
+                        // 'See related Videos: <span class="oc_description-value"></span><br />' +
+                        'Series:&nbsp;<span class="oc_description-value">${result.dcSeriesTitle}</span><br />' +
                         'Presenter:&nbsp;' +
                         '{if result.dcCreator != defaultChar}' +
                             '<a href="../../engage/ui/index.html?q=${result.dcCreator}">${result.dcCreator}</a><br />' +
                         '{else}' +
-                            '<span style="color:grey;">${result.dcCreator}</span><br />' +
+                            '<span class="oc_description-value">${result.dcCreator}</span><br />' +
                         '{/if}' +
-                        'Description:&nbsp;<span style="color:grey;">${result.dcDescription}</span><br />' +
+                        'Description:&nbsp;<span class="oc_description-value">${result.dcDescription}</span><br />' +
                     '</div>' +
                     '<div style="clear: both">' + 
                     '</div>';

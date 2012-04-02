@@ -43,6 +43,7 @@ a:hover {
   border:0;
   padding:0;
   margin: 10px 20px 0;
+  min-height: 400px;
 }
 
 .oc-search-bar-holder {
@@ -78,7 +79,7 @@ a:hover {
   margin-top:2px;
   position:relative;
   padding:5px 0px;
-  background-color: #EFF7F9;
+  border-bottom: 1px solid #333333;
 }
 
 div.table-row {
