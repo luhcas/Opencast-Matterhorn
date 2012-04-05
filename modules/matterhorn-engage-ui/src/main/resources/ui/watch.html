@@ -180,13 +180,13 @@
         	<div id="oc_embed-custom-title">
           	Custom size:
         	</div>
-        	<label for="oc_embed-costum-width-textinput" class="handcursor">
+        	<label for="oc_embed-costum-width-textinput" class="handcursor" style="padding-bottom:7px;">
           	Width:
         	</label>
 			&nbsp;
         	<input id="oc_embed-costum-width-textinput" maxlength="4" type="text" name="Costum width min 300px" alt="Costum width min 300px" title="Costum width min 300px" value="" />
         		<div class="clear"></div>
-        	<label for="oc_embed-costum-height-textinput" class="handcursor">
+        	<label for="oc_embed-costum-height-textinput" class="handcursor" style="padding-bottom:7px;">
           	Height:
         	</label>
 			&nbsp;
@@ -219,15 +219,18 @@
     	<!-- Link Dialog -->
 		<div class="link-wrapper oc_player-head-dropdown" title="Video at current time" style="display:none;">
       	<div id="oc_share-time-text"></div>
-      	<div>
-				<textarea id="oc_share-time-textfield" class="oc_embed-textarea" rows="1" cols="1"></textarea><br />
-				<a href="javascript: " id="oc_btn-email" class="handcursor" title="Email" role="button">E-Mail</a> | 
-				<a href="javascript: " id="oc_btn-share-time" class="handcursor" title="Share video URL at current time" role="button">Copy to clipboard</a>
-      	</div>
+      		<div class="oc_share-time-container">
+						<textarea id="oc_share-time-textfield" class="oc_embed-textarea" rows="1" cols="1"></textarea>
+					</div>
+					
+					<div class="button-container"><a href="javascript: " id="oc_btn-email" class="handcursor button" title="Email" role="button">E-Mail</a></div>					
+					<div class="button-container"><a href="javascript: " id="oc_btn-share-time" class="handcursor button" title="Share video URL at current time" role="button">Copy to clipboard</a></div> 	
+      	
+					 <div class="clear"></div>     	
       	<div id="oc_share-time-tip">
 				Press the pause button in the player to get the exact time.
       	</div>
-    	</div>
+    </div>
     	<!-- END Link Dialog -->      
       
       <!-- Download dialog -->

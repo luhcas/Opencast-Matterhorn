@@ -1414,6 +1414,7 @@ Opencast.Initialize = (function ()
         });
         $("#oc_embed-icon-five").css("width", "70px");
         $("#oc_embed-icon-five").css("height", "42px");
+				$("#oc_embed-icon-five").css("font-size", "11px");
         $("#oc_embed-icon-five").attr(
         {
             alt: embedWidhtFive + ' x ' + embedHeightFive,

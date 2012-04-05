@@ -202,6 +202,10 @@ input.ui-button {
 #oc_description {
 	margin: 10px 5px 5px 5px;	
 	background: url("/engage/ui/img/engage_player/content-bg.png");
+	box-shadow: 0px 0px 3px #333333 inset;
+	-moz-box-shadow: 0px 0px 3px #333333 inset;
+	-webkit-box-shadow: 0px 0px 3px #333333 inset;
+	border: 1px solid #631719;
 	color: #000000;
 }
 
@@ -215,6 +219,10 @@ input.ui-button {
 
 #oc_slidetext { 
 	background: url("/engage/ui/img/engage_player/content-bg.png");
+	box-shadow: 0px 0px 3px #333333 inset;
+	-moz-box-shadow: 0px 0px 3px #333333 inset;
+	-webkit-box-shadow: 0px 0px 3px #333333 inset;
+	border: 1px solid #631719;
 	margin: 10px 5px 5px; 
 }
 
